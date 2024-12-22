@@ -22,11 +22,3 @@ class SoftDeleteManagerAllObjects(Manager):
 class SoftDeleteManager(SoftDeleteManagerAllObjects):
     def get_queryset(self):
         return super().get_queryset().not_deleted()
-
-
-class SoftDeleteTenantManagerAllObjects(TenantManager, SoftDeleteManagerAllObjects):
-    pass
-
-
-class SoftDeleteTenantManager(TenantManager, SoftDeleteManager):
-    pass
