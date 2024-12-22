@@ -1,17 +1,17 @@
 from django.db import models
-from utils.models import SoftDeleteModel
+from utils.models import BaseModel
 
 
 # Create your models here.
-class Project(SoftDeleteModel):
+class Project(BaseModel):
     ...
 
 
-class CompanyAddress(SoftDeleteModel):
+class CompanyAddress(BaseModel):
     ...
 
 
-class Company(SoftDeleteModel):
+class Company(BaseModel):
     name = models.CharField(verbose_name="Name of the company")
     # Mudar para https://pypi.org/project/django-cpf-cnpj/
     # cnpj = models.CharField(verbose_name="Name of the company")
