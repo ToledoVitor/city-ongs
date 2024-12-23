@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "contracts",
     "reports",
     # Third parties
+    "django_cpf_cnpj",
 ]
 
 MIDDLEWARE = [
