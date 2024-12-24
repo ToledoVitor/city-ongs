@@ -1,16 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Inicio - Portal Gestão{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-Hi {{ user.username }}!
-<form action="{% url 'logout' %}" method="post">
-  {% csrf_token %}
-  <button type="submit">Log Out</button>
-</form>
-{% else %}
-<p>You are not logged in</p>
-<a href="{% url 'login' %}">Log In</a>
-{% endif %}
+
+<p class="text-2xl mb-4">
+  Olá <b>{{user.username}}</b>, seja bem vindo!
+</p>
+
+<div class="grid grid-cols-3 gap-4 mt-10 mb-4">
+  <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
+      <p class="text-2xl text-gray-400 dark:text-gray-500">
+        <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+      </p>
+  </div>
+  <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
+      <p class="text-2xl text-gray-400 dark:text-gray-500">
+        <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+      </p>
+  </div>
+  <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
+      <p class="text-2xl text-gray-400 dark:text-gray-500">
+        <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+      </p>
+  </div>
+</div>
+
 {% endblock %}
