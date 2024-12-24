@@ -17,7 +17,8 @@ class MonthChoices(models.IntegerChoices):
 
 
 class StatusChoices(models.TextChoices):
-    DRAFT = "DRAFT", "rascunho"
-    SENT = "SENT", "enviado"
+    ANALYZING = "ANALYZING", "em análise"
+    CORRECTING = "CORRECTING", "correção"
     APPROVED = "APPROVED", "aprovado"
+    APPROVED_WITH_PENDENCE = "APPROVED_WITH_PENDENCE", "aprovado com ressalva"
     REJECTED = "REJECTED", "rejeitado"

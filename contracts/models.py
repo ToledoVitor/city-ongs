@@ -4,6 +4,7 @@ from django_cpf_cnpj.fields import CNPJField
 from utils.choices import StatusChoices
 from utils.models import BaseModel
 from simple_history.models import HistoricalRecords
+from accounts.models import Ong
 
 
 class Company(BaseModel):
@@ -59,6 +60,11 @@ class Contract(BaseModel):
         null=True,
     )
 
+    # Ong
+    ong = models.ForeignKey(
+        Ong, verbose_name="Ong", related_name="contracts", on_delete=models.CASCADE
+    )
+
     history = HistoricalRecords()
 
     class Meta:
@@ -87,9 +93,9 @@ class ContractGoal(BaseModel):
     description = models.CharField(verbose_name="Descrição", max_length=128)
     status = models.CharField(
         verbose_name="Status",
-        max_length=16,
+        max_length=22,
         choices=StatusChoices,
-        default=StatusChoices.DRAFT,
+        default=StatusChoices.ANALYZING,
     )
 
     history = HistoricalRecords()
@@ -124,9 +130,9 @@ class ContractItem(BaseModel):
     is_additive = models.BooleanField(verbose_name="É aditivo?", default=False)
     status = models.CharField(
         verbose_name="Status",
-        max_length=16,
+        max_length=22,
         choices=StatusChoices,
-        default=StatusChoices.DRAFT,
+        default=StatusChoices.ANALYZING,
     )
 
     history = HistoricalRecords()

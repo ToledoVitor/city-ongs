@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 from utils.fields import LowerCaseEmailField
+from utils.models import BaseModel
+from simple_history.models import HistoricalRecords
 
 
 class User(AbstractUser):
@@ -23,3 +25,35 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
+
+
+class Ong(BaseModel):
+    name = models.CharField(verbose_name="Nome", max_length=128)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Ong"
+        verbose_name_plural = "Ongs"
+
+
+class UserOngRelatioship(BaseModel):
+    user = models.ForeignKey(
+        User,
+        verbose_name="Usuário",
+        related_name="user_ong_relationships",
+        on_delete=models.CASCADE,
+    )
+
+    ong = models.ForeignKey(
+        Ong,
+        verbose_name="Ong",
+        related_name="user_ong_relationships",
+        on_delete=models.CASCADE,
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Relação Ong-Usuário"
+        verbose_name_plural = "Relações Ong-Usuário"

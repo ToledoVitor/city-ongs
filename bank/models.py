@@ -1,5 +1,4 @@
 from django.db import models
-from django_cpf_cnpj.fields import CNPJField, CPFField
 
 from utils.choices import MonthChoices
 from utils.models import BaseModel
