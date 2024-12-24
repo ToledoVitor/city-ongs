@@ -61,7 +61,7 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
-ROOT_URLCONF = "ongs.urls"
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
@@ -79,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "ongs.wsgi.application"
+WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
