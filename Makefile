@@ -1,14 +1,14 @@
 format:
-	ruff format
+	@poetry run ruff format
 
 makemigrations:
-	python manage.py makemigrations
+	@poetry run python manage.py makemigrations
 
 migrate:
-	python manage.py migrate
+	@poetry run python manage.py migrate
 
 collectstatic:
-	python manage.py collectstatic
+	@poetry run python manage.py collectstatic
 
 superuser:
 	@poetry run python manage.py shell -c "from accounts.models import User; \
@@ -20,4 +20,4 @@ superuser:
 	print('Superuser: admin@admin.com / admin@2024');"
 
 run:
-	python manage.py runserver
+	@poetry run python manage.py runserver
