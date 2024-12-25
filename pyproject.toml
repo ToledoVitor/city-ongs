@@ -13,6 +13,7 @@ ruff = "^0.8.4"
 pre-commit = "^4.0.1"
 django-cpf-cnpj = "^1.0.0"
 django-simple-history = "^3.7.0"
+xlsxwriter = "^3.2.0"
 
 
 [build-system]
