@@ -57,3 +57,18 @@ class UserOngRelatioship(BaseModel):
     class Meta:
         verbose_name = "Relação Ong-Usuário"
         verbose_name_plural = "Relações Ong-Usuário"
+
+
+class CityHall(BaseModel):
+    name = models.CharField(verbose_name="Prefeitura", max_length=128)
+    users = models.ManyToManyField(
+        User,
+        verbose_name="Usuários",
+        related_name="city_halls",
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Prefeitura"
+        verbose_name_plural = "Prefeituras"
