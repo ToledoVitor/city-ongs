@@ -13,6 +13,11 @@ class Accountability(BaseModel):
         choices=MonthChoices,
         default=MonthChoices.JAN,
     )
+    year = models.IntegerField(
+        verbose_name="Ano",
+        # TODO: remake migrations and remove default
+        default=0,
+    )
 
     status = models.CharField(
         verbose_name="Status",
@@ -30,9 +35,13 @@ class Accountability(BaseModel):
 
     history = HistoricalRecords()
 
+    def __str__(self) -> str:
+        return f"Prestação mês {self.month}"
+
     class Meta:
         verbose_name = "Relatório"
         verbose_name_plural = "Relatórios"
+        unique_together = ("month", "year")
 
 
 class Expense(BaseModel):
@@ -53,6 +62,9 @@ class Expense(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Despesa {self.id}"
 
     class Meta:
         verbose_name = "Despesa"
@@ -84,9 +96,12 @@ class ExpenseAnalysis(BaseModel):
 
     history = HistoricalRecords()
 
+    def __str__(self) -> str:
+        return f"Análise {self.id} - {self.status}"
+
     class Meta:
-        verbose_name = "Despesa"
-        verbose_name_plural = "Despesas"
+        verbose_name = "Análise de Despesa"
+        verbose_name_plural = "Análise de Despesas"
 
 
 class Revenue(BaseModel):
@@ -104,6 +119,9 @@ class Revenue(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Receita {self.id}"
 
     class Meta:
         verbose_name = "Receita"
@@ -129,6 +147,9 @@ class AccountabilityFile(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Arquivo de Prestação {self.id}"
 
     class Meta:
         verbose_name = "Receita"
