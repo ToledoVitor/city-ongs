@@ -7,6 +7,15 @@ from simple_history.models import HistoricalRecords
 
 
 class User(AbstractUser):
+    class AccessChoices(models.TextChoices):
+        MASTER = "MASTER", "master"
+        # SOBE CONTRATOS
+        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"
+        # REVISA E ETC
+        FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta"
+        # SOBEM DOCUMENTAÇÃo
+        ONG_ACCOUNTANT = "ONG_ACCOUNTANT", "Contador / funcionário da ong"
+
     username = models.CharField(
         max_length=150,
         unique=False,
@@ -19,9 +28,36 @@ class User(AbstractUser):
         default=None,
         blank=True,
     )
+    access_level = models.CharField(
+        verbose_name="Nível de Acesso",
+        choices=AccessChoices,
+        default=AccessChoices.ONG_ACCOUNTANT,
+        max_length=14,
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+
+    @property
+    def has_admin_access(self) -> bool:
+        return self.is_superuser or self.access_level in {
+            self.AccessChoices.MASTER,
+            self.AccessChoices.CIVIL_SERVANT,
+        }
+
+    @property
+    def can_add_new_folder_managers(self) -> bool:
+        return self.is_superuser or self.access_level in {
+            self.AccessChoices.MASTER,
+            self.AccessChoices.CIVIL_SERVANT,
+        }
+
+    @property
+    def can_add_new_ong_accountants(self) -> bool:
+        return self.is_superuser or self.access_level in {
+            self.AccessChoices.MASTER,
+            self.AccessChoices.CIVIL_SERVANT,
+        }
 
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
@@ -31,6 +67,9 @@ class Ong(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Ong - {self.name}"
 
     class Meta:
         verbose_name = "Ong"
@@ -44,7 +83,6 @@ class UserOngRelatioship(BaseModel):
         related_name="user_ong_relationships",
         on_delete=models.CASCADE,
     )
-
     ong = models.ForeignKey(
         Ong,
         verbose_name="Ong",
@@ -53,6 +91,9 @@ class UserOngRelatioship(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Relação {self.ong.name} - {self.user.email}"
 
     class Meta:
         verbose_name = "Relação Ong-Usuário"
@@ -68,6 +109,9 @@ class CityHall(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = "Prefeitura"
