@@ -48,6 +48,17 @@ class AccountabilityCSVExporter:
                 "fg_color": "#a3d7c6",
             }
         )
+        
+        header_breaking_line_format = self.workbook.add_format(
+            {
+                "bold": True,
+                "border":  2,
+                "align": "center",
+                "valign": "vcenter",
+                "fg_color": "#a3d7c6",
+                'text_wrap': True
+            }
+        )
 
         # Formatação células sub título (linha 2)
         sub_format = self.workbook.add_format(
@@ -71,19 +82,21 @@ class AccountabilityCSVExporter:
 
         # Criando cabeçalho
         header_content = (
-            [" ID DO PROJETO ", "", ""],
-            [" IDENTIFICAÇÃO ", "", ""],
-            [" VALOR ", "", ""],
-            [" VENCIMENTO ", "", ""],
-            [" COMPETÊNCIA ", "", ""],
-            [" FONTE DE RECURSO ", "Nome", "ID (não preencher)"],
-            [" CONTA BANCÁRIA ", "Nome", "ID (não preencher)"],
-            [" NATUREZA DA RECEITA ", "Nome", "ID (não preencher)"],
-            [" OBSERVAÇÕES ", "", ""],
+            ["ID DO PROJETO", "", ""],
+            ["IDENTIFICAÇÃO", "", ""],
+            ["VALOR", "", ""],
+            ["VENCIMENTO", "", ""],
+            ["COMPETÊNCIA", "", ""],
+            ["FONTE DE RECURSO", "Nome", "ID (não preencher)"],
+            ["CONTA BANCÁRIA", "Nome", "ID (não preencher)"],
+            ["NATUREZA DA RECEITA", "Nome", "ID (não preencher)"],
+            ["OBSERVAÇÕES", "", ""],
         )
 
         #Preenchendo cabeçalho
-        col = 0
+        receipt_worksheet.merge_range(0, 0, 1, 0, header_content[0][0], header_breaking_line_format)
+        
+        col = 1
         for main_colum, sub1, sub2 in header_content:
             if sub1 == "":
                 # Adiciona texto e mesclas células 1 e 2 de suas respectivas colunas
@@ -102,8 +115,8 @@ class AccountabilityCSVExporter:
 
         # Preenchendo corpo
         for id in range(2, 1000):
-            # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da linha abaixo
-            receipt_worksheet.write(id, 0, "inserir ID aqui", body_format) # Coluna A
+            # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da Coluna A
+            receipt_worksheet.write(id, 0, id, body_format) # Coluna A
             receipt_worksheet.write(id, 1, "", body_format) # Coluna B
             receipt_worksheet.write(id, 2, "", body_format) # Coluna C
             receipt_worksheet.write(id, 3, "", body_format) # Coluna D
@@ -114,7 +127,8 @@ class AccountabilityCSVExporter:
             receipt_worksheet.write(id, 8, "", body_format) # Coluna I
             receipt_worksheet.write(id, 9, "", body_format) # Coluna J
             receipt_worksheet.write(id, 10, "", body_format) # Coluna K
-            receipt_worksheet.write(id, 11, "", body_format) # Coluna L           
+            receipt_worksheet.write(id, 11, "", body_format) # Coluna L
+            receipt_worksheet.write(id, 12, "", body_format) # Coluna M
             
         receipt_worksheet.autofit()
         return receipt_worksheet
