@@ -22,7 +22,7 @@ class AccountabilityCSVExporter:
             self.__build_receipt_worksheet,
             self.__build_expense_worksheet,
             self.__build_application_worksheet,
-            self.__build_fr_worksheet,
+            self.__build_resource_source_worksheet,
             self.__build_bank_account_worksheet,
             self.__build_category_worksheet,
             self.__build_expense_category_worksheet,
@@ -42,7 +42,7 @@ class AccountabilityCSVExporter:
         header_format = self.workbook.add_format(
             {
                 "bold": True,
-                # 'border':   6,
+                "border":  2,
                 "align": "center",
                 "valign": "vcenter",
                 "fg_color": "#a3d7c6",
@@ -55,22 +55,34 @@ class AccountabilityCSVExporter:
                 "align": "center",
                 "valign": "vcenter",
                 "fg_color": "#efe920",
+                "border":  2,
+            }
+        )
+        
+        # Formatação células corpo (linha 3)
+        body_format = self.workbook.add_format(
+            {
+                "align": "center",
+                "valign": "vcenter",
+                "border":  1,
+                # "fg_color": "#efe920",
             }
         )
 
         # Criando cabeçalho
         header_content = (
-            ["ID DO PROJETO", "", ""],
-            ["IDENTIFICAÇÃO", "", ""],
-            ["VALOR", "", ""],
-            ["VENCIMENTO", "", ""],
-            ["COMPETÊNCIA", "", ""],
-            ["FONTE DE RECURSO", "Nome", "ID (não preencher)"],
-            ["CONTA BANCÁRIA", "Nome", "ID (não preencher)"],
-            ["NATUREZA DA RECEITA", "Nome", "ID (não preencher)"],
-            ["OBSERVAÇÕES", "", ""],
+            [" ID DO PROJETO ", "", ""],
+            [" IDENTIFICAÇÃO ", "", ""],
+            [" VALOR ", "", ""],
+            [" VENCIMENTO ", "", ""],
+            [" COMPETÊNCIA ", "", ""],
+            [" FONTE DE RECURSO ", "Nome", "ID (não preencher)"],
+            [" CONTA BANCÁRIA ", "Nome", "ID (não preencher)"],
+            [" NATUREZA DA RECEITA ", "Nome", "ID (não preencher)"],
+            [" OBSERVAÇÕES ", "", ""],
         )
 
+        #Preenchendo cabeçalho
         col = 0
         for main_colum, sub1, sub2 in header_content:
             if sub1 == "":
@@ -88,6 +100,22 @@ class AccountabilityCSVExporter:
 
             col += 1
 
+        # Preenchendo corpo
+        for id in range(2, 1000):
+            # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da linha abaixo
+            receipt_worksheet.write(id, 0, "inserir ID aqui", body_format) # Coluna A
+            receipt_worksheet.write(id, 1, "", body_format) # Coluna B
+            receipt_worksheet.write(id, 2, "", body_format) # Coluna C
+            receipt_worksheet.write(id, 3, "", body_format) # Coluna D
+            receipt_worksheet.write(id, 4, "", body_format) # Coluna E
+            receipt_worksheet.write(id, 5, "", body_format) # Coluna F
+            receipt_worksheet.write(id, 6, "", body_format) # Coluna G
+            receipt_worksheet.write(id, 7, "", body_format) # Coluna H
+            receipt_worksheet.write(id, 8, "", body_format) # Coluna I
+            receipt_worksheet.write(id, 9, "", body_format) # Coluna J
+            receipt_worksheet.write(id, 10, "", body_format) # Coluna K
+            receipt_worksheet.write(id, 11, "", body_format) # Coluna L           
+            
         receipt_worksheet.autofit()
         return receipt_worksheet
 
@@ -109,13 +137,13 @@ class AccountabilityCSVExporter:
 
         return application_worksheet
 
-    def __build_fr_worksheet(self):
+    def __build_resource_source_worksheet(self):
         content = [""]
 
-        fr_worksheet = self.workbook.add_worksheet(name="FR")
+        resource_source_worksheet = self.workbook.add_worksheet(name="FR")
         # PREENCHER AQUI
 
-        return fr_worksheet
+        return resource_source_worksheet
 
     def __build_bank_account_worksheet(self):
         content = [""]
