@@ -12,4 +12,72 @@
 
 {{ contract }}
 
+<form method="post" class="max-w-lg mx-auto">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_name" class="form-label">Nome:</label>
+    {{ form.name }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_objective" class="form-label">objective:</label>
+    {{ form.objective }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_total_value" class="form-label">total_value:</label>
+    {{ form.total_value }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_start_of_vigency" class="form-label">start_of_vigency:</label>
+    {{ form.start_of_vigency }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_end_of_vigency" class="form-label">end_of_vigency:</label>
+    {{ form.end_of_vigency }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_contractor_company" class="form-label">contractor_company:</label>
+    {{ form.contractor_company }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_contractor_manager" class="form-label">contractor_manager:</label>
+    {{ form.contractor_manager }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_hired_company" class="form-label">hired_company:</label>
+    {{ form.hired_company }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_hired_manager" class="form-label">hired_manager:</label>
+    {{ form.hired_manager }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_ong" class="form-label">ong:</label>
+    {{ form.ong }}
+  </div>
+
+
+  <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="user_avatar">Upload file</label>
+  <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="user_avatar_help" id="user_avatar" type="file">
+  <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">A profile picture is useful to confirm your are logged into your account</div>
+  
+  <button
+    type="submit"
+    class="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-8 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+    style="display: flex; justify-self: center;"
+  >
+    Criar
+  </button>
+
+</form>
+
 {% endblock %}

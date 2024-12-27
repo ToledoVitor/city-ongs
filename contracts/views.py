@@ -2,7 +2,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, DetailView
 from utils.mixins import AdminRequiredMixin
 
+from django.shortcuts import redirect
+
 from contracts.models import Contract
+from contracts.forms import ContractCreateForm
 
 
 class ContractsListView(LoginRequiredMixin, TemplateView):
@@ -37,6 +40,13 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
     login_url = "/accounts/login"
 
     def get_context_data(self, **kwargs) -> dict:
-        return {
-            "user": self.request.user,
-        }
+        context = super().get_context_data(**kwargs)
+        context['form'] = ContractCreateForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = ContractCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('contracts:contracts-list')
+        return self.render_to_response(self.get_context_data(form=form))

@@ -12,7 +12,7 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
           <tr>
               <th scope="col" class="px-6 py-3">
                   Nome do Contrato <br>
@@ -32,29 +32,34 @@
       <tbody>
           {% if contract_results %}
             {% for contract in contract_results %}
-              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                  <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-white">
+              <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                  <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
                     {{ contract.name }} <br>
                     <p class="mt-2 text-xs">Gestora do Contratante: {{ contract.contractor_manager.name }}</p>
                     <p class="mt-1 text-xs">Gestora do Contratado: {{ contract.hired_manager.name }}</p>
                   </th>
-                  <td class="px-6 py-4 text-base">
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                     R$ <b>{{ contract.total_value|intcomma }}<b>
                   </td>
-                  <td class="px-6 py-4 text-base">
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                     {{ contract.start_of_vigency }}
                   </td>
-                  <td class="px-6 py-4 text-base">
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                     {{ contract.end_of_vigency }}
                   </td>
                   <td class="px-6 py-4 text-base">
-                      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Visualizar</a>
+                    <a
+                      href="{% url 'contracts:contracts-detail' contract.id %}"
+                      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      Visualizar
+                    </a>
                   </td>
               </tr>
             {% endfor %}
           {% else %}
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+            <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                   Nenhum resultado encontrado
               </th>
               <td class="px-6 py-4">
@@ -75,7 +80,7 @@
   </table>
 
   {% if user.has_admin_access %}
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-800">
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
       <a
         href="{% url 'contracts:contracts-create' %}"
         class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -88,34 +93,34 @@
     </div>
   {% endif %}
 
-  <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-800" aria-label="Table navigation">
+  <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-green-200" aria-label="Table navigation">
       <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
         Mostrando
-        <span class="font-semibold text-gray-900 dark:text-white">1-10</span>
+        <span class="font-semibold text-gray-900 dark:text-black">1-10</span>
         of
-        <span class="font-semibold text-gray-900 dark:text-white">1000</span>
+        <span class="font-semibold text-gray-900 dark:text-black">1000</span>
       </span>
       <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">Previous</a>
           </li>
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">1</a>
           </li>
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">2</a>
           </li>
           <li>
-              <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
+              <a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-green-800 dark:text-black">3</a>
           </li>
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">4</a>
           </li>
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">5</a>
           </li>
           <li>
-              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-green-100 hover:text-gray-700 dark:bg-green-200 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-green-800 dark:hover:text-black">Next</a>
           </li>
       </ul>
   </nav>

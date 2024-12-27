@@ -1,6 +1,9 @@
 format:
 	@poetry run ruff format
 
+pre-commit:
+	@poetry run pre-commit install
+
 makemigrations:
 	@poetry run python manage.py makemigrations
 
