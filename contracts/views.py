@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, DetailView
+from utils.mixins import AdminRequiredMixin
 
 from contracts.models import Contract
 
@@ -29,3 +30,13 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         return context
+
+
+class ContractCreateView(AdminRequiredMixin, TemplateView):
+    template_name = "contracts/contracts-create.html"
+    login_url = "/accounts/login"
+
+    def get_context_data(self, **kwargs) -> dict:
+        return {
+            "user": self.request.user,
+        }

@@ -70,9 +70,24 @@
                 -
               </td>
             </tr>
-          {% endif %}
+          {% endif %}     
       </tbody>
   </table>
+
+  {% if user.has_admin_access %}
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-800">
+      <a
+        href="{% url 'contracts:contracts-create' %}"
+        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Adicionar novo
+        <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
+
   <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-800" aria-label="Table navigation">
       <span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
         Mostrando
@@ -100,7 +115,7 @@
               <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
           </li>
           <li>
-      <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+              <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
           </li>
       </ul>
   </nav>
