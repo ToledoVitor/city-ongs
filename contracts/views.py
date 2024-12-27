@@ -41,12 +41,12 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context['form'] = ContractCreateForm()
+        context["form"] = ContractCreateForm()
         return context
 
     def post(self, request, *args, **kwargs):
         form = ContractCreateForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('contracts:contracts-list')
+            return redirect("contracts:contracts-list")
         return self.render_to_response(self.get_context_data(form=form))
