@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "reports",
     # Third parties
     "django_cpf_cnpj",
+    "health_check",
+    "health_check.db",
     "simple_history",
 ]
 
