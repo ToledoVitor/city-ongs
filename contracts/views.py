@@ -16,8 +16,8 @@ class ContractsListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     ordering = "-created_at"
 
-    template_name = "contracts/contracts-list.html"
-    login_url = "/accounts/login"
+    template_name = "contracts/list.html"
+    login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
         return self.model.objects.all()
@@ -26,10 +26,10 @@ class ContractsListView(LoginRequiredMixin, ListView):
 class ContractsDetailView(LoginRequiredMixin, DetailView):
     model = Contract
 
-    template_name = "contracts/contracts-detail.html"
+    template_name = "contracts/detail.html"
     context_object_name = "contract"
 
-    login_url = "/accounts/login"
+    login_url = "/auth/login"
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
@@ -40,8 +40,8 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
 
 
 class ContractCreateView(AdminRequiredMixin, TemplateView):
-    template_name = "contracts/contracts-create.html"
-    login_url = "/accounts/login"
+    template_name = "contracts/create.html"
+    login_url = "/auth/login"
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
