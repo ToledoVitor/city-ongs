@@ -2,7 +2,7 @@ from django import forms
 
 
 class BaseCharFieldFormWidget(forms.TextInput):
-    def __init__(self, *args, placeholder=None, **kwargs):
+    def __init__(self, *args, placeholder=None, is_password=False, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
@@ -13,8 +13,12 @@ class BaseCharFieldFormWidget(forms.TextInput):
                         "dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500",
                     ]
                 ),
+                "required": required,
             }
         )
+        if is_password:
+            kwargs["attrs"]["type"] = "password"
+
         if placeholder:
             kwargs["attrs"]["placeholder"] = placeholder
 
@@ -22,7 +26,7 @@ class BaseCharFieldFormWidget(forms.TextInput):
 
 
 class BaseTextAreaFormWidget(forms.Textarea):
-    def __init__(self, *args, placeholder=None, rows=3, **kwargs):
+    def __init__(self, *args, placeholder=None, required=True, rows=3, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
@@ -34,6 +38,7 @@ class BaseTextAreaFormWidget(forms.Textarea):
                     ]
                 ),
                 "rows": rows,
+                "required": required,
             }
         )
         if placeholder:
@@ -43,18 +48,40 @@ class BaseTextAreaFormWidget(forms.Textarea):
 
 
 class BaseSelectFormWidget(forms.Select):
-    def __init__(self, *args, placeholder=None, **kwargs):
+    def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
                     [
-                        "bg-gray-50 border border-gray-300 text-black",
-                        "text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500",
-                        "block w-full p-2.5 dark:bg-gray-300 dark:border-gray-600",
-                        "dark:placeholder-gray-800 dark:text-black",
-                        "dark:focus:ring-blue-500 dark:focus:border-blue-500",
+                        "w-full p-2.5 block text-sm border border-gray-300 text-gray-900",
+                        "bg-gray-50 rounded-lg focus:ring-blue-500 focus:border-blue-500",
+                        "dark:placeholder-gray-600 dark:bg-gray-300 dark:border-gray-600",
+                        "dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500",
                     ]
                 ),
+                "required": required,
+            }
+        )
+        if placeholder:
+            kwargs["attrs"]["placeholder"] = placeholder
+
+        super().__init__(*args, **kwargs)
+
+
+class BaseEmailFormWidget(forms.EmailInput):
+    def __init__(self, *args, placeholder=None, required=True, **kwargs):
+        kwargs.setdefault("attrs", {}).update(
+            {
+                "class": " ".join(
+                    [
+                        "bg-gray-50 border border-gray-300 text-gray-900 text-sm",
+                        "rounded-lg focus:ring-blue-500 focus:border-blue-500 block", 
+                        "w-full p-2.5 dark:bg-gray-300 dark:border-gray-600", 
+                        "dark:placeholder-gray-600 dark:text-black dark:focus:ring-blue-500",
+                        "dark:focus:border-blue-500",
+                    ]
+                ),
+                "required": required,
             }
         )
         if placeholder:

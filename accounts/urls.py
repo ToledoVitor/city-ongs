@@ -2,8 +2,10 @@ from django.urls import path
 
 from accounts.views import (
     FolderManagersListView,
+    FolderManagerCreateView,
     FolderManagersDetailView,
     OngAccountantsListView,
+    OngAccountantCreateView,
     OngAccountantsDetailView,
 )
 
@@ -15,7 +17,12 @@ urlpatterns = [
         name="folder-managers-list",
     ),
     path(
-        "folder-managers/detail/<uuid:pk>/",
+        "folder-managers/create/",
+        FolderManagerCreateView.as_view(),
+        name="folder-managers-create",
+    ),
+    path(
+        "folder-managers/detail/<int:pk>/",
         FolderManagersDetailView.as_view(),
         name="folder-managers-detail",
     ),
@@ -24,6 +31,11 @@ urlpatterns = [
         "ong-accountants/",
         OngAccountantsListView.as_view(),
         name="ong-accountants-list",
+    ),
+    path(
+        "ong-accountants/create/",
+        OngAccountantCreateView.as_view(),
+        name="ong-accountants-create",
     ),
     path(
         "ong-accountants/detail/<int:pk>/",

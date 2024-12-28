@@ -45,7 +45,9 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context["form"] = ContractCreateForm()
+        if not context.get("form", None):
+            context["form"] = ContractCreateForm()
+
         return context
 
     def post(self, request, *args, **kwargs):
