@@ -16,63 +16,152 @@
   {% csrf_token %}
 
   <div class="mb-3">
-    <label for="id_name" class="form-label">Nome:</label>
+    <label for="id_name" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Nome do Contrato</label>
     {{ form.name }}
   </div>
 
   <div class="mb-3">
-    <label for="id_objective" class="form-label">objective:</label>
+    <label for="id_objective" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Objetivo do Contrato</label>
     {{ form.objective }}
   </div>
 
   <div class="mb-3">
-    <label for="id_total_value" class="form-label">total_value:</label>
-    {{ form.total_value }}
+    <label for="id_total_value" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Valor do Contrato</label>
+    <div class="relative w-full">
+      <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
+        <svg class="w-4 h-4 text-gray-900 dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+        </svg>
+      </div>
+      <input
+        type="number"
+        id="id_total_value"
+        name="total_value"
+        step="0.01"
+        placeholder="0000,00"
+        class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+        required
+      />  
+    </div>  
+    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      Escreva somente os números, sem o R$, seperados por vírgula
+    </p>
   </div>
 
-  <div class="mb-3">
-    <label for="id_start_of_vigency" class="form-label">start_of_vigency:</label>
-    {{ form.start_of_vigency }}
+  <div class="my-3">
+    <label for="id_total_value" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Período de Vigência</label>
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+          <svg
+            class="w-4 h-4 text-gray-900 dark:text-gray-800"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+          </svg>
+        </div>
+
+        <input
+          id="id_start_of_vigency"
+          name="start_of_vigency"
+          type="text"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Início da Vigência"
+          required
+          datepicker
+          datepicker-autohide
+        >
+      </div>
+
+      <div class="relative">
+        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+          <svg
+            class="w-4 h-4 text-gray-900 dark:text-gray-800"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+          </svg>
+        </div>
+
+        <input
+          id="id_end_of_vigency"
+          name="end_of_vigency"
+          type="text"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Fim da Vigência"
+          required
+          datepicker
+          datepicker-autohide
+        >
+      </div>
+    </div>
   </div>
 
-  <div class="mb-3">
-    <label for="id_end_of_vigency" class="form-label">end_of_vigency:</label>
-    {{ form.end_of_vigency }}
+  <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
+    
+  <div class="my-3">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Empresa Contratante</label>
+        {{ form.contractor_company }}
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gestora da  Contratante</label>
+        {{ form.contractor_manager }}
+      </div>
+
+    </div>
   </div>
 
-  <div class="mb-3">
-    <label for="id_contractor_company" class="form-label">contractor_company:</label>
-    {{ form.contractor_company }}
+  <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
+
+  <div class="my-3">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Empresa Contratada</label>
+        {{ form.hired_company }}
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gestora da Contratada</label>
+        {{ form.hired_manager }}
+      </div>
+
+    </div>
   </div>
 
-  <div class="mb-3">
-    <label for="id_contractor_manager" class="form-label">contractor_manager:</label>
-    {{ form.contractor_manager }}
-  </div>
+  <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
 
-  <div class="mb-3">
-    <label for="id_hired_company" class="form-label">hired_company:</label>
-    {{ form.hired_company }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_hired_manager" class="form-label">hired_manager:</label>
-    {{ form.hired_manager }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_ong" class="form-label">ong:</label>
+  <div class="my-3">
+    <label for="id_ong" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Ong</label>
     {{ form.ong }}
   </div>
 
 
-  <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="user_avatar">Upload file</label>
-  <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="user_avatar_help" id="user_avatar" type="file">
-  <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">A profile picture is useful to confirm your are logged into your account</div>
+  {% comment %} <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-black" for="user_avatar">Upload file</label>
+  <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800" aria-describedby="user_avatar_help" id="user_avatar" type="file">
+  <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">A profile picture is useful to confirm your are logged into your account</div> {% endcomment %}
   
+  {% if form.errors %}
+    <ul class="errors">
+      {% for field in form %}
+        {% if field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ field.errors }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+
   <button
     type="submit"
-    class="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-8 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     style="display: flex; justify-self: center;"
   >
     Criar

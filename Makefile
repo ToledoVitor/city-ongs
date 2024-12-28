@@ -4,6 +4,9 @@ format:
 pre-commit:
 	@poetry run pre-commit install
 
+shell:
+	@poetry run python manage.py shell
+
 makemigrations:
 	@poetry run python manage.py makemigrations
 

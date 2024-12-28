@@ -1,5 +1,10 @@
 from django import forms
 
+from utils.widgets import (
+    BaseCharFieldFormWidget,
+    BaseTextAreaFormWidget,
+    BaseSelectFormWidget,
+)
 from contracts.models import Contract
 
 
@@ -19,10 +24,16 @@ class ContractCreateForm(forms.ModelForm):
             "ong",
         ]
 
-    # widgets = {
-    #     'title': forms.TextInput(attrs={
-    #         'class': 'form-control',   # Adiciona uma classe CSS personalizada
-    #         'placeholder': 'Enter the post title',  # Placeholder
-    #         'style': 'width: 100%; font-size: 18px;',  # Estilo inline (se necessário)
-    #     }),
-    # }
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
+            "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
+            "contractor_company": BaseSelectFormWidget(
+                placeholder="Empresa Contratante"
+            ),
+            "contractor_manager": BaseSelectFormWidget(
+                placeholder="Gestor do Contratante"
+            ),
+            "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
+            "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
+            "ong": BaseSelectFormWidget(placeholder="Ong"),
+        }

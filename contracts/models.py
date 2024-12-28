@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 
 from utils.choices import StatusChoices
@@ -12,6 +13,9 @@ class Company(BaseModel):
     cnpj = CNPJField(masked=True)
     history = HistoricalRecords()
 
+    def __str__(self) -> str:
+        return f"{self.name} - {self.cnpj}"
+
     class Meta:
         verbose_name = "Empresa"
         verbose_name_plural = "Empresas"
@@ -19,6 +23,11 @@ class Company(BaseModel):
 
 class Contract(BaseModel):
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
+    code = models.PositiveIntegerField(
+        verbose_name="Código do contrato",
+        null=True,
+        blank=True,
+    )
     objective = models.CharField(verbose_name="Objeto", max_length=128)
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
@@ -47,14 +56,14 @@ class Contract(BaseModel):
     # Hired
     hired_company = models.ForeignKey(
         Company,
-        verbose_name="Contratado",
+        verbose_name="Contratada",
         related_name="hired_contracts",
         on_delete=models.CASCADE,
         null=True,
     )
     hired_manager = models.ForeignKey(
         Company,
-        verbose_name="Gestor do Contratado",
+        verbose_name="Gestor do Contratada",
         related_name="hired_manager_contracts",
         on_delete=models.CASCADE,
         null=True,
@@ -70,6 +79,16 @@ class Contract(BaseModel):
     class Meta:
         verbose_name = "Contrato"
         verbose_name_plural = "Contratos"
+
+    def __str__(self) -> str:
+        return f"{self.code} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        if self.code is None:
+            max_code = Contract.objects.aggregate(Max("code"))["code__max"]
+            self.code = 1 if max_code is None else max_code + 1
+
+        super().save(*args, **kwargs)
 
 
 class ContractAddress(BaseModel):

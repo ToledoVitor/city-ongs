@@ -1,5 +1,7 @@
+from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, DetailView
+from django.db.models.query import QuerySet
+from django.views.generic import TemplateView, DetailView, ListView
 from utils.mixins import AdminRequiredMixin
 
 from django.shortcuts import redirect
@@ -8,15 +10,17 @@ from contracts.models import Contract
 from contracts.forms import ContractCreateForm
 
 
-class ContractsListView(LoginRequiredMixin, TemplateView):
+class ContractsListView(LoginRequiredMixin, ListView):
+    model = Contract
+    context_object_name = "contracts_list"
+    paginate_by = 10
+    ordering = "-created_at"
+
     template_name = "contracts/contracts-list.html"
     login_url = "/accounts/login"
 
-    def get_context_data(self, **kwargs) -> dict:
-        return {
-            "user": self.request.user,
-            "contract_results": Contract.objects.all(),
-        }
+    def get_queryset(self) -> QuerySet[Any]:
+        return self.model.objects.all()
 
 
 class ContractsDetailView(LoginRequiredMixin, DetailView):
