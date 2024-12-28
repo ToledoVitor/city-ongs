@@ -59,8 +59,30 @@ class User(AbstractUser):
             self.AccessChoices.CIVIL_SERVANT,
         }
 
+    @property
+    def city_hall(self) -> str:
+        # TODO: return user city hall
+        return "Prefeitura teste prefeitopolis"
+
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
+
+
+class Area(BaseModel):
+    name = models.CharField(verbose_name="Nome", max_length=128)
+    users = models.ManyToManyField(
+        User,
+        related_name="areas",
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Ong - {self.name}"
+
+    class Meta:
+        verbose_name = "Area"
+        verbose_name_plural = "Areas"
 
 
 class Ong(BaseModel):

@@ -5,9 +5,13 @@ from core.views import HomeView
 
 
 urlpatterns = [
-    path("", HomeView.as_view(), name="home"),
+    # Internal
     path("admin/", admin.site.urls),
     path("auth/", include("django.contrib.auth.urls")),
+    # Domain apps
+    path("", HomeView.as_view(), name="home"),
+    path("accounts/", include(("accounts.urls", "accounts"), namespace="accounts")),
     path("contracts/", include(("contracts.urls", "contracts"), namespace="contracts")),
+    # Health Check
     re_path(r"^api/health_check/", include("health_check.urls")),
 ]
