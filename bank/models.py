@@ -1,9 +1,9 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
+from contracts.models import Contract
 from utils.choices import MonthChoices
 from utils.models import BaseModel
-from simple_history.models import HistoricalRecords
-from contracts.models import Contract
 
 
 class Account(BaseModel):

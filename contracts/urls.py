@@ -1,6 +1,6 @@
 from django.urls import path
 
-from contracts.views import ContractsListView, ContractsDetailView, ContractCreateView
+from contracts.views import ContractCreateView, ContractsDetailView, ContractsListView
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),

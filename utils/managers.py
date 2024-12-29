@@ -1,5 +1,5 @@
 from django.db.models import Manager
-from easy_tenants.models import TenantManager
+
 from utils.query import SoftDeleteQueryset
 
 

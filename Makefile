@@ -1,5 +1,5 @@
 format:
-	@poetry run ruff format
+	@poetry run ruff check --select I --fix . && ruff format .
 
 pre-commit:
 	@poetry run pre-commit install

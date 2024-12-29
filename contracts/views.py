@@ -1,13 +1,18 @@
+import logging
 from typing import Any
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models.query import QuerySet
-from django.views.generic import TemplateView, DetailView, ListView
+from django.shortcuts import redirect
+from django.views.generic import DetailView, ListView, TemplateView
+
+from activity.models import ActivityLog
+from contracts.forms import ContractCreateForm
+from contracts.models import Contract
 from utils.mixins import AdminRequiredMixin
 
-from django.shortcuts import redirect
-
-from contracts.models import Contract
-from contracts.forms import ContractCreateForm
+logger = logging.getLogger(__name__)
 
 
 class ContractsListView(LoginRequiredMixin, ListView):
@@ -53,6 +58,17 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         form = ContractCreateForm(request.POST)
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                contract = form.save()
+
+                logger.info(f"{request.user.id} - Created new contract")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
             return redirect("contracts:contracts-list")
+
         return self.render_to_response(self.get_context_data(form=form))

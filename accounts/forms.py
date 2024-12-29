@@ -1,16 +1,15 @@
 from django import forms
 
-from utils.regex import password_is_valid
-from utils.widgets import (
-    BaseCharFieldFormWidget,
-    BaseEmailFormWidget,
-)
 from accounts.models import User
+from utils.regex import password_is_valid
+from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget
 
 
 class FolderManagerCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="Senha")
-    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirme a senha")
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput, label="Confirme a senha"
+    )
 
     class Meta:
         model = User
@@ -35,14 +34,16 @@ class FolderManagerCreateForm(forms.ModelForm):
             self.add_error("password", "A senha não atende aos critérios.")
 
         if password != confirm_password:
-            self.add_error('confirm_password', "As senhas não coincidem.")
+            self.add_error("confirm_password", "As senhas não coincidem.")
 
         return cleaned_data
 
 
 class OngAccountantCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="Senha")
-    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirme a senha")
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput, label="Confirme a senha"
+    )
 
     class Meta:
         model = User
@@ -67,6 +68,6 @@ class OngAccountantCreateForm(forms.ModelForm):
             self.add_error("password", "A senha não atende aos critérios.")
 
         if password != confirm_password:
-            self.add_error('confirm_password', "As senhas não coincidem.")
+            self.add_error("confirm_password", "As senhas não coincidem.")
 
         return cleaned_data

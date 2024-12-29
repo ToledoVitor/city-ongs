@@ -1,12 +1,12 @@
 from django.urls import path
 
 from accounts.views import (
-    FolderManagersListView,
     FolderManagerCreateView,
     FolderManagersDetailView,
-    OngAccountantsListView,
+    FolderManagersListView,
     OngAccountantCreateView,
     OngAccountantsDetailView,
+    OngAccountantsListView,
 )
 
 urlpatterns = [

@@ -9,7 +9,6 @@ from contracts.models import (
     ContractSubGoal,
 )
 
-
 admin.site.register(Company)
 admin.site.register(Contract)
 admin.site.register(ContractAddress)

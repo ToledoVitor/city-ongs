@@ -1,11 +1,11 @@
 from django.db import models
 from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
+from simple_history.models import HistoricalRecords
 
+from accounts.models import Ong
 from utils.choices import StatusChoices
 from utils.models import BaseModel
-from simple_history.models import HistoricalRecords
-from accounts.models import Ong
 
 
 class Company(BaseModel):

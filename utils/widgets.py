@@ -2,7 +2,9 @@ from django import forms
 
 
 class BaseCharFieldFormWidget(forms.TextInput):
-    def __init__(self, *args, placeholder=None, is_password=False, required=True, **kwargs):
+    def __init__(
+        self, *args, placeholder=None, is_password=False, required=True, **kwargs
+    ):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
@@ -75,8 +77,8 @@ class BaseEmailFormWidget(forms.EmailInput):
                 "class": " ".join(
                     [
                         "bg-gray-50 border border-gray-300 text-gray-900 text-sm",
-                        "rounded-lg focus:ring-blue-500 focus:border-blue-500 block", 
-                        "w-full p-2.5 dark:bg-gray-300 dark:border-gray-600", 
+                        "rounded-lg focus:ring-blue-500 focus:border-blue-500 block",
+                        "w-full p-2.5 dark:bg-gray-300 dark:border-gray-600",
                         "dark:placeholder-gray-600 dark:text-black dark:focus:ring-blue-500",
                         "dark:focus:border-blue-500",
                     ]

@@ -1,8 +1,8 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from contracts.models import Contract
 from utils.models import BaseModel
-from simple_history.models import HistoricalRecords
 
 
 class Report(BaseModel):

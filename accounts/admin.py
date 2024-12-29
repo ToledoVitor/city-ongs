@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from accounts.models import User, UserOngRelatioship, Ong, CityHall
-
+from accounts.models import CityHall, Ong, User, UserOngRelatioship
 
 admin.site.register(User)
 admin.site.register(UserOngRelatioship)

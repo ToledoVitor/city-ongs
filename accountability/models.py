@@ -1,10 +1,10 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
+from accounts.models import User
+from contracts.models import Contract
 from utils.choices import MonthChoices, StatusChoices
 from utils.models import BaseModel
-from simple_history.models import HistoricalRecords
-from contracts.models import Contract
-from accounts.models import User
 
 
 class Accountability(BaseModel):

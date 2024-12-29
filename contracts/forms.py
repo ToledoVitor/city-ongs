@@ -1,11 +1,11 @@
 from django import forms
 
+from contracts.models import Contract
 from utils.widgets import (
     BaseCharFieldFormWidget,
-    BaseTextAreaFormWidget,
     BaseSelectFormWidget,
+    BaseTextAreaFormWidget,
 )
-from contracts.models import Contract
 
 
 class ContractCreateForm(forms.ModelForm):

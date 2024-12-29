@@ -1,14 +1,18 @@
+import logging
 from typing import Any
 
-from accounts.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models.query import QuerySet
-from django.views.generic import ListView, DetailView, TemplateView
-from utils.mixins import AdminRequiredMixin
-
 from django.shortcuts import redirect
+from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import FolderManagerCreateForm, OngAccountantCreateForm
+from accounts.models import User
+from activity.models import ActivityLog
+from utils.mixins import AdminRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class FolderManagersListView(AdminRequiredMixin, ListView):
@@ -52,17 +56,34 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        if not request.user.can_add_new_folder_managers:
+            logger.error(
+                f"{request.user.id} - dont have access to create new folder managers"
+            )
+            return redirect("home")
+
         form = FolderManagerCreateForm(request.POST)
         if form.is_valid():
-            _ = User.objects.create(
-                email=form.cleaned_data["email"],
-                username=form.cleaned_data["email"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                password=form.cleaned_data["password"],
-                access_level=User.AccessChoices.FOLDER_MANAGER,
-            )
-            return redirect("accounts:folder-managers-list")
+            with transaction.atomic():
+                new_user = User.objects.create(
+                    email=form.cleaned_data["email"],
+                    username=form.cleaned_data["email"],
+                    first_name=form.cleaned_data["first_name"],
+                    last_name=form.cleaned_data["last_name"],
+                    password=form.cleaned_data["password"],
+                    access_level=User.AccessChoices.FOLDER_MANAGER,
+                )
+
+                logger.info(f"{request.user.id} - Created new folder manager")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_FOLDER_MANAGER,
+                    target_object_id=new_user.id,
+                    target_content_object=new_user,
+                )
+                return redirect("accounts:folder-managers-list")
+
         return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -107,15 +128,32 @@ class OngAccountantCreateView(AdminRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        if not request.user.can_add_new_ong_accountants:
+            logger.error(
+                f"{request.user.id} - dont have access to create new ong accountant"
+            )
+            return redirect("home")
+
         form = OngAccountantCreateForm(request.POST)
         if form.is_valid():
-            _ = User.objects.create(
-                email=form.cleaned_data["email"],
-                username=form.cleaned_data["email"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                password=form.cleaned_data["password"],
-                access_level=User.AccessChoices.ONG_ACCOUNTANT,
-            )
+            with transaction.atomic():
+                new_user = User.objects.create(
+                    email=form.cleaned_data["email"],
+                    username=form.cleaned_data["email"],
+                    first_name=form.cleaned_data["first_name"],
+                    last_name=form.cleaned_data["last_name"],
+                    password=form.cleaned_data["password"],
+                    access_level=User.AccessChoices.ONG_ACCOUNTANT,
+                )
+
+                logger.info(f"{request.user.id} - Created new ong accountant")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_ONG_ACCOUNTANT,
+                    target_object_id=new_user.id,
+                    target_content_object=new_user,
+                )
             return redirect("accounts:ong-accountants-list")
+
         return self.render_to_response(self.get_context_data(form=form))
