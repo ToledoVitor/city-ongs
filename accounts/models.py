@@ -6,6 +6,24 @@ from utils.fields import LowerCaseEmailField
 from utils.models import BaseModel
 
 
+class Area(BaseModel):
+    name = models.CharField(verbose_name="Nome", max_length=128)
+    description = models.CharField(
+        verbose_name="Descrição",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Ong - {self.name}"
+
+    class Meta:
+        verbose_name = "Area"
+        verbose_name_plural = "Areas"
+
 class User(AbstractUser):
     class AccessChoices(models.TextChoices):
         MASTER = "MASTER", "master"
@@ -33,6 +51,11 @@ class User(AbstractUser):
         choices=AccessChoices,
         default=AccessChoices.ONG_ACCOUNTANT,
         max_length=14,
+    )
+
+    areas = models.ManyToManyField(
+        Area,
+        related_name="users",
     )
 
     USERNAME_FIELD = "email"
@@ -67,22 +90,6 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
 
-
-class Area(BaseModel):
-    name = models.CharField(verbose_name="Nome", max_length=128)
-    users = models.ManyToManyField(
-        User,
-        related_name="areas",
-    )
-
-    history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return f"Ong - {self.name}"
-
-    class Meta:
-        verbose_name = "Area"
-        verbose_name_plural = "Areas"
 
 
 class Ong(BaseModel):

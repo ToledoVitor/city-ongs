@@ -1,6 +1,6 @@
 from django import forms
 
-from accounts.models import User
+from accounts.models import User, Area
 from utils.regex import password_is_valid
 from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget
 
@@ -10,6 +10,11 @@ class FolderManagerCreateForm(forms.ModelForm):
     confirm_password = forms.CharField(
         widget=forms.PasswordInput, label="Confirme a senha"
     )
+    areas = forms.ModelMultipleChoiceField(
+        queryset=Area.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+    )
 
     class Meta:
         model = User
@@ -17,6 +22,7 @@ class FolderManagerCreateForm(forms.ModelForm):
             "email",
             "first_name",
             "last_name",
+            "areas",
         ]
 
         widgets = {
@@ -29,12 +35,16 @@ class FolderManagerCreateForm(forms.ModelForm):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
+        areas = cleaned_data.get("areas", [])
 
         if not password_is_valid(password):
             self.add_error("password", "A senha não atende aos critérios.")
 
         if password != confirm_password:
             self.add_error("confirm_password", "As senhas não coincidem.")
+
+        if len(areas) < 1:
+            self.add_error("areas", "Você deve escolher pelo menos uma área.")
 
         return cleaned_data
 
@@ -45,12 +55,19 @@ class OngAccountantCreateForm(forms.ModelForm):
         widget=forms.PasswordInput, label="Confirme a senha"
     )
 
+    areas = forms.ModelMultipleChoiceField(
+        queryset=Area.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+    )
+
     class Meta:
         model = User
         fields = [
             "email",
             "first_name",
             "last_name",
+            "areas",
         ]
 
         widgets = {
@@ -59,15 +76,30 @@ class OngAccountantCreateForm(forms.ModelForm):
             "last_name": BaseCharFieldFormWidget(placeholder=""),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        # TODO: alterar queryset areas disponiveis para o usuário
+        self.fields['areas'].queryset = Area.objects.all()
+
+        # Filtrando a queryset com base na request
+        # if self.request and self.request.user.is_authenticated:
+            # self.fields['areas'].queryset = Area.objects.filter(user=self.request.user)
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
+        areas = cleaned_data.get("areas", [])
 
         if not password_is_valid(password):
             self.add_error("password", "A senha não atende aos critérios.")
 
         if password != confirm_password:
             self.add_error("confirm_password", "As senhas não coincidem.")
+
+        if len(areas) < 1:
+            self.add_error("areas", "Você deve escolher pelo menos uma área.")
 
         return cleaned_data
