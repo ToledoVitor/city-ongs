@@ -28,11 +28,11 @@ class User(AbstractUser):
     class AccessChoices(models.TextChoices):
         MASTER = "MASTER", "master"
         # SOBE CONTRATOS
-        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"
+        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público" # administrador
         # REVISA E ETC
-        FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta"
+        FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta" # Gestor da pasta / Proprietáio da Pasta
         # SOBEM DOCUMENTAÇÃo
-        ONG_ACCOUNTANT = "ONG_ACCOUNTANT", "Contador / funcionário da ong"
+        ONG_ACCOUNTANT = "ONG_ACCOUNTANT", "Contador / funcionário da ong" # usuário final
 
     username = models.CharField(
         max_length=150,
