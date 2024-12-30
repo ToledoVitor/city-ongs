@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Contas - Gestores de Pasta{% endblock %}
+{% block title %}Receita - Fontes de Receita{% endblock %}
 
 {% block content %}
 
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-  Gestores de Pasta
+  Fontes de Receita
 </p>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome ou email..." %}
+{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome da fonte..." %}
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -25,32 +25,20 @@
                 <th scope="col" class="px-6 py-3">
                     Início Vigência
                 </th>
-                {% comment %} <th scope="col" class="px-6 py-3">
-                    Fim Vigência
-                </th> {% endcomment %}
-                <th scope="col" class="px-6 py-3" />
             </tr>
         </thead>
         <tbody>
-            {% if managers_list %}
-              {% for manager in managers_list %}
+            {% if sources %}
+              {% for source in sources %}
                 <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ manager.get_full_name }}
+                      {{ source }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ manager.email }}
+                      {{ source }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ manager }}
-                    </td>
-                    <td class="px-6 py-4 text-base flex justify-end">
-                      <a
-                        href="{% url 'accounts:folder-managers-detail' manager.id %}"
-                        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      >
-                        Visualizar
-                      </a>
+                      {{ source }}
                     </td>
                 </tr>
               {% endfor %}
@@ -65,9 +53,6 @@
                 <td class="px-6 py-4">
                     -
                 </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
               </tr>
             {% endif %}     
         </tbody>
@@ -75,11 +60,11 @@
   
     {% if user.has_admin_access %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
+          {% comment %} href="{% url 'accountability:revenue-source-create' %}" {% endcomment %}
         <a
-        href="{% url 'accounts:folder-managers-create' %}"
           class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
-          Adicionar novo
+          Adicionar nova
           <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
           </svg>

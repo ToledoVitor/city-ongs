@@ -10,29 +10,7 @@
   Funcionários Privados
 </p>
 
-<form class="my-5" method="get">
-  <div class="relative">
-    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-      <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-      </svg>
-    </div>
-    <input
-      class="block w-full p-4 ps-10 text-sm text-black border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-600 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      type="search"
-      id="id_search"
-      name="q"
-      value="{{ search_query }}"
-      placeholder="Pesquisar por nome ou email..."
-    />
-    <button
-      type="submit"
-      class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-    >
-      Buscar
-    </button>
-  </div>
-</form>
+{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome ou email..." %}
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -106,79 +84,8 @@
       </div>
     {% endif %}
   
-    <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-green-200" aria-label="Table navigation">
-        <span class="text-base font-normal text-black dark:text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
-          Página
-          <span class="font-bold text-gray-900 dark:text-black">{{ page_obj.number }}</span>
-          de
-          <span class="font-bold text-gray-900 dark:text-black">{{ page_obj.paginator.num_pages }}</span>
-        </span>
-  
-        <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-            {% if page_obj.has_previous %}
-              <li>
-                <a
-                  href="?page=1"
-                  class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 rounded-s-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
-                >
-                  Primeira
-                </a>
-              </li>
-  
-              <li>
-                <a
-                  href="?page={{ page_obj.previous_page_number }}"
-                  class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
-                >
-                  Anterior
-                </a>
-              </li>
-            {% endif %}
-  
-            {% for num in page_obj.paginator.page_range %}
-              {% if num == page_obj.number %}
-                <li>
-                  <a
-                    href="?page={{ num }}"
-                    aria-current="page"
-                    class="flex items-center justify-center px-3 h-8 text-white border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-white dark:border-gray-700 dark:bg-green-800 dark:text-white"
-                  >
-                    {{ num }}
-                  </a>
-                </li>
-              {% else %}
-                <li>
-                  <a
-                    href="?page={{ num }}"
-                    class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
-                  >
-                    {{ num }}
-                  </a>
-                </li>
-              {% endif %}
-            {% endfor %}
-  
-            {% if page_obj.has_next %}
-              <li>
-                <a
-                  href="?page={{ page_obj.next_page_number }}"
-                  class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
-                >
-                  Próxima
-                </a>
-              </li>
-  
-              <li>
-                <a
-                  href="?page={{ page_obj.paginator.num_pages }}"
-                  class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 rounded-e-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
-                >
-                  Última
-                </a>
-              </li>
-            {% endif %}
-        </ul>
-    </nav>
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
+
 </div>
   
 {% endblock %}
