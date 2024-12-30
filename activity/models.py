@@ -59,7 +59,6 @@ class ActivityLog(models.Model):
         blank=True,
     )
     target_content_object = GenericForeignKey("target_content_type", "target_object_id")
-    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return f"{self.user_email} - {"self.action"}"

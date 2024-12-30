@@ -67,7 +67,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = FolderManagerCreateForm()
+            context["form"] = FolderManagerCreateForm(request=self.request)
 
         return context
 
@@ -78,7 +78,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
             )
             return redirect("home")
 
-        form = FolderManagerCreateForm(request.POST)
+        form = FolderManagerCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 new_user = User.objects.create(

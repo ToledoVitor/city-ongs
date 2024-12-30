@@ -31,6 +31,13 @@ class FolderManagerCreateForm(forms.ModelForm):
             "last_name": BaseCharFieldFormWidget(placeholder=""),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        if self.request:
+            self.fields["areas"].queryset = self.request.user.areas.all()
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
@@ -80,12 +87,8 @@ class OngAccountantCreateForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        # TODO: alterar queryset areas disponiveis para o usuário
-        self.fields["areas"].queryset = Area.objects.all()
-
-        # Filtrando a queryset com base na request
-        # if self.request and self.request.user.is_authenticated:
-        # self.fields['areas'].queryset = Area.objects.filter(user=self.request.user)
+        if self.request:
+            self.fields["areas"].queryset = self.request.user.areas.all()
 
     def clean(self):
         cleaned_data = super().clean()

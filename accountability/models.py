@@ -1,7 +1,8 @@
+
 from django.db import models
 from simple_history.models import HistoricalRecords
 
-from accounts.models import User
+from accounts.models import CityHall, User
 from contracts.models import Contract
 from utils.choices import MonthChoices, StatusChoices
 from utils.models import BaseModel
@@ -44,6 +45,36 @@ class Accountability(BaseModel):
         unique_together = ("month", "year")
 
 
+class ExpenseSource(BaseModel):
+    city_hall = models.ForeignKey(
+        CityHall,
+        verbose_name="Prefeitura",
+        related_name="expense_sources",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(verbose_name="Nome da fonte", max_length=64)
+    document = models.IntegerField(
+        verbose_name="CPF/CNPJ da fonte",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Fonte de Gasto"
+        verbose_name_plural = "Fonte de Gastos"
+        unique_together = ("city_hall", "name")
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.document is not None:
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
+            self.document = int(string_doc)
+
+        super().save(*args, **kwargs)
+
+
 class Expense(BaseModel):
     paid = models.BooleanField(verbose_name="Pago", default=False)
     reconciled = models.BooleanField(verbose_name="Conciliado", default=False)
@@ -60,15 +91,24 @@ class Expense(BaseModel):
         related_name="expenses",
         on_delete=models.CASCADE,
     )
+    source = models.ForeignKey(
+        # TODO: remove null
+        ExpenseSource,
+        verbose_name="source",
+        related_name="expenses",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return f"Despesa {self.id}"
 
     class Meta:
         verbose_name = "Despesa"
         verbose_name_plural = "Despesas"
+
+    def __str__(self) -> str:
+        return f"Despesa {self.id}"
 
 
 class ExpenseAnalysis(BaseModel):
@@ -102,6 +142,36 @@ class ExpenseAnalysis(BaseModel):
     class Meta:
         verbose_name = "Análise de Despesa"
         verbose_name_plural = "Análise de Despesas"
+
+
+class RevenueSource(BaseModel):
+    city_hall = models.ForeignKey(
+        CityHall,
+        verbose_name="Prefeitura",
+        related_name="revenue_sources",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(verbose_name="Nome da fonte", max_length=64)
+    document = models.IntegerField(
+        verbose_name="CPF/CNPJ da fonte",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Fonte de Receita"
+        verbose_name_plural = "Fonte de Receitas"
+        unique_together = ("city_hall", "name")
+
+    def __str__(self) -> str:
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.document is not None:
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
+            self.document = int(string_doc)
+
+        super().save(*args, **kwargs)
 
 
 class Revenue(BaseModel):

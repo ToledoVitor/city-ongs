@@ -3,7 +3,7 @@ from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Ong
+from accounts.models import Area, Ong
 from utils.choices import StatusChoices
 from utils.models import BaseModel
 
@@ -71,7 +71,21 @@ class Contract(BaseModel):
 
     # Ong
     ong = models.ForeignKey(
-        Ong, verbose_name="Ong", related_name="contracts", on_delete=models.CASCADE
+        Ong,
+        verbose_name="Ong",
+        related_name="contracts",
+        on_delete=models.CASCADE,
+    )
+
+    # Link with city hall area
+    area = models.ForeignKey(
+        # TODO: remove null
+        Area,
+        verbose_name="Area",
+        related_name="contracts",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -159,7 +173,3 @@ class ContractItem(BaseModel):
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
-
-    # 6.18
-    # status:
-    # analise, correcao, aprovada, aprovada c ressalva, rejeitada

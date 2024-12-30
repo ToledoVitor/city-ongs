@@ -6,6 +6,24 @@ from utils.fields import LowerCaseEmailField
 from utils.models import BaseModel
 
 
+class CityHall(BaseModel):
+    name = models.CharField(verbose_name="Prefeitura", max_length=128)
+    users = models.ManyToManyField(
+        "accounts.User",
+        verbose_name="Usuários",
+        related_name="city_halls",
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = "Prefeitura"
+        verbose_name_plural = "Prefeituras"
+
+
 class Area(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
     description = models.CharField(
@@ -13,6 +31,15 @@ class Area(BaseModel):
         max_length=128,
         blank=True,
         null=True,
+    )
+    # TODO: remove null and blank
+    city_hall = models.ForeignKey(
+        CityHall,
+        verbose_name="Prefeitura",
+        related_name="areas",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -133,21 +160,3 @@ class UserOngRelatioship(BaseModel):
     class Meta:
         verbose_name = "Relação Ong-Usuário"
         verbose_name_plural = "Relações Ong-Usuário"
-
-
-class CityHall(BaseModel):
-    name = models.CharField(verbose_name="Prefeitura", max_length=128)
-    users = models.ManyToManyField(
-        User,
-        verbose_name="Usuários",
-        related_name="city_halls",
-    )
-
-    history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return self.name
-
-    class Meta:
-        verbose_name = "Prefeitura"
-        verbose_name_plural = "Prefeituras"
