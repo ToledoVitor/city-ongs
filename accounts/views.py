@@ -3,6 +3,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, TemplateView
@@ -25,7 +26,20 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.filter(access_level=User.AccessChoices.FOLDER_MANAGER)
+        queryset = self.model.objects.filter(access_level=User.AccessChoices.FOLDER_MANAGER)
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(email__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
 
 
 class FolderManagersDetailView(LoginRequiredMixin, DetailView):
@@ -97,7 +111,20 @@ class OngAccountantsListView(AdminRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.filter(access_level=User.AccessChoices.ONG_ACCOUNTANT)
+        queryset = self.model.objects.filter(access_level=User.AccessChoices.ONG_ACCOUNTANT)
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(email__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
 
 
 class OngAccountantsDetailView(LoginRequiredMixin, DetailView):

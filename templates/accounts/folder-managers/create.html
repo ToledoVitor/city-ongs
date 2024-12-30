@@ -85,6 +85,19 @@
 
   </div>
 
+  <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
+
+  <div class="my-3">
+    <label for="id_areas" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Áreas de Trabalho</label>
+    <div class="p-2 text-gray-900 rounded-lg dark:bg-gray-300 dark:border-gray-600 dark:text-black">
+      {{ form.areas }}
+    </div>
+
+    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      O usuário deve fazer parte de pelo menos uma área.
+    </p>
+  </div>
+
   {% if form.errors %}
     <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-50 dark:bg-gray-300 dark:text-red-600" role="alert">
       <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">

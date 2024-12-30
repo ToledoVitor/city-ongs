@@ -25,8 +25,16 @@ class ContractsListView(LoginRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.all()
-
+        queryset = super().get_queryset()
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(name__icontains=query)
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
 
 class ContractsDetailView(LoginRequiredMixin, DetailView):
     model = Contract
