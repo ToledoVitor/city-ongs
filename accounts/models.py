@@ -24,15 +24,22 @@ class Area(BaseModel):
         verbose_name = "Area"
         verbose_name_plural = "Areas"
 
+
 class User(AbstractUser):
     class AccessChoices(models.TextChoices):
         MASTER = "MASTER", "master"
         # SOBE CONTRATOS
-        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público" # administrador
+        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"  # administrador
         # REVISA E ETC
-        FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta" # Gestor da pasta / Proprietáio da Pasta
+        FOLDER_MANAGER = (
+            "FOLDER_MANAGER",
+            "Gestor da pasta",
+        )  # Gestor da pasta / Proprietáio da Pasta
         # SOBEM DOCUMENTAÇÃo
-        ONG_ACCOUNTANT = "ONG_ACCOUNTANT", "Contador / funcionário da ong" # usuário final
+        ONG_ACCOUNTANT = (
+            "ONG_ACCOUNTANT",
+            "Contador / funcionário da ong",
+        )  # usuário final
 
     username = models.CharField(
         max_length=150,
@@ -89,7 +96,6 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
-
 
 
 class Ong(BaseModel):

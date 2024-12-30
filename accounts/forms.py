@@ -1,6 +1,6 @@
 from django import forms
 
-from accounts.models import User, Area
+from accounts.models import Area, User
 from utils.regex import password_is_valid
 from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget
 
@@ -77,15 +77,15 @@ class OngAccountantCreateForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
         # TODO: alterar queryset areas disponiveis para o usuário
-        self.fields['areas'].queryset = Area.objects.all()
+        self.fields["areas"].queryset = Area.objects.all()
 
         # Filtrando a queryset com base na request
         # if self.request and self.request.user.is_authenticated:
-            # self.fields['areas'].queryset = Area.objects.filter(user=self.request.user)
+        # self.fields['areas'].queryset = Area.objects.filter(user=self.request.user)
 
     def clean(self):
         cleaned_data = super().clean()

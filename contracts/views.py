@@ -30,11 +30,12 @@ class ContractsListView(LoginRequiredMixin, ListView):
         if query:
             queryset = queryset.filter(name__icontains=query)
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["search_query"] = self.request.GET.get("q", "")
         return context
+
 
 class ContractsDetailView(LoginRequiredMixin, DetailView):
     model = Contract

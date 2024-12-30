@@ -4,13 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0005_area_description_historicalarea_description"),
     ]
 
     operations = [
-        migrations.RemoveField(model_name="area", name="users",),
+        migrations.RemoveField(
+            model_name="area",
+            name="users",
+        ),
         migrations.AddField(
             model_name="user",
             name="areas",

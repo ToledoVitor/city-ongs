@@ -26,13 +26,15 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        queryset = self.model.objects.filter(access_level=User.AccessChoices.FOLDER_MANAGER)
+        queryset = self.model.objects.filter(
+            access_level=User.AccessChoices.FOLDER_MANAGER
+        )
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(email__icontains=query) |
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query)
+                Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
             )
         return queryset
 
@@ -111,13 +113,15 @@ class OngAccountantsListView(AdminRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        queryset = self.model.objects.filter(access_level=User.AccessChoices.ONG_ACCOUNTANT)
+        queryset = self.model.objects.filter(
+            access_level=User.AccessChoices.ONG_ACCOUNTANT
+        )
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(email__icontains=query) |
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query)
+                Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
             )
         return queryset
 
