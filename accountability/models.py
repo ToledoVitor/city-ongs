@@ -94,7 +94,7 @@ class Expense(BaseModel):
     source = models.ForeignKey(
         # TODO: remove null
         ExpenseSource,
-        verbose_name="source",
+        verbose_name="Fonte",
         related_name="expenses",
         on_delete=models.CASCADE,
         null=True,
@@ -124,7 +124,7 @@ class ExpenseAnalysis(BaseModel):
     reviwer = models.ForeignKey(
         User,
         verbose_name="Usuário",
-        related_name="reviwers",
+        related_name="expense_anaysis",
         on_delete=models.CASCADE,
     )
     expense = models.ForeignKey(
@@ -159,8 +159,8 @@ class RevenueSource(BaseModel):
     )
 
     class Meta:
-        verbose_name = "Fonte de Receita"
-        verbose_name_plural = "Fonte de Receitas"
+        verbose_name = "Fonte de Recurso"
+        verbose_name_plural = "Fonte de Recursos"
         unique_together = ("city_hall", "name")
 
     def __str__(self) -> str:
@@ -183,7 +183,7 @@ class Revenue(BaseModel):
 
     accountability = models.ForeignKey(
         Accountability,
-        verbose_name="Receita",
+        verbose_name="Contabilidade",
         related_name="revenues",
         on_delete=models.CASCADE,
     )
@@ -211,7 +211,7 @@ class AccountabilityFile(BaseModel):
 
     revenue = models.ForeignKey(
         Revenue,
-        verbose_name="Receita",
+        verbose_name="Recurso",
         related_name="accountabilitie_files",
         on_delete=models.CASCADE,
     )
