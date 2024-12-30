@@ -116,11 +116,6 @@ class User(AbstractUser):
             self.AccessChoices.CIVIL_SERVANT,
         }
 
-    @property
-    def city_hall(self) -> str:
-        # TODO: return user city hall
-        return "Prefeitura teste prefeitopolis"
-
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
 

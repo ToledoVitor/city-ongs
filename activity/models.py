@@ -14,12 +14,16 @@ class ActivityLog(models.Model):
             "CREATED_ONG_ACCOUNTANT",
             "criou contador / funcionário ong",
         )
-
-        # contracts
-        CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
-
         # accountability
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"
+        # contracts
+        CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
+        # expenses
+        CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "criou fonte de despesa"
+        DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "apagou fonte de despesa"
+        # revenues
+        CREATE_REVENUE_SOURCE = "CREATE_REVENUE_SOURCE", "criou fonte de recurso"
+        DELETED_REVENUE_SOURCE = "DELETED_REVENUE_SOURCE", "apagou fonte de recurso"
 
     created_at = models.DateTimeField(
         verbose_name="Hora do registro",

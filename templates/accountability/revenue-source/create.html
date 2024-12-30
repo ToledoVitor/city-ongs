@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Recursos - Fontes de Recurso{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Criar Nova Fonte de Recurso
+</p>
+
+
+<form method="post" class="max-w-lg mx-auto">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_name" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Nome da Fonte</label>
+    {{ form.name }}
+  </div>
+
+
+  <div class="mb-3">
+    <label for="id_document" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">CPF ou CNPJ da fonte</label>
+    <div class="relative w-full">
+      <input
+        type="number"
+        id="id_id_document"
+        name="id_document"
+        step="1"
+        placeholder=""
+        class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+        required
+      />  
+    </div>  
+    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      Escreva somente os números do documento, sem pontuação.
+    </p>
+  </div>
+
+  <div class="my-3">
+    <label for="id_ong" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Prefeitura</label>
+    {{ form.city_hall }}
+  </div>
+  
+
+  {% if form.errors %}
+    <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-50 dark:bg-gray-300 dark:text-red-600" role="alert">
+      <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+      </svg>
+      <span class="sr-only">Danger</span>
+      <div>
+        <span class="font-medium">Erro ao criar contrato</span>
+        <ul class="my-1.5 list-disc list-inside">
+          {% for field in form %}
+            {% if field.errors %}
+              <li class="my-1"><b>{{ field.label }}</b>: {{ field.errors }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-red-50 text-white rounded-lg focus:ring-2 focus:ring-white p-1.5 hover:bg-white inline-flex items-center justify-center h-8 w-8 dark:bg-gray-400 dark:text-white dark:hover:bg-gray-300" data-dismiss-target="#alert" aria-label="Close">
+        <span class="sr-only">Close</span>
+        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+        </svg>
+      </button>
+
+    </div>
+  {% endif %}
+
+  <button
+    type="submit"
+    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    style="display: flex; justify-self: center;"
+  >
+    Criar
+  </button>
+
+</form>
+
+{% endblock %}

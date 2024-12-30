@@ -1,4 +1,3 @@
-
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -60,8 +59,8 @@ class ExpenseSource(BaseModel):
     )
 
     class Meta:
-        verbose_name = "Fonte de Gasto"
-        verbose_name_plural = "Fonte de Gastos"
+        verbose_name = "Fonte de Despesa"
+        verbose_name_plural = "Fonte de Despesas"
         unique_together = ("city_hall", "name")
 
     def __str__(self) -> str:
@@ -194,8 +193,8 @@ class Revenue(BaseModel):
         return f"Receita {self.id}"
 
     class Meta:
-        verbose_name = "Receita"
-        verbose_name_plural = "Receitas"
+        verbose_name = "Recurso"
+        verbose_name_plural = "Recursos"
 
 
 class AccountabilityFile(BaseModel):

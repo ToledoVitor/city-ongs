@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Receita - Fontes de Receita{% endblock %}
+{% block title %}Recursos - Fontes de Recurso{% endblock %}
 
 {% block content %}
 
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-  Fontes de Receita
+  Fontes de Recurso
 </p>
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome da fonte..." %}
@@ -60,8 +60,8 @@
   
     {% if user.has_admin_access %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
-          {% comment %} href="{% url 'accountability:revenue-source-create' %}" {% endcomment %}
         <a
+          href="{% url 'accountability:revenues-source-create' %}"
           class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Adicionar nova

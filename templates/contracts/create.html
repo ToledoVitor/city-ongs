@@ -6,7 +6,7 @@
 
 {% load humanize %}
 
-<p class="text-2xl mb-4">
+<p class="text-3xl mb-4 font-bold">
   Criar Novo Contrato
 </p>
 
@@ -148,16 +148,6 @@
   <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800" aria-describedby="user_avatar_help" id="user_avatar" type="file">
   <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">A profile picture is useful to confirm your are logged into your account</div> {% endcomment %}
   
-  {% if form.errors %}
-    <ul class="errors">
-      {% for field in form %}
-        {% if field.errors %}
-          <li><strong>{{ field.label }}:</strong> {{ field.errors }}</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  {% endif %}
-
   {% if form.errors %}
     <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-50 dark:bg-gray-300 dark:text-red-600" role="alert">
       <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
