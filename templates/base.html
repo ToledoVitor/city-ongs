@@ -32,6 +32,11 @@
               </a>
           </li>
 
+          <div class="inline-flex items-center justify-center w-full">
+            <hr class="w-32 h-px my-4 bg-green-200 border-0 dark:bg-green-700">
+            <span class="absolute px-3 text-xs text-gray-900 dark:text-white">Contratos</span>
+          </div>
+
           <li>
             <a href="{% url 'contracts:contracts-list' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700 group">
             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -60,7 +65,10 @@
             </a>
           </li>
 
-          <hr class="w-32 h-px my-8 bg-green-200 border-0 dark:bg-green-700">
+          <div class="inline-flex items-center justify-center w-full">
+            <hr class="w-32 h-px my-4 bg-green-200 border-0 dark:bg-green-700">
+            <span class="absolute px-3 text-xs text-gray-900 dark:text-white">Contábil</span>
+          </div>
 
           <li>
             <a href="{% url 'accountability:expenses-source-list' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700 group">
@@ -84,7 +92,10 @@
           </li>
 
           {% if user.has_admin_access %}
-            <hr class="w-32 h-px my-8 bg-green-200 border-0 dark:bg-green-700">
+            <div class="inline-flex items-center justify-center w-full">
+              <hr class="w-32 h-px my-4 bg-green-200 border-0 dark:bg-green-700">
+              <span class="absolute px-3 text-xs text-gray-900 dark:text-white">Usuários</span>
+            </div>
 
             <li>
               <a href="{% url 'accounts:folder-managers-list' %}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-green-100 dark:hover:bg-green-700 group">

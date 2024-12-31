@@ -17,13 +17,13 @@
         <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
             <tr>
                 <th scope="col" class="px-6 py-3">
-                    Nome do Contrato <br>
+                    Nome da Fonte <br>
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Valor
+                    Documento (opcional)
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Início Vigência
+                    Prefeitura
                 </th>
             </tr>
         </thead>
@@ -32,13 +32,13 @@
               {% for source in sources %}
                 <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ source }}
+                      {{ source.name }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ source }}
+                      {{ source.document }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {{ source }}
+                      {{ source.city_hall }}
                     </td>
                 </tr>
               {% endfor %}
