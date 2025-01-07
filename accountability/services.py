@@ -14,6 +14,14 @@ class AccountabilityCSVExporter:
         # Cria planilha e abas.
         self.workbook = xlsxwriter.Workbook(archive)
         self._build_worksheets()
+        self.workbook.define_name("fr_tab", "FR!$A$2:$A$100")
+        self.workbook.define_name("cb_tab", "CB!$A$2:$A$100")
+        self.workbook.define_name("nr_tab", "NR!$A$2:$A$100")
+        self.workbook.define_name("nd_tab", "ND!$A$2:$A$100")
+        self.workbook.define_name("fv_tab", "FV!$A$2:$A$100")
+        self.workbook.define_name("ia_tab", "IA!$A$2:$A$100")
+        self.workbook.define_name("td_tab", "TD!$A$2:$A$100")
+        self.workbook.define_name("pr_tab", "PR!$A$2:$A$100")
         self.workbook.close()
 
         return self.workbook
@@ -61,17 +69,6 @@ class AccountabilityCSVExporter:
             }
         )
 
-        # Formatação células sub título (linha 2)
-        sub_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "fg_color": "#efe920",
-                "border": 2,
-                "text_wrap": True,
-            }
-        )
-
         # Formatação células corpo (linha 3)
         body_format = self.workbook.add_format(
             {
@@ -88,70 +85,85 @@ class AccountabilityCSVExporter:
                 "valign": "vcenter",
                 "border": 1,
                 "bg_color": "#cfcdcd",
-                "locked": False,
+                "locked": True,
             }
         )
 
         # Criando cabeçalho
         header_content = (
-            [" ID DO PROJETO ", "", ""],
-            [" IDENTIFICAÇÃO ", "", ""],
-            [" VALOR ", "", ""],
-            [" VENCIMENTO ", "", ""],
-            [" COMPETÊNCIA ", "", ""],
-            ["FONTE DE RECURSO", "Nome", "ID (não preencher)"],
-            ["CONTA BANCÁRIA", "Nome", "ID (não preencher)"],
-            ["NATUREZA DA RECEITA", "Nome", "ID (não preencher)"],
-            [" OBSERVAÇÕES ", "", ""],
+            [" ID DO PROJETO ", header_breaking_line_format],
+            [" IDENTIFICAÇÃO ", header_format],
+            [" VALOR ", header_format],
+            [" VENCIMENTO ", header_format],
+            [" COMPETÊNCIA ", header_format],
+            ["FONTE DE RECURSO", header_breaking_line_format],
+            ["CONTA BANCÁRIA", header_breaking_line_format],
+            ["NATUREZA DA RECEITA", header_breaking_line_format],
+            [" OBSERVAÇÕES ", header_format],
         )
 
         # Preenchendo cabeçalho
 
         col = 0
-        for main_colum, sub1, sub2 in header_content:
-            if col == 0:
-                receipt_worksheet.merge_range(
-                    0, 0, 1, 0, main_colum, header_breaking_line_format
-                )
-            elif sub1 == "":
-                # Adiciona texto e mesclas células 1 e 2 de suas respectivas colunas
-                receipt_worksheet.merge_range(0, col, 1, col, main_colum, header_format)
-
-            else:
-                # Adiciona sub coluna mescla colunas de acordo com o seu título
-                receipt_worksheet.merge_range(
-                    0, col, 0, col + 1, main_colum, header_format
-                )
-                receipt_worksheet.write(1, col, sub1, sub_format)
-                receipt_worksheet.write(1, col + 1, sub2, sub_format)
-                col += 1
+        for main_colum in header_content:
+            receipt_worksheet.merge_range(0, col, 1, col, main_colum[0], main_colum[1])
 
             col += 1
 
         # Preenchendo corpo
         for id in range(2, 1002):
             # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da Coluna A
-            receipt_worksheet.write(id, 0, id - 1, body_format)  # Coluna A
+            receipt_worksheet.write(id, 0, id - 1, locked_cell_format)  # Coluna A
             receipt_worksheet.write(id, 1, "", body_format)  # Coluna B
             receipt_worksheet.write(id, 2, "", body_format)  # Coluna C
             receipt_worksheet.write(id, 3, "", body_format)  # Coluna D
             receipt_worksheet.write(id, 4, "", body_format)  # Coluna E
-            receipt_worksheet.write(id, 5, "", body_format)  # Coluna F
-            formula = (
-                f'=IFERROR(VLOOKUP(F{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna G
+
+            # Coluna F
+            receipt_worksheet.write(id, 5, "", locked_cell_format)
+            receipt_worksheet.data_validation(
+                id,
+                5,
+                id,
+                5,
+                {
+                    "validate": "list",
+                    "source": "=fr_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽   ao lado da célula",
+                },
             )
-            receipt_worksheet.write(id, 6, formula, locked_cell_format)  # Coluna G
-            receipt_worksheet.write(id, 7, "", body_format)  # Coluna H
-            formula = (
-                f'=IFERROR(VLOOKUP(H{id+1},$CB.A$2:$CB.B$100,2),"")'  # fórmula coluna I
+
+            # Coluna G
+            receipt_worksheet.write(id, 6, "", locked_cell_format)
+            receipt_worksheet.data_validation(
+                id,
+                6,
+                id,
+                6,
+                {
+                    "validate": "list",
+                    "source": "=cb_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            receipt_worksheet.write(id, 8, formula, locked_cell_format)  # Coluna I
-            receipt_worksheet.write(id, 9, "", body_format)  # Coluna J
-            formula = (
-                f'=IFERROR(VLOOKUP(J{id+1},$NR.A$2:$CB.B$100,2),"")'  # fórmula coluna K
+
+            # Coluna H
+            receipt_worksheet.write(id, 7, "", locked_cell_format)
+            receipt_worksheet.data_validation(
+                id,
+                7,
+                id,
+                7,
+                {
+                    "validate": "list",
+                    "source": "=nr_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            receipt_worksheet.write(id, 10, formula, locked_cell_format)  # Coluna K
-            receipt_worksheet.write(id, 11, "", body_format)  # Coluna L
+            receipt_worksheet.write(id, 8, "", body_format)  # Coluna I
 
         receipt_worksheet.autofit()
         return receipt_worksheet
@@ -207,104 +219,127 @@ class AccountabilityCSVExporter:
                 "valign": "vcenter",
                 "border": 1,
                 "bg_color": "#cfcdcd",
-                "locked": False,
+                "locked": True,
             }
         )
 
         # Criando cabeçalho
         header_content = (
-            [" ID DO PROJETO ", "", "", ""],
-            [" IDENTIFICAÇÃO ", "", "", ""],
-            [" VALOR ", "", "", ""],
-            [" VENCIMENTO ", "", "", ""],
-            [" COMPETÊNCIA ", "", "", ""],
-            ["FONTE DE RECURSO", "Nome", "ID (não preencher)", ""],
+            [" ID DO PROJETO ", "", "", header_breaking_line_format],
+            [" IDENTIFICAÇÃO ", "", "", header_format],
+            [" VALOR ", "", "", header_format],
+            [" VENCIMENTO ", "", "", header_format],
+            [" COMPETÊNCIA ", "", "", header_format],
+            ["FONTE DE RECURSO", "", "", header_breaking_line_format],
             [
                 "NATUREZA DA DESPESA (somente para despesa NÃO planejada)",
-                "Nome",
-                "ID (não preencher)",
                 "",
+                "",
+                header_breaking_line_format,
             ],
-            ["FAVORECIDO/CONTRATADO", "Nome", "CPF/CNPJ", "ID (não preencher)"],
+            ["FAVORECIDO/CONTRATADO", "Nome", "CPF/CNPJ", header_format],
             [
                 "ITEM DE AQUISIÇÃO (somente despesa planejada)",
-                "Especifição",
-                "ID (não preencher)",
                 "",
+                "",
+                header_breaking_line_format,
             ],
-            [" TIṔO DE DOCUMENTO", "Nome", "ID (não preencher)", ""],
-            [" Nº DO DOCUMENTO ", "", "", ""],
-            [" OBSERVAÇÕES ", "", "", ""],
+            [" TIṔO DE DOCUMENTO", "", "", header_breaking_line_format],
+            [" Nº DO DOCUMENTO ", "", "", header_format],
+            [" OBSERVAÇÕES ", "", "", header_format],
         )
 
         col = 0
-        for main_colum, sub1, sub2, sub3 in header_content:
-            if col == 0:
+        for main_colum in header_content:
+            if main_colum[1] == "":
                 expense_worksheet.merge_range(
-                    0, 0, 1, 0, main_colum, header_breaking_line_format
+                    0, col, 1, col, main_colum[0], main_colum[3]
                 )
-            elif sub1 == "":
-                # Adiciona texto e mesclas células 1 e 2 de suas respectivas colunas
-                expense_worksheet.merge_range(0, col, 1, col, main_colum, header_format)
-
-            elif sub3 == "":
-                # Adiciona sub colunas em Títulos com 2 sub colunas
-                expense_worksheet.merge_range(
-                    0, col, 0, col + 1, main_colum, header_format
-                )
-                expense_worksheet.write(1, col, sub1, sub_format)
-                expense_worksheet.write(1, col + 1, sub2, sub_format)
-                col += 1
             else:
                 # Adiciona sub colunas em Títulos com 2 sub colunas
                 expense_worksheet.merge_range(
-                    0, col, 0, col + 2, main_colum, header_format
+                    0, col, 0, col + 1, main_colum[0], main_colum[3]
                 )
-                expense_worksheet.write(1, col, sub1, sub_format)
-                expense_worksheet.write(1, col + 1, sub2, sub_format)
-                expense_worksheet.write(1, col + 2, sub3, sub_format)
-                col += 2
+                expense_worksheet.write(1, col, main_colum[1], sub_format)
+                expense_worksheet.write(1, col + 1, main_colum[2], sub_format)
+                col += 1
 
             col += 1
 
         for id in range(2, 1002):
             # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da Coluna A
-            expense_worksheet.write(id, 0, id - 1, body_format)  # Coluna A
+            expense_worksheet.write(id, 0, id - 1, locked_cell_format)  # Coluna A
             expense_worksheet.write(id, 1, "", body_format)  # Coluna B
             expense_worksheet.write(id, 2, "", body_format)  # Coluna C
             expense_worksheet.write(id, 3, "", body_format)  # Coluna D
             expense_worksheet.write(id, 4, "", body_format)  # Coluna E
             expense_worksheet.write(id, 5, "", body_format)  # Coluna F
-            formula = (
-                f'=IFERROR(VLOOKUP(F{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna G
+
+            # Coluna G
+            expense_worksheet.write(id, 6, "", locked_cell_format)
+            expense_worksheet.data_validation(
+                id,
+                6,
+                id,
+                6,
+                {
+                    "validate": "list",
+                    "source": "=nd_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            expense_worksheet.write(id, 6, formula, locked_cell_format)  # Coluna G
-            expense_worksheet.write(id, 7, "", body_format)  # Coluna H
-            formula = (
-                f'=IFERROR(VLOOKUP(H{id+1},$ND.A$2:$ND.B$100,2),"")'  # fórmula coluna I
+
+            # Coluna H
+            expense_worksheet.write(id, 7, "", locked_cell_format)
+            expense_worksheet.data_validation(
+                id,
+                7,
+                id,
+                7,
+                {
+                    "validate": "list",
+                    "source": "=fv_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
+
+            # Coluna I com fórmula
+            formula = f'=IFERROR(VLOOKUP(J{id+1},$FV.A$2:$FV.B$100,2),"")'
             expense_worksheet.write(id, 8, formula, locked_cell_format)  # Coluna I
-            expense_worksheet.write(id, 9, "", body_format)  # Coluna J
-            formula = (
-                f'=IFERROR(VLOOKUP(J{id+1},$FV.A$2:$FV.B$100,2),"")'  # fórmula coluna K
+
+            # Coluna J
+            expense_worksheet.write(id, 9, "", locked_cell_format)
+            expense_worksheet.data_validation(
+                id,
+                9,
+                id,
+                9,
+                {
+                    "validate": "list",
+                    "source": "=ia_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            expense_worksheet.write(id, 10, formula, locked_cell_format)  # Coluna K
-            formula = (
-                f'=IFERROR(VLOOKUP(J{id+1},$FV.A$2:$FV.B$100,3),"")'  # fórmula coluna L
+
+            # Coluna K
+            expense_worksheet.write(id, 10, "", locked_cell_format)
+            expense_worksheet.data_validation(
+                id,
+                10,
+                id,
+                10,
+                {
+                    "validate": "list",
+                    "source": "=td_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            expense_worksheet.write(id, 11, formula, locked_cell_format)  # Coluna L
+            expense_worksheet.write(id, 11, "", body_format)  # Coluna L
             expense_worksheet.write(id, 12, "", body_format)  # Coluna M
-            formula = (
-                f'=IFERROR(VLOOKUP(M{id+1},$IA.A$2:$IA.B$100,2),"")'  # fórmula coluna N
-            )
-            expense_worksheet.write(id, 13, formula, locked_cell_format)  # Coluna N
-            expense_worksheet.write(id, 14, "", body_format)  # Coluna O
-            formula = (
-                f'=IFERROR(VLOOKUP(M{id+1},$IA.A$2:$IA.B$100,2),"")'  # fórmula coluna P
-            )
-            expense_worksheet.write(id, 15, formula, locked_cell_format)  # Coluna P
-            expense_worksheet.write(id, 16, "", body_format)  # Coluna Q
-            expense_worksheet.write(id, 17, "", body_format)  # Coluna R
 
         expense_worksheet.autofit()
         return expense_worksheet
@@ -336,17 +371,6 @@ class AccountabilityCSVExporter:
             }
         )
 
-        # Formatação células sub título (linha 2)
-        sub_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "fg_color": "#efe920",
-                "border": 2,
-                "text_wrap": True,
-            }
-        )
-
         # Formatação células corpo (linha 3)
         body_format = self.workbook.add_format(
             {
@@ -363,72 +387,96 @@ class AccountabilityCSVExporter:
                 "valign": "vcenter",
                 "border": 1,
                 "bg_color": "#cfcdcd",
-                "locked": False,
+                "locked": True,
             }
         )
 
         # Criando cabeçalho
         header_content = (
-            [" ID DO PROJETO ", "", ""],
-            [" VALOR ", "", ""],
-            [" DATA DA TRANSFERÊNCIA ", "", ""],
-            ["CONTA BANCÁRIA DE ORIGEM", "Nome", "ID (não preencher)"],
-            ["FONTE DE RECURSO DE ORIGEM", "Nome", "ID (não preencher)"],
-            ["CONTA BANCÁRIA", "Nome", "ID (não preencher)"],
-            ["FONTE DE RECURSO DE DESTINO", "Nome", "ID (não preencher)"],
+            [" ID DO PROJETO ", header_breaking_line_format],
+            [" VALOR ", header_format],
+            [" DATA DA TRANSFERÊNCIA ", header_breaking_line_format],
+            ["CONTA BANCÁRIA DE ORIGEM", header_breaking_line_format],
+            ["FONTE DE RECURSO DE ORIGEM", header_breaking_line_format],
+            ["CONTA BANCÁRIA", header_breaking_line_format],
+            ["FONTE DE RECURSO DE DESTINO", header_breaking_line_format],
         )
 
         # Preenchendo cabeçalho
-
         col = 0
-        for main_colum, sub1, sub2 in header_content:
-            if col == 0:
-                application_worksheet.merge_range(
-                    0, 0, 1, 0, main_colum, header_breaking_line_format
-                )
-            elif sub1 == "":
-                # Adiciona texto e mesclas células 1 e 2 de suas respectivas colunas
-                application_worksheet.merge_range(
-                    0, col, 1, col, main_colum, header_format
-                )
-
-            else:
-                # Adiciona sub coluna mescla colunas de acordo com o seu título
-                application_worksheet.merge_range(
-                    0, col, 0, col + 1, main_colum, header_format
-                )
-                application_worksheet.write(1, col, sub1, sub_format)
-                application_worksheet.write(1, col + 1, sub2, sub_format)
-                col += 1
+        for main_colum in header_content:
+            application_worksheet.merge_range(
+                0, col, 1, col, main_colum[0], main_colum[1]
+            )
 
             col += 1
 
         # Preenchendo corpo
         for id in range(2, 1002):
             # Inserir variável de alteração do "ID DO PROJETO" no segundo zero da Coluna A
-            application_worksheet.write(id, 0, id - 1, body_format)  # Coluna A
+            application_worksheet.write(id, 0, id - 1, locked_cell_format)  # Coluna A
             application_worksheet.write(id, 1, "", body_format)  # Coluna B
             application_worksheet.write(id, 2, "", body_format)  # Coluna C
-            application_worksheet.write(id, 3, "", body_format)  # Coluna D
-            formula = (
-                f'=IFERROR(VLOOKUP(D{id+1},$CB.A$2:$CB.B$100,2),"")'  # fórmula coluna E
+
+            # Coluna D
+            application_worksheet.write(id, 3, "", locked_cell_format)
+            application_worksheet.data_validation(
+                id,
+                3,
+                id,
+                3,
+                {
+                    "validate": "list",
+                    "source": "=cb_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            application_worksheet.write(id, 4, formula, locked_cell_format)  # Coluna E
-            application_worksheet.write(id, 5, "", body_format)  # Coluna F
-            formula = (
-                f'=IFERROR(VLOOKUP(F{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna G
+
+            # Coluna E
+            application_worksheet.write(id, 4, "", locked_cell_format)
+            application_worksheet.data_validation(
+                id,
+                4,
+                id,
+                4,
+                {
+                    "validate": "list",
+                    "source": "=fr_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            application_worksheet.write(id, 6, formula, locked_cell_format)  # Coluna G
-            application_worksheet.write(id, 7, "", body_format)  # Coluna H
-            formula = (
-                f'=IFERROR(VLOOKUP(H{id+1},$CB.A$2:$CB.B$100,2),"")'  # fórmula coluna I
+
+            # Coluna F
+            application_worksheet.write(id, 5, "", locked_cell_format)
+            application_worksheet.data_validation(
+                id,
+                5,
+                id,
+                5,
+                {
+                    "validate": "list",
+                    "source": "=cb_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            application_worksheet.write(id, 8, formula, locked_cell_format)  # Coluna I
-            application_worksheet.write(id, 9, "", body_format)  # Coluna J
-            formula = (
-                f'=IFERROR(VLOOKUP(J{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna K
+
+            # Coluna G
+            application_worksheet.write(id, 6, "", locked_cell_format)
+            application_worksheet.data_validation(
+                id,
+                6,
+                id,
+                6,
+                {
+                    "validate": "list",
+                    "source": "=fr_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
+                },
             )
-            application_worksheet.write(id, 10, formula, locked_cell_format)  # Coluna K
 
         application_worksheet.autofit()
         return application_worksheet
@@ -624,6 +672,10 @@ class AccountabilityCSVExporter:
 
         pr_worksheet.autofit()
         return pr_worksheet
+
+        # formula = (
+        #    f'=IFERROR(VLOOKUP(F{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna G
+        # )
 
 
 if __name__ == "__main__":
