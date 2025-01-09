@@ -72,8 +72,7 @@ pdf.add_page()
 
 # Dados da Organização
 pdf.add_text("Órgão Público:", "Prefeitura Municipal de Várzea Paulista", bold=True)
-# pdf.add_text("Organização da Sociedade Civil", bold=True)
-# pdf.add_text("Associação Comunidade Varzina - Eco & Vida (Meio Ambiente)")
+pdf.add_text("Organização da Sociedade Civil      ", "Associação Comunidade Varzina - Eco & Vida (Meio Ambiente)", bold=True)
 # pdf.add_text("CNPJ", bold=True)
 # pdf.add_text("02.834.119/0001-95")
 # pdf.add_text("Endereço e CEP", bold=True)
