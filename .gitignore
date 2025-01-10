@@ -170,6 +170,12 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+<<<<<<< Updated upstream
 # Files extensions
 *.pdf
 *.xlsx
+=======
+# Files extension
+.xlsx
+.pdf
+>>>>>>> Stashed changes
