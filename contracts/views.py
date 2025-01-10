@@ -1,15 +1,17 @@
 import logging
 from typing import Any
 
+from utils.choices import StatusChoices
+
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
 from contracts.forms import ContractCreateForm
-from contracts.models import Contract
+from contracts.models import Contract, ContractItem
 from utils.mixins import AdminRequiredMixin
 
 logger = logging.getLogger(__name__)
@@ -25,7 +27,10 @@ class ContractsListView(LoginRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related(
+            "contractor_manager",
+            "hired_manager",
+        )
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(name__icontains=query)
@@ -44,6 +49,19 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "contract"
 
     login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().select_related(
+            "contractor_company",
+            "contractor_manager",
+            "hired_company",
+            "hired_manager",
+            "ong",
+        ).prefetch_related(
+            "addendums",
+            "items",
+            "goals",
+        )
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
@@ -81,3 +99,34 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
             return redirect("contracts:contracts-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+def create_contract_item_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+    
+    contract = get_object_or_404(Contract, id=pk)
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        total_expense = request.POST.get("total_expense")
+        is_additive = request.POST.get("is_additive", "") == "True" 
+
+        item = ContractItem.objects.create(
+            contract=contract,
+            name=name,
+            description=description,
+            total_expense=total_expense,
+            is_additive=is_additive,
+            status=StatusChoices.ANALYZING,
+        )
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM,
+            target_object_id=item.id,
+            target_content_object=item,
+        )
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    return render(request, "contracts/items-create.html", {'contract': contract})

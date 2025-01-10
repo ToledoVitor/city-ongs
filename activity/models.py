@@ -18,6 +18,9 @@ class ActivityLog(models.Model):
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"
         # contracts
         CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
+        CREATED_CONTRACT_ADDENDUM = "CREATED_CONTRACT_ADDENDUM", "criou aditivo de contrato"
+        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "criou item do contrato"
+        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "criou meta do contrato"
         # expenses
         CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "criou fonte de despesa"
         DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "apagou fonte de despesa"
@@ -66,6 +69,10 @@ class ActivityLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_email} - {"self.action"}"
+
+    @property
+    def action_label(self) -> str:
+        return ActivityLog.ActivityLogChoices(self.action).label
 
     class Meta:
         verbose_name = "Registro de Atividade"

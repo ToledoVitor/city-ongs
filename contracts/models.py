@@ -3,6 +3,8 @@ from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
+from activity.models import ActivityLog
+
 from accounts.models import Area, Ong
 from utils.choices import StatusChoices
 from utils.models import BaseModel
@@ -97,6 +99,41 @@ class Contract(BaseModel):
     def __str__(self) -> str:
         return f"{self.code} - {self.name}"
 
+    @property
+    def trailing_code(self):
+        return "{:04}".format(self.code)
+
+    @property
+    def name_with_code(self):
+        return self.trailing_code + f" - {self.name}"
+
+    @property
+    def recent_logs(self):
+        contract_logs = ActivityLog.objects.filter(
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
+            target_object_id=self.id,
+        )
+
+        addendum_ids = [str(id) for id in self.addendums.values_list("id", flat=True)[:10]]
+        addendum_logs = ActivityLog.objects.filter(
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ADDENDUM,
+            target_object_id__in=addendum_ids,
+        )
+
+        goals_ids = [str(id) for id in self.goals.values_list("id", flat=True)[:10]]
+        goals_logs = ActivityLog.objects.filter(
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_GOAL,
+            target_object_id__in=goals_ids,
+        )
+
+        items_ids = [str(id) for id in self.items.values_list("id", flat=True)[:10]]
+        items_logs = ActivityLog.objects.filter(
+            target_object_id__in=items_ids,
+        )
+
+        combined_querset = (contract_logs | addendum_logs | goals_logs | items_logs).distinct()
+        return combined_querset.order_by("-created_at")[:10]
+
     def save(self, *args, **kwargs):
         if self.code is None:
             max_code = Contract.objects.aggregate(Max("code"))["code__max"]
@@ -104,6 +141,22 @@ class Contract(BaseModel):
 
         super().save(*args, **kwargs)
 
+
+class ContractAddendum(BaseModel):
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Contrato",
+        related_name="addendums",
+        on_delete=models.CASCADE
+    )
+    start_of_vigency = models.DateField(verbose_name="Começo da vigência")
+    end_of_vigency = models.DateField(verbose_name="Fim da vigência")
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Aditivo de Contrato"
+        verbose_name_plural = "Aditivos de Contrato"
 
 class ContractAddress(BaseModel):
     street = models.CharField(verbose_name="Rua", max_length=128)
@@ -122,6 +175,11 @@ class ContractAddress(BaseModel):
 
 
 class ContractGoal(BaseModel):
+    contract = models.ForeignKey(
+        #TODO: remove null
+        Contract, verbose_name="Contrato", related_name="goals", on_delete=models.CASCADE, null=True, blank=True,
+    )
+
     name = models.CharField(verbose_name="Meta", max_length=128)
     description = models.CharField(verbose_name="Descrição", max_length=128)
     status = models.CharField(
@@ -132,6 +190,9 @@ class ContractGoal(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = "Meta"
@@ -147,12 +208,20 @@ class ContractSubGoal(BaseModel):
 
     history = HistoricalRecords()
 
+    def __str__(self) -> str:
+        return self.name
+
     class Meta:
         verbose_name = "Submeta"
         verbose_name_plural = "Submetas"
 
 
 class ContractItem(BaseModel):
+    contract = models.ForeignKey(
+        #TODO: remove null
+        Contract, verbose_name="Contrato", related_name="items", on_delete=models.CASCADE, null=True, blank=True,
+    )
+
     name = models.CharField(verbose_name="Item", max_length=128)
     description = models.CharField(verbose_name="Descrição", max_length=128)
     total_expense = models.DecimalField(
@@ -169,6 +238,9 @@ class ContractItem(BaseModel):
     )
 
     history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = "Item"

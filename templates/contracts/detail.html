@@ -34,12 +34,276 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">{{ contract.code }}</span>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">{{ contract.trailing_code }}</span>
       </div>
     </li>
   </ol>
 </nav>
 
-{{ contract }}
+<div class="mb-4 mr-10 border-b border-gray-200 dark:border-gray-700">
+  <ul
+    class="flex flex-wrap -mb-px text-sm font-medium text-center"
+    id="default-tab"
+    data-tabs-toggle="#default-tab-content"
+    role="tablist"
+  >
+    <li class="me-2" role="presentation">
+      <button
+        id="details-tab"
+        class="inline-block p-4 border-b-2 rounded-t-lg"
+        data-tabs-target="#details"
+        type="button"
+        role="tab"
+        aria-controls="details"
+        aria-selected="false"
+      >
+        Detalhes
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="goals-tab"
+        data-tabs-target="#goals"
+        type="button"
+        role="tab"
+        aria-controls="goals"
+        aria-selected="false"
+      >
+        Metas
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="items-tab"
+        data-tabs-target="#items"
+        type="button"
+        role="tab"
+        aria-controls="items"
+        aria-selected="false"
+      >
+        Items
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="addendums-tab"
+        data-tabs-target="#addendums"
+        type="button"
+        role="tab"
+        aria-controls="addendums"
+        aria-selected="false"
+      >
+        Aditivos
+      </button>
+    </li>
+  </ul>
+</div>
+
+<div class="mr-10" id="default-tab-content">
+  <!-- Details Tab -->
+  <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="details" role="tabpanel" aria-labelledby="details-tab">
+    
+    <p class="text-2xl my-4 font-bold text-black">
+      {{ contract.name_with_code }}
+    </p>
+
+    <hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
+
+    <p class="text-lg my-2 text-black">
+      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
+    </p>
+    <p class="text-lg my-2 text-black">
+      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
+    </p>
+    <p class="text-lg my-2 text-black">
+      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
+    </p>
+    <p class="text-lg my-2 text-black">
+      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
+    </p>
+  </div>
+
+  <!-- Goals Tab -->
+  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
+    {% if contract.goals.count %}
+      <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">Dashboard tab's associated content</strong>. Clicking another tab will toggle the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
+    {% else %}
+      <p class="text-lg my-4 font-bold text-black">Nenhuma meta cadastrada.</p>
+    {% endif %}
+
+    {% if user.has_admin_access %}
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 px-4 bg-green-200">
+        <a
+          href="{% url 'accountability:expenses-source-create' %}"
+          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Adicionar nova meta
+          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Items Tab -->
+  <div class="hidden rounded-lg dark:bg-green-200" id="items" role="tabpanel" aria-labelledby="items-tab">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+              <tr>
+                  <th scope="col" class="px-6 py-3">
+                      Item
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                      Descrição
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                      Status
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                      Valor
+                  </th>
+                  <th scope="col" class="px-6 py-3" />
+              </tr>
+          </thead>
+          <tbody>
+              {% if contract.items.count %}
+                {% for item in contract.items.all %}
+                  <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                      <th scope="row" class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
+                        {{ item.name }}
+                      </th>
+                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                        {{ item.description }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                        {{ item.name }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                        R$ <b>{{ item.total_expense|intcomma }}<b>
+                      </td>
+                      <td class="px-6 py-4 text-sm flex justify-end">
+                        {% comment %} <a
+                          href="{% url 'contracts:contracts-detail' contract.id %}"
+                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                          Visualizar
+                        </a> {% endcomment %}
+                      </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                      Nenhum resultado encontrado
+                  </th>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                    -
+                  </td>
+                </tr>
+              {% endif %}     
+          </tbody>
+      </table>
+    
+      {% if user.has_admin_access %}
+        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-green-200">
+          <a
+            href="{% url 'contracts:contracts-item-create' contract.id %}"
+            class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            Adicionar novo item
+            <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+            </svg>
+          </a>
+        </div>
+      {% endif %}
+        
+    </div>
+  </div>
+
+  <!-- Addendums Tab -->
+  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
+    {% if contract.addendums.count %}
+      <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">Dashboard tab's associated content</strong>. Clicking another tab will toggle the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
+    {% else %}
+      <p class="text-lg my-4 font-bold text-black">Nenhum aditivo cadastrado.</p>
+    {% endif %}
+
+    {% if user.has_admin_access %}
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 px-4 bg-green-200">
+        <a
+          href="{% url 'accountability:expenses-source-create' %}"
+          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Adicionar aditivo
+          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+  </div>
+  
+</div>
+
+{% comment %} {{ contract.name }}
+{{ contract.code }}
+{{ contract.objective }}
+{{ contract.total_value }}
+{{ contract.start_of_vigency }}
+{{ contract.end_of_vigency }}
+{{ contract.contractor_company }}
+{{ contract.contractor_manager }}
+{{ contract.hired_company }}
+{{ contract.hired_manager }}
+{{ contract.ong }}
+{{ contract.area }} {% endcomment %}
+
+<p class="text-3xl my-6 font-bold">
+  Histórico
+</p>
+
+<ol class="mt-6 relative border-s border-gray-200 dark:border-gray-700">
+  {% if contract.recent_logs %}
+    {% for log in contract.recent_logs %}
+    <li class="mb-8 ms-6">
+        <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+            <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+            </svg>
+        </span>
+        <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ log.created_at }}</time>
+        <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">{{ log.user_email}} - {{ log.action_label }}</p>
+    </li>
+    {% endfor %}
+  {% else %}
+    <li class="mb-8 ms-6">
+      <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+          <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+          </svg>
+      </span>
+      <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Sem registros recentes</time>
+      <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">-</p>
+    </li>
+  {% endif%}
+</ol>
 
 {% endblock %}
