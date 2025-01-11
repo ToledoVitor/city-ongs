@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0005_contractgoal_contract_contractitem_contract_and_more"),
     ]

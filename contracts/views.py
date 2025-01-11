@@ -1,17 +1,16 @@
 import logging
 from typing import Any
 
-from utils.choices import StatusChoices
-
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models.query import QuerySet
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
 from contracts.forms import ContractCreateForm
 from contracts.models import Contract, ContractItem
+from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
 logger = logging.getLogger(__name__)
@@ -27,9 +26,13 @@ class ContractsListView(LoginRequiredMixin, ListView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        queryset = super().get_queryset().select_related(
-            "contractor_manager",
-            "hired_manager",
+        queryset = (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_manager",
+                "hired_manager",
+            )
         )
         query = self.request.GET.get("q")
         if query:
@@ -51,16 +54,21 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        return super().get_queryset().select_related(
-            "contractor_company",
-            "contractor_manager",
-            "hired_company",
-            "hired_manager",
-            "ong",
-        ).prefetch_related(
-            "addendums",
-            "items",
-            "goals",
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "ong",
+            )
+            .prefetch_related(
+                "addendums",
+                "items",
+                "goals",
+            )
         )
 
     def get_object(self, queryset=None):
@@ -69,7 +77,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         return context
-    
+
     def post(self, request, pk, *args, **kwargs):
         if not self.request.POST.get("csrfmiddlewaretoken"):
             return redirect("contracts:contracts-list")
@@ -100,6 +108,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 return redirect("contracts:contracts-list")
 
         return redirect("contracts:contracts-detail", pk=contract.id)
+
 
 class ContractCreateView(AdminRequiredMixin, TemplateView):
     template_name = "contracts/create.html"
@@ -134,29 +143,61 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
 def create_contract_item_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
-    
+
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-        total_expense = request.POST.get("total_expense")
-        is_additive = request.POST.get("is_additive", "") == "True" 
+        with transaction.atomic():
+            name = request.POST.get("name")
+            description = request.POST.get("description")
+            total_expense = request.POST.get("total_expense")
+            is_additive = request.POST.get("is_additive", "") == "True"
 
-        item = ContractItem.objects.create(
-            contract=contract,
-            name=name,
-            description=description,
-            total_expense=total_expense,
-            is_additive=is_additive,
-            status=StatusChoices.ANALYZING,
-        )
-        _ = ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM,
-            target_object_id=item.id,
-            target_content_object=item,
-        )
+            item = ContractItem.objects.create(
+                contract=contract,
+                name=name,
+                description=description,
+                total_expense=total_expense,
+                is_additive=is_additive,
+                status=StatusChoices.ANALYZING,
+            )
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM,
+                target_object_id=item.id,
+                target_content_object=item,
+            )
+
         return redirect("contracts:contracts-detail", pk=contract.id)
 
-    return render(request, "contracts/items-create.html", {'contract': contract})
+    return render(request, "contracts/items-create.html", {"contract": contract})
+
+
+def update_contract_item_view(request, pk, item_pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    item = get_object_or_404(ContractItem, id=item_pk)
+
+    if request.method == "POST":
+        with transaction.atomic():
+            item.name = request.POST.get("name")
+            item.description = request.POST.get("description")
+            item.total_expense = request.POST.get("total_expense")
+            item.is_additive = request.POST.get("is_additive", "") == "True"
+            item.save()
+
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
+                target_object_id=item.id,
+                target_content_object=item,
+            )
+
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    return render(
+        request, "contracts/items-update.html", {"contract": contract, "item": item}
+    )

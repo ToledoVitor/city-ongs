@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0004_expensesource_expense_source_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

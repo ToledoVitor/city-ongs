@@ -3,9 +3,8 @@ from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
-from activity.models import ActivityLog
-
 from accounts.models import Area, Ong
+from activity.models import ActivityLog
 from utils.choices import StatusChoices
 from utils.models import BaseModel
 
@@ -114,7 +113,9 @@ class Contract(BaseModel):
             target_object_id=self.id,
         )
 
-        addendum_ids = [str(id) for id in self.addendums.values_list("id", flat=True)[:10]]
+        addendum_ids = [
+            str(id) for id in self.addendums.values_list("id", flat=True)[:10]
+        ]
         addendum_logs = ActivityLog.objects.filter(
             action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ADDENDUM,
             target_object_id__in=addendum_ids,
@@ -131,7 +132,9 @@ class Contract(BaseModel):
             target_object_id__in=items_ids,
         )
 
-        combined_querset = (contract_logs | addendum_logs | goals_logs | items_logs).distinct()
+        combined_querset = (
+            contract_logs | addendum_logs | goals_logs | items_logs
+        ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
     def save(self, *args, **kwargs):
@@ -147,7 +150,7 @@ class ContractAddendum(BaseModel):
         Contract,
         verbose_name="Contrato",
         related_name="addendums",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     start_of_vigency = models.DateField(verbose_name="Começo da vigência")
     end_of_vigency = models.DateField(verbose_name="Fim da vigência")
@@ -157,6 +160,7 @@ class ContractAddendum(BaseModel):
     class Meta:
         verbose_name = "Aditivo de Contrato"
         verbose_name_plural = "Aditivos de Contrato"
+
 
 class ContractAddress(BaseModel):
     street = models.CharField(verbose_name="Rua", max_length=128)
@@ -176,8 +180,13 @@ class ContractAddress(BaseModel):
 
 class ContractGoal(BaseModel):
     contract = models.ForeignKey(
-        #TODO: remove null
-        Contract, verbose_name="Contrato", related_name="goals", on_delete=models.CASCADE, null=True, blank=True,
+        # TODO: remove null
+        Contract,
+        verbose_name="Contrato",
+        related_name="goals",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     name = models.CharField(verbose_name="Meta", max_length=128)
@@ -218,8 +227,13 @@ class ContractSubGoal(BaseModel):
 
 class ContractItem(BaseModel):
     contract = models.ForeignKey(
-        #TODO: remove null
-        Contract, verbose_name="Contrato", related_name="items", on_delete=models.CASCADE, null=True, blank=True,
+        # TODO: remove null
+        Contract,
+        verbose_name="Contrato",
+        related_name="items",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     name = models.CharField(verbose_name="Item", max_length=128)
@@ -247,11 +261,16 @@ class ContractItem(BaseModel):
 
     def __str__(self) -> str:
         return self.name
-    
+
     @property
     def status_label(self) -> str:
         return StatusChoices(self.status).label
 
+    @property
+    def total_expense_with_point(self) -> str:
+        return str(self.total_expense).replace(",", ".")
+
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
+        ordering = ("-total_expense",)

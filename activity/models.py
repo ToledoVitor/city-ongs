@@ -18,7 +18,10 @@ class ActivityLog(models.Model):
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"
         # contracts
         CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
-        CREATED_CONTRACT_ADDENDUM = "CREATED_CONTRACT_ADDENDUM", "criou aditivo de contrato"
+        CREATED_CONTRACT_ADDENDUM = (
+            "CREATED_CONTRACT_ADDENDUM",
+            "criou aditivo de contrato",
+        )
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "criou meta do contrato"
         UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "atualizou meta do contrato"
