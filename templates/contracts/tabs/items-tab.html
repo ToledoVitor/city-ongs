@@ -143,8 +143,9 @@
                         {% if user.can_change_statuses %}
                             <!-- items approve Modal toggle -->
                             <button
-                                data-modal-target="items-modal"
-                                data-modal-toggle="items-modal"
+                                data-modal-target="items-update-modal"
+                                data-modal-toggle="items-update-modal"
+                                data-item='{"itemId": "{{ item.id }}"}'
                                 class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-sm rounded-lg text-sm px-3 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                 type="button"
                             >
@@ -153,7 +154,7 @@
                             
                             <!-- items approve modal -->
                             <div
-                                id="items-modal"
+                                id="items-update-modal"
                                 tabindex="-1"
                                 data-modal-backdrop="static"
                                 aria-hidden="true"
@@ -167,7 +168,7 @@
                                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                                                 Selecione uma opção
                                             </h3>
-                                            <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="items-modal">
+                                            <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="items-update-modal">
                                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                                 </svg>
@@ -181,7 +182,7 @@
                                                 <div>
                                                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                                     <input type="hidden" name="form_type" value="items_modal">
-                                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                                    <input type="hidden" id="itemId" name="itemId">
 
                                                     <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Escolha uma opção</label>
                                                     <select
@@ -271,6 +272,13 @@
 
       document.getElementById('modalItemStatus').innerHTML = `<option value="${itemData.status}" selected>${itemData.status}</option>`;
       document.getElementById('modalItemPendencies').value = itemData.pendencies || "";
+    });
+  });
+
+  document.querySelectorAll('[data-modal-toggle="items-update-modal"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const itemData = JSON.parse(button.getAttribute('data-item'));
+      document.getElementById('itemId').value = itemData.itemId;
     });
   });
 </script>

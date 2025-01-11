@@ -82,7 +82,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
 
         match form_type:
             case "items_modal":
-                item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
+                item = get_object_or_404(ContractItem, id=request.POST.get("itemId"))
                 item.status = request.POST.get("status")
                 item.status_pendencies = request.POST.get("pendencies")
                 item.save()
