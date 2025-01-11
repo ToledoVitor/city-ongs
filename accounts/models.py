@@ -116,6 +116,13 @@ class User(AbstractUser):
             self.AccessChoices.CIVIL_SERVANT,
         }
 
+    @property
+    def can_change_statuses(self) -> bool:
+        return self.is_superuser or self.access_level in {
+            self.AccessChoices.MASTER,
+            self.AccessChoices.FOLDER_MANAGER,
+        }
+
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
 

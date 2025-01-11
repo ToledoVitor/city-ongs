@@ -19,8 +19,12 @@ class ActivityLog(models.Model):
         # contracts
         CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
         CREATED_CONTRACT_ADDENDUM = "CREATED_CONTRACT_ADDENDUM", "criou aditivo de contrato"
-        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "criou item do contrato"
+        # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "criou meta do contrato"
+        UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "atualizou meta do contrato"
+        # contract items
+        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "criou item do contrato"
+        UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "atualizou item do contrato"
         # expenses
         CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "criou fonte de despesa"
         DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "apagou fonte de despesa"

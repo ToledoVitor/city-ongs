@@ -154,88 +154,7 @@
 
   <!-- Items Tab -->
   <div class="hidden rounded-lg dark:bg-green-200" id="items" role="tabpanel" aria-labelledby="items-tab">
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
-              <tr>
-                  <th scope="col" class="px-6 py-3">
-                      Item
-                  </th>
-                  <th scope="col" class="px-6 py-3">
-                      Descrição
-                  </th>
-                  <th scope="col" class="px-6 py-3">
-                      Status
-                  </th>
-                  <th scope="col" class="px-6 py-3">
-                      Valor
-                  </th>
-                  <th scope="col" class="px-6 py-3" />
-              </tr>
-          </thead>
-          <tbody>
-              {% if contract.items.count %}
-                {% for item in contract.items.all %}
-                  <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
-                      <th scope="row" class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
-                        {{ item.name }}
-                      </th>
-                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                        {{ item.description }}
-                      </td>
-                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                        {{ item.name }}
-                      </td>
-                      <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                        R$ <b>{{ item.total_expense|intcomma }}<b>
-                      </td>
-                      <td class="px-6 py-4 text-sm flex justify-end">
-                        {% comment %} <a
-                          href="{% url 'contracts:contracts-detail' contract.id %}"
-                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        >
-                          Visualizar
-                        </a> {% endcomment %}
-                      </td>
-                  </tr>
-                {% endfor %}
-              {% else %}
-                <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
-                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
-                      Nenhum resultado encontrado
-                  </th>
-                  <td class="px-6 py-4">
-                      -
-                  </td>
-                  <td class="px-6 py-4">
-                      -
-                  </td>
-                  <td class="px-6 py-4">
-                      -
-                  </td>
-                  <td class="px-6 py-4">
-                    -
-                  </td>
-                </tr>
-              {% endif %}     
-          </tbody>
-      </table>
-    
-      {% if user.has_admin_access %}
-        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-green-200">
-          <a
-            href="{% url 'contracts:contracts-item-create' contract.id %}"
-            class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Adicionar novo item
-            <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-            </svg>
-          </a>
-        </div>
-      {% endif %}
-        
-    </div>
+    {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
 
   <!-- Addendums Tab -->
@@ -263,18 +182,6 @@
   
 </div>
 
-{% comment %} {{ contract.name }}
-{{ contract.code }}
-{{ contract.objective }}
-{{ contract.total_value }}
-{{ contract.start_of_vigency }}
-{{ contract.end_of_vigency }}
-{{ contract.contractor_company }}
-{{ contract.contractor_manager }}
-{{ contract.hired_company }}
-{{ contract.hired_manager }}
-{{ contract.ong }}
-{{ contract.area }} {% endcomment %}
 
 <p class="text-3xl my-6 font-bold">
   Histórico

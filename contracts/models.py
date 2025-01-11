@@ -236,11 +236,21 @@ class ContractItem(BaseModel):
         choices=StatusChoices,
         default=StatusChoices.ANALYZING,
     )
+    status_pendencies = models.CharField(
+        verbose_name="Pendências e erros",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
+    
+    @property
+    def status_label(self) -> str:
+        return StatusChoices(self.status).label
 
     class Meta:
         verbose_name = "Item"

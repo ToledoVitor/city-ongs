@@ -69,7 +69,37 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         return context
+    
+    def post(self, request, pk, *args, **kwargs):
+        if not self.request.POST.get("csrfmiddlewaretoken"):
+            return redirect("contracts:contracts-list")
 
+        if not (self.request.user and self.request.user.can_change_statuses):
+            return redirect("contracts:contracts-list")
+
+        contract = get_object_or_404(Contract, id=pk)
+        form_type = self.request.POST.get("form_type", "")
+
+        match form_type:
+            case "items_modal":
+                item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
+                item.status = request.POST.get("status")
+                item.status_pendencies = request.POST.get("pendencies")
+                item.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
+                    target_object_id=item.id,
+                    target_content_object=item,
+                )
+
+            case _:
+                logger.warning(f"form_type: {form_type} is not a valid form")
+                return redirect("contracts:contracts-list")
+
+        return redirect("contracts:contracts-detail", pk=contract.id)
 
 class ContractCreateView(AdminRequiredMixin, TemplateView):
     template_name = "contracts/create.html"
