@@ -5,7 +5,7 @@ from fpdf import FPDF, XPos, YPos
 
 
 @dataclass
-class PassToThird:
+class PassToThirdPDFExporter:
     pdf = None
     default_cell_height = 5
 
@@ -335,5 +335,5 @@ class PassToThird:
 
 
 if __name__ == "__main__":
-    pdf = PassToThird().handle()
+    pdf = PassToThirdPDFExporter().handle()
     pdf.output(f"rp10-{str(datetime.now().time())[0:8]}.pdf")
