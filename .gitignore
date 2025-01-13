@@ -171,9 +171,15 @@ cython_debug/
 .pypirc
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 # Files extensions
 *.pdf
 *.xlsx
+=======
+# Files extension
+.xlsx
+.pdf
+>>>>>>> Stashed changes
 =======
 # Files extension
 .xlsx
