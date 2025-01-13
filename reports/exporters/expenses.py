@@ -28,13 +28,15 @@ class Expenses(FPDF):
         )
         # Espaçamento do título pro próximo dado
         self.set_y(self.get_y() + 5)
+
     def footer(self):
         # Rodapé
         self.set_y(-15)
         self.set_font("Helvetica", "I", 7)
         self.cell(0, 10, f"Page {self.page_no()}", align="C")
         self.cell(0, 10, str(datetime.now().time())[0:8], align="R")
-        
+
+
 # Gera PDF
 pdf = FPDF()
 pdf = Expenses()
@@ -202,7 +204,7 @@ table_data.extend(
         (
             "1",
             "31/10/2024",
-            "NF-E", 
+            "NF-E",
             "249",
             "CONTABILIDADE PILOTO E SILVA SOCIEDADE SIMPLES LTDA",
             "Contabilidade",
@@ -214,7 +216,7 @@ table_data.extend(
         (
             "2",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "18",
             "ALLAN GOLÇALVES DE CARVALHO",
             "Administrativo",
@@ -226,7 +228,7 @@ table_data.extend(
         (
             "3",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "50",
             "DIRCELIO TIMOTIO DOS SANTOS",
             "Contrapartida",
@@ -238,7 +240,7 @@ table_data.extend(
         (
             "4",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "20",
             "REGINALDO ROSSI",
             "Caminhão",
@@ -250,7 +252,7 @@ table_data.extend(
         (
             "5",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "19",
             "CLAUDINEIA GONÇALO DOS SANTOS",
             "Caminhão",
@@ -262,7 +264,7 @@ table_data.extend(
         (
             "4",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "20",
             "REGINALDO ROSSI",
             "Caminhão",
@@ -274,7 +276,7 @@ table_data.extend(
         (
             "5",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "19",
             "CLAUDINEIA GONÇALO DOS SANTOS",
             "Caminhão",
@@ -286,7 +288,7 @@ table_data.extend(
         (
             "1",
             "31/10/2024",
-            "NF-E", 
+            "NF-E",
             "249",
             "CONTABILIDADE PILOTO E SILVA SOCIEDADE SIMPLES LTDA",
             "Contabilidade",
@@ -298,7 +300,7 @@ table_data.extend(
         (
             "2",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "18",
             "ALLAN GOLÇALVES DE CARVALHO",
             "Administrativo",
@@ -310,7 +312,7 @@ table_data.extend(
         (
             "3",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "50",
             "DIRCELIO TIMOTIO DOS SANTOS",
             "Contrapartida",
@@ -322,7 +324,7 @@ table_data.extend(
         (
             "4",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "20",
             "REGINALDO ROSSI",
             "Caminhão",
@@ -334,7 +336,7 @@ table_data.extend(
         (
             "5",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "19",
             "CLAUDINEIA GONÇALO DOS SANTOS",
             "Caminhão",
@@ -346,7 +348,7 @@ table_data.extend(
         (
             "4",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "20",
             "REGINALDO ROSSI",
             "Caminhão",
@@ -358,7 +360,7 @@ table_data.extend(
         (
             "5",
             "31/10/2024",
-            "NFS-E", 
+            "NFS-E",
             "19",
             "CLAUDINEIA GONÇALO DOS SANTOS",
             "Caminhão",
@@ -370,11 +372,7 @@ table_data.extend(
     ]
 )
 
-headings_style = FontFace(
-    emphasis="BOLD",
-    size_pt=8,
-    fill_color=(233, 234, 236)
-)
+headings_style = FontFace(emphasis="BOLD", size_pt=8, fill_color=(233, 234, 236))
 
 with pdf.table(
     borders_layout="NO_HORIZONTAL_LINES",
@@ -389,9 +387,9 @@ with pdf.table(
         row = table.row()
         for datum in data_row:
             row.cell(datum, align="C")
-            
 
-#pdf.cell(text="Segunda-feira, 6 de Janeiro de 2025", align="R", h=cell_height)
+
+# pdf.cell(text="Segunda-feira, 6 de Janeiro de 2025", align="R", h=cell_height)
 pdf.ln(10)
 pdf.set_font("Helvetica", "", 8)
 pdf.cell(text="Responsáveis pela Contratada:", h=cell_height)
