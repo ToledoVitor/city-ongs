@@ -1,0 +1,75 @@
+{% load humanize %}
+
+<div class="my-4 mx-5">
+    <p class="text-2xl mb-2 font-bold text-black">{{ contract.name_with_code }}</p>
+    <b>Associação:</b> {{ contract.ong.name }} <br>
+    <b>Area de atuação:</b> {{ contract.area.name }}
+</div>
+
+<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
+
+<div class="my-3 mx-5">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Valor do Contrato:</label>
+        <p class="text-lg">R${{ contract.total_value|intcomma }}</p>
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Vigência:</label>
+        <p class="text-lg">{{ contract.start_of_vigency }} - {{ contract.end_of_vigency }}</p>
+      </div>
+
+    </div>
+</div>
+
+<div class="my-3 mx-5">
+    <label class="block mb-2 text-xl font-semibold text-black">Objetivo do contrato:</label>
+    <p class="text-lg">{{ contract.objective }}</p>
+</div>
+
+<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
+
+<label class="block mx-5 mb-2 text-2xl font-bold text-black">Partes Interessadas</label>
+
+<div class="my-3 mx-5">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Contratante:</label>
+        <p class="text-lg">
+            Nome: {{ contract.contractor_company.name }} <br>
+            Cnpj: {{ contract.contractor_company.cnpj }} <br>
+        </p>
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Gestor da Contratante:</label>
+        <p class="text-lg">
+            Nome: {{ contract.contractor_manager.name }} <br>
+            Cnpj: {{ contract.contractor_manager.cnpj }} <br>
+        </p>
+      </div>
+
+    </div>
+</div>
+
+<div class="my-3 mx-5">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Contratada:</label>
+        <p class="text-lg">
+            Nome: {{ contract.hired_company.name }} <br>
+            Cnpj: {{ contract.hired_company.cnpj }} <br>
+        </p>
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-xl font-semibold text-black">Gestor da Contratada:</label>
+        <p class="text-lg">
+            Nome: {{ contract.hired_manager.name }} <br>
+            Cnpj: {{ contract.hired_manager.cnpj }} <br>
+        </p>
+      </div>
+
+    </div>
+</div>

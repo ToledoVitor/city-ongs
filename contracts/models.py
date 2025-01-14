@@ -117,13 +117,11 @@ class Contract(BaseModel):
             str(id) for id in self.addendums.values_list("id", flat=True)[:10]
         ]
         addendum_logs = ActivityLog.objects.filter(
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ADDENDUM,
             target_object_id__in=addendum_ids,
         )
 
         goals_ids = [str(id) for id in self.goals.values_list("id", flat=True)[:10]]
         goals_logs = ActivityLog.objects.filter(
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_GOAL,
             target_object_id__in=goals_ids,
         )
 

@@ -108,25 +108,7 @@
 <div class="mr-10" id="default-tab-content">
   <!-- Details Tab -->
   <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="details" role="tabpanel" aria-labelledby="details-tab">
-    
-    <p class="text-2xl my-4 font-bold text-black">
-      {{ contract.name_with_code }}
-    </p>
-
-    <hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
-
-    <p class="text-lg my-2 text-black">
-      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
-    </p>
-    <p class="text-lg my-2 text-black">
-      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
-    </p>
-    <p class="text-lg my-2 text-black">
-      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
-    </p>
-    <p class="text-lg my-2 text-black">
-      <b>Valor do Contrato:</b> R${{ contract.total_value|intcomma }}
-    </p>
+    {% include 'contracts/tabs/details-tab.html' with contract=contract %}
   </div>
 
   <!-- Goals Tab -->
@@ -165,8 +147,11 @@
 </div>
 
 
-<p class="text-3xl my-6 font-bold">
-  Histórico
+<p class="text-3xl mt-6 font-bold">
+  Histórico de Edições
+</p>
+<p id="helper-text-explanation" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+  Apenas as 10 ultimas alterações são exibidas
 </p>
 
 <ol class="mt-6 relative border-s border-gray-200 dark:border-gray-700">
