@@ -4,7 +4,9 @@ from contracts.views import (
     ContractCreateView,
     ContractsDetailView,
     ContractsListView,
+    create_contract_goal_view,
     create_contract_item_view,
+    update_contract_goal_view,
     update_contract_item_view,
 )
 
@@ -24,8 +26,13 @@ urlpatterns = [
     ),
     path(
         "detail/<uuid:pk>/goals/create/",
-        ContractsDetailView.as_view(),
+        create_contract_goal_view,
         name="contracts-goals-create",
+    ),
+    path(
+        "detail/<uuid:pk>/goals/update/<uuid:goal_pk>",
+        update_contract_goal_view,
+        name="contracts-goals-update",
     ),
     path(
         "detail/<uuid:pk>/addendums/create/",

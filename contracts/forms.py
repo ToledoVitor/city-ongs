@@ -1,6 +1,6 @@
 from django import forms
 
-from contracts.models import Contract
+from contracts.models import Contract, ContractGoal, ContractSubGoal
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseSelectFormWidget,
@@ -37,3 +37,26 @@ class ContractCreateForm(forms.ModelForm):
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "ong": BaseSelectFormWidget(placeholder="Ong"),
         }
+
+
+class ContractSubGoalForm(forms.ModelForm):
+    class Meta:
+        model = ContractSubGoal
+        fields = [
+            "name",
+            "description",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "description": BaseTextAreaFormWidget(),
+        }
+
+
+ContractSubGoalFormSet = forms.inlineformset_factory(
+    ContractGoal,
+    ContractSubGoal,
+    form=ContractSubGoalForm,
+    extra=1,
+    can_delete=True,
+)

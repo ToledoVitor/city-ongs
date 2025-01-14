@@ -190,18 +190,28 @@ class ContractGoal(BaseModel):
     )
 
     name = models.CharField(verbose_name="Meta", max_length=128)
-    description = models.CharField(verbose_name="Descrição", max_length=128)
+    description = models.CharField(verbose_name="Descrição", max_length=255)
     status = models.CharField(
         verbose_name="Status",
         max_length=22,
         choices=StatusChoices,
         default=StatusChoices.ANALYZING,
     )
+    status_pendencies = models.CharField(
+        verbose_name="Pendências e erros",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def status_label(self) -> str:
+        return StatusChoices(self.status).label
 
     class Meta:
         verbose_name = "Meta"
@@ -210,7 +220,7 @@ class ContractGoal(BaseModel):
 
 class ContractSubGoal(BaseModel):
     name = models.CharField(verbose_name="Item", max_length=128)
-    description = models.CharField(verbose_name="Descrição", max_length=128)
+    description = models.CharField(verbose_name="Descrição", max_length=255)
     goal = models.ForeignKey(
         ContractGoal, related_name="sub_goals", on_delete=models.CASCADE
     )

@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import ContractCreateForm
-from contracts.models import Contract, ContractItem
+from contracts.forms import ContractCreateForm, ContractSubGoalFormSet
+from contracts.models import Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -45,6 +45,36 @@ class ContractsListView(LoginRequiredMixin, ListView):
         return context
 
 
+class ContractCreateView(AdminRequiredMixin, TemplateView):
+    template_name = "contracts/create.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        if not context.get("form", None):
+            context["form"] = ContractCreateForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = ContractCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                contract = form.save()
+
+                logger.info(f"{request.user.id} - Created new contract")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
+            return redirect("contracts:contracts-list")
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+
 class ContractsDetailView(LoginRequiredMixin, DetailView):
     model = Contract
 
@@ -68,6 +98,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "addendums",
                 "items",
                 "goals",
+                "goals__sub_goals",
             )
         )
 
@@ -103,41 +134,25 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                     target_content_object=item,
                 )
 
+            case "goals_modal":
+                goal = get_object_or_404(ContractGoal, id=request.POST.get("goalId"))
+                goal.status = request.POST.get("status")
+                goal.status_pendencies = request.POST.get("pendencies")
+                goal.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
+                    target_object_id=goal.id,
+                    target_content_object=goal,
+                )
+
             case _:
                 logger.warning(f"form_type: {form_type} is not a valid form")
                 return redirect("contracts:contracts-list")
 
         return redirect("contracts:contracts-detail", pk=contract.id)
-
-
-class ContractCreateView(AdminRequiredMixin, TemplateView):
-    template_name = "contracts/create.html"
-    login_url = "/auth/login"
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        if not context.get("form", None):
-            context["form"] = ContractCreateForm()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = ContractCreateForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                contract = form.save()
-
-                logger.info(f"{request.user.id} - Created new contract")
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
-                    target_object_id=contract.id,
-                    target_content_object=contract,
-                )
-            return redirect("contracts:contracts-list")
-
-        return self.render_to_response(self.get_context_data(form=form))
 
 
 def create_contract_item_view(request, pk):
@@ -186,6 +201,8 @@ def update_contract_item_view(request, pk, item_pk):
             item.description = request.POST.get("description")
             item.total_expense = request.POST.get("total_expense")
             item.is_additive = request.POST.get("is_additive", "") == "True"
+            item.status = StatusChoices.ANALYZING
+            item.status_pendencies = None
             item.save()
 
             _ = ActivityLog.objects.create(
@@ -201,3 +218,85 @@ def update_contract_item_view(request, pk, item_pk):
     return render(
         request, "contracts/items-update.html", {"contract": contract, "item": item}
     )
+
+
+def create_contract_goal_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if request.method == "POST":
+        subgoals_formset = ContractSubGoalFormSet(request.POST)
+        if subgoals_formset.is_valid():
+            with transaction.atomic():
+                name = request.POST.get("name")
+                description = request.POST.get("description")
+
+                goal = ContractGoal.objects.create(
+                    contract=contract,
+                    name=name,
+                    description=description,
+                    status=StatusChoices.ANALYZING,
+                )
+                subgoals = subgoals_formset.save(commit=False)
+                for subgoal in subgoals:
+                    subgoal.goal = goal
+                    subgoal.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_GOAL,
+                    target_object_id=goal.id,
+                    target_content_object=goal,
+                )
+
+            return redirect("contracts:contracts-detail", pk=contract.id)
+
+    else:
+        subgoals_formset = ContractSubGoalFormSet()
+        return render(
+            request,
+            "contracts/goals-create.html",
+            {"contract": contract, "subgoals_formset": subgoals_formset},
+        )
+
+
+def update_contract_goal_view(request, pk, goal_pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    goal = get_object_or_404(ContractGoal, id=goal_pk)
+
+    if request.method == "POST":
+        with transaction.atomic():
+            goal.name = request.POST.get("name")
+            goal.description = request.POST.get("description")
+            goal.status = StatusChoices.ANALYZING
+            goal.status_pendencies = None
+            goal.save()
+
+            goal.sub_goals.all().delete()
+
+            subgoals_formset = ContractSubGoalFormSet(request.POST, instance=goal)
+            if subgoals_formset.is_valid():
+                subgoals_formset.save()
+
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
+                target_object_id=goal.id,
+                target_content_object=goal,
+            )
+
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    else:
+        subgoals_formset = ContractSubGoalFormSet()
+        return render(
+            request,
+            "contracts/goals-update.html",
+            {"contract": contract, "goal": goal, "subgoals_formset": subgoals_formset},
+        )
