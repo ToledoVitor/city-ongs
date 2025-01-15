@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Contas Bancárias - Portal Gestão{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Criar Nova Conta Bancária
+</p>
+
+
+<form method="post" class="max-w-lg mx-auto">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_bank_name" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Nome do Banco</label>
+    {{ form.bank_name }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_account" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Número da Conta</label>
+    {{ form.account }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_agency" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Agência</label>
+    {{ form.agency }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_contract" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Contrato Vinculado</label>
+    {{ form.contract }}
+  </div>
+
+  {% include 'commons/form-errors.html' with form=form %}
+
+  <button
+    type="submit"
+    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    style="display: flex; justify-self: center;"
+  >
+    Criar
+  </button>
+
+</form>
+
+{% endblock %}

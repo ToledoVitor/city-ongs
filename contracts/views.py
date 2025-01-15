@@ -3,6 +3,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
@@ -36,7 +37,9 @@ class ContractsListView(LoginRequiredMixin, ListView):
         )
         query = self.request.GET.get("q")
         if query:
-            queryset = queryset.filter(name__icontains=query)
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(code__icontains=query)
+            )
         return queryset
 
     def get_context_data(self, **kwargs):

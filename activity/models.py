@@ -16,6 +16,10 @@ class ActivityLog(models.Model):
         )
         # accountability
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"
+        UPDATED_ACCOUNTABILITY = "UPDATED_ACCOUNTABILITY", "atualizou contabilidade mês"
+        # bank
+        CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "criou conta bancária"
+        UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "atualizou conta bancária"
         # contracts
         CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
         CREATED_CONTRACT_ADDENDUM = (

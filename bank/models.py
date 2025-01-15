@@ -6,7 +6,7 @@ from utils.choices import MonthChoices
 from utils.models import BaseModel
 
 
-class Account(BaseModel):
+class BankAccount(BaseModel):
     bank_name = models.CharField(verbose_name="Nome do Banco", max_length=128)
     account = models.IntegerField(verbose_name="Número da Conta")
     agency = models.CharField(verbose_name="Agência", max_length=128)
@@ -49,10 +49,10 @@ class BankStatement(BaseModel):
         max_digits=12,
     )
 
-    account = models.ForeignKey(
-        Account,
+    bank_account = models.ForeignKey(
+        BankAccount,
         verbose_name="Conta Bancária",
-        related_name="bank_statement",
+        related_name="statements",
         on_delete=models.CASCADE,
         null=True,
     )

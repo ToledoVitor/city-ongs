@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Contas Bancárias - Portal Gestão{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Listagem de Contas Bancárias
+</p>
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Inicio
+      </a>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Contas</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+{% include 'commons/search-bar.html' with placeholder="Pesquisar por agência, conta ou banco..." %}
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+          <tr>
+              <th scope="col" class="px-6 py-3">
+                  Nome do Contrato <br>
+              </th>
+              <th scope="col" class="px-6 py-3">
+                  Valor
+              </th>
+              <th scope="col" class="px-6 py-3">
+                  Início Vigência
+              </th>
+              <th scope="col" class="px-6 py-3">
+                  Fim Vigência
+              </th>
+              <th scope="col" class="px-6 py-3" />
+          </tr>
+      </thead>
+      <tbody>
+          {% if bank_accounts_list %}
+            {% for bank_account in bank_accounts_list %}
+              <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                  <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
+                    {{ bank_account }} <br>
+                    {{bank_account.bank_name }} <br>
+                    {{bank_account.account }} <br>
+                    {{bank_account.agency }} <br>
+                    {{bank_account.balance }} <br>
+                    {{bank_account.contract }} <br>
+                  </th>
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                    {{ bank_account }}                   
+                  </td>
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                    {{ bank_account }}                   
+                  </td>
+                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                    {{ bank_account }}                   
+                  </td>
+                  <td class="px-6 py-4 text-base flex justify-end">
+                    {% comment %} <a
+                      href="{% url 'contracts:contracts-detail' contract.id %}"
+                      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      Visualizar
+                    </a> {% endcomment %}
+                  </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                  Nenhum resultado encontrado
+              </th>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                -
+              </td>
+            </tr>
+          {% endif %}     
+      </tbody>
+  </table>
+
+  {% if user.has_admin_access %}
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
+      <a
+        href="{% url 'bank:bank-accounts-create' %}"
+        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Adicionar novo
+        <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
+
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
+
+</div>
+
+{% endblock %}
