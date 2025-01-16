@@ -39,16 +39,13 @@
       <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
           <tr>
               <th scope="col" class="px-6 py-3">
-                  Nome do Contrato <br>
+                  Contrato Vinculado
               </th>
               <th scope="col" class="px-6 py-3">
-                  Valor
+                  Banco
               </th>
               <th scope="col" class="px-6 py-3">
-                  Início Vigência
-              </th>
-              <th scope="col" class="px-6 py-3">
-                  Fim Vigência
+                  Conta
               </th>
               <th scope="col" class="px-6 py-3" />
           </tr>
@@ -58,29 +55,22 @@
             {% for bank_account in bank_accounts_list %}
               <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                   <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
-                    {{ bank_account }} <br>
-                    {{bank_account.bank_name }} <br>
-                    {{bank_account.account }} <br>
-                    {{bank_account.agency }} <br>
-                    {{bank_account.balance }} <br>
-                    {{bank_account.contract }} <br>
+                    {{ bank_account.contract.name_with_code }}
                   </th>
                   <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                    {{ bank_account }}                   
+                    {{ bank_account.bank_name }}                   
                   </td>
                   <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                    {{ bank_account }}                   
-                  </td>
-                  <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                    {{ bank_account }}                   
+                    <b>Número: </b>{{ bank_account.account }} <br>
+                    <b>Agência: </b>{{ bank_account.agency }}                   
                   </td>
                   <td class="px-6 py-4 text-base flex justify-end">
-                    {% comment %} <a
-                      href="{% url 'contracts:contracts-detail' contract.id %}"
+                    <a
+                      href="{% url 'bank:bank-accounts-detail' bank_account.id %}"
                       class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
                       Visualizar
-                    </a> {% endcomment %}
+                    </a>
                   </td>
               </tr>
             {% endfor %}
@@ -89,9 +79,6 @@
               <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                   Nenhum resultado encontrado
               </th>
-              <td class="px-6 py-4">
-                  -
-              </td>
               <td class="px-6 py-4">
                   -
               </td>

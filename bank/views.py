@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.shortcuts import redirect
-from django.views.generic import ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
 from bank.forms import BankAccountCreateForm
@@ -41,7 +41,9 @@ class BankAccountsListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(
                 Q(account__icontains=query)
                 | Q(bank_name__icontains=query)
-                | Q(agencyname__icontains=query)
+                | Q(agency__icontains=query)
+                | Q(contract__name__icontains=query)
+                | Q(contract__code__icontains=query)
             )
         return queryset
 
@@ -81,3 +83,30 @@ class BankAccountCreateView(LoginRequiredMixin, TemplateView):
             return redirect("bank:bank-accounts-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class BankAccountDetailView(LoginRequiredMixin, DetailView):
+    model = BankAccount
+
+    template_name = "bank-account/detail.html"
+    context_object_name = "bank_account"
+
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contract",
+            )
+            # .prefetch_related(
+            # )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        return context
