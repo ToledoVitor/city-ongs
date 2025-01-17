@@ -6,11 +6,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from bank.forms import BankAccountCreateForm
+from bank.forms import BankAccountCreateForm, UploadOFXForm
 from bank.models import BankAccount
 
 logger = logging.getLogger(__name__)
@@ -110,3 +110,15 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         return context
+
+
+def upload_ofx_view(request):
+    if request.method == "POST":
+        form = UploadOFXForm(request.POST, request.FILES, request=request)
+        if form.is_valid():
+            breakpoint()
+            return redirect("bank:bank-accounts-list")
+    else:
+        form = UploadOFXForm(request=request)
+
+    return render(request, "bank-account/create.html", {"form": form})

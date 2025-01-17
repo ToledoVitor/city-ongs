@@ -1,14 +1,14 @@
 from django.urls import path
 
 from bank.views import (
-    BankAccountCreateView,
     BankAccountDetailView,
     BankAccountsListView,
+    upload_ofx_view,
 )
 
 urlpatterns = [
     path("", BankAccountsListView.as_view(), name="bank-accounts-list"),
-    path("create/", BankAccountCreateView.as_view(), name="bank-accounts-create"),
+    path("create/", upload_ofx_view, name="bank-accounts-create"),
     path(
         "detail/<uuid:pk>/",
         BankAccountDetailView.as_view(),
