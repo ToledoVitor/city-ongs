@@ -5,7 +5,7 @@ from fpdf import FPDF, XPos, YPos
 
 
 @dataclass
-class PassToThirdPDFExporter:
+class PassOn4PDFExporter:
     pdf = None
     default_cell_height = 5
 
@@ -14,7 +14,6 @@ class PassToThirdPDFExporter:
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
-        pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
 
     def __set_helvetica_font(self, font_size=7, bold=False):
@@ -26,12 +25,11 @@ class PassToThirdPDFExporter:
     def handle(self):
         self._draw_header()
         self._draw_informations()
-        self._draw_first_table()
-        self._draw_partners_data()
-        self._draw_documents_table()
-        self._draw_resources_table()
-        self._draw_resume_table()
-        self._draw_table_footer()
+        self._draw_manager_table()
+        # self._draw_documents_table()
+        # self._draw_resources_table()
+        # self._draw_resume_table()
+        # self._draw_table_footer()
         self._draw_footer()
 
         return self.pdf
@@ -42,7 +40,7 @@ class PassToThirdPDFExporter:
         self.pdf.cell(
             0,
             0,
-            "ANEXO RP-10 - REPASSES AO TERCEIRO SETOR",
+            "ANEXO RP-04 - REPASSES AO TERCEIRO SETOR",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -51,7 +49,7 @@ class PassToThirdPDFExporter:
         self.pdf.cell(
             0,
             10,
-            "DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS - TERMO DE COLABORAÇÃO/FOMENTO",
+            "RELAÇÃO DOS VALORES TRANSFERIDOS",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -60,96 +58,45 @@ class PassToThirdPDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
-        self.pdf.cell(
-            text="**Órgão Público:** Prefeitura Municipal de Várzea Paulista",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**Organização da Sociedade Civil:** Associação Com unidade Varzina - Eco & Vida (Meio Ambiente)",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**CNPJ**: 02.834.119/0001-95",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**Endereço e CEP:** Rua Feres Sada 82 - Loteamento Parque Empresarial São Luís",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**Responsáveis pela OSC:**", markdown=True, h=self.default_cell_height
-        )
-        self.pdf.ln(4)
-
-    def _draw_first_table(self):
-        self.__set_helvetica_font(font_size=7, bold=True)
-        table_data = [
-            ["Nome", "Papel", "CPF"],
-        ]
-
-        col_widths = [70, 60, 60]
-
-        for row in table_data:
-            for col_index, col_text in enumerate(row):
-                self.pdf.cell(
-                    col_widths[col_index],
-                    h=self.default_cell_height,
-                    text=col_text,
-                    border=1,
-                    align="L",
-                )
-            self.pdf.ln()
-
-    def _draw_partners_data(self):
-        self.pdf.ln(3)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="**Objeto da Parceria:** Executar a coleta de recicláveis no município de Várzea Paulista - SP",
+            text="**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** 01/01/2025 A 31/12/2025",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**Exercício:** 01/11/2024 a 30/11/2024",
+            text="**ÓRGÃO CONCESSOR:** PREFEITURA MUNICIPAL DE PREFEITURA MUNICIPAL DE VÁRZEA PAULISTA",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(10)
         self.pdf.cell(
-            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
+            text="**I - DECORRENTES DE AJUSTES:**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(3)
+        self.pdf.ln(12)
 
-    def _draw_documents_table(self):
+    def _draw_manager_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        headers = ["DOCUMENTO", "DATA", "VIGÊNCIA", "VALOR - R$"]
-        table_data = [
-            [
-                "Termo de Colaboração nº 10/2023",
-                "26/09/2023",
-                "26/09/2023 - 26/09/2024",
-                "R$ 761.992,32",
-            ],
-            [
-                "Aditamento Nº 1",
-                "25/09/2024",
-                "26/09/2024 - 25/09/2025",
-                "R$ 776.193,00",
-            ],
+        headers = [
+            "Contrato de Gestão Nº",
+            "Beneficiário",
+            "CNPJ",
+            "Endereço",
+            "Data",
+            "Vigência até",
+            "Valor Global do Ajuste",
+            "Objeto",
+            "Fonte",
+            "Valor Repassado no Exercício",
         ]
+        table_data = []
+        total_line = ["Total:" "R$ 0,00"]
 
-        col_widths = [75, 19, 65, 31]
+        col_widths = [35, 25, 10, 15, 10, 15, 20, 10, 10, 50]
         self.__set_helvetica_font(font_size=8, bold=True)
 
         for col_index, header in enumerate(headers):
@@ -158,7 +105,7 @@ class PassToThirdPDFExporter:
                 h=self.default_cell_height,
                 text=header,
                 border=1,
-                align="C",
+                align="L",
             )
         self.pdf.ln()
 
@@ -170,9 +117,21 @@ class PassToThirdPDFExporter:
                     h=self.default_cell_height,
                     text=col_text,
                     border=1,
-                    align="C",
+                    align="L",
                 )
             self.pdf.ln()
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        col_widths = [150, 50]
+        for col_index, total_line in enumerate(total_line):
+            self.pdf.cell(
+                col_widths[col_index],
+                h=self.default_cell_height,
+                text=header,
+                border=1,
+                align="L",
+            )
+        self.pdf.ln()
 
     def _draw_resources_table(self):
         self.pdf.ln(6)
@@ -335,5 +294,5 @@ class PassToThirdPDFExporter:
 
 
 if __name__ == "__main__":
-    pdf = PassToThirdPDFExporter().handle()
-    pdf.output(f"rp10-{str(datetime.now().time())[0:8]}.pdf")
+    pdf = PassOn4PDFExporter().handle()
+    pdf.output(f"rp4-{str(datetime.now().time())[0:8]}.pdf")

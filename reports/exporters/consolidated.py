@@ -35,56 +35,56 @@ def bank_statement(bs_pdf, bs_data, bs_col_widths, bs_headings_style):
             headings_style=bs_headings_style,
             line_height=6,
             align="L",
-            col_widths = bs_col_widths,
-            ) as table:
-                bs_pdf.set_fill_color(255, 255, 255),
-                bs_pdf.set_font("Helvetica", "", 6)
-                total = 0
-                for data_row in bs_data:
-                    row = table.row()
-                    for datum_index, datum_text in enumerate(data_row):
-                        text_align = "L"
-                        if datum_index == 1:
-                            text_align = "C"
-                        if datum_index == 2:
-                            text_align = "R"
-                            total += float(datum_text)
-                        row.cell(datum_text, align=text_align)
+            col_widths=bs_col_widths,
+        ) as table:
+            (bs_pdf.set_fill_color(255, 255, 255),)
+            bs_pdf.set_font("Helvetica", "", 6)
+            total = 0
+            for data_row in bs_data:
+                row = table.row()
+                for datum_index, datum_text in enumerate(data_row):
+                    text_align = "L"
+                    if datum_index == 1:
+                        text_align = "C"
+                    if datum_index == 2:
+                        text_align = "R"
+                        total += float(datum_text)
+                    row.cell(datum_text, align=text_align)
         return total
     else:
         pass
 
+
 def general_vision(bs_pdf, bs_data, bs_col_widths, bs_headings_style):
     with pdf.table(
-            borders_layout="NO_HORIZONTAL_LINES",
-            headings_style=bs_headings_style,
-            line_height=6,
-            align="L",
-            col_widths = bs_col_widths,
-            markdown = True
-            ) as table:
-                bs_pdf.set_fill_color(255, 255, 255),
-                sub_data = [
-                    ("Data","Histórico","Valor")
-                ]
-                for sub_data_row in sub_data:
-                    row = table.row()
-                    for datum_index, datum_text in enumerate(sub_data_row):
-                        row.cell(datum_text, align="L")
-                        
-                bs_pdf.set_fill_color(255, 255, 255),
-                bs_pdf.set_font("Helvetica", "", 6)
-                total = 0
-                for data_row in bs_data:
-                    row = table.row()
-                    for datum_index, datum_text in enumerate(data_row):
-                        text_align = "L"
-                        if datum_index == 2:
-                            total += float(datum_text)
-                            text_align = "R"
-                        row.cell(datum_text, align=text_align)
+        borders_layout="NO_HORIZONTAL_LINES",
+        headings_style=bs_headings_style,
+        line_height=6,
+        align="L",
+        col_widths=bs_col_widths,
+        markdown=True,
+    ) as table:
+        (bs_pdf.set_fill_color(255, 255, 255),)
+        sub_data = [("Data", "Histórico", "Valor")]
+        for sub_data_row in sub_data:
+            row = table.row()
+            for datum_index, datum_text in enumerate(sub_data_row):
+                row.cell(datum_text, align="L")
+
+        (bs_pdf.set_fill_color(255, 255, 255),)
+        bs_pdf.set_font("Helvetica", "", 6)
+        total = 0
+        for data_row in bs_data:
+            row = table.row()
+            for datum_index, datum_text in enumerate(data_row):
+                text_align = "L"
+                if datum_index == 2:
+                    total += float(datum_text)
+                    text_align = "R"
+                row.cell(datum_text, align=text_align)
     return total
-                    
+
+
 # Gera PDF
 pdf = FPDF()
 pdf = Consolidated()
@@ -140,11 +140,8 @@ pdf.set_font("Helvetica", "B", 8)
 pdf.cell(180, cell_height, "Saldos Anteriores", align="L", fill=True, border="LR")
 pdf.ln(cell_height)
 
-data = [
-    ("CONTA CORRENTE", "(+)", "3370.09"),
-    ("CONTA INVESTIMENTO", "(+)", "900.00")
-]
-col_widths=(80,90,20)
+data = [("CONTA CORRENTE", "(+)", "3370.09"), ("CONTA INVESTIMENTO", "(+)", "900.00")]
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
@@ -155,29 +152,49 @@ if data != []:
 
 pdf.set_font("Helvetica", "B", 8)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Aplicações e Resgates dos Recursos Financeiros", align="L", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Aplicações e Resgates dos Recursos Financeiros",
+    align="L",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
 data = []
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
 if data != []:
     headings_style = FontFace("Helvetica", "B", size_pt=6, fill_color=(233, 234, 236))
-    data = [("Total das Aplicações e Resgates dos Recursos Financeiros", "", str(total))]
+    data = [
+        ("Total das Aplicações e Resgates dos Recursos Financeiros", "", str(total))
+    ]
     bank_statement(pdf, data, col_widths, headings_style)
 
 pdf.set_font("Helvetica", "B", 8)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Agrupamento das Receitas por Natureza de Receita", align="L", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Agrupamento das Receitas por Natureza de Receita",
+    align="L",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
 data = [
-    ("Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc", "(+)", "1190.00"),
-    ("Repasse Público", "(+)", "64682.75")
+    (
+        "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
+        "(+)",
+        "1190.00",
+    ),
+    ("Repasse Público", "(+)", "64682.75"),
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
@@ -188,9 +205,13 @@ pdf.ln(cell_height)
 
 data = [
     ("Despesas Planejadas - Previstas no Plano de Trabalho", "(-)", "68893.81"),
-    ("Despesas Não Planejadas \n Desconsiderando despesas com investimento (IOF, IR, etc)", "(-)", "0")
+    (
+        "Despesas Não Planejadas \n Desconsiderando despesas com investimento (IOF, IR, etc)",
+        "(-)",
+        "0",
+    ),
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
@@ -201,14 +222,18 @@ if data != []:
 
 pdf.set_font("Helvetica", "B", 8)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Transferências Bancárias para outras contas", align="L", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Transferências Bancárias para outras contas",
+    align="L",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
-data = [
-    ("Entradas", "(+)", "0.00"),
-    ("Saidas", "(-)", "0.00")
-]
-col_widths=(80,90,20)
+data = [("Entradas", "(+)", "0.00"), ("Saidas", "(-)", "0.00")]
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
@@ -217,11 +242,8 @@ pdf.set_fill_color(233, 234, 236)
 pdf.cell(180, cell_height, "Saldos Finais", align="L", fill=True, border="LR")
 pdf.ln(cell_height)
 
-data = [
-    ("CONTA CORRENTE", "(+)", "349.43"),
-    ("CONTA INVESTIMENTO BB", "(-)", "0.00")
-]
-col_widths=(80,90,20)
+data = [("CONTA CORRENTE", "(+)", "349.43"), ("CONTA INVESTIMENTO BB", "(-)", "0.00")]
+col_widths = (80, 90, 20)
 headings_style = FontFace(size_pt=6)
 total = bank_statement(pdf, data, col_widths, headings_style)
 
@@ -229,9 +251,15 @@ if data != []:
     headings_style = FontFace("Helvetica", "B", size_pt=6, fill_color=(233, 234, 236))
     data = [("Total dos Saldos Disponíveis(Bancos)", "", str(total))]
     bank_statement(pdf, data, col_widths, headings_style)
-    
+
 headings_style = FontFace("Helvetica", "B", size_pt=6, fill_color=(233, 234, 236))
-data = [("Saldo Final Calculado \n Este saldo deverá ser igual ao Total dos Saldos Disponíveis (Banco)", "", str(total))]
+data = [
+    (
+        "Saldo Final Calculado \n Este saldo deverá ser igual ao Total dos Saldos Disponíveis (Banco)",
+        "",
+        str(total),
+    )
+]
 bank_statement(pdf, data, col_widths, headings_style)
 
 pdf.set_font("Helvetica", "B", 9)
@@ -239,18 +267,36 @@ pdf.cell(180, cell_height, "", align="C", border="LR")
 pdf.ln()
 pdf.set_font("Helvetica", "B", 9)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Visão Analítica dos Lançamentos", align="C", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Visão Analítica dos Lançamentos",
+    align="C",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
 pdf.set_font("Helvetica", "B", 8)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc", align="L", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
+    align="L",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
 data = [
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** TRANSFERÊnCIA RECEBIDA-22/1109:56ASSOCIACAOCOMUNIDADEVA \n **Sistema:** Devolução","1190.00")
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** TRANSFERÊnCIA RECEBIDA-22/1109:56ASSOCIACAOCOMUNIDADEVA \n **Sistema:** Devolução",
+        "1190.00",
+    )
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace("Helvetica", "B", size_pt=6)
 total = general_vision(pdf, data, col_widths, headings_style)
 
@@ -264,9 +310,13 @@ pdf.cell(180, cell_height, "Repasse Público", align="L", fill=True, border="LR"
 pdf.ln(cell_height)
 
 data = [
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** TRANSFERÊNCIARECEBIDA-05/1111:39PREFEITURAMDEVPAULIS \n **Sistema:** Repasse Público","64682.75")
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** TRANSFERÊNCIARECEBIDA-05/1111:39PREFEITURAMDEVPAULIS \n **Sistema:** Repasse Público",
+        "64682.75",
+    )
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace("Helvetica", "B", size_pt=6)
 total = general_vision(pdf, data, col_widths, headings_style)
 
@@ -276,13 +326,24 @@ bank_statement(pdf, data, col_widths, headings_style)
 
 pdf.set_font("Helvetica", "B", 8)
 pdf.set_fill_color(233, 234, 236)
-pdf.cell(180, cell_height, "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc", align="L", fill=True, border="LR")
+pdf.cell(
+    180,
+    cell_height,
+    "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
+    align="L",
+    fill=True,
+    border="LR",
+)
 pdf.ln(cell_height)
 
 data = [
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** TRANSFERÊnCIA RECEBIDA-22/1109:56ASSOCIACAOCOMUNIDADEVA \n **Sistema:** Devolução","1190.00")
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** TRANSFERÊnCIA RECEBIDA-22/1109:56ASSOCIACAOCOMUNIDADEVA \n **Sistema:** Devolução",
+        "1190.00",
+    )
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace("Helvetica", "B", size_pt=6)
 total = general_vision(pdf, data, col_widths, headings_style)
 
@@ -296,14 +357,38 @@ pdf.cell(180, cell_height, "Repasse Despesas", align="L", fill=True, border="LR"
 pdf.ln(cell_height)
 
 data = [
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Contabilidade","3000.75"),
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Contrapartida","6000.95"),
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Combustivel","1840.15"),
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Vale Transporte","300.00"),
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Holerite","400.00"),
-    (f"{str(datetime.now().time())[0:8]}","**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Caminhão","500.75"),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Contabilidade",
+        "3000.75",
+    ),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Contrapartida",
+        "6000.95",
+    ),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Combustivel",
+        "1840.15",
+    ),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Vale Transporte",
+        "300.00",
+    ),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Holerite",
+        "400.00",
+    ),
+    (
+        f"{str(datetime.now().time())[0:8]}",
+        "**Banco:** PIX-ENVIADO-05/1115:25CONTABILIDADEPSSSLME \n **Sistema:** Caminhão",
+        "500.75",
+    ),
 ]
-col_widths=(80,90,20)
+col_widths = (80, 90, 20)
 headings_style = FontFace("Helvetica", "B", size_pt=6)
 total = general_vision(pdf, data, col_widths, headings_style)
 
