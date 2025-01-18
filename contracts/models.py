@@ -5,6 +5,7 @@ from simple_history.models import HistoricalRecords
 
 from accounts.models import Area, Ong
 from activity.models import ActivityLog
+from bank.models import BankAccount
 from utils.choices import StatusChoices
 from utils.models import BaseModel
 
@@ -84,6 +85,24 @@ class Contract(BaseModel):
         Area,
         verbose_name="Area",
         related_name="contracts",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    # bank accounts
+    checking_account = models.OneToOneField(
+        BankAccount,
+        verbose_name="Conta Corrente",
+        related_name="checking_account",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    investing_account = models.OneToOneField(
+        BankAccount,
+        verbose_name="Conta Investimento",
+        related_name="investing_contracts",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

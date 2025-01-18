@@ -92,6 +92,20 @@
     <li class="me-2" role="presentation">
       <button
         class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="accounts-tab"
+        data-tabs-target="#accounts"
+        type="button"
+        role="tab"
+        aria-controls="accounts"
+        aria-selected="false"
+      >
+        Contas
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
         id="addendums-tab"
         data-tabs-target="#addendums"
         type="button"
@@ -121,6 +135,11 @@
     {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
 
+  <!-- Accounts Tab -->
+  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+    {% include 'contracts/tabs/banks-tab.html' with contract=contract user=user csrf_token=csrf_token %}
+  </div>
+  
   <!-- Addendums Tab -->
   <div class="hidden p-4 rounded-lg dark:bg-green-200" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
     {% if contract.addendums.count %}

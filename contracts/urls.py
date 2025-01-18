@@ -9,6 +9,7 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_item_view,
 )
+from bank.views import create_bank_account_view
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
@@ -38,5 +39,10 @@ urlpatterns = [
         "detail/<uuid:pk>/addendums/create/",
         ContractsDetailView.as_view(),
         name="contracts-addendum-create",
+    ),
+    path(
+        "detail/<uuid:pk>/accounts/create/",
+        create_bank_account_view,
+        name="contracts-accounts-create",
     ),
 ]

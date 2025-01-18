@@ -3,6 +3,7 @@ import re
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime
+from django.db import transaction
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -54,46 +55,61 @@ class OFXFileParser:
     def create_bank_account(self, contract: Contract) -> bool:
         account_data = self.account_data
 
+        bank_name = account_data["bank_name"]
+        bank_id = account_data["bank_id"]
+        agency = account_data["agency_id"]
+        account = account_data["account_id"]
+        account_type = account_data["account_type"]
+
         if BankAccount.objects.filter(
-            bank_name=account_data["bank_name"],
-            bank_id=account_data["bank_id"],
-            agency=account_data["agency_id"],
-            account=account_data["account_id"],
-            account_type=account_data["account_type"],
+            bank_name=bank_name,
+            bank_id=bank_id,
+            agency=agency,
+            account=account,
+            account_type=account_type,
         ).exists():
             logger.warning(
                 f"Bank Account {account_data["account_id"]} - Already exists"
             )
             raise ValidationError("Conta bancária já cadastrada.")
 
-        bank_account = BankAccount.objects.create(
-            bank_name=account_data["bank_name"],
-            bank_id=account_data["bank_id"],
-            agency=account_data["agency_id"],
-            account=account_data["account_id"],
-            account_type=account_data["account_type"],
-            balance=self.balance_amount,
-            contract=contract,
-        )
+        with transaction.atomic():
+            bank_account = BankAccount.objects.create(
+                bank_name=bank_name,
+                bank_id=bank_id,
+                agency=agency,
+                account=account,
+                account_type=account_type,
+                balance=self.balance_amount,
+            )
+            if account_type == "CHECKING":
+                contract.checking_account = bank_account
+            elif account_type == "INVESTING":
+                contract.investing_account = bank_account
+            else:
+                logger.info(f"Account type of {account_type} is not a valid type")
+                raise ValidationError(f"Conta tipo {account_type} não é valida")
+            
+            contract.save()
 
-        balance_date = self.balance_date
-        BankStatement.objects.create(
-            bank_account=bank_account,
-            balance=self.balance_amount,
-            opening_date=balance_date["date_start"],
-            closing_date=balance_date["date_end"],
-        )
+            balance_date = self.balance_date
+            BankStatement.objects.create(
+                bank_account=bank_account,
+                balance=self.balance_amount,
+                opening_date=balance_date["date_start"],
+                closing_date=balance_date["date_end"],
+            )
 
-        self._update_transactions(bank_account)
-        return bank_account
+            transactions = self._updated_transactions(bank_account)
+            Transaction.objects.bulk_create(transactions)
+
+            return bank_account
 
     def update_bank_account_balance(self) -> bool:
         return ...
 
-    def _update_transactions(self, bank_account: BankAccount) -> None:
-        transactions_list = self.transactions_list
-
-        transactions_objects = [
+    def _updated_transactions(self, bank_account: BankAccount) -> None:
+        return [
             Transaction(
                 bank_account=bank_account,
                 transaction_type=transaction.trntype,
@@ -103,9 +119,8 @@ class OFXFileParser:
                 date=transaction.dtposted,
                 memo=getattr(transaction, "memo", None),
             )
-            for transaction in transactions_list
+            for transaction in self.transactions_list
         ]
-        Transaction.objects.bulk_create(transactions_objects)
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
         ofx_content = ofx_file.read().decode("latin1")

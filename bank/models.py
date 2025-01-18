@@ -2,7 +2,6 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from activity.models import ActivityLog
-from contracts.models import Contract
 from utils.models import BaseModel
 
 
@@ -42,14 +41,6 @@ class BankAccount(BaseModel):
         verbose_name="Saldo Atual",
         decimal_places=2,
         max_digits=12,
-    )
-
-    contract = models.ForeignKey(
-        Contract,
-        verbose_name="Contrato",
-        related_name="accounts",
-        on_delete=models.CASCADE,
-        null=True,
     )
 
     history = HistoricalRecords()

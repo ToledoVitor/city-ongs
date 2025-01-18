@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from activity.models import ActivityLog
@@ -84,11 +84,11 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-def create_banck_account_view(request):
+def create_bank_account_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        form = UploadOFXForm(request.POST, request.FILES, request=request)
+        form = UploadOFXForm(request.POST, request.FILES)
         if form.is_valid():
-            contract = Contract.objects.get(id=form.data["contract"])
             try:
                 bank_account = OFXFileParser(
                     ofx_file=request.FILES["ofx_file"]
@@ -109,14 +109,14 @@ def create_banck_account_view(request):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                return redirect("bank:bank-accounts-list")
+                redirect("contracts:contracts-detail", pk=contract.id)
             except ValidationError:
                 return render(
                     request,
                     "bank-account/create.html",
-                    {"form": form, "account_exists": True},
+                    {"form": form, "contract": contract, "account_exists": True},
                 )
     else:
-        form = UploadOFXForm(request=request)
+        form = UploadOFXForm()
 
-    return render(request, "bank-account/create.html", {"form": form})
+    return render(request, "bank-account/create.html", {"form": form, "contract": contract})
