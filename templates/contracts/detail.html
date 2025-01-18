@@ -43,8 +43,10 @@
 <div class="mb-4 mr-10 border-b border-gray-200 dark:border-gray-700">
   <ul
     class="flex flex-wrap -mb-px text-sm font-medium text-center"
-    id="default-tab"
-    data-tabs-toggle="#default-tab-content"
+    id="default-styled-tab"
+    data-tabs-toggle="#default-styled-tab-content" 
+    data-tabs-active-classes="text-white hover:text-gray-800 rounded-t-lg active bg-blue-600"
+    data-tabs-inactive-classes="dark:border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
     role="tablist"
   >
     <li class="me-2" role="presentation">
@@ -119,7 +121,7 @@
   </ul>
 </div>
 
-<div class="mr-10" id="default-tab-content">
+<div class="mr-10" id="default-styled-tab-content">
   <!-- Details Tab -->
   <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="details" role="tabpanel" aria-labelledby="details-tab">
     {% include 'contracts/tabs/details-tab.html' with contract=contract %}
