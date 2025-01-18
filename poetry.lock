@@ -283,6 +283,16 @@ files = [
 ]
 
 [[package]]
+name = "ofxtools"
+version = "0.9.5"
+description = "Library for working with Open Financial Exchange (OFX) data"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "ofxtools-0.9.5.tar.gz", hash = "sha256:682a516bfa5ccad0f9551c17cc2cf155422f9f5f85a341cfb4911b324de46045"},
+]
+
+[[package]]
 name = "pillow"
 version = "11.0.0"
 description = "Python Imaging Library (Fork)"
@@ -557,4 +567,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "d749bb0ba61d57b9db34d96ab8590b22f18bd26f9cb02470060be37739e64f3e"
+content-hash = "813493e210defdbeebeb06f29879f542b803bd855aec35eae841a51f05677415"

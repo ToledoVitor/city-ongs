@@ -1,17 +1,18 @@
 import logging
-from decimal import Decimal
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.shortcuts import redirect, render
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView
 
 from activity.models import ActivityLog
-from bank.forms import BankAccountCreateForm, UploadOFXForm
+from bank.forms import UploadOFXForm
 from bank.models import BankAccount
+from bank.services.ofx_parser import OFXFileParser
+from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
 
@@ -53,38 +54,6 @@ class BankAccountsListView(LoginRequiredMixin, ListView):
         return context
 
 
-class BankAccountCreateView(LoginRequiredMixin, TemplateView):
-    template_name = "bank-account/create.html"
-    login_url = "/auth/login"
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        if not context.get("form", None):
-            context["form"] = BankAccountCreateForm()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = BankAccountCreateForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                contract = form.save(commit=False)
-                contract.balance = Decimal("0.00")
-                contract.save()
-
-                logger.info(f"{request.user.id} - Created new contract")
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATED_BANK_ACCOUNT,
-                    target_object_id=contract.id,
-                    target_content_object=contract,
-                )
-            return redirect("bank:bank-accounts-list")
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-
 class BankAccountDetailView(LoginRequiredMixin, DetailView):
     model = BankAccount
 
@@ -112,12 +81,31 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-def upload_ofx_view(request):
+def create_banck_account_view(request):
     if request.method == "POST":
         form = UploadOFXForm(request.POST, request.FILES, request=request)
         if form.is_valid():
-            breakpoint()
-            return redirect("bank:bank-accounts-list")
+            contract = Contract.objects.get(id=form.data["contract"])
+            try:
+                bank_account = OFXFileParser(
+                    ofx_file=request.FILES["ofx_file"]
+                ).create_bank_account(contract=contract)
+
+                logger.info(f"{request.user.id} - Created new bank account")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_BANK_ACCOUNT,
+                    target_object_id=bank_account.id,
+                    target_content_object=bank_account,
+                )
+                return redirect("bank:bank-accounts-list")
+            except ValidationError:
+                return render(
+                    request,
+                    "bank-account/create.html",
+                    {"form": form, "account_exists": True},
+                )
     else:
         form = UploadOFXForm(request=request)
 

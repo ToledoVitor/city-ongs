@@ -64,9 +64,10 @@ class UploadOFXForm(forms.Form):
 
         if ofx_file:
             if not ofx_file.name.lower().endswith(".ofx"):
-                raise forms.ValidationError("Somente arquivos OFX são permitidos.")
+                raise forms.ValidationError(
+                    "Somente arquivos do tipo OFX são permitidos."
+                )
 
-            # Verificar o tamanho do arquivo (opcional)
             if ofx_file.size > 5 * 1024 * 1024:  # Limite de 5 MB
                 raise forms.ValidationError(
                     "O tamanho máximo permitido para o arquivo é 5MB."

@@ -2,14 +2,41 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from contracts.models import Contract
-from utils.choices import MonthChoices
 from utils.models import BaseModel
 
 
 class BankAccount(BaseModel):
-    bank_name = models.CharField(verbose_name="Nome do Banco", max_length=128)
-    account = models.IntegerField(verbose_name="Número da Conta")
-    agency = models.CharField(verbose_name="Agência", max_length=128)
+    # TODO: remove nulls
+    bank_name = models.CharField(
+        verbose_name="Nome do Banco",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    bank_id = models.IntegerField(
+        verbose_name="Id do Banco",
+        blank=True,
+        null=True,
+    )
+
+    account = models.CharField(
+        verbose_name="Número da Conta",
+        max_length=16,
+        blank=True,
+        null=True,
+    )
+    account_type = models.CharField(
+        verbose_name="Tipo da Conta",
+        max_length=16,
+        blank=True,
+        null=True,
+    )
+    agency = models.CharField(
+        verbose_name="Agência",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
     balance = models.DecimalField(
         verbose_name="Saldo Atual",
         decimal_places=2,
@@ -26,35 +53,40 @@ class BankAccount(BaseModel):
 
     history = HistoricalRecords()
 
+    def __str__(self) -> str:
+        return f"{self.bank_name} - {self.account}"
+
     class Meta:
         verbose_name = "Conta Bancária"
         verbose_name_plural = "Contas Bancárias"
 
 
 class BankStatement(BaseModel):
-    # file
-    month = models.IntegerField(
-        verbose_name="Mês",
-        choices=MonthChoices,
-        default=MonthChoices.JAN,
-    )
-    opening_balance = models.DecimalField(
-        verbose_name="Valor Inicial",
-        decimal_places=2,
-        max_digits=12,
-    )
-    closing_balance = models.DecimalField(
-        verbose_name="Valor Final",
-        decimal_places=2,
-        max_digits=12,
-    )
-
+    # TODO: Remove nulls
     bank_account = models.ForeignKey(
         BankAccount,
         verbose_name="Conta Bancária",
         related_name="statements",
         on_delete=models.CASCADE,
         null=True,
+    )
+
+    balance = models.DecimalField(
+        verbose_name="Saldo no Dia",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
+    opening_date = models.DateField(
+        verbose_name="Data Inicial do Extrato",
+        null=True,
+        blank=True,
+    )
+    closing_date = models.DateField(
+        verbose_name="Data Final do extrato",
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -64,21 +96,52 @@ class BankStatement(BaseModel):
         verbose_name_plural = "Extratos Bancários"
 
 
-class Transactions(BaseModel):
-    source = models.CharField(verbose_name="Origem", max_length=128)
-    destination = models.CharField(verbose_name="Destino", max_length=128)
+class Transaction(BaseModel):
+    bank_account = models.ForeignKey(
+        BankAccount,
+        verbose_name="Conta Bancária",
+        related_name="transactions",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
     amount = models.DecimalField(
         verbose_name="Valor da Transação",
         decimal_places=2,
         max_digits=12,
     )
-
-    bank_statement = models.ForeignKey(
-        BankStatement,
-        verbose_name="Extrato Bancário",
-        related_name="transactions",
-        on_delete=models.CASCADE,
+    # TODO: remove null
+    date = models.DateTimeField(
+        verbose_name="Data da Transação",
         null=True,
+        blank=True,
+    )
+
+    transaction_type = models.CharField(
+        verbose_name="Tipo da Transação",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
+    transaction_id = models.CharField(
+        verbose_name="Id da Transação",
+        max_length=32,
+        null=True,
+        blank=True,
+        unique=True,
+    )
+
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    memo = models.CharField(
+        verbose_name="Notas Adicionais (opcional)",
+        max_length=256,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
