@@ -1,6 +1,7 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 
+from activity.models import ActivityLog
 from contracts.models import Contract
 from utils.models import BaseModel
 
@@ -60,6 +61,32 @@ class BankAccount(BaseModel):
         verbose_name = "Conta Bancária"
         verbose_name_plural = "Contas Bancárias"
 
+    @property
+    def recent_logs(self):
+        return ActivityLog.objects.filter(target_object_id=self.id)
+
+    @property
+    def account_type_label(self):
+        types = {
+            "CHECKING": "Conta Corrente",
+        }
+        return types.get(self.account_type, self.account_type)
+
+    @property
+    def last_statement_update(self):
+        last_statement = self.statements.order_by("-closing_date").first()
+        if last_statement:
+            return {
+                "start": last_statement.opening_date,
+                "end": last_statement.closing_date,
+            }
+        else:
+            return None
+
+    @property
+    def last_transactions(self):
+        return self.transactions.order_by("-date")[:10]
+
 
 class BankStatement(BaseModel):
     # TODO: Remove nulls
@@ -111,7 +138,7 @@ class Transaction(BaseModel):
         max_digits=12,
     )
     # TODO: remove null
-    date = models.DateTimeField(
+    date = models.DateField(
         verbose_name="Data da Transação",
         null=True,
         blank=True,

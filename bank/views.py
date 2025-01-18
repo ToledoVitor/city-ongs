@@ -3,14 +3,14 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.db.models.query import QuerySet
 from django.shortcuts import redirect, render
 from django.views.generic import DetailView, ListView
 
 from activity.models import ActivityLog
 from bank.forms import UploadOFXForm
-from bank.models import BankAccount
+from bank.models import BankAccount, BankStatement
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
 
@@ -32,9 +32,6 @@ class BankAccountsListView(LoginRequiredMixin, ListView):
             .get_queryset()
             .select_related(
                 "contract",
-            )
-            .prefetch_related(
-                "statements",
             )
         )
         query = self.request.GET.get("q")
@@ -58,7 +55,6 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
     model = BankAccount
 
     template_name = "bank-account/detail.html"
-    context_object_name = "bank_account"
 
     login_url = "/auth/login"
 
@@ -69,8 +65,15 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
             .select_related(
                 "contract",
             )
-            # .prefetch_related(
-            # )
+            .prefetch_related(
+                Prefetch(
+                    "statements",
+                    queryset=BankStatement.objects.order_by("-closing_date"),
+                ),
+                Prefetch(
+                    "transactions", queryset=BankStatement.objects.order_by("-date")
+                ),
+            )
         )
 
     def get_object(self, queryset=None):
@@ -96,6 +99,13 @@ def create_banck_account_view(request):
                     user=request.user,
                     user_email=request.user.email,
                     action=ActivityLog.ActivityLogChoices.CREATED_BANK_ACCOUNT,
+                    target_object_id=bank_account.id,
+                    target_content_object=bank_account,
+                )
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPLOADED_BALANCE_FILE,
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )

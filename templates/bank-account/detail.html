@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{% load humanize %}
+
 <p class="text-3xl mb-4 font-bold">
     Detalhe da Conta
   </p>
@@ -32,10 +34,96 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">{{ bank_account.bank_name }} - {{ bank_account.account }}</span>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">{{ object.bank_name }} - {{ object.account }}</span>
         </div>
       </li>
     </ol>
   </nav>
+
+
+  <div class="mb-4 mr-10 border-b border-gray-200 dark:border-gray-700">
+    <ul
+      class="flex flex-wrap -mb-px text-sm font-medium text-center"
+      id="default-tab"
+      data-tabs-toggle="#default-tab-content"
+      role="tablist"
+    >
+      <li class="me-2" role="presentation">
+        <button
+          id="details-tab"
+          class="inline-block p-4 border-b-2 rounded-t-lg"
+          data-tabs-target="#details"
+          type="button"
+          role="tab"
+          aria-controls="details"
+          aria-selected="false"
+        >
+          Detalhes
+        </button>
+      </li>
+  
+      <li class="me-2" role="presentation">
+        <button
+          class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+          id="transactions-tab"
+          data-tabs-target="#transactions"
+          type="button"
+          role="tab"
+          aria-controls="transactions"
+          aria-selected="false"
+        >
+          Transações
+        </button>
+      </li>
+
+  
+    </ul>
+  </div>
+
+  <div class="mr-10" id="default-tab-content">
+    <!-- Details Tab -->
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="details" role="tabpanel" aria-labelledby="details-tab">
+      {% include 'bank-account/tabs/details-tab.html' with object=object %}
+    </div>
+  
+    <!-- Transactions Tab -->
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+      {% include 'bank-account/tabs/transactions-tab.html' with object=object %}
+    </div>
+        
+  </div>
+
+  <p class="text-3xl mt-6 font-bold">
+    Histórico de Edições
+  </p>
+  <p id="helper-text-explanation" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+    Apenas as 10 ultimas alterações são exibidas
+  </p>
+  
+  <ol class="mt-6 relative border-s border-gray-200 dark:border-gray-700">
+    {% if object.recent_logs %}
+      {% for log in object.recent_logs %}
+      <li class="mb-8 ms-6">
+          <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+              <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+              </svg>
+          </span>
+          <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ log.created_at }}</time>
+          <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">{{ log.user_email}} - {{ log.action_label }}</p>
+      </li>
+      {% endfor %}
+    {% else %}
+      <li class="mb-8 ms-6">
+        <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+            <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+            </svg>
+        </span>
+        <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Sem registros recentes</time>
+        <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">-</p>
+      </li>
+    {% endif%}
+  </ol>
 
 {% endblock %}

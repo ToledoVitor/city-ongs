@@ -20,6 +20,7 @@ class ActivityLog(models.Model):
         # bank
         CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "criou conta bancária"
         UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "atualizou conta bancária"
+        UPLOADED_BALANCE_FILE = "UPLOADED_BALANCE_FILE", "subiu extrato bancário"
         # contracts
         CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
         CREATED_CONTRACT_ADDENDUM = (
