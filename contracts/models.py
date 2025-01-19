@@ -235,7 +235,7 @@ class ContractGoal(BaseModel):
         verbose_name_plural = "Metas"
 
 
-class ContractSubGoal(BaseModel):
+class ContractStep(BaseModel):
     name = models.CharField(verbose_name="Item", max_length=128)
     description = models.CharField(verbose_name="Descrição", max_length=255)
     goal = models.ForeignKey(
@@ -248,8 +248,8 @@ class ContractSubGoal(BaseModel):
         return self.name
 
     class Meta:
-        verbose_name = "Submeta"
-        verbose_name_plural = "Submetas"
+        verbose_name = "Etapa"
+        verbose_name_plural = "Etapas"
 
 
 class ContractItem(BaseModel):

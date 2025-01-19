@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bank", "0007_remove_bankaccount_contract_and_more"),
         ("contracts", "0007_alter_contractitem_options_and_more"),

@@ -6,7 +6,7 @@ from contracts.models import (
     ContractAddress,
     ContractGoal,
     ContractItem,
-    ContractSubGoal,
+    ContractStep,
 )
 
 admin.site.register(Company)
@@ -14,4 +14,4 @@ admin.site.register(Contract)
 admin.site.register(ContractAddress)
 admin.site.register(ContractGoal)
 admin.site.register(ContractItem)
-admin.site.register(ContractSubGoal)
+admin.site.register(ContractStep)

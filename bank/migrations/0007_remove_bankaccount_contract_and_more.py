@@ -4,14 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bank", "0006_remove_transactions_bank_statement_and_more"),
     ]
 
     operations = [
-        migrations.RemoveField(model_name="bankaccount", name="contract",),
-        migrations.RemoveField(model_name="historicalbankaccount", name="contract",),
+        migrations.RemoveField(
+            model_name="bankaccount",
+            name="contract",
+        ),
+        migrations.RemoveField(
+            model_name="historicalbankaccount",
+            name="contract",
+        ),
         migrations.AlterField(
             model_name="historicaltransaction",
             name="date",

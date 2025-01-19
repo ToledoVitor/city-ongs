@@ -3,11 +3,11 @@ import re
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime
-from django.db import transaction
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 from ofxtools.Parser import OFXTree
 
 from bank.models import BankAccount, BankStatement, Transaction
@@ -89,7 +89,7 @@ class OFXFileParser:
             else:
                 logger.info(f"Account type of {account_type} is not a valid type")
                 raise ValidationError(f"Conta tipo {account_type} não é valida")
-            
+
             contract.save()
 
             balance_date = self.balance_date

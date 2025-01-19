@@ -1,6 +1,6 @@
 from django import forms
 
-from contracts.models import Contract, ContractGoal, ContractSubGoal
+from contracts.models import Contract, ContractGoal, ContractStep
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseSelectFormWidget,
@@ -39,9 +39,9 @@ class ContractCreateForm(forms.ModelForm):
         }
 
 
-class ContractSubGoalForm(forms.ModelForm):
+class ContractStepForm(forms.ModelForm):
     class Meta:
-        model = ContractSubGoal
+        model = ContractStep
         fields = [
             "name",
             "description",
@@ -53,10 +53,10 @@ class ContractSubGoalForm(forms.ModelForm):
         }
 
 
-ContractSubGoalFormSet = forms.inlineformset_factory(
+ContractStepFormSet = forms.inlineformset_factory(
     ContractGoal,
-    ContractSubGoal,
-    form=ContractSubGoalForm,
+    ContractStep,
+    form=ContractStepForm,
     extra=1,
     can_delete=True,
 )

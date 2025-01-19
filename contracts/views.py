@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import ContractCreateForm, ContractSubGoalFormSet
+from contracts.forms import ContractCreateForm, ContractStepFormSet
 from contracts.models import Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -229,8 +229,8 @@ def create_contract_goal_view(request, pk):
 
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        subgoals_formset = ContractSubGoalFormSet(request.POST)
-        if subgoals_formset.is_valid():
+        steps_formset = ContractStepFormSet(request.POST)
+        if steps_formset.is_valid():
             with transaction.atomic():
                 name = request.POST.get("name")
                 description = request.POST.get("description")
@@ -241,10 +241,10 @@ def create_contract_goal_view(request, pk):
                     description=description,
                     status=StatusChoices.ANALYZING,
                 )
-                subgoals = subgoals_formset.save(commit=False)
-                for subgoal in subgoals:
-                    subgoal.goal = goal
-                    subgoal.save()
+                steps = steps_formset.save(commit=False)
+                for step in steps:
+                    step.goal = goal
+                    step.save()
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -257,11 +257,11 @@ def create_contract_goal_view(request, pk):
             return redirect("contracts:contracts-detail", pk=contract.id)
 
     else:
-        subgoals_formset = ContractSubGoalFormSet()
+        steps_formset = ContractStepFormSet()
         return render(
             request,
             "contracts/goals-create.html",
-            {"contract": contract, "subgoals_formset": subgoals_formset},
+            {"contract": contract, "steps_formset": steps_formset},
         )
 
 
@@ -282,9 +282,9 @@ def update_contract_goal_view(request, pk, goal_pk):
 
             goal.sub_goals.all().delete()
 
-            subgoals_formset = ContractSubGoalFormSet(request.POST, instance=goal)
-            if subgoals_formset.is_valid():
-                subgoals_formset.save()
+            steps_formset = ContractStepFormSet(request.POST, instance=goal)
+            if steps_formset.is_valid():
+                steps_formset.save()
 
             _ = ActivityLog.objects.create(
                 user=request.user,
@@ -297,9 +297,9 @@ def update_contract_goal_view(request, pk, goal_pk):
         return redirect("contracts:contracts-detail", pk=contract.id)
 
     else:
-        subgoals_formset = ContractSubGoalFormSet()
+        steps_formset = ContractStepFormSet()
         return render(
             request,
             "contracts/goals-update.html",
-            {"contract": contract, "goal": goal, "subgoals_formset": subgoals_formset},
+            {"contract": contract, "goal": goal, "steps_formset": steps_formset},
         )

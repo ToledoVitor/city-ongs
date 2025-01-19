@@ -1,5 +1,6 @@
 from django.urls import path
 
+from bank.views import create_bank_account_view
 from contracts.views import (
     ContractCreateView,
     ContractsDetailView,
@@ -9,7 +10,6 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_item_view,
 )
-from bank.views import create_bank_account_view
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),

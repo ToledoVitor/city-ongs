@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
 
 from activity.models import ActivityLog
@@ -119,4 +119,6 @@ def create_bank_account_view(request, pk):
     else:
         form = UploadOFXForm()
 
-    return render(request, "bank-account/create.html", {"form": form, "contract": contract})
+    return render(
+        request, "bank-account/create.html", {"form": form, "contract": contract}
+    )

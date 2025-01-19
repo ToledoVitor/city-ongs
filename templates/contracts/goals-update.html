@@ -90,18 +90,18 @@
 
   <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
 
-  <div id="subgoals-formset">
-      {{ subgoals_formset.management_form }}
+  <div id="steps-formset">
+      {{ steps_formset.management_form }}
 
       <p class="text-2xl mt-4 mb-4 font-bold">
-        Submetas
+        Etapas
       </p>
       <p id="helper-text-explanation" class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        As submetas são uma maneira de dividir a meta principal em menores metas, a fim de acompanhar seu progresso
+        As etapas são uma maneira de dividir a meta principal em menores metas, a fim de acompanhar seu progresso
       </p>
 
-      {% for form in subgoals_formset %}
-        <div class="subgoal-form">
+      {% for form in steps_formset %}
+        <div class="step-form">
 
           <div class="my-3">
             <div class="flex justify-between my-2">
@@ -134,7 +134,7 @@
 
   <button
     type="button"
-    id="add-subgoal"
+    id="add-step"
     class="px-3 py-2 mt-4 text-xs font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
   >
     <svg class="w-[12px] h-[12px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -148,19 +148,19 @@
       class="px-3 py-2 mt-4 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       style="display: flex; justify-self: center;"
   >
-      Atualizar Meta e Submetas
+      Atualizar Meta e Etapas
   </button>
 </form>
 
 
 <script>
-  const addSubGoalButton = document.getElementById('add-subgoal');
-  const formsetDiv = document.getElementById('subgoals-formset');
+  const addStepButton = document.getElementById('add-step');
+  const formsetDiv = document.getElementById('steps-formset');
   const totalFormsInput = document.querySelector('#id_sub_goals-TOTAL_FORMS');
 
-  addSubGoalButton.addEventListener('click', () => {
+  addStepButton.addEventListener('click', () => {
       const formCount = parseInt(totalFormsInput.value, 10);
-      const newForm = formsetDiv.querySelector('.subgoal-form').cloneNode(true);
+      const newForm = formsetDiv.querySelector('.step-form').cloneNode(true);
 
       // Atualiza os índices nos campos do novo formulário
       newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
@@ -179,7 +179,7 @@
 
   formsetDiv.addEventListener('click', (e) => {
       if (e.target.classList.contains('remove-form')) {
-          e.target.closest('.subgoal-form').remove();
+          e.target.closest('.step-form').remove();
           totalFormsInput.value -= 1;
       }
   });
