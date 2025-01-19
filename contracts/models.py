@@ -81,13 +81,10 @@ class Contract(BaseModel):
 
     # Link with city hall area
     area = models.ForeignKey(
-        # TODO: remove null
         Area,
         verbose_name="Area",
         related_name="contracts",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     # bank accounts
@@ -197,13 +194,10 @@ class ContractAddress(BaseModel):
 
 class ContractGoal(BaseModel):
     contract = models.ForeignKey(
-        # TODO: remove null
         Contract,
         verbose_name="Contrato",
         related_name="goals",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     # ITEM ESPECIFICATION
@@ -211,18 +205,13 @@ class ContractGoal(BaseModel):
         verbose_name="Item",
         max_length=128,
     )
-    # TODO: remove nulls
     objective = models.CharField(
         verbose_name="Objetivo",
         max_length=256,
-        null=True,
-        blank=True,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
         max_length=256,
-        null=True,
-        blank=True,
     )
     
     status = models.CharField(
@@ -257,7 +246,6 @@ class ContractStep(BaseModel):
         ContractGoal, related_name="sub_goals", on_delete=models.CASCADE
     )
 
-    # TODO: remove nulls
     name = models.CharField(
         verbose_name="Item",
         max_length=128,
@@ -265,20 +253,14 @@ class ContractStep(BaseModel):
     objective = models.CharField(
         verbose_name="Objetivo",
         max_length=256,
-        null=True,
-        blank=True,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
         max_length=256,
-        null=True,
-        blank=True,
     )
     resources = models.CharField(
         verbose_name="Recursos",
         max_length=256,
-        null=True,
-        blank=True,
     )
     
     history = HistoricalRecords()
@@ -293,13 +275,10 @@ class ContractStep(BaseModel):
 
 class ContractItem(BaseModel):
     contract = models.ForeignKey(
-        # TODO: remove null
         Contract,
         verbose_name="Contrato",
         related_name="items",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     # ITEM ESPECIFICATION
@@ -307,43 +286,31 @@ class ContractItem(BaseModel):
         verbose_name="Item",
         max_length=128,
     )
-    # TODO: remove nulls
     objective = models.CharField(
         verbose_name="Objetivo",
         max_length=256,
-        null=True,
-        blank=True,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
         max_length=256,
-        null=True,
-        blank=True,
     )
 
     # EXPENSE ESPECIFICATION
     month_quantity = models.PositiveIntegerField(
         verbose_name="Quantidade de Meses",
-        null=True,
-        blank=True,
     )
     month_expense = models.DecimalField(
         verbose_name="Custo Mensal",
         decimal_places=2,
         max_digits=12,
-        default=0,
     )
     unit_type = models.CharField(
         verbose_name="Tipo da Unidade",
-        null=True,
-        blank=True,
         max_length=32,
     )
     nature = models.CharField(
         verbose_name="Natureza da Despesa",
         choices=ItemNatureChoices,
-        null=True,
-        blank=True,
         max_length=34,
     )
 

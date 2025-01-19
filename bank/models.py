@@ -6,30 +6,21 @@ from utils.models import BaseModel
 
 
 class BankAccount(BaseModel):
-    # TODO: remove nulls
     bank_name = models.CharField(
         verbose_name="Nome do Banco",
         max_length=128,
-        blank=True,
-        null=True,
     )
     bank_id = models.IntegerField(
         verbose_name="Id do Banco",
-        blank=True,
-        null=True,
     )
 
     account = models.CharField(
         verbose_name="Número da Conta",
         max_length=16,
-        blank=True,
-        null=True,
     )
     account_type = models.CharField(
         verbose_name="Tipo da Conta",
         max_length=16,
-        blank=True,
-        null=True,
     )
     agency = models.CharField(
         verbose_name="Agência",
@@ -80,31 +71,23 @@ class BankAccount(BaseModel):
 
 
 class BankStatement(BaseModel):
-    # TODO: Remove nulls
     bank_account = models.ForeignKey(
         BankAccount,
         verbose_name="Conta Bancária",
         related_name="statements",
         on_delete=models.CASCADE,
-        null=True,
     )
 
     balance = models.DecimalField(
         verbose_name="Saldo no Dia",
         decimal_places=2,
         max_digits=12,
-        null=True,
-        blank=True,
     )
     opening_date = models.DateField(
         verbose_name="Data Inicial do Extrato",
-        null=True,
-        blank=True,
     )
     closing_date = models.DateField(
         verbose_name="Data Final do extrato",
-        null=True,
-        blank=True,
     )
 
     history = HistoricalRecords()
@@ -120,7 +103,6 @@ class Transaction(BaseModel):
         verbose_name="Conta Bancária",
         related_name="transactions",
         on_delete=models.CASCADE,
-        null=True,
     )
 
     amount = models.DecimalField(
@@ -128,24 +110,17 @@ class Transaction(BaseModel):
         decimal_places=2,
         max_digits=12,
     )
-    # TODO: remove null
     date = models.DateField(
         verbose_name="Data da Transação",
-        null=True,
-        blank=True,
     )
 
     transaction_type = models.CharField(
         verbose_name="Tipo da Transação",
         max_length=32,
-        null=True,
-        blank=True,
     )
     transaction_id = models.CharField(
         verbose_name="Id da Transação",
         max_length=32,
-        null=True,
-        blank=True,
         unique=True,
     )
 

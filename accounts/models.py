@@ -32,14 +32,11 @@ class Area(BaseModel):
         blank=True,
         null=True,
     )
-    # TODO: remove null and blank
     city_hall = models.ForeignKey(
         CityHall,
         verbose_name="Prefeitura",
         related_name="areas",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     history = HistoricalRecords()

@@ -15,7 +15,6 @@ class Accountability(BaseModel):
     )
     year = models.IntegerField(
         verbose_name="Ano",
-        # TODO: remake migrations and remove default
         default=0,
     )
 
@@ -91,13 +90,10 @@ class Expense(BaseModel):
         on_delete=models.CASCADE,
     )
     source = models.ForeignKey(
-        # TODO: remove null
         ExpenseSource,
         verbose_name="Fonte",
         related_name="expenses",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     history = HistoricalRecords()
