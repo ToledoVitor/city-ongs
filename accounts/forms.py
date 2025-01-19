@@ -56,7 +56,7 @@ class FolderManagerCreateForm(forms.ModelForm):
         return cleaned_data
 
 
-class OngAccountantCreateForm(forms.ModelForm):
+class OrganizationAccountantCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="Senha")
     confirm_password = forms.CharField(
         widget=forms.PasswordInput, label="Confirme a senha"

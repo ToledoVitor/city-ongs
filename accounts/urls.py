@@ -4,9 +4,9 @@ from accounts.views import (
     FolderManagerCreateView,
     FolderManagersDetailView,
     FolderManagersListView,
-    OngAccountantCreateView,
-    OngAccountantsDetailView,
-    OngAccountantsListView,
+    OrganizationAccountantCreateView,
+    OrganizationAccountantsDetailView,
+    OrganizationAccountantsListView,
 )
 
 urlpatterns = [
@@ -26,20 +26,20 @@ urlpatterns = [
         FolderManagersDetailView.as_view(),
         name="folder-managers-detail",
     ),
-    # Ong Accountant Views
+    # Organization Accountant Views
     path(
-        "ong-accountants/",
-        OngAccountantsListView.as_view(),
-        name="ong-accountants-list",
+        "organization-accountants/",
+        OrganizationAccountantsListView.as_view(),
+        name="organization-accountants-list",
     ),
     path(
-        "ong-accountants/create/",
-        OngAccountantCreateView.as_view(),
-        name="ong-accountants-create",
+        "organization-accountants/create/",
+        OrganizationAccountantCreateView.as_view(),
+        name="organization-accountants-create",
     ),
     path(
-        "ong-accountants/detail/<int:pk>/",
-        OngAccountantsDetailView.as_view(),
-        name="ong-accountants-detail",
+        "organization-accountants/detail/<int:pk>/",
+        OrganizationAccountantsDetailView.as_view(),
+        name="organization-accountants-detail",
     ),
 ]

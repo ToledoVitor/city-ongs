@@ -3,7 +3,7 @@ from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Area, Ong
+from accounts.models import Area, Organization
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import ItemNatureChoices
@@ -72,10 +72,9 @@ class Contract(BaseModel):
         null=True,
     )
 
-    # Ong
-    ong = models.ForeignKey(
-        Ong,
-        verbose_name="Ong",
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name="Organização",
         related_name="contracts",
         on_delete=models.CASCADE,
     )

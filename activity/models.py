@@ -10,9 +10,9 @@ class ActivityLog(models.Model):
         # accounts
         CREATED_CIVIL_SERVANT = "CREATED_CIVIL_SERVANT", "criou funcionário público"
         CREATED_FOLDER_MANAGER = "CREATED_FOLDER_MANAGER", "criou gestor de pasta"
-        CREATED_ONG_ACCOUNTANT = (
-            "CREATED_ONG_ACCOUNTANT",
-            "criou contador / funcionário ong",
+        CREATED_ORGANIZATION_ACCOUNTANT = (
+            "CREATED_ORGANIZATION_ACCOUNTANT",
+            "criou contador / funcionário organização",
         )
         # accountability
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"

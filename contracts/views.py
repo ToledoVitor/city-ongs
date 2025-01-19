@@ -95,7 +95,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "contractor_manager",
                 "hired_company",
                 "hired_manager",
-                "ong",
+                "organization",
             )
             .prefetch_related(
                 "addendums",

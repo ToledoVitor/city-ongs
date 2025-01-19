@@ -21,7 +21,7 @@ class ContractCreateForm(forms.ModelForm):
             "contractor_manager",
             "hired_company",
             "hired_manager",
-            "ong",
+            "organization",
         ]
 
         widgets = {
@@ -35,7 +35,7 @@ class ContractCreateForm(forms.ModelForm):
             ),
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
-            "ong": BaseSelectFormWidget(placeholder="Ong"),
+            "organization": BaseSelectFormWidget(placeholder="Organização"),
         }
 
 

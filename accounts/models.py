@@ -45,7 +45,7 @@ class Area(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Ong - {self.name}"
+        return f"Organização - {self.name}"
 
     class Meta:
         verbose_name = "Area"
@@ -63,9 +63,9 @@ class User(AbstractUser):
             "Gestor da pasta",
         )  # Gestor da pasta / Proprietáio da Pasta
         # SOBEM DOCUMENTAÇÃo
-        ONG_ACCOUNTANT = (
-            "ONG_ACCOUNTANT",
-            "Contador / funcionário da ong",
+        ORGANIZATION_ACCOUNTANT = (
+            "ORGANIZATION_ACCOUNTANT",
+            "Contador / funcionário da organização",
         )  # usuário final
 
     username = models.CharField(
@@ -83,7 +83,7 @@ class User(AbstractUser):
     access_level = models.CharField(
         verbose_name="Nível de Acesso",
         choices=AccessChoices,
-        default=AccessChoices.ONG_ACCOUNTANT,
+        default=AccessChoices.ORGANIZATION_ACCOUNTANT,
         max_length=14,
     )
 
@@ -110,7 +110,7 @@ class User(AbstractUser):
         }
 
     @property
-    def can_add_new_ong_accountants(self) -> bool:
+    def can_add_new_organization_accountants(self) -> bool:
         return self.is_superuser or self.access_level in {
             self.AccessChoices.MASTER,
             self.AccessChoices.CIVIL_SERVANT,
@@ -127,38 +127,38 @@ class User(AbstractUser):
         return f"{super().__str__()} {self.email}"
 
 
-class Ong(BaseModel):
+class Organization(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Ong - {self.name}"
+        return f"Organização - {self.name}"
 
     class Meta:
-        verbose_name = "Ong"
-        verbose_name_plural = "Ongs"
+        verbose_name = "Organização"
+        verbose_name_plural = "Organizações"
 
 
-class UserOngRelatioship(BaseModel):
+class UserOrganizationRelatioship(BaseModel):
     user = models.ForeignKey(
         User,
         verbose_name="Usuário",
-        related_name="user_ong_relationships",
+        related_name="user_organization_relationships",
         on_delete=models.CASCADE,
     )
-    ong = models.ForeignKey(
-        Ong,
-        verbose_name="Ong",
-        related_name="user_ong_relationships",
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name="organization",
+        related_name="user_organization_relationships",
         on_delete=models.CASCADE,
     )
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Relação {self.ong.name} - {self.user.email}"
+        return f"Relação {self.organization.name} - {self.user.email}"
 
     class Meta:
-        verbose_name = "Relação Ong-Usuário"
-        verbose_name_plural = "Relações Ong-Usuário"
+        verbose_name = "Relação Organização-Usuário"
+        verbose_name_plural = "Relações Organização-Usuário"

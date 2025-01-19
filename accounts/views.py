@@ -8,7 +8,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, TemplateView
 
-from accounts.forms import FolderManagerCreateForm, OngAccountantCreateForm
+from accounts.forms import FolderManagerCreateForm, OrganizationAccountantCreateForm
 from accounts.models import User
 from activity.models import ActivityLog
 from utils.mixins import AdminRequiredMixin
@@ -103,18 +103,18 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class OngAccountantsListView(AdminRequiredMixin, ListView):
+class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
     model = User
     context_object_name = "accountants_list"
     paginate_by = 10
     ordering = "-created_at"
 
-    template_name = "accounts/ong-accountants/list.html"
+    template_name = "accounts/organization-accountants/list.html"
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.filter(
-            access_level=User.AccessChoices.ONG_ACCOUNTANT
+            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT
         )
         query = self.request.GET.get("q")
         if query:
@@ -131,10 +131,10 @@ class OngAccountantsListView(AdminRequiredMixin, ListView):
         return context
 
 
-class OngAccountantsDetailView(LoginRequiredMixin, DetailView):
+class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
     model = User
 
-    template_name = "accounts/ong-accountants/detail.html"
+    template_name = "accounts/organization-accountants/detail.html"
     context_object_name = "accountant"
 
     login_url = "/auth/login"
@@ -147,25 +147,25 @@ class OngAccountantsDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class OngAccountantCreateView(AdminRequiredMixin, TemplateView):
-    template_name = "accounts/ong-accountants/create.html"
+class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
+    template_name = "accounts/organization-accountants/create.html"
     login_url = "/auth/login"
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = OngAccountantCreateForm(request=self.request)
+            context["form"] = OrganizationAccountantCreateForm(request=self.request)
 
         return context
 
     def post(self, request, *args, **kwargs):
-        if not request.user.can_add_new_ong_accountants:
+        if not request.user.can_add_new_organization_accountants:
             logger.error(
-                f"{request.user.id} - dont have access to create new ong accountant"
+                f"{request.user.id} - dont have access to create new organization accountant"
             )
             return redirect("home")
 
-        form = OngAccountantCreateForm(request.POST, request=request)
+        form = OrganizationAccountantCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 new_user = User.objects.create(
@@ -174,17 +174,17 @@ class OngAccountantCreateView(AdminRequiredMixin, TemplateView):
                     first_name=form.cleaned_data["first_name"],
                     last_name=form.cleaned_data["last_name"],
                     password=form.cleaned_data["password"],
-                    access_level=User.AccessChoices.ONG_ACCOUNTANT,
+                    access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
                 )
 
-                logger.info(f"{request.user.id} - Created new ong accountant")
+                logger.info(f"{request.user.id} - Created new organization accountant")
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATED_ONG_ACCOUNTANT,
+                    action=ActivityLog.ActivityLogChoices.CREATED_ORGANIZATION_ACCOUNTANT,
                     target_object_id=new_user.id,
                     target_content_object=new_user,
                 )
-            return redirect("accounts:ong-accountants-list")
+            return redirect("accounts:organization-accountants-list")
 
         return self.render_to_response(self.get_context_data(form=form))

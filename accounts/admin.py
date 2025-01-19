@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from accounts.models import CityHall, Ong, User, UserOngRelatioship
+from accounts.models import CityHall, Organization, User, UserOrganizationRelatioship
 
 admin.site.register(User)
-admin.site.register(UserOngRelatioship)
-admin.site.register(Ong)
+admin.site.register(UserOrganizationRelatioship)
+admin.site.register(Organization)
 admin.site.register(CityHall)
