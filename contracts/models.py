@@ -207,8 +207,25 @@ class ContractGoal(BaseModel):
         blank=True,
     )
 
-    name = models.CharField(verbose_name="Meta", max_length=128)
-    description = models.CharField(verbose_name="Descrição", max_length=255)
+    # ITEM ESPECIFICATION
+    name = models.CharField(
+        verbose_name="Item",
+        max_length=128,
+    )
+    # TODO: remove nulls
+    objective = models.CharField(
+        verbose_name="Objetivo",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    methodology = models.CharField(
+        verbose_name="Metodologia",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    
     status = models.CharField(
         verbose_name="Status",
         max_length=22,

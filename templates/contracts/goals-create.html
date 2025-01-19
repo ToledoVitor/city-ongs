@@ -52,37 +52,82 @@
   {% csrf_token %}
 
   <div class="mb-3">
-      <label
-          for="id_name"
-          class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
-      >
-          Meta
-      </label>        
-      <input
-          type="text"
-          id="name"
-          name="name"
-          class="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          required
-      />
+    <label
+        for="id_name"
+        class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+    >
+        Nome da meta
+    </label>        
+    <input
+        type="text"
+        id="name"
+        name="name"
+        maxlength="127"
+        class="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        required
+    />
   </div>
 
   <div class="mb-3">
-      <label
-          for="id_description"
-          class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
-      >
-          Descrição
-      </label>        
-      <textarea
-        id="description"
-        name="description"
-        rows="4"
-        maxlength="254"
-        class="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="....."
-        required
-      ></textarea>
+    <label
+        for="id_objective"
+        class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+    >
+        Objetivo
+    </label>        
+    <textarea
+      id="objective"
+      name="objective"
+      rows="3"
+      maxlength="254"
+      class="
+        rounded-lg 
+        focus:ring-blue-500 
+        focus:border-blue-500 
+        block 
+        w-full 
+        p-2.5 
+        bg-gray-300 
+        border-gray-600 
+        placeholder-gray-400 
+        text-black 
+        focus:ring-blue-500 
+        focus:border-blue-500
+      "
+      placeholder="....."
+      required
+    ></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label
+        for="id_methodology"
+        class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+    >
+        Metodologia
+    </label>        
+    <textarea
+      id="methodology"
+      name="methodology"
+      rows="3"
+      maxlength="254"
+      class="
+        rounded-lg 
+        focus:ring-blue-500 
+        focus:border-blue-500 
+        block 
+        w-full 
+        p-2.5 
+        bg-gray-300 
+        border-gray-600 
+        placeholder-gray-400 
+        text-black 
+        focus:ring-blue-500 
+        focus:border-blue-500
+      "
+      placeholder="....."
+      required
+    ></textarea>
   </div>
 
   <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
