@@ -56,7 +56,10 @@ class ItemNatureChoices(TextChoices):
     WORKS = "WORKS", "Obras"
 
     # Other expenses
-    OTHER_ADMINISTRATIVE_EXPENSES = "OTHER_ADMINISTRATIVE_EXPENSES", "Despesas Administrativas"
+    OTHER_ADMINISTRATIVE_EXPENSES = (
+        "OTHER_ADMINISTRATIVE_EXPENSES",
+        "Despesas Administrativas",
+    )
     RETURN_OF_FUNDS = "RETURN_OF_FUNDS", "Devolução de Recurso ao Órgão Concedente"
     PARKING_DRIVING_TAXI = "PARKING_DRIVING_TAXI", "Estacionamento/condução/táxi"
     IPTU = "IPTU", "IPTU"
@@ -186,7 +189,10 @@ class ItemNatureChoices(TextChoices):
     )
 
     # Public Utilities (7)
-    PUBLIC_ADMINISTRATIVE_EXPENSES = "PUBLIC_ADMINISTRATIVE_EXPENSES", "Despesas Administrativas"
+    PUBLIC_ADMINISTRATIVE_EXPENSES = (
+        "PUBLIC_ADMINISTRATIVE_EXPENSES",
+        "Despesas Administrativas",
+    )
     ELECTRICITY = "ELECTRICITY", "Energia Elétrica"
     INTERNET_TV = "INTERNET_TV", "Internet/TV a cabo"
     TELEPHONE = "TELEPHONE", "Telefone"

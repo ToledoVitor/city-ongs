@@ -213,7 +213,7 @@ class ContractGoal(BaseModel):
         verbose_name="Metodologia",
         max_length=256,
     )
-    
+
     status = models.CharField(
         verbose_name="Status",
         max_length=22,
@@ -262,7 +262,7 @@ class ContractStep(BaseModel):
         verbose_name="Recursos",
         max_length=256,
     )
-    
+
     history = HistoricalRecords()
 
     def __str__(self) -> str:
