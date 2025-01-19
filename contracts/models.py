@@ -6,6 +6,7 @@ from simple_history.models import HistoricalRecords
 from accounts.models import Area, Ong
 from activity.models import ActivityLog
 from bank.models import BankAccount
+from contracts.choices import ItemNatureChoices
 from utils.choices import StatusChoices
 from utils.models import BaseModel
 
@@ -263,14 +264,53 @@ class ContractItem(BaseModel):
         blank=True,
     )
 
-    name = models.CharField(verbose_name="Item", max_length=128)
-    description = models.CharField(verbose_name="Descrição", max_length=128)
-    total_expense = models.DecimalField(
-        verbose_name="Despesa total",
+    # ITEM ESPECIFICATION
+    name = models.CharField(
+        verbose_name="Item",
+        max_length=128,
+    )
+    # TODO: remove nulls
+    objective = models.CharField(
+        verbose_name="Objetivo",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    methodology = models.CharField(
+        verbose_name="Metodologia",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+
+    # EXPENSE ESPECIFICATION
+    month_quantity = models.PositiveIntegerField(
+        verbose_name="Quantidade de Meses",
+        null=True,
+        blank=True,
+    )
+    month_expense = models.DecimalField(
+        verbose_name="Custo Mensal",
         decimal_places=2,
         max_digits=12,
+        default=0,
     )
+    unit_type = models.CharField(
+        verbose_name="Tipo da Unidade",
+        null=True,
+        blank=True,
+        max_length=32,
+    )
+    nature = models.CharField(
+        verbose_name="Natureza da Despesa",
+        choices=ItemNatureChoices,
+        null=True,
+        blank=True,
+        max_length=34,
+    )
+
     is_additive = models.BooleanField(verbose_name="É aditivo?", default=False)
+
     status = models.CharField(
         verbose_name="Status",
         max_length=22,
@@ -295,9 +335,9 @@ class ContractItem(BaseModel):
 
     @property
     def total_expense_with_point(self) -> str:
-        return str(self.total_expense).replace(",", ".")
+        return str(self.month_expense).replace(",", ".")
 
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
-        ordering = ("-total_expense",)
+        ordering = ("-month_expense",)

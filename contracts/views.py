@@ -166,15 +166,23 @@ def create_contract_item_view(request, pk):
     if request.method == "POST":
         with transaction.atomic():
             name = request.POST.get("name")
-            description = request.POST.get("description")
-            total_expense = request.POST.get("total_expense")
+            objective = request.POST.get("objective")
+            methodology = request.POST.get("methodology")
+            month_quantity = request.POST.get("month_quantity")
+            month_expense = request.POST.get("month_expense")
+            unit_type = request.POST.get("unit_type")
+            nature = request.POST.get("nature")
             is_additive = request.POST.get("is_additive", "") == "True"
 
             item = ContractItem.objects.create(
                 contract=contract,
                 name=name,
-                description=description,
-                total_expense=total_expense,
+                objective=objective,
+                methodology=methodology,
+                month_quantity=month_quantity,
+                month_expense=month_expense,
+                unit_type=unit_type,
+                nature=nature,
                 is_additive=is_additive,
                 status=StatusChoices.ANALYZING,
             )
