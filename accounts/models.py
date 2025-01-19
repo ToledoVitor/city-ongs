@@ -84,7 +84,7 @@ class User(AbstractUser):
         verbose_name="Nível de Acesso",
         choices=AccessChoices,
         default=AccessChoices.ORGANIZATION_ACCOUNTANT,
-        max_length=14,
+        max_length=23,
     )
 
     areas = models.ManyToManyField(
