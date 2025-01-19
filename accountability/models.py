@@ -144,17 +144,55 @@ class ExpenseAnalysis(BaseModel):
 
 
 class RevenueSource(BaseModel):
+    class OriginChoices(models.TextChoices):
+        FEDERAL = "FEDERAL", "Federal"
+        STATE = "STATE", "Estadual"
+        MUNICIPAL = "MUNICIPAL", "Municipal"
+        COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
+        PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
+
+    class CategoryChoices(models.TextChoices):
+        NOT_APPLIABLE = "NOT_APPLIABLE", "Não Aplicavél"
+        COOPERATION_AGREEMENT = "COOPERATION_AGREEMENT", "Acordo de Cooperação"
+        AGREEMENT = "AGREEMENT", "Convênio"
+        COLLABORATION_AGREEMENT = "COLLABORATION_AGREEMENT", "Termo de Colaboração"
+        PROMOTION_AGREEMENT = "PROMOTION_AGREEMENT", "Termo de Fomento"
+        DONATION_AGREEMENT = "DONATION_AGREEMENT", "Contrato de Doação"
+        MANAGEMENT_AGREEMENT = "MANAGEMENT_AGREEMENT", "Contrato de Gestão"
+        TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
+        PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
+
     city_hall = models.ForeignKey(
         CityHall,
         verbose_name="Prefeitura",
         related_name="revenue_sources",
         on_delete=models.CASCADE,
     )
+
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
     document = models.IntegerField(
         verbose_name="CPF/CNPJ da fonte",
         null=True,
         blank=True,
+    )
+    contract_number = models.CharField(
+        verbose_name="Número do contrato",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
+
+    origin = models.CharField(
+        verbose_name="Origem da Fonte",
+        choices=OriginChoices,
+        default=OriginChoices.FEDERAL,
+        max_length=19,
+    )
+    category = models.CharField(
+        verbose_name="Categoria",
+        choices=CategoryChoices,
+        default=CategoryChoices.NOT_APPLIABLE,
+        max_length=23,
     )
 
     class Meta:
