@@ -44,12 +44,16 @@ class ContractStepForm(forms.ModelForm):
         model = ContractStep
         fields = [
             "name",
-            "description",
+            "objective",
+            "methodology",
+            "resources",
         ]
 
         widgets = {
             "name": BaseCharFieldFormWidget(),
-            "description": BaseTextAreaFormWidget(),
+            "objective": BaseTextAreaFormWidget(),
+            "methodology": BaseTextAreaFormWidget(),
+            "resources": BaseTextAreaFormWidget(),
         }
 
 

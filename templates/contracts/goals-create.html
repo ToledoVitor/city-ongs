@@ -48,7 +48,7 @@
     </ol>
 </nav>
   
-<form method="post" class="max-w-lg mx-auto">
+<form method="post" class="">
   {% csrf_token %}
 
   <div class="mb-3">
@@ -164,9 +164,23 @@
 
           <div class="mb-3">
             <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">
-              Descrição
+              Objetivo
             </label>
-            {{ form.description }}
+            {{ form.objective }}
+          </div>
+
+          <div class="mb-3">
+            <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">
+              Metodologia
+            </label>
+            {{ form.methodology }}
+          </div>
+
+          <div class="mb-3">
+            <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">
+              Recursos Necessários
+            </label>
+            {{ form.resources }}
           </div>
 
           <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">

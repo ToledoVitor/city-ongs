@@ -254,12 +254,34 @@ class ContractGoal(BaseModel):
 
 
 class ContractStep(BaseModel):
-    name = models.CharField(verbose_name="Item", max_length=128)
-    description = models.CharField(verbose_name="Descrição", max_length=255)
     goal = models.ForeignKey(
         ContractGoal, related_name="sub_goals", on_delete=models.CASCADE
     )
 
+    # TODO: remove nulls
+    name = models.CharField(
+        verbose_name="Item",
+        max_length=128,
+    )
+    objective = models.CharField(
+        verbose_name="Objetivo",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    methodology = models.CharField(
+        verbose_name="Metodologia",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    resources = models.CharField(
+        verbose_name="Recursos",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    
     history = HistoricalRecords()
 
     def __str__(self) -> str:
