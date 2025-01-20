@@ -12,8 +12,49 @@ from utils.models import BaseModel
 
 
 class Company(BaseModel):
+    # Info
     name = models.CharField(verbose_name="Nome", max_length=128)
     cnpj = CNPJField(masked=True)
+
+    # Address
+    street = models.CharField(
+        verbose_name="Rua",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    number = models.IntegerField(
+        verbose_name="Número",
+        null=True,
+        blank=True,
+    )
+    complement = models.CharField(
+        verbose_name="Complemento", max_length=128, null=True, blank=True
+    )
+    district = models.CharField(
+        verbose_name="Bairro",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    city = models.CharField(
+        verbose_name="Cidade",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    uf = models.CharField(
+        verbose_name="UF",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    postal_code = models.CharField(
+        verbose_name="CEP",
+        max_length=8,
+        null=True,
+        blank=True,
+    )
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -25,6 +66,12 @@ class Company(BaseModel):
 
 
 class Contract(BaseModel):
+    class ContractStatusChoices(models.TextChoices):
+        PLANNING = "PLANNING", "planejamento"
+        WAITING_START = "WAITING_START", "aguardando início"
+        EXECUTION = "EXECUTION", "em execução"
+        FINISHED = "FINISHED", "finalizado"
+
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
     code = models.PositiveIntegerField(
         verbose_name="Código do contrato",
@@ -39,6 +86,12 @@ class Contract(BaseModel):
     )
     start_of_vigency = models.DateField(verbose_name="Começo da vigência")
     end_of_vigency = models.DateField(verbose_name="Fim da vigência")
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ContractStatusChoices,
+        default=ContractStatusChoices.PLANNING,
+        max_length=13,
+    )
 
     # Contractor
     contractor_company = models.ForeignKey(
@@ -174,22 +227,6 @@ class ContractAddendum(BaseModel):
     class Meta:
         verbose_name = "Aditivo de Contrato"
         verbose_name_plural = "Aditivos de Contrato"
-
-
-class ContractAddress(BaseModel):
-    street = models.CharField(verbose_name="Rua", max_length=128)
-    number = models.IntegerField(verbose_name="Número")
-    complement = models.CharField(
-        verbose_name="Complemento", max_length=128, null=True, blank=True
-    )
-    district = models.CharField(verbose_name="Bairro", max_length=128)
-    city = models.CharField(verbose_name="Cidade", max_length=128)
-    uf = models.CharField(verbose_name="UF", max_length=128)
-    postal_code = models.CharField(verbose_name="CEP", max_length=8)
-
-    class Meta:
-        verbose_name = "Endereço"
-        verbose_name_plural = "Endereços"
 
 
 class ContractGoal(BaseModel):

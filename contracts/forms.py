@@ -1,5 +1,6 @@
 from django import forms
 
+from accounts.models import Organization
 from contracts.models import Contract, ContractGoal, ContractStep
 from utils.widgets import (
     BaseCharFieldFormWidget,
@@ -37,6 +38,14 @@ class ContractCreateForm(forms.ModelForm):
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "organization": BaseSelectFormWidget(placeholder="Organização"),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["organization"].queryset = Organization.objects.filter(
+            user_organization_relationships__user=self.request.user
+        )
 
 
 class ContractStepForm(forms.ModelForm):

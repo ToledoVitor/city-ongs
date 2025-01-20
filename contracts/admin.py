@@ -4,17 +4,14 @@ from contracts.models import (
     Company,
     Contract,
     ContractAddendum,
-    ContractAddress,
     ContractGoal,
-    ContractStep,
     ContractItem,
+    ContractStep,
 )
-
 
 admin.site.register(Company)
 admin.site.register(Contract)
 admin.site.register(ContractAddendum)
-admin.site.register(ContractAddress)
 admin.site.register(ContractGoal)
 admin.site.register(ContractStep)
 admin.site.register(ContractItem)

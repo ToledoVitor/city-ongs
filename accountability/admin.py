@@ -2,12 +2,12 @@ from django.contrib import admin
 
 from accountability.models import (
     Accountability,
-    ExpenseSource,
+    AccountabilityFile,
     Expense,
     ExpenseAnalysis,
-    RevenueSource,
+    ExpenseSource,
     Revenue,
-    AccountabilityFile,
+    RevenueSource,
 )
 
 admin.site.register(Accountability)

@@ -50,6 +50,7 @@ class RevenueSourceCreateForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
+        self.fields["city_hall"].queryset = self.request.user.city_halls.all()
         self.fields["origin"].widget.attrs.update(
             {
                 "class": " ".join(
@@ -74,6 +75,3 @@ class RevenueSourceCreateForm(forms.ModelForm):
                 )
             }
         )
-
-        if self.request:
-            self.fields["city_hall"].queryset = self.request.user.city_halls.all()

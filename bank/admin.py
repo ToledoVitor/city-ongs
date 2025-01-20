@@ -6,7 +6,6 @@ from bank.models import (
     Transaction,
 )
 
-
 admin.site.register(BankAccount)
 admin.site.register(BankStatement)
 admin.site.register(Transaction)

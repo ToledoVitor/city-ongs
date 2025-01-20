@@ -55,12 +55,12 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = ContractCreateForm()
+            context["form"] = ContractCreateForm(request=self.request)
 
         return context
 
     def post(self, request, *args, **kwargs):
-        form = ContractCreateForm(request.POST)
+        form = ContractCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 contract = form.save()
