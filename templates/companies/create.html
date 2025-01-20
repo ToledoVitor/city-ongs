@@ -53,7 +53,18 @@
 
   <div class="mb-3">
     <label for="id_cnpj" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">CNPJ</label>
-    {{ form.cnpj }}
+    <input
+      type="number"
+      id="id_cnpj"
+      name="cnpj"
+      step="1"
+      placeholder=""
+      class="block w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+      required
+    />
+    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      Escreva somente os números do cnpj, sem pontuação.
+    </p>
   </div>
 
   <hr class="h-px my-4 border-0 bg-gray-700">
@@ -72,7 +83,7 @@
         <input
           type="number"
           id="id_number"
-          name="id_number"
+          name="number"
           step="1"
           placeholder=""
           class="block w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
@@ -84,7 +95,7 @@
         <input
           type="number"
           id="id_postal_code"
-          name="id_postal_code"
+          name="postal_code"
           step="1"
           placeholder=""
           class="block w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
@@ -97,7 +108,9 @@
   <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Complemento</label>
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">
+          Complemento <span class="text-gray-400">(opcional)</span>
+        </label>
         {{ form.complement }}
       </div>
 

@@ -7,7 +7,7 @@ from accounts.models import Area, Organization
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import ItemNatureChoices
-from utils.choices import StatusChoices
+from utils.choices import StatusChoices, StatesChoices
 from utils.models import BaseModel
 
 
@@ -45,7 +45,8 @@ class Company(BaseModel):
     )
     uf = models.CharField(
         verbose_name="UF",
-        max_length=128,
+        choices=StatesChoices.choices,
+        max_length=2,
         null=True,
         blank=True,
     )
@@ -91,6 +92,12 @@ class Contract(BaseModel):
         choices=ContractStatusChoices,
         default=ContractStatusChoices.PLANNING,
         max_length=13,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contracts/",
+        null=True,
+        blank=True,
     )
 
     # Contractor
