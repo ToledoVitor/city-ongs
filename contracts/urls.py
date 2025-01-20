@@ -9,6 +9,8 @@ from contracts.views import (
     create_contract_item_view,
     update_contract_goal_view,
     update_contract_item_view,
+    CompanyListView,
+    CompanyCreateView,
 )
 
 urlpatterns = [
@@ -45,4 +47,11 @@ urlpatterns = [
         create_bank_account_view,
         name="contracts-accounts-create",
     ),
+    path("company/", CompanyListView.as_view(), name="companies-list"),
+    path(
+        "company/create/",
+        CompanyCreateView.as_view(),
+        name="companies-create",
+    ),
+
 ]

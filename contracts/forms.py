@@ -1,7 +1,7 @@
 from django import forms
 
 from accounts.models import Organization
-from contracts.models import Contract, ContractGoal, ContractStep
+from contracts.models import Contract, ContractGoal, ContractStep, Company
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseSelectFormWidget,
@@ -73,3 +73,31 @@ ContractStepFormSet = forms.inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+class CompanyCreateForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [
+            "name",
+            "cnpj",
+            # Address
+            "street",
+            "number",
+            "complement",
+            "district",
+            "city",
+            "uf",
+            "postal_code",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "cnpj": BaseCharFieldFormWidget(),
+            "street": BaseCharFieldFormWidget(),
+            "complement": BaseCharFieldFormWidget(),
+            "district": BaseCharFieldFormWidget(),
+            "city": BaseCharFieldFormWidget(),
+            "uf": BaseCharFieldFormWidget(),
+            "postal_code": BaseCharFieldFormWidget(),
+        }

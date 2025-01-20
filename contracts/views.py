@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import ContractCreateForm, ContractStepFormSet
-from contracts.models import Contract, ContractGoal, ContractItem
+from contracts.forms import ContractCreateForm, ContractStepFormSet, CompanyCreateForm
+from contracts.models import Contract, ContractGoal, ContractItem, Company
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -311,3 +311,64 @@ def update_contract_goal_view(request, pk, goal_pk):
             "contracts/goals-update.html",
             {"contract": contract, "goal": goal, "steps_formset": steps_formset},
         )
+
+
+class CompanyListView(LoginRequiredMixin, ListView):
+    model = Company
+    context_object_name = "companies_list"
+    paginate_by = 10
+    ordering = "-created_at"
+
+    template_name = "companies/list.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = (
+            super()
+            .get_queryset()
+            # .select_related(
+            #     "contractor_manager",
+            #     "hired_manager",
+            # )
+        )
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) | Q(cnpj__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
+
+
+class CompanyCreateView(LoginRequiredMixin, TemplateView):
+    template_name = "companies/create.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        if not context.get("form", None):
+            context["form"] = CompanyCreateForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = CompanyCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                source = form.save()
+
+                logger.info(f"{request.user.id} - Created new company")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_COMPANY,
+                    target_object_id=source.id,
+                    target_content_object=source,
+                )
+                return redirect("contracts:companies-list")
+
+        return self.render_to_response(self.get_context_data(form=form))
