@@ -108,6 +108,20 @@
     <li class="me-2" role="presentation">
       <button
         class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="accountability-tab"
+        data-tabs-target="#accountability"
+        type="button"
+        role="tab"
+        aria-controls="accountability"
+        aria-selected="false"
+      >
+        Prestação
+      </button>
+    </li>
+  
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
         id="addendums-tab"
         data-tabs-target="#addendums"
         type="button"
@@ -137,9 +151,14 @@
     {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
 
-  <!-- Accounts Tab -->
+  <!-- Bank Accounts Tab -->
   <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
     {% include 'contracts/tabs/banks-tab.html' with contract=contract user=user csrf_token=csrf_token %}
+  </div>
+
+    <!-- Month Accountability Tab -->
+  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
+    {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
   
   <!-- Addendums Tab -->
