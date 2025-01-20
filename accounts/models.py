@@ -8,11 +8,6 @@ from utils.models import BaseModel
 
 class CityHall(BaseModel):
     name = models.CharField(verbose_name="Prefeitura", max_length=128)
-    users = models.ManyToManyField(
-        "accounts.User",
-        verbose_name="Usuários",
-        related_name="city_halls",
-    )
 
     history = HistoricalRecords()
 

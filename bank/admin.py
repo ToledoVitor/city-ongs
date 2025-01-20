@@ -1,3 +1,12 @@
 from django.contrib import admin
 
-# Register your models here.
+from bank.models import (
+    BankAccount,
+    BankStatement,
+    Transaction,
+)
+
+
+admin.site.register(BankAccount)
+admin.site.register(BankStatement)
+admin.site.register(Transaction)
