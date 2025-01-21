@@ -109,7 +109,7 @@ def create_bank_account_view(request, pk):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                redirect("contracts:contracts-detail", pk=contract.id)
+                return redirect("contracts:contracts-detail", pk=contract.id)
             except ValidationError:
                 return render(
                     request,

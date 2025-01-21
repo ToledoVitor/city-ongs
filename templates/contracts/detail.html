@@ -66,6 +66,20 @@
     <li class="me-2" role="presentation">
       <button
         class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="accounts-tab"
+        data-tabs-target="#accounts"
+        type="button"
+        role="tab"
+        aria-controls="accounts"
+        aria-selected="false"
+      >
+        Contas
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
         id="goals-tab"
         data-tabs-target="#goals"
         type="button"
@@ -88,20 +102,6 @@
         aria-selected="false"
       >
         Items
-      </button>
-    </li>
-
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
-        id="accounts-tab"
-        data-tabs-target="#accounts"
-        type="button"
-        role="tab"
-        aria-controls="accounts"
-        aria-selected="false"
-      >
-        Contas
       </button>
     </li>
 
@@ -141,23 +141,23 @@
     {% include 'contracts/tabs/details-tab.html' with contract=contract %}
   </div>
 
+  <!-- Bank Accounts Tab -->
+  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+    {% include 'contracts/tabs/banks-tab.html' with contract=contract %}
+  </div>
+
   <!-- Goals Tab -->
   <div class="hidden rounded-lg dark:bg-green-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
     {% include 'contracts/tabs/goals-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>
+  </div>  
 
   <!-- Items Tab -->
   <div class="hidden rounded-lg dark:bg-green-200" id="items" role="tabpanel" aria-labelledby="items-tab">
     {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>
-
-  <!-- Bank Accounts Tab -->
-  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
-    {% include 'contracts/tabs/banks-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>
+  </div>  
 
     <!-- Month Accountability Tab -->
-  <div class="hidden p-4 rounded-lg dark:bg-green-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
+  <div class="hidden rounded-lg dark:bg-green-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
     {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
   

@@ -1,7 +1,292 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-    <p class="text-2xl mb-2 font-bold text-black">Prestação de Contas Mensal</p>
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+            Our products
+            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">Browse a list of Flowbite products designed to help you work and play, stay organized, get answers, keep in touch, grow your business, and more.</p>
+        </caption>
+        <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+            <tr>
+                <th scope="col" class="px-6 py-3" />
+                <th scope="col" class="px-6 py-3">
+                    Item
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Objetivo
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Status
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Valor
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if contract.items.count %}
+              {% for item in contract.items.all %}
+                <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                  <td scope="row" class="py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
+
+                    {% if user.can_change_statuses %}
+                      <!-- items approve Modal toggle -->
+                      <button
+                        data-modal-target="items-update-modal"
+                        data-modal-toggle="items-update-modal"
+                        data-item='{"itemId": "{{ item.id }}"}'
+                        class="ml-4 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-sm rounded-lg text-sm px-3 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                      >
+                        Avaliar
+                      </button>
+                    {% else %}
+
+                      <div class="grid grid-cols-1 gap-0 sm:grid-cols-2">
+                        <!-- items detail Modal toggle -->
+                        <button
+                          data-modal-target="items-detail-modal"
+                          data-modal-toggle="items-detail-modal"
+                          data-item='{"status": "{{ item.status_label }}", "pendencies": "{{ item.status_pendencies|default_if_none:"" }}"}'
+                          type="button"
+                        >
+                          <svg class="w-6 h-6 ml-4 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>
+                            <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                          </svg>
+                        </button>
+                        
+                        <a
+                          href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
+                        >
+                          <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
+                          </svg>
+                        </a>
+                      </div>         
+                    {% endif %}
+                  </td>
+
+                  <th class="pl-2 pr-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black max-w-48">
+                    {{ item.name }}
+                  </th>
+
+                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
+                    {{ item.objective }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                    {% if item.status == "ANALYZING" %}
+                      <span
+                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                      >
+                        Em análise
+                      </span>
+                    {% elif item.status == "CORRECTING" %}
+                      <span
+                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Em correção
+                      </span>
+                    {% elif item.status == "APPROVED" %}
+                      <span
+                        class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Aprovado
+                      </span>
+                    {% elif item.status == "APPROVED_WITH_PENDENCE" %}
+                      <span
+                        class="bg-yellow-300 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Pendências
+                      </span>
+                    {% elif item.status == "REJECTED" %}
+                      <span
+                        class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Rejeitado
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                    R$ <b>{{ item.total_expense|intcomma }}<b>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                    Nenhuma prestação cadastrada
+                </th>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                  -
+                </td>
+              </tr>
+            {% endif %}     
+        </tbody>
+    </table>
+  
+    {% if user.has_admin_access %}
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-green-200">
+        <a
+          href="{% url 'contracts:contracts-item-create' contract.id %}"
+          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Adicionar novo item
+          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+      
 </div>
 
-<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
+<!-- items approve modal -->
+<div
+    id="items-update-modal"
+    tabindex="-1"
+    data-modal-backdrop="static"
+    aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <!-- Modal header -->
+          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  Selecione uma opção
+              </h3>
+              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="items-update-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">Fechar modal</span>
+              </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-4 md:p-5">
+              <form class="space-y-4"  method="post">
+
+                  <div>
+                      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                      <input type="hidden" name="form_type" value="items_modal">
+                      <input type="hidden" id="itemId" name="itemId">
+
+                      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Escolha uma opção</label>
+                      <select
+                          id="status"
+                          name="status"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      >
+                        <option selected value="APPROVED">Aprovado</option>
+                        <option value="APPROVED_WITH_PENDENCE">Pendências</option>
+                        <option value="CORRECTING">Corrigir</option>
+                        <option value="REJECTED">Rejeitado</option>
+                      </select>
+                  </div>
+
+                  <div>
+                      <label for="pendencies" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes</label>
+                      <textarea
+                          id="pendencies"
+                          name="pendencies"
+                          rows="4"
+                          maxlength="254"
+                          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          placeholder="....."
+                      ></textarea>
+                      <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                          Escreva as pendências ou razão para a rejeição
+                      </p>
+                  </div>
+                  <button
+                      type="submit"
+                      class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                      Salvar Análise
+                  </button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div> 
+
+<!-- item detail modal -->
+<div
+    id="items-detail-modal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  Detalhes do Item
+              </h3>
+              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="items-detail-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">Fechar modal</span>
+              </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-4 md:p-5">
+            <div>
+                <label for="modalItemStatus" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes do Item</label>
+                <select
+                    id="modalItemStatus"
+                    disabled
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option value="">Selecione</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="modalItemPendencies" class="block my-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes</label>
+                <textarea
+                    id="modalItemPendencies"
+                    name="modalItemPendencies"
+                    rows="4"
+                    maxlength="254"
+                    class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    disabled
+                ></textarea>
+            </div>
+          </div>
+      </div>
+  </div>
+</div> 
+
+<!-- JavaScript -->
+<script>
+  document.querySelectorAll('[data-modal-toggle="items-detail-modal"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const itemData = JSON.parse(button.getAttribute('data-item'));
+
+      document.getElementById('modalItemStatus').innerHTML = `<option value="${itemData.status}" selected>${itemData.status}</option>`;
+      document.getElementById('modalItemPendencies').value = itemData.pendencies || "";
+    });
+  });
+
+  document.querySelectorAll('[data-modal-toggle="items-update-modal"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const itemData = JSON.parse(button.getAttribute('data-item'));
+      document.getElementById('itemId').value = itemData.itemId;
+    });
+  });
+</script>
