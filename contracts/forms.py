@@ -6,6 +6,7 @@ from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
+    BaseFileFormWidget,
 )
 
 
@@ -23,6 +24,7 @@ class ContractCreateForm(forms.ModelForm):
             "hired_company",
             "hired_manager",
             "organization",
+            "file",
         ]
 
         widgets = {
@@ -37,6 +39,7 @@ class ContractCreateForm(forms.ModelForm):
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "organization": BaseSelectFormWidget(placeholder="Organização"),
+            "file": BaseFileFormWidget(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -46,6 +49,22 @@ class ContractCreateForm(forms.ModelForm):
         self.fields["organization"].queryset = Organization.objects.filter(
             user_organization_relationships__user=self.request.user
         )
+
+    def clean_ofx_file(self):
+        ofx_file = self.cleaned_data.get("ofx_file")
+
+        if ofx_file:
+            if not ofx_file.name.lower().endswith(".ofx"):
+                raise forms.ValidationError(
+                    "Somente arquivos do tipo OFX são permitidos."
+                )
+
+            if ofx_file.size > 10 * 1024 * 1024:  # Limite de 10 MB
+                raise forms.ValidationError(
+                    "O tamanho máximo permitido para o arquivo é 10MB."
+                )
+
+        return ofx_file
 
 
 class ContractStepForm(forms.ModelForm):

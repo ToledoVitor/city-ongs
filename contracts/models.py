@@ -56,6 +56,13 @@ class Company(BaseModel):
         null=True,
         blank=True,
     )
+
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name="Organização",
+        related_name="companies",
+        on_delete=models.CASCADE,
+    )
     history = HistoricalRecords()
 
     def __str__(self) -> str:

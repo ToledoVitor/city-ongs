@@ -92,19 +92,17 @@ class BaseEmailFormWidget(forms.EmailInput):
         super().__init__(*args, **kwargs)
 
 
-# class BaseDecimalFormWidget(forms.DecimalField):
-#     def __init__(self, *args, placeholder=None, **kwargs):
-#         kwargs.setdefault('attrs', {}).update({
-#             "class": " ".join([
-#                 "block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50",
-#                 "rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300",
-#                 "focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300",
-#                 "dark:border-e-gray-700 dark:border-gray-600 dark:placeholder-gray-800",
-#                 "dark:text-black dark:focus:border-blue-500",
-#             ]),
-#             "step": "0.01",
-#         })
-#         if placeholder:
-#             kwargs['attrs']['placeholder'] = placeholder
-
-#         super().__init__(*args, **kwargs)
+class BaseFileFormWidget(forms.FileInput):
+    def __init__(self, *args, required=True, **kwargs):
+        kwargs.setdefault("attrs", {}).update(
+            {
+                "class": " ".join(
+                    [
+                        "block w-full text-sm text-gray-900 border border-gray-600",
+                        "rounded-lg cursor-pointer bg-gray-300 focus:outline-none",
+                    ]
+                ),
+                "required": required,
+            }
+        )
+        super().__init__(*args, **kwargs)

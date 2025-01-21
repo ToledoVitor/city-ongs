@@ -5,6 +5,9 @@ from accounts.models import (
     User,
     UserOrganizationRelatioship,
 )
+from contracts.models import Company
+from utils.choices import StatesChoices
+
 
 varzea = CityHall.objects.create(name="Prefeitura Municipal de Varzea Paulista")
 CityHall.objects.create(name="Prefeitura Municipal de Campo Limpo Paulista")
@@ -46,3 +49,54 @@ UserOrganizationRelatioship.objects.create(
     user=u,
     organization=o2,
 )
+
+
+Company.objects.create(
+    name='Empresa Contratente',
+    cnpj='24479422000150',
+    street='Rua Fausto Silveira Pires',
+    number=93,
+    complement=None,
+    district='Jardim Primavera',
+    city='Varzea Paulista',
+    uf=StatesChoices.SP,
+    postal_code=13220270,
+    organization=o1,
+)
+Company.objects.create(
+    name='Empresa Contratada',
+    cnpj='49279736000130',
+    street='Rua Senador Vergueiro',
+    number=250,
+    complement='Apto 305',
+    district='Flamengo',
+    city='Rio de Janeiro',
+    uf=StatesChoices.RJ,
+    postal_code=22220000,
+    organization=o1,
+)
+Company.objects.create(
+    name='Software Vitor Toledo S.A.',
+    cnpj='21135963000172',
+    street='Rua Xavier da Silveira',
+    number=29,
+    complement='Apto 901',
+    district='Copacabana',
+    city='Rio de Janeiro',
+    uf=StatesChoices.RJ,
+    postal_code=22061010,
+    organization=o1,
+)
+Company.objects.create(
+    name='Empresa Teste',
+    cnpj='98521329000100',
+    street='Rua Testes',
+    number=100,
+    complement='Bloco B',
+    district='Jardim Testes',
+    city='Testópolis',
+    uf=StatesChoices.GO,
+    postal_code=11110000,
+    organization=o1,
+)
+    

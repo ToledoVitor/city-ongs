@@ -139,7 +139,7 @@
   <label class="block mb-2 text-2xl font-bold text-black">Partes Interessadas</label>
   
   <div class="flex items-start">
-    <a href="{% url 'contracts:companies-create' %}" class="text-sm hover:underline text-blue-500">Não achou a parte? Cadastre uma empresa</a>
+    <a href="{% url 'contracts:companies-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Não achou a parte? Cadastre uma empresa</a>
   </div>
 
   <div class="my-3">
@@ -171,19 +171,21 @@
 
     </div>
   </div>
-
-  <hr class="max-w-lg h-px bg-gray-200 border-0 dark:bg-gray-400">
-
+  
   <div class="my-3">
     <label for="id_organization" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Organização</label>
     {{ form.organization }}
   </div>
 
+  <hr class="h-px my-4 border-0 bg-gray-700">
+   
+  <label class="block mb-2 text-2xl font-bold text-black">Arquivo</label>
 
-  {% comment %} <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-black" for="user_avatar">Upload file</label>
-  <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800" aria-describedby="user_avatar_help" id="user_avatar" type="file">
-  <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">A profile picture is useful to confirm your are logged into your account</div> {% endcomment %}
-  
+  <div class="my-3">
+    {{ form.file }}
+    <p class="mt-2 text-sm text-gray-500" id="file_input_help">Apenas arquivos PDF (máximo 10MB).</p>
+  </div>
+
   {% include 'commons/form-errors.html' with form=form %}
 
   <button
