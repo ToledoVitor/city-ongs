@@ -1,12 +1,12 @@
 from django import forms
 
 from accounts.models import Organization
-from contracts.models import Contract, ContractGoal, ContractStep, Company
+from contracts.models import Company, Contract, ContractGoal, ContractStep
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseFileFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
-    BaseFileFormWidget,
 )
 
 
@@ -24,6 +24,7 @@ class ContractCreateForm(forms.ModelForm):
             "hired_company",
             "hired_manager",
             "organization",
+            "area",
             "file",
         ]
 
@@ -39,6 +40,7 @@ class ContractCreateForm(forms.ModelForm):
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "organization": BaseSelectFormWidget(placeholder="Organização"),
+            "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
             "file": BaseFileFormWidget(),
         }
 
@@ -49,6 +51,7 @@ class ContractCreateForm(forms.ModelForm):
         self.fields["organization"].queryset = Organization.objects.filter(
             user_organization_relationships__user=self.request.user
         )
+        self.fields["area"].queryset = self.request.user.areas.all()
 
     def clean_ofx_file(self):
         ofx_file = self.cleaned_data.get("ofx_file")

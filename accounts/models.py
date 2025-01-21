@@ -37,7 +37,7 @@ class Area(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Organização - {self.name}"
+        return f"Area - {self.name}"
 
     class Meta:
         verbose_name = "Area"

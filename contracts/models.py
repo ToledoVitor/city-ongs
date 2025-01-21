@@ -7,7 +7,7 @@ from accounts.models import Area, Organization
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import ItemNatureChoices
-from utils.choices import StatusChoices, StatesChoices
+from utils.choices import StatesChoices, StatusChoices
 from utils.models import BaseModel
 
 
@@ -188,6 +188,10 @@ class Contract(BaseModel):
     @property
     def name_with_code(self):
         return self.trailing_code + f" - {self.name}"
+
+    @property
+    def status_label(self) -> str:
+        return Contract.ContractStatusChoices(self.status).label
 
     @property
     def recent_logs(self):

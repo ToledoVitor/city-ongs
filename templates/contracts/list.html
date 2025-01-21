@@ -59,11 +59,12 @@
               <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                   <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
                     {{ contract.name_with_code }} <br>
+                    <p class="mt-2 text-xs">Status: {{ contract.status_label }}</p>
                     <p class="mt-2 text-xs">Gestora do Contratante: {{ contract.contractor_manager.name }}</p>
                     <p class="mt-1 text-xs">Gestora do Contratado: {{ contract.hired_manager.name }}</p>
                   </th>
                   <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                    R$ <b>{{ contract.total_value|intcomma }}<b>
+                    R$ {{ contract.total_value|intcomma }}
                   </td>
                   <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                     {{ contract.start_of_vigency }}

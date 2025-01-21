@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import ContractCreateForm, ContractStepFormSet, CompanyCreateForm
-from contracts.models import Contract, ContractGoal, ContractItem, Company
+from contracts.forms import CompanyCreateForm, ContractCreateForm, ContractStepFormSet
+from contracts.models import Company, Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -324,8 +324,7 @@ class CompanyListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = (
-            super()
-            .get_queryset()
+            super().get_queryset()
             # .select_related(
             #     "contractor_manager",
             #     "hired_manager",
