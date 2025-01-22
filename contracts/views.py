@@ -9,7 +9,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import CompanyCreateForm, ContractCreateForm, ContractGoalCreateForm, ContractStepFormSet
+from contracts.forms import (
+    CompanyCreateForm,
+    ContractCreateForm,
+    ContractGoalCreateForm,
+    ContractStepFormSet,
+)
 from contracts.models import Company, Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -266,7 +271,11 @@ def create_contract_goal_view(request, pk):
             return render(
                 request,
                 "contracts/goals-create.html",
-                {"contract": contract, "form": form, "steps_formset": steps_formset,},
+                {
+                    "contract": contract,
+                    "form": form,
+                    "steps_formset": steps_formset,
+                },
             )
 
     else:
@@ -275,7 +284,11 @@ def create_contract_goal_view(request, pk):
         return render(
             request,
             "contracts/goals-create.html",
-            {"contract": contract, "form": form, "steps_formset": steps_formset,},
+            {
+                "contract": contract,
+                "form": form,
+                "steps_formset": steps_formset,
+            },
         )
 
 

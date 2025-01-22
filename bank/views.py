@@ -3,8 +3,8 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch, Q
 from django.db import transaction as django_transaction
+from django.db.models import Prefetch, Q
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
@@ -133,7 +133,9 @@ def create_bank_account_manual_view(request, pk):
         form = CreateBankAccountForm(request.POST)
         transactions_formset = TransactionFormSet(request.POST)
         if form.is_valid() and transactions_formset.is_valid():
-            if _account_type_already_created(contract, form.cleaned_data["account_type"]):
+            if _account_type_already_created(
+                contract, form.cleaned_data["account_type"]
+            ):
                 return render(
                     request,
                     "bank-account/manual-create.html",
@@ -184,7 +186,7 @@ def create_bank_account_manual_view(request, pk):
                     contract.checking_account = bank_account
                 else:
                     contract.investing_account = bank_account
-                
+
                 contract.save()
 
                 logger.info(f"{request.user.id} - Created new bank account")

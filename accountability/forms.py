@@ -1,7 +1,11 @@
 from django import forms
 
 from accountability.models import Accountability, ExpenseSource, RevenueSource
-from utils.widgets import BaseCharFieldFormWidget, BaseSelectFormWidget, BaseNumberFormWidget
+from utils.widgets import (
+    BaseCharFieldFormWidget,
+    BaseNumberFormWidget,
+    BaseSelectFormWidget,
+)
 
 
 class ExpenseSourceCreateForm(forms.ModelForm):

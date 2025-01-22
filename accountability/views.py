@@ -5,12 +5,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect, get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, TemplateView
-from contracts.models import Contract
-from accountability.forms import ExpenseSourceCreateForm, RevenueSourceCreateForm, AccountabilityCreateForm
-from accountability.models import ExpenseSource, RevenueSource, Accountability
+
+from accountability.forms import (
+    AccountabilityCreateForm,
+    ExpenseSourceCreateForm,
+    RevenueSourceCreateForm,
+)
+from accountability.models import Accountability, ExpenseSource, RevenueSource
 from activity.models import ActivityLog
+from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +159,9 @@ def create_contract_accountability_view(request, pk):
                     target_object_id=accountability.id,
                     target_content_object=accountability,
                 )
-            return redirect("accountability:accountability-detail", pk=accountability.id)
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
         else:
             return render(
                 request,
