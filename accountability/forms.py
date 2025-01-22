@@ -1,7 +1,7 @@
 from django import forms
 
-from accountability.models import ExpenseSource, RevenueSource
-from utils.widgets import BaseCharFieldFormWidget, BaseSelectFormWidget
+from accountability.models import Accountability, ExpenseSource, RevenueSource
+from utils.widgets import BaseCharFieldFormWidget, BaseSelectFormWidget, BaseNumberFormWidget
 
 
 class ExpenseSourceCreateForm(forms.ModelForm):
@@ -75,3 +75,21 @@ class RevenueSourceCreateForm(forms.ModelForm):
                 )
             }
         )
+
+
+class AccountabilityCreateForm(forms.ModelForm):
+    class Meta:
+        model = Accountability
+        fields = [
+            "month",
+            "year",
+        ]
+
+        widgets = {
+            "month": BaseSelectFormWidget(),
+            "year": BaseNumberFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["year"].initial = 2025

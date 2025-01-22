@@ -5,6 +5,7 @@ from accountability.views import (
     ExpenseSourceListView,
     RevenueSourceCreateView,
     RevenueSourceListView,
+    create_contract_accountability_view,
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
         RevenueSourceCreateView.as_view(),
         name="revenues-source-create",
     ),
+    path("<uuid:pk>/accountability/create", create_contract_accountability_view, name="accountability-create"),
 ]

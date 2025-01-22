@@ -5,11 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.views.generic import ListView, TemplateView
-
-from accountability.forms import ExpenseSourceCreateForm, RevenueSourceCreateForm
-from accountability.models import ExpenseSource, RevenueSource
+from contracts.models import Contract
+from accountability.forms import ExpenseSourceCreateForm, RevenueSourceCreateForm, AccountabilityCreateForm
+from accountability.models import ExpenseSource, RevenueSource, Accountability
 from activity.models import ActivityLog
 
 logger = logging.getLogger(__name__)
@@ -131,3 +131,40 @@ class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("accountability:revenues-source-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+def create_contract_accountability_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if request.method == "POST":
+        form = AccountabilityCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                accountability = Accountability.objects.create(
+                    contract=contract,
+                    month=form.cleaned_data["month"],
+                    year=form.cleaned_data["year"],
+                )
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_ACCOUNTABILITY,
+                    target_object_id=accountability.id,
+                    target_content_object=accountability,
+                )
+            return redirect("accountability:accountability-detail", pk=accountability.id)
+        else:
+            return render(
+                request,
+                "accountability/accountability/create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = AccountabilityCreateForm()
+        return render(
+            request,
+            "accountability/accountability/create.html",
+            {"contract": contract, "form": form},
+        )
