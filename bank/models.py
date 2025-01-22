@@ -6,6 +6,10 @@ from utils.models import BaseModel
 
 
 class BankAccount(BaseModel):
+    class AccountTypeChoices(models.TextChoices):
+        CHECKING = "CHECKING", "conta corrente"
+        INVESTING = "INVESTING", "investimento"
+
     bank_name = models.CharField(
         verbose_name="Nome do Banco",
         max_length=128,
@@ -20,7 +24,9 @@ class BankAccount(BaseModel):
     )
     account_type = models.CharField(
         verbose_name="Tipo da Conta",
-        max_length=16,
+        max_length=9,
+        choices=AccountTypeChoices.choices,
+        default=AccountTypeChoices.CHECKING,
     )
     agency = models.CharField(
         verbose_name="Agência",
@@ -69,6 +75,13 @@ class BankAccount(BaseModel):
     def last_transactions(self):
         return self.transactions.order_by("-date")[:10]
 
+    @property
+    def contract(self):
+        if hasattr(self, "checking_account"):
+            return self.checking_account
+        if hasattr(self, "investing_contract"):
+            return self.investing_contract
+        return None
 
 class BankStatement(BaseModel):
     bank_account = models.ForeignKey(
@@ -85,6 +98,8 @@ class BankStatement(BaseModel):
     )
     opening_date = models.DateField(
         verbose_name="Data Inicial do Extrato",
+        null=True,
+        blank=True,
     )
     closing_date = models.DateField(
         verbose_name="Data Final do extrato",
@@ -98,6 +113,25 @@ class BankStatement(BaseModel):
 
 
 class Transaction(BaseModel):
+    class TransactionTypeChoices(models.TextChoices):
+        DEBIT = "DEBIT", "débito"
+        CREDIT = "CREDIT", "crédito"
+        INT = "INT", "juros"
+        DIV = "DIV", "dividendos"
+        FEE = "FEE", "taxa"
+        SRVCHG = "SRVCHG", "taxa de serviço"
+        DEP = "DEP", "depósito"
+        ATM = "ATM", "caixa eletrônico"
+        POS = "POS", "ponto de venda"
+        XFER = "XFER", "transferência entre contas"
+        CHECK = "CHECK", "cheque"
+        PAYMENT = "PAYMENT", "fatura ou débito"
+        CASH = "CASH", "saque"
+        DIRECTDEP = "DIRECTDEP", "depósito direto"
+        DIRECTDEBIT = "DIRECTDEBIT", "débito automático"
+        REPEATPMT = "REPEATPMT", "pagamento recorrente"
+        OTHER = "OTHER", "outros"
+
     bank_account = models.ForeignKey(
         BankAccount,
         verbose_name="Conta Bancária",
@@ -117,11 +151,14 @@ class Transaction(BaseModel):
     transaction_type = models.CharField(
         verbose_name="Tipo da Transação",
         max_length=32,
+        choices=TransactionTypeChoices.choices,
+        default=TransactionTypeChoices.OTHER,
     )
     transaction_id = models.CharField(
         verbose_name="Id da Transação",
         max_length=32,
-        unique=True,
+        null=True,
+        blank=True,
     )
 
     name = models.CharField(
@@ -142,3 +179,14 @@ class Transaction(BaseModel):
     class Meta:
         verbose_name = "Movimentação Bancária"
         verbose_name_plural = "Movimentações Bancárias"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['transaction_id'],
+                name='unique__transaction_id',
+                condition=models.Q(
+                    transaction_id__isnull=False,
+                    deleted_at__isnull=True,
+                )
+            ),
+        ]

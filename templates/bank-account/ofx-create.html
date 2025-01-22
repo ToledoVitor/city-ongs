@@ -53,14 +53,28 @@
   <h2 class="mt-4 mb-2 text-xl text-center">Faça upload do extrato em formato OFX e deixe o resto com a gente.<h2>
     
   <div class="mb-3">
+    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">Tipo de Conta</label>
+    {{ form.account_type }}
+  </div>
+
+  <div class="mb-3">
     <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">Arquivo Bancário (OFX):</label>
     {{ form.ofx_file }}
     <p class="mt-1 text-sm text-black dark:text-black" id="file_input_help">Apenas arquivos tipo .ofx</p>
   </div>
 
-  <div class="mb-6 text-base text-center">
+  <div class="mb-6 text-base text-justify">
     O sistema criará sua conta com base nas informações do arquivo. Após criada, você poderá
     <b>atualizar os extratos na página de detalhes da conta.</b>
+  </div>
+
+  <hr class="h-px my-4 border-0 bg-gray-700">
+
+  <div class="flex mb-2 items-start">
+    <p class="text-sm">
+      Em alguns casos, a instituição bancária pode não disponibilizar o extrato no formato OFX para contas do tipo investimento. Se esse for o caso,
+      <a href="{% url 'contracts:contracts-accounts-manual-create' contract.id %}" class="text-sm hover:underline text-blue-500" target="_blank">cadastre manualmente a conta.</a>
+    </p>
   </div>
 
   {% include 'commons/form-errors.html' with form=form %}

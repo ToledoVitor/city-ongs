@@ -1,7 +1,13 @@
 from django import forms
 
+from utils.widgets import BaseSelectFormWidget, BaseCharFieldFormWidget, BaseNumberFormWidget
+from bank.models import BankAccount, Transaction
 
 class UploadOFXForm(forms.Form):
+    account_type = forms.ChoiceField(
+        choices=BankAccount.AccountTypeChoices.choices,
+        widget=BaseSelectFormWidget(),
+    )
     ofx_file = forms.FileField(
         widget=forms.ClearableFileInput(
             attrs={
@@ -29,3 +35,53 @@ class UploadOFXForm(forms.Form):
     # # Verificar o tipo MIME (opcional)
     # if ofx_file.content_type != 'application/pdf':
     #     raise forms.ValidationError("O arquivo enviado não é um OFX válido.")
+
+
+class CreateBankAccountForm(forms.ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = [
+            "bank_name",
+            "bank_id",
+            "account",
+            "account_type",
+            "agency",
+            "balance",
+        ]
+
+        widgets = {
+            "bank_name": BaseCharFieldFormWidget(),
+            "bank_id": BaseNumberFormWidget(),
+            "account": BaseCharFieldFormWidget(),
+            "account_type": BaseSelectFormWidget(),
+            "agency": BaseCharFieldFormWidget(),
+            "balance": BaseCharFieldFormWidget(),
+        }
+
+class TransactionForm(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        fields = [
+            "name",
+            "memo",
+            "amount",
+            "transaction_type",
+            "transaction_id",
+            "date",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "memo": BaseCharFieldFormWidget(),
+            "amount": BaseNumberFormWidget(),
+            "transaction_id": BaseCharFieldFormWidget(required=False),
+            "transaction_type": BaseSelectFormWidget(),
+        }
+
+TransactionFormSet = forms.inlineformset_factory(
+    BankAccount,
+    Transaction,
+    form=TransactionForm,
+    extra=1,
+    can_delete=True,
+)

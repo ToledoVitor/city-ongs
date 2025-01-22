@@ -166,7 +166,7 @@ class Contract(BaseModel):
     investing_account = models.OneToOneField(
         BankAccount,
         verbose_name="Conta Investimento",
-        related_name="investing_contracts",
+        related_name="investing_contract",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

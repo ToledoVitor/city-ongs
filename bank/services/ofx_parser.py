@@ -31,7 +31,6 @@ class OFXFileParser:
             "bank_id": self.ofx_data.bankmsgsrsv1.statements[0].bankid,
             "agency_id": self.ofx_data.bankmsgsrsv1.statements[0].branchid,
             "account_id": self.ofx_data.bankmsgsrsv1.statements[0].acctid,
-            "account_type": self.ofx_data.bankmsgsrsv1.statements[0].accttype,
         }
 
     @property
@@ -52,14 +51,13 @@ class OFXFileParser:
     def is_account_already_created(self) -> bool:
         return False
 
-    def create_bank_account(self, contract: Contract) -> bool:
+    def create_bank_account(self, contract: Contract, account_type: str) -> bool:
         account_data = self.account_data
 
         bank_name = account_data["bank_name"]
         bank_id = account_data["bank_id"]
         agency = account_data["agency_id"]
         account = account_data["account_id"]
-        account_type = account_data["account_type"]
 
         if BankAccount.objects.filter(
             bank_name=bank_name,
