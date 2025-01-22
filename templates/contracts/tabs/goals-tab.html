@@ -72,9 +72,9 @@
                   </td>
 
                   <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
-                    {% if goal.sub_goals.count %}
-                      {% for sub_goal in goal.sub_goals.all %}  
-                        <p> - {{ sub_goal.name }}</p>
+                    {% if goal.steps.count %}
+                      {% for step in goal.steps.all %}  
+                        <p> - {{ step.name }}</p>
                       {% endfor %}
                     {% else %}
                       <p> - Sem etapas cadastradas </p>

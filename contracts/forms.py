@@ -70,6 +70,22 @@ class ContractCreateForm(forms.ModelForm):
         return ofx_file
 
 
+class ContractGoalCreateForm(forms.ModelForm):
+    class Meta:
+        model = ContractGoal
+        fields = [
+            "name",
+            "objective",
+            "methodology",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "objective": BaseTextAreaFormWidget(),
+            "methodology": BaseTextAreaFormWidget(),
+        }
+
+
 class ContractStepForm(forms.ModelForm):
     class Meta:
         model = ContractStep

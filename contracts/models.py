@@ -298,7 +298,7 @@ class ContractGoal(BaseModel):
 
 class ContractStep(BaseModel):
     goal = models.ForeignKey(
-        ContractGoal, related_name="sub_goals", on_delete=models.CASCADE
+        ContractGoal, related_name="steps", on_delete=models.CASCADE
     )
 
     name = models.CharField(

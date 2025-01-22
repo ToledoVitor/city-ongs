@@ -457,11 +457,11 @@
 </form>
 
 <script>
-const addStepButton = document.getElementById('add-transaction');
+const addTransactionButton = document.getElementById('add-transaction');
 const formsetDiv = document.getElementById('transactions-formset');
 const totalFormsInput = document.querySelector('#id_transactions-TOTAL_FORMS');
 
-addStepButton.addEventListener('click', () => {
+addTransactionButton.addEventListener('click', () => {
     const formCount = parseInt(totalFormsInput.value, 10);
     const newForm = formsetDiv.querySelector('.transactions-form').cloneNode(true);
 

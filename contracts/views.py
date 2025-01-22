@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
 
 from activity.models import ActivityLog
-from contracts.forms import CompanyCreateForm, ContractCreateForm, ContractStepFormSet
+from contracts.forms import CompanyCreateForm, ContractCreateForm, ContractGoalCreateForm, ContractStepFormSet
 from contracts.models import Company, Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -101,7 +101,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "addendums",
                 "items",
                 "goals",
-                "goals__sub_goals",
+                "goals__steps",
             )
         )
 
@@ -237,16 +237,15 @@ def create_contract_goal_view(request, pk):
 
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
+        form = ContractGoalCreateForm(request.POST)
         steps_formset = ContractStepFormSet(request.POST)
-        if steps_formset.is_valid():
+        if form.is_valid() and steps_formset.is_valid():
             with transaction.atomic():
-                name = request.POST.get("name")
-                description = request.POST.get("description")
-
                 goal = ContractGoal.objects.create(
                     contract=contract,
-                    name=name,
-                    description=description,
+                    name=form.cleaned_data["name"],
+                    objective=form.cleaned_data["objective"],
+                    methodology=form.cleaned_data["methodology"],
                     status=StatusChoices.ANALYZING,
                 )
                 steps = steps_formset.save(commit=False)
@@ -263,13 +262,20 @@ def create_contract_goal_view(request, pk):
                 )
 
             return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/goals-create.html",
+                {"contract": contract, "form": form, "steps_formset": steps_formset,},
+            )
 
     else:
+        form = ContractGoalCreateForm()
         steps_formset = ContractStepFormSet()
         return render(
             request,
             "contracts/goals-create.html",
-            {"contract": contract, "steps_formset": steps_formset},
+            {"contract": contract, "form": form, "steps_formset": steps_formset,},
         )
 
 
@@ -288,7 +294,7 @@ def update_contract_goal_view(request, pk, goal_pk):
             goal.status_pendencies = None
             goal.save()
 
-            goal.sub_goals.all().delete()
+            goal.steps.all().delete()
 
             steps_formset = ContractStepFormSet(request.POST, instance=goal)
             if steps_formset.is_valid():
