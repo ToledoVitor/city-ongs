@@ -49,6 +49,7 @@
 </nav>
 
 <form method="post" class="max-w-lg mx-auto" id="multistep-form">
+  {% csrf_token %}
 
 
     <!-- Step 1 -->
@@ -112,6 +113,11 @@
         <p class="text-2xl mt-4 mb-4 font-bold">
             Detalhes da Conta
         </p>
+
+        <div class="mb-3">
+          <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">Tipo de Conta</label>
+          {{ form.account_type }}
+        </div>
 
         <div class="my-3">
             <div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -417,7 +423,7 @@
                     dark:focus:ring-blue-800
                 "
             >
-                Próximo
+                Criar
             </button>
         </div>
     </div>

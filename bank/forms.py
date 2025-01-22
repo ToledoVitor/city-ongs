@@ -43,6 +43,9 @@ class UploadOFXForm(forms.Form):
 
 
 class CreateBankAccountForm(forms.ModelForm):
+    closing_date = forms.DateField()
+    balance = forms.DecimalField()
+
     class Meta:
         model = BankAccount
         fields = [

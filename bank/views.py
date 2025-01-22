@@ -4,6 +4,7 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
+from django.db import transaction as django_transaction
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
@@ -131,11 +132,21 @@ def create_bank_account_manual_view(request, pk):
     if request.method == "POST":
         form = CreateBankAccountForm(request.POST)
         transactions_formset = TransactionFormSet(request.POST)
-        if form.is_valid():
-            try:
-                bank_account = OFXFileParser(
-                    ofx_file=request.FILES["ofx_file"]
-                ).create_bank_account(contract=contract)
+        if form.is_valid() and transactions_formset.is_valid():
+            with django_transaction.atomic():
+                bank_account = BankAccount.objects.create(
+                    bank_name=form.cleaned_data["bank_name"],
+                    bank_id=form.cleaned_data["bank_id"],
+                    account=form.cleaned_data["account"],
+                    account_type=form.cleaned_data["account_type"],
+                    agency=form.cleaned_data["agency"],
+                    balance=form.cleaned_data["balance"],
+                )
+                BankStatement.objects.create(
+                    bank_account=bank_account,
+                    balance=form.cleaned_data["balance"],
+                    closing_date=form.cleaned_data["closing_date"],
+                )
 
                 transactions = transactions_formset.save(commit=False)
                 for transaction in transactions:
@@ -158,12 +169,12 @@ def create_bank_account_manual_view(request, pk):
                     target_content_object=bank_account,
                 )
                 return redirect("contracts:contracts-detail", pk=contract.id)
-            except ValidationError:
-                return render(
-                    request,
-                    "bank-account/manual-create.html",
-                    {"form": form, "contract": contract, "account_exists": True},
-                )
+            # except ValidationError:
+            #     return render(
+            #         request,
+            #         "bank-account/manual-create.html",
+            #         {"form": form, "contract": contract, "account_exists": True},
+            #     )
     else:
         form = CreateBankAccountForm()
         transactions_formset = TransactionFormSet()
