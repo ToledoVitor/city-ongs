@@ -1,7 +1,12 @@
 from django import forms
 
-from utils.widgets import BaseSelectFormWidget, BaseCharFieldFormWidget, BaseNumberFormWidget
 from bank.models import BankAccount, Transaction
+from utils.widgets import (
+    BaseCharFieldFormWidget,
+    BaseNumberFormWidget,
+    BaseSelectFormWidget,
+)
+
 
 class UploadOFXForm(forms.Form):
     account_type = forms.ChoiceField(
@@ -58,6 +63,7 @@ class CreateBankAccountForm(forms.ModelForm):
             "balance": BaseCharFieldFormWidget(),
         }
 
+
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
@@ -77,6 +83,7 @@ class TransactionForm(forms.ModelForm):
             "transaction_id": BaseCharFieldFormWidget(required=False),
             "transaction_type": BaseSelectFormWidget(),
         }
+
 
 TransactionFormSet = forms.inlineformset_factory(
     BankAccount,

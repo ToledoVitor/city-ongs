@@ -83,6 +83,7 @@ class BankAccount(BaseModel):
             return self.investing_contract
         return None
 
+
 class BankStatement(BaseModel):
     bank_account = models.ForeignKey(
         BankAccount,
@@ -182,11 +183,11 @@ class Transaction(BaseModel):
 
         constraints = [
             models.UniqueConstraint(
-                fields=['transaction_id'],
-                name='unique__transaction_id',
+                fields=["transaction_id"],
+                name="unique__transaction_id",
                 condition=models.Q(
                     transaction_id__isnull=False,
                     deleted_at__isnull=True,
-                )
+                ),
             ),
         ]

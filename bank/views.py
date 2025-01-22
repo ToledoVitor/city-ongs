@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
 
 from activity.models import ActivityLog
-from bank.forms import UploadOFXForm, CreateBankAccountForm, TransactionFormSet
+from bank.forms import CreateBankAccountForm, TransactionFormSet, UploadOFXForm
 from bank.models import BankAccount, BankStatement
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
@@ -92,7 +92,9 @@ def create_bank_account_ofx_view(request, pk):
             try:
                 bank_account = OFXFileParser(
                     ofx_file=request.FILES["ofx_file"]
-                ).create_bank_account(contract=contract, account_type=form.data["account_type"])
+                ).create_bank_account(
+                    contract=contract, account_type=form.data["account_type"]
+                )
 
                 logger.info(f"{request.user.id} - Created new bank account")
                 _ = ActivityLog.objects.create(
@@ -167,5 +169,11 @@ def create_bank_account_manual_view(request, pk):
         transactions_formset = TransactionFormSet()
 
     return render(
-        request, "bank-account/manual-create.html", {"form": form, "contract": contract, "transactions_formset": transactions_formset}
+        request,
+        "bank-account/manual-create.html",
+        {
+            "form": form,
+            "contract": contract,
+            "transactions_formset": transactions_formset,
+        },
     )

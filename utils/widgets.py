@@ -28,9 +28,7 @@ class BaseCharFieldFormWidget(forms.TextInput):
 
 
 class BaseNumberFormWidget(forms.NumberInput):
-    def __init__(
-        self, *args, placeholder=None, required=True, **kwargs
-    ):
+    def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
@@ -48,7 +46,6 @@ class BaseNumberFormWidget(forms.NumberInput):
             kwargs["attrs"]["placeholder"] = placeholder
 
         super().__init__(*args, **kwargs)
-
 
 
 class BaseTextAreaFormWidget(forms.Textarea):

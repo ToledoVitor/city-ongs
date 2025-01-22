@@ -1,6 +1,6 @@
 from django.urls import path
 
-from bank.views import create_bank_account_ofx_view, create_bank_account_manual_view
+from bank.views import create_bank_account_manual_view, create_bank_account_ofx_view
 from contracts.views import (
     CompanyCreateView,
     CompanyListView,
