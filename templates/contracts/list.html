@@ -39,7 +39,7 @@
       <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
           <tr>
               <th scope="col" class="px-6 py-3">
-                  Nome do Contrato <br>
+                  Contrato <br>
               </th>
               <th scope="col" class="px-6 py-3">
                   Valor
@@ -58,8 +58,8 @@
             {% for contract in contracts_list %}
               <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                   <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
+                    <span class="px-2.5 py-0.5  mb-2 rounded bg-blue-700 text-white uppercase text-sm font-medium">{{ contract.status_label }}</span> <br>
                     {{ contract.name_with_code }} <br>
-                    <p class="mt-2 text-xs">Status: <span class="uppercase">{{ contract.status_label }}</span></p>
                     <p class="mt-2 text-xs">Gestora do Contratante: {{ contract.contractor_manager.name }}</p>
                     <p class="mt-1 text-xs">Gestora do Contratado: {{ contract.hired_manager.name }}</p>
                   </th>

@@ -147,3 +147,8 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = "accounts.User"
+
+DATE_INPUT_FORMATS = [
+    "%d/%m/%Y",
+    "%Y-%m-%d",  # ISO
+]

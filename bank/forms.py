@@ -63,8 +63,12 @@ class CreateBankAccountForm(forms.ModelForm):
             "account": BaseCharFieldFormWidget(),
             "account_type": BaseSelectFormWidget(),
             "agency": BaseCharFieldFormWidget(),
-            "balance": BaseCharFieldFormWidget(),
+            "closing_date": forms.DateInput(attrs={"type": "closing_date"}, format="%d/%m/%Y"),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["closing_date"].input_formats = ["%d/%m/%Y"]
 
 
 class TransactionForm(forms.ModelForm):
@@ -85,8 +89,12 @@ class TransactionForm(forms.ModelForm):
             "amount": BaseNumberFormWidget(),
             "transaction_id": BaseCharFieldFormWidget(required=False),
             "transaction_type": BaseSelectFormWidget(),
+            "date": forms.DateInput(attrs={"type": "date"}, format="%d/%m/%Y"),
         }
-
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].input_formats = ["%d/%m/%Y"]
 
 TransactionFormSet = forms.inlineformset_factory(
     BankAccount,
@@ -94,4 +102,5 @@ TransactionFormSet = forms.inlineformset_factory(
     form=TransactionForm,
     extra=1,
     can_delete=True,
+    min_num=0,
 )

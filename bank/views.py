@@ -133,6 +133,33 @@ def create_bank_account_manual_view(request, pk):
         form = CreateBankAccountForm(request.POST)
         transactions_formset = TransactionFormSet(request.POST)
         if form.is_valid() and transactions_formset.is_valid():
+            if _account_type_already_created(contract, form.cleaned_data["account_type"]):
+                return render(
+                    request,
+                    "bank-account/manual-create.html",
+                    {
+                        "form": form,
+                        "contract": contract,
+                        "transactions_formset": transactions_formset,
+                    },
+                )
+
+            if BankAccount.objects.filter(
+                bank_name=form.cleaned_data["bank_name"],
+                bank_id=form.cleaned_data["bank_id"],
+                account=form.cleaned_data["account"],
+                account_type=form.cleaned_data["account_type"],
+            ).exists():
+                return render(
+                    request,
+                    "bank-account/manual-create.html",
+                    {
+                        "form": form,
+                        "contract": contract,
+                        "transactions_formset": transactions_formset,
+                    },
+                )
+
             with django_transaction.atomic():
                 bank_account = BankAccount.objects.create(
                     bank_name=form.cleaned_data["bank_name"],
@@ -153,6 +180,13 @@ def create_bank_account_manual_view(request, pk):
                     transaction.bank_account = bank_account
                     transaction.save()
 
+                if bank_account.account_type == "CHECKING":
+                    contract.checking_account = bank_account
+                else:
+                    contract.investing_account = bank_account
+                
+                contract.save()
+
                 logger.info(f"{request.user.id} - Created new bank account")
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -169,12 +203,6 @@ def create_bank_account_manual_view(request, pk):
                     target_content_object=bank_account,
                 )
                 return redirect("contracts:contracts-detail", pk=contract.id)
-            # except ValidationError:
-            #     return render(
-            #         request,
-            #         "bank-account/manual-create.html",
-            #         {"form": form, "contract": contract, "account_exists": True},
-            #     )
     else:
         form = CreateBankAccountForm()
         transactions_formset = TransactionFormSet()
@@ -188,3 +216,13 @@ def create_bank_account_manual_view(request, pk):
             "transactions_formset": transactions_formset,
         },
     )
+
+
+def _account_type_already_created(contract: Contract, account_type: str):
+    if account_type == "CHECKING":
+        return contract.checking_account is not None
+
+    if account_type == "INVESTING":
+        return contract.investing_account is not None
+
+    return True
