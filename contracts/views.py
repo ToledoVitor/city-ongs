@@ -103,6 +103,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "organization",
             )
             .prefetch_related(
+                "accountabilities",
                 "addendums",
                 "items",
                 "goals",

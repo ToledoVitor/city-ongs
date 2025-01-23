@@ -8,40 +8,40 @@ from accounts.models import User
 class ActivityLog(models.Model):
     class ActivityLogChoices(models.TextChoices):
         # accounts
-        CREATED_CIVIL_SERVANT = "CREATED_CIVIL_SERVANT", "criou funcionário público"
-        CREATED_FOLDER_MANAGER = "CREATED_FOLDER_MANAGER", "criou gestor de pasta"
+        CREATED_CIVIL_SERVANT = "CREATED_CIVIL_SERVANT", "Criou funcionário público"
+        CREATED_FOLDER_MANAGER = "CREATED_FOLDER_MANAGER", "Criou gestor de pasta"
         CREATED_ORGANIZATION_ACCOUNTANT = (
             "CREATED_ORGANIZATION_ACCOUNTANT",
-            "criou contador / funcionário organização",
+            "Criou contador / funcionário organização",
         )
         # accountability
-        CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "criou contabilidade mês"
-        UPDATED_ACCOUNTABILITY = "UPDATED_ACCOUNTABILITY", "atualizou contabilidade mês"
+        CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "Criou prestação mensal"
+        UPDATED_ACCOUNTABILITY = "UPDATED_ACCOUNTABILITY", "Atualizou prestação mensal"
         # bank
-        CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "criou conta bancária"
-        UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "atualizou conta bancária"
+        CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "Criou conta bancária"
+        UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "Atualizou conta bancária"
         UPLOADED_BALANCE_FILE = "UPLOADED_BALANCE_FILE", "subiu extrato bancário"
         # company
-        CREATED_COMPANY = "CREATED_COMPANY", "criou empresa"
-        UPDATED_COMPANY = "UPDATED_COMPANY", "atualizou empresa"
+        CREATED_COMPANY = "CREATED_COMPANY", "Criou empresa"
+        UPDATED_COMPANY = "UPDATED_COMPANY", "Atualizou empresa"
         # contracts
-        CREATED_CONTRACT = "CREATED_CONTRACT", "criou contrato"
+        CREATED_CONTRACT = "CREATED_CONTRACT", "Criou contrato"
         CREATED_CONTRACT_ADDENDUM = (
             "CREATED_CONTRACT_ADDENDUM",
-            "criou aditivo de contrato",
+            "Criou aditivo de contrato",
         )
         # contract goals
-        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "criou meta do contrato"
-        UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "atualizou meta do contrato"
+        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Criou meta do contrato"
+        UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"
         # contract items
-        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "criou item do contrato"
-        UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "atualizou item do contrato"
+        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Criou item do contrato"
+        UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
         # expenses
-        CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "criou fonte de despesa"
-        DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "apagou fonte de despesa"
+        CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "Criou fonte de despesa"
+        DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "Apagou fonte de despesa"
         # revenues
-        CREATE_REVENUE_SOURCE = "CREATE_REVENUE_SOURCE", "criou fonte de recurso"
-        DELETED_REVENUE_SOURCE = "DELETED_REVENUE_SOURCE", "apagou fonte de recurso"
+        CREATE_REVENUE_SOURCE = "CREATE_REVENUE_SOURCE", "Criou fonte de recurso"
+        DELETED_REVENUE_SOURCE = "DELETED_REVENUE_SOURCE", "Apagou fonte de recurso"
 
     created_at = models.DateTimeField(
         verbose_name="Hora do registro",

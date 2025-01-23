@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, DetailView
 
 from accountability.forms import (
     AccountabilityCreateForm,
@@ -175,3 +175,35 @@ def create_contract_accountability_view(request, pk):
             "accountability/accountability/create.html",
             {"contract": contract, "form": form},
         )
+
+
+class AccountabilityDetailView(LoginRequiredMixin, DetailView):
+    model = Accountability
+    template_name = "accountability/accountability/detail.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contract",
+            )
+            # .prefetch_related(
+            #     Prefetch(
+            #         "statements",
+            #         queryset=BankStatement.objects.order_by("-closing_date"),
+            #     ),
+            #     Prefetch(
+            #         "transactions", queryset=BankStatement.objects.order_by("-date")
+            #     ),
+            # )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        return context
+

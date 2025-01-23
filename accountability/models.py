@@ -8,6 +8,14 @@ from utils.models import BaseModel
 
 
 class Accountability(BaseModel):
+    class ReviewStatus(models.TextChoices):
+        WIP = "WIP", "Em "
+        SENT = "SENT", "Enviada para análise"
+        REJECTED = "REJECTED", "Rejeitada"
+        PENDENCIES = "PENDENCIES", "Com pendências"
+        APPROVED = "APPROVED", "Aprovada"
+        FINISHED = "FINISHED", "Finalizada"
+
     month = models.IntegerField(
         verbose_name="Mês",
         choices=MonthChoices,
@@ -30,6 +38,13 @@ class Accountability(BaseModel):
         verbose_name="Contrato",
         related_name="accountabilities",
         on_delete=models.CASCADE,
+    )
+
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.WIP,
+        max_length=10,
     )
 
     history = HistoricalRecords()

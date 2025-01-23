@@ -54,9 +54,7 @@ class BankAccountsListView(LoginRequiredMixin, ListView):
 
 class BankAccountDetailView(LoginRequiredMixin, DetailView):
     model = BankAccount
-
     template_name = "bank-account/detail.html"
-
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:

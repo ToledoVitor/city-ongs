@@ -7,7 +7,7 @@
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-  Cadastrar Nova Empresa
+  Detalhe da Prestação
 </p>
 
 <!-- Breadcrumb -->
@@ -26,7 +26,7 @@
         <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <a href="{% url 'contracts:companies-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Empresas</a>
+        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Contratos</a>
       </div>
     </li>
     <li aria-current="page">
@@ -34,10 +34,20 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Cadastrar Empresa</span>
+        <a href="{% url 'contracts:contracts-detail' object.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ object.contract.trailing_code }}</a>
+      </div>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Prestação {{ object.month }}/{{ object.year }}</span>
       </div>
     </li>
   </ol>
 </nav>
+
+{{ object }}
 
 {% endblock %}

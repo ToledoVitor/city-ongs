@@ -217,8 +217,13 @@ class Contract(BaseModel):
             target_object_id__in=items_ids,
         )
 
+        accountability_ids = [str(id) for id in self.accountabilities.values_list("id", flat=True)[:10]]
+        accountability_logs = ActivityLog.objects.filter(
+            target_object_id__in=accountability_ids,
+        )
+
         combined_querset = (
-            contract_logs | addendum_logs | goals_logs | items_logs
+            contract_logs | addendum_logs | goals_logs | items_logs | accountability_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
