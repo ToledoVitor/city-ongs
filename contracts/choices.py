@@ -1,7 +1,7 @@
 from django.db.models import TextChoices
 
 
-class ItemNatureChoices(TextChoices):
+class NatureChoices(TextChoices):
     # Permanent Goods and Materials
     PERMANENT_GOODS_AND_MATERIALS = (
         "PERMANENT_GOODS_AND_MATERIALS",

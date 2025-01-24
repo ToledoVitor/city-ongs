@@ -6,7 +6,7 @@ from simple_history.models import HistoricalRecords
 from accounts.models import Area, Organization
 from activity.models import ActivityLog
 from bank.models import BankAccount
-from contracts.choices import ItemNatureChoices
+from contracts.choices import NatureChoices
 from utils.choices import StatesChoices, StatusChoices
 from utils.models import BaseModel
 
@@ -370,7 +370,7 @@ class ContractItem(BaseModel):
     )
     nature = models.CharField(
         verbose_name="Natureza da Despesa",
-        choices=ItemNatureChoices,
+        choices=NatureChoices,
         max_length=34,
     )
 

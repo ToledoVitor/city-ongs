@@ -2,7 +2,8 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from accounts.models import CityHall, User
-from contracts.models import Contract
+from contracts.models import Contract, ContractItem
+from contracts.choices import NatureChoices
 from utils.choices import MonthChoices, StatusChoices
 from utils.models import BaseModel
 
@@ -11,9 +12,7 @@ class Accountability(BaseModel):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em "
         SENT = "SENT", "Enviada para análise"
-        REJECTED = "REJECTED", "Rejeitada"
-        PENDENCIES = "PENDENCIES", "Com pendências"
-        APPROVED = "APPROVED", "Aprovada"
+        CORRECTING = "CORRECTING", "Corrigindo"
         FINISHED = "FINISHED", "Finalizada"
 
     month = models.IntegerField(
@@ -58,6 +57,24 @@ class Accountability(BaseModel):
         unique_together = ("month", "year")
 
 
+class Favored(BaseModel):
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=64,
+    )
+    document = models.IntegerField(
+        verbose_name="CPF/CNPJ",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Favorecido"
+        verbose_name_plural = "Favorecidos"
+
 class ExpenseSource(BaseModel):
     city_hall = models.ForeignKey(
         CityHall,
@@ -89,14 +106,32 @@ class ExpenseSource(BaseModel):
 
 
 class Expense(BaseModel):
-    paid = models.BooleanField(verbose_name="Pago", default=False)
-    reconciled = models.BooleanField(verbose_name="Conciliado", default=False)
+    class LiquidationChoices(models.TextChoices):
+        # TODO: what are all the possible choices?
+        ELETRONIC_TRANSFER = "ELETRONIC_TRANSFER", "Transferência Eletrônica"
 
-    value = models.DecimalField(
-        verbose_name="Valor da Despesa",
-        decimal_places=2,
-        max_digits=12,
-    )
+    class DocumentChoices(models.TextChoices):
+        INSURANCE_POLICY = "INSURANCE_POLICY", "Apolice de Seguro"
+        DEBIT_NOTICE = "DEBIT_NOTICE", "Aviso de Débito"
+        PAY_SLIP = "PAY_SLIP", "Boleto"
+        TAX_RECEIPT = "TAX_RECEIPT", "Cupom Fiscal"
+        DARF = "DARF", "DARF"
+        INVOICE = "INVOICE", "Fatura"
+        GPS = "GPS", "GPS"
+        GRCS_DOC = "GRCS_DOC", "GRCS ou DOC"
+        GRF = "GRF", "GRF"
+        GRRF = "GRRF", "GRRF"
+        PAYSLIP = "PAYSLIP", "Holerite"
+        NF = "NF", "NF"
+        NFE = "NFE", "NF-E"
+        NFS = "NFS", "NFS"
+        NFSE = "NFSE", "NFS-E"
+        NF_INVOICES = "NF_INVOICES", "Notas Fiscais (Eletronica, Serviços, etc)"
+        OTHERS = "OTHERS", "Outros"
+        RECEIPT = "RECEIPT", "Recibo"
+        VACATION_RECEIPT = "VACATION_RECEIPT", "Recibo de Férias"
+        RPA = "RPA", "RPA"
+        TERMINATION_AGREEMENT = "TERMINATION_AGREEMENT", "Termo de Rescisão"
 
     accountability = models.ForeignKey(
         Accountability,
@@ -104,11 +139,94 @@ class Expense(BaseModel):
         related_name="expenses",
         on_delete=models.CASCADE,
     )
+
+    # flags
+    paid = models.BooleanField(verbose_name="Pago?", default=False)
+    conciled = models.BooleanField(verbose_name="Conciliado?", default=False)
+    planned = models.BooleanField(verbose_name="Planejado?", default=True)
+
+    # specifications
+    identification = models.CharField(
+        # TODO: remove null
+        verbose_name="Identificação da Despesa",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    observations = models.CharField(
+        verbose_name="Observações",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    value = models.DecimalField(
+        verbose_name="Valor da Despesa",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    # relations
     source = models.ForeignKey(
         ExpenseSource,
-        verbose_name="Fonte",
+        verbose_name="Fonte de Recurso",
         related_name="expenses",
         on_delete=models.CASCADE,
+    )
+    favored = models.ForeignKey(
+        Favored,
+        verbose_name="Favorecido",
+        related_name="expenses",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item Relacionado",
+        related_name="expenses",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    nature = models.CharField(
+        verbose_name="Natureza da Despesa",
+        choices=NatureChoices.choices,
+        max_length=34,
+        null=True,
+        blank=True,
+    )
+
+    # dates
+    competency = models.DateField(
+        # TODO: remove null
+        verbose_name="Competência",
+        null=True,
+        blank=True,
+    )
+    liquidation = models.DateField(
+        verbose_name="Liquidação",
+        null=True,
+        blank=True,
+    )
+    liquidation_form = models.CharField(
+        verbose_name="Forma de Liquidação",
+        choices=LiquidationChoices.choices,
+        default=LiquidationChoices.ELETRONIC_TRANSFER,
+        max_length=18,
+    )
+
+    # douments
+    document_type = models.CharField(
+        verbose_name="Tipo de Documento",
+        choices=DocumentChoices.choices,
+        max_length=21,
+        null=True,
+        blank=True,
+    )
+    document_number = models.CharField(
+        verbose_name="Número do documento",
+        max_length=64,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
