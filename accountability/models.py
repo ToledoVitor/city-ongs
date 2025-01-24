@@ -1,10 +1,10 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 
-from accounts.models import User, Organization
+from accounts.models import Organization, User
 from bank.models import BankAccount
-from contracts.models import Contract, ContractItem
 from contracts.choices import NatureChoices
+from contracts.models import Contract, ContractItem
 from utils.choices import MonthChoices, StatusChoices
 from utils.models import BaseModel
 
@@ -75,6 +75,7 @@ class Favored(BaseModel):
     class Meta:
         verbose_name = "Favorecido"
         verbose_name_plural = "Favorecidos"
+
 
 class ExpenseSource(BaseModel):
     organization = models.ForeignKey(
@@ -347,9 +348,15 @@ class Revenue(BaseModel):
         RETURN_DEPOSIT = "RETURN_DEPOSIT", "Depósito para devolução ao Órgão Concedente"
         PAYMENT_REVERSAL = "PAYMENT_REVERSAL", "Estorno de Pagamento"
         FEE_REVERSAL = "FEE_REVERSAL", "Estorno de Tarifas"
-        OTHER_REVENUES = "OTHER_REVENUES", "Outras Receitas decorrentes da execução do ajuste"
+        OTHER_REVENUES = (
+            "OTHER_REVENUES",
+            "Outras Receitas decorrentes da execução do ajuste",
+        )
         OWN_RESOURCES = "OWN_RESOURCES", "Recurso próprio da entidade parceira"
-        REIMBURSEMENT_INTEREST = "REIMBURSEMENT_INTEREST", "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc"
+        REIMBURSEMENT_INTEREST = (
+            "REIMBURSEMENT_INTEREST",
+            "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
+        )
         FEE_REIMBURSEMENT = "FEE_REIMBURSEMENT", "Reembolso de Tarifas"
         INVESTMENT_INCOME = "INVESTMENT_INCOME", "Rendimento de Aplicação"
         SAVINGS_INCOME = "SAVINGS_INCOME", "Rendimento de Poupança"

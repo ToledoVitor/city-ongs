@@ -6,9 +6,9 @@ from accountability.views import (
     RevenueSourceCreateView,
     RevenueSourceListView,
     accountability_detail_view,
-    create_contract_accountability_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
+    create_contract_accountability_view,
 )
 
 urlpatterns = [
@@ -36,7 +36,7 @@ urlpatterns = [
         create_accountability_expense_view,
         name="expenses-create",
     ),
-        path(
+    path(
         "<uuid:pk>/accountability/revenues/create",
         create_accountability_revenue_view,
         name="revenues-create",

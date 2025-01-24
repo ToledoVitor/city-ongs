@@ -1,11 +1,17 @@
 from django import forms
 
-from accountability.models import Accountability, ExpenseSource, Expense, RevenueSource, Revenue
+from accountability.models import (
+    Accountability,
+    Expense,
+    ExpenseSource,
+    Revenue,
+    RevenueSource,
+)
 from utils.widgets import (
     BaseCharFieldFormWidget,
-    BaseTextAreaFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
+    BaseTextAreaFormWidget,
 )
 
 
@@ -61,9 +67,14 @@ class ExpenseCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.request:
-            self.fields["source"].queryset = self.request.user.organization.expense_sources.all()
+            self.fields[
+                "source"
+            ].queryset = self.request.user.organization.expense_sources.all()
         else:
-            self.fields["source"].queryset = self.request.user.organization.expense_sources.none()
+            self.fields[
+                "source"
+            ].queryset = self.request.user.organization.expense_sources.none()
+
 
 class RevenueSourceCreateForm(forms.ModelForm):
     class Meta:
@@ -146,9 +157,13 @@ class RevenueCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.request:
-            self.fields["source"].queryset = self.request.user.organization.revenue_sources.all()
+            self.fields[
+                "source"
+            ].queryset = self.request.user.organization.revenue_sources.all()
         else:
-            self.fields["source"].queryset = self.request.user.organization.revenue_sources.none()
+            self.fields[
+                "source"
+            ].queryset = self.request.user.organization.revenue_sources.none()
 
 
 class AccountabilityCreateForm(forms.ModelForm):

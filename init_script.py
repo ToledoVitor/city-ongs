@@ -28,7 +28,9 @@ a3 = Area.objects.create(
 )
 
 o1 = Organization.objects.create(name="Ong Contabilide Vitor Toledo", city_hall=varzea)
-o2 = Organization.objects.create(name="Fundação Social de Desenvolvimento Social", city_hall=varzea)
+o2 = Organization.objects.create(
+    name="Fundação Social de Desenvolvimento Social", city_hall=varzea
+)
 
 super_user = User.objects.create(
     first_name="Vitor",
