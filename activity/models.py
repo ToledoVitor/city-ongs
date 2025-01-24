@@ -31,16 +31,20 @@ class ActivityLog(models.Model):
             "Criou aditivo de contrato",
         )
         # contract goals
-        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Criou meta do contrato"
+        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
         UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"
         # contract items
-        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Criou item do contrato"
+        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Cadastrou item do contrato"
         UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
         # expenses
-        CREATE_EXPENSE_SOURCE = "CREATE_EXPENSE_SOURCE", "Criou fonte de despesa"
+        CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
+        UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
+        CREATED_EXPENSE_SOURCE = "CREATED_EXPENSE_SOURCE", "Cadastrou fonte de despesa"
         DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "Apagou fonte de despesa"
         # revenues
-        CREATE_REVENUE_SOURCE = "CREATE_REVENUE_SOURCE", "Criou fonte de recurso"
+        CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
+        UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
+        CREATED_REVENUE_SOURCE = "CREATED_REVENUE_SOURCE", "Cadastrou fonte de recurso"
         DELETED_REVENUE_SOURCE = "DELETED_REVENUE_SOURCE", "Apagou fonte de recurso"
 
     created_at = models.DateTimeField(

@@ -1,7 +1,8 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 
-from accounts.models import CityHall, User
+from accounts.models import User, Organization
+from bank.models import BankAccount
 from contracts.models import Contract, ContractItem
 from contracts.choices import NatureChoices
 from utils.choices import MonthChoices, StatusChoices
@@ -76,11 +77,14 @@ class Favored(BaseModel):
         verbose_name_plural = "Favorecidos"
 
 class ExpenseSource(BaseModel):
-    city_hall = models.ForeignKey(
-        CityHall,
-        verbose_name="Prefeitura",
+    organization = models.ForeignKey(
+        # TODO: remove null
+        Organization,
+        verbose_name="Organização",
         related_name="expense_sources",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
     document = models.IntegerField(
@@ -92,7 +96,7 @@ class ExpenseSource(BaseModel):
     class Meta:
         verbose_name = "Fonte de Despesa"
         verbose_name_plural = "Fonte de Despesas"
-        unique_together = ("city_hall", "name")
+        unique_together = ("organization", "name")
 
     def __str__(self) -> str:
         return self.name
@@ -107,8 +111,13 @@ class ExpenseSource(BaseModel):
 
 class Expense(BaseModel):
     class LiquidationChoices(models.TextChoices):
-        # TODO: what are all the possible choices?
+        BILL = "BILL", "Boleto"
+        CHECK = "CHECK", "Cheque"
+        DEBIT_CREDIT_CARD = "DEBIT_CREDIT_CARD", "Cartão Débito/Crédito"
+        DIRECT_DEBIT = "DIRECT_DEBIT", "Débito em Conta"
         ELETRONIC_TRANSFER = "ELETRONIC_TRANSFER", "Transferência Eletrônica"
+        MONEY = "MONEY", "Dinheiro"
+        OBTV = "OBTV", "OBTV"
 
     class DocumentChoices(models.TextChoices):
         INSURANCE_POLICY = "INSURANCE_POLICY", "Apolice de Seguro"
@@ -291,11 +300,14 @@ class RevenueSource(BaseModel):
         TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
         PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
 
-    city_hall = models.ForeignKey(
-        CityHall,
-        verbose_name="Prefeitura",
+    organization = models.ForeignKey(
+        # TODO: remove null
+        Organization,
+        verbose_name="Organização",
         related_name="revenue_sources",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
@@ -327,7 +339,7 @@ class RevenueSource(BaseModel):
     class Meta:
         verbose_name = "Fonte de Recurso"
         verbose_name_plural = "Fonte de Recursos"
-        unique_together = ("city_hall", "name")
+        unique_together = ("organization", "name")
 
     def __str__(self) -> str:
         return self.name
@@ -341,17 +353,83 @@ class RevenueSource(BaseModel):
 
 
 class Revenue(BaseModel):
-    value = models.DecimalField(
-        verbose_name="Valor da Despesa",
-        decimal_places=2,
-        max_digits=12,
-    )
+    class Nature(models.TextChoices):
+        UNDUE_CREDIT = "UNDUE_CREDIT", "Crédito Indevido"
+        BANK_DEPOSIT = "BANK_DEPOSIT", "Depósito Bancário"
+        RETURN_DEPOSIT = "RETURN_DEPOSIT", "Depósito para devolução ao Órgão Concedente"
+        PAYMENT_REVERSAL = "PAYMENT_REVERSAL", "Estorno de Pagamento"
+        FEE_REVERSAL = "FEE_REVERSAL", "Estorno de Tarifas"
+        OTHER_REVENUES = "OTHER_REVENUES", "Outras Receitas decorrentes da execução do ajuste"
+        OWN_RESOURCES = "OWN_RESOURCES", "Recurso próprio da entidade parceira"
+        REIMBURSEMENT_INTEREST = "REIMBURSEMENT_INTEREST", "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc"
+        FEE_REIMBURSEMENT = "FEE_REIMBURSEMENT", "Reembolso de Tarifas"
+        INVESTMENT_INCOME = "INVESTMENT_INCOME", "Rendimento de Aplicação"
+        SAVINGS_INCOME = "SAVINGS_INCOME", "Rendimento de Poupança"
+        PUBLIC_TRANSFER = "PUBLIC_TRANSFER", "Repasse Público"
+        PREVIOUS_BALANCE = "PREVIOUS_BALANCE", "Saldo anterior para acerto"
 
     accountability = models.ForeignKey(
         Accountability,
         verbose_name="Contabilidade",
         related_name="revenues",
         on_delete=models.CASCADE,
+    )
+
+    # specifications
+    identification = models.CharField(
+        # TODO: remove null
+        verbose_name="Identificação da Despesa",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    observations = models.CharField(
+        verbose_name="Observações",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    value = models.DecimalField(
+        verbose_name="Valor da Despesa",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    # dates
+    competency = models.DateField(
+        # TODO: remove null
+        verbose_name="Competência",
+        null=True,
+        blank=True,
+    )
+    due_date = models.DateField(
+        verbose_name="Vencimento",
+        null=True,
+        blank=True,
+    )
+
+    revenue_source = models.ForeignKey(
+        RevenueSource,
+        verbose_name="Fonte de Recurso",
+        related_name="revenues",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    bank_account = models.ForeignKey(
+        # TODO: remove null
+        BankAccount,
+        verbose_name="Conta Bancária Destino",
+        related_name="revenues",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    revenue_nature = models.CharField(
+        verbose_name="Natureza da Receita",
+        choices=Nature.choices,
+        default=Nature.BANK_DEPOSIT,
+        max_length=22,
     )
 
     history = HistoricalRecords()

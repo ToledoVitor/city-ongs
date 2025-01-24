@@ -1,8 +1,9 @@
 from django import forms
 
-from accountability.models import Accountability, ExpenseSource, RevenueSource
+from accountability.models import Accountability, ExpenseSource, Expense, RevenueSource, Revenue
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseTextAreaFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
 )
@@ -12,13 +13,13 @@ class ExpenseSourceCreateForm(forms.ModelForm):
     class Meta:
         model = ExpenseSource
         fields = [
-            "city_hall",
+            "organization",
             "name",
             "document",
         ]
 
         widgets = {
-            "city_hall": BaseSelectFormWidget(placeholder="Prefeitura"),
+            "organization": BaseSelectFormWidget(placeholder="Prefeitura"),
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
         }
 
@@ -30,11 +31,44 @@ class ExpenseSourceCreateForm(forms.ModelForm):
             self.fields["city_hall"].queryset = self.request.user.city_halls.all()
 
 
+class ExpenseCreateForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = [
+            "identification",
+            "observations",
+            "value",
+            "source",
+            "favored",
+            "item",
+            "nature",
+            "competency",
+            "liquidation",
+            "liquidation_form",
+            "document_type",
+            "document_number",
+        ]
+
+        widgets = {
+            "identification": BaseCharFieldFormWidget(),
+            "observations": BaseTextAreaFormWidget(),
+            "value": BaseNumberFormWidget(),
+            "source": BaseSelectFormWidget(required=False),
+            "favored": BaseSelectFormWidget(required=False),
+            "item": BaseSelectFormWidget(),
+            "nature": BaseSelectFormWidget(),
+            # "competency": BaseCharFieldFormWidget(),
+            # "liquidation": BaseCharFieldFormWidget(),
+            "liquidation_form": BaseSelectFormWidget(),
+            "document_type": BaseSelectFormWidget(),
+            "document_number": BaseCharFieldFormWidget(),
+        }
+
 class RevenueSourceCreateForm(forms.ModelForm):
     class Meta:
         model = RevenueSource
         fields = [
-            "city_hall",
+            "organization",
             "name",
             "document",
             "contract_number",
@@ -43,7 +77,7 @@ class RevenueSourceCreateForm(forms.ModelForm):
         ]
 
         widgets = {
-            "city_hall": BaseSelectFormWidget(placeholder="Prefeitura"),
+            "organization": BaseSelectFormWidget(placeholder="Organização"),
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
             "contract_number": BaseCharFieldFormWidget(
                 placeholder="xxxx.xxxxx.xx.xx.xx.xx"
@@ -79,6 +113,32 @@ class RevenueSourceCreateForm(forms.ModelForm):
                 )
             }
         )
+
+
+class RevenueCreateForm(forms.ModelForm):
+    class Meta:
+        model = Revenue
+        fields = [
+            "identification",
+            "observations",
+            "value",
+            "competency",
+            "due_date",
+            "revenue_source",
+            "bank_account",
+            "revenue_nature",
+        ]
+
+        widgets = {
+            "identification": BaseCharFieldFormWidget(),
+            "observations": BaseTextAreaFormWidget(),
+            "value": BaseCharFieldFormWidget(),
+            "bank_account": BaseSelectFormWidget(),
+            # "competency": BaseCharFieldFormWidget(),
+            # "due_date": BaseCharFieldFormWidget(),
+            "revenue_source": BaseSelectFormWidget(),
+            "revenue_nature": BaseSelectFormWidget(),
+        }
 
 
 class AccountabilityCreateForm(forms.ModelForm):

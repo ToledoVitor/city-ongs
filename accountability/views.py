@@ -15,6 +15,8 @@ from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseSourceCreateForm,
     RevenueSourceCreateForm,
+    ExpenseCreateForm,
+    RevenueCreateForm,
 )
 from accountability.models import ExpenseSource, RevenueSource
 from activity.models import ActivityLog
@@ -73,7 +75,7 @@ class ExpenseSourceCreateView(LoginRequiredMixin, TemplateView):
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATE_EXPENSE_SOURCE,
+                    action=ActivityLog.ActivityLogChoices.CREATED_EXPENSE_SOURCE,
                     target_object_id=source.id,
                     target_content_object=source,
                 )
@@ -132,7 +134,7 @@ class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATE_REVENUE_SOURCE,
+                    action=ActivityLog.ActivityLogChoices.CREATED_REVENUE_SOURCE,
                     target_object_id=source.id,
                     target_content_object=source,
                 )
@@ -199,3 +201,73 @@ def accountability_detail_view(request, pk):
         "revenues_page": revenues_page,
     }
     return render(request, "accountability/accountability/detail.html", context)
+
+
+def create_accountability_revenue_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    accountability = get_object_or_404(Accountability, id=pk)
+    if request.method == "POST":
+        form = RevenueCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                revenue = form.save()
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_REVENUE,
+                    target_object_id=revenue.id,
+                    target_content_object=revenue,
+                )
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+        else:
+            return render(
+                request,
+                "accountability/revenues/create.html",
+                {"accountability": accountability, "form": form},
+            )
+    else:
+        form = RevenueCreateForm()
+        return render(
+            request,
+            "accountability/revenues/create.html",
+            {"accountability": accountability, "form": form},
+        )
+
+
+def create_accountability_expense_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    accountability = get_object_or_404(Accountability, id=pk)
+    if request.method == "POST":
+        form = ExpenseCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                expense = form.save()
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_EXPENSE,
+                    target_object_id=expense.id,
+                    target_content_object=expense,
+                )
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+        else:
+            return render(
+                request,
+                "accountability/expenses/create.html",
+                {"accountability": accountability, "form": form},
+            )
+    else:
+        form = ExpenseCreateForm()
+        return render(
+            request,
+            "accountability/expenses/create.html",
+            {"accountability": accountability, "form": form},
+        )
