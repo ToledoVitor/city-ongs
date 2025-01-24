@@ -78,13 +78,10 @@ class Favored(BaseModel):
 
 class ExpenseSource(BaseModel):
     organization = models.ForeignKey(
-        # TODO: remove null
         Organization,
         verbose_name="Organização",
         related_name="expense_sources",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
     document = models.IntegerField(
@@ -156,11 +153,8 @@ class Expense(BaseModel):
 
     # specifications
     identification = models.CharField(
-        # TODO: remove null
         verbose_name="Identificação da Despesa",
         max_length=128,
-        null=True,
-        blank=True,
     )
     observations = models.CharField(
         verbose_name="Observações",
@@ -206,10 +200,7 @@ class Expense(BaseModel):
 
     # dates
     competency = models.DateField(
-        # TODO: remove null
         verbose_name="Competência",
-        null=True,
-        blank=True,
     )
     liquidation = models.DateField(
         verbose_name="Liquidação",
@@ -301,13 +292,10 @@ class RevenueSource(BaseModel):
         PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
 
     organization = models.ForeignKey(
-        # TODO: remove null
         Organization,
         verbose_name="Organização",
         related_name="revenue_sources",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
@@ -377,11 +365,8 @@ class Revenue(BaseModel):
 
     # specifications
     identification = models.CharField(
-        # TODO: remove null
         verbose_name="Identificação da Despesa",
         max_length=128,
-        null=True,
-        blank=True,
     )
     observations = models.CharField(
         verbose_name="Observações",
@@ -397,10 +382,7 @@ class Revenue(BaseModel):
 
     # dates
     competency = models.DateField(
-        # TODO: remove null
         verbose_name="Competência",
-        null=True,
-        blank=True,
     )
     due_date = models.DateField(
         verbose_name="Vencimento",
@@ -417,13 +399,10 @@ class Revenue(BaseModel):
         blank=True,
     )
     bank_account = models.ForeignKey(
-        # TODO: remove null
         BankAccount,
         verbose_name="Conta Bancária Destino",
         related_name="revenues",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
     )
     revenue_nature = models.CharField(
         verbose_name="Natureza da Receita",
