@@ -48,6 +48,17 @@
   </ol>
 </nav>
 
-{{ object }}
+
+<p class="text-xl my-4 font-bold text-black">Despesas Cadastradas</p>
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+  {% include 'accountability/accountability/expenses-table.html' with expenses_page=expenses_page revenue_page_number=revenue_page.number %}
+</div>
+
+<p class="text-xl my-4 font-bold text-black">Receitas Cadastradas</p>
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+  {% include 'accountability/accountability/resources-table.html' with revenue_page=revenue_page expenses_page_number=expenses_page.number %}
+</div>
 
 {% endblock %}

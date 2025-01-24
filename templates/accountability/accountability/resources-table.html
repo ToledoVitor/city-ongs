@@ -1,0 +1,163 @@
+
+<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+        <tr>
+            <th scope="col" class="px-6 py-3">
+                Nome
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Documento
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Número do Contrato
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Origem
+            </th>
+            <th scope="col" class="px-6 py-3">
+                Categoria
+            </th>
+            <th scope="col" class="px-6 py-3" />
+        </tr>
+    </thead>
+    <tbody>
+        {% if revenues_page %}
+          {% for revenue in revenues_page %}
+            <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
+                  {{ revenue }} 
+                </th>
+                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                  {{ revenue }}
+                </td>
+                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                  {{ revenue }}
+                </td>
+                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                  {{ revenue }}
+                </td>
+                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                  {{ revenue }}
+                </td>
+                <td class="px-6 py-4 text-base flex justify-end">
+                  <a
+                    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Visualizar
+                  </a>
+                </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                Nenhum resultado encontrado
+            </th>
+            <td class="px-6 py-4">
+                -
+            </td>
+            <td class="px-6 py-4">
+                -
+            </td>
+            <td class="px-6 py-4">
+                -
+            </td>
+            <td class="px-6 py-4">
+              -
+            </td>
+            <td class="px-6 py-4">
+              -
+            </td>
+          </tr>
+        {% endif %}     
+    </tbody>
+</table>
+
+{% if user.has_admin_access %}
+  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
+    <a
+      href="{% url 'contracts:contracts-create' %}"
+      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    >
+      Adicionar nova
+      <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+      </svg>
+    </a>
+  </div>
+{% endif %}
+
+<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-green-200" aria-label="Table navigation">
+  <span class="text-base font-normal text-black dark:text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
+    Página
+    <span class="font-bold text-gray-900 dark:text-black">{{ revenues_page.number }}</span>
+    de
+    <span class="font-bold text-gray-900 dark:text-black">{{ revenues_page.paginator.num_pages }}</span>
+  </span>
+
+  <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+    {% if page_obj.has_previous %}
+      <li>
+        <a
+          href="?revenues_page=1&expenses_page={{ expenses_page_number }}"
+          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 rounded-s-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+        >
+          Primeira
+        </a>
+      </li>
+
+      <li>
+        <a
+          href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}"
+          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+        >
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    {% for num in revenues_page.paginator.page_range %}
+      {% if num == revenues_page.number %}
+        <li>
+          <a
+            href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}"
+            aria-current="page"
+            class="flex items-center justify-center px-3 h-8 text-white border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-white dark:border-gray-700 dark:bg-green-800 dark:text-white"
+          >
+            {{ num }}
+          </a>
+        </li>
+      {% else %}
+        <li>
+          <a
+            href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}"
+            class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+          >
+            {{ num }}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if revenues_page.has_next %}
+      <li>
+        <a
+          href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+        >
+          Próxima
+        </a>
+      </li>
+
+      <li>
+        <a
+          href="?revenues_page={{ revenues_page.paginator.num_pages }}&expenses_page={{ expenses_page_number }}"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 rounded-e-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+        >
+          Última
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+

@@ -1,19 +1,22 @@
 import logging
 from typing import Any
 
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from accountability.models import Accountability
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, TemplateView, DetailView
+from django.shortcuts import redirect
+from django.views.generic import ListView, TemplateView
 
 from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseSourceCreateForm,
     RevenueSourceCreateForm,
 )
-from accountability.models import Accountability, ExpenseSource, RevenueSource
+from accountability.models import ExpenseSource, RevenueSource
 from activity.models import ActivityLog
 from contracts.models import Contract
 
@@ -177,33 +180,22 @@ def create_contract_accountability_view(request, pk):
         )
 
 
-class AccountabilityDetailView(LoginRequiredMixin, DetailView):
-    model = Accountability
-    template_name = "accountability/accountability/detail.html"
-    login_url = "/auth/login"
+def accountability_detail_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    expenses_list = accountability.expenses.all()
+    revenues_list = accountability.revenues.all()
 
-    def get_queryset(self) -> QuerySet[Any]:
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                "contract",
-            )
-            # .prefetch_related(
-            #     Prefetch(
-            #         "statements",
-            #         queryset=BankStatement.objects.order_by("-closing_date"),
-            #     ),
-            #     Prefetch(
-            #         "transactions", queryset=BankStatement.objects.order_by("-date")
-            #     ),
-            # )
-        )
+    expenses_paginator = Paginator(expenses_list, 5)
+    expenses_page_number = request.GET.get("expenses_page")
+    expenses_page = expenses_paginator.get_page(expenses_page_number)
 
-    def get_object(self, queryset=None):
-        return self.model.objects.get(id=self.kwargs["pk"])
+    revenues_paginator = Paginator(revenues_list, 5)
+    revenues_page_number = request.GET.get("revenues_page")
+    revenues_page = revenues_paginator.get_page(revenues_page_number)
 
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        return context
-
+    context = {
+        "object": accountability,
+        "expenses_page": expenses_page,
+        "revenues_page": revenues_page,
+    }
+    return render(request, "accountability/accountability/detail.html", context)
