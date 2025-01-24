@@ -3,7 +3,6 @@ from accounts.models import (
     CityHall,
     Organization,
     User,
-    UserOrganizationRelatioship,
 )
 from contracts.models import Company
 from utils.choices import StatesChoices
@@ -28,27 +27,19 @@ a3 = Area.objects.create(
     description="Gestão e Fiscalização",
 )
 
-u = User.objects.get()
-u.first_name = "Vitor"
-u.last_name = "Toledo"
-u.save()
+o1 = Organization.objects.create(name="Ong Contabilide Vitor Toledo", city_hall=varzea)
+o2 = Organization.objects.create(name="Fundação Social de Desenvolvimento Social", city_hall=varzea)
 
-u.areas.add(a1)
-u.areas.add(a2)
-u.areas.add(a3)
-
-o1 = Organization.objects.create(name="Ong Contabilide Vitor Toledo")
-o2 = Organization.objects.create(name="Fundação Social de Desenvolvimento Social")
-
-UserOrganizationRelatioship.objects.create(
-    user=u,
-    organization=o1,
+super_user = User.objects.create(
+    first_name="Vitor",
+    last_name="Toledo",
+    email="admin@admin.com",
+    password="admin@2025",
+    Organization=o1,
 )
-UserOrganizationRelatioship.objects.create(
-    user=u,
-    organization=o2,
-)
-
+super_user.areas.add(a1)
+super_user.areas.add(a2)
+super_user.areas.add(a3)
 
 Company.objects.create(
     name="Empresa Contratente",

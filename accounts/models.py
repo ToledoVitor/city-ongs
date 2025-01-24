@@ -36,6 +36,7 @@ class Organization(BaseModel):
         verbose_name = "Organização"
         verbose_name_plural = "Organizações"
 
+
 class Area(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
     description = models.CharField(
