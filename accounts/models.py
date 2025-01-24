@@ -19,6 +19,23 @@ class CityHall(BaseModel):
         verbose_name_plural = "Prefeituras"
 
 
+class Organization(BaseModel):
+    city_hall = models.ForeignKey(
+        CityHall,
+        related_name="organizations",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(verbose_name="Nome", max_length=128)
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Organização - {self.name}"
+
+    class Meta:
+        verbose_name = "Organização"
+        verbose_name_plural = "Organizações"
+
 class Area(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
     description = models.CharField(
@@ -83,6 +100,12 @@ class User(AbstractUser):
         Area,
         related_name="users",
     )
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name="organization",
+        related_name="users",
+        on_delete=models.CASCADE,
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -117,40 +140,3 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"
-
-
-class Organization(BaseModel):
-    name = models.CharField(verbose_name="Nome", max_length=128)
-
-    history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return f"Organização - {self.name}"
-
-    class Meta:
-        verbose_name = "Organização"
-        verbose_name_plural = "Organizações"
-
-
-class UserOrganizationRelatioship(BaseModel):
-    user = models.ForeignKey(
-        User,
-        verbose_name="Usuário",
-        related_name="user_organization_relationships",
-        on_delete=models.CASCADE,
-    )
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="organization",
-        related_name="user_organization_relationships",
-        on_delete=models.CASCADE,
-    )
-
-    history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return f"Relação {self.organization.name} - {self.user.email}"
-
-    class Meta:
-        verbose_name = "Relação Organização-Usuário"
-        verbose_name_plural = "Relações Organização-Usuário"

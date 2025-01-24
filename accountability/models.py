@@ -390,7 +390,7 @@ class Revenue(BaseModel):
         blank=True,
     )
 
-    revenue_source = models.ForeignKey(
+    source = models.ForeignKey(
         RevenueSource,
         verbose_name="Fonte de Recurso",
         related_name="revenues",

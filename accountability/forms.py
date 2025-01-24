@@ -13,7 +13,6 @@ class ExpenseSourceCreateForm(forms.ModelForm):
     class Meta:
         model = ExpenseSource
         fields = [
-            "organization",
             "name",
             "document",
         ]
@@ -22,13 +21,6 @@ class ExpenseSourceCreateForm(forms.ModelForm):
             "organization": BaseSelectFormWidget(placeholder="Prefeitura"),
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
         }
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
-
-        if self.request:
-            self.fields["city_hall"].queryset = self.request.user.city_halls.all()
 
 
 class ExpenseCreateForm(forms.ModelForm):
@@ -63,6 +55,15 @@ class ExpenseCreateForm(forms.ModelForm):
             "document_type": BaseSelectFormWidget(),
             "document_number": BaseCharFieldFormWidget(),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        if self.request:
+            self.fields["source"].queryset = self.request.user.organization.expense_sources.all()
+        else:
+            self.fields["source"].queryset = self.request.user.organization.expense_sources.none()
 
 class RevenueSourceCreateForm(forms.ModelForm):
     class Meta:
@@ -124,7 +125,7 @@ class RevenueCreateForm(forms.ModelForm):
             "value",
             "competency",
             "due_date",
-            "revenue_source",
+            "source",
             "bank_account",
             "revenue_nature",
         ]
@@ -136,9 +137,18 @@ class RevenueCreateForm(forms.ModelForm):
             "bank_account": BaseSelectFormWidget(),
             # "competency": BaseCharFieldFormWidget(),
             # "due_date": BaseCharFieldFormWidget(),
-            "revenue_source": BaseSelectFormWidget(),
+            "source": BaseSelectFormWidget(),
             "revenue_nature": BaseSelectFormWidget(),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+        if self.request:
+            self.fields["source"].queryset = self.request.user.organization.revenue_sources.all()
+        else:
+            self.fields["source"].queryset = self.request.user.organization.revenue_sources.none()
 
 
 class AccountabilityCreateForm(forms.ModelForm):

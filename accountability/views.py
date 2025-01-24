@@ -60,16 +60,18 @@ class ExpenseSourceCreateView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = ExpenseSourceCreateForm(request=self.request)
+            context["form"] = ExpenseSourceCreateForm()
 
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: should check any user access?
-        form = ExpenseSourceCreateForm(request.POST, request=request)
+        form = ExpenseSourceCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                source = form.save()
+                source = form.save(commit=False)
+                source.organization = self.request.user.organization
+                source.save()
 
                 logger.info(f"{request.user.id} - Created new revenue source")
                 _ = ActivityLog.objects.create(
@@ -119,13 +121,13 @@ class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = RevenueSourceCreateForm(request=self.request)
+            context["form"] = RevenueSourceCreateForm()
 
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: should check any user access?
-        form = RevenueSourceCreateForm(request.POST, request=request)
+        form = RevenueSourceCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 source = form.save()
@@ -209,7 +211,7 @@ def create_accountability_revenue_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
-        form = RevenueCreateForm(request.POST)
+        form = RevenueCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save()
@@ -230,7 +232,7 @@ def create_accountability_revenue_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = RevenueCreateForm()
+        form = RevenueCreateForm(request=request)
         return render(
             request,
             "accountability/revenues/create.html",
@@ -244,7 +246,7 @@ def create_accountability_expense_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
-        form = ExpenseCreateForm(request.POST)
+        form = ExpenseCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 expense = form.save()
@@ -265,7 +267,7 @@ def create_accountability_expense_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = ExpenseCreateForm()
+        form = ExpenseCreateForm(request=request)
         return render(
             request,
             "accountability/expenses/create.html",
