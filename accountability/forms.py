@@ -7,6 +7,7 @@ from accountability.models import (
     Revenue,
     RevenueSource,
 )
+from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseNumberFormWidget,
@@ -40,6 +41,8 @@ class ExpenseSourceCreateForm(forms.ModelForm):
         return cleaned_data
 
 class ExpenseCreateForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
     class Meta:
         model = Expense
         fields = [

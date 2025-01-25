@@ -460,6 +460,11 @@
 function formatMoney(input) {
   let value = input.value.replace(/\D/g, "");
 
+  if (!value) {
+    input.value = "0"
+    return
+  }
+
   value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

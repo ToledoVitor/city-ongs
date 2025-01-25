@@ -1,6 +1,7 @@
 from django import forms
 
 from contracts.models import Company, Contract, ContractGoal, ContractStep
+from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseFileFormWidget,
@@ -10,6 +11,8 @@ from utils.widgets import (
 
 
 class ContractCreateForm(forms.ModelForm):
+    total_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
     class Meta:
         model = Contract
         fields = [

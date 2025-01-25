@@ -101,6 +101,7 @@
             id="id_total_expense"
             name="total_expense"
             value="{{ item.total_expense_with_point }}"
+            oninput="formatMoney(this)"
             placeholder="000,00"
             class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
             required
@@ -135,6 +136,11 @@
 <script>
   function formatMoney(input) {
     let value = input.value.replace(/\D/g, "");
+
+    if (!value) {
+      input.value = "0"
+      return
+    }
 
     value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
       minimumFractionDigits: 2,

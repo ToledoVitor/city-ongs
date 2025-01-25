@@ -1,6 +1,7 @@
 from django import forms
 
 from bank.models import BankAccount, Transaction
+from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseNumberFormWidget,
@@ -45,6 +46,7 @@ class UploadOFXForm(forms.Form):
 class CreateBankAccountForm(forms.ModelForm):
     closing_date = forms.DateField()
     balance = forms.DecimalField()
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:
         model = BankAccount

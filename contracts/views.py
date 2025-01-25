@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -177,7 +178,10 @@ def create_contract_item_view(request, pk):
             objective = request.POST.get("objective")
             methodology = request.POST.get("methodology")
             month_quantity = request.POST.get("month_quantity")
-            month_expense = request.POST.get("month_expense")
+            
+            month_expense_str = request.POST.get("month_expense")
+            month_expense = re.sub(r"\.", "", month_expense_str).replace(",", ".")
+
             unit_type = request.POST.get("unit_type")
             nature = request.POST.get("nature")
             is_additive = request.POST.get("is_additive", "") == "True"

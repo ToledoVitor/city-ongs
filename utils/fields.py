@@ -1,3 +1,5 @@
+import re
+from django import forms
 from django.db import models
 
 
@@ -13,3 +15,9 @@ class LowerCaseEmailField(models.EmailField):
         if isinstance(value, str):
             return value.lower()
         return value
+
+class DecimalMaskedField(forms.DecimalField):
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = re.sub(r"\.", "", value).replace(",", ".")
+        return super().to_python(value)
