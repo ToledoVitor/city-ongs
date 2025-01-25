@@ -59,6 +59,14 @@ class Accountability(BaseModel):
 
 
 class Favored(BaseModel):
+    organization = models.ForeignKey(
+        # TODO: remove null
+        Organization,
+        verbose_name="Organização",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     name = models.CharField(
         verbose_name="Nome",
         max_length=64,
@@ -172,7 +180,7 @@ class Expense(BaseModel):
     # relations
     source = models.ForeignKey(
         ExpenseSource,
-        verbose_name="Fonte de Recurso",
+        verbose_name="Fonte de Despesa",
         related_name="expenses",
         on_delete=models.CASCADE,
     )
@@ -235,6 +243,10 @@ class Expense(BaseModel):
     class Meta:
         verbose_name = "Despesa"
         verbose_name_plural = "Despesas"
+
+    @property
+    def nature_label(self) -> str:
+        return NatureChoices(self.nature).label
 
     def __str__(self) -> str:
         return f"Despesa {self.id}"

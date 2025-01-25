@@ -32,12 +32,18 @@
                   R${{ revenue.value|intcomma }}
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ revenue.bank_account.bank_name }} <br>
-                  {{ revenue.bank_account.account }} ({{revenue.bank_account.account_type_label}})
+                  <a
+                    href="{% url 'bank:bank-accounts-detail' revenue.bank_account.id %}"
+                    class="hover:underline text-blue-700"
+                    target="_blank"
+                  >
+                    {{ revenue.bank_account.account }} ({{revenue.bank_account.account_type_label}}) <br>
+                    <span class="text-sm">{{ revenue.bank_account.bank_name }}</span>
+                </a>
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                   {{ revenue.source.name }} <br>
-                  {{ revenue.source.category_label }} <br>
+                  <span class="text-sm">{{ revenue.source.category_label }}</span>
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                   {{ revenue.revenue_nature_label }}

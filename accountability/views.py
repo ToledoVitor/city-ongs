@@ -11,12 +11,13 @@ from django.views.generic import ListView, TemplateView
 
 from accountability.forms import (
     AccountabilityCreateForm,
-    ExpenseCreateForm,
+    ExpenseForm,
     ExpenseSourceCreateForm,
+    FavoredForm,
     RevenueForm,
     RevenueSourceCreateForm,
 )
-from accountability.models import Accountability, ExpenseSource, RevenueSource
+from accountability.models import Accountability, ExpenseSource, RevenueSource, Favored
 from activity.models import ActivityLog
 from contracts.models import Contract
 
@@ -251,10 +252,13 @@ def create_accountability_expense_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
-        form = ExpenseCreateForm(request.POST, request=request)
+        form = ExpenseForm(request.POST, request=request, accountability=accountability)
         if form.is_valid():
             with transaction.atomic():
-                expense = form.save()
+                expense = form.save(commit=False)
+                expense.accountability = accountability
+                expense.save()
+
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -272,9 +276,69 @@ def create_accountability_expense_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = ExpenseCreateForm(request=request)
+        form = ExpenseForm(request=request, accountability=accountability)
         return render(
             request,
             "accountability/expenses/create.html",
             {"accountability": accountability, "form": form},
         )
+
+
+class FavoredListView(LoginRequiredMixin, ListView):
+    model = Favored
+    context_object_name = "favoreds_list"
+    paginate_by = 10
+    ordering = "-created_at"
+
+    template_name = "accountability/favoreds/list.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = self.model.objects.filter(
+            organization=self.request.user.organization
+        )
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query)
+                | Q(document__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
+
+
+class FavoredCreateView(LoginRequiredMixin, TemplateView):
+    template_name = "accountability/favoreds/create.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        if not context.get("form", None):
+            context["form"] = FavoredForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        # TODO: should check any user access?
+        form = FavoredForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                favored = form.save(commit=False)
+                favored.organization = request.user.organization
+                favored.save()
+
+                logger.info(f"{request.user.id} - Created new favored")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_FAVORED,
+                    target_object_id=favored.id,
+                    target_content_object=favored,
+                )
+                return redirect("accountability:favoreds-list")
+
+        return self.render_to_response(self.get_context_data(form=form))

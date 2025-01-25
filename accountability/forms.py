@@ -1,11 +1,13 @@
 from django import forms
 
+from contracts.models import ContractItem
 from accountability.models import (
     Accountability,
     Expense,
     ExpenseSource,
     Revenue,
     RevenueSource,
+    Favored,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -40,7 +42,7 @@ class ExpenseSourceCreateForm(forms.ModelForm):
 
         return cleaned_data
 
-class ExpenseCreateForm(forms.ModelForm):
+class ExpenseForm(forms.ModelForm):
     value = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:
@@ -77,6 +79,7 @@ class ExpenseCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
+        self.accountability = kwargs.pop("accountability", None)
         super().__init__(*args, **kwargs)
 
         if self.request:
@@ -86,7 +89,16 @@ class ExpenseCreateForm(forms.ModelForm):
         else:
             self.fields[
                 "source"
-            ].queryset = self.request.user.organization.expense_sources.none()
+            ].queryset = ExpenseSource.objects.none()
+
+        if self.accountability:
+            self.fields[
+                "item"
+            ].queryset = self.accountability.contract.items.all()
+        else:
+            self.fields[
+                "source"
+            ].queryset = ContractItem.objects.none()
 
 
 class RevenueSourceCreateForm(forms.ModelForm):
@@ -177,3 +189,27 @@ class AccountabilityCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["year"].initial = 2025
+
+class FavoredForm(forms.ModelForm):
+    class Meta:
+        model = Favored
+        fields = [
+            "name",
+            "document",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name")
+        document = cleaned_data.get("document")
+
+        if ExpenseSource.objects.filter(name=name, document=document).exists():
+            raise forms.ValidationError(
+                "Já existe uma fonte criada com esse nome e documento."
+            )
+
+        return cleaned_data

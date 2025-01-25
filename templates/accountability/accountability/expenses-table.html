@@ -1,18 +1,22 @@
+{% load humanize %}
 
-<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+<table class="w-full text-sm text-left rtl:text-right text-center text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
         <tr>
             <th scope="col" class="px-6 py-3">
-                Nome
+                Identificação
             </th>
             <th scope="col" class="px-6 py-3">
-                Documento
+                Status
             </th>
             <th scope="col" class="px-6 py-3">
-                Número do Contrato
+                Valor
             </th>
             <th scope="col" class="px-6 py-3">
-                Origem
+                Item Relacionado
+            </th>
+            <th scope="col" class="px-6 py-3">
+               Fonte da Despesa
             </th>
             <th scope="col" class="px-6 py-3">
                 Categoria
@@ -24,20 +28,44 @@
         {% if expenses_page %}
           {% for expense in expenses_page %}
             <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
-                <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
-                  {{ expense }} 
+                <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
+                  {{ expense.identification }} <br>
+                  <p class="text-sm"> Pendências: 0</span>
                 </th>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ expense }}
+                <td class="px-6 py-4 text-base text-left text-black whitespace-nowrap">
+                  <p class="mt-1 text-sm">Planejada:
+                    {% if expense.planned %}
+                      &#9989;
+                    {% else %}
+                      &#10060;
+                    {% endif %}
+                  </p>
+                  <p class="mt-1 text-sm">Paga:
+                    {% if expense.paid %}
+                      &#9989;
+                    {% else %}
+                      &#10060;
+                    {% endif %}
+                  </p>
+                  <p class="mt-1 text-sm">Conciliada:
+                    {% if expense.conciled %}
+                      &#9989;
+                    {% else %}
+                      &#10060;
+                    {% endif %}
+                  </p>
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ expense }}
+                  R${{ expense.value|intcomma }}
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ expense }}
+                  {{ expense.item.name }}
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ expense }}
+                  {{ expense.source.name }}
+                </td>
+                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                  {{ expense.nature_label }}
                 </td>
                 <td class="px-6 py-4 text-base flex justify-end">
                   <a
@@ -53,6 +81,9 @@
             <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                 Nenhum resultado encontrado
             </th>
+            <td class="px-6 py-4">
+              -
+            </td>
             <td class="px-6 py-4">
                 -
             </td>

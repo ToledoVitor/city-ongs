@@ -5,6 +5,8 @@ from accountability.views import (
     ExpenseSourceListView,
     RevenueSourceCreateView,
     RevenueSourceListView,
+    FavoredListView,
+    FavoredCreateView,
     accountability_detail_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
@@ -40,5 +42,11 @@ urlpatterns = [
         "<uuid:pk>/accountability/revenues/create",
         create_accountability_revenue_view,
         name="revenues-create",
+    ),
+    path("favoreds/", FavoredListView.as_view(), name="favoreds-list"),
+    path(
+        "favoreds/create/",
+        FavoredCreateView.as_view(),
+        name="favoreds-create",
     ),
 ]

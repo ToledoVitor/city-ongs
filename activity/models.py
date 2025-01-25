@@ -41,6 +41,10 @@ class ActivityLog(models.Model):
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
         CREATED_EXPENSE_SOURCE = "CREATED_EXPENSE_SOURCE", "Cadastrou fonte de despesa"
         DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "Apagou fonte de despesa"
+        # favored
+        CREATED_FAVORED = "CREATED_FAVORED", "Cadastrou favorecido"
+        UPDATED_FAVORED = "UPDATED_FAVORED", "Atualizou favorecido"
+        DELETED_FAVORED = "DELETED_FAVORED", "Apagou favorecido"
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
         UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
