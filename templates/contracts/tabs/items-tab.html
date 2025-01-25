@@ -9,21 +9,30 @@
                     Item
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Objetivo
+                    Natureza
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Período (meses)
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Unidade
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Custo Mensal
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Custo Total
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Status
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    Valor
-                </th>
-            </tr>
+          </tr>
         </thead>
         <tbody>
             {% if contract.items.count %}
               {% for item in contract.items.all %}
-                <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
-                  <td scope="row" class="py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
+                <tr class="border-b bg-green-200 border-gray-700 hover:bg-green-400 text-center">
+                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
 
                     {% if user.can_change_statuses %}
                       <!-- items approve Modal toggle -->
@@ -63,15 +72,31 @@
                     {% endif %}
                   </td>
 
-                  <th class="pl-2 pr-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black max-w-48">
+                  <td class="px-6 py-4 text-sm text-black max-w-48">
                     {{ item.name }}
-                  </th>
-
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
-                    {{ item.objective }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
+                  <td class="px-6 py-4 text-sm text-black max-w-48">
+                    {{ item.nature_label }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    {{ item.month_quantity }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    {{ item.unit_type }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    R$ <b>{{ item.month_expense|intcomma }}<b>
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    R$ <b>{{ item.total_expense|intcomma }}<b>
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
                     {% if item.status == "ANALYZING" %}
                       <span
                         class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
@@ -104,10 +129,6 @@
                       </span>
                     {% endif %}
                   </td>
-
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                    R$ <b>{{ item.total_expense|intcomma }}<b>
-                  </td>
                 </tr>
               {% endfor %}
             {% else %}
@@ -125,7 +146,13 @@
                     -
                 </td>
                 <td class="px-6 py-4">
-                  -
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
                 </td>
               </tr>
             {% endif %}     

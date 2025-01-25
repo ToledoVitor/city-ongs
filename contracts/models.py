@@ -405,7 +405,15 @@ class ContractItem(BaseModel):
         return StatusChoices(self.status).label
 
     @property
-    def total_expense_with_point(self) -> str:
+    def nature_label(self) -> str:
+        return NatureChoices(self.nature).label
+
+    @property
+    def total_expense(self) -> str:
+        return self.month_expense * self.month_quantity
+
+    @property
+    def month_expense_with_point(self) -> str:
         return str(self.month_expense).replace(",", ".")
 
     class Meta:

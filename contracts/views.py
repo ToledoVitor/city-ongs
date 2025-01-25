@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,6 +13,7 @@ from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
     ContractGoalCreateForm,
+    ContractItemCreateForm,
     ContractStepFormSet,
 )
 from contracts.models import Company, Contract, ContractGoal, ContractItem
@@ -173,42 +173,26 @@ def create_contract_item_view(request, pk):
 
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        with transaction.atomic():
-            name = request.POST.get("name")
-            objective = request.POST.get("objective")
-            methodology = request.POST.get("methodology")
-            month_quantity = request.POST.get("month_quantity")
-            
-            month_expense_str = request.POST.get("month_expense")
-            month_expense = re.sub(r"\.", "", month_expense_str).replace(",", ".")
+        form = ContractItemCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                item = form.save(commit=False)
+                item.contract = contract
+                item.save()
 
-            unit_type = request.POST.get("unit_type")
-            nature = request.POST.get("nature")
-            is_additive = request.POST.get("is_additive", "") == "True"
-
-            item = ContractItem.objects.create(
-                contract=contract,
-                name=name,
-                objective=objective,
-                methodology=methodology,
-                month_quantity=month_quantity,
-                month_expense=month_expense,
-                unit_type=unit_type,
-                nature=nature,
-                is_additive=is_additive,
-                status=StatusChoices.ANALYZING,
-            )
-            _ = ActivityLog.objects.create(
-                user=request.user,
-                user_email=request.user.email,
-                action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM,
-                target_object_id=item.id,
-                target_content_object=item,
-            )
-
-        return redirect("contracts:contracts-detail", pk=contract.id)
-
-    return render(request, "contracts/items-create.html", {"contract": contract})
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM,
+                    target_object_id=item.id,
+                    target_content_object=item,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
+    else:
+        form = ContractItemCreateForm()
+        return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
 
 
 def update_contract_item_view(request, pk, item_pk):

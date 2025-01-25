@@ -59,15 +59,8 @@
             class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
         >
             Nome do Item
-        </label>        
-        <input
-            type="text"
-            id="name"
-            name="name"
-            maxlength="127"
-            class="bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            required
-        />
+        </label>
+        {{ form.name }}
     </div>
 
     <div class="mb-3">
@@ -76,29 +69,8 @@
             class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
         >
             Objetivo
-        </label>        
-        <textarea
-          id="objective"
-          name="objective"
-          rows="3"
-          maxlength="254"
-          class="
-            rounded-lg 
-            focus:ring-blue-500 
-            focus:border-blue-500 
-            block 
-            w-full 
-            p-2.5 
-            bg-gray-300 
-            border-gray-600 
-            placeholder-gray-400 
-            text-black 
-            focus:ring-blue-500 
-            focus:border-blue-500
-          "
-          placeholder="....."
-          required
-        ></textarea>
+        </label> 
+        {{ form.objective }}
     </div>
 
     <div class="mb-3">
@@ -107,29 +79,8 @@
           class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
       >
           Metodologia
-      </label>        
-      <textarea
-        id="methodology"
-        name="methodology"
-        rows="3"
-        maxlength="254"
-        class="
-          rounded-lg 
-          focus:ring-blue-500 
-          focus:border-blue-500 
-          block 
-          w-full 
-          p-2.5 
-          bg-gray-300 
-          border-gray-600 
-          placeholder-gray-400 
-          text-black 
-          focus:ring-blue-500 
-          focus:border-blue-500
-        "
-        placeholder="....."
-        required
-      ></textarea>
+      </label>
+      {{ form.methodology }}
     </div>
 
     <hr class="h-px my-4 border-0 bg-gray-700">
@@ -144,8 +95,8 @@
           Natureza da Despesa
       </label>
       <select
-          id="status"
-          name="status"
+          id="id_nature"
+          name="nature"
           class="
             border
             text-sm
@@ -497,16 +448,8 @@
         class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
       >
         Quantidade de meses
-      </label>        
-      <input
-        type="number"
-        id="id_month_quantity"
-        name="month_quantity"
-        step="1"
-        placeholder=""
-        class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
-        required
-      />  
+      </label>
+      {{ form.month_quantity }}
     </div>
 
     <div class="mb-3">
@@ -539,40 +482,10 @@
       >
           Unidade
       </label>
-      <input
-          type="text"
-          id="unit_type"
-          name="unit_type"
-          maxlength="127"
-          class="
-            text-sm
-            rounded-lg
-            block
-            w-full
-            p-2.5
-            bg-gray-300
-            border-gray-600
-            placeholder-gray-400
-            text-black
-            focus:ring-blue-500
-            focus:border-blue-500
-          "
-          required
-      />
+      {{ form.unit_type}}
       <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Unidade, KGs, Blocos, Litros, ...
       </p>
-    </div>
-
-    <div class="flex items-center mb-4">
-        <input
-            id="is_additive"
-            type="checkbox"
-            name="is_additive"
-            value="True"
-            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-400 dark:border-gray-600"
-        >
-        <label for="is_additive" class="ms-2 text-base font-medium text-black dark:text-black">Aditivo?</label>
     </div>
 
     <button
@@ -583,6 +496,8 @@
         Criar
     </button>
 </form>
+
+{% include 'commons/form-errors.html' with form=form %}
 
 <script>
   function formatMoney(input) {
