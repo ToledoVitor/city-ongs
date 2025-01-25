@@ -90,7 +90,6 @@ class RevenueSourceCreateForm(forms.ModelForm):
     class Meta:
         model = RevenueSource
         fields = [
-            "organization",
             "name",
             "document",
             "contract_number",
@@ -103,37 +102,9 @@ class RevenueSourceCreateForm(forms.ModelForm):
             "contract_number": BaseCharFieldFormWidget(
                 placeholder="xxxx.xxxxx.xx.xx.xx.xx"
             ),
+            "origin": BaseSelectFormWidget(),
+            "category": BaseSelectFormWidget(),
         }
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
-
-        self.fields["city_hall"].queryset = self.request.user.city_halls.all()
-        self.fields["origin"].widget.attrs.update(
-            {
-                "class": " ".join(
-                    [
-                        "w-full p-2.5 block text-sm border border-gray-300 text-gray-900",
-                        "bg-gray-50 rounded-lg focus:ring-blue-500 focus:border-blue-500",
-                        "dark:placeholder-gray-600 dark:bg-gray-300 dark:border-gray-600",
-                        "dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500",
-                    ]
-                )
-            }
-        )
-        self.fields["category"].widget.attrs.update(
-            {
-                "class": " ".join(
-                    [
-                        "w-full p-2.5 block text-sm border border-gray-300 text-gray-900",
-                        "bg-gray-50 rounded-lg focus:ring-blue-500 focus:border-blue-500",
-                        "dark:placeholder-gray-600 dark:bg-gray-300 dark:border-gray-600",
-                        "dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500",
-                    ]
-                )
-            }
-        )
 
     def clean(self):
         cleaned_data = super().clean()

@@ -13,11 +13,9 @@
                     {% endif %}
                 {% endfor %} {% endcomment %}
                 {% for field, errors in form.errors.items %}
-                    {% if field == '__all__' %}
-                        {% for error in errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endif %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
             </ul>
         </div>
