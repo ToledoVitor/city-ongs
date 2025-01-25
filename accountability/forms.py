@@ -122,7 +122,9 @@ class RevenueSourceCreateForm(forms.ModelForm):
         return cleaned_data
 
 
-class RevenueCreateForm(forms.ModelForm):
+class RevenueForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
     class Meta:
         model = Revenue
         fields = [
@@ -141,8 +143,6 @@ class RevenueCreateForm(forms.ModelForm):
             "observations": BaseTextAreaFormWidget(),
             "value": BaseCharFieldFormWidget(),
             "bank_account": BaseSelectFormWidget(),
-            # "competency": BaseCharFieldFormWidget(),
-            # "due_date": BaseCharFieldFormWidget(),
             "source": BaseSelectFormWidget(),
             "revenue_nature": BaseSelectFormWidget(),
         }

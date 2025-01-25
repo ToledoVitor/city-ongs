@@ -333,6 +333,10 @@ class RevenueSource(BaseModel):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def category_label(self) -> str:
+        return RevenueSource.CategoryChoices(self.category).label
+
     def save(self, *args, **kwargs):
         if self.document is not None:
             string_doc = "".join([i for i in str(self.document) if i.isdigit()])
@@ -421,8 +425,11 @@ class Revenue(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Receita {self.id}"
+        return f"Receita {self.identification}"
 
+    @property
+    def revenue_nature_label(self) -> str:
+        return Revenue.Nature(self.revenue_nature).label
     class Meta:
         verbose_name = "Recurso"
         verbose_name_plural = "Recursos"

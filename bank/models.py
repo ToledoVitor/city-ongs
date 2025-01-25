@@ -43,7 +43,7 @@ class BankAccount(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"{self.bank_name} - {self.account}"
+        return f"{self.bank_name} - {self.account} ({self.account_type_label})"
 
     class Meta:
         verbose_name = "Conta Bancária"

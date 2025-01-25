@@ -1,15 +1,16 @@
+{% load humanize %}
 
-<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+<table class="w-full text-sm text-left rtl:text-right text-center text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
         <tr>
             <th scope="col" class="px-6 py-3">
-                Nome
+                Identificação
             </th>
             <th scope="col" class="px-6 py-3">
-                Documento
+                Valor
             </th>
             <th scope="col" class="px-6 py-3">
-                Número do Contrato
+                Conta Bancária
             </th>
             <th scope="col" class="px-6 py-3">
                 Origem
@@ -25,19 +26,21 @@
           {% for revenue in revenues_page %}
             <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                 <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
-                  {{ revenue }} 
+                  {{ revenue.identification }} 
                 </th>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ revenue }}
+                  R${{ revenue.value|intcomma }}
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ revenue }}
+                  {{ revenue.bank_account.bank_name }} <br>
+                  {{ revenue.bank_account.account }} ({{revenue.bank_account.account_type_label}})
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ revenue }}
+                  {{ revenue.source.name }} <br>
+                  {{ revenue.source.category_label }} <br>
                 </td>
                 <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ revenue }}
+                  {{ revenue.revenue_nature_label }}
                 </td>
                 <td class="px-6 py-4 text-base flex justify-end">
                   <a

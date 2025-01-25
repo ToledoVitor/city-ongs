@@ -13,7 +13,7 @@ from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseCreateForm,
     ExpenseSourceCreateForm,
-    RevenueCreateForm,
+    RevenueForm,
     RevenueSourceCreateForm,
 )
 from accountability.models import Accountability, ExpenseSource, RevenueSource
@@ -186,9 +186,11 @@ def create_contract_accountability_view(request, pk):
 
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
-    expenses_list = accountability.expenses.all()
-    revenues_list = accountability.revenues.all()
-
+    expenses_list = accountability.expenses.order_by("value")
+    revenues_list = accountability.revenues.order_by("value").select_related(
+        "bank_account",
+        "source"
+    )
     expenses_paginator = Paginator(expenses_list, 5)
     expenses_page_number = request.GET.get("expenses_page")
     expenses_page = expenses_paginator.get_page(expenses_page_number)
@@ -211,10 +213,13 @@ def create_accountability_revenue_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
-        form = RevenueCreateForm(request.POST, request=request)
+        form = RevenueForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
-                revenue = form.save()
+                revenue = form.save(commit=False)
+                revenue.accountability = accountability
+                revenue.save()
+
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -232,7 +237,7 @@ def create_accountability_revenue_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = RevenueCreateForm(request=request)
+        form = RevenueForm(request=request)
         return render(
             request,
             "accountability/revenues/create.html",
