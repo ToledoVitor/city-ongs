@@ -35,10 +35,15 @@ o2 = Organization.objects.create(
 super_user = User.objects.create(
     first_name="Vitor",
     last_name="Toledo",
+    username="admin@admin.com",
     email="admin@admin.com",
-    password="admin@2025",
-    Organization=o1,
+    is_superuser=True,
+    is_staff=True,
+    organization=o1,
 )
+super_user.set_password("admin")
+super_user.save()
+
 super_user.areas.add(a1)
 super_user.areas.add(a2)
 super_user.areas.add(a3)

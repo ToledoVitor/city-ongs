@@ -34,7 +34,7 @@ class ExpenseSourceListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.filter(
-            city_hall__in=self.request.user.city_halls.all()
+            organization=self.request.user.organization
         )
         query = self.request.GET.get("q")
         if query:
@@ -95,7 +95,7 @@ class RevenueSourceListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.filter(
-            city_hall__in=self.request.user.city_halls.all()
+            organization=self.request.user.organization
         )
         query = self.request.GET.get("q")
         if query:
@@ -128,7 +128,9 @@ class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
         form = RevenueSourceCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                source = form.save()
+                source = form.save(commit=False)
+                source.organization = self.request.user.organization
+                source.save()
 
                 logger.info(f"{request.user.id} - Created new revenue source")
                 _ = ActivityLog.objects.create(

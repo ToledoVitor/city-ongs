@@ -5,13 +5,20 @@
         </svg>
         <span class="sr-only">Danger</span>
         <div>
-            <span class="font-medium">Erro ao criar contrato</span>
+            <span class="font-medium">Erro ao criar objeto</span>
             <ul class="my-1.5 list-disc list-inside">
-            {% for field in form %}
-                {% if field.errors %}
-                <li class="my-1"><b>{{ field.label }}</b>: {{ field.errors }}</li>
-                {% endif %}
-            {% endfor %}
+                {% comment %} {% for field in form %}
+                    {% if field.errors %}
+                    <li class="my-1"><b>{{ field.label }}</b>: {{ field.errors }}</li>
+                    {% endif %}
+                {% endfor %} {% endcomment %}
+                {% for field, errors in form.errors.items %}
+                    {% if field == '__all__' %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
             </ul>
         </div>
 

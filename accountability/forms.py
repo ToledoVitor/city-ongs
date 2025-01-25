@@ -24,10 +24,20 @@ class ExpenseSourceCreateForm(forms.ModelForm):
         ]
 
         widgets = {
-            "organization": BaseSelectFormWidget(placeholder="Prefeitura"),
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name")
+        document = cleaned_data.get("document")
+
+        if ExpenseSource.objects.filter(name=name, document=document).exists():
+            raise forms.ValidationError(
+                "Já existe uma fonte criada com esse nome e documento."
+            )
+
+        return cleaned_data
 
 class ExpenseCreateForm(forms.ModelForm):
     class Meta:
@@ -89,7 +99,6 @@ class RevenueSourceCreateForm(forms.ModelForm):
         ]
 
         widgets = {
-            "organization": BaseSelectFormWidget(placeholder="Organização"),
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
             "contract_number": BaseCharFieldFormWidget(
                 placeholder="xxxx.xxxxx.xx.xx.xx.xx"
@@ -125,6 +134,18 @@ class RevenueSourceCreateForm(forms.ModelForm):
                 )
             }
         )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name")
+        document = cleaned_data.get("document")
+
+        if RevenueSource.objects.filter(name=name, document=document).exists():
+            raise forms.ValidationError(
+                "Já existe uma fonte criada com esse nome e documento."
+            )
+
+        return cleaned_data
 
 
 class RevenueCreateForm(forms.ModelForm):

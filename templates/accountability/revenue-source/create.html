@@ -55,8 +55,8 @@
         <div class="relative w-full">
           <input
             type="number"
-            id="id_id_document"
-            name="id_document"
+            id="id_document"
+            name="document"
             step="1"
             placeholder=""
             class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
@@ -103,11 +103,6 @@
       </div>
 
     </div>
-  </div>
-  
-  <div class="my-3">
-    <label for="id_city_hall" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Prefeitura</label>
-    {{ form.city_hall }}
   </div>
   
   {% include 'commons/form-errors.html' with form=form %}
