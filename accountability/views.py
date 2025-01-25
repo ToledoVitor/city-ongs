@@ -68,7 +68,7 @@ class ExpenseSourceCreateView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             with transaction.atomic():
                 source = form.save(commit=False)
-                source.organization = self.request.user.organization
+                source.organization = request.user.organization
                 source.save()
 
                 logger.info(f"{request.user.id} - Created new revenue source")
@@ -129,7 +129,7 @@ class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             with transaction.atomic():
                 source = form.save(commit=False)
-                source.organization = self.request.user.organization
+                source.organization = request.user.organization
                 source.save()
 
                 logger.info(f"{request.user.id} - Created new revenue source")

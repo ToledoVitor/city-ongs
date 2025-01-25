@@ -68,7 +68,9 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
         form = ContractCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
-                contract = form.save()
+                contract = form.save(commit=False)
+                contract.organization = request.user.organization
+                contract.save()
 
                 logger.info(f"{request.user.id} - Created new contract")
                 _ = ActivityLog.objects.create(
@@ -378,7 +380,9 @@ class CompanyCreateView(LoginRequiredMixin, TemplateView):
         form = CompanyCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                source = form.save()
+                source = form.save(commit=False)
+                source.organization = request.user.organization
+                source.save()
 
                 logger.info(f"{request.user.id} - Created new company")
                 _ = ActivityLog.objects.create(
