@@ -34,7 +34,7 @@
                 <tr class="border-b bg-green-200 border-gray-700 hover:bg-green-400 text-center">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
 
-                    {% if user.can_change_statuses %}
+                    {% if not user.can_change_statuses %}
                       <!-- items approve Modal toggle -->
                       <button
                         data-modal-target="items-update-modal"

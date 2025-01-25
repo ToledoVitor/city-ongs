@@ -67,7 +67,7 @@ class ContractCreateForm(forms.ModelForm):
 
         return file
 
-class ContractItemCreateForm(forms.ModelForm):
+class ContractItemForm(forms.ModelForm):
     month_expense = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:

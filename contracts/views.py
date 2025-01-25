@@ -13,7 +13,7 @@ from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
     ContractGoalCreateForm,
-    ContractItemCreateForm,
+    ContractItemForm,
     ContractStepFormSet,
 )
 from contracts.models import Company, Contract, ContractGoal, ContractItem
@@ -173,7 +173,7 @@ def create_contract_item_view(request, pk):
 
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        form = ContractItemCreateForm(request.POST)
+        form = ContractItemForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 item = form.save(commit=False)
@@ -191,7 +191,7 @@ def create_contract_item_view(request, pk):
         else:
             return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
     else:
-        form = ContractItemCreateForm()
+        form = ContractItemForm()
         return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
 
 
@@ -203,28 +203,31 @@ def update_contract_item_view(request, pk, item_pk):
     item = get_object_or_404(ContractItem, id=item_pk)
 
     if request.method == "POST":
-        with transaction.atomic():
-            item.name = request.POST.get("name")
-            item.description = request.POST.get("description")
-            item.total_expense = request.POST.get("total_expense")
-            item.is_additive = request.POST.get("is_additive", "") == "True"
-            item.status = StatusChoices.ANALYZING
-            item.status_pendencies = None
-            item.save()
-
-            _ = ActivityLog.objects.create(
-                user=request.user,
-                user_email=request.user.email,
-                action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
-                target_object_id=item.id,
-                target_content_object=item,
+        form = ContractItemForm(request.POST, instance=item)
+        if form.is_valid():
+            with transaction.atomic():
+                form.save()
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
+                    target_object_id=item.id,
+                    target_content_object=item,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items-update.html",
+                {"contract": contract, "item": item, "form": form}
             )
-
-        return redirect("contracts:contracts-detail", pk=contract.id)
-
-    return render(
-        request, "contracts/items-update.html", {"contract": contract, "item": item}
-    )
+    else:
+        form = ContractItemForm(instance=item)
+        return render(
+            request,
+            "contracts/items-update.html",
+            {"contract": contract, "item": item, "form": form}
+        )
 
 
 def create_contract_goal_view(request, pk):
