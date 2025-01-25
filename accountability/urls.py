@@ -3,10 +3,10 @@ from django.urls import path
 from accountability.views import (
     ExpenseSourceCreateView,
     ExpenseSourceListView,
+    FavoredCreateView,
+    FavoredListView,
     RevenueSourceCreateView,
     RevenueSourceListView,
-    FavoredListView,
-    FavoredCreateView,
     accountability_detail_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,

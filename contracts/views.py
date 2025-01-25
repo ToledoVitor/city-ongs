@@ -12,10 +12,10 @@ from activity.models import ActivityLog
 from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
+    ContractExtraStepFormSet,
     ContractGoalForm,
     ContractItemForm,
     ContractStepFormSet,
-    ContractExtraStepFormSet,
 )
 from contracts.models import Company, Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
@@ -190,10 +190,16 @@ def create_contract_item_view(request, pk):
                 )
             return redirect("contracts:contracts-detail", pk=contract.id)
         else:
-            return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
+            return render(
+                request,
+                "contracts/items-create.html",
+                {"contract": contract, "form": form},
+            )
     else:
         form = ContractItemForm()
-        return render(request, "contracts/items-create.html", {"contract": contract, "form": form})
+        return render(
+            request, "contracts/items-create.html", {"contract": contract, "form": form}
+        )
 
 
 def update_contract_item_view(request, pk, item_pk):
@@ -220,14 +226,14 @@ def update_contract_item_view(request, pk, item_pk):
             return render(
                 request,
                 "contracts/items-update.html",
-                {"contract": contract, "item": item, "form": form}
+                {"contract": contract, "item": item, "form": form},
             )
     else:
         form = ContractItemForm(instance=item)
         return render(
             request,
             "contracts/items-update.html",
-            {"contract": contract, "item": item, "form": form}
+            {"contract": contract, "item": item, "form": form},
         )
 
 

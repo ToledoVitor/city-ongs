@@ -1,14 +1,14 @@
 from django import forms
 
-from contracts.models import ContractItem
 from accountability.models import (
     Accountability,
     Expense,
     ExpenseSource,
+    Favored,
     Revenue,
     RevenueSource,
-    Favored,
 )
+from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
@@ -41,6 +41,7 @@ class ExpenseSourceCreateForm(forms.ModelForm):
             )
 
         return cleaned_data
+
 
 class ExpenseForm(forms.ModelForm):
     value = DecimalMaskedField(max_digits=12, decimal_places=2)
@@ -87,18 +88,12 @@ class ExpenseForm(forms.ModelForm):
                 "source"
             ].queryset = self.request.user.organization.expense_sources.all()
         else:
-            self.fields[
-                "source"
-            ].queryset = ExpenseSource.objects.none()
+            self.fields["source"].queryset = ExpenseSource.objects.none()
 
         if self.accountability:
-            self.fields[
-                "item"
-            ].queryset = self.accountability.contract.items.all()
+            self.fields["item"].queryset = self.accountability.contract.items.all()
         else:
-            self.fields[
-                "source"
-            ].queryset = ContractItem.objects.none()
+            self.fields["source"].queryset = ContractItem.objects.none()
 
 
 class RevenueSourceCreateForm(forms.ModelForm):
@@ -189,6 +184,7 @@ class AccountabilityCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["year"].initial = 2025
+
 
 class FavoredForm(forms.ModelForm):
     class Meta:

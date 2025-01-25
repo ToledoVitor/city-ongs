@@ -1,12 +1,12 @@
 from django import forms
 
-from contracts.models import Company, Contract, ContractItem, ContractGoal, ContractStep
+from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseFileFormWidget,
-    BaseSelectFormWidget,
     BaseNumberFormWidget,
+    BaseSelectFormWidget,
     BaseTextAreaFormWidget,
 )
 
@@ -66,6 +66,7 @@ class ContractCreateForm(forms.ModelForm):
                 )
 
         return file
+
 
 class ContractItemForm(forms.ModelForm):
     month_expense = DecimalMaskedField(max_digits=12, decimal_places=2)

@@ -442,6 +442,7 @@ class Revenue(BaseModel):
     @property
     def revenue_nature_label(self) -> str:
         return Revenue.Nature(self.revenue_nature).label
+
     class Meta:
         verbose_name = "Recurso"
         verbose_name_plural = "Recursos"

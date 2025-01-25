@@ -17,7 +17,7 @@ from accountability.forms import (
     RevenueForm,
     RevenueSourceCreateForm,
 )
-from accountability.models import Accountability, ExpenseSource, RevenueSource, Favored
+from accountability.models import Accountability, ExpenseSource, Favored, RevenueSource
 from activity.models import ActivityLog
 from contracts.models import Contract
 
@@ -189,8 +189,7 @@ def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     expenses_list = accountability.expenses.order_by("value")
     revenues_list = accountability.revenues.order_by("value").select_related(
-        "bank_account",
-        "source"
+        "bank_account", "source"
     )
     expenses_paginator = Paginator(expenses_list, 5)
     expenses_page_number = request.GET.get("expenses_page")
@@ -300,8 +299,7 @@ class FavoredListView(LoginRequiredMixin, ListView):
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(name__icontains=query)
-                | Q(document__icontains=query)
+                Q(name__icontains=query) | Q(document__icontains=query)
             )
         return queryset
 
