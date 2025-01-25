@@ -12,9 +12,10 @@ from activity.models import ActivityLog
 from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
-    ContractGoalCreateForm,
+    ContractGoalForm,
     ContractItemForm,
     ContractStepFormSet,
+    ContractExtraStepFormSet,
 )
 from contracts.models import Company, Contract, ContractGoal, ContractItem
 from utils.choices import StatusChoices
@@ -236,17 +237,14 @@ def create_contract_goal_view(request, pk):
 
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
-        form = ContractGoalCreateForm(request.POST)
-        steps_formset = ContractStepFormSet(request.POST)
+        form = ContractGoalForm(request.POST)
+        steps_formset = ContractExtraStepFormSet(request.POST)
         if form.is_valid() and steps_formset.is_valid():
             with transaction.atomic():
-                goal = ContractGoal.objects.create(
-                    contract=contract,
-                    name=form.cleaned_data["name"],
-                    objective=form.cleaned_data["objective"],
-                    methodology=form.cleaned_data["methodology"],
-                    status=StatusChoices.ANALYZING,
-                )
+                goal = form.save(commit=False)
+                goal.contract = contract
+                goal.save()
+
                 steps = steps_formset.save(commit=False)
                 for step in steps:
                     step.goal = goal
@@ -273,8 +271,8 @@ def create_contract_goal_view(request, pk):
             )
 
     else:
-        form = ContractGoalCreateForm()
-        steps_formset = ContractStepFormSet()
+        form = ContractGoalForm()
+        steps_formset = ContractExtraStepFormSet()
         return render(
             request,
             "contracts/goals-create.html",
@@ -294,35 +292,41 @@ def update_contract_goal_view(request, pk, goal_pk):
     goal = get_object_or_404(ContractGoal, id=goal_pk)
 
     if request.method == "POST":
-        with transaction.atomic():
-            goal.name = request.POST.get("name")
-            goal.description = request.POST.get("description")
-            goal.status = StatusChoices.ANALYZING
-            goal.status_pendencies = None
-            goal.save()
+        form = ContractGoalForm(request.POST, instance=goal)
+        steps_formset = ContractStepFormSet(request.POST, instance=goal)
+        if form.is_valid() and steps_formset.is_valid():
+            with transaction.atomic():
+                goal = form.save(commit=False)
+                goal.status = StatusChoices.ANALYZING
+                goal.status_pendencies = None
+                goal.save()
 
-            goal.steps.all().delete()
+                goal.steps.all().delete()
 
-            steps_formset = ContractStepFormSet(request.POST, instance=goal)
-            if steps_formset.is_valid():
-                steps_formset.save()
+                if steps_formset.is_valid():
+                    steps_formset.save()
 
-            _ = ActivityLog.objects.create(
-                user=request.user,
-                user_email=request.user.email,
-                action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
-                target_object_id=goal.id,
-                target_content_object=goal,
-            )
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
+                    target_object_id=goal.id,
+                    target_content_object=goal,
+                )
 
         return redirect("contracts:contracts-detail", pk=contract.id)
 
     else:
-        steps_formset = ContractStepFormSet()
+        form = ContractGoalForm(instance=goal)
+        steps_formset = ContractStepFormSet(instance=goal)
         return render(
             request,
             "contracts/goals-update.html",
-            {"contract": contract, "goal": goal, "steps_formset": steps_formset},
+            {
+                "contract": contract,
+                "form": form,
+                "steps_formset": steps_formset,
+            },
         )
 
 

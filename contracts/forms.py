@@ -92,7 +92,7 @@ class ContractItemForm(forms.ModelForm):
         }
 
 
-class ContractGoalCreateForm(forms.ModelForm):
+class ContractGoalForm(forms.ModelForm):
     class Meta:
         model = ContractGoal
         fields = [
@@ -126,11 +126,20 @@ class ContractStepForm(forms.ModelForm):
         }
 
 
-ContractStepFormSet = forms.inlineformset_factory(
+ContractExtraStepFormSet = forms.inlineformset_factory(
     ContractGoal,
     ContractStep,
     form=ContractStepForm,
     extra=1,
+    can_delete=True,
+)
+
+
+ContractStepFormSet = forms.inlineformset_factory(
+    ContractGoal,
+    ContractStep,
+    form=ContractStepForm,
+    extra=0,
     can_delete=True,
 )
 

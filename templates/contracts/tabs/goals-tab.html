@@ -25,7 +25,7 @@
                 <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                   <td scope="row" class="py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
 
-                    {% if user.can_change_statuses %}
+                    {% if not user.can_change_statuses %}
                       <!-- goals approve Modal toggle -->
                       <button
                         data-modal-target="goals-update-modal"
