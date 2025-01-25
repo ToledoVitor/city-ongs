@@ -65,11 +65,11 @@
         </svg>
       </div>
       <input
-        type="number"
+        type="text"
         id="id_total_value"
         name="total_value"
-        step="0.01"
-        placeholder="0000,00"
+        placeholder="000,00"
+        oninput="formatMoney(this)"
         class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
         required
       />  
@@ -176,20 +176,10 @@
   
   <hr class="h-px my-4 border-0 bg-gray-700">
    
-  <label class="block mb-2 text-2xl font-bold text-black">Atuação</label>
+  <label class="block mb-2 text-2xl font-bold text-black">Área de Atuação</label>
 
   <div class="my-3">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label for="id_organization" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Organização</label>
-        {{ form.organization }}
-      </div>
-
-      <div class="relative">
-        <label for="id_area" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Area</label>
-        {{ form.area }}
-      </div>
-    </div>
+    {{ form.area }}
   </div>
 
   <hr class="h-px my-4 border-0 bg-gray-700">
@@ -212,5 +202,18 @@
   </button>
 
 </form>
+
+<script>
+  function formatMoney(input) {
+    let value = input.value.replace(/\D/g, "");
+
+    value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    input.value = value;
+  }
+</script>
 
 {% endblock %}

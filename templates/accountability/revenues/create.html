@@ -70,11 +70,11 @@
             </svg>
           </div>
           <input
-            type="number"
+            type="text"
             id="id_value"
             name="value"
-            step="0.01"
-            placeholder="0000,00"
+            placeholder="000,00"
+            oninput="formatMoney(this)"
             class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
             required
           />  
@@ -121,5 +121,18 @@
   </button>
 
 </form>
+
+<script>
+  function formatMoney(input) {
+    let value = input.value.replace(/\D/g, "");
+
+    value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    input.value = value;
+  }
+</script>
 
 {% endblock %}
