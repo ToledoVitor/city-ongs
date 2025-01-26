@@ -187,15 +187,30 @@ def create_contract_accountability_view(request, pk):
 
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
-    expenses_list = accountability.expenses.order_by("value")
-    revenues_list = accountability.revenues.order_by("value").select_related(
+    expenses_list = accountability.expenses.order_by("-value").select_related(
+        "item", "source"
+    )
+    revenues_list = accountability.revenues.order_by("-value").select_related(
         "bank_account", "source"
     )
-    expenses_paginator = Paginator(expenses_list, 5)
+
+    query = request.GET.get("q", "")
+    if query:
+        expenses_list = expenses_list.filter(
+            Q(identification__icontains=query) | 
+            Q(item__name__icontains=query) |
+            Q(source__name__icontains=query)
+        )
+        revenues_list = revenues_list.filter(
+            Q(identification__icontains=query) | 
+            Q(source__name__icontains=query)
+        )
+
+    expenses_paginator = Paginator(expenses_list, 1)
     expenses_page_number = request.GET.get("expenses_page")
     expenses_page = expenses_paginator.get_page(expenses_page_number)
 
-    revenues_paginator = Paginator(revenues_list, 5)
+    revenues_paginator = Paginator(revenues_list, 1)
     revenues_page_number = request.GET.get("revenues_page")
     revenues_page = revenues_paginator.get_page(revenues_page_number)
 
@@ -203,6 +218,7 @@ def accountability_detail_view(request, pk):
         "object": accountability,
         "expenses_page": expenses_page,
         "revenues_page": revenues_page,
+        "search_query": query,
     }
     return render(request, "accountability/accountability/detail.html", context)
 

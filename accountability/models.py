@@ -63,6 +63,7 @@ class Favored(BaseModel):
         # TODO: remove null
         Organization,
         verbose_name="Organização",
+        related_name="favoreds",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

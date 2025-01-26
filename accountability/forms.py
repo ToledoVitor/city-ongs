@@ -71,8 +71,6 @@ class ExpenseForm(forms.ModelForm):
             "favored": BaseSelectFormWidget(required=False),
             "item": BaseSelectFormWidget(),
             "nature": BaseSelectFormWidget(),
-            # "competency": BaseCharFieldFormWidget(),
-            # "liquidation": BaseCharFieldFormWidget(),
             "liquidation_form": BaseSelectFormWidget(),
             "document_type": BaseSelectFormWidget(),
             "document_number": BaseCharFieldFormWidget(),
@@ -87,13 +85,15 @@ class ExpenseForm(forms.ModelForm):
             self.fields[
                 "source"
             ].queryset = self.request.user.organization.expense_sources.all()
+            self.fields["favored"].queryset = self.request.user.organization.favoreds.all()
         else:
             self.fields["source"].queryset = ExpenseSource.objects.none()
+            self.fields["favored"].queryset = Favored.objects.none()
 
         if self.accountability:
             self.fields["item"].queryset = self.accountability.contract.items.all()
         else:
-            self.fields["source"].queryset = ContractItem.objects.none()
+            self.fields["item"].queryset = ContractItem.objects.none()
 
 
 class RevenueSourceCreateForm(forms.ModelForm):
