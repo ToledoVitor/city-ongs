@@ -356,3 +356,38 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("accountability:favoreds-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+def upload_accountability_file_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    accountability = get_object_or_404(Accountability, id=pk)
+    if request.method == "POST":
+        form = AccountabilityCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                ...
+                # _ = ActivityLog.objects.create(
+                #     user=request.user,
+                #     user_email=request.user.email,
+                #     action=ActivityLog.ActivityLogChoices.CREATED_ACCOUNTABILITY,
+                #     target_object_id=accountability.id,
+                #     target_content_object=accountability,
+                # )
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+        else:
+            return render(
+                request,
+                "accountability/accountability/import.html",
+                {"accountability": accountability, "form": form},
+            )
+    else:
+        form = AccountabilityCreateForm()
+        return render(
+            request,
+            "accountability/accountability/import.html",
+            {"accountability": accountability, "form": form},
+        )

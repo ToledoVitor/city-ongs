@@ -50,7 +50,26 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por identificação, item, fonte, origem..." %}
 
-<p class="text-xl my-4 font-bold text-black">Despesas Cadastradas</p>
+<div class="my-3">
+  <div class="grid gap-6 mb-6 md:grid-cols-2">
+    <div class="relative">
+      <p class="text-xl font-bold text-black">Despesas Cadastradas</p>
+    </div>
+
+    <div class="relative text-right">
+      <a href="{% url 'accountability:accountability-upload' object.id %}">
+        <button
+          type="button"
+          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+        >
+          Importar Dados
+          <svg class="ml-2 w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2m-8 1V4m0 12-4-4m4 4 4-4"/>
+          </svg>
+        </button>
+      </a>
+  </div>
+</div>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
   {% include 'accountability/accountability/expenses-table.html' with accountability=object expenses_page=expenses_page revenue_page_number=revenues_page.number q=search_query %}
