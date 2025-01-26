@@ -85,7 +85,9 @@ class ExpenseForm(forms.ModelForm):
             self.fields[
                 "source"
             ].queryset = self.request.user.organization.expense_sources.all()
-            self.fields["favored"].queryset = self.request.user.organization.favoreds.all()
+            self.fields[
+                "favored"
+            ].queryset = self.request.user.organization.favoreds.all()
         else:
             self.fields["source"].queryset = ExpenseSource.objects.none()
             self.fields["favored"].queryset = Favored.objects.none()

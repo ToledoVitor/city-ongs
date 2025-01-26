@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0003_favored_organization"),
         ("accounts", "0001_initial"),

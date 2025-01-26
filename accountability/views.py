@@ -197,13 +197,12 @@ def accountability_detail_view(request, pk):
     query = request.GET.get("q", "")
     if query:
         expenses_list = expenses_list.filter(
-            Q(identification__icontains=query) | 
-            Q(item__name__icontains=query) |
-            Q(source__name__icontains=query)
+            Q(identification__icontains=query)
+            | Q(item__name__icontains=query)
+            | Q(source__name__icontains=query)
         )
         revenues_list = revenues_list.filter(
-            Q(identification__icontains=query) | 
-            Q(source__name__icontains=query)
+            Q(identification__icontains=query) | Q(source__name__icontains=query)
         )
 
     expenses_paginator = Paginator(expenses_list, 1)
