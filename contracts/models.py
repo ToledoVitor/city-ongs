@@ -3,7 +3,7 @@ from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Area, Organization
+from accounts.models import Area, Organization, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
@@ -286,12 +286,6 @@ class ContractGoal(BaseModel):
         choices=StatusChoices,
         default=StatusChoices.ANALYZING,
     )
-    status_pendencies = models.CharField(
-        verbose_name="Pendências e erros",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
 
     history = HistoricalRecords()
 
@@ -305,6 +299,28 @@ class ContractGoal(BaseModel):
     class Meta:
         verbose_name = "Meta"
         verbose_name_plural = "Metas"
+
+class ContractGoalReview(BaseModel):
+    goal = models.ForeignKey(
+        ContractGoal,
+        verbose_name="Meta",
+        related_name="goal_reviews",
+        on_delete=models.CASCADE,
+    )
+    reviewer = models.ForeignKey(
+        User,
+        verbose_name="Revisor",
+        related_name="goal_reviews",
+        on_delete=models.CASCADE,
+    )
+    comment = models.CharField(
+        verbose_name="Comentário",
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = "Revisão de Meta"
+        verbose_name_plural = "Revisões de Metas"
 
 
 class ContractStep(BaseModel):
@@ -388,12 +404,6 @@ class ContractItem(BaseModel):
         choices=StatusChoices,
         default=StatusChoices.ANALYZING,
     )
-    status_pendencies = models.CharField(
-        verbose_name="Pendências e erros",
-        max_length=255,
-        null=True,
-        blank=True,
-    )
 
     history = HistoricalRecords()
 
@@ -416,7 +426,34 @@ class ContractItem(BaseModel):
     def month_expense_with_point(self) -> str:
         return str(self.month_expense).replace(",", ".")
 
+    @property
+    def last_reviews(self) -> str:
+        return self.item_reviews.order_by("-created_at")[:10]
+
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
         ordering = ("-month_expense",)
+
+
+class ContractItemReview(BaseModel):
+    item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item",
+        related_name="item_reviews",
+        on_delete=models.CASCADE,
+    )
+    reviewer = models.ForeignKey(
+        User,
+        verbose_name="Revisor",
+        related_name="item_reviews",
+        on_delete=models.CASCADE,
+    )
+    comment = models.CharField(
+        verbose_name="Comentário",
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = "Revisão de Item"
+        verbose_name_plural = "Revisões de Itens"

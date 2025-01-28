@@ -17,7 +17,7 @@ from contracts.forms import (
     ContractItemForm,
     ContractStepFormSet,
 )
-from contracts.models import Company, Contract, ContractGoal, ContractItem
+from contracts.models import Company, Contract, ContractGoal, ContractGoalReview, ContractItem, ContractItemReview
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -105,11 +105,18 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "hired_company",
                 "hired_manager",
                 "organization",
+                "inversting_account",
+                "checking_account",
             )
             .prefetch_related(
                 "accountabilities",
                 "addendums",
                 "items",
+                "items__items_reviews",
+                "items__items_reviews__reviewer",
+                "goals",
+                "goals__goals_reviews",
+                "goals__goals_reviews__reviewer",
                 "goals",
                 "goals__steps",
             )
@@ -126,18 +133,34 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         if not self.request.POST.get("csrfmiddlewaretoken"):
             return redirect("contracts:contracts-list")
 
-        if not (self.request.user and self.request.user.can_change_statuses):
+        if not self.request.user:
             return redirect("contracts:contracts-list")
 
         contract = get_object_or_404(Contract, id=pk)
         form_type = self.request.POST.get("form_type", "")
+        can_change_statuses = self.request.user.can_change_statuses
 
         match form_type:
             case "items_modal":
-                item = get_object_or_404(ContractItem, id=request.POST.get("itemId"))
-                item.status = request.POST.get("status")
-                item.status_pendencies = request.POST.get("pendencies")
-                item.save()
+                item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
+
+                if can_change_statuses:
+                    item.status = request.POST.get("status")
+                    item.save()
+
+                if comment := request.POST.get("comment"):
+                    ContractItemReview.objects.create(
+                        item=item,
+                        reviewer=request.user,
+                        comment=comment,
+                    )
+                    _ = ActivityLog.objects.create(
+                        user=request.user,
+                        user_email=request.user.email,
+                        action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_ITEM,
+                        target_object_id=item.id,
+                        target_content_object=item,
+                    )
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -148,10 +171,25 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 )
 
             case "goals_modal":
-                goal = get_object_or_404(ContractGoal, id=request.POST.get("goalId"))
-                goal.status = request.POST.get("status")
-                goal.status_pendencies = request.POST.get("pendencies")
-                goal.save()
+                goal = get_object_or_404(ContractGoal, id=request.POST.get("goal_id"))
+
+                if can_change_statuses:
+                    goal.status = request.POST.get("status")
+                    goal.save()
+
+                if comment := request.POST.get("comment"):
+                    ContractGoalReview.objects.create(
+                        goal=goal,
+                        reviewer=request.user,
+                        comment=comment,
+                    )
+                    _ = ActivityLog.objects.create(
+                        user=request.user,
+                        user_email=request.user.email,
+                        action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_GOAL,
+                        target_object_id=item.id,
+                        target_content_object=item,
+                    )
 
                 _ = ActivityLog.objects.create(
                     user=request.user,

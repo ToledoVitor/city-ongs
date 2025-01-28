@@ -32,9 +32,11 @@ class ActivityLog(models.Model):
         )
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
+        COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"
         UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"
         # contract items
         CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Cadastrou item do contrato"
+        COMMENTED_CONTRACT_ITEM = "COMMENTED_CONTRACT_ITEM", "Comentou item do contrato"
         UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
