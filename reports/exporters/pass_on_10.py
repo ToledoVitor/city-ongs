@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from fpdf import FPDF, XPos, YPos
+from fpdf import XPos, YPos
+from commons.exporters import BasePdf
 
 
 @dataclass
@@ -10,7 +11,7 @@ class PassOn10PDFExporter:
     default_cell_height = 5
 
     def __init__(self):
-        pdf = FPDF(orientation="portrait", unit="mm", format="A4")
+        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
@@ -32,7 +33,6 @@ class PassOn10PDFExporter:
         self._draw_resources_table()
         self._draw_resume_table()
         self._draw_table_footer()
-        self._draw_footer()
 
         return self.pdf
 
@@ -326,13 +326,6 @@ class PassOn10PDFExporter:
             text="(3) Receitas com estacionamento, aluguéis, entre outras.",
             h=self.default_cell_height,
         )
-
-    def _draw_footer(self):
-        # Rodapé
-        self.pdf.set_y(-15)
-        self.pdf.set_font("Helvetica", "I", 8)
-        self.pdf.cell(0, 10, f"Page {self.pdf.page_no()}", align="C")
-
 
 if __name__ == "__main__":
     pdf = PassOn10PDFExporter().handle()

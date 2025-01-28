@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from fpdf import FPDF, XPos, YPos
+from fpdf import XPos, YPos
+from commons.exporters import BasePdf
 
 
 @dataclass
@@ -10,7 +11,7 @@ class PassOn5PDFExporter:
     default_cell_height = 5
 
     def __init__(self):
-        pdf = FPDF(orientation="portrait", unit="mm", format="A4")
+        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)

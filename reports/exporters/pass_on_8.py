@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from fpdf import FPDF, XPos, YPos
+from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
+from commons.exporters import BasePdf
 
 
 @dataclass
@@ -11,7 +12,7 @@ class PassOn8PDFExporter:
     default_cell_height = 5
 
     def __init__(self):
-        pdf = FPDF(orientation="portrait", unit="mm", format="A4")
+        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
@@ -37,7 +38,6 @@ class PassOn8PDFExporter:
         self._draw_expenses_footer()
         self._draw_financial_table()
         self._draw_last_informations()
-        self._draw_footer()
 
         return self.pdf
 
@@ -599,34 +599,6 @@ class PassOn8PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(7)
-
-    def _draw_footer(self):
-        # Rodapé
-        # self.pdf.set_y(-15) # TODO "colocar rodapé no lugar correto"
-        self.pdf.set_font("Helvetica", "I", 8)
-        self.pdf.cell(0, 10, f"Page {self.pdf.page_no()}", align="C")
-        self.pdf.set_y(-15)
-        self.pdf.set_line_width(0.1)  # Define a espessura da linha
-        self.pdf.set_draw_color(0, 0, 0)  # Define a cor da linha (preto)
-        self.pdf.line(
-            self.pdf.l_margin,
-            self.pdf.get_y(),
-            self.pdf.w - self.pdf.r_margin,
-            self.pdf.get_y(),
-        )  # Desenha a linha do rodapé
-
-        current_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-        # Configurar fonte
-        self.pdf.set_font("Helvetica", "I", 8)
-
-        # Adicionar texto de página (centralizado)
-        self.pdf.set_y(-10)  # Ajusta a posição do texto após a linha
-        self.pdf.cell(0, 10, f"Page {self.pdf.page_no()}", align="C")
-
-        # Adicionar data/hora (alinhado à direita)
-        self.pdf.set_y(-10)  # Mantém o alinhamento na mesma linha
-        self.pdf.cell(0, 10, current_datetime, align="R")
 
 
 if __name__ == "__main__":
