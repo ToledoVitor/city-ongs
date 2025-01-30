@@ -38,9 +38,8 @@ class PassOn12PDFExporter:
         self._draw_expenses_footer()
         self._draw_financial_table()
         self._draw_last_informations()
-        
+
         return self.pdf
-       
 
     def _draw_header(self):
         # Cabeçalho e títulos
@@ -601,6 +600,7 @@ class PassOn12PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(7)
+
 
 if __name__ == "__main__":
     pdf = PassOn12PDFExporter().handle()

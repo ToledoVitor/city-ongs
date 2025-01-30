@@ -233,6 +233,10 @@ class Contract(BaseModel):
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
+    @property
+    def total_value_with_point(self) -> str:
+        return str(self.total_value).replace(".", ",")
+
 
 class ContractAddendum(BaseModel):
     contract = models.ForeignKey(
@@ -288,7 +292,7 @@ class ContractGoal(BaseModel):
     @property
     def status_label(self) -> str:
         return StatusChoices(self.status).label
-    
+
     @property
     def last_reviews(self) -> str:
         return self.goal_reviews.order_by("-created_at")[:10]
@@ -296,6 +300,7 @@ class ContractGoal(BaseModel):
     class Meta:
         verbose_name = "Meta"
         verbose_name_plural = "Metas"
+
 
 class ContractGoalReview(BaseModel):
     goal = models.ForeignKey(

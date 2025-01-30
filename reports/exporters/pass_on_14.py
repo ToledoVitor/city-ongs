@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from commons.exporters import BasePdf
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
-from commons.exporters import BasePdf
 
 
 @dataclass
@@ -597,6 +597,7 @@ class PassOn14PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(7)
+
 
 if __name__ == "__main__":
     pdf = PassOn14PDFExporter().handle()

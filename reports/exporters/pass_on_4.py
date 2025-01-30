@@ -3,7 +3,8 @@ from datetime import datetime
 
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
-from commons.exporters import BasePdf
+
+from reports.exporters.commons.exporters import BasePdf
 
 
 @dataclass
@@ -11,12 +12,13 @@ class PassOn4PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self):
+    def __init__(self, contract):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         self.pdf = pdf
+        self.contract = contract
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -414,8 +416,3 @@ class PassOn4PDFExporter:
                 total.cell(datum_text)
 
         self.pdf.ln(self.default_cell_height)
-
-
-if __name__ == "__main__":
-    pdf = PassOn4PDFExporter().handle()
-    pdf.output(f"rp4-{str(datetime.now().time())[0:8]}.pdf")

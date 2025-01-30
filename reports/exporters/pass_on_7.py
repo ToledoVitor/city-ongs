@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from fpdf import XPos, YPos
-from commons.exporters import BasePdf
+
+from reports.exporters.commons.exporters import BasePdf
 
 
 @dataclass
@@ -10,12 +11,13 @@ class PassOn7PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self):
+    def __init__(self, contract):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         self.pdf = pdf
+        self.contract = contract
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -60,37 +62,39 @@ class PassOn7PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text="**ÓRGÃO PÚBLICO PARCEIRO:** Prefeitura Municipal de Várzea Paulista",
+            text=f"**ÓRGÃO PÚBLICO PARCEIRO:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**ENTIDADE PARCEIRA:** Associação Comunidade Varzina - Eco & Vida (Meio Ambiente)",
+            text=f"**ENTIDADE PARCEIRA:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**TERMO DE PARCERIA N° (DE ORIGEM):** 10/2023",
+            text=f"**TERMO DE PARCERIA N° (DE ORIGEM):** {self.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**OBJETO:** Executar a coleta de recicláveis no município de Várzea Paulista - SP, em acordo com a Política Nacional de Resíduos Sólidos (PNRS)",
+            text=f"**OBJETO:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**VALOR DO AJUSTE/VALOR REPASSADO (1):** R$ 0,00",
+            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** R$ {self.contract.total_value_with_point}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
-            text="**EXERCÍCIO (1):** 01/01/2025 a 31/12/2025",
+            text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -274,7 +278,3 @@ class PassOn7PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-
-if __name__ == "__main__":
-    pdf = PassOn7PDFExporter().handle()
-    pdf.output(f"rp7-{str(datetime.now().time())[0:8]}.pdf")

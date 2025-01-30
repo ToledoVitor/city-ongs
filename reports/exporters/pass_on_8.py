@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from commons.exporters import BasePdf
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
-from commons.exporters import BasePdf
 
 
 @dataclass

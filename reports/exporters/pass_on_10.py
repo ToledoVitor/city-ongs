@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from fpdf import XPos, YPos
 from commons.exporters import BasePdf
+from fpdf import XPos, YPos
 
 
 @dataclass
@@ -326,6 +326,7 @@ class PassOn10PDFExporter:
             text="(3) Receitas com estacionamento, aluguéis, entre outras.",
             h=self.default_cell_height,
         )
+
 
 if __name__ == "__main__":
     pdf = PassOn10PDFExporter().handle()

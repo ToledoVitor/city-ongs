@@ -17,7 +17,14 @@ from contracts.forms import (
     ContractItemForm,
     ContractStepFormSet,
 )
-from contracts.models import Company, Contract, ContractGoal, ContractGoalReview, ContractItem, ContractItemReview
+from contracts.models import (
+    Company,
+    Contract,
+    ContractGoal,
+    ContractGoalReview,
+    ContractItem,
+    ContractItemReview,
+)
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
