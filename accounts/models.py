@@ -22,6 +22,7 @@ class CityHall(BaseModel):
 class Organization(BaseModel):
     city_hall = models.ForeignKey(
         CityHall,
+        verbose_name="Prefeitura",
         related_name="organizations",
         on_delete=models.CASCADE,
     )

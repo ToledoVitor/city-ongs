@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
@@ -81,8 +80,9 @@ class Contract(BaseModel):
         FINISHED = "FINISHED", "finalizado"
 
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
-    code = models.PositiveIntegerField(
+    code = models.CharField(
         verbose_name="Código do contrato",
+        max_length=16,
         null=True,
         blank=True,
     )
@@ -233,13 +233,6 @@ class Contract(BaseModel):
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
-    def save(self, *args, **kwargs):
-        if self.code is None:
-            max_code = Contract.objects.aggregate(Max("code"))["code__max"]
-            self.code = 1 if max_code is None else max_code + 1
-
-        super().save(*args, **kwargs)
-
 
 class ContractAddendum(BaseModel):
     contract = models.ForeignKey(
@@ -295,6 +288,10 @@ class ContractGoal(BaseModel):
     @property
     def status_label(self) -> str:
         return StatusChoices(self.status).label
+    
+    @property
+    def last_reviews(self) -> str:
+        return self.goal_reviews.order_by("-created_at")[:10]
 
     class Meta:
         verbose_name = "Meta"
