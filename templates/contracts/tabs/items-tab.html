@@ -153,10 +153,10 @@
                 >
                   <div class="relative p-4 w-full max-w-md max-h-full">
                       <!-- Modal content -->
-                      <div class="relative bg-white rounded-lg shadow bg-gray-300">
+                      <div class="relative rounded-lg shadow bg-gray-300">
                           <!-- Modal header -->
                           <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                              <h3 class="text-xl font-semibold text-gray-900 dark:text-black">
+                              <h3 class="text-xl font-semibold text-black">
                                   Selecione uma opção
                               </h3>
                               <button
@@ -184,6 +184,9 @@
                                           id="item-status-select"
                                           name="status"
                                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-00 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                          {% if not user.can_change_statuses %}
+                                          disabled
+                                          {% endif %}
                                       >
                                         <option value="ANALYZING">Em análise</option>
                                         <option value="APPROVED">Aprovado</option>
@@ -199,24 +202,24 @@
 
                                   <div class="h-64 w-full overflow-y-scroll rounded-lg p-4">
                                     {% if not item.last_reviews %}
-                                      <div class="flex items-start gap-2.5 mb-4 flex-row-reverse">
+                                      <div class="flex items-start gap-2.5 mb-4">
                                         <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                           <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
                                         </svg>
                                         <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                          <div class="flex items-center justify-end space-x-2 rtl:space-x-reverse">
-                                            <span class="text-sm font-normal text-gray-600">00:00</span>
-                                            <span class="text-sm font-semibold text-black">----</span>
+                                          <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                              <span class="text-sm font-semibold text-black">----</span>
+                                              <span class="text-sm font-normal text-gray-600">00:00</span>
                                           </div>
-                                          <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                            <p class="text-sm font-normal text-gray-800">Sem nenhum comentário...</p>
+                                          <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
+                                            <p class="text-sm font-normal text-gray-900 dark:text-black">Sem nenhum comentário...</p>
                                           </div>
                                         </div>
                                       </div>
                                     {% endif %}
 
                                     {% for review in item.last_reviews %}
-                                      {% if review.reviewer.id != user.id%}
+                                      {% if review.reviewer.id == user.id%}
                                         <div class="flex items-start gap-2.5 mb-4 flex-row-reverse">
                                           <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
@@ -260,15 +263,15 @@
                                           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-00 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                           placeholder="....."
                                       ></textarea>
-                                      <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                          Adicione um novo comentário
+                                      <p id="helper-text-explanation" class="my-2 text-sm text-gray-800">
+                                          Adicionar um novo comentário
                                       </p>
                                   </div>
                                   <button
                                       type="submit"
                                       class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                   >
-                                      Salvar Análise
+                                      Atualizar
                                   </button>
                               </form>
                           </div>

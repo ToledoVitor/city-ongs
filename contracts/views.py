@@ -147,68 +147,69 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         form_type = self.request.POST.get("form_type", "")
         can_change_statuses = self.request.user.can_change_statuses
 
-        match form_type:
-            case "items_modal":
-                item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
+        with transaction.atomic():
+            match form_type:
+                case "items_modal":
+                    item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
 
-                if can_change_statuses:
-                    item.status = request.POST.get("status")
-                    item.save()
+                    if can_change_statuses:
+                        item.status = request.POST.get("status")
+                        item.save()
 
-                if comment := request.POST.get("comment"):
-                    ContractItemReview.objects.create(
-                        item=item,
-                        reviewer=request.user,
-                        comment=comment,
-                    )
-                    _ = ActivityLog.objects.create(
-                        user=request.user,
-                        user_email=request.user.email,
-                        action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_ITEM,
-                        target_object_id=item.id,
-                        target_content_object=item,
-                    )
+                        _ = ActivityLog.objects.create(
+                            user=request.user,
+                            user_email=request.user.email,
+                            action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
+                            target_object_id=item.id,
+                            target_content_object=item,
+                        )
 
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM,
-                    target_object_id=item.id,
-                    target_content_object=item,
-                )
+                    if comment := request.POST.get("comment"):
+                        ContractItemReview.objects.create(
+                            item=item,
+                            reviewer=request.user,
+                            comment=comment,
+                        )
+                        _ = ActivityLog.objects.create(
+                            user=request.user,
+                            user_email=request.user.email,
+                            action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_ITEM,
+                            target_object_id=item.id,
+                            target_content_object=item,
+                        )
 
-            case "goals_modal":
-                goal = get_object_or_404(ContractGoal, id=request.POST.get("goal_id"))
+                case "goals_modal":
+                    goal = get_object_or_404(ContractGoal, id=request.POST.get("goal_id"))
 
-                if can_change_statuses:
-                    goal.status = request.POST.get("status")
-                    goal.save()
+                    if can_change_statuses:
+                        goal.status = request.POST.get("status")
+                        goal.save()
 
-                if comment := request.POST.get("comment"):
-                    ContractGoalReview.objects.create(
-                        goal=goal,
-                        reviewer=request.user,
-                        comment=comment,
-                    )
-                    _ = ActivityLog.objects.create(
-                        user=request.user,
-                        user_email=request.user.email,
-                        action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_GOAL,
-                        target_object_id=item.id,
-                        target_content_object=item,
-                    )
+                        _ = ActivityLog.objects.create(
+                            user=request.user,
+                            user_email=request.user.email,
+                            action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
+                            target_object_id=goal.id,
+                            target_content_object=goal,
+                        )
 
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_GOAL,
-                    target_object_id=goal.id,
-                    target_content_object=goal,
-                )
+                    if comment := request.POST.get("comment"):
+                        ContractGoalReview.objects.create(
+                            goal=goal,
+                            reviewer=request.user,
+                            comment=comment,
+                        )
+                        _ = ActivityLog.objects.create(
+                            user=request.user,
+                            user_email=request.user.email,
+                            action=ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_GOAL,
+                            target_object_id=goal.id,
+                            target_content_object=goal,
+                        )
 
-            case _:
-                logger.warning(f"form_type: {form_type} is not a valid form")
-                return redirect("contracts:contracts-list")
+                case _:
+                    logger.warning(f"form_type: {form_type} is not a valid form")
+                    return redirect("contracts:contracts-list")
 
         return redirect("contracts:contracts-detail", pk=contract.id)
 
@@ -441,3 +442,32 @@ class CompanyCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("contracts:companies-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class ContractItemDetailView(LoginRequiredMixin, DetailView):
+    model = ContractItem
+
+    template_name = "contracts/items-detail.html"
+    context_object_name = "item"
+
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "organization",
+            )
+            .prefetch_related(
+                "items_reviews",
+                "items_reviews__reviewer",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        return context
