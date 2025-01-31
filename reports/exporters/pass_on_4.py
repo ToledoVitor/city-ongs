@@ -63,14 +63,16 @@ class PassOn4PDFExporter:
 
     def _draw_informations(self):
         self.__set_helvetica_font(font_size=8)
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
-            text="**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** 01/01/2025 A 31/12/2025",
+            text=f"**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**ÓRGÃO CONCESSOR:** PREFEITURA MUNICIPAL DE PREFEITURA MUNICIPAL DE VÁRZEA PAULISTA",
+            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
