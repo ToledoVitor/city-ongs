@@ -133,7 +133,7 @@ class Contract(BaseModel):
     )
     hired_manager = models.ForeignKey(
         Company,
-        verbose_name="Gestor do Contratada",
+        verbose_name="Gestor da Contratada",
         related_name="hired_manager_contracts",
         on_delete=models.CASCADE,
         null=True,

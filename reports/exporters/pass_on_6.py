@@ -46,9 +46,9 @@ class PassOn6PDFExporter:
     def _draw_header(self):
         # Cabeçalho e títulos
         self.__set_helvetica_font(font_size=11, bold=True)
-        self.pdf.cell(
+        self.pdf.multi_cell(
             0,
-            0,
+            4,
             "ANEXO RP-06 - DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS \n (CONTRATO DE GESTÃO)",
             align="C",
             new_x=XPos.LMARGIN,
@@ -60,31 +60,33 @@ class PassOn6PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text="**Contratante:** Prefeitura Municipal de Várzea Paulista",
+            text=f"**Contratante:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**Contratada:** Associação Com unidade Varzina - Eco & Vida (Meio Ambiente)",
+            text=f"**Contratada:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**CNPJ**: 02.834.119/0001-95",
+            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
+            markdown=True,
+            h=self.default_cell_height,
+        )
+        self.pdf.ln(4)
+        hired_company = self.contract.hired_company
+        self.pdf.cell(
+            # TODO averiguar se dados pertence a entidade "Contratada"
+            text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**Endereço e CEP:** Rua Feres Sada 82 - Loteamento Parque Empresarial São Luís",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**Responsáveis pela Organização Social:**",
+            text=f"**Responsáveis pela Organização Social:** {self.contract.hired_manager.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -113,7 +115,7 @@ class PassOn6PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.multi_cell(
-            text="**Objeto do Contrato de Gestão:** Executar a coleta de recicláveis no município de Várzea Paulista - SP, em acordo com a Política Nacional de Resíduos Sólidos (PNRS)",
+            text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -121,15 +123,17 @@ class PassOn6PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
-            text="**Exercício:** 01/11/2024 a 30/11/2024",
+            text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
         self.pdf.cell(
-            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
+            text=f"**Origem dos Recursos (1):** Consolidado de todas as fontes",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -378,6 +382,10 @@ class PassOn6PDFExporter:
             [
                 "Bens e Materiais permanentes",
                 "R$0,00",
+                "R$0,00",
+                "R$0,00",
+                "R$0,00",
+                "R$0,00",
             ],
             [
                 "Combustível",
@@ -479,6 +487,7 @@ class PassOn6PDFExporter:
             align="L",
             col_widths=col_widths,
             repeat_headings=0,
+            v_align="M"
         ) as table:
             header = table.row()
             for text in headers:
@@ -569,7 +578,7 @@ class PassOn6PDFExporter:
         ]
 
         col_widths = [160, 30]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
+        font = FontFace("Helvetica", "", 7)
         # self.pdf.set_fill_color(255, 255, 255),
         with self.pdf.table(
             headings_style=font,

@@ -6,7 +6,7 @@ from fpdf import FPDF
 class BasePdf(FPDF):
     def footer(self, *args, **kwargs):
         self.set_font("Helvetica", "I", 7)
-        self.set_y(-23)
+        self.set_y(-20)
         self.set_line_width(0.1)
         self.set_draw_color(0, 0, 0)
         current_datetime = datetime.now().strftime("%d/%m/%Y %H:%M")
