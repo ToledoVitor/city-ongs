@@ -26,7 +26,7 @@ class NatureChoices(TextChoices):
     INTEREST = "INTEREST", "Juros"
 
     # Foodstuffs
-    FOODSTUFS = "FOODSTUFS", "Gêneros Alimentícios"
+    FOODSTUFFS = "FOODSTUFFS", "Gêneros Alimentícios"
 
     # Real Estate Lease
     REAL_ESTATE_LEASE = "REAL_ESTATE_LEASE", "Locação de Imóveis"
@@ -198,3 +198,150 @@ class NatureChoices(TextChoices):
     TELEPHONE = "TELEPHONE", "Telefone"
     PUBLIC_UTILITIES = "PUBLIC_UTILITIES", "Utilidade Publica"
     WATER_SEWAGE = "WATER_SEWAGE", "Água e Esgoto"
+
+
+class NatureCategories:
+    PERMANENT_GOODS = [
+        NatureChoices.PERMANENT_GOODS_AND_MATERIALS,
+        NatureChoices.COMPUTER_GOODS_AND_EQUIPMENT,
+        NatureChoices.HOSPITAL_GOODS_AND_EQUIPMENT,
+    ]
+
+    FUEL = [
+        NatureChoices.FUEL,
+    ]
+
+    FINANCIAL_AND_BANKING = [
+        NatureChoices.BANKING_EXPENSES,
+        NatureChoices.BANKING_IOF,
+        NatureChoices.BANKING_IRRF,
+        NatureChoices.INTEREST,
+    ]
+
+    FOODSTUFFS = [
+        NatureChoices.FOODSTUFFS,
+    ]
+
+    REAL_STATE = [
+        NatureChoices.REAL_ESTATE_LEASE,
+    ]
+
+    MISCELLANEOUS = [
+        NatureChoices.AMBULANCES,
+        NatureChoices.COMPUTER_EQUIPMENT,
+        NatureChoices.HOSPITCAL_MEDICAL_EQUIPMENT,
+        NatureChoices.LAUNDRY_LINEN,
+        NatureChoices.CAR_LEASE,
+        NatureChoices.MISCELLANOUS_LEASES,
+        NatureChoices.SOFTWARE_SYSTEM,
+    ]
+
+    MEDICAL_AND_HOSPITAL = [
+        NatureChoices.MEDICAL_HOSPITAL_SUPPLIES,
+    ]
+
+    MEDICINES = [
+        NatureChoices.MEDICINES,
+    ]
+
+    WORKS = [
+        NatureChoices.WORKS,
+    ]
+    
+    OTHER_EXPENSES = [
+        NatureChoices.OTHER_ADMINISTRATIVE_EXPENSES,
+        NatureChoices.RETURN_OF_FUNDS,
+        NatureChoices.PARKING_DRIVING_TAXI,
+        NatureChoices.IPTU,
+        NatureChoices.TAXES_FEES_CONTRIBUTIONS,
+        NatureChoices.OTHER_EXPENSES,
+        NatureChoices.INSURANCE,
+        NatureChoices.TRAVEL_TICKET_STAY,
+    ]
+
+    OTHER_CONSUMABLES = [
+        NatureChoices.COOKING_GAS,
+        NatureChoices.COMPUTER_SUPPLIES,
+        NatureChoices.MATERIALS_FOR_SMALL_REPAIRS,
+        NatureChoices.EDUCATIONAL_MATERIAL,
+        NatureChoices.HYGIENE_CLEANING_SUPPLIES_UNIFORMS,
+        NatureChoices.SPORTS_EQUIPMENTS,
+        NatureChoices.UTENSILS,
+        NatureChoices.OFFICE_SUPPLIES_1,
+        NatureChoices.OFFICE_SUPPLIES_2,
+        NatureChoices.OFFICE_SUPPLIES_3,
+        NatureChoices.OTHER_CONSUMABLES,
+    ]
+
+    OTHER_THIRD_PARTY = [
+        NatureChoices.COMMON_WASTE_COLLECT,
+        NatureChoices.HOSPITAL_WASTE_COLLECT,
+        NatureChoices.CONSULTING_LEGAL_ADVICE,
+        NatureChoices.CLEANING_MAINTENANCE,
+        NatureChoices.MAINTENANCE_HOSPITAL_EQUIPMENT,
+        NatureChoices.MAINTENANCE_COMPUTER_EQUIPMENT,
+        NatureChoices.MAINTENANCE_BUILDING,
+        NatureChoices.MAINTENANCE_VEHICLE,
+        NatureChoices.CONSTRUCTION,
+        NatureChoices.MAINTENANCE_OTHERS,
+        NatureChoices.LEGAL_THIRD_PARTY_SERVICES,
+        NatureChoices.ADVERTISING_PUBILICITY,
+        NatureChoices.THERAPEUTIC_SUPPORT_SERVICE,
+        NatureChoices.SERVICES_ACCOUNTING,
+        NatureChoices.SERVICES_AUDITING,
+        NatureChoices.SERVIECS_IT,
+        NatureChoices.SERVICES_SURVEILLANCES,
+    ]
+
+    HUMAN_RESOURCES = [
+        NatureChoices.THIRTHEENTH_SALARY,
+        NatureChoices.APPRENTICES,
+        NatureChoices.MEDICAL_ASSISTENCE,
+        NatureChoices.ADVANCE_NOTICE,
+        NatureChoices.BENEFITS,
+        NatureChoices.INTERNSHIP_ALLOWANCE,
+        NatureChoices.INSS_CONTRIBUTION_SHARE,
+        NatureChoices.PIS_CONTRIBUTION,
+        NatureChoices.SOCIAL_CONTRIBUTIONS,
+        NatureChoices.COURSES_TRAINING_RETRAINING,
+        NatureChoices.PERSONNEL_EXPENSES,
+        NatureChoices.COLLECTIVE_BARGAINING,
+        NatureChoices.SOCIAL_CHARGES,
+        NatureChoices.FGTS,
+        NatureChoices.RESERVE_FUND,
+        NatureChoices.VACATIONS,
+        NatureChoices.BONUSES,
+        NatureChoices.HR_INSS,
+        NatureChoices.HR_IRRF,
+        NatureChoices.COMPENSATIONS,
+        NatureChoices.TERMINATION_EMPLOYMENT_CONTRACT,
+        NatureChoices.MISCELLANOUS_WITHHOLDINGS,
+        NatureChoices.MANAGEMENT_SALARY,
+        NatureChoices.SALARIES_AND_WAGES,
+        NatureChoices.UNIFORMS,
+        NatureChoices.FOOD_VOUCHERS,
+        NatureChoices.MEAL_VOUCHERS,
+        NatureChoices.TRANSPORTATION_VOUCHERS,
+    ]
+
+
+    OTHER_HUMAN_RESOURCES = [
+        NatureChoices.INTERN_REMUNERATION,
+        NatureChoices.SERVICES_PF_THIRD_PARTIES,
+        NatureChoices.SERVICES_PJ_THIRD_PARTIES,
+    ]
+
+    MEDICAL_SERVICES = [
+        NatureChoices.MEDICAL_SERVICES,
+        NatureChoices.MEDICAL_SERVICES_FOR_INDIVIDUALS,
+        NatureChoices.MEDICAL_SERVICES_FOR_ENTITIES,
+    ]
+
+    PUBLIC_UTILITIES = [
+        NatureChoices.PUBLIC_ADMINISTRATIVE_EXPENSES,
+        NatureChoices.ELECTRICITY,
+        NatureChoices.INTERNET_TV,
+        NatureChoices.TELEPHONE,
+        NatureChoices.PUBLIC_UTILITIES,
+        NatureChoices.WATER_SEWAGE,
+    ]

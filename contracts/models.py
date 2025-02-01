@@ -191,7 +191,7 @@ class Contract(BaseModel):
 
     @property
     def trailing_code(self):
-        return "{:04}".format(self.code)
+        return "{:04}".format(self.internal_code)
 
     @property
     def name_with_code(self):
