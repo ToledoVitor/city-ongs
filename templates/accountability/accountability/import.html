@@ -14,7 +14,7 @@
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
           <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
           </svg>
@@ -37,23 +37,52 @@
           <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ accountability.contract.trailing_code }}</a>
         </div>
       </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
-        </div>
-      </li>
       <li aria-current="page">
         <div class="flex items-center">
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Importar</span>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Importar Dados</span>
         </div>
       </li>
     </ol>
 </nav>
   
+<form method="post" class="mx-auto">
+  {% csrf_token %}
+
+  <label class="block mb-2 text-2xl font-bold text-black">Baixe aqui o modelo da planilha de importação</label>
+
+  <input type="hidden" name="step" value="download">
+
+  <button
+    type="submit"
+    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    style="display: flex; justify-self: center;"
+  >
+    Criar
+  </button>
+  
+</form>
+
+<form method="post" class="mx-auto">
+  {% csrf_token %}
+
+  <label class="block mb-2 text-2xl font-bold text-black">Dados da Empresa</label>
+
+  <div class="max-w-4xl mx-auto flex items-center justify-center w-full">
+    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-500 border-dashed rounded-lg cursor-pointer bg-gray-300 hover:bg-gray-400">
+        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+            </svg>
+            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click para escolher</span> ou arraste e solte</p>
+            <p class="text-xs text-gray-500">XLSX (MAX. 10MB)</p>
+        </div>
+        <input id="dropzone-file" type="file" class="hidden" />
+    </label>
+  </div> 
+
+</form>
+
 {% endblock %}

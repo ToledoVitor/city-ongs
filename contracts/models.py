@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
 
@@ -86,6 +87,13 @@ class Contract(BaseModel):
         null=True,
         blank=True,
     )
+    
+    internal_code = models.PositiveIntegerField(
+        verbose_name="Código interno para importação",
+        null=True,
+        blank=True,
+    )
+
     objective = models.CharField(verbose_name="Objeto", max_length=128)
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
@@ -232,6 +240,12 @@ class Contract(BaseModel):
             | accountability_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
+    
+    def save(self, *args, **kwargs):
+        if self.internal_code is None:
+            max_code = Contract.objects.aggregate(Max("internal_code"))["internal_code__max"]
+            self.internal_code = 1 if max_code is None else max_code + 1
+        super().save(*args, **kwargs)
 
     @property
     def total_value_with_point(self) -> str:

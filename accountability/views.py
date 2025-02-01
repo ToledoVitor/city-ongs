@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -9,6 +10,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, TemplateView
 
+from accountability.services import AccountabilityCSVExporter
 from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseForm,
@@ -357,36 +359,37 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-def upload_accountability_file_view(request, pk):
+def import_accountability_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
     accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
-        form = AccountabilityCreateForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                ...
-                # _ = ActivityLog.objects.create(
-                #     user=request.user,
-                #     user_email=request.user.email,
-                #     action=ActivityLog.ActivityLogChoices.CREATED_ACCOUNTABILITY,
-                #     target_object_id=accountability.id,
-                #     target_content_object=accountability,
-                # )
-            return redirect(
-                "accountability:accountability-detail", pk=accountability.id
+        step = request.POST.get("step")
+
+        if step == "download":
+            xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
+            response = HttpResponse(
+                xlsx.getvalue(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
+            response["Content-Disposition"] = (
+                f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
+            )    
+            return response
+
+        elif step == "upload":
+            ...
+
         else:
             return render(
                 request,
                 "accountability/accountability/import.html",
-                {"accountability": accountability, "form": form},
+                {"accountability": accountability},
             )
     else:
-        form = AccountabilityCreateForm()
         return render(
             request,
             "accountability/accountability/import.html",
-            {"accountability": accountability, "form": form},
+            {"accountability": accountability},
         )

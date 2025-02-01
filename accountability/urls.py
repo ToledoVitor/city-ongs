@@ -11,7 +11,7 @@ from accountability.views import (
     create_accountability_expense_view,
     create_accountability_revenue_view,
     create_contract_accountability_view,
-    upload_accountability_file_view,
+    import_accountability_view,
 )
 
 urlpatterns = [
@@ -29,9 +29,9 @@ urlpatterns = [
         name="revenues-source-create",
     ),
     path(
-        "<uuid:pk>/accountability/upload",
-        upload_accountability_file_view,
-        name="accountability-upload",
+        "<uuid:pk>/accountability/import",
+        import_accountability_view,
+        name="accountability-import",
     ),
     path("detail/<uuid:pk>", accountability_detail_view, name="accountability-detail"),
     path(
