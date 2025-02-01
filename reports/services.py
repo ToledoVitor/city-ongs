@@ -7,7 +7,9 @@ from reports.exporters import (
     PassOn5PDFExporter,
     PassOn6PDFExporter,
     PassOn7PDFExporter,
+    PassOn8PDFExporter,
     PassOn9PDFExporter,
+    PassOn10PDFExporter,
     PassOn11PDFExporter,
     PassOn13PDFExporter,
 )
@@ -43,10 +45,22 @@ def export_pass_on_7():
     pdf.output(f"rp7-{str(datetime.now().time())[0:8]}.pdf")
 
 
+def export_pass_on_8():
+    contract = Contract.objects.first()  # get(id=contract_id)
+    pdf = PassOn8PDFExporter(contract).handle()
+    pdf.output(f"rp8-{str(datetime.now().time())[0:8]}.pdf")
+
+
 def export_pass_on_9():
     contract = Contract.objects.first()  # get(id=contract_id)
     pdf = PassOn9PDFExporter(contract).handle()
     pdf.output(f"rp9-{str(datetime.now().time())[0:8]}.pdf")
+
+
+def export_pass_on_10():
+    contract = Contract.objects.first()  # get(id=contract_id)
+    pdf = PassOn10PDFExporter(contract).handle()
+    pdf.output(f"rp10-{str(datetime.now().time())[0:8]}.pdf")
 
 
 def export_pass_on_11():

@@ -4,7 +4,9 @@ from .pass_on_4 import PassOn4PDFExporter
 from .pass_on_5 import PassOn5PDFExporter
 from .pass_on_6 import PassOn6PDFExporter
 from .pass_on_7 import PassOn7PDFExporter
+from .pass_on_8 import PassOn8PDFExporter
 from .pass_on_9 import PassOn9PDFExporter
+from .pass_on_10 import PassOn10PDFExporter
 from .pass_on_11 import PassOn11PDFExporter
 from .pass_on_13 import PassOn13PDFExporter
 
@@ -15,7 +17,9 @@ __all__ = [
     "PassOn5PDFExporter",
     "PassOn6PDFExporter",
     "PassOn7PDFExporter",
+    "PassOn8PDFExporter",
     "PassOn9PDFExporter",
+    "PassOn10PDFExporter",
     "PassOn11PDFExporter",
     "PassOn13PDFExporter",
 ]
