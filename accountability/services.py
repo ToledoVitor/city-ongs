@@ -1,6 +1,7 @@
 from io import BytesIO
 
 from accountability.models import Accountability
+from contracts.models import Organization
 
 import xlsxwriter
 
@@ -9,8 +10,9 @@ class AccountabilityCSVExporter:
     workbook: None
 
     def __init__(self, accountability: Accountability):
-        self.accountability = accountability
-        self.contract_code = accountability.contract.internal_code
+        self.accountability: Accountability = accountability
+        self.organization: Organization = accountability.contract.organization
+        self.contract_code: int = accountability.contract.internal_code
 
     def handle(self):
         output = BytesIO()
@@ -35,7 +37,7 @@ class AccountabilityCSVExporter:
             self.__build_receipt_worksheet,
             self.__build_expense_worksheet,
             self.__build_application_worksheet,
-            self.__build_resource_source_worksheet,
+            self.__build_revenue_worksheet,
             self.__build_bank_account_worksheet,
             self.__build_category_worksheet,
             self.__build_expense_category_worksheet,
@@ -450,8 +452,8 @@ class AccountabilityCSVExporter:
         application_worksheet.autofit()
         return application_worksheet
 
-    def __build_resource_source_worksheet(self):
-        resource_source_worksheet = self.workbook.add_worksheet(name="FR")
+    def __build_revenue_worksheet(self):
+        revenue_worksheet = self.workbook.add_worksheet(name="FR")
 
         body_format = self.workbook.add_format(
             {
@@ -461,16 +463,17 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
-        resource_source_worksheet.write(0, 0, "NOME", body_format)
-        resource_source_worksheet.write(0, 1, "ID", body_format)
+        revenue_worksheet.write(0, 0, "NOME", body_format)
+        revenue_worksheet.write(0, 1, "ID", body_format)
 
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            resource_source_worksheet.write(id, 0, "ID")
-            resource_source_worksheet.write(id, 1, id)
+        line = 1
+        for source in self.organization.revenue_sources.all():
+            revenue_worksheet.write(line, 0, source.name)
+            revenue_worksheet.write(line, 1, source.id)
+            line += 1
 
-        resource_source_worksheet.autofit()
-        return resource_source_worksheet
+        revenue_worksheet.autofit()
+        return revenue_worksheet
 
     def __build_bank_account_worksheet(self):
         bank_account_worksheet = self.workbook.add_worksheet(name="CB")

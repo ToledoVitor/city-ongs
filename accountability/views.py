@@ -363,11 +363,17 @@ def import_accountability_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
-    accountability = get_object_or_404(Accountability, id=pk)
     if request.method == "POST":
         step = request.POST.get("step")
 
         if step == "download":
+            accountability = Accountability.objects.select_related(
+                "contract",
+                "contract__organization",
+            ).prefetch_related(
+                "contract__organization__revenue_sources",
+            ).get(id=pk)
+            
             xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
             response = HttpResponse(
                 xlsx.getvalue(),
@@ -388,6 +394,7 @@ def import_accountability_view(request, pk):
                 {"accountability": accountability},
             )
     else:
+        accountability = get_object_or_404(Accountability, id=pk)
         return render(
             request,
             "accountability/accountability/import.html",
