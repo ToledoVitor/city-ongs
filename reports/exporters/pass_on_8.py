@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from django.db.models import Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
+from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
+from utils.formats import format_into_brazilian_currency
 
 
 @dataclass
@@ -377,6 +380,23 @@ class PassOn8PDFExporter:
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
+        all_expenses = self.contract.items.filter(
+            expenses__competency__gte=self.contract.start_of_vigency,
+            expenses__competency__lte=self.contract.end_of_vigency,
+        )
+
+        medical_expenses = format_into_brazilian_currency(
+            all_expenses.filter(
+                nature__in=NatureCategories.MEDICINES,
+            ).aggregate(total=Sum("expenses__value"))["total"]
+        )
+
+        fuel_expenses = format_into_brazilian_currency(
+            all_expenses.filter(
+                nature__in=NatureCategories.FUEL,
+            ).aggregate(total=Sum("expenses__value"))["total"]
+        )
+
         table_data = [
             [
                 "Bens e Materiais permanentes",
@@ -388,7 +408,7 @@ class PassOn8PDFExporter:
             ],
             [
                 "Combustível",
-                "R$0,00",
+                fuel_expenses,
                 "R$0,00",
                 "R$0,00",
                 "R$0,00",
@@ -436,7 +456,7 @@ class PassOn8PDFExporter:
             ],
             [
                 "Medicamentos",
-                "R$0,00",
+                medical_expenses,
                 "R$0,00",
                 "R$0,00",
                 "R$0,00",

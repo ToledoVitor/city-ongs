@@ -8,7 +8,9 @@ from .pass_on_8 import PassOn8PDFExporter
 from .pass_on_9 import PassOn9PDFExporter
 from .pass_on_10 import PassOn10PDFExporter
 from .pass_on_11 import PassOn11PDFExporter
+from .pass_on_12 import PassOn12PDFExporter
 from .pass_on_13 import PassOn13PDFExporter
+from .pass_on_14 import PassOn14PDFExporter
 
 __all__ = [
     "ContractProgressPDFExporter",
@@ -21,5 +23,7 @@ __all__ = [
     "PassOn9PDFExporter",
     "PassOn10PDFExporter",
     "PassOn11PDFExporter",
+    "PassOn11PDFExporter",
     "PassOn13PDFExporter",
+    "PassOn14PDFExporter",
 ]

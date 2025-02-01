@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from commons.exporters import BasePdf
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
+
+from reports.exporters.commons.exporters import BasePdf
 
 
 @dataclass
@@ -11,13 +12,14 @@ class PassOn12PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self):
+    def __init__(self, contract):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
+        self.contract = contract
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -58,31 +60,32 @@ class PassOn12PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text="**Órgão Público Convenente:** Prefeitura Municipal de Várzea Paulista",
+            text=f"**Órgão Público Convenente:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**Conveniada:** Associação Comunidade Varzina - Eco & Vida (Meio Ambiente)",
+            text=f"**Conveniada:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**CNPJ**: 02.834.119/0001-95",
+            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
+            markdown=True,
+            h=self.default_cell_height,
+        )
+        self.pdf.ln(4)
+        hired_company = self.contract.hired_company
+        self.pdf.cell(
+            text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**Endereço e CEP:** Rua Feres Sada 82 - Loteamento Parque Empresarial São Luís",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="**Responsáveis pela Conveniada:**",
+            text=f"**Responsáveis pela Conveniada:**",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -111,7 +114,7 @@ class PassOn12PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.multi_cell(
-            text="**Objeto da Parceria:** Executar a coleta de recicláveis no município de Várzea Paulista - SP, em acordo com a Política Nacional de Resíduos Sólidos (PNRS)",
+            text=f"**Objeto da Parceria:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -119,15 +122,17 @@ class PassOn12PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
-            text="**Exercício:** 01/11/2024 a 30/11/2024",
+            text=f"**Exercício:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
         self.pdf.cell(
-            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
+            text=f"**Origem dos Recursos (1):** Consolidado de todas as fontes",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -376,6 +381,10 @@ class PassOn12PDFExporter:
             [
                 "Bens e Materiais permanentes",
                 "R$0,00",
+                "R$0,00",
+                "R$0,00",
+                "R$0,00",
+                "R$0,00",
             ],
             [
                 "Combustível",
@@ -567,7 +576,7 @@ class PassOn12PDFExporter:
         ]
 
         col_widths = [160, 30]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
+        font = FontFace("Helvetica", "", 7)
         # self.pdf.set_fill_color(255, 255, 255),
         with self.pdf.table(
             headings_style=font,
@@ -600,8 +609,3 @@ class PassOn12PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(7)
-
-
-if __name__ == "__main__":
-    pdf = PassOn12PDFExporter().handle()
-    pdf.output(f"rp12-{str(datetime.now().time())[0:8]}.pdf")
