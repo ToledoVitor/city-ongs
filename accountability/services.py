@@ -2,8 +2,9 @@ from io import BytesIO
 
 import xlsxwriter
 
-from accountability.models import Accountability
-from contracts.models import Organization
+from accountability.models import Accountability, Expense, Revenue
+from contracts.choices import NatureChoices
+from contracts.models import Contract, Organization
 
 
 class AccountabilityCSVExporter:
@@ -11,6 +12,7 @@ class AccountabilityCSVExporter:
 
     def __init__(self, accountability: Accountability):
         self.accountability: Accountability = accountability
+        self.contract: Contract = accountability.contract
         self.organization: Organization = accountability.contract.organization
         self.contract_code: int = accountability.contract.internal_code
 
@@ -39,7 +41,7 @@ class AccountabilityCSVExporter:
             self.__build_application_worksheet,
             self.__build_revenue_worksheet,
             self.__build_bank_account_worksheet,
-            self.__build_category_worksheet,
+            self.__build_nature_category_worksheet,
             self.__build_expense_category_worksheet,
             self.__build_favored_worksheet,
             self.__build_ia_worksheet,
@@ -471,13 +473,13 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
-        revenue_worksheet.write(0, 0, "NOME", body_format)
+        revenue_worksheet.write(0, 0, "Nome", body_format)
         revenue_worksheet.write(0, 1, "ID", body_format)
 
         line = 1
         for source in self.organization.revenue_sources.all():
             revenue_worksheet.write(line, 0, source.name)
-            revenue_worksheet.write(line, 1, source.id)
+            revenue_worksheet.write(line, 1, str(source.id))
             line += 1
 
         revenue_worksheet.autofit()
@@ -485,7 +487,6 @@ class AccountabilityCSVExporter:
 
     def __build_bank_account_worksheet(self):
         bank_account_worksheet = self.workbook.add_worksheet(name="CB")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -495,21 +496,33 @@ class AccountabilityCSVExporter:
             }
         )
 
-        # Cabeçalho
-        bank_account_worksheet.write(0, 0, "NOME", body_format)
+        bank_account_worksheet.write(0, 0, "Nome", body_format)
         bank_account_worksheet.write(0, 1, "ID", body_format)
 
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            bank_account_worksheet.write(id, 0, "ID")
-            bank_account_worksheet.write(id, 1, id)
+        current_line = 1
+        if self.contract.checking_account:
+            bank_account_worksheet.write(
+                current_line, 0, self.contract.checking_account.account
+            )
+            bank_account_worksheet.write(
+                current_line, 1, str(self.contract.checking_account.id)
+            )
+            current_line += 1
+
+        if self.contract.investing_account:
+            bank_account_worksheet.write(
+                current_line, 0, self.contract.investing_account.account
+            )
+            bank_account_worksheet.write(
+                current_line, 1, str(self.contract.investing_account.id)
+            )
+            current_line += 1
 
         bank_account_worksheet.autofit()
         return bank_account_worksheet
 
-    def __build_category_worksheet(self):
+    def __build_nature_category_worksheet(self):
         category_worksheet = self.workbook.add_worksheet(name="NR")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -518,22 +531,19 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
+        category_worksheet.write(0, 0, "Nome", body_format)
 
-        # Cabeçalho
-        category_worksheet.write(0, 0, "NOME", body_format)
-        category_worksheet.write(0, 1, "ID", body_format)
-
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            category_worksheet.write(id, 0, "ID")
-            category_worksheet.write(id, 1, id)
+        current_line = 1
+        natures = [nature.label for nature in Revenue.Nature]
+        for nature in natures:
+            category_worksheet.write(current_line, 0, nature)
+            current_line += 1
 
         category_worksheet.autofit()
         return category_worksheet
 
     def __build_expense_category_worksheet(self):
         expense_category_worksheet = self.workbook.add_worksheet(name="ND")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -542,22 +552,19 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
+        expense_category_worksheet.write(0, 0, "Nome", body_format)
 
-        # Cabeçalho
-        expense_category_worksheet.write(0, 0, "NOME", body_format)
-        expense_category_worksheet.write(0, 1, "ID", body_format)
-
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            expense_category_worksheet.write(id, 0, "ID")
-            expense_category_worksheet.write(id, 1, id)
+        current_line = 1
+        natures = [nature.label for nature in NatureChoices]
+        for nature in natures:
+            expense_category_worksheet.write(current_line, 0, nature)
+            current_line += 1
 
         expense_category_worksheet.autofit()
         return expense_category_worksheet
 
     def __build_favored_worksheet(self):
         favored_worksheet = self.workbook.add_worksheet(name="FV")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -566,22 +573,20 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
-
-        # Cabeçalho
-        favored_worksheet.write(0, 0, "NOME", body_format)
+        favored_worksheet.write(0, 0, "Nome", body_format)
         favored_worksheet.write(0, 1, "ID", body_format)
 
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            favored_worksheet.write(id, 0, "ID")
-            favored_worksheet.write(id, 1, id)
+        current_line = 1
+        for favored in self.organization.favoreds.all():
+            favored_worksheet.write(current_line, 0, favored.name)
+            favored_worksheet.write(current_line, 1, str(favored.id))
+            current_line += 1
 
         favored_worksheet.autofit()
         return favored_worksheet
 
     def __build_ia_worksheet(self):
         ia_worksheet = self.workbook.add_worksheet(name="IA")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -590,22 +595,20 @@ class AccountabilityCSVExporter:
                 "bg_color": "#f0fc0a",
             }
         )
-
-        # Cabeçalho
-        ia_worksheet.write(0, 0, "NOME", body_format)
+        ia_worksheet.write(0, 0, "Nome", body_format)
         ia_worksheet.write(0, 1, "ID", body_format)
 
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            ia_worksheet.write(id, 0, "ID")
-            ia_worksheet.write(id, 1, id)
+        current_line = 1
+        for item in self.contract.items.all():
+            ia_worksheet.write(current_line, 0, item.name)
+            ia_worksheet.write(current_line, 1, str(item.id))
+            current_line += 1
 
         ia_worksheet.autofit()
         return ia_worksheet
 
     def __build_doc_type_worksheet(self):
         doc_type_worksheet = self.workbook.add_worksheet(name="TD")
-
         body_format = self.workbook.add_format(
             {
                 "align": "center",
@@ -615,14 +618,13 @@ class AccountabilityCSVExporter:
             }
         )
 
-        # Cabeçalho
-        doc_type_worksheet.write(0, 0, "NOME", body_format)
-        doc_type_worksheet.write(0, 1, "ID", body_format)
+        doc_type_worksheet.write(0, 0, "Nome", body_format)
 
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            doc_type_worksheet.write(id, 0, "ID")
-            doc_type_worksheet.write(id, 1, id)
+        current_line = 1
+        documents = [document.label for document in Expense.DocumentChoices]
+        for document in documents:
+            doc_type_worksheet.write(current_line, 0, document)
+            current_line += 1
 
         doc_type_worksheet.autofit()
         return doc_type_worksheet
@@ -639,8 +641,7 @@ class AccountabilityCSVExporter:
             }
         )
 
-        # Cabeçalho
-        pr_worksheet.write(0, 0, "NOME", body_format)
+        pr_worksheet.write(0, 0, "Nome", body_format)
         pr_worksheet.write(0, 1, "ID", body_format)
 
         # Preenchendo corpo (Inserir dados importados aqui)
@@ -650,7 +651,3 @@ class AccountabilityCSVExporter:
 
         pr_worksheet.autofit()
         return pr_worksheet
-
-        # formula = (
-        #    f'=IFERROR(VLOOKUP(F{id+1},$FR.A$2:$FR.B$100,2),"")'  # fórmula coluna G
-        # )
