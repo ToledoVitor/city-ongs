@@ -51,24 +51,29 @@
 <form method="post" class="mx-auto">
   {% csrf_token %}
 
-  <label class="block mb-2 text-2xl font-bold text-black">Baixe aqui o modelo da planilha de importação</label>
+  <label class="block mb-2 text-2xl font-bold text-black">Modelo de importação</label>
+  <span class="">Desc.</span> <br>
 
   <input type="hidden" name="step" value="download">
 
   <button
     type="submit"
-    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-    style="display: flex; justify-self: center;"
+    class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
   >
-    Criar
+    Baixar Modelo
+    <svg class="ml-2 w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2m-8 1V4m0 12-4-4m4 4 4-4"/>
+    </svg>
   </button>
-  
+
 </form>
+
+<hr class="max-w-lg h-px my-4 border-0 bg-gray-400">
 
 <form method="post" class="mx-auto">
   {% csrf_token %}
 
-  <label class="block mb-2 text-2xl font-bold text-black">Dados da Empresa</label>
+  <label class="block mb-2 text-2xl font-bold text-black">Carregar Dados</label>
 
   <div class="max-w-4xl mx-auto flex items-center justify-center w-full">
     <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-500 border-dashed rounded-lg cursor-pointer bg-gray-300 hover:bg-gray-400">

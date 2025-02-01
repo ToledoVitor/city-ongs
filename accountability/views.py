@@ -207,11 +207,11 @@ def accountability_detail_view(request, pk):
             Q(identification__icontains=query) | Q(source__name__icontains=query)
         )
 
-    expenses_paginator = Paginator(expenses_list, 1)
+    expenses_paginator = Paginator(expenses_list, 10)
     expenses_page_number = request.GET.get("expenses_page")
     expenses_page = expenses_paginator.get_page(expenses_page_number)
 
-    revenues_paginator = Paginator(revenues_list, 1)
+    revenues_paginator = Paginator(revenues_list, 10)
     revenues_page_number = request.GET.get("revenues_page")
     revenues_page = revenues_paginator.get_page(revenues_page_number)
 

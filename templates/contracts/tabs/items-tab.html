@@ -97,31 +97,31 @@
                   <td class="px-6 py-4 text-sm text-black">
                     {% if item.status == "ANALYZING" %}
                       <span
-                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
                       >
                         Em análise
                       </span>
                     {% elif item.status == "CORRECTING" %}
                       <span
-                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Em correção
                       </span>
                     {% elif item.status == "APPROVED" %}
                       <span
-                        class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-green-100 whitespace-nowrap text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Aprovado
                       </span>
                     {% elif item.status == "APPROVED_WITH_PENDENCE" %}
                       <span
-                        class="bg-yellow-300 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Pendências
                       </span>
                     {% elif item.status == "REJECTED" %}
                       <span
-                        class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-red-100 whitespace-nowrap text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Rejeitado
                       </span>
