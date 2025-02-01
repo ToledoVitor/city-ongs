@@ -247,7 +247,7 @@ class NatureCategories:
     WORKS = [
         NatureChoices.WORKS,
     ]
-    
+
     OTHER_EXPENSES = [
         NatureChoices.OTHER_ADMINISTRATIVE_EXPENSES,
         NatureChoices.RETURN_OF_FUNDS,
@@ -323,7 +323,6 @@ class NatureCategories:
         NatureChoices.MEAL_VOUCHERS,
         NatureChoices.TRANSPORTATION_VOUCHERS,
     ]
-
 
     OTHER_HUMAN_RESOURCES = [
         NatureChoices.INTERN_REMUNERATION,

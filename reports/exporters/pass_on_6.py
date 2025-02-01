@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
@@ -133,7 +132,7 @@ class PassOn6PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.cell(
-            text=f"**Origem dos Recursos (1):** Consolidado de todas as fontes",
+            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -487,7 +486,7 @@ class PassOn6PDFExporter:
             align="L",
             col_widths=col_widths,
             repeat_headings=0,
-            v_align="M"
+            v_align="M",
         ) as table:
             header = table.row()
             for text in headers:

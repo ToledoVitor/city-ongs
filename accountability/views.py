@@ -1,16 +1,15 @@
 import logging
 from typing import Any
 
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, TemplateView
 
-from accountability.services import AccountabilityCSVExporter
 from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseForm,
@@ -20,6 +19,7 @@ from accountability.forms import (
     RevenueSourceCreateForm,
 )
 from accountability.models import Accountability, ExpenseSource, Favored, RevenueSource
+from accountability.services import AccountabilityCSVExporter
 from activity.models import ActivityLog
 from contracts.models import Contract
 
@@ -367,13 +367,17 @@ def import_accountability_view(request, pk):
         step = request.POST.get("step")
 
         if step == "download":
-            accountability = Accountability.objects.select_related(
-                "contract",
-                "contract__organization",
-            ).prefetch_related(
-                "contract__organization__revenue_sources",
-            ).get(id=pk)
-            
+            accountability = (
+                Accountability.objects.select_related(
+                    "contract",
+                    "contract__organization",
+                )
+                .prefetch_related(
+                    "contract__organization__revenue_sources",
+                )
+                .get(id=pk)
+            )
+
             xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
             response = HttpResponse(
                 xlsx.getvalue(),
@@ -381,7 +385,7 @@ def import_accountability_view(request, pk):
             )
             response["Content-Disposition"] = (
                 f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
-            )    
+            )
             return response
 
         elif step == "upload":

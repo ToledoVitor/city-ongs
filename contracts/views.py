@@ -150,7 +150,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         with transaction.atomic():
             match form_type:
                 case "items_modal":
-                    item = get_object_or_404(ContractItem, id=request.POST.get("item_id"))
+                    item = get_object_or_404(
+                        ContractItem, id=request.POST.get("item_id")
+                    )
 
                     if can_change_statuses:
                         item.status = request.POST.get("status")
@@ -179,7 +181,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                         )
 
                 case "goals_modal":
-                    goal = get_object_or_404(ContractGoal, id=request.POST.get("goal_id"))
+                    goal = get_object_or_404(
+                        ContractGoal, id=request.POST.get("goal_id")
+                    )
 
                     if can_change_statuses:
                         goal.status = request.POST.get("status")

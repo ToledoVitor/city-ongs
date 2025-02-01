@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0003_alter_contract_code_alter_historicalcontract_code"),
     ]

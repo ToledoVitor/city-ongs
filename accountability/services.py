@@ -1,9 +1,9 @@
 from io import BytesIO
 
+import xlsxwriter
+
 from accountability.models import Accountability
 from contracts.models import Organization
-
-import xlsxwriter
 
 
 class AccountabilityCSVExporter:
@@ -17,7 +17,7 @@ class AccountabilityCSVExporter:
     def handle(self):
         output = BytesIO()
 
-        self.workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        self.workbook = xlsxwriter.Workbook(output, {"in_memory": True})
         self._build_worksheets()
         self.workbook.define_name("fr_tab", "FR!$A$2:$A$100")
         self.workbook.define_name("cb_tab", "CB!$A$2:$A$100")
@@ -28,7 +28,7 @@ class AccountabilityCSVExporter:
         self.workbook.define_name("td_tab", "TD!$A$2:$A$100")
         self.workbook.define_name("pr_tab", "PR!$A$2:$A$100")
         self.workbook.close()
-        
+
         output.seek(0)
         return output
 
@@ -107,7 +107,9 @@ class AccountabilityCSVExporter:
             col += 1
 
         for line in range(2, 1002):
-            receipt_worksheet.write(line, 0, self.contract_code, locked_cell_format)  # Coluna A
+            receipt_worksheet.write(
+                line, 0, self.contract_code, locked_cell_format
+            )  # Coluna A
             receipt_worksheet.write(line, 1, "", body_format)  # Column B
             receipt_worksheet.write(line, 2, "", body_format)  # Column C
             receipt_worksheet.write(line, 3, "", body_format)  # Column D
@@ -252,7 +254,9 @@ class AccountabilityCSVExporter:
             col += 1
 
         for line in range(2, 1002):
-            expense_worksheet.write(line, 0, self.contract_code - 1, locked_cell_format)  # Column A
+            expense_worksheet.write(
+                line, 0, self.contract_code - 1, locked_cell_format
+            )  # Column A
             expense_worksheet.write(line, 1, "", body_format)  # Column B
             expense_worksheet.write(line, 2, "", body_format)  # Column C
             expense_worksheet.write(line, 3, "", body_format)  # Column D
@@ -290,7 +294,9 @@ class AccountabilityCSVExporter:
             )
 
             # Column I com fórmula
-            formula = f'=IFERROR(VLOOKUP(J{self.contract_code+1},$FV.A$2:$FV.B$100,2),"")'
+            formula = (
+                f'=IFERROR(VLOOKUP(J{self.contract_code+1},$FV.A$2:$FV.B$100,2),"")'
+            )
             expense_worksheet.write(line, 8, formula, locked_cell_format)  # Column I
 
             # Column J
@@ -385,7 +391,9 @@ class AccountabilityCSVExporter:
             col += 1
 
         for line in range(2, 1002):
-            application_worksheet.write(line, 0, self.contract_code, locked_cell_format)  # Column A
+            application_worksheet.write(
+                line, 0, self.contract_code, locked_cell_format
+            )  # Column A
             application_worksheet.write(line, 1, "", body_format)  # Column B
             application_worksheet.write(line, 2, "", body_format)  # Column C
 
