@@ -394,7 +394,7 @@ class AccountabilityCSVExporter:
             application_worksheet.data_validation(
                 line,
                 3,
-                id,
+                self.contract_code,
                 3,
                 {
                     "validate": "list",
@@ -409,7 +409,7 @@ class AccountabilityCSVExporter:
             application_worksheet.data_validation(
                 line,
                 4,
-                id,
+                self.contract_code,
                 4,
                 {
                     "validate": "list",
@@ -424,7 +424,7 @@ class AccountabilityCSVExporter:
             application_worksheet.data_validation(
                 line,
                 5,
-                id,
+                self.contract_code,
                 5,
                 {
                     "validate": "list",
@@ -439,7 +439,7 @@ class AccountabilityCSVExporter:
             application_worksheet.data_validation(
                 line,
                 6,
-                id,
+                self.contract_code,
                 6,
                 {
                     "validate": "list",
