@@ -181,8 +181,8 @@ class Contract(BaseModel):
         blank=True,
     )
 
-    # Responsible users
-    accountability_responsible = models.ForeignKey(
+    # Autority users
+    accountability_autority = models.ForeignKey(
         # TODO: remove null
         User,
         related_name="accountability_contracts",
@@ -190,10 +190,10 @@ class Contract(BaseModel):
         null=True,
         blank=True,
     )
-    manager_responsible = models.ForeignKey(
+    supervision_autority = models.ForeignKey(
         # TODO: remove null
         User,
-        related_name="manager_contracts",
+        related_name="supervision_contracts",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
