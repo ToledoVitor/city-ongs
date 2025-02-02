@@ -80,6 +80,7 @@ class Contract(BaseModel):
         EXECUTION = "EXECUTION", "em execução"
         FINISHED = "FINISHED", "finalizado"
 
+    # Specifications
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
     code = models.CharField(
         verbose_name="Código do contrato",
@@ -87,14 +88,14 @@ class Contract(BaseModel):
         null=True,
         blank=True,
     )
-
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
         null=True,
         blank=True,
     )
-
     objective = models.CharField(verbose_name="Objeto", max_length=128)
+    
+    # Dates and values
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
         decimal_places=2,
@@ -176,6 +177,24 @@ class Contract(BaseModel):
         verbose_name="Conta Investimento",
         related_name="investing_contract",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    # Responsible users
+    accountability_responsible = models.ForeignKey(
+        # TODO: remove null
+        User,
+        related_name="accountability_contracts",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    manager_responsible = models.ForeignKey(
+        # TODO: remove null
+        User,
+        related_name="manager_contracts",
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
