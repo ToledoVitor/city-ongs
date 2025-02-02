@@ -11,7 +11,6 @@ class AccountabilityCSVExporter:
     workbook: None
 
     def __init__(self, accountability: Accountability):
-        self.accountability: Accountability = accountability
         self.contract: Contract = accountability.contract
         self.organization: Organization = accountability.contract.organization
         self.contract_code: int = accountability.contract.internal_code
@@ -19,7 +18,7 @@ class AccountabilityCSVExporter:
     def handle(self):
         output = BytesIO()
 
-        self.workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        self.workbook: xlsxwriter.Workbook = xlsxwriter.Workbook(output, {"in_memory": True})
         self._build_worksheets()
         self.workbook.define_name("fr_tab", "FR!$A$2:$A$100")
         self.workbook.define_name("cb_tab", "CB!$A$2:$A$100")
@@ -28,7 +27,6 @@ class AccountabilityCSVExporter:
         self.workbook.define_name("fv_tab", "FV!$A$2:$A$100")
         self.workbook.define_name("ia_tab", "IA!$A$2:$A$100")
         self.workbook.define_name("td_tab", "TD!$A$2:$A$100")
-        self.workbook.define_name("pr_tab", "PR!$A$2:$A$100")
         self.workbook.close()
 
         output.seek(0)
@@ -46,7 +44,6 @@ class AccountabilityCSVExporter:
             self.__build_favored_worksheet,
             self.__build_ia_worksheet,
             self.__build_doc_type_worksheet,
-            self.__build_pr_worksheet,
         ]
 
         for builder in builders:
@@ -628,26 +625,3 @@ class AccountabilityCSVExporter:
 
         doc_type_worksheet.autofit()
         return doc_type_worksheet
-
-    def __build_pr_worksheet(self):
-        pr_worksheet = self.workbook.add_worksheet(name="PR")
-
-        body_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "border": 0,
-                "bg_color": "#f0fc0a",
-            }
-        )
-
-        pr_worksheet.write(0, 0, "Nome", body_format)
-        pr_worksheet.write(0, 1, "ID", body_format)
-
-        # Preenchendo corpo (Inserir dados importados aqui)
-        for id in range(1, 100):
-            pr_worksheet.write(id, 0, "ID")
-            pr_worksheet.write(id, 1, id)
-
-        pr_worksheet.autofit()
-        return pr_worksheet

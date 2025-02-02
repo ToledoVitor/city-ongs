@@ -370,9 +370,13 @@ def import_accountability_view(request, pk):
             accountability = (
                 Accountability.objects.select_related(
                     "contract",
+                    "contract__checking_account",
+                    "contract__investing_account",
                     "contract__organization",
                 )
                 .prefetch_related(
+                    "contract__items",
+                    "contract__organization__favoreds",
                     "contract__organization__revenue_sources",
                 )
                 .get(id=pk)
