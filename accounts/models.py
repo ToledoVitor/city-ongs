@@ -161,5 +161,12 @@ class User(AbstractUser):
             self.AccessChoices.FOLDER_MANAGER,
         }
 
+    def save(self, *args, **kwargs):
+        if self.cpf is not None:
+            string_doc = "".join([i for i in str(self.cpf) if i.isdigit()])
+            self.cpf = str(string_doc)
+
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return f"{super().__str__()} {self.email}"

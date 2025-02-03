@@ -20,6 +20,7 @@ class FolderManagerCreateForm(forms.ModelForm):
         model = User
         fields = [
             "email",
+            "cpf",
             "first_name",
             "last_name",
             "areas",
@@ -27,6 +28,7 @@ class FolderManagerCreateForm(forms.ModelForm):
 
         widgets = {
             "email": BaseEmailFormWidget(placeholder=""),
+            "cpf": BaseCharFieldFormWidget(placeholder="xxx.xxx.xxx-xx"),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
         }
@@ -72,6 +74,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         model = User
         fields = [
             "email",
+            "cpf", 
             "first_name",
             "last_name",
             "areas",
@@ -79,6 +82,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
 
         widgets = {
             "email": BaseEmailFormWidget(placeholder=""),
+            "cpf": BaseCharFieldFormWidget(placeholder="xxx.xxx.xxx-xx"),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
         }

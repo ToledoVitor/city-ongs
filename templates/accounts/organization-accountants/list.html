@@ -39,7 +39,10 @@
         <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
             <tr>
                 <th scope="col" class="px-6 py-3">
-                    Nome <br>
+                    Nome
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Cpf
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Email
@@ -56,6 +59,9 @@
                 <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                       {{ accountant.get_full_name }}
+                    </td>
+                    <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                      {{ accountant.cpf }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
                       {{ accountant.email }}
@@ -84,6 +90,9 @@
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                     Nenhum resultado encontrado
                 </th>
+                <td class="px-6 py-4">
+                  -
+                </td>
                 <td class="px-6 py-4">
                     -
                 </td>

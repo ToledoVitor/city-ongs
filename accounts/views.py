@@ -83,10 +83,12 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
             with transaction.atomic():
                 new_user = User.objects.create(
                     email=form.cleaned_data["email"],
+                    cpf=form.cleaned_data["cpf"],
                     username=form.cleaned_data["email"],
                     first_name=form.cleaned_data["first_name"],
                     last_name=form.cleaned_data["last_name"],
                     password=form.cleaned_data["password"],
+                    organization=self.request.user.organization,
                     access_level=User.AccessChoices.FOLDER_MANAGER,
                 )
 
@@ -170,10 +172,12 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
             with transaction.atomic():
                 new_user = User.objects.create(
                     email=form.cleaned_data["email"],
+                    cpf=form.cleaned_data["cpf"],
                     username=form.cleaned_data["email"],
                     first_name=form.cleaned_data["first_name"],
                     last_name=form.cleaned_data["last_name"],
                     password=form.cleaned_data["password"],
+                    organization=self.request.user.organization,
                     access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
                 )
 
