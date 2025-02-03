@@ -19,7 +19,7 @@ from accountability.forms import (
     RevenueSourceCreateForm,
 )
 from accountability.models import Accountability, ExpenseSource, Favored, RevenueSource
-from accountability.services import AccountabilityCSVExporter
+from accountability.services import export_csv_model
 from activity.models import ActivityLog
 from contracts.models import Contract
 
@@ -382,7 +382,7 @@ def import_accountability_view(request, pk):
                 .get(id=pk)
             )
 
-            xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
+            xlsx = export_csv_model(accountability=accountability)
             response = HttpResponse(
                 xlsx.getvalue(),
                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
