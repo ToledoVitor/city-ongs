@@ -402,7 +402,9 @@ def import_accountability_view(request, pk):
                 {"accountability": accountability},
             )
     else:
-        accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+        accountability = get_object_or_404(
+            Accountability.objects.select_related("contract"), id=pk
+        )
         return render(
             request,
             "accountability/accountability/import.html",

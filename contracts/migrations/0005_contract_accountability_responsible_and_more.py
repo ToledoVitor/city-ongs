@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0004_contract_internal_code_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

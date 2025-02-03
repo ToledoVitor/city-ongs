@@ -94,7 +94,7 @@ class Contract(BaseModel):
         blank=True,
     )
     objective = models.CharField(verbose_name="Objeto", max_length=128)
-    
+
     # Dates and values
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",

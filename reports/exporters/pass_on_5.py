@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from fpdf import XPos, YPos
 
 from reports.exporters.commons.exporters import BasePdf
+from utils.formats import document_mask
 
 
 @dataclass
@@ -180,19 +181,19 @@ class PassOn5PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text="Nome: ODAIR DE CARVALHO FERREIRA JUNIOR",
+            text=f"Nome: {self.contract.organization.city_hall.mayor}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="Cargo: Responsável pela Entidade",
+            text=f"Cargo: Responsável pela Entidade",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="CPF: ***.*35.008-**",
+            text=document_mask(str(self.contract.organization.city_hall.document)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -206,19 +207,19 @@ class PassOn5PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text="Nome: ODAIR DE CARVALHO FERREIRA JUNIOR",
+            text=f"Nome: {self.contract.organization.owner}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="Cargo: Responsável pela Entidade",
+            text=f"Cargo: Responsável pela Entidade",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="CPF: ***.*35.008-**",
+            text=document_mask(str(self.contract.organization.document)),  # TODO
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -237,19 +238,19 @@ class PassOn5PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text="Nome: ODAIR DE CARVALHO FERREIRA JUNIOR",
+            text=f"Nome: {self.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="Cargo: Responsável pela Entidade",
+            text=f"Cargo: Responsável pela Entidade",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="CPF: ***.*35.008-**",
+            text=document_mask(str(self.contract.supervision_autority.cpf)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -268,19 +269,19 @@ class PassOn5PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text="Nome: ODAIR DE CARVALHO FERREIRA JUNIOR",  # TODO
+            text=f"Nome: {self.contract.accountability_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="Cargo: Responsável pela Entidade",
+            text=f"Cargo: Responsável pela Entidade",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text="CPF: ***.*35.008-**",
+            text=document_mask(str(self.contract.accountability_autority.cpf)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)

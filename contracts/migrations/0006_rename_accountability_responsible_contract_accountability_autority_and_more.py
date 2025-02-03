@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0005_contract_accountability_responsible_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -28,7 +27,10 @@ class Migration(migrations.Migration):
             old_name="manager_responsible",
             new_name="supervision_autority",
         ),
-        migrations.RemoveField(model_name="contract", name="manager_responsible",),
+        migrations.RemoveField(
+            model_name="contract",
+            name="manager_responsible",
+        ),
         migrations.AddField(
             model_name="contract",
             name="supervision_autority",

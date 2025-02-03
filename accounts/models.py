@@ -10,10 +10,16 @@ class CityHall(BaseModel):
     name = models.CharField(verbose_name="Prefeitura", max_length=128)
     # TODO: remove nulls
     mayor = models.CharField(
-        verbose_name="Prefeito", max_length=256, null=True, blank=True,
+        verbose_name="Prefeito",
+        max_length=256,
+        null=True,
+        blank=True,
     )
     document = models.CharField(
-        verbose_name="Documento", max_length=32, null=True, blank=True,
+        verbose_name="Documento",
+        max_length=32,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -36,10 +42,16 @@ class Organization(BaseModel):
     name = models.CharField(verbose_name="Nome", max_length=128)
 
     owner = models.CharField(
-        verbose_name="Presidente", max_length=256, null=True, blank=True,
+        verbose_name="Presidente",
+        max_length=256,
+        null=True,
+        blank=True,
     )
     document = models.CharField(
-        verbose_name="Documento", max_length=32, null=True, blank=True,
+        verbose_name="Documento",
+        max_length=32,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
