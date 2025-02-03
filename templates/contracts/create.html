@@ -175,6 +175,25 @@
   </div>
   
   <hr class="h-px my-4 border-0 bg-gray-700">
+
+  <label class="block mb-2 text-2xl font-bold text-black">Partes Interessadas</label>
+
+  <div class="my-3">
+    <div class="grid gap-6 mb-6 md:grid-cols-2">
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Responsável Contábil</label>
+        {{ form.accountability_autority }}
+      </div>
+
+      <div class="relative">
+        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Responsável Fiscal</label>
+        {{ form.supervision_autority }}
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="h-px my-4 border-0 bg-gray-700">
    
   <label class="block mb-2 text-2xl font-bold text-black">Área de Atuação</label>
 

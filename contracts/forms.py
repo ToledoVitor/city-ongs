@@ -1,5 +1,6 @@
 from django import forms
 
+from accounts.models import User
 from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -26,6 +27,8 @@ class ContractCreateForm(forms.ModelForm):
             "contractor_manager",
             "hired_company",
             "hired_manager",
+            "accountability_autority",
+            "supervision_autority",
             "area",
             "file",
         ]
@@ -39,6 +42,12 @@ class ContractCreateForm(forms.ModelForm):
             "contractor_manager": BaseSelectFormWidget(
                 placeholder="Gestor do Contratante"
             ),
+            "accountability_autority": BaseSelectFormWidget(
+                placeholder="Responsável Contábil",
+            ),
+            "supervision_autority": BaseSelectFormWidget(
+                placeholder="Fiscal Responsável",
+            ),
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
@@ -49,7 +58,17 @@ class ContractCreateForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
+        user_org = self.request.user.organization
+
         self.fields["area"].queryset = self.request.user.areas.all()
+        self.fields["accountability_autority"].queryset = User.objects.filter(
+            organization=user_org,
+            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
+        )
+        self.fields["supervision_autority"].queryset = User.objects.filter(
+            organization=user_org,
+            access_level=User.AccessChoices.FOLDER_MANAGER,
+        )
 
     def clean_file(self):
         file = self.cleaned_data.get("file")
