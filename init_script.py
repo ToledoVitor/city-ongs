@@ -7,9 +7,21 @@ from accounts.models import (
 from contracts.models import Company
 from utils.choices import StatesChoices
 
-varzea = CityHall.objects.create(name="Prefeitura Municipal de Varzea Paulista")
-CityHall.objects.create(name="Prefeitura Municipal de Campo Limpo Paulista")
-CityHall.objects.create(name="Prefeitura Municipal de Jundiai")
+varzea = CityHall.objects.create(
+    name="Prefeitura Municipal de Varzea Paulista",
+    mayor="Jorge Prefeito",
+    document="1231421412",
+)
+CityHall.objects.create(
+    name="Prefeitura Municipal de Campo Limpo Paulista",
+    mayor="João Prefeito",
+    document="3332224423",
+)
+CityHall.objects.create(
+    name="Prefeitura Municipal de Jundiai",
+    mayor="José Prefeito",
+    document="455912391",
+)
 
 a1 = Area.objects.create(
     city_hall=varzea,
@@ -27,9 +39,17 @@ a3 = Area.objects.create(
     description="Gestão e Fiscalização",
 )
 
-o1 = Organization.objects.create(name="Ong Contabilide Vitor Toledo", city_hall=varzea)
+o1 = Organization.objects.create(
+    name="Ong Contabilide Vitor Toledo",
+    owner="Marcos Dono",
+    document="2131231231",
+    city_hall=varzea,
+)
 o2 = Organization.objects.create(
-    name="Fundação Social de Desenvolvimento Social", city_hall=varzea
+    name="Fundação Social de Desenvolvimento Social",
+    owner="Matheus Dono",
+    document="1231231211",
+    city_hall=varzea,
 )
 
 super_user = User.objects.create(

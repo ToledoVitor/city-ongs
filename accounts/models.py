@@ -100,6 +100,13 @@ class User(AbstractUser):
         blank=True,
     )
     email = LowerCaseEmailField(unique=True)
+    cpf = models.CharField(
+        # TODO: remove null
+        verbose_name="Cpf",
+        max_length=16,
+        null=True,
+        blank=True,
+    )
     password_expires_at = models.DateTimeField(
         null=True,
         default=None,
