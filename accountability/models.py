@@ -230,6 +230,7 @@ class Expense(BaseModel):
         related_name="expenses",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
     )
     item = models.ForeignKey(
         ContractItem,

@@ -175,6 +175,23 @@ class Transaction(BaseModel):
         blank=True,
     )
 
+    origin_source = models.ForeignKey(
+        "accountability.ResourceSource",
+        verbose_name="Fonte Recurso Origem",
+        related_name="transaction_origins",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    destination_source = models.ForeignKey(
+        "accountability.ResourceSource",
+        verbose_name="Fonte Recurso Destino",
+        related_name="transaction_destinations",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+
     history = HistoricalRecords()
 
     class Meta:

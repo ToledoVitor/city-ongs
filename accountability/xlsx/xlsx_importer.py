@@ -1,11 +1,16 @@
+# ruff: noqa: E722
+
+from typing import Tuple
 from datetime import datetime
 from decimal import Decimal
 
 import numpy as np
 import pandas as pd
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
 
 from accountability.models import Accountability, Expense, Revenue
+from bank.models import Transaction
 from contracts.choices import NatureChoices
 
 
@@ -14,7 +19,7 @@ class AccountabilityXLSXImporter:
         self.file = file
         self.accountability = accountability
 
-    def handle(self):
+    def handle(self) -> Tuple[bool, bool, bool, bool]:
         try:
             revenues_df = pd.read_excel(self.file, sheet_name="1. RECEITAS")
             expenses_df = pd.read_excel(self.file, sheet_name="2. DESPESAS")
@@ -32,10 +37,13 @@ class AccountabilityXLSXImporter:
         self._store_nd_choices()
         self._store_td_choices()
 
-        revenues = self._create_revenues(revenues_df)
-        expenses = self._create_expenses(expenses_df)
-        applications = self._create_applications(applications_df)
+        revenues_error = self._create_revenues(revenues_df)
+        expenses_error = self._create_expenses(expenses_df)
+        applications_error = self._create_applications(applications_df)
 
+        imported = any([revenues_error, expenses_error, applications_error])
+
+        return imported, revenues_error, expenses_error, applications_error
 
     def _store_fr_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="FR")
@@ -106,7 +114,14 @@ class AccountabilityXLSXImporter:
                 )
             )
 
-        return revenues
+        error = False
+        try:
+            with transaction.atomic():
+                Revenue.objects.bulk_create(revenues, batch_size=10)
+                return error
+        except:
+            error = True
+            return error
 
     def _create_expenses(self, expenses_df: pd.DataFrame) -> dict:
         expenses_df = expenses_df.replace({np.nan: None})
@@ -138,8 +153,57 @@ class AccountabilityXLSXImporter:
                 )
             )
 
-        return expenses
+        error = False
+        try:
+            with transaction.atomic():
+                Expense.objects.bulk_create(expenses, batch_size=10)
+                return error
+        except:
+            error = True
+            return error
 
     def _create_applications(self, applications_df: pd.DataFrame) -> dict:
         applications_df = applications_df.replace({np.nan: None})
-        ...
+
+        transactions = []
+        for line in applications_df.values.tolist()[1:]:
+            if not line[2]:
+                break
+
+            if line[4]:
+                transaction_date = line[3]
+                transactions.append(
+                    Transaction(
+                        name="Aplicação / Resgate",
+                        amount=Decimal(line[2] * -1),
+                        date=datetime(transaction_date.year, transaction_date.month, transaction_date.day),
+                        bank_account_id=self.mapped_cbs.get(line[4]),
+                        origin_source_id=self.mapped_frs.get(line[5]),
+                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
+                    )
+                )
+
+            elif line[6]:
+                transaction_date = line[3]
+                transactions.append(
+                    Transaction(
+                        name="Aplicação / Resgate",
+                        amount=Decimal(line[2]),
+                        date=datetime(transaction_date.year, transaction_date.month, transaction_date.day),
+                        bank_account_id=self.mapped_cbs.get(line[6]),
+                        destination_source_id=self.mapped_frs.get(line[7]),
+                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
+                    )
+                )
+
+            else:
+                continue
+
+        error = False
+        try:
+            with transaction.atomic():
+                Transaction.objects.bulk_create(transactions, batch_size=10)
+                return error
+        except:
+            error = True
+            return error
