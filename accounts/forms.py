@@ -74,7 +74,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         model = User
         fields = [
             "email",
-            "cpf", 
+            "cpf",
             "first_name",
             "last_name",
             "areas",

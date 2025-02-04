@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -15,9 +14,9 @@ from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseForm,
     FavoredForm,
-    RevenueForm,
-    ResourceSourceCreateForm,
     ImportXLSXAccountabilityForm,
+    ResourceSourceCreateForm,
+    RevenueForm,
 )
 from accountability.models import Accountability, Favored, ResourceSource
 from accountability.services import export_xlsx_model, import_xlsx_model
@@ -334,7 +333,8 @@ def import_accountability_view(request, pk):
 
         elif step == "upload":
             accountability = get_object_or_404(
-                Accountability.objects.select_related("contract"), id=pk,
+                Accountability.objects.select_related("contract"),
+                id=pk,
             )
             form = ImportXLSXAccountabilityForm(request.POST, request.FILES)
 
@@ -346,24 +346,28 @@ def import_accountability_view(request, pk):
                 return render(
                     request,
                     "accountability/accountability/import.html",
-                    {"accountability": accountability, "form": form },
+                    {"accountability": accountability, "form": form},
                 )
             else:
                 return render(
                     request,
                     "accountability/accountability/import.html",
-                    {"accountability": accountability, "form": form },
+                    {"accountability": accountability, "form": form},
                 )
             return
 
         else:
-            return redirect("accountability:accountability-import", pk=accountability.id)
+            return redirect(
+                "accountability:accountability-import", pk=accountability.id
+            )
 
     else:
-        accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+        accountability = get_object_or_404(
+            Accountability.objects.select_related("contract"), id=pk
+        )
         form = ImportXLSXAccountabilityForm()
         return render(
             request,
             "accountability/accountability/import.html",
-            {"accountability": accountability, "form": form },
+            {"accountability": accountability, "form": form},
         )

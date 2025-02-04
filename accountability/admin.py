@@ -3,9 +3,9 @@ from django.contrib import admin
 from accountability.models import (
     Accountability,
     AccountabilityFile,
-    ResourceSource,
     Expense,
     ExpenseAnalysis,
+    ResourceSource,
     Revenue,
 )
 

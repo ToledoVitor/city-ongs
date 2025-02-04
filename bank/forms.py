@@ -38,6 +38,7 @@ class UploadOFXForm(forms.Form):
 
         return ofx_file
 
+
 class CreateBankAccountForm(forms.ModelForm):
     closing_date = forms.DateField()
     balance = forms.DecimalField()

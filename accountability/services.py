@@ -7,5 +7,6 @@ from accountability.xlsx import AccountabilityXLSXExporter, AccountabilityXLSXIm
 def export_xlsx_model(accountability: Accountability):
     return AccountabilityXLSXExporter(accountability).handle()
 
+
 def import_xlsx_model(file: InMemoryUploadedFile, accountability: Accountability):
     return AccountabilityXLSXImporter(file, accountability).handle()

@@ -1,5 +1,5 @@
-from io import BytesIO
 from datetime import datetime
+from io import BytesIO
 
 import xlsxwriter
 
@@ -19,7 +19,9 @@ class AccountabilityXLSXExporter:
     def handle(self):
         output = BytesIO()
 
-        self.workbook: xlsxwriter.Workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+        self.workbook: xlsxwriter.Workbook = xlsxwriter.Workbook(
+            output, {"in_memory": True}
+        )
         self.__build_formats()
 
         self._build_worksheets()
@@ -117,7 +119,7 @@ class AccountabilityXLSXExporter:
         receipt_worksheet = self.workbook.add_worksheet(name="1. RECEITAS")
 
         header_content = (
-            [" Nº DA RECEITA ", self.header_format ],
+            [" Nº DA RECEITA ", self.header_format],
             [" CÓDIGO DO CONTRATO ", self.header_breaking_line_format],
             [" IDENTIFICAÇÃO ", self.header_format],
             [" VALOR ", self.header_format],
@@ -140,7 +142,7 @@ class AccountabilityXLSXExporter:
                 line, 1, self.contract_code, self.locked_cell_format
             )
             receipt_worksheet.write(line, 2, "", self.body_format)
-            
+
             receipt_worksheet.write(line, 3, 0.00, self.money_format)
             receipt_worksheet.data_validation(
                 line,
@@ -153,8 +155,8 @@ class AccountabilityXLSXExporter:
                     "value": 0,
                     "input_message": "Digite um valor positivo em reais",
                     "error_message": "Por favor, insira um valor numérico válido (ex: 15,40)",
-                    "error_type": "stop"
-                }
+                    "error_type": "stop",
+                },
             )
 
             receipt_worksheet.write(line, 4, "", self.date_format)
@@ -170,7 +172,7 @@ class AccountabilityXLSXExporter:
                     "maximum": datetime(2099, 12, 31),
                     "input_message": "Digite uma data no formato dd/mm/yyyy",
                     "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
-                    "error_type": "stop"
+                    "error_type": "stop",
                 },
             )
 
@@ -265,7 +267,12 @@ class AccountabilityXLSXExporter:
         col = 0
         for column_name, column_format in header_content:
             expense_worksheet.merge_range(
-                0, col, 1, col, column_name, column_format,
+                0,
+                col,
+                1,
+                col,
+                column_name,
+                column_format,
             )
             col += 1
 
@@ -287,8 +294,8 @@ class AccountabilityXLSXExporter:
                     "value": 0,
                     "input_message": "Digite um valor positivo em reais",
                     "error_message": "Por favor, insira um valor numérico válido (ex: 15,40)",
-                    "error_type": "stop"
-                }
+                    "error_type": "stop",
+                },
             )
 
             expense_worksheet.write(line, 4, "", self.date_format)
@@ -304,7 +311,7 @@ class AccountabilityXLSXExporter:
                     "maximum": datetime(2099, 12, 31),
                     "input_message": "Digite uma data no formato dd/mm/yyyy",
                     "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
-                    "error_type": "stop"
+                    "error_type": "stop",
                 },
             )
 
@@ -321,7 +328,7 @@ class AccountabilityXLSXExporter:
                     "maximum": datetime(2099, 12, 31),
                     "input_message": "Digite uma data no formato dd/mm/yyyy",
                     "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
-                    "error_type": "stop"
+                    "error_type": "stop",
                 },
             )
 
@@ -439,8 +446,8 @@ class AccountabilityXLSXExporter:
                     "value": 0,
                     "input_message": "Digite um valor positivo em reais",
                     "error_message": "Por favor, insira um valor numérico válido (ex: 15,40)",
-                    "error_type": "stop"
-                }
+                    "error_type": "stop",
+                },
             )
 
             application_worksheet.write(line, 3, "", self.date_format)
@@ -456,7 +463,7 @@ class AccountabilityXLSXExporter:
                     "maximum": datetime(2099, 12, 31),
                     "input_message": "Digite uma data no formato dd/mm/yyyy",
                     "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
-                    "error_type": "stop"
+                    "error_type": "stop",
                 },
             )
 

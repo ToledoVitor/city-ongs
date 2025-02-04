@@ -46,7 +46,10 @@ class ActivityLog(models.Model):
         UPDATED_FAVORED = "UPDATED_FAVORED", "Atualizou favorecido"
         DELETED_FAVORED = "DELETED_FAVORED", "Apagou favorecido"
         # sources
-        CREATED_RESOURCES_SOURCE = "CREATED_RESOURCES_SOURCE", "Cadastrou fonte de recurso"
+        CREATED_RESOURCES_SOURCE = (
+            "CREATED_RESOURCES_SOURCE",
+            "Cadastrou fonte de recurso",
+        )
         DELETED_RESOURCES_SOURCE = "DELETED_RESOURCES_SOURCE", "Apagou fonte de recurso"
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"

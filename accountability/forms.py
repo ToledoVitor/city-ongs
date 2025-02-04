@@ -4,8 +4,8 @@ from accountability.models import (
     Accountability,
     Expense,
     Favored,
-    Revenue,
     ResourceSource,
+    Revenue,
 )
 from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
@@ -192,9 +192,7 @@ class ImportXLSXAccountabilityForm(forms.Form):
         xlsx = self.cleaned_data.get("xlsx")
 
         if xlsx:
-            if not (
-                xlsx.name.lower().endswith(".xlsx")
-            ):
+            if not (xlsx.name.lower().endswith(".xlsx")):
                 raise forms.ValidationError(
                     "Somente arquivos do tipo .xlsx são permitidos."
                 )

@@ -154,6 +154,7 @@ class ResourceSource(BaseModel):
 
         super().save(*args, **kwargs)
 
+
 class Expense(BaseModel):
     class LiquidationChoices(models.TextChoices):
         BILL = "BILL", "Boleto"
