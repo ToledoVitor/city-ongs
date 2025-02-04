@@ -12,7 +12,7 @@
   <title>{% block title %}Portal Gestão{% endblock %}</title>
 </head>
 
-<body class="flex justify-center inline-block items-center align-center bg-slate-100" style="height: 100vh;">
+<body class="flex justify-center inline-block items-center align-center bg-white" style="height: 100vh;">
 
   <div class="
       w-full
@@ -23,20 +23,20 @@
       shadow
       sm:p-6
       md:p-8
-      bg-green-800
-      border-gray-700
+      bg-gray-300
+      border-gray-400
     "
     >
     <form method="post" class="space-y-6" action="#">
         {% csrf_token %}
 
-        <h5 class="text-xl font-medium text-white">
+        <h5 class="text-xl font-medium text-black">
           Bem vindo(a)! <br>
-          <span class="text-xs">Faça login antes de continuar</span>
+          <span class="text-sm">Faça login antes de continuar</span>
         </h5>
 
         <div>
-            <label for="email" class="block mb-2 text-sm font-medium text-white">
+            <label for="email" class="block mb-2 text-sm font-medium text-black">
               Email
             </label>
             <input
@@ -52,10 +52,10 @@
                 block
                 w-full
                 p-2.5
-                bg-green-600
-                border-gray-500
+                bg-gray-400
+                border-gray-300
                 placeholder-gray-600
-                text-white
+                text-black
               "
               placeholder="nome@email.com"
               required
@@ -63,7 +63,7 @@
         </div>
 
         <div>
-            <label for="password" class="block mb-2 text-sm font-medium text-white">
+            <label for="password" class="block mb-2 text-sm font-medium text-black">
               Senha
             </label>
             <input
@@ -80,17 +80,17 @@
                 block
                 w-full
                 p-2.5
-                bg-green-600
-                border-gray-500
+                bg-gray-400
+                border-gray-300
                 placeholder-gray-600
-                text-white
+                text-black
               "
               required
             />
         </div>
 
         <div class="flex items-start">
-          <a href="#" class="ms-auto text-sm hover:underline text-blue-500">Esqueci minha senha</a>
+          <a href="#" class="text-sm ms-auto hover:underline text-blue-800">Esqueci minha senha</a>
         </div>
 
         <button
