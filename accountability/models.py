@@ -60,13 +60,10 @@ class Accountability(BaseModel):
 
 class Favored(BaseModel):
     organization = models.ForeignKey(
-        # TODO: remove null
         Organization,
         verbose_name="Organização",
         related_name="favoreds",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     name = models.CharField(
         verbose_name="Nome",

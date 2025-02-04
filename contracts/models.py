@@ -88,19 +88,11 @@ class Contract(BaseModel):
         null=True,
         blank=True,
     )
-<<<<<<< Updated upstream
-=======
-    
->>>>>>> Stashed changes
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
         null=True,
         blank=True,
     )
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     objective = models.CharField(verbose_name="Objeto", max_length=128)
 
     # Dates and values
@@ -191,7 +183,6 @@ class Contract(BaseModel):
 
     # Autority users
     accountability_autority = models.ForeignKey(
-        # TODO: remove null
         User,
         related_name="accountability_contracts",
         on_delete=models.SET_NULL,
@@ -199,7 +190,6 @@ class Contract(BaseModel):
         blank=True,
     )
     supervision_autority = models.ForeignKey(
-        # TODO: remove null
         User,
         related_name="supervision_contracts",
         on_delete=models.SET_NULL,

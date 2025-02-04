@@ -11,7 +11,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, TemplateView
 
-from accountability.services import AccountabilityCSVExporter
 from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseForm,
@@ -308,7 +307,6 @@ def import_accountability_view(request, pk):
         step = request.POST.get("step")
 
         if step == "download":
-<<<<<<< Updated upstream
             accountability = (
                 Accountability.objects.select_related(
                     "contract",
@@ -368,36 +366,4 @@ def import_accountability_view(request, pk):
             request,
             "accountability/accountability/import.html",
             {"accountability": accountability, "form": form },
-=======
-            xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
-            response = HttpResponse(
-                xlsx.getvalue(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
-            response["Content-Disposition"] = (
-                f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
-            )    
-            return response
-
-        elif step == "upload":
-            ...
-
-        else:
-            return render(
-                request,
-                "accountability/accountability/import.html",
-                {"accountability": accountability},
-            )
-    else:
-<<<<<<< Updated upstream
-        accountability = get_object_or_404(
-            Accountability.objects.select_related("contract"), id=pk
-        )
-=======
->>>>>>> Stashed changes
-        return render(
-            request,
-            "accountability/accountability/import.html",
-            {"accountability": accountability},
->>>>>>> Stashed changes
         )

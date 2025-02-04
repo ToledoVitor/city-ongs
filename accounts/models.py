@@ -8,18 +8,13 @@ from utils.models import BaseModel
 
 class CityHall(BaseModel):
     name = models.CharField(verbose_name="Prefeitura", max_length=128)
-    # TODO: remove nulls
     mayor = models.CharField(
         verbose_name="Prefeito",
         max_length=256,
-        null=True,
-        blank=True,
     )
     document = models.CharField(
         verbose_name="Documento",
         max_length=32,
-        null=True,
-        blank=True,
     )
 
     history = HistoricalRecords()
@@ -113,11 +108,8 @@ class User(AbstractUser):
     )
     email = LowerCaseEmailField(unique=True)
     cpf = models.CharField(
-        # TODO: remove null
         verbose_name="Cpf",
         max_length=16,
-        null=True,
-        blank=True,
     )
     password_expires_at = models.DateTimeField(
         null=True,
