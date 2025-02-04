@@ -434,6 +434,13 @@ class ContractItem(BaseModel):
         decimal_places=2,
         max_digits=12,
     )
+    anual_expense = models.DecimalField(
+        verbose_name="Custo Anual",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
     unit_type = models.CharField(
         verbose_name="Tipo da Unidade",
         max_length=32,
@@ -467,8 +474,8 @@ class ContractItem(BaseModel):
         return NatureChoices(self.nature).label
 
     @property
-    def total_expense(self) -> str:
-        return self.month_expense * self.month_quantity
+    def anual_expense_with_point(self) -> str:
+        return str(self.anual_expense).replace(",", ".")
 
     @property
     def month_expense_with_point(self) -> str:

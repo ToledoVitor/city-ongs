@@ -121,7 +121,7 @@
       </div>
     </div>
 
-    <div class="mb-3">
+    <div>
       <div class="grid gap-6 mb-6 md:grid-cols-2">
         <div class="relative">
           <label for="id_month_expense" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gasto Mensal</label>
@@ -141,22 +141,40 @@
               required
             />  
           </div>  
-          <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Escreva somente os números, sem o R$, seperados por vírgula
-          </p>
         </div>
 
         <div class="relative">
-          <label
-              for="id_unit_type"
-              class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
-          >
-            Unidade <span class="text-gray-400">(und., kg, litros, ...)</span>
-          </label>
-          {{ form.unit_type}}
+          <label for="id_anual_expense" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gasto Anual</label>
+          <div class="relative w-full">
+            <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-900 dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="id_anual_expense"
+              name="anual_expense"
+              oninput="formatMoney(this)"
+              placeholder="000,00"
+              class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+              required
+            />  
+          </div>  
         </div>
       </div>
     </div>
+    <p id="helper-text-explanation" class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      Escreva somente os números, sem o R$, seperados por vírgula
+    </p>
+    
+    <label
+        for="id_unit_type"
+        class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+    >
+      Unidade <span class="text-gray-400">(und., kg, litros, ...)</span>
+    </label>
+    {{ form.unit_type}}
 
     <button
         type="submit"
