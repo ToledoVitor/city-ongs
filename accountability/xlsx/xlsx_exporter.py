@@ -8,7 +8,7 @@ from contracts.choices import NatureChoices
 from contracts.models import Contract, Organization
 
 
-class AccountabilityCSVExporter:
+class AccountabilityXLSXExporter:
     workbook: None
 
     def __init__(self, accountability: Accountability):
@@ -60,6 +60,14 @@ class AccountabilityCSVExporter:
                 "align": "center",
                 "valign": "vcenter",
                 "border": 1,
+            }
+        )
+        self.yellow_body_format = self.workbook.add_format(
+            {
+                "align": "center",
+                "valign": "vcenter",
+                "border": 0,
+                "bg_color": "#f0fc0a",
             }
         )
         self.locked_cell_format = self.workbook.add_format(
@@ -239,7 +247,7 @@ class AccountabilityCSVExporter:
             [" VALOR ", self.header_format],
             [" VENCIMENTO ", self.header_format],
             [" COMPETÊNCIA ", self.header_format],
-            [" FONTE DE RECURSO ", self.header_breaking_line_format],
+            [" FONTE DE DESPESA ", self.header_breaking_line_format],
             [
                 " NATUREZA DA DESPESA (somente para despesa NÃO planejada)",
                 self.header_breaking_line_format,
@@ -267,14 +275,12 @@ class AccountabilityCSVExporter:
                 line, 1, self.contract_code, self.locked_cell_format
             )
             expense_worksheet.write(line, 2, "", self.body_format)
-            expense_worksheet.write(line, 3, "", self.body_format)
-
-            expense_worksheet.write(line, 4, 0.00, self.money_format)
+            expense_worksheet.write(line, 3, 0.00, self.money_format)
             expense_worksheet.data_validation(
                 line,
-                4,
+                3,
                 line,
-                4,
+                3,
                 options={
                     "validate": "decimal",
                     "criteria": "greater than or equal to",
@@ -283,6 +289,23 @@ class AccountabilityCSVExporter:
                     "error_message": "Por favor, insira um valor numérico válido (ex: 15,40)",
                     "error_type": "stop"
                 }
+            )
+
+            expense_worksheet.write(line, 4, "", self.date_format)
+            expense_worksheet.data_validation(
+                line,
+                4,
+                line,
+                4,
+                options={
+                    "validate": "date",
+                    "criteria": "between",
+                    "minimum": datetime(2020, 1, 1),
+                    "maximum": datetime(2099, 12, 31),
+                    "input_message": "Digite uma data no formato dd/mm/yyyy",
+                    "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
+                    "error_type": "stop"
+                },
             )
 
             expense_worksheet.write(line, 5, "", self.date_format)
@@ -302,20 +325,17 @@ class AccountabilityCSVExporter:
                 },
             )
 
-            expense_worksheet.write(line, 6, "", self.date_format)
+            expense_worksheet.write(line, 6, "", self.locked_cell_format)
             expense_worksheet.data_validation(
                 line,
                 6,
                 line,
                 6,
                 options={
-                    "validate": "date",
-                    "criteria": "between",
-                    "minimum": datetime(2020, 1, 1),
-                    "maximum": datetime(2099, 12, 31),
-                    "input_message": "Digite uma data no formato dd/mm/yyyy",
-                    "error_message": "Por favor, insira uma data válida (dd/mm/yyyy)",
-                    "error_type": "stop"
+                    "validate": "list",
+                    "source": "=fr_tab",
+                    "input_message": "Escolha da lista",
+                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
                 },
             )
 
@@ -501,17 +521,8 @@ class AccountabilityCSVExporter:
 
     def __build_revenue_worksheet(self):
         revenue_worksheet = self.workbook.add_worksheet(name="FR")
-
-        body_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "border": 0,
-                "bg_color": "#f0fc0a",
-            }
-        )
-        revenue_worksheet.write(0, 0, "Nome", body_format)
-        revenue_worksheet.write(0, 1, "ID", body_format)
+        revenue_worksheet.write(0, 0, "Nome", self.yellow_body_format)
+        revenue_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         line = 1
         for source in self.organization.revenue_sources.all():
@@ -524,17 +535,8 @@ class AccountabilityCSVExporter:
 
     def __build_bank_account_worksheet(self):
         bank_account_worksheet = self.workbook.add_worksheet(name="CB")
-        body_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "border": 0,
-                "bg_color": "#f0fc0a",
-            }
-        )
-
-        bank_account_worksheet.write(0, 0, "Nome", body_format)
-        bank_account_worksheet.write(0, 1, "ID", body_format)
+        bank_account_worksheet.write(0, 0, "Nome", self.yellow_body_format)
+        bank_account_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         current_line = 1
         if self.contract.checking_account:
@@ -560,15 +562,7 @@ class AccountabilityCSVExporter:
 
     def __build_nature_category_worksheet(self):
         category_worksheet = self.workbook.add_worksheet(name="NR")
-        body_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "border": 0,
-                "bg_color": "#f0fc0a",
-            }
-        )
-        category_worksheet.write(0, 0, "Nome", body_format)
+        category_worksheet.write(0, 0, "Nome", self.yellow_body_format)
 
         current_line = 1
         natures = [nature.label for nature in Revenue.Nature]
@@ -581,15 +575,7 @@ class AccountabilityCSVExporter:
 
     def __build_expense_category_worksheet(self):
         expense_category_worksheet = self.workbook.add_worksheet(name="ND")
-        body_format = self.workbook.add_format(
-            {
-                "align": "center",
-                "valign": "vcenter",
-                "border": 0,
-                "bg_color": "#f0fc0a",
-            }
-        )
-        expense_category_worksheet.write(0, 0, "Nome", body_format)
+        expense_category_worksheet.write(0, 0, "Nome", self.yellow_body_format)
 
         current_line = 1
         natures = [nature.label for nature in NatureChoices]
@@ -602,8 +588,8 @@ class AccountabilityCSVExporter:
 
     def __build_favored_worksheet(self):
         favored_worksheet = self.workbook.add_worksheet(name="FV")
-        favored_worksheet.write(0, 0, "Nome", self.body_format)
-        favored_worksheet.write(0, 1, "ID", self.body_format)
+        favored_worksheet.write(0, 0, "Nome", self.yellow_body_format)
+        favored_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         current_line = 1
         for favored in self.organization.favoreds.all():
@@ -616,8 +602,8 @@ class AccountabilityCSVExporter:
 
     def __build_ia_worksheet(self):
         ia_worksheet = self.workbook.add_worksheet(name="IA")
-        ia_worksheet.write(0, 0, "Nome", self.body_format)
-        ia_worksheet.write(0, 1, "ID", self.body_format)
+        ia_worksheet.write(0, 0, "Nome", self.yellow_body_format)
+        ia_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         current_line = 1
         for item in self.contract.items.all():
@@ -630,7 +616,7 @@ class AccountabilityCSVExporter:
 
     def __build_doc_type_worksheet(self):
         doc_type_worksheet = self.workbook.add_worksheet(name="TD")
-        doc_type_worksheet.write(0, 0, "Nome", self.body_format)
+        doc_type_worksheet.write(0, 0, "Nome", self.yellow_body_format)
 
         current_line = 1
         documents = [document.label for document in Expense.DocumentChoices]

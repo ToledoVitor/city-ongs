@@ -41,17 +41,16 @@ class ActivityLog(models.Model):
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
-        CREATED_EXPENSE_SOURCE = "CREATED_EXPENSE_SOURCE", "Cadastrou fonte de despesa"
-        DELETED_EXPENSE_SOURCE = "DELETED_EXPENSE_SOURCE", "Apagou fonte de despesa"
         # favored
         CREATED_FAVORED = "CREATED_FAVORED", "Cadastrou favorecido"
         UPDATED_FAVORED = "UPDATED_FAVORED", "Atualizou favorecido"
         DELETED_FAVORED = "DELETED_FAVORED", "Apagou favorecido"
+        # sources
+        CREATED_RESOURCES_SOURCE = "CREATED_RESOURCES_SOURCE", "Cadastrou fonte de recurso"
+        DELETED_RESOURCES_SOURCE = "DELETED_RESOURCES_SOURCE", "Apagou fonte de recurso"
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
         UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
-        CREATED_REVENUE_SOURCE = "CREATED_REVENUE_SOURCE", "Cadastrou fonte de recurso"
-        DELETED_REVENUE_SOURCE = "DELETED_REVENUE_SOURCE", "Apagou fonte de recurso"
 
     created_at = models.DateTimeField(
         verbose_name="Hora do registro",

@@ -88,11 +88,19 @@ class Contract(BaseModel):
         null=True,
         blank=True,
     )
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
         null=True,
         blank=True,
     )
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     objective = models.CharField(verbose_name="Objeto", max_length=128)
 
     # Dates and values
@@ -259,6 +267,12 @@ class Contract(BaseModel):
             | accountability_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
+    
+    def save(self, *args, **kwargs):
+        if self.internal_code is None:
+            max_code = Contract.objects.aggregate(Max("internal_code"))["internal_code__max"]
+            self.internal_code = 1 if max_code is None else max_code + 1
+        super().save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if self.internal_code is None:

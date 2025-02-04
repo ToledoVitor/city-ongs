@@ -86,27 +86,69 @@ class Favored(BaseModel):
         verbose_name_plural = "Favorecidos"
 
 
-class ExpenseSource(BaseModel):
+class ResourceSource(BaseModel):
+    class OriginChoices(models.TextChoices):
+        FEDERAL = "FEDERAL", "Federal"
+        STATE = "STATE", "Estadual"
+        MUNICIPAL = "MUNICIPAL", "Municipal"
+        COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
+        PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
+
+    class CategoryChoices(models.TextChoices):
+        NOT_APPLIABLE = "NOT_APPLIABLE", "Não Aplicavél"
+        COOPERATION_AGREEMENT = "COOPERATION_AGREEMENT", "Acordo de Cooperação"
+        AGREEMENT = "AGREEMENT", "Convênio"
+        COLLABORATION_AGREEMENT = "COLLABORATION_AGREEMENT", "Termo de Colaboração"
+        PROMOTION_AGREEMENT = "PROMOTION_AGREEMENT", "Termo de Fomento"
+        DONATION_AGREEMENT = "DONATION_AGREEMENT", "Contrato de Doação"
+        MANAGEMENT_AGREEMENT = "MANAGEMENT_AGREEMENT", "Contrato de Gestão"
+        TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
+        PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
+
     organization = models.ForeignKey(
         Organization,
         verbose_name="Organização",
-        related_name="expense_sources",
+        related_name="resource_source",
         on_delete=models.CASCADE,
     )
+
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
     document = models.IntegerField(
         verbose_name="CPF/CNPJ da fonte",
         null=True,
         blank=True,
     )
+    contract_number = models.CharField(
+        verbose_name="Número do contrato",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
+
+    origin = models.CharField(
+        verbose_name="Origem da Fonte",
+        choices=OriginChoices,
+        default=OriginChoices.FEDERAL,
+        max_length=19,
+    )
+    category = models.CharField(
+        verbose_name="Categoria",
+        choices=CategoryChoices,
+        default=CategoryChoices.NOT_APPLIABLE,
+        max_length=23,
+    )
 
     class Meta:
-        verbose_name = "Fonte de Despesa"
-        verbose_name_plural = "Fonte de Despesas"
+        verbose_name = "Fonte de Recurso"
+        verbose_name_plural = "Fonte de Recursos"
         unique_together = ("organization", "name")
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def category_label(self) -> str:
+        return ResourceSource.CategoryChoices(self.category).label
 
     def save(self, *args, **kwargs):
         if self.document is not None:
@@ -114,7 +156,6 @@ class ExpenseSource(BaseModel):
             self.document = int(string_doc)
 
         super().save(*args, **kwargs)
-
 
 class Expense(BaseModel):
     class LiquidationChoices(models.TextChoices):
@@ -180,7 +221,7 @@ class Expense(BaseModel):
 
     # relations
     source = models.ForeignKey(
-        ExpenseSource,
+        ResourceSource,
         verbose_name="Fonte de Despesa",
         related_name="expenses",
         on_delete=models.CASCADE,
@@ -286,78 +327,6 @@ class ExpenseAnalysis(BaseModel):
         verbose_name_plural = "Análise de Despesas"
 
 
-class RevenueSource(BaseModel):
-    class OriginChoices(models.TextChoices):
-        FEDERAL = "FEDERAL", "Federal"
-        STATE = "STATE", "Estadual"
-        MUNICIPAL = "MUNICIPAL", "Municipal"
-        COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
-        PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
-
-    class CategoryChoices(models.TextChoices):
-        NOT_APPLIABLE = "NOT_APPLIABLE", "Não Aplicavél"
-        COOPERATION_AGREEMENT = "COOPERATION_AGREEMENT", "Acordo de Cooperação"
-        AGREEMENT = "AGREEMENT", "Convênio"
-        COLLABORATION_AGREEMENT = "COLLABORATION_AGREEMENT", "Termo de Colaboração"
-        PROMOTION_AGREEMENT = "PROMOTION_AGREEMENT", "Termo de Fomento"
-        DONATION_AGREEMENT = "DONATION_AGREEMENT", "Contrato de Doação"
-        MANAGEMENT_AGREEMENT = "MANAGEMENT_AGREEMENT", "Contrato de Gestão"
-        TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
-        PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
-
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="Organização",
-        related_name="revenue_sources",
-        on_delete=models.CASCADE,
-    )
-
-    name = models.CharField(verbose_name="Nome da fonte", max_length=64)
-    document = models.IntegerField(
-        verbose_name="CPF/CNPJ da fonte",
-        null=True,
-        blank=True,
-    )
-    contract_number = models.CharField(
-        verbose_name="Número do contrato",
-        max_length=32,
-        null=True,
-        blank=True,
-    )
-
-    origin = models.CharField(
-        verbose_name="Origem da Fonte",
-        choices=OriginChoices,
-        default=OriginChoices.FEDERAL,
-        max_length=19,
-    )
-    category = models.CharField(
-        verbose_name="Categoria",
-        choices=CategoryChoices,
-        default=CategoryChoices.NOT_APPLIABLE,
-        max_length=23,
-    )
-
-    class Meta:
-        verbose_name = "Fonte de Recurso"
-        verbose_name_plural = "Fonte de Recursos"
-        unique_together = ("organization", "name")
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def category_label(self) -> str:
-        return RevenueSource.CategoryChoices(self.category).label
-
-    def save(self, *args, **kwargs):
-        if self.document is not None:
-            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
-            self.document = int(string_doc)
-
-        super().save(*args, **kwargs)
-
-
 class Revenue(BaseModel):
     class Nature(models.TextChoices):
         UNDUE_CREDIT = "UNDUE_CREDIT", "Crédito Indevido"
@@ -415,7 +384,7 @@ class Revenue(BaseModel):
     )
 
     source = models.ForeignKey(
-        RevenueSource,
+        ResourceSource,
         verbose_name="Fonte de Recurso",
         related_name="revenues",
         on_delete=models.SET_NULL,

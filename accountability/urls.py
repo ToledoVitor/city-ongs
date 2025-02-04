@@ -1,12 +1,10 @@
 from django.urls import path
 
 from accountability.views import (
-    ExpenseSourceCreateView,
-    ExpenseSourceListView,
     FavoredCreateView,
     FavoredListView,
-    RevenueSourceCreateView,
-    RevenueSourceListView,
+    ResourceSourceCreateView,
+    ResourceSourceListView,
     accountability_detail_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
@@ -15,18 +13,11 @@ from accountability.views import (
 )
 
 urlpatterns = [
-    path("expenses/", ExpenseSourceListView.as_view(), name="expenses-source-list"),
+    path("sources/", ResourceSourceListView.as_view(), name="sources-list"),
     path(
-        "expenses/create/",
-        ExpenseSourceCreateView.as_view(),
-        name="expenses-source-create",
-    ),
-    # path("detail/<uuid:pk>/", ContractsDetailView.as_view(), name="contracts-detail"),
-    path("revenues/", RevenueSourceListView.as_view(), name="revenues-source-list"),
-    path(
-        "revenues/create/",
-        RevenueSourceCreateView.as_view(),
-        name="revenues-source-create",
+        "sources/create/",
+        ResourceSourceCreateView.as_view(),
+        name="sources-create",
     ),
     path(
         "<uuid:pk>/accountability/import",

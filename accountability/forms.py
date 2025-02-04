@@ -3,10 +3,9 @@ from django import forms
 from accountability.models import (
     Accountability,
     Expense,
-    ExpenseSource,
     Favored,
     Revenue,
-    RevenueSource,
+    ResourceSource,
 )
 from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
@@ -18,9 +17,9 @@ from utils.widgets import (
 )
 
 
-class ExpenseSourceCreateForm(forms.ModelForm):
+class ResourceSourceCreateForm(forms.ModelForm):
     class Meta:
-        model = ExpenseSource
+        model = ResourceSource
         fields = [
             "name",
             "document",
@@ -35,7 +34,7 @@ class ExpenseSourceCreateForm(forms.ModelForm):
         name = cleaned_data.get("name")
         document = cleaned_data.get("document")
 
-        if ExpenseSource.objects.filter(name=name, document=document).exists():
+        if ResourceSource.objects.filter(name=name, document=document).exists():
             raise forms.ValidationError(
                 "Já existe uma fonte criada com esse nome e documento."
             )
@@ -84,51 +83,18 @@ class ExpenseForm(forms.ModelForm):
         if self.request:
             self.fields[
                 "source"
-            ].queryset = self.request.user.organization.expense_sources.all()
+            ].queryset = self.request.user.organization.resource_source.all()
             self.fields[
                 "favored"
             ].queryset = self.request.user.organization.favoreds.all()
         else:
-            self.fields["source"].queryset = ExpenseSource.objects.none()
+            self.fields["source"].queryset = ResourceSource.objects.none()
             self.fields["favored"].queryset = Favored.objects.none()
 
         if self.accountability:
             self.fields["item"].queryset = self.accountability.contract.items.all()
         else:
             self.fields["item"].queryset = ContractItem.objects.none()
-
-
-class RevenueSourceCreateForm(forms.ModelForm):
-    class Meta:
-        model = RevenueSource
-        fields = [
-            "name",
-            "document",
-            "contract_number",
-            "origin",
-            "category",
-        ]
-
-        widgets = {
-            "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
-            "contract_number": BaseCharFieldFormWidget(
-                placeholder="xxxx.xxxxx.xx.xx.xx.xx"
-            ),
-            "origin": BaseSelectFormWidget(),
-            "category": BaseSelectFormWidget(),
-        }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        name = cleaned_data.get("name")
-        document = cleaned_data.get("document")
-
-        if RevenueSource.objects.filter(name=name, document=document).exists():
-            raise forms.ValidationError(
-                "Já existe uma fonte criada com esse nome e documento."
-            )
-
-        return cleaned_data
 
 
 class RevenueForm(forms.ModelForm):
@@ -205,9 +171,37 @@ class FavoredForm(forms.ModelForm):
         name = cleaned_data.get("name")
         document = cleaned_data.get("document")
 
-        if ExpenseSource.objects.filter(name=name, document=document).exists():
+        if Favored.objects.filter(name=name, document=document).exists():
             raise forms.ValidationError(
                 "Já existe uma fonte criada com esse nome e documento."
             )
 
         return cleaned_data
+
+
+class ImportXLSXAccountabilityForm(forms.Form):
+    xlsx_file = forms.FileField(
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
+            }
+        )
+    )
+
+    def clean_xlsx(self):
+        xlsx = self.cleaned_data.get("xlsx")
+
+        if xlsx:
+            if not (
+                xlsx.name.lower().endswith(".xlsx")
+            ):
+                raise forms.ValidationError(
+                    "Somente arquivos do tipo .xlsx são permitidos."
+                )
+
+            if xlsx.size > 10 * 1024 * 1024:  # Limite de 10 MB
+                raise forms.ValidationError(
+                    "O tamanho máximo permitido para o arquivo é 10MB."
+                )
+
+        return xlsx

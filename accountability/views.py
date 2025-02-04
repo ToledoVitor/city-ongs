@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -10,29 +11,30 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, TemplateView
 
+from accountability.services import AccountabilityCSVExporter
 from accountability.forms import (
     AccountabilityCreateForm,
     ExpenseForm,
-    ExpenseSourceCreateForm,
     FavoredForm,
     RevenueForm,
-    RevenueSourceCreateForm,
+    ResourceSourceCreateForm,
+    ImportXLSXAccountabilityForm,
 )
-from accountability.models import Accountability, ExpenseSource, Favored, RevenueSource
-from accountability.services import export_csv_model
+from accountability.models import Accountability, Favored, ResourceSource
+from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
 from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
 
 
-class ExpenseSourceListView(LoginRequiredMixin, ListView):
-    model = ExpenseSource
+class ResourceSourceListView(LoginRequiredMixin, ListView):
+    model = ResourceSource
     context_object_name = "sources"
     paginate_by = 10
     ordering = "-created_at"
 
-    template_name = "accountability/expense-source/list.html"
+    template_name = "accountability/sources/list.html"
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
@@ -54,27 +56,27 @@ class ExpenseSourceListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ExpenseSourceCreateView(LoginRequiredMixin, TemplateView):
-    template_name = "accountability/expense-source/create.html"
+class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
+    template_name = "accountability/sources/create.html"
     login_url = "/auth/login"
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = ExpenseSourceCreateForm()
+            context["form"] = ResourceSourceCreateForm()
 
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: should check any user access?
-        form = ExpenseSourceCreateForm(request.POST)
+        form = ResourceSourceCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 source = form.save(commit=False)
                 source.organization = request.user.organization
                 source.save()
 
-                logger.info(f"{request.user.id} - Created new revenue source")
+                logger.info(f"{request.user.id} - Created new resource source")
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -82,68 +84,7 @@ class ExpenseSourceCreateView(LoginRequiredMixin, TemplateView):
                     target_object_id=source.id,
                     target_content_object=source,
                 )
-                return redirect("accountability:expenses-source-list")
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-class RevenueSourceListView(LoginRequiredMixin, ListView):
-    model = RevenueSource
-    context_object_name = "sources"
-    paginate_by = 10
-    ordering = "-created_at"
-
-    template_name = "accountability/revenue-source/list.html"
-    login_url = "/auth/login"
-
-    def get_queryset(self) -> QuerySet[Any]:
-        queryset = self.model.objects.filter(
-            organization=self.request.user.organization
-        )
-        query = self.request.GET.get("q")
-        if query:
-            queryset = queryset.filter(
-                Q(email__icontains=query)
-                | Q(first_name__icontains=query)
-                | Q(last_name__icontains=query)
-            )
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "")
-        return context
-
-
-class RevenueSourceCreateView(LoginRequiredMixin, TemplateView):
-    template_name = "accountability/revenue-source/create.html"
-    login_url = "/auth/login"
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        if not context.get("form", None):
-            context["form"] = RevenueSourceCreateForm()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        # TODO: should check any user access?
-        form = RevenueSourceCreateForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                source = form.save(commit=False)
-                source.organization = request.user.organization
-                source.save()
-
-                logger.info(f"{request.user.id} - Created new revenue source")
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATED_REVENUE_SOURCE,
-                    target_object_id=source.id,
-                    target_content_object=source,
-                )
-                return redirect("accountability:revenues-source-list")
+                return redirect("accountability:sources-list")
 
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -367,6 +308,7 @@ def import_accountability_view(request, pk):
         step = request.POST.get("step")
 
         if step == "download":
+<<<<<<< Updated upstream
             accountability = (
                 Accountability.objects.select_related(
                     "contract",
@@ -382,7 +324,7 @@ def import_accountability_view(request, pk):
                 .get(id=pk)
             )
 
-            xlsx = export_csv_model(accountability=accountability)
+            xlsx = export_xlsx_model(accountability=accountability)
             response = HttpResponse(
                 xlsx.getvalue(),
                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -390,6 +332,51 @@ def import_accountability_view(request, pk):
             response["Content-Disposition"] = (
                 f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
             )
+            return response
+
+        elif step == "upload":
+            accountability = get_object_or_404(
+                Accountability.objects.select_related("contract"), id=pk,
+            )
+            form = ImportXLSXAccountabilityForm(request.POST, request.FILES)
+
+            if form.is_valid():
+                imported, errors = import_xlsx_model(
+                    file=form.cleaned_data["xlsx_file"],
+                    accountability=accountability,
+                )
+                return render(
+                    request,
+                    "accountability/accountability/import.html",
+                    {"accountability": accountability, "form": form },
+                )
+            else:
+                return render(
+                    request,
+                    "accountability/accountability/import.html",
+                    {"accountability": accountability, "form": form },
+                )
+            return
+
+        else:
+            return redirect("accountability:accountability-import", pk=accountability.id)
+
+    else:
+        accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+        form = ImportXLSXAccountabilityForm()
+        return render(
+            request,
+            "accountability/accountability/import.html",
+            {"accountability": accountability, "form": form },
+=======
+            xlsx = AccountabilityCSVExporter(accountability=accountability).handle()
+            response = HttpResponse(
+                xlsx.getvalue(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+            response["Content-Disposition"] = (
+                f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
+            )    
             return response
 
         elif step == "upload":
@@ -402,11 +389,15 @@ def import_accountability_view(request, pk):
                 {"accountability": accountability},
             )
     else:
+<<<<<<< Updated upstream
         accountability = get_object_or_404(
             Accountability.objects.select_related("contract"), id=pk
         )
+=======
+>>>>>>> Stashed changes
         return render(
             request,
             "accountability/accountability/import.html",
             {"accountability": accountability},
+>>>>>>> Stashed changes
         )

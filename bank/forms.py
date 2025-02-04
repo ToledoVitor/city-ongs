@@ -17,7 +17,7 @@ class UploadOFXForm(forms.Form):
     ofx_file = forms.FileField(
         widget=forms.ClearableFileInput(
             attrs={
-                "class": "block w-full text-sm text-black border border-gray-300 rounded-lg cursor-pointer dark:text-black focus:outline-none bg-gray-300 dark:border-gray-600 dark:placeholder-gray-400"
+                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
             }
         )
     )
@@ -37,11 +37,6 @@ class UploadOFXForm(forms.Form):
                 )
 
         return ofx_file
-
-    # # Verificar o tipo MIME (opcional)
-    # if ofx_file.content_type != 'application/pdf':
-    #     raise forms.ValidationError("O arquivo enviado não é um OFX válido.")
-
 
 class CreateBankAccountForm(forms.ModelForm):
     closing_date = forms.DateField()
