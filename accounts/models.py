@@ -133,6 +133,12 @@ class User(AbstractUser):
         related_name="users",
         on_delete=models.CASCADE,
     )
+    position = models.CharField(
+        verbose_name="cargo",
+        max_length=150,
+        null=True,
+        blank=True,
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]

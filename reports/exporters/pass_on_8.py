@@ -384,6 +384,8 @@ class PassOn8PDFExporter:
             expenses__competency__gte=self.contract.start_of_vigency,
             expenses__competency__lte=self.contract.end_of_vigency,
         )
+        
+        # all_expenses = self.contract.items.all()
 
         medical_expenses = format_into_brazilian_currency(
             all_expenses.filter(
@@ -498,7 +500,7 @@ class PassOn8PDFExporter:
         ]
 
         col_widths = [40, 30, 30, 30, 30, 30]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
+        font = FontFace("Helvetica", "B", size_pt=7)
         (self.pdf.set_fill_color(255, 255, 255),)
         with self.pdf.table(
             headings_style=font,
@@ -516,7 +518,7 @@ class PassOn8PDFExporter:
                     body = table.row()
                     for text in item:
                         body.cell(text)
-            self.pdf.set_font("Helvetica", "B", 8)
+            self.pdf.set_font("Helvetica", "B", 7)
             total = table.row()
             for text in line_total:
                 total.cell(text)
