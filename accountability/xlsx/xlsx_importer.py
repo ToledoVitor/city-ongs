@@ -32,9 +32,10 @@ class AccountabilityXLSXImporter:
         self._store_nd_choices()
         self._store_td_choices()
 
-        # revenues = self._create_revenues(revenues_df)
-        # expenses = self._create_expenses(expenses_df)
-        # applications = self._create_applications(applications_df)
+        revenues = self._create_revenues(revenues_df)
+        expenses = self._create_expenses(expenses_df)
+        applications = self._create_applications(applications_df)
+
 
     def _store_fr_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="FR")
