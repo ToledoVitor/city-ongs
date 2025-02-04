@@ -1,6 +1,7 @@
 from django import forms
 
-from utils.widgets import BaseSelectFormWidget
+from utils.widgets import BaseSelectFormWidget, BaseNumberFormWidget
+from utils.choices import MonthChoices
 from contracts.models import Contract
 
 
@@ -28,14 +29,21 @@ class ReportForm(forms.Form):
         label="Escolha um modelo de relatório",
         widget=BaseSelectFormWidget(),
     )
+    month = forms.ChoiceField(
+        choices=MonthChoices.choices,
+        label="Escolha um modelo de relatório",
+        widget=BaseSelectFormWidget(),
+    )
+    year = forms.IntegerField(
+        label="Ano",
+        widget=BaseNumberFormWidget(),
+    )
     contract = forms.ModelChoiceField(
         queryset=Contract.objects.none(),
         label="Escolha um contrato",
         empty_label="Selecione um contrato",
         widget=BaseSelectFormWidget(),
     )
-    start_date = forms.DateField()
-    end_date = forms.DateField()
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)

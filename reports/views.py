@@ -26,8 +26,8 @@ class ReportsView(TemplateView):
             report = export_report(
                 contract=form.cleaned_data["contract"],
                 report_model=report_model,
-                start_date=form.cleaned_data["start_date"],
-                end_date=form.cleaned_data["end_date"],
+                month=form.cleaned_data["month"],
+                year=form.cleaned_data["year"],
             )
             report.output(buffer)
             buffer.seek(0)

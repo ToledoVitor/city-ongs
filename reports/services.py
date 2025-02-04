@@ -1,4 +1,5 @@
-from datetime import date
+import calendar
+from datetime import date, datetime
 
 from contracts.models import Contract
 from reports.exporters import (
@@ -77,7 +78,15 @@ def export_pass_on_14(contract: Contract, start_date: date, end_date: date):
     return PassOn14PDFExporter(contract).handle()
 
 
-def export_report(contract: Contract, report_model: str, start_date: date, end_date: date):
+def _get_start_end_date(month: int, year: int):
+    last_day = calendar.monthrange(year, month)[1]
+    
+    start_date = datetime(year, month, 1)
+    end_date = datetime(year, month, last_day)
+    return start_date, end_date
+
+def export_report(contract: Contract, report_model: str, month: int, year: int):
+    start_date, end_date = _get_start_end_date(int(month), int(year))
     match report_model:
         # case "rp_1":
         #     return export_pass_on_1(contract, start_date, end_date)
