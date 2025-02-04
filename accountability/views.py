@@ -78,7 +78,7 @@ class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.CREATED_EXPENSE_SOURCE,
+                    action=ActivityLog.ActivityLogChoices.CREATED_RESOURCES_SOURCE,
                     target_object_id=source.id,
                     target_content_object=source,
                 )
@@ -316,7 +316,7 @@ def import_accountability_view(request, pk):
                 .prefetch_related(
                     "contract__items",
                     "contract__organization__favoreds",
-                    "contract__organization__revenue_sources",
+                    "contract__organization__resource_sources",
                 )
                 .get(id=pk)
             )

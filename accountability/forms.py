@@ -55,6 +55,7 @@ class ExpenseForm(forms.ModelForm):
             "favored",
             "item",
             "nature",
+            "due_date",
             "competency",
             "liquidation",
             "liquidation_form",

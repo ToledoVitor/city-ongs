@@ -249,7 +249,7 @@ class AccountabilityXLSXExporter:
             [" VALOR ", self.header_format],
             [" VENCIMENTO ", self.header_format],
             [" COMPETÊNCIA ", self.header_format],
-            [" FONTE DE DESPESA ", self.header_breaking_line_format],
+            [" FONTE DE RECURSO ", self.header_breaking_line_format],
             [
                 " NATUREZA DA DESPESA (somente para despesa NÃO planejada)",
                 self.header_breaking_line_format,
@@ -532,7 +532,7 @@ class AccountabilityXLSXExporter:
         revenue_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         line = 1
-        for source in self.organization.revenue_sources.all():
+        for source in self.organization.resource_sources.all():
             revenue_worksheet.write(line, 0, source.name)
             revenue_worksheet.write(line, 1, str(source.id))
             line += 1

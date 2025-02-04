@@ -105,7 +105,7 @@ class ResourceSource(BaseModel):
     organization = models.ForeignKey(
         Organization,
         verbose_name="Organização",
-        related_name="resource_source",
+        related_name="resource_sources",
         on_delete=models.CASCADE,
     )
 
@@ -248,6 +248,11 @@ class Expense(BaseModel):
     )
 
     # dates
+    due_date = models.DateField(
+        verbose_name="Vencimento",
+        null=True,
+        blank=True,
+    )
     competency = models.DateField(
         verbose_name="Competência",
     )

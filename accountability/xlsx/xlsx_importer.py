@@ -15,29 +15,26 @@ class AccountabilityXLSXImporter:
         self.accountability = accountability
 
     def handle(self):
-        ...
-        # try:
-        #     revenues_df = pd.read_excel(self.file, sheet_name="1. RECEITAS")
-        #     expenses_df = pd.read_excel(self.file, sheet_name="2. DESPESAS")
-        #     applications_df = pd.read_excel(
-        #         self.file, sheet_name="3. APLICACOES E RESGATES"
-        #     )
-        # except ValueError:
-        #     raise ValueError("Excel sheets are not in the right format")
+        try:
+            revenues_df = pd.read_excel(self.file, sheet_name="1. RECEITAS")
+            expenses_df = pd.read_excel(self.file, sheet_name="2. DESPESAS")
+            applications_df = pd.read_excel(
+                self.file, sheet_name="3. APLICACOES E RESGATES"
+            )
+        except ValueError:
+            raise ValueError("Excel sheets are not in the right format")
 
-        # self._store_fr_ids()
-        # self._store_cb_ids()
-        # self._store_fv_ids()
-        # self._store_ia_ids()
-        # self._store_nr_choices()
-        # self._store_nd_choices()
-        # self._store_td_choices()
+        self._store_fr_ids()
+        self._store_cb_ids()
+        self._store_fv_ids()
+        self._store_ia_ids()
+        self._store_nr_choices()
+        self._store_nd_choices()
+        self._store_td_choices()
 
         # revenues = self._create_revenues(revenues_df)
         # expenses = self._create_expenses(expenses_df)
         # applications = self._create_applications(applications_df)
-
-        print("1")
 
     def _store_fr_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="FR")
@@ -78,7 +75,7 @@ class AccountabilityXLSXImporter:
         self.mapped_nds = {label: value for value, label in NatureChoices.choices}
 
     def _store_td_choices(self) -> None:
-        self.mapped_nds = {
+        self.mapped_tds = {
             label: value for value, label in Expense.DocumentChoices.choices
         }
 
@@ -101,8 +98,8 @@ class AccountabilityXLSXImporter:
                     competency=datetime(
                         competency.year, competency.month, competency.day
                     ),
-                    source__id=self.mapped_frs.get(line[6]),
-                    bank_account=self.mapped_cbs.get(line[7]),
+                    source_id=self.mapped_frs.get(line[6]),
+                    bank_account_id=self.mapped_cbs.get(line[7]),
                     revenue_nature=self.mapped_nrs.get(line[8]),
                     observations=line[9],
                 )
@@ -118,40 +115,27 @@ class AccountabilityXLSXImporter:
             if not line[2]:
                 break
 
-            # planned = bool(line[9])
+            planned = bool(line[9])
 
-            # due_date = line[4]
-            # competency = line[5]
-            # expenses.append(
-            #     Expense(
-            #         accountability=self.accountability,
-            #         planned=planned,
-            #         identification=line[2],
-            #         value=Decimal(line[3]),
-            #         due_date=datetime(due_date.year, due_date.month, due_date.day),
-            #         competency=datetime(competency.year, competency.month, competency.day),
-            #         value=,
-            #         source__id=self.mapped_frs.get(line[6]),
-            #         favored=,
-            #         item=,
-            #         nature=,
-            #         competency=,
-            #         liquidation=,
-            #         liquidation_form=,
-            #         document_type=,
-            #         document_number=,
-            #         observations=line[12],
-
-            #         identification=line[2],
-            #         value=Decimal(line[3]),
-            #         due_date=datetime(due_date.year, due_date.month, due_date.day),
-            #         competency=datetime(competency.year, competency.month, competency.day),
-            #         source__id=self.mapped_frs.get(line[6]),
-            #         bank_account=self.mapped_cbs.get(line[7]),
-            #         revenue_nature=self.mapped_nrs.get(line[8]),
-            #         observations=line[9],
-            #     )
-            # )
+            due_date = line[4]
+            competency = line[5]
+            expenses.append(
+                Expense(
+                    accountability=self.accountability,
+                    planned=planned,
+                    identification=line[2],
+                    value=Decimal(line[3]),
+                    due_date=datetime(due_date.year, due_date.month, due_date.day),
+                    competency=datetime(competency.year, competency.month, competency.day),
+                    source_id=self.mapped_frs.get(line[6], None),
+                    nature=self.mapped_nds.get(line[7], None),
+                    favored_id=self.mapped_frs.get(line[8], None),
+                    item_id=self.mapped_ias.get(line[9], None),
+                    document_type=self.mapped_tds.get(line[10], None),
+                    document_number=line[11],
+                    observations=line[12],
+                )
+            )
 
         return expenses
 
