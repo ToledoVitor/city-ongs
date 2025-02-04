@@ -1,7 +1,21 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-    <p class="text-2xl mb-2 font-bold text-black">Contas Bancárias Cadastradas</p>
+<div>
+    <div class="grid gap-6 mb-4 mx-5 md:grid-cols-2">
+        <div class="relative">
+        <p class="text-xl mt-2 font-bold text-black">Contas Bancárias Cadastradas</p>
+        </div>
+
+        <div class="relative text-right">
+        <a href="#">
+            <button
+                type="button"
+                class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+            >
+                Ver Extrato
+            </button>
+        </a>
+    </div>
 </div>
 
 <hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">

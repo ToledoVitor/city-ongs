@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from contracts.models import Contract
 from reports.exporters import (
@@ -17,73 +17,109 @@ from reports.exporters import (
 )
 
 
-def export_pass_on_3():
+def export_pass_on_3(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn3PDFExporter(contract).handle()
-    pdf.output(f"rp3-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn3PDFExporter(contract).handle()
 
 
-def export_pass_on_4():  # TODO
+def export_pass_on_4():  # TOcontract: Contract, start_date: date, end_date: dateD -> NoneO
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn4PDFExporter(contract).handle()
-    pdf.output(f"rp4-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn4PDFExporter(contract).handle()
 
 
-def export_pass_on_5():
+def export_pass_on_5(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn5PDFExporter(contract).handle()
-    pdf.output(f"rp5-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn5PDFExporter(contract).handle()
 
 
-def export_pass_on_6():
+def export_pass_on_6(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn6PDFExporter(contract).handle()
-    pdf.output(f"rp6-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn6PDFExporter(contract).handle()
 
 
-def export_pass_on_7():
+def export_pass_on_7(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn7PDFExporter(contract).handle()
-    pdf.output(f"rp7-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn7PDFExporter(contract).handle()
 
 
-def export_pass_on_8():
+def export_pass_on_8(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn8PDFExporter(contract).handle()
-    pdf.output(f"rp8-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn8PDFExporter(contract).handle()
 
 
-def export_pass_on_9():
+def export_pass_on_9(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn9PDFExporter(contract).handle()
-    pdf.output(f"rp9-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn9PDFExporter(contract).handle()
 
 
-def export_pass_on_10():
+def export_pass_on_10(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn10PDFExporter(contract).handle()
-    pdf.output(f"rp10-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn10PDFExporter(contract).handle()
 
 
-def export_pass_on_11():
+def export_pass_on_11(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn11PDFExporter(contract).handle()
-    pdf.output(f"rp11-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn11PDFExporter(contract).handle()
 
 
-def export_pass_on_12():
+def export_pass_on_12(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn12PDFExporter(contract).handle()
-    pdf.output(f"rp12-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn12PDFExporter(contract).handle()
 
 
-def export_pass_on_13():
+def export_pass_on_13(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn13PDFExporter(contract).handle()
-    pdf.output(f"rp13-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn13PDFExporter(contract).handle()
 
 
-def export_pass_on_14():
+def export_pass_on_14(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
-    pdf = PassOn14PDFExporter(contract).handle()
-    pdf.output(f"rp14-{str(datetime.now().time())[0:8]}.pdf")
+    return PassOn14PDFExporter(contract).handle()
+
+
+def export_report(contract: Contract, report_model: str, start_date: date, end_date: date):
+    match report_model:
+        # case "rp_1":
+        #     return export_pass_on_1(contract, start_date, end_date)
+
+        # case "rp_2":
+        #     return export_pass_on_2(contract, start_date, end_date)
+
+        case "rp_3":
+            return export_pass_on_3(contract, start_date, end_date)
+
+        case "rp_4":
+            return export_pass_on_4(contract, start_date, end_date)
+
+        case "rp_5":
+            return export_pass_on_5(contract, start_date, end_date)
+
+        case "rp_6":
+            return export_pass_on_6(contract, start_date, end_date)
+
+        case "rp_7":
+            return export_pass_on_7(contract, start_date, end_date)
+
+        case "rp_8":
+            return export_pass_on_8(contract, start_date, end_date)
+
+        case "rp_9":
+            return export_pass_on_9(contract, start_date, end_date)
+
+        case "rp_10":
+            return export_pass_on_10(contract, start_date, end_date)
+
+        case "rp_11":
+            return export_pass_on_11(contract, start_date, end_date)
+
+        case "rp_12":
+            return export_pass_on_12(contract, start_date, end_date)
+
+        case "rp_13":
+            return export_pass_on_13(contract, start_date, end_date)
+
+        case "rp_14":
+            return export_pass_on_14(contract, start_date, end_date)
+
+        case _:
+            raise ValueError(f"Report model {report_model} is not a valid option")

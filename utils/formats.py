@@ -22,4 +22,4 @@ def document_mask(document: str | None):
     elif len(document) == 14:  # CNPJ
         return f"CNPJ: **.{document[2:5]}.{document[5:8]}/{document[8:12]}-**"
     else:
-        return None
+        return f"DOC: {document}"

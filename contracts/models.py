@@ -204,7 +204,7 @@ class Contract(BaseModel):
         verbose_name_plural = "Contratos"
 
     def __str__(self) -> str:
-        return f"{self.code} - {self.name}"
+        return f"{self.internal_code} - {self.name}"
 
     @property
     def trailing_code(self):

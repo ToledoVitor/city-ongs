@@ -16,6 +16,7 @@ urlpatterns = [
     path("accounts/", include(("accounts.urls", "accounts"), namespace="accounts")),
     path("bank/", include(("bank.urls", "bank"), namespace="bank")),
     path("contracts/", include(("contracts.urls", "contracts"), namespace="contracts")),
+    path("reports/", include(("reports.urls", "reports"), namespace="reports")),
     # Health Check
     re_path(r"^api/health_check/", include("health_check.urls")),
 ]
