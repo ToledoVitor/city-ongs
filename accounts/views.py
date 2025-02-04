@@ -91,6 +91,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.FOLDER_MANAGER,
                 )
+                new_user.areas.set(form.cleaned_data["areas"])
 
                 logger.info(f"{request.user.id} - Created new folder manager")
                 _ = ActivityLog.objects.create(
@@ -180,6 +181,7 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
                 )
+                new_user.areas.set(form.cleaned_data["areas"])
 
                 logger.info(f"{request.user.id} - Created new organization accountant")
                 _ = ActivityLog.objects.create(

@@ -67,8 +67,8 @@
                       {{ manager.email }}
                     </td>
                     <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                      {% if accountant.areas.count %}
-                        {% for area in accountant.areas.all %}
+                      {% if manager.areas.count %}
+                        {% for area in manager.areas.all %}
                           - {{ area.name }} <br>
                         {% endfor %}
                       {% else %}
