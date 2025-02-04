@@ -17,6 +17,13 @@ class CityHall(BaseModel):
         max_length=32,
     )
 
+    position = models.CharField(
+        verbose_name="cargo",
+        max_length=150,
+        null=True,
+        blank=True,
+    )
+
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -45,6 +52,13 @@ class Organization(BaseModel):
     document = models.CharField(
         verbose_name="Documento",
         max_length=32,
+        null=True,
+        blank=True,
+    )
+    
+    position = models.CharField(
+        verbose_name="cargo",
+        max_length=150,
         null=True,
         blank=True,
     )
