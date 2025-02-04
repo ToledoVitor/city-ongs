@@ -418,7 +418,7 @@ class AccountabilityXLSXExporter:
             [" DATA DA TRANSFERÊNCIA ", self.header_breaking_line_format],
             ["CONTA BANCÁRIA DE ORIGEM", self.header_breaking_line_format],
             ["FONTE DE RECURSO DE ORIGEM", self.header_breaking_line_format],
-            ["CONTA BANCÁRIA", self.header_breaking_line_format],
+            ["CONTA BANCÁRIA DE DESTINO", self.header_breaking_line_format],
             ["FONTE DE RECURSO DE DESTINO", self.header_breaking_line_format],
         )
 

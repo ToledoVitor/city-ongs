@@ -183,11 +183,13 @@
       <div class="relative">
         <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Responsável Contábil</label>
         {{ form.accountability_autority }}
+        <a href="{% url 'accounts:organization-accountants-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar Contador</a>
       </div>
 
       <div class="relative">
         <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Responsável Fiscal</label>
         {{ form.supervision_autority }}
+        <a href="{% url 'accounts:folder-managers-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar Fiscal</a>
       </div>
 
     </div>

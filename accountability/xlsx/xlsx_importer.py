@@ -41,7 +41,7 @@ class AccountabilityXLSXImporter:
         expenses_error = self._create_expenses(expenses_df)
         applications_error = self._create_applications(applications_df)
 
-        imported = any([revenues_error, expenses_error, applications_error])
+        imported = False in [revenues_error, expenses_error, applications_error]
 
         return imported, revenues_error, expenses_error, applications_error
 

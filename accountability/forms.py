@@ -84,7 +84,7 @@ class ExpenseForm(forms.ModelForm):
         if self.request:
             self.fields[
                 "source"
-            ].queryset = self.request.user.organization.resource_source.all()
+            ].queryset = self.request.user.organization.resource_sources.all()
             self.fields[
                 "favored"
             ].queryset = self.request.user.organization.favoreds.all()
@@ -130,11 +130,11 @@ class RevenueForm(forms.ModelForm):
         if self.request:
             self.fields[
                 "source"
-            ].queryset = self.request.user.organization.revenue_sources.all()
+            ].queryset = self.request.user.organization.resource_sources.all()
         else:
             self.fields[
                 "source"
-            ].queryset = self.request.user.organization.revenue_sources.none()
+            ].queryset = self.request.user.organization.resource_sources.none()
 
 
 class AccountabilityCreateForm(forms.ModelForm):

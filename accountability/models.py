@@ -292,7 +292,9 @@ class Expense(BaseModel):
 
     @property
     def nature_label(self) -> str:
-        return NatureChoices(self.nature).label
+        if self.nature:
+            return NatureChoices(self.nature).label
+        return ""
 
     def __str__(self) -> str:
         return f"Despesa {self.id}"
