@@ -96,6 +96,7 @@ class ContractItemForm(forms.ModelForm):
             "name",
             "objective",
             "methodology",
+            "observations",
             "month_quantity",
             "month_expense",
             "unit_type",
@@ -106,6 +107,7 @@ class ContractItemForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
+            "observations": BaseTextAreaFormWidget(),
             "month_quantity": BaseNumberFormWidget(),
             "unit_type": BaseCharFieldFormWidget(),
             "nature": BaseSelectFormWidget(),
@@ -119,12 +121,14 @@ class ContractGoalForm(forms.ModelForm):
             "name",
             "objective",
             "methodology",
+            "observations",
         ]
 
         widgets = {
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
+            "observations": BaseTextAreaFormWidget(),
         }
 
 

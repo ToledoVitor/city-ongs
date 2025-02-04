@@ -309,6 +309,12 @@ class ContractGoal(BaseModel):
         verbose_name="Metodologia",
         max_length=256,
     )
+    observations = models.CharField(
+        verbose_name="Observações",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(
         verbose_name="Status",
@@ -411,6 +417,13 @@ class ContractItem(BaseModel):
         verbose_name="Metodologia",
         max_length=256,
     )
+    observations = models.CharField(
+        verbose_name="Observações",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+
 
     # EXPENSE ESPECIFICATION
     month_quantity = models.PositiveIntegerField(
