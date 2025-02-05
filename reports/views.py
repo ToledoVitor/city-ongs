@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from reports.forms import ReportForm
-from reports.services import export_report
+from reports.services import export_report, get_accountability
 
 
 class ReportsView(TemplateView):
@@ -15,19 +15,30 @@ class ReportsView(TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["form"] = ReportForm(request=self.request)
+        context["missing_accountability"] = kwargs.get("missing_accountability", False)
         return context
 
     def post(self, request, *args, **kwargs):
         form = ReportForm(request.POST, request=self.request)
         if form.is_valid():
-            report_model = form.cleaned_data["report_model"]
-
-            buffer = BytesIO()
-            report = export_report(
+            accountability = get_accountability(
                 contract=form.cleaned_data["contract"],
-                report_model=report_model,
                 month=form.cleaned_data["month"],
                 year=form.cleaned_data["year"],
+            )
+            if not accountability:
+                return self.render_to_response(
+                    self.get_context_data(
+                        form=form,
+                        missing_accountability=True,
+                    ),
+                )
+
+            report_model = form.cleaned_data["report_model"]
+            buffer = BytesIO()
+            report = export_report(
+                accountability=accountability,
+                report_model=report_model,
             )
             report.output(buffer)
             buffer.seek(0)

@@ -44,25 +44,25 @@
                   </th>
 
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
-                    {% if accountability.review_status == "WIP" %}
+                    {% if accountability.status == "WIP" %}
                       <span
                         class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100"
                       >
                         {{ accountability.status_label }}
                       </span>
-                    {% elif accountability.review_status == "SENT" %}
+                    {% elif accountability.status == "SENT" %}
                       <span
                         class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
                       >
                         {{ accountability.status_label }}
                       </span>
-                    {% elif accountability.review_status == "CORRECTING" %}
+                    {% elif accountability.status == "CORRECTING" %}
                       <span
                         class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         {{ accountability.status_label }}
                       </span>
-                    {% elif accountability.review_status == "FINISHED" %}
+                    {% elif accountability.status == "FINISHED" %}
                       <span
                         class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >

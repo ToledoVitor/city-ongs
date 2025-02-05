@@ -20,7 +20,7 @@ from reports.exporters import (
 )
 
 
-def export_pass_on_1(contract: Contract, start_date: date, end_date: date):
+def export_pass_on_1(accountability: Accountability, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn1PDFExporter(contract).handle()
 
@@ -96,9 +96,8 @@ def _get_start_end_date(month: int, year: int):
     return start_date, end_date
 
 
-def export_report(contract: Contract, report_model: str, month: int, year: int):
-    start_date, end_date = _get_start_end_date(int(month), int(year))
-    accountability = (
+def get_accountability(contract: Contract, month: int, year: int):
+    return (
         Accountability.objects.filter(
             month=month,
             year=year,
@@ -113,13 +112,15 @@ def export_report(contract: Contract, report_model: str, month: int, year: int):
         .first()
     )
 
-    if not accountability:
-        # TODO: raise error and validate its finished accountability
-        return
+def export_report(accountability: Accountability, report_model: str):
+    start_date, end_date = _get_start_end_date(
+        month=int(accountability.month),
+        year=int(accountability.year),
+    )
 
     match report_model:
         case "rp_1":
-            return export_pass_on_1(contract, start_date, end_date)
+            return export_pass_on_1(accountability, start_date, end_date)
 
         # case "rp_2":
         #     return export_pass_on_2(accountability, start_date, end_date)
