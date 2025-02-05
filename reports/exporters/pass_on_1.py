@@ -76,8 +76,20 @@ class PassOn1PDFExporter:
         self.pdf.ln(6)
 
     def _draw_table(self):
-        data_up_header = ["", "", "", ""]
-        data_header = ["", "", "", "", "", "", "", "", "", "", ""]
+        data_up_header = ["", "LEI", "CONVÊNIO", ""]
+        data_header = [
+            "TIPO (*)",
+            "BENEFICIARIO / CNPJ",
+            "ENDEREÇO (Rua, n°, cidade, CEP)",
+            "N°",
+            "DATA",
+            "N°",
+            "DATA",
+            "FINALIDADE",
+            "DATA DO PGTO",
+            "FONTE (**)",
+            "VALOR EM REAIS",
+        ]
         data_body = [
             ["", "", "", "", "", "", "", "", "", "", ""],
             ["", "", "", "", "", "", "", "", "", "", ""],
@@ -86,7 +98,7 @@ class PassOn1PDFExporter:
         data_footer = ["Total", ""]
 
         self.pdf.ln(10)
-        sub_col_widths = [53, 34, 34, 69]  # Total: 190
+        sub_col_widths = [61, 29, 29, 73]  # Total: 190
         font = FontFace("Helvetica", "", size_pt=6)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
@@ -98,22 +110,22 @@ class PassOn1PDFExporter:
         ) as table:
             up_header = table.row()
             for text in data_up_header:
-                up_header.cell(text)
-        
+                up_header.cell(text=text, align="C")
+
         self.default_cell_height
-        col_widths = [17, 19, 17, 17, 17, 17, 17, 18, 17, 17, 17]  # Total: 190   
+        col_widths = [15, 20, 26, 14, 15, 14, 15, 19, 17, 17, 20]  # Total: 190
         font = FontFace("Helvetica", "", size_pt=6)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="C",
             col_widths=col_widths,
             repeat_headings=0,
         ) as table:
             header = table.row()
             for text in data_header:
-                header.cell(text)
+                header.cell(text=text, align="C")
 
             if data_body != []:
                 self.pdf.set_font("Helvetica", "", 6)
@@ -123,7 +135,7 @@ class PassOn1PDFExporter:
                         body.cell(text)
 
         self.default_cell_height
-        footer_col_widths = [160, 30]  # Total: 190
+        footer_col_widths = [170, 20]  # Total: 190
         font = FontFace("Helvetica", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
@@ -156,11 +168,13 @@ class PassOn1PDFExporter:
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
-            markdown=True
+            markdown=True,
         )
         self.pdf.ln(8)
         self.pdf.cell(190, 10, "", ln=True, align="C")
-        self.pdf.line(self.pdf.get_x(), self.pdf.get_y(), self.pdf.get_x() + 190, self.pdf.get_y())
+        self.pdf.line(
+            self.pdf.get_x(), self.pdf.get_y(), self.pdf.get_x() + 190, self.pdf.get_y()
+        )
         self.pdf.ln(10)
 
     def _draw_observations(self):

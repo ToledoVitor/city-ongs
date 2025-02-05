@@ -135,6 +135,7 @@ class ContractItemForm(forms.ModelForm):
 
         return file
 
+
 class ContractGoalForm(forms.ModelForm):
     class Meta:
         model = ContractGoal
