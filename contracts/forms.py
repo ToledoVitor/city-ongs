@@ -19,6 +19,7 @@ class ContractCreateForm(forms.ModelForm):
         model = Contract
         fields = [
             "name",
+            "bidding",
             "objective",
             "total_value",
             "start_of_vigency",
@@ -35,6 +36,7 @@ class ContractCreateForm(forms.ModelForm):
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
+            "bidding": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
             "contractor_company": BaseSelectFormWidget(
                 placeholder="Empresa Contratante"
@@ -103,6 +105,7 @@ class ContractItemForm(forms.ModelForm):
             "anual_expense",
             "unit_type",
             "nature",
+            "file",
         ]
 
         widgets = {
@@ -113,8 +116,24 @@ class ContractItemForm(forms.ModelForm):
             "month_quantity": BaseNumberFormWidget(),
             "unit_type": BaseCharFieldFormWidget(),
             "nature": BaseSelectFormWidget(),
+            "file": BaseFileFormWidget(required=False),
         }
 
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+
+        if file:
+            if not file.name.lower().endswith(".pdf"):
+                raise forms.ValidationError(
+                    "Somente arquivos do tipo PDF são permitidos."
+                )
+
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(
+                    "O tamanho máximo permitido para o arquivo é 10MB."
+                )
+
+        return file
 
 class ContractGoalForm(forms.ModelForm):
     class Meta:

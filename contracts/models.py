@@ -94,6 +94,13 @@ class Contract(BaseModel):
         blank=True,
     )
     objective = models.CharField(verbose_name="Objeto", max_length=128)
+    bidding = models.CharField(
+        # TODO: remove null
+        verbose_name="Licitação",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
 
     # Dates and values
     total_value = models.DecimalField(
@@ -457,6 +464,13 @@ class ContractItem(BaseModel):
         max_length=22,
         choices=StatusChoices,
         default=StatusChoices.ANALYZING,
+    )
+
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contract-items/",
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
