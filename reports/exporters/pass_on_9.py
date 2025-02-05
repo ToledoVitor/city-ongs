@@ -181,7 +181,7 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: Responsável pela Entidade",
+            text=f"Cargo: {self.contract.organization.city_hall.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -207,7 +207,7 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: Responsável pela Entidade",
+            text=f"Cargo: {self.contract.organization.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -238,7 +238,7 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: Responsável pela Entidade",
+            text=f"Cargo: {self.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -269,7 +269,7 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: Responsável pela Entidade",
+            text=f"Cargo: {self.contract.accountability_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
