@@ -2,7 +2,7 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+        <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
             <tr>
                 <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
@@ -22,7 +22,7 @@
         <tbody>
             {% if contract.goals.count %}
               {% for goal in contract.goals.all %}
-                <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+                <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
                   <td scope="row" class="py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
 
                     {% if user.can_change_statuses %}
@@ -94,7 +94,7 @@
                       </span>
                     {% elif goal.status == "APPROVED" %}
                       <span
-                        class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Aprovado
                       </span>
@@ -178,7 +178,7 @@
                                       </select>
                                   </div>
 
-                                  <hr class="h-px my-4 border-0 bg-gray-700">
+                                  <hr class="h-px my-4 border-0 bg-gray-500">
 
                                   <b class="mt-2 inline-flex text-center">HISTÓRICO DE COMENTÁRIOS</b>
 
@@ -262,7 +262,7 @@
                 </div>
               {% endfor %}
             {% else %}
-              <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+              <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                     Nenhuma meta cadastrada
                 </th>
@@ -284,7 +284,7 @@
     </table>
   
     {% if user.has_admin_access %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-green-200">
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
         <a
           href="{% url 'contracts:contracts-goals-create' contract.id %}"
           class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

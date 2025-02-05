@@ -4,7 +4,7 @@
     <p class="text-2xl mb-2 font-bold text-black">Contas Bancárias Cadastradas</p>
 </div>
 
-<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-700">
+<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-500">
 
 <div class="my-3 mx-5">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -49,7 +49,7 @@
     </div>
 
     {% if user.has_admin_access %}
-        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
+        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
         <a
             href="{% url 'contracts:contracts-accounts-auto-create' contract.id %}"
             class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

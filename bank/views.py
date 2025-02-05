@@ -4,10 +4,10 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 
 from activity.models import ActivityLog
 from bank.forms import CreateBankAccountForm, TransactionFormSet, UploadOFXForm
@@ -16,40 +16,6 @@ from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
-
-
-class BankAccountsListView(LoginRequiredMixin, ListView):
-    model = BankAccount
-    context_object_name = "bank_accounts_list"
-    paginate_by = 10
-    ordering = "-created_at"
-
-    template_name = "bank-account/list.html"
-    login_url = "/auth/login"
-
-    def get_queryset(self) -> QuerySet[Any]:
-        queryset = (
-            super()
-            .get_queryset()
-            .select_related(
-                "contract",
-            )
-        )
-        query = self.request.GET.get("q")
-        if query:
-            queryset = queryset.filter(
-                Q(account__icontains=query)
-                | Q(bank_name__icontains=query)
-                | Q(agency__icontains=query)
-                | Q(contract__name__icontains=query)
-                | Q(contract__code__icontains=query)
-            )
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "")
-        return context
 
 
 class BankAccountDetailView(LoginRequiredMixin, DetailView):

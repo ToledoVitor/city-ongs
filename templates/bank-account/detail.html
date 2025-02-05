@@ -90,12 +90,12 @@
 
   <div class="mr-10" id="default-styled-tab-content">
     <!-- Details Tab -->
-    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="details" role="tabpanel" aria-labelledby="details-tab">
+    <div class="hidden p-4 rounded-lg bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
       {% include 'bank-account/tabs/details-tab.html' with object=object %}
     </div>
   
     <!-- Transactions Tab -->
-    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-green-200" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+    <div class="hidden p-4 rounded-lg bg-gray-200" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
       {% include 'bank-account/tabs/transactions-tab.html' with object=object %}
     </div>
         
@@ -112,7 +112,7 @@
     {% if object.recent_logs %}
       {% for log in object.recent_logs %}
       <li class="mb-8 ms-6">
-          <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+          <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-500">
               <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
@@ -123,7 +123,7 @@
       {% endfor %}
     {% else %}
       <li class="mb-8 ms-6">
-        <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-700">
+        <span class="absolute flex items-center justify-center w-6 h-6 bg-white rounded-full -start-3 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-500">
             <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
             </svg>

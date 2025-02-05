@@ -1,7 +1,7 @@
 {% load humanize %}
 
 <table class="w-full text-sm text-left rtl:text-right text-center text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-white uppercase bg-green-50 dark:bg-green-700 dark:text-white">
+    <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
         <tr>
             <th scope="col" class="px-6 py-3">
                 Identificação
@@ -24,7 +24,7 @@
     <tbody>
         {% if revenues_page %}
           {% for revenue in revenues_page %}
-            <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+            <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
                   {{ revenue.identification }} 
                 </th>
@@ -58,7 +58,7 @@
             </tr>
           {% endfor %}
         {% else %}
-          <tr class="bg-white border-b dark:bg-green-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-400">
+          <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
             <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                 Nenhum resultado encontrado
             </th>
@@ -82,7 +82,7 @@
     </tbody>
 </table>
 
-<div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-green-200">
+<div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
   <a
     href="{% url 'accountability:revenues-create' accountability.id %}"
     class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -94,7 +94,7 @@
   </a>
 </div>
 
-<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-green-200" aria-label="Table navigation">
+<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200" aria-label="Table navigation">
   <span class="text-base font-normal text-black dark:text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
     Página
     <span class="font-bold text-gray-900 dark:text-black">{{ revenues_page.number }}</span>
@@ -107,7 +107,7 @@
       <li>
         <a
           href="?revenues_page=1&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 rounded-s-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
         >
           Primeira
         </a>
@@ -116,7 +116,7 @@
       <li>
         <a
           href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
         >
           Anterior
         </a>
@@ -129,7 +129,7 @@
           <a
             href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
             aria-current="page"
-            class="flex items-center justify-center px-3 h-8 text-white border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-white dark:border-gray-700 dark:bg-green-800 dark:text-white"
+            class="flex items-center justify-center px-3 h-8 text-white border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           >
             {{ num }}
           </a>
@@ -138,7 +138,7 @@
         <li>
           <a
             href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-            class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+            class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
           >
             {{ num }}
           </a>
@@ -150,7 +150,7 @@
       <li>
         <a
           href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
         >
           Próxima
         </a>
@@ -159,7 +159,7 @@
       <li>
         <a
           href="?revenues_page={{ revenues_page.paginator.num_pages }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 rounded-e-lg hover:bg-green-100 hover:text-white dark:bg-green-200 dark:border-gray-700 dark:text-black dark:hover:bg-green-800 dark:hover:text-white"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
         >
           Última
         </a>
