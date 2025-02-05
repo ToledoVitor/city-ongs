@@ -23,10 +23,14 @@ class ResourceSourceCreateForm(forms.ModelForm):
         fields = [
             "name",
             "document",
+            "origin",
+            "category",
         ]
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
+            "origin": BaseSelectFormWidget(),
+            "category": BaseSelectFormWidget(),
         }
 
     def clean(self):

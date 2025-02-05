@@ -48,7 +48,6 @@
     {{ form.name }}
   </div>
 
-
   <div class="mb-3">
     <label for="id_document" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">CPF ou CNPJ da fonte</label>
     <div class="relative w-full">
@@ -65,6 +64,16 @@
     <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
       Escreva somente os números do documento, sem pontuação.
     </p>
+  </div>
+
+  <div class="mb-3">
+    <label for="id_origin" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Origem</label>
+    {{ form.origin }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_category" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Categoria</label>
+    {{ form.category }}
   </div>
 
   {% include 'commons/form-errors.html' with form=form %}

@@ -4,6 +4,7 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, TemplateView
@@ -17,6 +18,7 @@ from contracts.forms import (
     ContractItemForm,
     ContractStepFormSet,
     ContractExecutionCreateForm,
+    ContractExecutionActivityCreateForm,
 )
 from contracts.models import (
     Company,
@@ -513,7 +515,7 @@ def create_contract_execution_view(request, pk):
                     target_content_object=execution,
                 )
             return redirect(
-                "contracts:execution-detail", pk=execution.id
+                "contracts:executions-detail", pk=execution.id
             )
     else:
         form = ContractExecutionCreateForm()
@@ -521,4 +523,62 @@ def create_contract_execution_view(request, pk):
             request,
             "contracts/execution/create.html",
             {"contract": contract, "form": form},
+        )
+    
+class ContractExecutionDetailView(LoginRequiredMixin, DetailView):
+    model = ContractExecution
+
+    template_name = "contracts/execution/detail.html"
+    context_object_name = "execution"
+
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().prefetch_related(
+            "activities", "activities__step",
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+def create_execution_activity_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    execution = get_object_or_404(ContractExecution, id=pk)    
+    if request.method == "POST":
+        form = ContractExecutionActivityCreateForm(request.POST, execution=execution)
+        if form.is_valid():
+            with transaction.atomic():
+                activity = form.save(commit=False)
+                activity.execution = execution
+                activity.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_EXECUTION_ACTIVITY,
+                    target_object_id=activity.id,
+                    target_content_object=activity,
+                )
+                return redirect(
+                    "contracts:executions-detail", pk=execution.id
+                )
+        else:
+            return render(
+                request,
+                "contracts/execution/activity-create.html",
+                {"execution": execution, "form": form},
+            )
+    else:
+        form = ContractExecutionActivityCreateForm(execution=execution)
+        return render(
+            request,
+            "contracts/execution/activity-create.html",
+            {"execution": execution, "form": form},
         )

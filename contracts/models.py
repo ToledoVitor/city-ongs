@@ -573,7 +573,15 @@ class ContractExecutionActivity(BaseModel):
         verbose_name="Nome",
         max_length=32,
     )
-    completion = models.DecimalField(
+    description = models.CharField(
+        # TODO: remove null
+        verbose_name="Descrição",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    percentage = models.DecimalField(
+        verbose_name="Porcentagem Completa",
         max_digits=3,
         decimal_places=0,
         default=Decimal(0),
@@ -589,6 +597,7 @@ class ContractExecutionActivity(BaseModel):
     class Meta:
         verbose_name = "Atividade Executada"
         verbose_name_plural = "Atividades Executadas"
+        unique_together = ("execution", "step", "name")
 
 
 class ContractExecutionFile(BaseModel):
