@@ -10,7 +10,10 @@
             <tr>
                 <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
-                    Item
+                    Prestação
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Status
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Items Pendentes
@@ -36,9 +39,37 @@
                       </a>
                   </td>
 
-                  <th class="pl-2 pr-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black max-w-48">
-                    {{ accountability }}
+                  <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
+                    Prestação {{ accountability.month }}/{{ accountability.year }}
                   </th>
+
+                  <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
+                    {% if accountability.review_status == "WIP" %}
+                      <span
+                        class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100"
+                      >
+                        {{ accountability.status_label }}
+                      </span>
+                    {% elif accountability.review_status == "SENT" %}
+                      <span
+                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                      >
+                        {{ accountability.status_label }}
+                      </span>
+                    {% elif accountability.review_status == "CORRECTING" %}
+                      <span
+                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        {{ accountability.status_label }}
+                      </span>
+                    {% elif accountability.review_status == "FINISHED" %}
+                      <span
+                        class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        {{ accountability.status_label }}
+                      </span>
+                    {% endif %}
+                  </td>
 
                   <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
                     {{ accountability }}

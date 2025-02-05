@@ -11,7 +11,7 @@ from utils.models import BaseModel
 
 class Accountability(BaseModel):
     class ReviewStatus(models.TextChoices):
-        WIP = "WIP", "Em "
+        WIP = "WIP", "Em Andamento"
         SENT = "SENT", "Enviada para análise"
         CORRECTING = "CORRECTING", "Corrigindo"
         FINISHED = "FINISHED", "Finalizada"
@@ -51,6 +51,10 @@ class Accountability(BaseModel):
 
     def __str__(self) -> str:
         return f"Prestação mês {self.month}"
+
+    @property
+    def status_label(self) -> str:
+        return Accountability.ReviewStatus(self.status).label
 
     class Meta:
         verbose_name = "Relatório"
