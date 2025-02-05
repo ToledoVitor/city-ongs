@@ -1,8 +1,8 @@
 # ruff: noqa: E722
 
-from typing import Tuple
 from datetime import datetime
 from decimal import Decimal
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -142,7 +142,9 @@ class AccountabilityXLSXImporter:
                     identification=line[2],
                     value=Decimal(line[3]),
                     due_date=datetime(due_date.year, due_date.month, due_date.day),
-                    competency=datetime(competency.year, competency.month, competency.day),
+                    competency=datetime(
+                        competency.year, competency.month, competency.day
+                    ),
                     source_id=self.mapped_frs.get(line[6], None),
                     nature=self.mapped_nds.get(line[7], None),
                     favored_id=self.mapped_frs.get(line[8], None),
@@ -176,7 +178,11 @@ class AccountabilityXLSXImporter:
                     Transaction(
                         name="Aplicação / Resgate",
                         amount=Decimal(line[2] * -1),
-                        date=datetime(transaction_date.year, transaction_date.month, transaction_date.day),
+                        date=datetime(
+                            transaction_date.year,
+                            transaction_date.month,
+                            transaction_date.day,
+                        ),
                         bank_account_id=self.mapped_cbs.get(line[4]),
                         origin_source_id=self.mapped_frs.get(line[5]),
                         transaction_type=Transaction.TransactionTypeChoices.OTHER,
@@ -189,7 +195,11 @@ class AccountabilityXLSXImporter:
                     Transaction(
                         name="Aplicação / Resgate",
                         amount=Decimal(line[2]),
-                        date=datetime(transaction_date.year, transaction_date.month, transaction_date.day),
+                        date=datetime(
+                            transaction_date.year,
+                            transaction_date.month,
+                            transaction_date.day,
+                        ),
                         bank_account_id=self.mapped_cbs.get(line[6]),
                         destination_source_id=self.mapped_frs.get(line[7]),
                         transaction_type=Transaction.TransactionTypeChoices.OTHER,

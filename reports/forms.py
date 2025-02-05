@@ -1,25 +1,24 @@
 from django import forms
 
-from utils.widgets import BaseSelectFormWidget, BaseNumberFormWidget
-from utils.choices import MonthChoices
 from contracts.models import Contract
-
+from utils.choices import MonthChoices
+from utils.widgets import BaseNumberFormWidget, BaseSelectFormWidget
 
 REPORTS_OPTIONS = [
-    ("rp_1", "Anexo RP 1"),
-    ("rp_2", "Anexo RP 2"),
-    ("rp_3", "Anexo RP 3"),
-    ("rp_4", "Anexo RP 4"),
-    ("rp_5", "Anexo RP 5"),
-    ("rp_6", "Anexo RP 6"),
-    ("rp_7", "Anexo RP 7"),
-    ("rp_8", "Anexo RP 8"),
-    ("rp_9", "Anexo RP 9"),
-    ("rp_10", "Anexo RP 10"),
-    ("rp_11", "Anexo RP 11"),
-    ("rp_12", "Anexo RP 12"),
-    ("rp_13", "Anexo RP 13"),
-    ("rp_14", "Anexo RP 14"),
+    ("rp_1", "Repasses: Terceiro Setor (RP) - 1"),
+    ("rp_2", "Repasses: Terceiro Setor (RP) - 2"),
+    ("rp_3", "Repasses: Terceiro Setor (RP) - 3"),
+    ("rp_4", "Repasses: Terceiro Setor (RP) - 4"),
+    ("rp_5", "Repasses: Terceiro Setor (RP) - 5"),
+    ("rp_6", "Repasses: Terceiro Setor (RP) - 6"),
+    ("rp_7", "Repasses: Terceiro Setor (RP) - 7"),
+    ("rp_8", "Repasses: Terceiro Setor (RP) - 8"),
+    ("rp_9", "Repasses: Terceiro Setor (RP) - 9"),
+    ("rp_10", "Repasses: Terceiro Setor (RP) - 10"),
+    ("rp_11", "Repasses: Terceiro Setor (RP) - 11"),
+    ("rp_12", "Repasses: Terceiro Setor (RP) - 12"),
+    ("rp_13", "Repasses: Terceiro Setor (RP) - 13"),
+    ("rp_14", "Repasses: Terceiro Setor (RP) - 14"),
 ]
 
 
@@ -49,4 +48,6 @@ class ReportForm(forms.Form):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["contract"].queryset = self.request.user.organization.contracts.all()
+        self.fields[
+            "contract"
+        ].queryset = self.request.user.organization.contracts.all()

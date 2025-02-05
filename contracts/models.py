@@ -424,7 +424,6 @@ class ContractItem(BaseModel):
         blank=True,
     )
 
-
     # EXPENSE ESPECIFICATION
     month_quantity = models.PositiveIntegerField(
         verbose_name="Quantidade de Meses",

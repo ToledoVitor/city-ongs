@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0004_expense_due_date_historicalexpense_due_date"),
     ]

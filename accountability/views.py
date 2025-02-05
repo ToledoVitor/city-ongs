@@ -339,9 +339,11 @@ def import_accountability_view(request, pk):
             form = ImportXLSXAccountabilityForm(request.POST, request.FILES)
 
             if form.is_valid():
-                imported, revenues_error, expenses_error, applications_error = import_xlsx_model(
-                    file=form.cleaned_data["xlsx_file"],
-                    accountability=accountability,
+                imported, revenues_error, expenses_error, applications_error = (
+                    import_xlsx_model(
+                        file=form.cleaned_data["xlsx_file"],
+                        accountability=accountability,
+                    )
                 )
                 return render(
                     request,

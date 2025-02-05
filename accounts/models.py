@@ -55,7 +55,7 @@ class Organization(BaseModel):
         null=True,
         blank=True,
     )
-    
+
     position = models.CharField(
         verbose_name="cargo",
         max_length=150,
