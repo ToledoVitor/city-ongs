@@ -23,7 +23,7 @@ def export_pass_on_3(contract: Contract, start_date: date, end_date: date):
     return PassOn3PDFExporter(contract).handle()
 
 
-def export_pass_on_4():  # TOcontract: Contract, start_date: date, end_date: dateD -> NoneO
+def export_pass_on_4(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn4PDFExporter(contract).handle()
 
