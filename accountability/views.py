@@ -95,6 +95,18 @@ def create_contract_accountability_view(request, pk):
     if request.method == "POST":
         form = AccountabilityCreateForm(request.POST)
         if form.is_valid():
+            accountability_exists = Accountability.objects.filter(
+                contract=contract,
+                month=form.cleaned_data["month"],
+                year=form.cleaned_data["year"],
+            ).exists()
+            if accountability_exists:
+                return render(
+                    request,
+                    "accountability/accountability/create.html",
+                    {"contract": contract, "form": form, "accountability_exists": True},
+                )
+
             with transaction.atomic():
                 accountability = Accountability.objects.create(
                     contract=contract,

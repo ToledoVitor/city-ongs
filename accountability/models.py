@@ -59,7 +59,7 @@ class Accountability(BaseModel):
     class Meta:
         verbose_name = "Relatório"
         verbose_name_plural = "Relatórios"
-        unique_together = ("month", "year")
+        unique_together = ("contract", "month", "year")
 
 
 class Favored(BaseModel):

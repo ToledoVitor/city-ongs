@@ -496,7 +496,7 @@ def create_contract_execution_view(request, pk):
                 return render(
                     request,
                     "contracts/execution/create.html",
-                    {"contract": contract, "form": form, "execution_exists": execution_exists},
+                    {"contract": contract, "form": form, "execution_exists": True},
                 )
 
             with transaction.atomic():

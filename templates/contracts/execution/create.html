@@ -61,8 +61,6 @@
       {{ form.year }}
     </div>
   
-    {% include 'commons/form-errors.html' with form=form %}
-  
     <button
       type="submit"
       class="
@@ -95,7 +93,7 @@
         <div>
             <span class="font-medium">Erro ao iniciar relatório</span>
             <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">Já existe um relatório de execução iniciado para o período.</li>
+                <li class="my-1">Já existe um relatório de execução criado para o período.</li>
             </ul>
         </div>
     
