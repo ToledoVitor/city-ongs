@@ -384,22 +384,6 @@ class PassOn8PDFExporter:
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
-<<<<<<< Updated upstream
-=======
-        all_expenses = self.contract.items.filter(
-            expenses__competency__gte=self.contract.start_of_vigency,
-            expenses__competency__lte=self.contract.end_of_vigency,
-        )
-
-        # all_expenses = self.contract.items.all()
-
-        medical_expenses = format_into_brazilian_currency(
-            all_expenses.filter(
-                nature__in=NatureCategories.MEDICINES,
-            ).aggregate(total=Sum("expenses__value"))["total"]
-        )
->>>>>>> Stashed changes
-
         expenses_dict = self.__categorize_expenses()
         expenses_dict = self.__convert_decimal_to_brl(expenses_dict)
 

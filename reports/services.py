@@ -20,27 +20,17 @@ from reports.exporters import (
 )
 
 
-<<<<<<< Updated upstream
-def export_pass_on_3(accountability: Accountability, start_date: date, end_date: date):
-=======
 def export_pass_on_1(contract: Contract, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn1PDFExporter(contract).handle()
 
 
-def export_pass_on_3(contract: Contract, start_date: date, end_date: date):
->>>>>>> Stashed changes
+def export_pass_on_3(accountability: Accountability, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn3PDFExporter(contract).handle()
 
 
-<<<<<<< Updated upstream
 def export_pass_on_4(accountability: Accountability, start_date: date, end_date: date):
-=======
-def export_pass_on_4(
-    contract: Contract, start_date: date, end_date: date
-):  # TOcontract: Contract, start_date: date, end_date: dateD -> NoneO
->>>>>>> Stashed changes
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn4PDFExporter(contract).handle()
 
@@ -128,13 +118,8 @@ def export_report(contract: Contract, report_model: str, month: int, year: int):
         return
 
     match report_model:
-<<<<<<< Updated upstream
-        # case "rp_1":
-        #     return export_pass_on_1(accountability, start_date, end_date)
-=======
         case "rp_1":
             return export_pass_on_1(contract, start_date, end_date)
->>>>>>> Stashed changes
 
         # case "rp_2":
         #     return export_pass_on_2(accountability, start_date, end_date)
