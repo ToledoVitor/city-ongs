@@ -6,8 +6,9 @@ from django.db import transaction
 from django.db.models import Q
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from activity.models import ActivityLog
 from contracts.forms import (
@@ -18,11 +19,12 @@ from contracts.forms import (
     ContractItemForm,
     ContractStepFormSet,
     ContractExecutionCreateForm,
-    ContractExecutionActivityCreateForm,
+    ContractExecutionActivityForm,
 )
 from contracts.models import (
     Company,
     Contract,
+    ContractExecutionActivity,
     ContractGoal,
     ContractExecution,
     ContractGoalReview,
@@ -552,7 +554,7 @@ def create_execution_activity_view(request, pk):
 
     execution = get_object_or_404(ContractExecution, id=pk)    
     if request.method == "POST":
-        form = ContractExecutionActivityCreateForm(request.POST, execution=execution)
+        form = ContractExecutionActivityForm(request.POST, execution=execution)
         if form.is_valid():
             with transaction.atomic():
                 activity = form.save(commit=False)
@@ -576,9 +578,49 @@ def create_execution_activity_view(request, pk):
                 {"execution": execution, "form": form},
             )
     else:
-        form = ContractExecutionActivityCreateForm(execution=execution)
+        form = ContractExecutionActivityForm(execution=execution)
         return render(
             request,
             "contracts/execution/activity-create.html",
             {"execution": execution, "form": form},
         )
+
+
+class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
+    model = ContractExecutionActivity
+    form_class = ContractExecutionActivityForm
+    template_name = "contracts/execution/activity-detail.html"
+    context_object_name = "activity"
+
+    login_url = "/auth/login"
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["execution"] = kwargs["instance"].execution
+        return kwargs
+
+    def form_valid(self, form):
+        ActivityLog.objects.create(
+            user=self.request.user,
+            user_email=self.request.user.email,
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
+            target_object_id=form.instance.id,
+            target_content_object=form.instance,
+        )
+
+        return super().form_valid(form)
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().select_related(
+            "activity",
+            "activity__execution",
+            "activity__execution__contract",
+        )
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:executions-detail", kwargs={"pk": self.object.execution.id}
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])

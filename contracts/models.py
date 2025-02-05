@@ -555,6 +555,25 @@ class ContractExecution(BaseModel):
     def __str__(self) -> str:
         return f"Execution {self.month}/{self.year}"
 
+    @property
+    def recent_logs(self):
+        execution_logs = ActivityLog.objects.filter(
+            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_EXECUTION,
+            target_object_id=self.id,
+        )
+
+        activities_ids = [
+            str(id) for id in self.activities.values_list("id", flat=True)[:10]
+        ]
+        activities_logs = ActivityLog.objects.filter(
+            target_object_id__in=activities_ids,
+        )
+
+        combined_querset = (
+            execution_logs
+            | activities_logs
+        ).distinct()
+        return combined_querset.order_by("-created_at")[:10]
 
 class ContractExecutionActivity(BaseModel):
     execution = models.ForeignKey(

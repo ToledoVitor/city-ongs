@@ -8,6 +8,7 @@ from contracts.views import (
     ContractsDetailView,
     ContractsListView,
     ContractExecutionDetailView,
+    ContractExecutionActivityUpdateView,
     create_contract_goal_view,
     create_contract_item_view,
     create_execution_activity_view,
@@ -24,6 +25,11 @@ urlpatterns = [
         "detail/<uuid:pk>/executions/create/",
         create_contract_execution_view,
         name="executions-create",
+    ),
+    path(
+        "activities/<uuid:pk>/",
+        ContractExecutionActivityUpdateView.as_view(),
+        name="activities-detail",
     ),
     path(
         "executions/detail/<uuid:pk>/",

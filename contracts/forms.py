@@ -236,7 +236,7 @@ class ContractExecutionCreateForm(forms.ModelForm):
         self.fields["year"].initial = 2025
 
 
-class ContractExecutionActivityCreateForm(forms.ModelForm):
+class ContractExecutionActivityForm(forms.ModelForm):
     class Meta:
         model = ContractExecutionActivity
         fields = [

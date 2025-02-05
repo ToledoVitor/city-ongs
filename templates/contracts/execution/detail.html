@@ -48,81 +48,235 @@
   </ol>
 </nav>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome da atividade" %}
+<div class="mb-4 mr-10 border-b border-gray-200 dark:border-gray-700">
+  <ul
+    class="flex flex-wrap -mb-px text-sm font-medium text-center"
+    id="default-styled-tab"
+    data-tabs-toggle="#default-styled-tab-content" 
+    data-tabs-active-classes="text-white hover:text-gray-800 rounded-t-lg active bg-blue-600"
+    data-tabs-inactive-classes="dark:border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
+    role="tablist"
+  >
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
-            <tr>
-                <th scope="col" class="px-6 py-3" />
-                <th scope="col" class="px-6 py-3">
-                  Atividade
-                </th>
-                <th scope="col" class="px-6 py-3">
-                  Etapa
-                </th>
-                <th scope="col" class="px-6 py-3" />
-          </tr>
-        </thead>
-        <tbody>
-            {% if execution.activities.count %}
-              {% for activity in execution.activities.all %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
-                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
-                    {% comment %} href="{% url 'accountability:accountability-detail' accountability.id %}" {% endcomment %}
-                    <a
-                      class="ml-4 px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    >
-                      Conferir
-                    </a>
+    <li class="me-2" role="presentation">
+      <button
+        id="activities-tab"
+        class="inline-block p-4 border-b-2 rounded-t-lg"
+        data-tabs-target="#activities"
+        type="button"
+        role="tab"
+        aria-controls="activities"
+        aria-selected="false"
+      >
+        Atividades
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        id="documents-tab"
+        data-tabs-target="#documents"
+        type="button"
+        role="tab"
+        aria-controls="documents"
+        aria-selected="false"
+      >
+        Documentos
+      </button>
+    </li>
+
+
+  </ul>
+</div>
+
+<div class="mr-10" id="default-styled-tab-content">
+  <!-- activities Tab -->
+  <div class="hidden rounded-lg bg-gray-200" id="activities" role="tabpanel" aria-labelledby="activities-tab">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
+                <tr>
+                    <th scope="col" class="px-6 py-3" />
+                    <th scope="col" class="px-6 py-3">
+                      Atividade
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                      Etapa
+                    </th>
+                    <th scope="col" class="px-6 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+                {% if execution.activities.count %}
+                  {% for activity in execution.activities.all %}
+                    <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
+                      <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
+                        <a
+                          href="{% url 'contracts:activities-detail' activity.id %}"
+                          class="ml-4 px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                          Conferir
+                        </a>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                        {{ activity.name }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                        {{ activity.step.name }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-black">
+                        <div class="flex justify-between mb-1">
+                          <span class="text-sm text-black">Progresso:</span>
+                          <span class="text-sm font-bold text-blue-700">{{ activity.percentage }}%</span>
+                        </div>
+                        <div class="w-full rounded-full h-2.5 bg-gray-700">
+                          <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ activity.percentage }}%"></div>
+                        </div>                    
+                      </td>
+                    </tr>
+    
+                  {% endfor %}
+                {% else %}
+                  <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                      Nenhuma atividade cadastrada
+                    </th>
+                    <td class="px-6 py-4">
+                      -
+                    </td>
+                    <td class="px-6 py-4">
+                      -
+                    </td>
+                  </tr>
+                {% endif %}     
+            </tbody>
+        </table>
+      
+        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
+            <a
+                href="{% url 'contracts:execution-items-create' execution.id %}"
+                class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+                Adicionar novo item
+                <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+  </div>
+
+  <!-- documents Tab -->
+  <div class="hidden rounded-lg bg-gray-200" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
+              <tr>
+                  <th scope="col" class="px-6 py-3" />
+                  <th scope="col" class="px-6 py-3">
+                    Atividade
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                    Etapa
+                  </th>
+                  <th scope="col" class="px-6 py-3" />
+            </tr>
+          </thead>
+          <tbody>
+              {% if execution.activities.count %}
+                {% for activity in execution.activities.all %}
+                  <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
+                    <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
+                      <a
+                        href="{% url 'contracts:activities-detail' activity.id %}"
+                        class="ml-4 px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Conferir
+                      </a>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                      {{ activity.name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                      {{ activity.step.name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black">
+                      <div class="flex justify-between mb-1">
+                        <span class="text-sm text-black">Progresso:</span>
+                        <span class="text-sm font-bold text-blue-700">{{ activity.percentage }}%</span>
+                      </div>
+                      <div class="w-full rounded-full h-2.5 bg-gray-700">
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ activity.percentage }}%"></div>
+                      </div>                    
+                    </td>
+                  </tr>
+  
+                {% endfor %}
+              {% else %}
+                <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
+                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                    Nenhuma atividade cadastrada
+                  </th>
+                  <td class="px-6 py-4">
+                    -
                   </td>
-                  <td class="px-6 py-4 text-sm text-black text-left max-w-48">
-                    {{ activity.name }}
-                  </td>
-                  <td class="px-6 py-4 text-sm text-black text-left max-w-48">
-                    {{ activity.step.name }}
-                  </td>
-                  <td class="px-6 py-4 text-sm text-black">
-                    <div class="flex justify-between mb-1">
-                      <span class="text-sm text-black">Progresso:</span>
-                      <span class="text-sm font-bold text-blue-700">{{ activity.percentage }}%</span>
-                    </div>
-                    <div class="w-full rounded-full h-2.5 bg-gray-700">
-                      <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ activity.percentage }}%"></div>
-                    </div>                    
+                  <td class="px-6 py-4">
+                    -
                   </td>
                 </tr>
-
-              {% endfor %}
-            {% else %}
-              <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
-                  Nenhuma atividade cadastrada
-                </th>
-                <td class="px-6 py-4">
-                  -
-                </td>
-                <td class="px-6 py-4">
-                  -
-                </td>
-              </tr>
-            {% endif %}     
-        </tbody>
-    </table>
-  
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
-        <a
-            href="{% url 'contracts:execution-items-create' execution.id %}"
-            class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-            Adicionar novo item
-            <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-            </svg>
-        </a>
+              {% endif %}     
+          </tbody>
+      </table>
+    
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
+          <a
+              href="{% url 'contracts:execution-items-create' execution.id %}"
+              class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+              Adicionar novo item
+              <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+              </svg>
+          </a>
+      </div>
     </div>
-      
+  </div>
 </div>
+
+
+<p class="text-3xl mt-6 font-bold">
+  Histórico de Atualizações
+</p>
+<p id="helper-text-explanation" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+  Apenas as 10 ultimas alterações são exibidas
+</p>
+
+<ol class="ml-4 mt-6 relative border-s border-gray-200 dark:border-gray-700">
+  {% if execution.recent_logs %}
+    {% for log in execution.recent_logs %}
+    <li class="mb-8 ms-6">
+        <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-500 bg-gray-500">
+            <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+            </svg>
+        </span>
+        <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ log.created_at }}</time>
+        <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">{{ log.user_email}} - {{ log.action_label }}</p>
+    </li>
+    {% endfor %}
+  {% else %}
+    <li class="mb-8 ms-6">
+      <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-700 bg-gray-500">
+          <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+          </svg>
+      </span>
+      <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Sem registros recentes</time>
+      <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">-</p>
+    </li>
+  {% endif%}
+</ol>
 
 
 {% endblock %}
