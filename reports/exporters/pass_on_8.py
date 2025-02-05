@@ -493,14 +493,14 @@ class PassOn8PDFExporter:
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="C",
             col_widths=col_widths,
             repeat_headings=0,
         ) as table:
             header = table.row()
             for text in headers:
-                header.cell(text)
+                header.cell(text=text, align="C")
             if table_data != []:
                 self.pdf.set_font("Helvetica", "", 7)
                 for item in table_data:
@@ -533,15 +533,21 @@ class PassOn8PDFExporter:
             text="(7) Energia elétrica, água e esgoto, gás, telefone e internet.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.pdf.ln(5)
+        self.pdf.multi_cell(
+            190,
             text="(8) No rol exemplificativo incluir também as aquisições e os compromissos assumidos que não são classificados contabilmente como DESPESAS, como, por exemplo, aquisição de bens permanentes.",
-            h=self.default_cell_height,
+            h=3,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.pdf.cell(w=190, text="", h=1)  # It works, please do not erase
+        self.pdf.ln()
+        self.pdf.multi_cell(
+            190,
             text="(9) Quando a diferença entre a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO e a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO E PAGAS NESTE EXERCÍCIO for decorrente de descontos obtidos ou pagamento de multa por atraso, o resultado não deve aparecer na coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES, uma vez que tais descontos ou multas são contabilizados em contas de receitas ou despesas. Assim sendo deverá se indicado como nota de rodapé os valores e as respectivas contas de receitas e despesas.",
-            h=self.default_cell_height,
+            h=4,
+            new_x=XPos.LMARGIN,
         )
         self.pdf.ln(7)
         self.pdf.cell(
@@ -566,7 +572,7 @@ class PassOn8PDFExporter:
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
-                "R$R$ 38.343,81",
+                "R$ 38.343,81",
             ],
             [
                 "(J) DESPESAS PAGAS NO EXERCÍCIO (H+I)",

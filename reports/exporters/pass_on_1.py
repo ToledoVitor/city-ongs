@@ -1,10 +1,12 @@
+import copy
 from dataclasses import dataclass
-from datetime import datetime
+from decimal import Decimal
 
-from django.db.models import Sum
+from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
+from accountability.models import Expense
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency
@@ -15,14 +17,16 @@ class PassOn1PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract):
+    def __init__(self, accountability, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.contract = contract
+        self.accountability = accountability
+        self.start_date = start_date
+        self.end_date = end_date
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -163,7 +167,6 @@ class PassOn1PDFExporter:
         self.pdf.multi_cell(
             0,
             0,
-            # f"RESPONSÁVEL:** {self.contract.supervision_autority.get_full_name()}, {self.contract.supervision_autority.position} e assinatura**",  # TODO acho que é estático
             f"**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
             new_x=XPos.LMARGIN,

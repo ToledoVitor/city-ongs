@@ -1,10 +1,15 @@
+import copy
 from dataclasses import dataclass
-from datetime import datetime
+from decimal import Decimal
 
+from django.db.models import Q
 from fpdf import XPos, YPos
+from fpdf.fonts import FontFace
 
+from accountability.models import Expense
+from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import document_mask
+from utils.formats import document_mask, format_into_brazilian_currency
 
 
 @dataclass
@@ -12,13 +17,16 @@ class PassOn9PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract):
+    def __init__(self, accountability, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
+        pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.contract = contract
+        self.accountability = accountability
+        self.start_date = start_date
+        self.end_date = end_date
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -63,37 +71,37 @@ class PassOn9PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.contract.organization.city_hall.name}",
+            text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.contract.organization.name}",
+            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.accountability.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.contract.name}",
+            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.accountability.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**OBJETO:** {self.contract.objective}",
+            text=f"**OBJETO:** {self.accountability.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** R$ {self.contract.total_value_with_point}",
+            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** R$ {self.accountability.contract.total_value_with_point}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        start = self.contract.start_of_vigency
-        end = self.contract.end_of_vigency
+        start = self.accountability.contract.start_of_vigency
+        end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
             text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
@@ -175,19 +183,21 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.organization.city_hall.mayor}",
+            text=f"Nome: {self.accountability.contract.organization.city_hall.mayor}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.organization.city_hall.position}",
+            text=f"Cargo: {self.accountability.contract.organization.city_hall.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.city_hall.document)),
+            text=document_mask(
+                str(self.accountability.contract.organization.city_hall.document)
+            ),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -201,19 +211,21 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.organization.owner}",
+            text=f"Nome: {self.accountability.contract.organization.owner}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.organization.position}",
+            text=f"Cargo: {self.accountability.contract.organization.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document)),  # TODO
+            text=document_mask(
+                str(self.accountability.contract.organization.document)
+            ),  # TODO
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -232,19 +244,21 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.supervision_autority.get_full_name()}",
+            text=f"Nome: {self.accountability.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.supervision_autority.position}",
+            text=f"Cargo: {self.accountability.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.supervision_autority.cpf)),
+            text=document_mask(
+                str(self.accountability.contract.supervision_autority.cpf)
+            ),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -263,19 +277,21 @@ class PassOn9PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.accountability_autority.get_full_name()}",
+            text=f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.accountability_autority.position}",
+            text=f"Cargo: {self.accountability.contract.accountability_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.accountability_autority.cpf)),
+            text=document_mask(
+                str(self.accountability.contract.accountability_autority.cpf)
+            ),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)

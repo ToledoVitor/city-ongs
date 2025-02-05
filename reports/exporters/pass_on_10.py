@@ -1,9 +1,16 @@
+import copy
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 
+from django.db.models import Q
 from fpdf import XPos, YPos
+from fpdf.fonts import FontFace
 
+from accountability.models import Expense
+from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
+from utils.formats import format_into_brazilian_currency
 
 
 @dataclass
@@ -11,14 +18,16 @@ class PassOn10PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract):
+    def __init__(self, accountability, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.contract = contract
+        self.accountability = accountability
+        self.start_date = start_date
+        self.end_date = end_date
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -63,24 +72,24 @@ class PassOn10PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text=f"**Órgão Público:** {self.contract.organization.city_hall.name}",
+            text=f"**Órgão Público:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Organização da Sociedade Civil:** {self.contract.organization.name}",
+            text=f"**Organização da Sociedade Civil:** {self.accountability.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
+            text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        hired_company = self.contract.hired_company
+        hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
@@ -118,13 +127,13 @@ class PassOn10PDFExporter:
         self.pdf.ln(3)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"**Objeto da Parceria:** {self.contract.objective}",
+            text=f"**Objeto da Parceria:** {self.accountability.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        start = self.contract.start_of_vigency
-        end = self.contract.end_of_vigency
+        start = self.accountability.contract.start_of_vigency
+        end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
             text=f"**Exercício:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,

@@ -1,9 +1,15 @@
+import copy
 from dataclasses import dataclass
+from decimal import Decimal
 
+from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
+from accountability.models import Expense
+from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
+from utils.formats import format_into_brazilian_currency
 
 
 @dataclass
@@ -11,14 +17,16 @@ class PassOn6PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract):
+    def __init__(self, accountability, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.contract = contract
+        self.accountability = accountability
+        self.start_date = start_date
+        self.end_date = end_date
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -59,24 +67,24 @@ class PassOn6PDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text=f"**Contratante:** {self.contract.organization.city_hall.name}",
+            text=f"**Contratante:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Contratada:** {self.contract.organization.name}",
+            text=f"**Contratada:** {self.accountability.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
+            text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        hired_company = self.contract.hired_company
+        hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
@@ -85,7 +93,7 @@ class PassOn6PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Responsáveis pela Organização Social:** {self.contract.hired_manager.name}",
+            text=f"**Responsáveis pela Organização Social:** {self.accountability.contract.hired_manager.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -114,7 +122,7 @@ class PassOn6PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.multi_cell(
-            text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
+            text=f"**Objeto do Contrato de Gestão:** {self.accountability.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -122,8 +130,8 @@ class PassOn6PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        start = self.contract.start_of_vigency
-        end = self.contract.end_of_vigency
+        start = self.accountability.contract.start_of_vigency
+        end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
             text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
@@ -377,104 +385,107 @@ class PassOn6PDFExporter:
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
+        expenses_dict = self.__categorize_expenses()
+        expenses_dict = self.__convert_decimal_to_brl(expenses_dict)
+
         table_data = [
             [
                 "Bens e Materiais permanentes",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["PERMANENT_GOODS"]["accounted_on"],
+                expenses_dict["PERMANENT_GOODS"]["not_accounted"],
+                expenses_dict["PERMANENT_GOODS"]["accounted_and_paid"],
+                expenses_dict["PERMANENT_GOODS"]["paid_on"],
+                expenses_dict["PERMANENT_GOODS"]["not_paid"],
             ],
             [
                 "Combustível",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["FUEL"]["accounted_on"],
+                expenses_dict["FUEL"]["not_accounted"],
+                expenses_dict["FUEL"]["accounted_and_paid"],
+                expenses_dict["FUEL"]["paid_on"],
+                expenses_dict["FUEL"]["not_paid"],
             ],
             [
                 "Despesas financeiras e bancárias",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_on"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["not_accounted"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_and_paid"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["paid_on"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["not_paid"],
             ],
             [
                 "Gêneros Alimentícios",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["FOODSTUFFS"]["accounted_on"],
+                expenses_dict["FOODSTUFFS"]["not_accounted"],
+                expenses_dict["FOODSTUFFS"]["accounted_and_paid"],
+                expenses_dict["FOODSTUFFS"]["paid_on"],
+                expenses_dict["FOODSTUFFS"]["not_paid"],
             ],
             [
                 "Locação de Imóveis",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["REAL_STATE"]["accounted_on"],
+                expenses_dict["REAL_STATE"]["not_accounted"],
+                expenses_dict["REAL_STATE"]["accounted_and_paid"],
+                expenses_dict["REAL_STATE"]["paid_on"],
+                expenses_dict["REAL_STATE"]["not_paid"],
             ],
             [
                 "Locações Diversas",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["MISCELLANEOUS"]["accounted_on"],
+                expenses_dict["MISCELLANEOUS"]["not_accounted"],
+                expenses_dict["MISCELLANEOUS"]["accounted_and_paid"],
+                expenses_dict["MISCELLANEOUS"]["paid_on"],
+                expenses_dict["MISCELLANEOUS"]["not_paid"],
             ],
             [
                 "Material Médico e Hospitalar",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_on"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_accounted"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_and_paid"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["paid_on"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_paid"],
             ],
             [
                 "Medicamentos",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["MEDICINES"]["accounted_on"],
+                expenses_dict["MEDICINES"]["not_accounted"],
+                expenses_dict["MEDICINES"]["accounted_and_paid"],
+                expenses_dict["MEDICINES"]["paid_on"],
+                expenses_dict["MEDICINES"]["not_paid"],
             ],
             [
                 "Obras",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["WORKS"]["accounted_on"],
+                expenses_dict["WORKS"]["not_accounted"],
+                expenses_dict["WORKS"]["accounted_and_paid"],
+                expenses_dict["WORKS"]["paid_on"],
+                expenses_dict["WORKS"]["not_paid"],
             ],
             [
                 "Outras despesas",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["OTHER_EXPENSES"]["accounted_on"],
+                expenses_dict["OTHER_EXPENSES"]["not_accounted"],
+                expenses_dict["OTHER_EXPENSES"]["accounted_and_paid"],
+                expenses_dict["OTHER_EXPENSES"]["paid_on"],
+                expenses_dict["OTHER_EXPENSES"]["not_paid"],
             ],
             [
                 "Outros Materiais de Consumo",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
-                "R$0,00",
+                expenses_dict["OTHER_CONSUMABLES"]["accounted_on"],
+                expenses_dict["OTHER_CONSUMABLES"]["not_accounted"],
+                expenses_dict["OTHER_CONSUMABLES"]["accounted_and_paid"],
+                expenses_dict["OTHER_CONSUMABLES"]["paid_on"],
+                expenses_dict["OTHER_CONSUMABLES"]["not_paid"],
             ],
         ]
 
         line_total = [
             "Total",
-            "R$0,00",
-            "R$0,00",
-            "R$0,00",
-            "R$0,00",
-            "R$0,00",
+            expenses_dict["TOTAL"]["accounted_on"],
+            expenses_dict["TOTAL"]["not_accounted"],
+            expenses_dict["TOTAL"]["accounted_and_paid"],
+            expenses_dict["TOTAL"]["paid_on"],
+            expenses_dict["TOTAL"]["not_paid"],
         ]
 
         col_widths = [40, 30, 30, 30, 30, 30]  # Total: 190
@@ -482,15 +493,14 @@ class PassOn6PDFExporter:
         (self.pdf.set_fill_color(255, 255, 255),)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
             col_widths=col_widths,
             repeat_headings=0,
-            v_align="M",
         ) as table:
             header = table.row()
             for text in headers:
-                header.cell(text)
+                header.cell(text=text, align="C")
             if table_data != []:
                 self.pdf.set_font("Helvetica", "", 7)
                 for item in table_data:
@@ -523,15 +533,21 @@ class PassOn6PDFExporter:
             text="(7) Energia elétrica, água e esgoto, gás, telefone e internet.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.pdf.ln(5)
+        self.pdf.multi_cell(
+            190,
             text="(8) No rol exemplificativo incluir também as aquisições e os compromissos assumidos que não são classificados contabilmente como DESPESAS, como, por exemplo, aquisição de bens permanentes.",
-            h=self.default_cell_height,
+            h=3,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.pdf.cell(w=190, text="", h=1)  # It works, please do not erase
+        self.pdf.ln()
+        self.pdf.multi_cell(
+            190,
             text="(9) Quando a diferença entre a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO e a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO E PAGAS NESTE EXERCÍCIO for decorrente de descontos obtidos ou pagamento de multa por atraso, o resultado não deve aparecer na coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES, uma vez que tais descontos ou multas são contabilizados em contas de receitas ou despesas. Assim sendo deverá se indicado como nota de rodapé os valores e as respectivas contas de receitas e despesas.",
-            h=self.default_cell_height,
+            h=4,
+            new_x=XPos.LMARGIN,
         )
         self.pdf.ln(7)
         self.pdf.cell(
@@ -610,3 +626,120 @@ class PassOn6PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(7)
+
+    def __categorize_expenses(self) -> dict:
+        expenses = Expense.objects.filter(
+            Q(accountability=self.accountability)
+            | Q(item__contract=self.accountability.contract)
+        )
+
+        base_empty_dict = {
+            "accounted_on": Decimal(0.00),
+            "not_accounted": Decimal(0.00),
+            "accounted_and_paid": Decimal(0.00),
+            "paid_on": Decimal(0.00),
+            "not_paid": Decimal(0.00),
+        }
+        categorized_expenses = {
+            "PERMANENT_GOODS": copy.deepcopy(base_empty_dict),
+            "FUEL": copy.deepcopy(base_empty_dict),
+            "FINANCIAL_AND_BANKING": copy.deepcopy(base_empty_dict),
+            "FOODSTUFFS": copy.deepcopy(base_empty_dict),
+            "REAL_STATE": copy.deepcopy(base_empty_dict),
+            "MISCELLANEOUS": copy.deepcopy(base_empty_dict),
+            "MEDICAL_AND_HOSPITAL": copy.deepcopy(base_empty_dict),
+            "MEDICINES": copy.deepcopy(base_empty_dict),
+            "WORKS": copy.deepcopy(base_empty_dict),
+            "OTHER_EXPENSES": copy.deepcopy(base_empty_dict),
+            "OTHER_CONSUMABLES": copy.deepcopy(base_empty_dict),
+            "TOTAL": copy.deepcopy(base_empty_dict),
+        }
+
+        for expense in expenses:
+            expense_category = self.__get_expense_nature_category(expense=expense)
+            if not expense_category:
+                continue
+
+            accounted_on_period = (
+                expense.competency
+                and self.start_date.date() < expense.competency < self.end_date.date()
+            )
+            paid_on_period = (
+                expense.due_date
+                and self.start_date.date() < expense.due_date < self.end_date.date()
+            )
+
+            if paid_on_period and accounted_on_period:
+                categorized_expenses[expense_category]["accounted_and_paid"] += (
+                    expense.value
+                )
+                categorized_expenses[expense_category]["accounted_on"] += expense.value
+                categorized_expenses[expense_category]["paid_on"] += expense.value
+
+                categorized_expenses["TOTAL"]["accounted_and_paid"] += expense.value
+                categorized_expenses["TOTAL"]["paid_on"] += expense.value
+                categorized_expenses["TOTAL"]["accounted_on"] += expense.value
+
+            elif paid_on_period and not accounted_on_period:
+                categorized_expenses[expense_category]["not_accounted"] += expense.value
+                categorized_expenses[expense_category]["paid_on"] += expense.value
+
+                categorized_expenses["TOTAL"]["not_accounted"] += expense.value
+                categorized_expenses["TOTAL"]["paid_on"] += expense.value
+
+            elif not paid_on_period and accounted_on_period:
+                categorized_expenses[expense_category]["not_paid"] += expense.value
+                categorized_expenses[expense_category]["accounted_on"] += expense.value
+
+                categorized_expenses["TOTAL"]["accounted_on"] += expense.value
+                categorized_expenses["TOTAL"]["not_paid"] += expense.value
+
+        return categorized_expenses
+
+    def __get_expense_nature_category(self, expense: Expense):
+        if not expense.nature:
+            return None
+
+        if expense.nature in NatureCategories.PERMANENT_GOODS:
+            return "PERMANENT_GOODS"
+
+        if expense.nature in NatureCategories.FUEL:
+            return "FUEL"
+
+        if expense.nature in NatureCategories.FINANCIAL_AND_BANKING:
+            return "FINANCIAL_AND_BANKING"
+
+        if expense.nature in NatureCategories.FOODSTUFFS:
+            return "FOODSTUFFS"
+
+        if expense.nature in NatureCategories.REAL_STATE:
+            return "REAL_STATE"
+
+        if expense.nature in NatureCategories.MISCELLANEOUS:
+            return "MISCELLANEOUS"
+
+        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
+            return "MEDICAL_AND_HOSPITAL"
+
+        if expense.nature in NatureCategories.MEDICINES:
+            return "MEDICINES"
+
+        if expense.nature in NatureCategories.WORKS:
+            return "WORKS"
+
+        if expense.nature in NatureCategories.OTHER_EXPENSES:
+            return "OTHER_EXPENSES"
+
+        if expense.nature in NatureCategories.OTHER_CONSUMABLES:
+            return "OTHER_CONSUMABLES"
+
+        return None
+
+    def __convert_decimal_to_brl(self, expenses_dict):
+        for key, value in expenses_dict.items():
+            if isinstance(value, Decimal):
+                expenses_dict[key] = format_into_brazilian_currency(value)
+            elif isinstance(value, dict):
+                self.__convert_decimal_to_brl(value)
+
+        return expenses_dict

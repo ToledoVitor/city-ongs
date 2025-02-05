@@ -22,38 +22,59 @@ from reports.exporters import (
 
 
 def export_pass_on_1(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn1PDFExporter(contract).handle()
+    return PassOn1PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
-def export_pass_on_2(contract: Contract, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn2PDFExporter(contract).handle()
+def export_pass_on_2(accountability: Accountability, start_date: date, end_date: date):
+    return PassOn2PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_3(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn3PDFExporter(contract).handle()
+    return PassOn3PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_4(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn4PDFExporter(contract).handle()
+    return PassOn4PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_5(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn5PDFExporter(contract).handle()
+    return PassOn5PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_6(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn6PDFExporter(contract).handle()
+    return PassOn6PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_7(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn7PDFExporter(contract).handle()
+    return PassOn7PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_8(accountability: Accountability, start_date: date, end_date: date):
@@ -65,33 +86,51 @@ def export_pass_on_8(accountability: Accountability, start_date: date, end_date:
 
 
 def export_pass_on_9(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn9PDFExporter(contract).handle()
+    return PassOn9PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_10(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn10PDFExporter(contract).handle()
+    return PassOn10PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_11(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn11PDFExporter(contract).handle()
+    return PassOn11PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_12(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn12PDFExporter(contract).handle()
+    return PassOn12PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_13(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn13PDFExporter(contract).handle()
+    return PassOn13PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def export_pass_on_14(accountability: Accountability, start_date: date, end_date: date):
-    contract = Contract.objects.first()  # get(id=contract_id)
-    return PassOn14PDFExporter(contract).handle()
+    return PassOn14PDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def _get_start_end_date(month: int, year: int):
@@ -117,6 +156,7 @@ def get_accountability(contract: Contract, month: int, year: int):
         )
         .first()
     )
+
 
 def export_report(accountability: Accountability, report_model: str):
     start_date, end_date = _get_start_end_date(
