@@ -16,11 +16,13 @@ from contracts.forms import (
     ContractGoalForm,
     ContractItemForm,
     ContractStepFormSet,
+    ContractExecutionCreateForm,
 )
 from contracts.models import (
     Company,
     Contract,
     ContractGoal,
+    ContractExecution,
     ContractGoalReview,
     ContractItem,
     ContractItemReview,
@@ -475,3 +477,48 @@ class ContractItemDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         return context
+
+
+def create_contract_execution_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if request.method == "POST":
+        form = ContractExecutionCreateForm(request.POST)
+        if form.is_valid():
+            execution_exists = ContractExecution.objects.filter(
+                contract=contract,
+                month=form.cleaned_data["month"],
+                year=form.cleaned_data["year"],
+            ).exists()
+            if execution_exists:
+                return render(
+                    request,
+                    "contracts/execution/create.html",
+                    {"contract": contract, "form": form, "execution_exists": execution_exists},
+                )
+
+            with transaction.atomic():
+                execution = ContractExecution.objects.create(
+                    contract=contract,
+                    month=form.cleaned_data["month"],
+                    year=form.cleaned_data["year"],
+                )
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_EXECUTION,
+                    target_object_id=execution.id,
+                    target_content_object=execution,
+                )
+            return redirect(
+                "contracts:execution-detail", pk=execution.id
+            )
+    else:
+        form = ContractExecutionCreateForm()
+        return render(
+            request,
+            "contracts/execution/create.html",
+            {"contract": contract, "form": form},
+        )

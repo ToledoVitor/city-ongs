@@ -11,12 +11,18 @@ from contracts.views import (
     create_contract_item_view,
     update_contract_goal_view,
     update_contract_item_view,
+    create_contract_execution_view,
 )
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
     path("create/", ContractCreateView.as_view(), name="contracts-create"),
     path("detail/<uuid:pk>/", ContractsDetailView.as_view(), name="contracts-detail"),
+    path(
+        "detail/<uuid:pk>/executions/create/",
+        create_contract_execution_view,
+        name="executions-create",
+    ),
     path(
         "detail/<uuid:pk>/items/create/",
         create_contract_item_view,

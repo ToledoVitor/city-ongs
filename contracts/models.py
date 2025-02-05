@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
@@ -7,7 +10,7 @@ from accounts.models import Area, Organization, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
-from utils.choices import StatesChoices, StatusChoices
+from utils.choices import StatesChoices, StatusChoices, MonthChoices
 from utils.models import BaseModel
 
 
@@ -525,3 +528,77 @@ class ContractItemReview(BaseModel):
     class Meta:
         verbose_name = "Revisão de Item"
         verbose_name_plural = "Revisões de Itens"
+
+
+class ContractExecution(BaseModel):
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Execução",
+        related_name="executions",
+        on_delete=models.CASCADE,
+    )
+    month = models.IntegerField(
+        verbose_name="Mês",
+        choices=MonthChoices,
+        default=MonthChoices.JAN,
+    )
+    year = models.IntegerField(
+        verbose_name="Ano",
+        default=0,
+    )
+
+    class Meta:
+        verbose_name = "Relatório de Execução"
+        verbose_name_plural = "Relatórios de Execução"
+        unique_together = ("contract", "month", "year")
+
+    def __str__(self) -> str:
+        return f"Execution {self.month}/{self.year}"
+
+
+class ContractExecutionActivity(BaseModel):
+    execution = models.ForeignKey(
+        ContractExecution,
+        verbose_name="Relatório de Execução",
+        related_name="activities",
+        on_delete=models.CASCADE,
+    )
+    step = models.ForeignKey(
+        ContractStep,
+        verbose_name="Etapa",
+        related_name="activities",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=32,
+    )
+    completion = models.DecimalField(
+        max_digits=3,
+        decimal_places=0,
+        default=Decimal(0),
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(100),
+        ],
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = "Atividade Executada"
+        verbose_name_plural = "Atividades Executadas"
+
+
+class ContractExecutionFile(BaseModel):
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contracts/executions",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Arquivo de Atividade"
+        verbose_name_plural = "Arquivos de Atividades"

@@ -1,7 +1,7 @@
 from django import forms
 
 from accounts.models import User
-from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep
+from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep, ContractExecution
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
@@ -216,3 +216,21 @@ class CompanyCreateForm(forms.ModelForm):
             "uf": BaseSelectFormWidget(),
             "postal_code": BaseCharFieldFormWidget(),
         }
+
+
+class ContractExecutionCreateForm(forms.ModelForm):
+    class Meta:
+        model = ContractExecution
+        fields = [
+            "month",
+            "year",
+        ]
+
+        widgets = {
+            "month": BaseSelectFormWidget(),
+            "year": BaseNumberFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["year"].initial = 2025

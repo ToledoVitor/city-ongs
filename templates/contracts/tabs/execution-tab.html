@@ -1,0 +1,94 @@
+{% load humanize %}
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
+            <tr>
+                <th scope="col" class="px-6 py-3" />
+                <th scope="col" class="px-6 py-3">
+                    Item
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Status
+                </th>
+          </tr>
+        </thead>
+        <tbody>
+            {% if contract.executions.count %}
+              {% for execution in contract.executions.all %}
+                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
+                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
+                    Botao
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black max-w-48">
+                    {{ execution }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    {% if execution.status == "ANALYZING" %}
+                      <span
+                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                      >
+                        Em análise
+                      </span>
+                    {% elif execution.status == "CORRECTING" %}
+                      <span
+                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Em correção
+                      </span>
+                    {% elif execution.status == "APPROVED" %}
+                      <span
+                        class="bg-gray-100 whitespace-nowrap text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Aprovado
+                      </span>
+                    {% elif execution.status == "APPROVED_WITH_PENDENCE" %}
+                      <span
+                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Pendências
+                      </span>
+                    {% elif execution.status == "REJECTED" %}
+                      <span
+                        class="bg-red-100 whitespace-nowrap text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                      >
+                        Rejeitado
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+
+              {% endfor %}
+            {% else %}
+              <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+                  Nenhum relatório de execução iniciado
+                </th>
+                <td class="px-6 py-4">
+                  -
+                </td>
+                <td class="px-6 py-4">
+                  -
+                </td>
+              </tr>
+            {% endif %}     
+        </tbody>
+    </table>
+  
+    {% if user.has_admin_access %}
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
+        <a
+          href="{% url 'contracts:executions-create' contract.id %}"
+          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Adicionar novo item
+          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+      
+</div>
