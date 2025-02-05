@@ -40,7 +40,6 @@ class PassOn1PDFExporter:
         return self.pdf
 
     def _draw_header(self):
-        # Cabeçalho e títulos
         self.__set_helvetica_font(font_size=9, bold=True)
         self.pdf.multi_cell(
             0,
@@ -164,7 +163,8 @@ class PassOn1PDFExporter:
         self.pdf.multi_cell(
             0,
             0,
-            f"RESPONSÁVEL:** {self.contract.supervision_autority.get_full_name()}, {self.contract.supervision_autority.position} e assinatura**",  # TODO
+            # f"RESPONSÁVEL:** {self.contract.supervision_autority.get_full_name()}, {self.contract.supervision_autority.position} e assinatura**",  # TODO acho que é estático
+            f"**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,

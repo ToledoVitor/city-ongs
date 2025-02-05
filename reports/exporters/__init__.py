@@ -1,5 +1,6 @@
 from .contract_progress import ContractProgressPDFExporter
 from .pass_on_1 import PassOn1PDFExporter
+from .pass_on_2 import PassOn2PDFExporter
 from .pass_on_3 import PassOn3PDFExporter
 from .pass_on_4 import PassOn4PDFExporter
 from .pass_on_5 import PassOn5PDFExporter
@@ -16,6 +17,7 @@ from .pass_on_14 import PassOn14PDFExporter
 __all__ = [
     "ContractProgressPDFExporter",
     "PassOn1PDFExporter",
+    "PassOn2PDFExporter",
     "PassOn3PDFExporter",
     "PassOn4PDFExporter",
     "PassOn5PDFExporter",

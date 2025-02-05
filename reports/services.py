@@ -5,6 +5,7 @@ from accountability.models import Accountability
 from contracts.models import Contract
 from reports.exporters import (
     PassOn1PDFExporter,
+    PassOn2PDFExporter,
     PassOn3PDFExporter,
     PassOn4PDFExporter,
     PassOn5PDFExporter,
@@ -23,6 +24,11 @@ from reports.exporters import (
 def export_pass_on_1(accountability: Accountability, start_date: date, end_date: date):
     contract = Contract.objects.first()  # get(id=contract_id)
     return PassOn1PDFExporter(contract).handle()
+
+
+def export_pass_on_2(contract: Contract, start_date: date, end_date: date):
+    contract = Contract.objects.first()  # get(id=contract_id)
+    return PassOn2PDFExporter(contract).handle()
 
 
 def export_pass_on_3(accountability: Accountability, start_date: date, end_date: date):
@@ -122,8 +128,8 @@ def export_report(accountability: Accountability, report_model: str):
         case "rp_1":
             return export_pass_on_1(accountability, start_date, end_date)
 
-        # case "rp_2":
-        #     return export_pass_on_2(accountability, start_date, end_date)
+        case "rp_2":
+            return export_pass_on_2(accountability, start_date, end_date)
 
         case "rp_3":
             return export_pass_on_3(accountability, start_date, end_date)
