@@ -163,10 +163,35 @@
       </div>
     </div>
 
+        
+    <div class="my-3">
+      <div class="grid gap-6 mb-6 md:grid-cols-2">
+        <div class="relative">
+          <label
+              for="id_quantity"
+              class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+          >
+            Quantidade
+          </label>
+          {{ form.quantity}}
+        </div>
+  
+        <div class="relative">
+          <label
+              for="id_unit_type"
+              class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
+          >
+            Unidade <span class="text-gray-400">(und., kg, litros, ...)</span>
+          </label>
+          {{ form.unit_type}}
+        </div>
+      </div>
+    </div>
+
     <div>
       <div class="grid gap-6 mb-6 md:grid-cols-2">
         <div class="relative">
-          <label for="id_month_expense" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gasto Mensal</label>
+          <label for="id_month_expense" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Gasto Mensal por Unidade</label>
           <div class="relative w-full">
             <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
               <svg class="w-4 h-4 text-gray-900 dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
@@ -209,14 +234,6 @@
     <p id="helper-text-explanation" class="mb-4 text-sm text-gray-500 dark:text-gray-400">
       Escreva somente os números, sem o R$, seperados por vírgula
     </p>
-    
-    <label
-        for="id_unit_type"
-        class="block mb-2 text-base font-medium text-gray-900 dark:text-black"
-    >
-      Unidade <span class="text-gray-400">(und., kg, litros, ...)</span>
-    </label>
-    {{ form.unit_type}}
 
     <hr class="h-px my-4 border-0 bg-gray-500">
 

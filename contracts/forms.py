@@ -19,6 +19,7 @@ class ContractCreateForm(forms.ModelForm):
         model = Contract
         fields = [
             "name",
+            "concession_type",
             "bidding",
             "objective",
             "total_value",
@@ -36,6 +37,7 @@ class ContractCreateForm(forms.ModelForm):
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
+            "concession_type": BaseCharFieldFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
             "contractor_company": BaseSelectFormWidget(
@@ -100,6 +102,7 @@ class ContractItemForm(forms.ModelForm):
             "objective",
             "methodology",
             "observations",
+            "quantity",
             "month_quantity",
             "month_expense",
             "anual_expense",
@@ -115,6 +118,7 @@ class ContractItemForm(forms.ModelForm):
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
             "observations": BaseTextAreaFormWidget(),
+            "quantity": BaseNumberFormWidget(),
             "month_quantity": BaseNumberFormWidget(),
             "unit_type": BaseCharFieldFormWidget(),
             "nature": BaseSelectFormWidget(),

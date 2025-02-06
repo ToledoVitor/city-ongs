@@ -86,6 +86,13 @@ class Contract(BaseModel):
 
     # Specifications
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
+    concession_type = models.CharField(
+        # TODO: remove null
+        verbose_name="Tipo de Concessão",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
     code = models.CharField(
         verbose_name="Código do contrato",
         max_length=16,
@@ -437,7 +444,7 @@ class ContractItem(BaseModel):
         verbose_name="Quantidade de Meses",
     )
     month_expense = models.DecimalField(
-        verbose_name="Custo Mensal",
+        verbose_name="Custo Mensal Unitário",
         decimal_places=2,
         max_digits=12,
     )
@@ -447,6 +454,10 @@ class ContractItem(BaseModel):
         max_digits=12,
         null=True,
         blank=True,
+    )
+    quantity = models.PositiveIntegerField(
+        verbose_name="Quantidade",
+        default=1,
     )
     unit_type = models.CharField(
         verbose_name="Tipo da Unidade",
