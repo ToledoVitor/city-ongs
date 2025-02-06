@@ -73,7 +73,24 @@
   <div class="mb-3 flex justify-between">
     <label for="id_identification" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Despesa Planejada:</label>
     <div class="flex items-center">
-      <input checked id="checkbox" type="checkbox" value="" name="planned" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+      <input
+        checked
+        id="checkbox"
+        type="checkbox"
+        value="true"
+        name="planned"
+        class="
+          w-4
+          h-4
+          text-blue-600
+          rounded-sm
+          focus:ring-blue-600
+          ring-offset-gray-800
+          focus:ring-2
+          bg-gray-700
+          border-gray-600
+        "
+      >
       <label for="checkbox" class="ms-2 text-sm font-medium text-dark">Planejada</label>
     </div>
   </div>
@@ -134,6 +151,7 @@
               </svg>
             </div>
             <input 
+                required
                 datepicker
                 datepicker-format="dd/mm/yyyy"
                 id="id_competency"
@@ -152,7 +170,8 @@
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
             </div>
-            <input 
+            <input
+                required
                 datepicker
                 datepicker-format="dd/mm/yyyy"
                 id="id_due_date"
@@ -173,7 +192,12 @@
 
   <hr class="h-px my-4 border-0 bg-gray-500">
 
-  <label class="block mb-2 text-2xl font-bold text-black">Documento</label>
+  <div class="flex justify-between">
+    <label class="block text-2xl font-bold text-black">
+      Documento
+    </label>
+    <span class="text-lg text-gray-400">(opcional)</span>
+  </div>
 
   <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">

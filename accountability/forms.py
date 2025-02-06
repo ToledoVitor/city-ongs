@@ -65,6 +65,7 @@ class ExpenseForm(forms.ModelForm):
             "liquidation_form",
             "document_type",
             "document_number",
+            "planned",
         ]
 
         widgets = {
@@ -73,11 +74,11 @@ class ExpenseForm(forms.ModelForm):
             "value": BaseNumberFormWidget(),
             "source": BaseSelectFormWidget(required=False),
             "favored": BaseSelectFormWidget(required=False),
-            "item": BaseSelectFormWidget(),
-            "nature": BaseSelectFormWidget(),
+            "item": BaseSelectFormWidget(required=False),
+            "nature": BaseSelectFormWidget(required=False),
             "liquidation_form": BaseSelectFormWidget(),
-            "document_type": BaseSelectFormWidget(),
-            "document_number": BaseCharFieldFormWidget(),
+            "document_type": BaseSelectFormWidget(required=False),
+            "document_number": BaseCharFieldFormWidget(required=False),
         }
 
     def __init__(self, *args, **kwargs):
@@ -100,6 +101,27 @@ class ExpenseForm(forms.ModelForm):
             self.fields["item"].queryset = self.accountability.contract.items.all()
         else:
             self.fields["item"].queryset = ContractItem.objects.none()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        planned = cleaned_data["planned"]
+
+        if planned and not cleaned_data["item"]:
+            raise forms.ValidationError(
+                "As despesas planejadas devem estar relacionadas com um item de"
+                " aquisição do contrato."
+            )
+        elif not planned and cleaned_data["item"]:
+            raise forms.ValidationError(
+                "As despesas não planejadas não podem estar relacionadas com um item de"
+                " aquisição do contrato."
+            )
+        elif not planned and not cleaned_data["nature"]:
+            raise forms.ValidationError(
+                "As despesas não planejadas precisam ter uma natureza da despesa."
+            )
+
+        return cleaned_data
 
 
 class RevenueForm(forms.ModelForm):

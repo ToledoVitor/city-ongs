@@ -7,11 +7,6 @@
         <div>
             <span class="font-medium">Erro ao criar objeto</span>
             <ul class="my-1.5 list-disc list-inside">
-                {% comment %} {% for field in form %}
-                    {% if field.errors %}
-                    <li class="my-1"><b>{{ field.label }}</b>: {{ field.errors }}</li>
-                    {% endif %}
-                {% endfor %} {% endcomment %}
                 {% for field, errors in form.errors.items %}
                     {% for error in errors %}
                         <li>{{ field }} - {{ error }}</li>
