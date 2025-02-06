@@ -1,7 +1,7 @@
 from django import forms
 
 from accounts.models import User
-from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep, ContractExecution, ContractExecutionActivity
+from contracts.models import Company, Contract, ContractGoal, ContractItem, ContractStep, ContractExecution, ContractExecutionActivity, ContractExecutionFile
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
@@ -260,3 +260,17 @@ class ContractExecutionActivityForm(forms.ModelForm):
             self.fields["step"].queryset = ContractStep.objects.filter(goal__contract=self.execution.contract)
         else:
             self.fields["step"].queryset = ContractExecution.objects.none()
+
+
+class ContractExecutionFileForm(forms.ModelForm):
+    class Meta:
+        model = ContractExecutionFile
+        fields = [
+            "name",
+            "file",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "file": BaseFileFormWidget(),
+        }

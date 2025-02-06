@@ -20,6 +20,7 @@ from contracts.forms import (
     ContractStepFormSet,
     ContractExecutionCreateForm,
     ContractExecutionActivityForm,
+    ContractExecutionFileForm,
 )
 from contracts.models import (
     Company,
@@ -30,6 +31,7 @@ from contracts.models import (
     ContractGoalReview,
     ContractItem,
     ContractItemReview,
+    ContractExecutionFile
 )
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -537,7 +539,9 @@ class ContractExecutionDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return super().get_queryset().prefetch_related(
-            "activities", "activities__step",
+            "activities",
+            "activities__step",
+            "files",
         )
 
     def get_object(self, queryset=None):
@@ -624,3 +628,44 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
+    
+
+def create_execution_file_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    execution = get_object_or_404(ContractExecution, id=pk)    
+    if request.method == "POST":
+        form = ContractExecutionFileForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                execution_file = ContractExecutionFile.objects.create(
+                    execution=execution,
+                    name=form.cleaned_data["name"],
+                    file=request.FILES["file"],
+                )
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_EXECUTION_FILE,
+                    target_object_id=execution_file.id,
+                    target_content_object=execution_file,
+                )
+                return redirect(
+                    "contracts:executions-detail", pk=execution.id
+                )
+        else:
+            return render(
+                request,
+                "contracts/execution/file-create.html",
+                {"execution": execution, "form": form},
+            )
+    else:
+        form = ContractExecutionFileForm()
+        return render(
+            request,
+            "contracts/execution/file-create.html",
+            {"execution": execution, "form": form},
+        )
+

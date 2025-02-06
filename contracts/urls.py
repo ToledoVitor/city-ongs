@@ -12,6 +12,7 @@ from contracts.views import (
     create_contract_goal_view,
     create_contract_item_view,
     create_execution_activity_view,
+    create_execution_file_view,
     update_contract_goal_view,
     update_contract_item_view,
     create_contract_execution_view,
@@ -40,6 +41,11 @@ urlpatterns = [
         "executions/detail/<uuid:pk>/activities/create",
         create_execution_activity_view,
         name="execution-items-create",
+    ),
+    path(
+        "executions/detail/<uuid:pk>/files/create",
+        create_execution_file_view,
+        name="execution-files-create",
     ),
     path(
         "detail/<uuid:pk>/items/create/",

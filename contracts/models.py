@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 
 from django.db import models
@@ -620,6 +621,21 @@ class ContractExecutionActivity(BaseModel):
 
 
 class ContractExecutionFile(BaseModel):
+    execution = models.ForeignKey(
+        # TODO: remove null
+        ContractExecution,
+        verbose_name="Relatório de Execução",
+        related_name="files",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=32,
+        null=True,
+        blank=True,
+    )
     file = models.FileField(
         verbose_name="Arquivo",
         upload_to="uploads/contracts/executions",
@@ -630,3 +646,10 @@ class ContractExecutionFile(BaseModel):
     class Meta:
         verbose_name = "Arquivo de Atividade"
         verbose_name_plural = "Arquivos de Atividades"
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def file_type(self) -> str:
+        return os.path.splitext(self.file.name)[1]

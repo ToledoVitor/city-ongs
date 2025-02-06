@@ -43,6 +43,9 @@ class ActivityLog(models.Model):
         # contract executions activities
         CREATED_EXECUTION_ACTIVITY = "CREATED_EXECUTION_ACTIVITY", "Criou Atividade Executada"
         UPDATED_EXECUTION_ACTIVITY = "UPDATED_EXECUTION_ACTIVITY", "Atualizou Atividade Executada"
+        # contract executions files
+        CREATED_EXECUTION_FILE = "CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"
+        UPDATED_EXECUTION_FILE = "UPDATED_EXECUTION_FILE", "Atualizou Arquivo de Atividade"
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
