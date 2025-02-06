@@ -21,6 +21,7 @@ from contracts.forms import (
     ContractExecutionCreateForm,
     ContractExecutionActivityForm,
     ContractExecutionFileForm,
+    ContractStatusUpdateForm,
 )
 from contracts.models import (
     Company,
@@ -711,3 +712,79 @@ def create_execution_file_view(request, pk):
             {"execution": execution, "form": form},
         )
 
+class ContractWorkPlanView(LoginRequiredMixin, DetailView):
+    model = Contract
+
+    template_name = "contracts/workplan.html"
+    context_object_name = "contract"
+
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            # .select_related(
+            # )
+            # .prefetch_related(
+            # )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        return super().get_context_data(**kwargs)
+
+
+class ContractTimelineView(LoginRequiredMixin, DetailView):
+    model = Contract
+
+    template_name = "contracts/timeline.html"
+    context_object_name = "contract"
+
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            # .select_related(
+            # )
+            # .prefetch_related(
+            # )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        return super().get_context_data(**kwargs)
+    
+
+def contract_status_change_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+    
+    contract = get_object_or_404(Contract, id=pk)
+    if not request.user.has_admin_access:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+    
+    if request.method == "POST":
+        form = ContractStatusUpdateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                contract.status = form.cleaned_data["status"]
+                contract.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_STATUS,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
+                return redirect("contracts:contracts-detail", pk=contract.id)
+    else:
+        form = ContractStatusUpdateForm()
+        return render(request, "contracts/status-update.html", {"form": form})

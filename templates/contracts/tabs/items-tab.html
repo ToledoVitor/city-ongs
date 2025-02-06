@@ -37,7 +37,7 @@
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
 
-                    {% if not user.can_change_statuses %}
+                    {% if user.can_change_statuses %}
                       <!-- items approve Modal toggle -->
                       <button
                         data-modal-target="items-modal-{{ item.id }}"
@@ -62,14 +62,16 @@
                           </svg>
                         </button>
                         
-                        <a
-                          class="ml-4"
-                          href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
-                        >
-                          <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
-                          </svg>
-                        </a>
+                        {% if contract.is_on_planning %}
+                          <a
+                            class="ml-4"
+                            href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
+                          >
+                            <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
+                            </svg>
+                          </a>
+                        {% endif %}
                       </div>         
                     {% endif %}
                   </td>

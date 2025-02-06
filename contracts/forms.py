@@ -280,3 +280,10 @@ class ContractExecutionFileForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "file": BaseFileFormWidget(),
         }
+
+
+class ContractStatusUpdateForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=Contract.ContractStatusChoices.choices,
+        widget=BaseSelectFormWidget(),
+    )

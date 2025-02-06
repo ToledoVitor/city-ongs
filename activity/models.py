@@ -30,6 +30,7 @@ class ActivityLog(models.Model):
             "CREATED_CONTRACT_ADDENDUM",
             "Criou aditivo de contrato",
         )
+        UPDATED_CONTRACT_STATUS = "UPDATED_CONTRACT_STATUS", "Atualizou status do contrato"
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
         COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"

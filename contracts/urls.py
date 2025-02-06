@@ -9,6 +9,8 @@ from contracts.views import (
     ContractsListView,
     ContractExecutionDetailView,
     ContractExecutionActivityUpdateView,
+    ContractWorkPlanView,
+    ContractTimelineView,
     create_contract_goal_view,
     create_contract_item_view,
     create_execution_activity_view,
@@ -16,12 +18,16 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_item_view,
     create_contract_execution_view,
+    contract_status_change_view,
 )
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
     path("create/", ContractCreateView.as_view(), name="contracts-create"),
     path("detail/<uuid:pk>/", ContractsDetailView.as_view(), name="contracts-detail"),
+    path("detail/<uuid:pk>/workplan/", ContractWorkPlanView.as_view(), name="contract-workplan"),
+    path("detail/<uuid:pk>/timeline/", ContractTimelineView.as_view(), name="contract-timeline"),
+    path("detail/<uuid:pk>/change-status/", contract_status_change_view, name="contract-status-change"),
     path(
         "detail/<uuid:pk>/executions/create/",
         create_contract_execution_view,
