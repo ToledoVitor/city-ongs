@@ -87,6 +87,7 @@ class ContractCreateView(AdminRequiredMixin, TemplateView):
             with transaction.atomic():
                 contract = form.save(commit=False)
                 contract.organization = request.user.organization
+                contract.file = request.FILES["file"]
                 contract.save()
 
                 logger.info(f"{request.user.id} - Created new contract")
@@ -237,6 +238,7 @@ def create_contract_item_view(request, pk):
             with transaction.atomic():
                 item = form.save(commit=False)
                 item.contract = contract
+                item.file = request.FILES["file"]
                 item.save()
 
                 _ = ActivityLog.objects.create(
