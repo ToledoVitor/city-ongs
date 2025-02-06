@@ -18,6 +18,7 @@ from reports.exporters import (
     PassOn12PDFExporter,
     PassOn13PDFExporter,
     PassOn14PDFExporter,
+    PeriodEpensesPDFExporter,
 )
 
 
@@ -131,6 +132,14 @@ def export_pass_on_14(accountability: Accountability, start_date: date, end_date
         start_date=start_date,
         end_date=end_date,
     ).handle()
+    
+
+def PeriodEpensesPDFExporter(accountability: Accountability, start_date: date, end_date: date):
+    return PeriodEpensesPDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
 
 
 def _get_start_end_date(month: int, year: int):
@@ -206,6 +215,9 @@ def export_report(accountability: Accountability, report_model: str):
 
         case "rp_14":
             return export_pass_on_14(accountability, start_date, end_date)
+        
+        case "Despesas Reaizadas no Período":
+            return export_period_expenses(accountability, start_date, end_date)
 
         case _:
             raise ValueError(f"Report model {report_model} is not a valid option")
