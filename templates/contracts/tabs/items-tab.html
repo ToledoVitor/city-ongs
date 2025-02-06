@@ -37,7 +37,7 @@
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
 
-                    {% if user.can_change_statuses %}
+                    {% if not user.can_change_statuses %}
                       <!-- items approve Modal toggle -->
                       <button
                         data-modal-target="items-modal-{{ item.id }}"
@@ -56,13 +56,14 @@
                           data-modal-toggle="items-modal-{{ item.id }}"
                           type="button"
                         >
-                          <svg class="w-6 h-6 ml-4 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                          <svg class="w-6 h-6 ml-4 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>
                             <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                           </svg>
                         </button>
                         
                         <a
+                          class="ml-4"
                           href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
                         >
                           <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -320,7 +321,7 @@
         </tbody>
     </table>
   
-    {% if user.has_admin_access %}
+    {% if user.has_admin_access and contract.is_on_planning %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
         <a
           href="{% url 'contracts:contracts-item-create' contract.id %}"

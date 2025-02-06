@@ -80,7 +80,6 @@ class Company(BaseModel):
 class Contract(BaseModel):
     class ContractStatusChoices(models.TextChoices):
         PLANNING = "PLANNING", "planejamento"
-        WAITING_START = "WAITING_START", "aguardando início"
         EXECUTION = "EXECUTION", "em execução"
         FINISHED = "FINISHED", "finalizado"
 
@@ -237,6 +236,22 @@ class Contract(BaseModel):
         return Contract.ContractStatusChoices(self.status).label
 
     @property
+    def total_value_with_point(self) -> str:
+        return str(self.total_value).replace(".", ",")
+    
+    @property
+    def is_on_planning(self) -> bool:
+        return self.status == Contract.ContractStatusChoices.PLANNING
+
+    @property
+    def is_on_execution(self) -> bool:
+        return self.status == Contract.ContractStatusChoices.EXECUTION
+
+    @property
+    def is_finished(self) -> bool:
+        return self.status == Contract.ContractStatusChoices.FINISHED
+
+    @property
     def recent_logs(self):
         contract_logs = ActivityLog.objects.filter(target_object_id=self.id)
 
@@ -281,9 +296,6 @@ class Contract(BaseModel):
             self.internal_code = 1 if max_code is None else max_code + 1
         super().save(*args, **kwargs)
 
-    @property
-    def total_value_with_point(self) -> str:
-        return str(self.total_value).replace(".", ",")
 
 
 class ContractAddendum(BaseModel):

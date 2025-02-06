@@ -254,6 +254,8 @@
           </p>
 
           {% for form in steps_formset %}
+            {{ form.id }}
+
             <div class="steps-form">
     
               <div class="my-3">
@@ -363,7 +365,7 @@
         </div>
     </div>
   
-    {% include 'commons/form-errors.html' with form=form subform=transactions_formset %}
+    {% include 'commons/form-errors.html' with form=form subform=steps_formset %}
   
 </form>
 

@@ -248,6 +248,9 @@ def create_contract_item_view(request, pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
     if request.method == "POST":
         form = ContractItemForm(request.POST)
         if form.is_valid():
@@ -283,6 +286,9 @@ def update_contract_item_view(request, pk, item_pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+    
     item = get_object_or_404(ContractItem, id=item_pk)
 
     if request.method == "POST":
@@ -318,6 +324,9 @@ def create_contract_goal_view(request, pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
     if request.method == "POST":
         form = ContractGoalForm(request.POST)
         steps_formset = ContractExtraStepFormSet(request.POST)
@@ -371,6 +380,9 @@ def update_contract_goal_view(request, pk, goal_pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
     goal = get_object_or_404(ContractGoal, id=goal_pk)
 
     if request.method == "POST":
@@ -395,8 +407,17 @@ def update_contract_goal_view(request, pk, goal_pk):
                     target_object_id=goal.id,
                     target_content_object=goal,
                 )
-
-        return redirect("contracts:contracts-detail", pk=contract.id)
+                return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/goals-update.html",
+                {
+                    "contract": contract,
+                    "form": form,
+                    "steps_formset": steps_formset,
+                },
+            )
 
     else:
         form = ContractGoalForm(instance=goal)
@@ -508,6 +529,9 @@ def create_contract_execution_view(request, pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_execution:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
     if request.method == "POST":
         form = ContractExecutionCreateForm(request.POST)
         if form.is_valid():

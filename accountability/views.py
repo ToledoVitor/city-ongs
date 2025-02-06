@@ -92,6 +92,9 @@ def create_contract_accountability_view(request, pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_execution:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
     if request.method == "POST":
         form = AccountabilityCreateForm(request.POST)
         if form.is_valid():
