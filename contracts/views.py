@@ -150,13 +150,14 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 count_files=Count("files", filter=Q(files__deleted_at__isnull=True), distinct=True)
             )
             .prefetch_related("activities", "files")
+            .order_by("-year", "-month")[:12]
         )
         context["accountabilities"] = (
             self.object.accountabilities
             .annotate(
                 count_revenues=Count("revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True),
                 count_expenses=Count("expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True),
-            )
+            )[:12]
         )
         return context
 
