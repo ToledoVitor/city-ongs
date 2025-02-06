@@ -458,6 +458,20 @@ class ContractItem(BaseModel):
         max_length=34,
     )
 
+    # DATES
+    start_date = models.DateField(
+        # TODO: remove null
+        verbose_name="Data Inicial",
+        null=True,
+        blank=True,
+    )
+    end_date = models.DateField(
+        # TODO: remove null
+        verbose_name="Data Final",
+        null=True,
+        blank=True,
+    )
+
     is_additive = models.BooleanField(verbose_name="É aditivo?", default=False)
 
     status = models.CharField(
@@ -529,6 +543,12 @@ class ContractItemReview(BaseModel):
 
 
 class ContractExecution(BaseModel):
+    class ReviewStatus(models.TextChoices):
+        WIP = "WIP", "Em Andamento"
+        SENT = "SENT", "Enviada para análise"
+        CORRECTING = "CORRECTING", "Corrigindo"
+        FINISHED = "FINISHED", "Finalizada"
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Execução",
@@ -543,6 +563,12 @@ class ContractExecution(BaseModel):
     year = models.IntegerField(
         verbose_name="Ano",
         default=0,
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus,
+        default=ReviewStatus.WIP,
+        max_length=10,
     )
 
     class Meta:

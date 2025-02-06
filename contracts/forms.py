@@ -106,6 +106,8 @@ class ContractItemForm(forms.ModelForm):
             "unit_type",
             "nature",
             "file",
+            "start_date",
+            "end_date",
         ]
 
         widgets = {
