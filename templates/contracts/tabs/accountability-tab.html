@@ -13,22 +13,25 @@
                     Prestação
                 </th>
                 <th scope="col" class="px-6 py-3">
+                  Total de Itens
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Items com Pendências
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Cadastrados
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Conciliados
+                </th>
+                <th scope="col" class="px-6 py-3">
                     Status
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Items Pendentes
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Cadastrado
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Conciliado
                 </th>
             </tr>
         </thead>
         <tbody>
-            {% if contract.accountabilities.count %}
-              {% for accountability in contract.accountabilities.all %}
+            {% if accountabilities.count %}
+              {% for accountability in accountabilities.all %}
                 <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-400">
                   <td scope="row" class="py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black">
                       <a
@@ -42,6 +45,21 @@
                   <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
                     Prestação {{ accountability.month }}/{{ accountability.year }}
                   </th>
+
+                  <td class="px-6 py-4 text-base text-gray-900 text-center dark:text-black max-w-48">
+                    Receitas: {{ accountability.count_revenues }} <br>
+                    Despesas: {{ accountability.count_expenses }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-center text-black max-w-48">
+                    {{ accountability }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-center text-black">
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-center text-black">
+                  </td>
 
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
                     {% if accountability.status == "WIP" %}
@@ -71,15 +89,6 @@
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
-                    {{ accountability }}
-                  </td>
-
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                  </td>
-
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
-                  </td>
                 </tr>
               {% endfor %}
             {% else %}
@@ -89,6 +98,9 @@
                 </th>
                 <td class="px-6 py-4">
                     -
+                </td>
+                <td class="px-6 py-4">
+                  -
                 </td>
                 <td class="px-6 py-4">
                     -

@@ -151,6 +151,13 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             )
             .prefetch_related("activities", "files")
         )
+        context["accountabilities"] = (
+            self.object.accountabilities
+            .annotate(
+                count_revenues=Count("revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True),
+                count_expenses=Count("expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True),
+            )
+        )
         return context
 
     def post(self, request, pk, *args, **kwargs):
