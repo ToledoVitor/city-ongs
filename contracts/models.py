@@ -580,6 +580,10 @@ class ContractExecution(BaseModel):
         return f"Execution {self.month}/{self.year}"
 
     @property
+    def month_text(self) -> str:
+        return MonthChoices(self.month).label
+
+    @property
     def recent_logs(self):
         execution_logs = ActivityLog.objects.filter(target_object_id=self.id)
 

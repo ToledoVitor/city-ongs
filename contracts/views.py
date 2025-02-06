@@ -3,7 +3,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
 from django.urls import reverse_lazy
@@ -143,6 +143,14 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+        context["executions"] = (
+            self.object.executions
+            .annotate(
+                count_activities=Count("activities", filter=Q(activities__deleted_at__isnull=True), distinct=True),
+                count_files=Count("files", filter=Q(files__deleted_at__isnull=True), distinct=True)
+            )
+            .prefetch_related("activities", "files")
+        )
         return context
 
     def post(self, request, pk, *args, **kwargs):

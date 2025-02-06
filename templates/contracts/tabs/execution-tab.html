@@ -6,7 +6,13 @@
             <tr>
                 <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
-                    Item
+                    Período
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Atividades
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Documentos
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Status
@@ -14,8 +20,8 @@
           </tr>
         </thead>
         <tbody>
-            {% if contract.executions.count %}
-              {% for execution in contract.executions.all %}
+            {% if executions.count %}
+              {% for execution in executions.all %}
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
                     <a
@@ -26,40 +32,42 @@
                     </a>
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black max-w-48">
-                    {{ execution }}
+                  <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                    Relatório {{ execution.month_text }} de {{execution.year }}
                   </td>
 
                   <td class="px-6 py-4 text-sm text-black">
-                    {% if execution.status == "ANALYZING" %}
+                    {{ execution.count_activities }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    {{ execution.count_files }}
+                  </td>
+
+                  <td class="px-6 py-4 text-sm text-black">
+                    {% if execution.status == "WIP" %}
                       <span
                         class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                      >
+                        Em Andamento
+                      </span>
+                    {% elif execution.status == "SENT" %}
+                      <span
+                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Em análise
                       </span>
                     {% elif execution.status == "CORRECTING" %}
                       <span
-                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
                         Em correção
                       </span>
-                    {% elif execution.status == "APPROVED" %}
+                    {% elif execution.status == "FINISHED" %}
                       <span
-                        class="bg-gray-100 whitespace-nowrap text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="bg-green-300 whitespace-nowrap text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
                       >
-                        Aprovado
-                      </span>
-                    {% elif execution.status == "APPROVED_WITH_PENDENCE" %}
-                      <span
-                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
-                        Pendências
-                      </span>
-                    {% elif execution.status == "REJECTED" %}
-                      <span
-                        class="bg-red-100 whitespace-nowrap text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
-                        Rejeitado
+                        Finalizado
                       </span>
                     {% endif %}
                   </td>
@@ -71,6 +79,12 @@
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
                   Nenhum relatório de execução iniciado
                 </th>
+                <td class="px-6 py-4">
+                  -
+                </td>
+                <td class="px-6 py-4">
+                  -
+                </td>
                 <td class="px-6 py-4">
                   -
                 </td>
