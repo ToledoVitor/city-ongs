@@ -6,6 +6,13 @@ from utils.models import BaseModel
 
 
 class BankAccount(BaseModel):
+    class OriginChoices(models.TextChoices):
+        MUNICIPAL = "MUNICIPAL", "Municipal"
+        FEDERAL = "FEDERAL", "Federal"
+        STATE = "STATE", "Estadual"
+        COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
+        PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
+
     class AccountTypeChoices(models.TextChoices):
         CHECKING = "CHECKING", "conta corrente"
         INVESTING = "INVESTING", "investimento"
@@ -38,6 +45,12 @@ class BankAccount(BaseModel):
         verbose_name="Saldo Atual",
         decimal_places=2,
         max_digits=12,
+    )
+    origin = models.CharField(
+        verbose_name="Origem da Fonte",
+        choices=OriginChoices,
+        default=OriginChoices.MUNICIPAL,
+        max_length=19,
     )
 
     history = HistoricalRecords()

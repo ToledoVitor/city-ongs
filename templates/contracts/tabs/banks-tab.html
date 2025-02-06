@@ -14,6 +14,7 @@
             <b>Banco:</b> {{ contract.checking_account.bank_name }} - {{ contract.checking_account.bank_id }}<br>
             <b>Conta:</b> {{ contract.checking_account.account }}<br>
             <b>Agência:</b> {{ contract.checking_account.agency|default_if_none:"N/A" }}<br>
+            <b>Origem da Receita:</b> {{ contract.checking_account.origin }}<br>
             <a
                 href="{% url 'bank:bank-accounts-detail' contract.checking_account.id %}"
                 class="px-3 py-1 my-4 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -33,6 +34,7 @@
             <b>Banco:</b> {{ contract.investing_account.bank_id }} - {{ contract.investing_account.bank_name }}<br>
             <b>Conta:</b> {{ contract.investing_account.account }}<br>
             <b>Agência:</b> {{ contract.investing_account.agency }}<br>
+            <b>Origem da Receita:</b> {{ contract.investing_account.origin }}<br>
             <a
                 href="{% url 'bank:bank-accounts-detail' contract.investing_account.id %}"
                 class="px-3 py-1 my-4 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

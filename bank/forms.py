@@ -14,6 +14,10 @@ class UploadOFXForm(forms.Form):
         choices=BankAccount.AccountTypeChoices.choices,
         widget=BaseSelectFormWidget(),
     )
+    origin = forms.ChoiceField(
+        choices=BankAccount.OriginChoices.choices,
+        widget=BaseSelectFormWidget(),
+    )
     ofx_file = forms.FileField(
         widget=forms.ClearableFileInput(
             attrs={
@@ -51,6 +55,7 @@ class CreateBankAccountForm(forms.ModelForm):
             "bank_id",
             "account",
             "account_type",
+            "origin",
             "agency",
             "balance",
         ]
@@ -61,6 +66,7 @@ class CreateBankAccountForm(forms.ModelForm):
             "account": BaseCharFieldFormWidget(),
             "account_type": BaseSelectFormWidget(),
             "agency": BaseCharFieldFormWidget(),
+            "origin": BaseSelectFormWidget(),
             "closing_date": forms.DateInput(
                 attrs={"type": "closing_date"}, format="%d/%m/%Y"
             ),

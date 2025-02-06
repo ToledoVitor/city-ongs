@@ -134,6 +134,7 @@ def create_bank_account_manual_view(request, pk):
                     account_type=form.cleaned_data["account_type"],
                     agency=form.cleaned_data["agency"],
                     balance=form.cleaned_data["balance"],
+                    origin=form.cleaned_data["origin"],
                 )
                 BankStatement.objects.create(
                     bank_account=bank_account,

@@ -58,6 +58,11 @@
   </div>
 
   <div class="mb-3">
+    <label class="block mb-2 text-base font-medium text-black dark:text-black">Origem da Receita</label>
+    {{ form.origin }}
+  </div>
+
+  <div class="mb-3">
     <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">Arquivo Bancário (OFX):</label>
     {{ form.ofx_file }}
     <p class="mt-1 text-sm text-black dark:text-black" id="file_input_help">Apenas arquivos tipo .ofx</p>
