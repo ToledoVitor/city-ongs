@@ -609,7 +609,7 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
         ActivityLog.objects.create(
             user=self.request.user,
             user_email=self.request.user.email,
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
+            action=ActivityLog.ActivityLogChoices.CREATED_EXECUTION_ACTIVITY,
             target_object_id=form.instance.id,
             target_content_object=form.instance,
         )

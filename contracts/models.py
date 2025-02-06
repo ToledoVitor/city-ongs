@@ -231,10 +231,7 @@ class Contract(BaseModel):
 
     @property
     def recent_logs(self):
-        contract_logs = ActivityLog.objects.filter(
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT,
-            target_object_id=self.id,
-        )
+        contract_logs = ActivityLog.objects.filter(target_object_id=self.id)
 
         addendum_ids = [
             str(id) for id in self.addendums.values_list("id", flat=True)[:10]
@@ -558,10 +555,7 @@ class ContractExecution(BaseModel):
 
     @property
     def recent_logs(self):
-        execution_logs = ActivityLog.objects.filter(
-            action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_EXECUTION,
-            target_object_id=self.id,
-        )
+        execution_logs = ActivityLog.objects.filter(target_object_id=self.id)
 
         activities_ids = [
             str(id) for id in self.activities.values_list("id", flat=True)[:10]
@@ -570,9 +564,17 @@ class ContractExecution(BaseModel):
             target_object_id__in=activities_ids,
         )
 
+        files_ids = [
+            str(id) for id in self.files.values_list("id", flat=True)[:10]
+        ]
+        files_logs = ActivityLog.objects.filter(
+            target_object_id__in=files_ids,
+        )
+
         combined_querset = (
             execution_logs
             | activities_logs
+            | files_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
