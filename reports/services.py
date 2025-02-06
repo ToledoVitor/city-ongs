@@ -134,7 +134,7 @@ def export_pass_on_14(accountability: Accountability, start_date: date, end_date
     ).handle()
     
 
-def PeriodEpensesPDFExporter(accountability: Accountability, start_date: date, end_date: date):
+def export_period_expenses(accountability: Accountability, start_date: date, end_date: date):
     return PeriodEpensesPDFExporter(
         accountability=accountability,
         start_date=start_date,
@@ -216,7 +216,7 @@ def export_report(accountability: Accountability, report_model: str):
         case "rp_14":
             return export_pass_on_14(accountability, start_date, end_date)
         
-        case "Despesas Reaizadas no Período":
+        case "period_expenses":
             return export_period_expenses(accountability, start_date, end_date)
 
         case _:

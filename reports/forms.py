@@ -19,6 +19,7 @@ REPORTS_OPTIONS = [
     ("rp_12", "Repasses: Terceiro Setor (RP) - 12"),
     ("rp_13", "Repasses: Terceiro Setor (RP) - 13"),
     ("rp_14", "Repasses: Terceiro Setor (RP) - 14"),
+    ("period_expenses", "Despesas: Realizadas no Período"),
 ]
 
 
