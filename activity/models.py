@@ -67,6 +67,7 @@ class ActivityLog(models.Model):
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
+        GLOSSED_EXPENSE = "GLOSSED_EXPENSE", "Glosou despesa"
         DUPLICATED_EXPENSE = "DUPLICATED_EXPENSE", "Duplicou despesa"
         DELETED_EXPENSE = "DELETED_EXPENSE", "Deletou despesa"
         # favored

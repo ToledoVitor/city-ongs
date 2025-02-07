@@ -10,13 +10,13 @@
                 Status
             </th>
             <th scope="col" class="px-6 py-3">
+                Planejada?
+            </th>
+            <th scope="col" class="px-6 py-3">
                 Valor
             </th>
             <th scope="col" class="px-6 py-3">
                 Item Relacionado
-            </th>
-            <th scope="col" class="px-6 py-3">
-               Fonte da Despesa
             </th>
             <th scope="col" class="px-6 py-3">
                 Natureza
@@ -32,14 +32,7 @@
                   {{ expense.identification }} <br>
                   <p class="text-sm"> Pendências: 0</span>
                 </th>
-                <td class="px-6 py-4 text-base text-left text-black whitespace-nowrap">
-                  <p class="mt-1 text-sm">Planejada:
-                    {% if expense.planned %}
-                      &#9989;
-                    {% else %}
-                      &#10060;
-                    {% endif %}
-                  </p>
+                <td class="px-6 py-4 text-sm text-left text-black whitespace-nowrap">
                   <p class="mt-1 text-sm">Paga:
                     {% if expense.paid %}
                       &#9989;
@@ -55,19 +48,52 @@
                     {% endif %}
                   </p>
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
+                  <p class="mt-1 text-sm">Planejada:
+                    {% if expense.planned %}
+                      &#9989; <br>
+                      <button
+                        type="button"
+                        data-modal-target="expenses-gloss-{{ expense.id}}"
+                        data-modal-toggle="expenses-gloss-{{ expense.id}}"
+                        class="
+                          text-white
+                          ml-2
+                          bg-blue-600
+                          hover:bg-blue-600
+                          focus:ring-4
+                          focus:outline-none
+                          focus:ring-blue-600
+                          font-medium
+                          rounded-full
+                          text-xs
+                          mt-2
+                          px-2.5
+                          py-1
+                          text-center
+                          inline-flex
+                          items-center
+                          me-2
+                        "
+                      >
+                        glosar
+                      </button>
+                    {% else %}
+                      &#10060;
+                    {% endif %}
+                    
+                  </p>
+                </td>
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   R${{ expense.value|intcomma }}
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   {{ expense.item.name }}
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
-                  {{ expense.source.name }}
-                </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   {{ expense.nature_label }}
                 </td>
-                <td class="px-6 py-4 text-base flex justify-end">
+                <td class="px-6 py-4 text-sm flex justify-end">
                   <a
                     href="{% url 'accountability:expense-update' expense.id %}"
                     class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -133,6 +159,118 @@
                   {% endif %}
                 </td>
             </tr>
+
+            <div
+                id="expenses-gloss-{{ expense.id}}"
+                tabindex="-1"
+                data-modal-backdrop="static"
+                aria-hidden="true"
+                class="
+                  hidden
+                  overflow-y-auto
+                  overflow-x-hidden
+                  fixed
+                  top-0
+                  right-0
+                  left-0
+                  z-50
+                  justify-center
+                  items-center
+                  w-full
+                  md:inset-0
+                  h-[calc(100%-1rem)]
+                  max-h-full
+                "
+            >
+              <div class="relative p-4 w-full max-w-md max-h-full">
+                  <!-- Modal content -->
+                  <div class="relative rounded-lg shadow bg-gray-300">
+                    <!-- Modal header -->
+                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                          <h3 class="text-xl font-semibold text-black">
+                              Duplicar despesa?
+                          </h3>
+                          <button
+                            type="button"
+                            data-modal-hide="expenses-gloss-{{ expense.id}}"
+                            class="
+                              end-2.5
+                              text-black
+                              hover:bg-gray-600
+                              hover:text-black
+                              bg-transparent
+                              rounded-lg
+                              text-sm
+                              w-8
+                              h-8
+                              ms-auto
+                              inline-flex
+                              justify-center
+                              items-center
+                            "
+                          >
+                              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                              </svg>
+                              <span class="sr-only">Fechar modal</span>
+                          </button>
+                      </div>
+                      <!-- Modal body -->
+                      <div class="p-4 md:p-5">
+                          <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.pk %}">
+                              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                              <input type="hidden" name="expense_id" value="{{ expense.id }}">
+
+                              <span class="py-10 my-10 text-base">
+                                A despesa será marcada como não planejada, e o item será desacossiado.
+                              </span>
+
+                              <div class="grid gap-6 my-6 md:grid-cols-2">
+                                <button
+                                  type="button"
+                                  data-modal-hide="expenses-gloss-{{ expense.id}}"
+                                  class="
+                                    w-full
+                                    text-white
+                                    bg-gray-700
+                                    hover:bg-gray-800
+                                    focus:ring-4
+                                    focus:outline-none
+                                    focus:ring-gray-300
+                                    font-medium rounded-lg
+                                    text-sm
+                                    px-5
+                                    py-2.5
+                                    text-center
+                                  "
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="
+                                      w-full
+                                      text-white
+                                      bg-blue-700
+                                      hover:bg-blue-800
+                                      focus:ring-4
+                                      focus:outline-none
+                                      focus:ring-blue-300
+                                      font-medium rounded-lg
+                                      text-sm
+                                      px-5
+                                      py-2.5
+                                      text-center
+                                    "
+                                >
+                                    Glosar
+                                </button>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+            </div>
 
             <div
                 id="expenses-duplicate-{{ expense.id}}"
@@ -360,9 +498,6 @@
                 Nenhum resultado encontrado
             </th>
             <td class="px-6 py-4">
-              -
-            </td>
-            <td class="px-6 py-4">
                 -
             </td>
             <td class="px-6 py-4">
@@ -372,10 +507,13 @@
                 -
             </td>
             <td class="px-6 py-4">
-              -
+                -
             </td>
             <td class="px-6 py-4">
-              -
+                -
+            </td>
+            <td class="px-6 py-4">
+                -
             </td>
           </tr>
         {% endif %}     
@@ -399,9 +537,9 @@
 <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200" aria-label="Table navigation">
   <span class="text-base font-normal text-black dark:text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
     Página
-    <span class="font-bold text-gray-900 dark:text-black">{{ expenses_page.number }}</span>
+    <span class="font-bold text-black whitespace-nowrap">{{ expenses_page.number }}</span>
     de
-    <span class="font-bold text-gray-900 dark:text-black">{{ expenses_page.paginator.num_pages }}</span>
+    <span class="font-bold text-black whitespace-nowrap">{{ expenses_page.paginator.num_pages }}</span>
   </span>
 
   <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">

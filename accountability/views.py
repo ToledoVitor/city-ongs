@@ -397,6 +397,29 @@ def duplicate_accountability_expense_view(request, pk):
         )
 
 
+def gloss_accountability_expense_view(request, pk):
+    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
+
+    with transaction.atomic():
+        expense.planned = False
+        expense.item = None
+        expense.save()
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.GLOSSED_EXPENSE,
+            target_object_id=expense.id,
+            target_content_object=expense,
+        )
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
+
+
 class FavoredListView(LoginRequiredMixin, ListView):
     model = Favored
     context_object_name = "favoreds_list"

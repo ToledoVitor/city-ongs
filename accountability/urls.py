@@ -18,6 +18,7 @@ from accountability.views import (
     send_accountability_to_analisys_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
+    gloss_accountability_expense_view,
 )
 
 urlpatterns = [
@@ -68,6 +69,11 @@ urlpatterns = [
         "expenses/<uuid:pk>/update/",
         update_accountability_expense_view,
         name="expense-update",
+    ),
+    path(
+        "expenses/<uuid:pk>/gloss/",
+        gloss_accountability_expense_view,
+        name="expense-gloss",
     ),
     path(
         "expenses/<uuid:pk>/duplicate/",

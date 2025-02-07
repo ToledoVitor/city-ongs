@@ -28,10 +28,10 @@
                 <th scope="row" class="px-6 py-4 text-base text-gray-900 whitespace-nowrap dark:text-black">
                   {{ revenue.identification }} 
                 </th>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
                   R${{ revenue.value|intcomma }}
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
                   <a
                     href="{% url 'bank:bank-accounts-detail' revenue.bank_account.id %}"
                     class="hover:underline text-blue-700"
@@ -41,14 +41,14 @@
                     <span class="text-sm">{{ revenue.bank_account.bank_name }}</span>
                 </a>
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
                   {{ revenue.source.name }} <br>
                   <span class="text-sm">{{ revenue.source.category_label }}</span>
                 </td>
-                <td class="px-6 py-4 text-base text-gray-900 dark:text-black">
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-black">
                   {{ revenue.revenue_nature_label }}
                 </td>
-                <td class="px-6 py-4 text-base flex justify-end">
+                <td class="px-6 py-4 text-sm flex justify-end">
                   <a
                     href="{% url 'accountability:revenue-update' revenue.id %}"
                     class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
