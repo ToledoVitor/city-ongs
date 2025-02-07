@@ -2,6 +2,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from accounts.models import Organization, User
+from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from contracts.models import Contract, ContractItem
@@ -47,7 +48,10 @@ class Accountability(BaseModel):
 
     @property
     def is_on_execution(self) -> bool:
-        return self.status in {Accountability.ReviewStatus.WIP, Accountability.ReviewStatus.CORRECTING}
+        return self.status in {
+            Accountability.ReviewStatus.WIP,
+            Accountability.ReviewStatus.CORRECTING,
+        }
 
     @property
     def is_sent(self) -> bool:
@@ -60,6 +64,29 @@ class Accountability(BaseModel):
     @property
     def status_label(self) -> str:
         return Accountability.ReviewStatus(self.status).label
+
+    @property
+    def recent_logs(self):
+        accountability_logs = ActivityLog.objects.filter(target_object_id=self.id)
+
+        revenues_ids = [
+            str(id) for id in self.revenues.values_list("id", flat=True)[:10]
+        ]
+        revenues_logs = ActivityLog.objects.filter(
+            target_object_id__in=revenues_ids,
+        )
+
+        expenses_ids = [
+            str(id) for id in self.expenses.values_list("id", flat=True)[:10]
+        ]
+        expenses_logs = ActivityLog.objects.filter(
+            target_object_id__in=expenses_ids,
+        )
+
+        combined_querset = (
+            accountability_logs | revenues_logs | expenses_logs
+        ).distinct()
+        return combined_querset.order_by("-created_at")[:10]
 
     class Meta:
         verbose_name = "Prestação"
