@@ -12,13 +12,13 @@ from accountability.views import (
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
+    gloss_accountability_expense_view,
     import_accountability_view,
     revenue_delete_view,
     send_accountability_review_analisys,
     send_accountability_to_analisys_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
-    gloss_accountability_expense_view,
 )
 
 urlpatterns = [
