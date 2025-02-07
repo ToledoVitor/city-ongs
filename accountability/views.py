@@ -216,6 +216,41 @@ def create_accountability_revenue_view(request, pk):
         )
 
 
+def update_accountability_revenue_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
+    if request.method == "POST":
+        form = RevenueForm(request.POST, instance=revenue, request=request)
+        if form.is_valid():
+            with transaction.atomic():
+                revenue = form.save()
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_REVENUE,
+                    target_object_id=revenue.id,
+                    target_content_object=revenue,
+                )
+            return redirect(
+                "accountability:accountability-detail", pk=revenue.accountability.id
+            )
+        else:
+            return render(
+                request,
+                "accountability/revenues/update.html",
+                {"revenue": revenue, "form": form},
+            )
+    else:
+        form = RevenueForm(request=request, instance=revenue)
+        return render(
+            request,
+            "accountability/revenues/update.html",
+            {"revenue": revenue, "form": form},
+        )
+
+
 def create_accountability_expense_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -253,6 +288,39 @@ def create_accountability_expense_view(request, pk):
             {"accountability": accountability, "form": form},
         )
 
+def update_accountability_expense_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    if request.method == "POST":
+        form = ExpenseForm(request.POST, request=request, instance=expense, accountability=expense.accountability)
+        if form.is_valid():
+            with transaction.atomic():
+                expense = form.save()
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_EXPENSE,
+                    target_object_id=expense.id,
+                    target_content_object=expense,
+                )
+            return redirect(
+                "accountability:accountability-detail", pk=expense.accountability.id
+            )
+        else:
+            return render(
+                request,
+                "accountability/expenses/update.html",
+                {"expense": expense, "form": form},
+            )
+    else:
+        form = ExpenseForm(request=request, instance=expense, accountability=expense.accountability)
+        return render(
+            request,
+            "accountability/expenses/update.html",
+            {"expense": expense, "form": form},
+        )
 
 class FavoredListView(LoginRequiredMixin, ListView):
     model = Favored
