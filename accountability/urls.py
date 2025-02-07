@@ -10,6 +10,8 @@ from accountability.views import (
     create_accountability_revenue_view,
     create_contract_accountability_view,
     import_accountability_view,
+    expense_delete_view,
+    revenue_delete_view,
 )
 
 urlpatterns = [
@@ -46,4 +48,6 @@ urlpatterns = [
         FavoredCreateView.as_view(),
         name="favoreds-create",
     ),
+    path("expenses/<uuid:pk>/delete/", expense_delete_view, name="expense-delete"),
+    path("revenues/<uuid:pk>/delete/", revenue_delete_view, name="revenue-delete"),
 ]

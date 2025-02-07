@@ -18,7 +18,7 @@ from accountability.forms import (
     ResourceSourceCreateForm,
     RevenueForm,
 )
-from accountability.models import Accountability, Favored, ResourceSource
+from accountability.models import Accountability, Favored, ResourceSource, Expense, Revenue
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
 from contracts.models import Contract
@@ -395,3 +395,28 @@ def import_accountability_view(request, pk):
             "accountability/accountability/import.html",
             {"accountability": accountability, "form": form},
         )
+
+def expense_delete_view(request, pk):
+    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    if not expense.accountability.is_on_wip and not expense.accountability.is_correcting:
+        return redirect(
+                "accountability:accountability-detail", pk=expense.accountability.id
+            )
+
+    expense.delete()
+    return redirect(
+        "accountability:accountability-detail", pk=expense.accountability.id
+    )
+
+
+def revenue_delete_view(request, pk):
+    revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
+    if not revenue.accountability.is_on_wip and not revenue.accountability.is_correcting:
+        return redirect(
+                "accountability:accountability-detail", pk=revenue.accountability.id
+            )
+
+    revenue.delete()
+    return redirect(
+        "accountability:accountability-detail", pk=revenue.accountability.id
+    )
