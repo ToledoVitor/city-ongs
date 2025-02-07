@@ -183,6 +183,11 @@ def create_accountability_revenue_view(request, pk):
         return redirect("/accounts-login/")
 
     accountability = get_object_or_404(Accountability, id=pk)
+    if not accountability.is_on_execution:
+        return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
     if request.method == "POST":
         form = RevenueForm(request.POST, request=request)
         if form.is_valid():
@@ -221,6 +226,11 @@ def update_accountability_revenue_view(request, pk):
         return redirect("/accounts-login/")
 
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
+    if not revenue.accountability.is_on_execution:
+        return redirect(
+                "accountability:accountability-detail", pk=revenue.accountability.id
+            )
+
     if request.method == "POST":
         form = RevenueForm(request.POST, instance=revenue, request=request)
         if form.is_valid():
@@ -250,12 +260,37 @@ def update_accountability_revenue_view(request, pk):
             {"revenue": revenue, "form": form},
         )
 
+def duplicate_accountability_revenue_view(request, pk):
+    revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
+    if not revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=revenue.accountability.id
+        )
+
+    with transaction.atomic():
+        revenue.id = None
+        revenue.save()
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DUPLICATED_REVENUE,
+            target_object_id=revenue.id,
+            target_content_object=revenue,
+        )
+        return redirect(
+            "accountability:accountability-detail", pk=revenue.accountability.id
+        )
 
 def create_accountability_expense_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
     accountability = get_object_or_404(Accountability, id=pk)
+    if not accountability.is_on_execution:
+        return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
     if request.method == "POST":
         form = ExpenseForm(request.POST, request=request, accountability=accountability)
         if form.is_valid():
@@ -293,6 +328,11 @@ def update_accountability_expense_view(request, pk):
         return redirect("/accounts-login/")
 
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
+
     if request.method == "POST":
         form = ExpenseForm(request.POST, request=request, instance=expense, accountability=expense.accountability)
         if form.is_valid():
@@ -320,6 +360,27 @@ def update_accountability_expense_view(request, pk):
             request,
             "accountability/expenses/update.html",
             {"expense": expense, "form": form},
+        )
+
+def duplicate_accountability_expense_view(request, pk):
+    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
+
+    with transaction.atomic():
+        expense.id = None
+        expense.save()
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DUPLICATED_EXPENSE,
+            target_object_id=expense.id,
+            target_content_object=expense,
+        )
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
         )
 
 class FavoredListView(LoginRequiredMixin, ListView):
