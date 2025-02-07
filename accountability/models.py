@@ -26,13 +26,6 @@ class Accountability(BaseModel):
         default=0,
     )
 
-    status = models.CharField(
-        verbose_name="Status",
-        choices=StatusChoices,
-        default=StatusChoices.ANALYZING,
-        max_length=22,
-    )
-
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -53,16 +46,12 @@ class Accountability(BaseModel):
         return f"Prestação mês {self.month}"
 
     @property
-    def is_on_wip(self) -> bool:
-        return self.status == Accountability.ReviewStatus.WIP
+    def is_on_execution(self) -> bool:
+        return self.status in {Accountability.ReviewStatus.WIP, Accountability.ReviewStatus.CORRECTING}
 
     @property
     def is_sent(self) -> bool:
         return self.status == Accountability.ReviewStatus.SENT
-
-    @property
-    def is_correcting(self) -> bool:
-        return self.status == Accountability.ReviewStatus.CORRECTING
 
     @property
     def is_finished(self) -> bool:
@@ -73,8 +62,8 @@ class Accountability(BaseModel):
         return Accountability.ReviewStatus(self.status).label
 
     class Meta:
-        verbose_name = "Relatório"
-        verbose_name_plural = "Relatórios"
+        verbose_name = "Prestação"
+        verbose_name_plural = "Prestações"
         unique_together = ("contract", "month", "year")
 
 

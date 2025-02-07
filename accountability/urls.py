@@ -9,6 +9,8 @@ from accountability.views import (
     create_accountability_expense_view,
     create_accountability_revenue_view,
     create_contract_accountability_view,
+    send_accountability_review_analisys,
+    send_accountability_to_analisys_view,
     import_accountability_view,
     expense_delete_view,
     revenue_delete_view,
@@ -27,6 +29,8 @@ urlpatterns = [
         name="accountability-import",
     ),
     path("detail/<uuid:pk>", accountability_detail_view, name="accountability-detail"),
+    path("detail/<uuid:pk>/send-to-analisys", send_accountability_to_analisys_view, name="send-to-analisys"),
+    path("detail/<uuid:pk>/send-review-analisys", send_accountability_review_analisys, name="send-review-analisys"),
     path(
         "detail/<uuid:pk>/import",
         create_contract_accountability_view,
@@ -50,4 +54,5 @@ urlpatterns = [
     ),
     path("expenses/<uuid:pk>/delete/", expense_delete_view, name="expense-delete"),
     path("revenues/<uuid:pk>/delete/", revenue_delete_view, name="revenue-delete"),
+    
 ]

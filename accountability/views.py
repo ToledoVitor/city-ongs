@@ -318,24 +318,27 @@ def import_accountability_view(request, pk):
         return redirect("/accounts-login/")
 
     if request.method == "POST":
-        step = request.POST.get("step")
-
-        if step == "download":
-            accountability = (
-                Accountability.objects.select_related(
-                    "contract",
-                    "contract__checking_account",
-                    "contract__investing_account",
-                    "contract__organization",
-                )
-                .prefetch_related(
-                    "contract__items",
-                    "contract__organization__favoreds",
-                    "contract__organization__resource_sources",
-                )
-                .get(id=pk)
+        accountability = (
+            Accountability.objects.select_related(
+                "contract",
+                "contract__checking_account",
+                "contract__investing_account",
+                "contract__organization",
+            )
+            .prefetch_related(
+                "contract__items",
+                "contract__organization__favoreds",
+                "contract__organization__resource_sources",
+            )
+            .get(id=pk)
+        )
+        if not accountability.is_on_execution:
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
             )
 
+        step = request.POST.get("step")
+        if step == "download":
             xlsx = export_xlsx_model(accountability=accountability)
             response = HttpResponse(
                 xlsx.getvalue(),
@@ -347,12 +350,7 @@ def import_accountability_view(request, pk):
             return response
 
         elif step == "upload":
-            accountability = get_object_or_404(
-                Accountability.objects.select_related("contract"),
-                id=pk,
-            )
             form = ImportXLSXAccountabilityForm(request.POST, request.FILES)
-
             if form.is_valid():
                 imported, revenues_error, expenses_error, applications_error = (
                     import_xlsx_model(
@@ -378,7 +376,6 @@ def import_accountability_view(request, pk):
                     "accountability/accountability/import.html",
                     {"accountability": accountability, "form": form},
                 )
-            return
 
         else:
             return redirect(
@@ -398,25 +395,97 @@ def import_accountability_view(request, pk):
 
 def expense_delete_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
-    if not expense.accountability.is_on_wip and not expense.accountability.is_correcting:
+    if not expense.accountability.is_on_execution:
         return redirect(
                 "accountability:accountability-detail", pk=expense.accountability.id
             )
 
-    expense.delete()
-    return redirect(
-        "accountability:accountability-detail", pk=expense.accountability.id
-    )
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DELETED_EXPENSE,
+            target_object_id=expense.id,
+            target_content_object=expense,
+        )
+        expense.delete()
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
 
 
 def revenue_delete_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
-    if not revenue.accountability.is_on_wip and not revenue.accountability.is_correcting:
+    if not revenue.accountability.is_on_execution:
         return redirect(
                 "accountability:accountability-detail", pk=revenue.accountability.id
             )
+    
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DELETED_REVENUE,
+            target_object_id=revenue.id,
+            target_content_object=revenue,
+        )
+        revenue.delete()
+        return redirect(
+            "accountability:accountability-detail", pk=revenue.accountability.id
+        )
 
-    revenue.delete()
-    return redirect(
-        "accountability:accountability-detail", pk=revenue.accountability.id
-    )
+
+def send_accountability_to_analisys_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if accountability.is_finished:
+        return redirect("home")
+    
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS,
+            target_object_id=accountability.id,
+            target_content_object=accountability,
+        )
+        accountability.status = Accountability.ReviewStatus.SENT
+        accountability.save()
+        return redirect(
+            "accountability:accountability-detail", pk=accountability.id
+        )
+    
+
+def send_accountability_review_analisys(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not accountability.is_sent:
+        return redirect(
+            "accountability:accountability-detail", pk=accountability.id
+        )
+       
+    if not request.user or not request.user.can_change_statuses:
+        return redirect(
+            "accountability:accountability-detail", pk=accountability.id
+        )
+
+    with transaction.atomic():
+        review_status = request.POST.get("review_status")
+
+        if review_status == Accountability.ReviewStatus.CORRECTING:
+            action = ActivityLog.ActivityLogChoices.SENT_TO_CORRECT
+        elif review_status == Accountability.ReviewStatus.FINISHED:
+            action = ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED
+        else:
+            raise ValueError(f"{review_status} - Is an unnknow status review")
+
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=action,
+            target_object_id=accountability.id,
+            target_content_object=accountability,
+        )
+        accountability.status = review_status
+        accountability.save()
+        return redirect(
+            "accountability:accountability-detail", pk=accountability.id
+        )

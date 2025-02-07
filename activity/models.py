@@ -16,7 +16,9 @@ class ActivityLog(models.Model):
         )
         # accountability
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "Criou prestação mensal"
-        UPDATED_ACCOUNTABILITY = "UPDATED_ACCOUNTABILITY", "Atualizou prestação mensal"
+        SENT_TO_ANALISYS = "SENT_TO_ANALISYS", "Enviou para análise"
+        SENT_TO_CORRECT = "SENT_TO_CORRECT", "Enviou para correção"
+        MARKED_AS_FINISHED = "MARKED_AS_FINISHED", "Marcou como finalizada"
         # bank
         CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "Criou conta bancária"
         UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "Atualizou conta bancária"
@@ -65,6 +67,7 @@ class ActivityLog(models.Model):
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
+        DELETED_EXPENSE = "DELETED_EXPENSE", "Deletou despesa"
         # favored
         CREATED_FAVORED = "CREATED_FAVORED", "Cadastrou favorecido"
         UPDATED_FAVORED = "UPDATED_FAVORED", "Atualizou favorecido"
@@ -78,6 +81,7 @@ class ActivityLog(models.Model):
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
         UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
+        DELETED_REVENUE = "DELETED_REVENUE", "Deletou receita"
 
     created_at = models.DateTimeField(
         verbose_name="Hora do registro",

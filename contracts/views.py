@@ -145,27 +145,23 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context["executions"] = (
-            self.object.executions.annotate(
-                count_activities=Count(
-                    "activities",
-                    filter=Q(activities__deleted_at__isnull=True),
-                    distinct=True,
-                ),
-                count_files=Count(
-                    "files", filter=Q(files__deleted_at__isnull=True), distinct=True
-                ),
+            self.object.executions
+            .filter(deleted_at__isnull=True)
+            .annotate(
+                count_activities=Count("activities", filter=Q(activities__deleted_at__isnull=True), distinct=True),
+                count_files=Count("files", filter=Q(files__deleted_at__isnull=True), distinct=True)
             )
             .prefetch_related("activities", "files")
             .order_by("-year", "-month")[:12]
         )
-        context["accountabilities"] = self.object.accountabilities.annotate(
-            count_revenues=Count(
-                "revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True
-            ),
-            count_expenses=Count(
-                "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
-            ),
-        )[:12]
+        context["accountabilities"] = (
+            self.object.accountabilities
+            .filter(deleted_at__isnull=True)
+            .annotate(
+                count_revenues=Count("revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True),
+                count_expenses=Count("expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True),
+            )[:12]
+        )
         return context
 
     def post(self, request, pk, *args, **kwargs):
