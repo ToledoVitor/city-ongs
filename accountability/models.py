@@ -53,6 +53,22 @@ class Accountability(BaseModel):
         return f"Prestação mês {self.month}"
 
     @property
+    def is_on_wip(self) -> bool:
+        return self.status == Accountability.ReviewStatus.WIP
+
+    @property
+    def is_sent(self) -> bool:
+        return self.status == Accountability.ReviewStatus.SENT
+
+    @property
+    def is_correcting(self) -> bool:
+        return self.status == Accountability.ReviewStatus.CORRECTING
+
+    @property
+    def is_finished(self) -> bool:
+        return self.status == Accountability.ReviewStatus.FINISHED
+
+    @property
     def status_label(self) -> str:
         return Accountability.ReviewStatus(self.status).label
 
@@ -424,8 +440,8 @@ class Revenue(BaseModel):
         return Revenue.Nature(self.revenue_nature).label
 
     class Meta:
-        verbose_name = "Recurso"
-        verbose_name_plural = "Recursos"
+        verbose_name = "Revenue"
+        verbose_name_plural = "Revenues"
 
 
 class AccountabilityFile(BaseModel):
