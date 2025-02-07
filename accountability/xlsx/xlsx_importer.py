@@ -103,7 +103,9 @@ class AccountabilityXLSXImporter:
                     accountability=self.accountability,
                     identification=line[2],
                     value=Decimal(line[3]),
-                    receive_date=datetime(receive_date.year, receive_date.month, receive_date.day),
+                    receive_date=datetime(
+                        receive_date.year, receive_date.month, receive_date.day
+                    ),
                     competency=datetime(
                         competency.year, competency.month, competency.day
                     ),

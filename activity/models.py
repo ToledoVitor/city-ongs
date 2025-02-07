@@ -30,7 +30,10 @@ class ActivityLog(models.Model):
             "CREATED_CONTRACT_ADDENDUM",
             "Criou aditivo de contrato",
         )
-        UPDATED_CONTRACT_STATUS = "UPDATED_CONTRACT_STATUS", "Atualizou status do contrato"
+        UPDATED_CONTRACT_STATUS = (
+            "UPDATED_CONTRACT_STATUS",
+            "Atualizou status do contrato",
+        )
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
         COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"
@@ -40,13 +43,25 @@ class ActivityLog(models.Model):
         COMMENTED_CONTRACT_ITEM = "COMMENTED_CONTRACT_ITEM", "Comentou item do contrato"
         UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
         # contract executions
-        CREATED_CONTRACT_EXECUTION = "CREATED_CONTRACT_EXECUTION", "Criou Relatório de Execução"
+        CREATED_CONTRACT_EXECUTION = (
+            "CREATED_CONTRACT_EXECUTION",
+            "Criou Relatório de Execução",
+        )
         # contract executions activities
-        CREATED_EXECUTION_ACTIVITY = "CREATED_EXECUTION_ACTIVITY", "Criou Atividade Executada"
-        UPDATED_EXECUTION_ACTIVITY = "UPDATED_EXECUTION_ACTIVITY", "Atualizou Atividade Executada"
+        CREATED_EXECUTION_ACTIVITY = (
+            "CREATED_EXECUTION_ACTIVITY",
+            "Criou Atividade Executada",
+        )
+        UPDATED_EXECUTION_ACTIVITY = (
+            "UPDATED_EXECUTION_ACTIVITY",
+            "Atualizou Atividade Executada",
+        )
         # contract executions files
         CREATED_EXECUTION_FILE = "CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"
-        UPDATED_EXECUTION_FILE = "UPDATED_EXECUTION_FILE", "Atualizou Arquivo de Atividade"
+        UPDATED_EXECUTION_FILE = (
+            "UPDATED_EXECUTION_FILE",
+            "Atualizou Arquivo de Atividade",
+        )
         # expenses
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"

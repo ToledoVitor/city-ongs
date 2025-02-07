@@ -1,8 +1,8 @@
 import os
 from decimal import Decimal
 
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
@@ -11,7 +11,7 @@ from accounts.models import Area, Organization, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
-from utils.choices import StatesChoices, StatusChoices, MonthChoices
+from utils.choices import MonthChoices, StatesChoices, StatusChoices
 from utils.models import BaseModel
 
 
@@ -238,7 +238,7 @@ class Contract(BaseModel):
     @property
     def total_value_with_point(self) -> str:
         return str(self.total_value).replace(".", ",")
-    
+
     @property
     def is_on_planning(self) -> bool:
         return self.status == Contract.ContractStatusChoices.PLANNING
@@ -295,7 +295,6 @@ class Contract(BaseModel):
             ]
             self.internal_code = 1 if max_code is None else max_code + 1
         super().save(*args, **kwargs)
-
 
 
 class ContractAddendum(BaseModel):
@@ -617,19 +616,14 @@ class ContractExecution(BaseModel):
             target_object_id__in=activities_ids,
         )
 
-        files_ids = [
-            str(id) for id in self.files.values_list("id", flat=True)[:10]
-        ]
+        files_ids = [str(id) for id in self.files.values_list("id", flat=True)[:10]]
         files_logs = ActivityLog.objects.filter(
             target_object_id__in=files_ids,
         )
 
-        combined_querset = (
-            execution_logs
-            | activities_logs
-            | files_logs
-        ).distinct()
+        combined_querset = (execution_logs | activities_logs | files_logs).distinct()
         return combined_querset.order_by("-created_at")[:10]
+
 
 class ContractExecutionActivity(BaseModel):
     execution = models.ForeignKey(

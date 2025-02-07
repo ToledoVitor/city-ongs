@@ -4,14 +4,14 @@ from contracts.models import (
     Company,
     Contract,
     ContractAddendum,
-    ContractGoal,
-    ContractItem,
-    ContractStep,
     ContractExecution,
     ContractExecutionActivity,
     ContractExecutionFile,
+    ContractGoal,
     ContractGoalReview,
+    ContractItem,
     ContractItemReview,
+    ContractStep,
 )
 
 admin.site.register(Company)

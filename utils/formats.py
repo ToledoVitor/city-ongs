@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from decimal import Decimal
 
 
@@ -23,3 +24,14 @@ def document_mask(document: str | None):
         return f"CNPJ: **.{document[2:5]}.{document[5:8]}/{document[8:12]}-**"
     else:
         return f"DOC: {document}"
+
+
+def format_into_brazilian_date(date: datetime | None):
+    if not date:
+        return ""
+
+    day = f"{date.day:02d}"
+    month = f"{date.month:02d}"
+    year = date.year
+
+    return f"{day}/{month}/{year}"

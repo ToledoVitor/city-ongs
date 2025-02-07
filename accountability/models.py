@@ -316,6 +316,18 @@ class Expense(BaseModel):
             return NatureChoices(self.nature).label
         return ""
 
+    @property
+    def document_type_label(self) -> str:
+        if self.document_type:
+            return Expense.DocumentChoices(self.document_type).label
+        return ""
+
+    @property
+    def liquidation_form_label(self) -> str:
+        if self.liquidation_form:
+            return Expense.LiquidationChoices(self.liquidation_form).label
+        return ""
+
     def __str__(self) -> str:
         return f"Despesa {self.id}"
 

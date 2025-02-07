@@ -4,14 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0008_alter_historicalrevenue_options_and_more"),
     ]
 
     operations = [
-        migrations.RemoveField(model_name="historicalrevenue", name="due_date",),
-        migrations.RemoveField(model_name="revenue", name="due_date",),
+        migrations.RemoveField(
+            model_name="historicalrevenue",
+            name="due_date",
+        ),
+        migrations.RemoveField(
+            model_name="revenue",
+            name="due_date",
+        ),
         migrations.AddField(
             model_name="historicalrevenue",
             name="receive_date",

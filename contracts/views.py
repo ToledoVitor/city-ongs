@@ -3,36 +3,36 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from activity.models import ActivityLog
 from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
+    ContractExecutionActivityForm,
+    ContractExecutionCreateForm,
+    ContractExecutionFileForm,
     ContractExtraStepFormSet,
     ContractGoalForm,
     ContractItemForm,
-    ContractStepFormSet,
-    ContractExecutionCreateForm,
-    ContractExecutionActivityForm,
-    ContractExecutionFileForm,
     ContractStatusUpdateForm,
+    ContractStepFormSet,
 )
 from contracts.models import (
     Company,
     Contract,
-    ContractExecutionActivity,
-    ContractGoal,
     ContractExecution,
+    ContractExecutionActivity,
+    ContractExecutionFile,
+    ContractGoal,
     ContractGoalReview,
     ContractItem,
     ContractItemReview,
-    ContractExecutionFile
 )
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -145,21 +145,27 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context["executions"] = (
-            self.object.executions
-            .annotate(
-                count_activities=Count("activities", filter=Q(activities__deleted_at__isnull=True), distinct=True),
-                count_files=Count("files", filter=Q(files__deleted_at__isnull=True), distinct=True)
+            self.object.executions.annotate(
+                count_activities=Count(
+                    "activities",
+                    filter=Q(activities__deleted_at__isnull=True),
+                    distinct=True,
+                ),
+                count_files=Count(
+                    "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+                ),
             )
             .prefetch_related("activities", "files")
             .order_by("-year", "-month")[:12]
         )
-        context["accountabilities"] = (
-            self.object.accountabilities
-            .annotate(
-                count_revenues=Count("revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True),
-                count_expenses=Count("expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True),
-            )[:12]
-        )
+        context["accountabilities"] = self.object.accountabilities.annotate(
+            count_revenues=Count(
+                "revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True
+            ),
+            count_expenses=Count(
+                "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
+            ),
+        )[:12]
         return context
 
     def post(self, request, pk, *args, **kwargs):
@@ -289,7 +295,7 @@ def update_contract_item_view(request, pk, item_pk):
     contract = get_object_or_404(Contract, id=pk)
     if not contract.is_on_planning:
         return redirect("contracts:contracts-detail", pk=contract.id)
-    
+
     item = get_object_or_404(ContractItem, id=item_pk)
 
     if request.method == "POST":
@@ -561,9 +567,7 @@ def create_contract_execution_view(request, pk):
                     target_object_id=execution.id,
                     target_content_object=execution,
                 )
-            return redirect(
-                "contracts:executions-detail", pk=execution.id
-            )
+            return redirect("contracts:executions-detail", pk=execution.id)
     else:
         form = ContractExecutionCreateForm()
         return render(
@@ -571,7 +575,8 @@ def create_contract_execution_view(request, pk):
             "contracts/execution/create.html",
             {"contract": contract, "form": form},
         )
-    
+
+
 class ContractExecutionDetailView(LoginRequiredMixin, DetailView):
     model = ContractExecution
 
@@ -581,10 +586,14 @@ class ContractExecutionDetailView(LoginRequiredMixin, DetailView):
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        return super().get_queryset().prefetch_related(
-            "activities",
-            "activities__step",
-            "files",
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "activities",
+                "activities__step",
+                "files",
+            )
         )
 
     def get_object(self, queryset=None):
@@ -599,7 +608,7 @@ def create_execution_activity_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
-    execution = get_object_or_404(ContractExecution, id=pk)    
+    execution = get_object_or_404(ContractExecution, id=pk)
     if request.method == "POST":
         form = ContractExecutionActivityForm(request.POST, execution=execution)
         if form.is_valid():
@@ -615,9 +624,7 @@ def create_execution_activity_view(request, pk):
                     target_object_id=activity.id,
                     target_content_object=activity,
                 )
-                return redirect(
-                    "contracts:executions-detail", pk=execution.id
-                )
+                return redirect("contracts:executions-detail", pk=execution.id)
         else:
             return render(
                 request,
@@ -640,7 +647,7 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
     context_object_name = "activity"
 
     login_url = "/auth/login"
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["execution"] = kwargs["instance"].execution
@@ -658,12 +665,16 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_queryset(self) -> QuerySet[Any]:
-        return super().get_queryset().select_related(
-            "activity",
-            "activity__execution",
-            "activity__execution__contract",
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "activity",
+                "activity__execution",
+                "activity__execution__contract",
+            )
         )
-    
+
     def get_success_url(self) -> str:
         return reverse_lazy(
             "contracts:executions-detail", kwargs={"pk": self.object.execution.id}
@@ -671,13 +682,13 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
-    
+
 
 def create_execution_file_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
-    execution = get_object_or_404(ContractExecution, id=pk)    
+    execution = get_object_or_404(ContractExecution, id=pk)
     if request.method == "POST":
         form = ContractExecutionFileForm(request.POST)
         if form.is_valid():
@@ -695,9 +706,7 @@ def create_execution_file_view(request, pk):
                     target_object_id=execution_file.id,
                     target_content_object=execution_file,
                 )
-                return redirect(
-                    "contracts:executions-detail", pk=execution.id
-                )
+                return redirect("contracts:executions-detail", pk=execution.id)
         else:
             return render(
                 request,
@@ -712,6 +721,7 @@ def create_execution_file_view(request, pk):
             {"execution": execution, "form": form},
         )
 
+
 class ContractWorkPlanView(LoginRequiredMixin, DetailView):
     model = Contract
 
@@ -722,8 +732,7 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super()
-            .get_queryset()
+            super().get_queryset()
             # .select_related(
             # )
             # .prefetch_related(
@@ -747,8 +756,7 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super()
-            .get_queryset()
+            super().get_queryset()
             # .select_related(
             # )
             # .prefetch_related(
@@ -760,16 +768,16 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs) -> dict:
         return super().get_context_data(**kwargs)
-    
+
 
 def contract_status_change_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
-    
+
     contract = get_object_or_404(Contract, id=pk)
     if not request.user.has_admin_access:
         return redirect("contracts:contracts-detail", pk=contract.id)
-    
+
     if request.method == "POST":
         form = ContractStatusUpdateForm(request.POST)
         if form.is_valid():

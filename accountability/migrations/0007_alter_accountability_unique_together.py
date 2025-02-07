@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0006_alter_accountability_status_and_more"),
         ("contracts", "0006_contractexecutionfile_contractexecution_and_more"),
@@ -12,6 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterUniqueTogether(
-            name="accountability", unique_together={("contract", "month", "year")},
+            name="accountability",
+            unique_together={("contract", "month", "year")},
         ),
     ]
