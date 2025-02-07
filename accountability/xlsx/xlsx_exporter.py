@@ -123,7 +123,7 @@ class AccountabilityXLSXExporter:
             [" CÓDIGO DO CONTRATO ", self.header_breaking_line_format],
             [" IDENTIFICAÇÃO ", self.header_format],
             [" VALOR ", self.header_format],
-            [" VENCIMENTO ", self.header_format],
+            [" RECEBIMENTO ", self.header_format],
             [" COMPETÊNCIA ", self.header_format],
             ["FONTE DE RECURSO", self.header_breaking_line_format],
             ["CONTA BANCÁRIA", self.header_breaking_line_format],

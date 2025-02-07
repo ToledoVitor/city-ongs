@@ -403,8 +403,8 @@ class Revenue(BaseModel):
     competency = models.DateField(
         verbose_name="Competência",
     )
-    due_date = models.DateField(
-        verbose_name="Vencimento",
+    receive_date = models.DateField(
+        verbose_name="Data de Recebimento",
         null=True,
         blank=True,
     )

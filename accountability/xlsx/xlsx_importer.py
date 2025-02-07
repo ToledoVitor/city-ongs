@@ -96,14 +96,14 @@ class AccountabilityXLSXImporter:
             if not line[2]:
                 break
 
-            due_date = line[4]
+            receive_date = line[4]
             competency = line[5]
             revenues.append(
                 Revenue(
                     accountability=self.accountability,
                     identification=line[2],
                     value=Decimal(line[3]),
-                    due_date=datetime(due_date.year, due_date.month, due_date.day),
+                    receive_date=datetime(receive_date.year, receive_date.month, receive_date.day),
                     competency=datetime(
                         competency.year, competency.month, competency.day
                     ),

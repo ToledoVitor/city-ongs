@@ -134,7 +134,7 @@ class RevenueForm(forms.ModelForm):
             "observations",
             "value",
             "competency",
-            "due_date",
+            "receive_date",
             "source",
             "bank_account",
             "revenue_nature",
