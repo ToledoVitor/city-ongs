@@ -192,6 +192,11 @@ class ResourceSource(BaseModel):
 
 
 class Expense(BaseModel):
+    class ReviewStatus(models.TextChoices):
+        IN_ANALISIS = "IN_ANALISIS", "Em Análise"
+        REJECTED = "REJECTED", "Rejeitada"
+        APPROVED = "APPROVED", "Aprovada"
+
     class LiquidationChoices(models.TextChoices):
         BILL = "BILL", "Boleto"
         CHECK = "CHECK", "Cheque"
@@ -229,6 +234,18 @@ class Expense(BaseModel):
         verbose_name="Prestação",
         related_name="expenses",
         on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.IN_ANALISIS,
+        max_length=11,
+    )
+    pendencies = models.CharField(
+        verbose_name="Pendências",
+        max_length=255,
+        null=True,
+        blank=True,
     )
 
     # flags
@@ -330,13 +347,13 @@ class Expense(BaseModel):
     def nature_label(self) -> str:
         if self.nature:
             return NatureChoices(self.nature).label
-        return ""
+        return "-"
 
     @property
     def document_type_label(self) -> str:
         if self.document_type:
             return Expense.DocumentChoices(self.document_type).label
-        return ""
+        return "-"
 
     @property
     def liquidation_form_label(self) -> str:
@@ -382,6 +399,11 @@ class ExpenseAnalysis(BaseModel):
 
 
 class Revenue(BaseModel):
+    class ReviewStatus(models.TextChoices):
+        IN_ANALISIS = "IN_ANALISIS", "Em Análise"
+        REJECTED = "REJECTED", "Rejeitada"
+        APPROVED = "APPROVED", "Aprovada"
+
     class Nature(models.TextChoices):
         UNDUE_CREDIT = "UNDUE_CREDIT", "Crédito Indevido"
         BANK_DEPOSIT = "BANK_DEPOSIT", "Depósito Bancário"
@@ -408,6 +430,18 @@ class Revenue(BaseModel):
         verbose_name="Contabilidade",
         related_name="revenues",
         on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.IN_ANALISIS,
+        max_length=11,
+    )
+    pendencies = models.CharField(
+        verbose_name="Pendências",
+        max_length=255,
+        null=True,
+        blank=True,
     )
 
     # specifications
@@ -468,33 +502,45 @@ class Revenue(BaseModel):
         return Revenue.Nature(self.revenue_nature).label
 
     class Meta:
-        verbose_name = "Revenue"
-        verbose_name_plural = "Revenues"
+        verbose_name = "Receita"
+        verbose_name_plural = "Receitas"
 
 
-class AccountabilityFile(BaseModel):
+class ExpenseFile(BaseModel):
     # file
     category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
-
     expense = models.ForeignKey(
         Expense,
         verbose_name="Despesa",
-        related_name="accountabilitie_files",
-        on_delete=models.CASCADE,
-    )
-
-    revenue = models.ForeignKey(
-        Revenue,
-        verbose_name="Recurso",
-        related_name="accountabilitie_files",
+        related_name="expense_files",
         on_delete=models.CASCADE,
     )
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Arquivo de Prestação {self.id}"
+        return f"Arquivo de Despesa {self.id}"
 
     class Meta:
-        verbose_name = "Receita"
-        verbose_name_plural = "Receitas"
+        verbose_name = "Arquivo de Despesa"
+        verbose_name_plural = "Arquivo de Despesas"
+
+
+class RevenueFile(BaseModel):
+    # file
+    category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
+    revenue = models.ForeignKey(
+        Revenue,
+        verbose_name="Recurso",
+        related_name="revenue_files",
+        on_delete=models.CASCADE,
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Arquivo de Receita {self.id}"
+
+    class Meta:
+        verbose_name = "Arquivo de Receita"
+        verbose_name_plural = "Arquivo de Receitas"

@@ -648,3 +648,115 @@ def send_accountability_review_analisys(request, pk):
         accountability.status = review_status
         accountability.save()
         return redirect("accountability:accountability-detail", pk=accountability.id)
+
+
+def review_accountability_expenses(request, pk, index):
+    accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+    expenses = list(
+        accountability
+        .expenses
+        .select_related(
+            "source",
+            "favored",
+            "item",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+    total_expenses = len(expenses)
+
+    if index < 0 or index >= total_expenses:
+        return redirect("revisar_item", accountability_id=accountability.id, index=0)
+
+    current_expense = expenses[index]
+    if request.method == "POST":
+        with transaction.atomic():
+            current_expense.status = request.POST.get("status")
+            current_expense.pendencies = request.POST.get("pendencies")
+            current_expense.save()
+            
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.REVIEWED_EXPENSE,
+                target_object_id=current_expense.id,
+                target_content_object=current_expense,
+            )
+
+
+        action = request.POST.get("action")
+        if action == "next":
+            next_index = index + 1 if index < total_expenses - 1 else index
+            return redirect("accountability:review-expenses", pk=accountability.id, index=next_index)
+        elif action == "previous":
+            previous_index = index - 1 if index > 0 else 0
+            return redirect("accountability:review-expenses", pk=accountability.id, index=previous_index)
+        elif action == "save_all":
+            return redirect("accountability:accountability-detail", pk=accountability.id)
+    
+    context = {
+        "accountability": accountability,
+        "expense": current_expense,
+        "current_expense_index": index + 1,
+        "total_expenses": total_expenses,
+    }
+    return render(
+        request,
+        "accountability/expenses/review.html",
+        context,
+    )
+
+
+def review_accountability_revenues(request, pk, index):
+    accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+    revenues = list(
+        accountability
+        .revenues
+        .select_related(
+            "source",
+            "bank_account",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+    total_revenues = len(revenues)
+
+    if index < 0 or index >= total_revenues:
+        return redirect("revisar_item", accountability_id=accountability.id, index=0)
+
+    current_revenue = revenues[index]
+    if request.method == "POST":
+        with transaction.atomic():
+            current_revenue.status = request.POST.get("status")
+            current_revenue.pendencies = request.POST.get("pendencies")
+            current_revenue.save()
+
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.REVIEWED_REVENUE,
+                target_object_id=current_revenue.id,
+                target_content_object=current_revenue,
+            )
+
+        action = request.POST.get("action")
+        if action == "next":
+            next_index = index + 1 if index < total_revenues - 1 else index
+            return redirect("accountability:review-revenues", pk=accountability.id, index=next_index)
+        elif action == "previous":
+            previous_index = index - 1 if index > 0 else 0
+            return redirect("accountability:review-revenues", pk=accountability.id, index=previous_index)
+        elif action == "save_all":
+            return redirect("accountability:accountability-detail", pk=accountability.id)
+    
+    context = {
+        "accountability": accountability,
+        "revenue": current_revenue,
+        "current_revenue_index": index + 1,
+        "total_revenues": total_revenues,
+    }
+    return render(
+        request,
+        "accountability/revenues/review.html",
+        context,
+    )

@@ -50,7 +50,7 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   <p class="mt-1 text-sm">Planejada:
-                    {% if expense.planned %}
+                    {% if expense.planned and object.is_on_execution %}
                       &#9989; <br>
                       <button
                         type="button"

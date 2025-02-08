@@ -19,6 +19,8 @@ from accountability.views import (
     send_accountability_to_analisys_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
+    review_accountability_expenses,
+    review_accountability_revenues
 )
 
 urlpatterns = [
@@ -58,6 +60,16 @@ urlpatterns = [
         "<uuid:pk>/accountability/revenues/create",
         create_accountability_revenue_view,
         name="revenues-create",
+    ),
+    path(
+        "<uuid:pk>/accountability/review-expenses/<int:index>/",
+        review_accountability_expenses,
+        name="review-expenses",
+    ),
+    path(
+        "<uuid:pk>/accountability/review-revenues/<int:index>/",
+        review_accountability_revenues,
+        name="review-revenues",
     ),
     path("favoreds/", FavoredListView.as_view(), name="favoreds-list"),
     path(
