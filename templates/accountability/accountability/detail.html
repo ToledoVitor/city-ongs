@@ -154,6 +154,7 @@
   </div>
 </div>
 
+{% if object.is_on_execution %}
 <div
   id="send-to-review-modal"
   tabindex="-1"
@@ -266,7 +267,7 @@
     </div>
   </div>
 </div>
-
+{% elif object.is_sent %}
 <div
   id="send-review-analisys"
   tabindex="-1"
@@ -402,6 +403,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <p class="text-xl my-4 font-bold text-black">Despesas Cadastradas</p>
 

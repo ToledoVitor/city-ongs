@@ -334,7 +334,7 @@
     <!-- Modal content -->
     <div class="relative rounded-lg shadow bg-gray-300">
       <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 mb-10 md:p-5 border-b dark:border-gray-600">
+        <div class="flex items-center justify-between p-2 mb-2 md:p-5 border-b border-gray-600">
             <h3 class="text-xl font-semibold text-black">
               Documentos Anexados
             </h3>
@@ -365,10 +365,88 @@
         </div>
         <!-- Modal body -->
         <div class="p-4 md:p-5">
-            <div class="pb-10">
-              <span class="py-10 my-10 text-base rounded-lg bg-blue-100">documento.pdf</span>
+            <div>
+              <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
+                {% if revenue.files.count %}
+                  {% for file in revenue.files %}
+                  <li class="py-3 sm:pb-4">
+                    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                      <div class="
+                          text-white
+                          ml-2
+                          bg-blue-600
+                          hover:bg-blue-600
+                          focus:ring-4
+                          focus:outline-none
+                          focus:ring-blue-600
+                          font-medium
+                          rounded-full
+                          text-sm
+                          p-2.5
+                          text-center
+                          inline-flex
+                          items-center
+                          me-2
+                        "
+                      >
+                        <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
+                        </svg>                      
+                      </div>
+                      <div class="flex-1 min-w-0">
+                          <a
+                          href="https://google.com.br"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-base font-medium text-blue-600 hover:underline"
+                          >
+                            {{ file.category }}
+                          </a>
+                          <p class="text-xs text-gray-600 truncate">
+                            Anexado em: {{ file.created_at }}
+                          </p>
+                      </div>
+                    </div>
+                  </li>
+                  {% endfor %}  
+                {% else %}
+                <li class="py-3 sm:pb-4">
+                  <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                     <div class="
+                         text-white
+                         ml-2
+                         bg-blue-600
+                         hover:bg-blue-600
+                         focus:ring-4
+                         focus:outline-none
+                         focus:ring-blue-600
+                         font-medium
+                         rounded-full
+                         text-sm
+                         p-2.5
+                         text-center
+                         inline-flex
+                         items-center
+                         me-2
+                       "
+                     >
+                       <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                         <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
+                       </svg>                      
+                     </div>
+                     <div class="flex-1 min-w-0">
+                        <p class="text-base font-medium truncate text-black">
+                           Sem arquivos anexados
+                        </p>
+                        <p class="text-xs text-gray-600 truncate">
+                           Anexado em: ----
+                        </p>
+                     </div>
+                  </div>
+                </li>
+                {% endif %}
+              </ul>
             </div>
-
 
             <div class="my-6">
               <button
@@ -396,6 +474,5 @@
     </div>
   </div>
 </div>
-
 
 {% endblock %}

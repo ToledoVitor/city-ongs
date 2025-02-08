@@ -507,12 +507,18 @@ class Revenue(BaseModel):
 
 
 class ExpenseFile(BaseModel):
-    # file
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/expenses/",
+        null=True,
+        blank=True,
+    )
+
     category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
     expense = models.ForeignKey(
         Expense,
         verbose_name="Despesa",
-        related_name="expense_files",
+        related_name="files",
         on_delete=models.CASCADE,
     )
 
@@ -527,12 +533,18 @@ class ExpenseFile(BaseModel):
 
 
 class RevenueFile(BaseModel):
-    # file
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/revenues/",
+        null=True,
+        blank=True,
+    )
+    
     category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
     revenue = models.ForeignKey(
         Revenue,
         verbose_name="Recurso",
-        related_name="revenue_files",
+        related_name="files",
         on_delete=models.CASCADE,
     )
 

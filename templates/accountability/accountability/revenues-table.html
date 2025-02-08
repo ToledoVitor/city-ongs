@@ -115,6 +115,7 @@
                 </td>
             </tr>
 
+            {% if accountability.is_on_execution %}
             <div
                 id="revenues-duplicate-{{ revenue.id}}"
                 tabindex="-1"
@@ -338,6 +339,7 @@
                   </div>
               </div>
             </div>
+            {% endif %}
 
           {% endfor %}
         {% else %}

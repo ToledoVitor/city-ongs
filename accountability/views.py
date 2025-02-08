@@ -660,6 +660,7 @@ def review_accountability_expenses(request, pk, index):
             "favored",
             "item",
         )
+        .prefetch_related("files")
         .all()
         .order_by("-created_at")
     )
@@ -716,6 +717,7 @@ def review_accountability_revenues(request, pk, index):
             "source",
             "bank_account",
         )
+        .prefetch_related("files")
         .all()
         .order_by("-created_at")
     )

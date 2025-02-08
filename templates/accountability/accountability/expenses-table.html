@@ -50,7 +50,7 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   <p class="mt-1 text-sm">Planejada:
-                    {% if expense.planned and object.is_on_execution %}
+                    {% if expense.planned and accountability.is_on_execution %}
                       &#9989; <br>
                       <button
                         type="button"
@@ -160,6 +160,7 @@
                 </td>
             </tr>
 
+            {% if expense.planned and accountability.is_on_execution %}
             <div
                 id="expenses-gloss-{{ expense.id}}"
                 tabindex="-1"
@@ -271,7 +272,9 @@
                   </div>
               </div>
             </div>
+            {% endif %}
 
+            {% if accountability.is_on_execution %}
             <div
                 id="expenses-duplicate-{{ expense.id}}"
                 tabindex="-1"
@@ -491,6 +494,8 @@
                   </div>
               </div>
             </div>
+            {% endif %}
+
           {% endfor %}
         {% else %}
           <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
