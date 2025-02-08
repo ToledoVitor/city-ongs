@@ -20,6 +20,14 @@ REPORTS_OPTIONS = [
     ("rp_13", "Repasses: Terceiro Setor (RP) - 13"),
     ("rp_14", "Repasses: Terceiro Setor (RP) - 14"),
     ("period_expenses", "Despesas: Realizadas no Período"),
+    (
+        "predicted_versus_realized",
+        "Demonstrativo de Repasses: Previsto versus Reaizado",
+    ),
+    (
+        "consolidated",
+        "Consolidado das Conciliações Bancárias",
+    ),
 ]
 
 

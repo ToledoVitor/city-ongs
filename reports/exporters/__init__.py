@@ -1,3 +1,4 @@
+from .consolidated import ConsolidatedPDFExporter
 from .contract_progress import ContractProgressPDFExporter
 from .pass_on_1 import PassOn1PDFExporter
 from .pass_on_2 import PassOn2PDFExporter
@@ -14,6 +15,7 @@ from .pass_on_12 import PassOn12PDFExporter
 from .pass_on_13 import PassOn13PDFExporter
 from .pass_on_14 import PassOn14PDFExporter
 from .period_expenses import PeriodEpensesPDFExporter
+from .predicted_versus_realized import PredictedVersusRealizedPDFExporter
 
 __all__ = [
     "ContractProgressPDFExporter",
@@ -33,4 +35,6 @@ __all__ = [
     "PassOn13PDFExporter",
     "PassOn14PDFExporter",
     "PeriodEpensesPDFExporter",
+    "PredictedVersusRealizedPDFExporter",
+    "ConsolidatedPDFExporter",
 ]

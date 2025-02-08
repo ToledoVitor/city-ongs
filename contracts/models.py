@@ -1,5 +1,5 @@
 import os
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -287,6 +287,12 @@ class Contract(BaseModel):
             | accountability_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
+
+    @property
+    def month_income_value(self):
+        months_amount = (self.end_of_vigency - self.start_of_vigency).days // 30
+        value_per_month = self.total_value / months_amount
+        return value_per_month.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def save(self, *args, **kwargs):
         if self.internal_code is None:

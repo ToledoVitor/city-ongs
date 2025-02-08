@@ -1,6 +1,8 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
+
+from utils.choices import MonthChoices
 
 
 def format_into_brazilian_currency(value: Decimal | None):
@@ -35,3 +37,20 @@ def format_into_brazilian_date(date: datetime | None):
     year = date.year
 
     return f"{day}/{month}/{year}"
+
+
+def get_month_range(start_date: date | None, end_date: date | None):
+    if not start_date or not end_date:
+        return []
+
+    months = []
+    year, month = start_date.year, start_date.month
+
+    while (year, month) <= (end_date.year, end_date.month):
+        months.append((month, year))
+        month += 1
+        if month > 12:
+            year += 1
+            month = 1
+
+    return months

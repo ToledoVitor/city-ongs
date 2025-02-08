@@ -4,6 +4,7 @@ from datetime import date, datetime
 from accountability.models import Accountability
 from contracts.models import Contract
 from reports.exporters import (
+    ConsolidatedPDFExporter,
     PassOn1PDFExporter,
     PassOn2PDFExporter,
     PassOn3PDFExporter,
@@ -19,6 +20,7 @@ from reports.exporters import (
     PassOn13PDFExporter,
     PassOn14PDFExporter,
     PeriodEpensesPDFExporter,
+    PredictedVersusRealizedPDFExporter,
 )
 
 
@@ -144,6 +146,26 @@ def export_period_expenses(
     ).handle()
 
 
+def export_predicted_versus_realized(
+    accountability: Accountability, start_date: date, end_date: date
+):
+    return PredictedVersusRealizedPDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
+
+
+def export_consolidated(
+    accountability: Accountability, start_date: date, end_date: date
+):
+    return ConsolidatedPDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
+
+
 def _get_start_end_date(month: int, year: int):
     last_day = calendar.monthrange(year, month)[1]
 
@@ -220,6 +242,14 @@ def export_report(accountability: Accountability, report_model: str):
 
         case "period_expenses":
             return export_period_expenses(accountability, start_date, end_date)
+
+        case "predicted_versus_realized":
+            return export_predicted_versus_realized(
+                accountability, start_date, end_date
+            )
+
+        case "consolidated":
+            return export_consolidated(accountability, start_date, end_date)
 
         case _:
             raise ValueError(f"Report model {report_model} is not a valid option")
