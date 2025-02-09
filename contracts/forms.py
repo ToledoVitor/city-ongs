@@ -165,7 +165,7 @@ class ContractGoalForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
-            "observations": BaseTextAreaFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
         }
 
 

@@ -1,8 +1,8 @@
 {% load humanize %}
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-white uppercase bg-gray-50 dark:bg-gray-500 dark:text-white">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
+        <thead class="text-xs uppercase bg-gray-500 text-white">
             <tr>
                 <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
@@ -12,17 +12,15 @@
                     Objetivo
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Etapas
-                </th>
-                <th scope="col" class="px-6 py-3">
                     Status
                 </th>
+                <th />
             </tr>
         </thead>
         <tbody>
             {% if contract.goals.count %}
               {% for goal in contract.goals.all %}
-                <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
+                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
 
                     {% if user.can_change_statuses %}
@@ -30,7 +28,22 @@
                       <button
                         data-modal-target="goals-modal-{{ goal.id}}"
                         data-modal-toggle="goals-modal-{{ goal.id}}"
-                        class="ml-4 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-sm rounded-lg text-sm px-3 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        class="
+                          ml-4
+                          block
+                          text-white
+                          focus:ring-4
+                          focus:outline-none
+                          font-sm
+                          rounded-lg
+                          text-sm
+                          px-3
+                          py-2.5
+                          text-center
+                          bg-blue-600
+                          hover:bg-blue-700
+                          focus:ring-blue-800
+                        "
                         type="button"
                       >
                         Avaliar
@@ -54,7 +67,7 @@
                           <a
                             href="{% url 'contracts:contracts-goals-update' contract.id goal.id %}"
                           >
-                            <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
                             </svg>
                           </a>
@@ -63,28 +76,18 @@
                     {% endif %}
                   </td>
 
-                  <th class="pl-2 pr-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-black max-w-48">
+                  <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
                     {{ goal.name }}
                   </th>
 
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
+                  <td class="px-6 py-4 text-sm text-black max-w-48">
                     {{ goal.objective }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-black max-w-48">
-                    {% if goal.steps.count %}
-                      {% for step in goal.steps.all %}  
-                        <p> - {{ step.name }}</p>
-                      {% endfor %}
-                    {% else %}
-                      <p> - Sem etapas cadastradas </p>
-                    {% endif %}
-                  </td>
-
-                  <td class="px-6 py-4 align-center text-sm text-gray-900 dark:text-black">
+                  <td class="px-6 py-4 align-center text-sm text-black">
                     {% if goal.status == "ANALYZING" %}
                       <span
-                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100"
+                        class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100"
                       >
                         Em análise
                       </span>
@@ -112,6 +115,37 @@
                       >
                         Rejeitado
                       </span>
+                    {% endif %}
+                  </td>
+                  
+                  <td class="pr-3 py-4">
+                    <button 
+                    class="expand-btn text-blue-600 hover:underline mr-2 flex items-center" 
+                    data-target="#details-{{ goal.id }}"
+                    >
+                    Ver Etapas
+                    <svg data-accordion-icon class="ml-2 pl-2 w-4 h-4 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+                    </svg>
+                  </button>
+                </td>
+
+                </tr>
+                <tr id="details-{{ goal.id }}" class="hidden bg-gray-300">
+                  <td colspan="6" class="px-6 py-4 ml-4 text-sm text-black text-left">
+                    {% if goal.steps.count %}
+                      {% for step in goal.steps.all %}
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 pb-3">
+                          <p><strong>Etapa:</strong> {{ step.name }}</p>
+                          <p><strong>Objetivo:</strong> {{ step.objective }}</p>
+                          <p><strong>Metodologia:</strong> {{ step.methodology }}</p>
+                          <p><strong>Recursos:</strong> {{ step.resources }}</p>
+                        </div>
+
+                        <hr class="h-px mb-3 border-0 bg-gray-500">
+                      {% endfor%}
+                    {% else %}
+                      Sem etapas cadastradas
                     {% endif %}
                   </td>
                 </tr>
@@ -143,11 +177,29 @@
                       <!-- Modal content -->
                       <div class="relative rounded-lg shadow bg-gray-300">
                         <!-- Modal header -->
-                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
                               <h3 class="text-xl font-semibold text-black">
                                   Selecione uma opção
                               </h3>
-                              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-black" data-modal-hide="goals-modal-{{ goal.id }}">
+                              <button
+                                type="button"
+                                class="
+                                  end-2.5
+                                  text-gray-400
+                                  bg-transparent
+                                  rounded-lg
+                                  text-sm
+                                  w-8
+                                  h-8
+                                  ms-auto
+                                  inline-flex
+                                  justify-center
+                                  items-center
+                                  hover:bg-gray-600
+                                  hover:text-black
+                                "
+                                data-modal-hide="goals-modal-{{ goal.id }}"
+                              >
                                   <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                   </svg>
@@ -163,11 +215,24 @@
                                       <input type="hidden" name="form_type" value="goals_modal">
                                       <input type="hidden" name="goal_id" value="{{ goal.id }}">
 
-                                      <label for="status" class="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Escolha uma opção</label>
+                                      <label for="status" class="block mb-2 text-sm font-medium text-black">Escolha uma opção</label>
                                       <select
                                           id="goal-status-select"
                                           name="status"
-                                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-00 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                          class="
+                                            border
+                                            text-sm
+                                            rounded-lg
+                                            block
+                                            w-full
+                                            p-2.5
+                                            bg-gray-50
+                                            border-gray-600
+                                            placeholder-gray-400
+                                            text-black
+                                            focus:ring-blue-500
+                                            focus:border-blue-500
+                                          "
                                           {% if not user.can_change_statuses %}
                                           disabled
                                           {% endif %}
@@ -196,7 +261,7 @@
                                               <span class="text-sm font-normal text-gray-600">00:00</span>
                                           </div>
                                           <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                            <p class="text-sm font-normal text-gray-900 dark:text-black">Sem nenhum comentário...</p>
+                                            <p class="text-sm font-normal text-black">Sem nenhum comentário...</p>
                                           </div>
                                         </div>
                                       </div>
@@ -214,7 +279,7 @@
                                               <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                              <p class="text-sm font-normal text-gray-900 dark:text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
@@ -229,7 +294,7 @@
                                                 <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                              <p class="text-sm font-normal text-gray-900 dark:text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
@@ -244,7 +309,19 @@
                                           name="comment"
                                           rows="4"
                                           maxlength="254"
-                                          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-00 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                          class="
+                                            block
+                                            p-2.5
+                                            w-full
+                                            text-sm
+                                            rounded-lg
+                                            border
+                                            border-gray-600
+                                            placeholder-gray-400
+                                            text-black
+                                            focus:ring-blue-500
+                                            focus:border-blue-500
+                                          "
                                           placeholder="....."
                                       ></textarea>
                                       <p id="helper-text-explanation" class="my-2 text-sm text-gray-800">
@@ -253,7 +330,21 @@
                                   </div>
                                   <button
                                       type="submit"
-                                      class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                      class="
+                                        w-full
+                                        text-white
+                                        focus:ring-4
+                                        focus:outline-none
+                                        font-medium
+                                        rounded-lg
+                                        text-sm
+                                        px-5
+                                        py-2.5
+                                        text-center
+                                        bg-blue-600
+                                        hover:bg-blue-700
+                                        focus:ring-blue-800
+                                      "
                                   >
                                       Atualizar
                                   </button>
@@ -264,8 +355,8 @@
                 </div>
               {% endfor %}
             {% else %}
-              <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
                     Nenhuma meta cadastrada
                 </th>
                 <td class="px-6 py-4">
@@ -275,11 +366,12 @@
                     -
                 </td>
                 <td class="px-6 py-4">
-                  -
+                    -
                 </td>
                 <td class="px-6 py-4">
                     -
                 </td>
+                <td class="px-6 py-4" />
               </tr>
             {% endif %}     
         </tbody>
@@ -289,10 +381,25 @@
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
         <a
           href="{% url 'contracts:contracts-goals-create' contract.id %}"
-          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          class="
+            px-3
+            py-2
+            text-sm
+            font-medium
+            text-center
+            inline-flex
+            items-center
+            text-white
+            rounded-lg
+            focus:ring-4
+            focus:outline-none
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
         >
           Adicionar nova meta
-          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
           </svg>
         </a>
@@ -300,3 +407,13 @@
     {% endif %}
       
 </div>
+
+
+<script>
+  document.querySelectorAll('.expand-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const target = document.querySelector(button.dataset.target);
+      target.classList.toggle('hidden');
+    });
+  });
+</script>

@@ -365,6 +365,7 @@ class Expense(BaseModel):
         return f"Despesa {self.id}"
 
 
+# TODO: drop model??
 class ExpenseAnalysis(BaseModel):
     status = models.CharField(
         verbose_name="Status",
