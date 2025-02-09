@@ -7,7 +7,10 @@ from accountability.models import (
     ResourceSource,
     Revenue,
 )
+from bank.models import Transaction
 from contracts.models import ContractItem
+from django.db.models import Q
+from utils.formats import format_into_brazilian_currency
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
@@ -230,3 +233,36 @@ class ImportXLSXAccountabilityForm(forms.Form):
                 )
 
         return xlsx
+
+class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return f"Data: {obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}"
+
+class ReconcileExpenseForm(forms.Form):
+    transactions = CustomTransactionMultipleChoiceField(
+        queryset=Transaction.objects.none(),
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                'style': 'max-height: 200px; overflow-y: scroll;', 
+            }
+        ),
+        required=True,
+    )
+
+    class Meta:
+        model: Expense
+        fields = [
+            "transactions",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["transactions"].queryset = Transaction.objects.filter(
+                Q(bank_account=self.contract.checking_account) |
+                Q(bank_account=self.contract.investing_account)
+            ).filter(
+                expense__isnull=True
+            )

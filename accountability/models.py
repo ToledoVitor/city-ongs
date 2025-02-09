@@ -499,7 +499,9 @@ class Revenue(BaseModel):
 
     @property
     def revenue_nature_label(self) -> str:
-        return Revenue.Nature(self.revenue_nature).label
+        if self.revenue_nature:
+            return Revenue.Nature(self.revenue_nature).label
+        return "-"
 
     class Meta:
         verbose_name = "Receita"
@@ -507,19 +509,33 @@ class Revenue(BaseModel):
 
 
 class ExpenseFile(BaseModel):
+    expense = models.ForeignKey(
+        Expense,
+        verbose_name="Despesa",
+        related_name="files",
+        on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        User,
+        verbose_name="Criado por",
+        related_name="expense_files",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
     file = models.FileField(
         verbose_name="Arquivo",
         upload_to="uploads/expenses/",
         null=True,
         blank=True,
     )
-
-    category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
-    expense = models.ForeignKey(
-        Expense,
-        verbose_name="Despesa",
-        related_name="files",
-        on_delete=models.CASCADE,
+    name = models.CharField(
+        # TODO: remove null
+        verbose_name="Nome do Arquivo",
+        max_length=128,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -533,19 +549,33 @@ class ExpenseFile(BaseModel):
 
 
 class RevenueFile(BaseModel):
-    file = models.FileField(
-        verbose_name="Arquivo",
-        upload_to="uploads/revenues/",
-        null=True,
-        blank=True,
-    )
-    
-    category = models.CharField(verbose_name="Tipo de Anexo", max_length=128)
     revenue = models.ForeignKey(
         Revenue,
         verbose_name="Recurso",
         related_name="files",
         on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        User,
+        verbose_name="Criado por",
+        related_name="revenue_files",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    
+    name = models.CharField(
+        # TODO: remove null
+        verbose_name="Nome do Arquivo",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/revenues/",
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()

@@ -17,6 +17,7 @@ from accountability.forms import (
     ImportXLSXAccountabilityForm,
     ResourceSourceCreateForm,
     RevenueForm,
+    ReconcileExpenseForm,
 )
 from accountability.models import (
     Accountability,
@@ -24,6 +25,7 @@ from accountability.models import (
     Favored,
     ResourceSource,
     Revenue,
+    ExpenseFile,
 )
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
@@ -762,3 +764,75 @@ def review_accountability_revenues(request, pk, index):
         "accountability/revenues/review.html",
         context,
     )
+
+def reconcile_expense_view(request, pk):
+    expense = get_object_or_404(
+        Expense
+        .objects
+        .select_related(
+            "accountability",
+            "accountability__contract",
+            "accountability__contract__checking_account",
+            "accountability__contract__investing_account",
+        ),
+        id=pk
+    )
+    contract = expense.accountability.contract
+    if request.method == "POST":
+        form = ReconcileExpenseForm(request.POST, contract=contract)
+        files = request.FILES.getlist("files")
+        
+        if not files:
+            return render(
+                request,
+                "accountability/expenses/reconcile.html",
+                {
+                    "form": form,
+                    "expense": expense,
+                    "missing_files": True,
+                }
+            )
+
+        if form.is_valid():
+            with transaction.atomic():
+                expense.conciled = True
+                expense.paid = True
+                expense.save()
+                expense.transactions.set(form.cleaned_data["transactions"])
+
+                for file in files:
+                    ExpenseFile.objects.create(
+                        expense=expense,
+                        created_by=request.user,
+                        name=file.name,
+                        file=file
+                    )
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.RECONCILED_EXPENSE,
+                    target_object_id=expense.id,
+                    target_content_object=expense,
+                )
+                return redirect("accountability:accountability-detail", pk=expense.accountability.id)
+
+        else:
+            return render(
+                request,
+                "accountability/expenses/reconcile.html",
+                {
+                    "form": form,
+                    "expense": expense
+                }
+            )
+    else:
+        form = ReconcileExpenseForm(contract=contract)
+        return render(
+            request,
+            "accountability/expenses/reconcile.html",
+            {
+                "form": form,
+                "expense": expense
+            }
+        )

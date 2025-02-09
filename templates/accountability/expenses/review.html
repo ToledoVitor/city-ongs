@@ -375,7 +375,7 @@
             <div>
               <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
                 {% if expense.files.count %}
-                  {% for file in expense.files %}
+                  {% for file in expense.files.all %}
                   <li class="py-3 sm:pb-4">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                       <div class="
@@ -402,14 +402,14 @@
                       </div>
                       <div class="flex-1 min-w-0">
                           <a
-                          href="https://google.com.br"
+                            href="{{ file.file.url }}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="text-base font-medium text-blue-600 hover:underline"
                           >
-                            {{ file.category }}
+                            {{ file.name }}
                           </a>
-                          <p class="text-xs text-gray-600 truncate">
+                          <p class="text-xs mt-2 text-gray-600 truncate">
                             Anexado em: {{ file.created_at }}
                           </p>
                       </div>

@@ -124,7 +124,7 @@
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Natureza: </b> {{ revenue.nature_label }}
+      <b>Natureza: </b> {{ revenue.revenue_nature_label }}
     </div>
     
     <hr class="h-px my-3 border-0 bg-gray-500">
@@ -368,7 +368,7 @@
             <div>
               <ul class="max-w-md divide-y divide-gray-200 dark:divide-gray-700">
                 {% if revenue.files.count %}
-                  {% for file in revenue.files %}
+                  {% for file in revenue.files.all %}
                   <li class="py-3 sm:pb-4">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                       <div class="
@@ -400,7 +400,7 @@
                             rel="noopener noreferrer"
                             class="text-base font-medium text-blue-600 hover:underline"
                           >
-                            {{ file.category }}
+                            {{ file.name }}
                           </a>
                           <p class="text-xs text-gray-600 truncate">
                             Anexado em: {{ file.created_at }}

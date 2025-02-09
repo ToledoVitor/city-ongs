@@ -20,7 +20,8 @@ from accountability.views import (
     update_accountability_expense_view,
     update_accountability_revenue_view,
     review_accountability_expenses,
-    review_accountability_revenues
+    review_accountability_revenues,
+    reconcile_expense_view,
 )
 
 urlpatterns = [
@@ -81,6 +82,11 @@ urlpatterns = [
         "expenses/<uuid:pk>/update/",
         update_accountability_expense_view,
         name="expense-update",
+    ),
+    path(
+        "expenses/<uuid:pk>/reconcile/",
+        reconcile_expense_view,
+        name="expense-reconcile",
     ),
     path(
         "expenses/<uuid:pk>/gloss/",

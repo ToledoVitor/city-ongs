@@ -204,6 +204,14 @@ class Transaction(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+    expense = models.ForeignKey(
+        "accountability.Expense",
+        verbose_name="Despesa",
+        related_name="transactions",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
 
     history = HistoricalRecords()
 

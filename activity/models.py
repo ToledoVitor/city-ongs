@@ -68,6 +68,7 @@ class ActivityLog(models.Model):
         CREATED_EXPENSE = "CREATED_EXPENSE", "Cadastrou despesa"
         UPDATED_EXPENSE = "UPDATED_EXPENSE", "Atualizou despesa"
         GLOSSED_EXPENSE = "GLOSSED_EXPENSE", "Glosou despesa"
+        RECONCILED_EXPENSE = "RECONCILED_EXPENSE", "Conciliou despesa"
         REVIEWED_EXPENSE = "REVIEWED_EXPENSE", "Revisou despesa"
         DUPLICATED_EXPENSE = "DUPLICATED_EXPENSE", "Duplicou despesa"
         DELETED_EXPENSE = "DELETED_EXPENSE", "Deletou despesa"
@@ -84,6 +85,7 @@ class ActivityLog(models.Model):
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
         UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
+        RECONCILED_REVENUE = "RECONCILED_REVENUE", "Conciliou receita"
         REVIEWED_REVENUE = "REVIEWED_REVENUE", "Revisou receita"
         DUPLICATED_REVENUE = "DUPLICATED_REVENUE", "Duplicou receita"
         DELETED_REVENUE = "DELETED_REVENUE", "Deletou receita"

@@ -30,7 +30,34 @@
             <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
                   {{ expense.identification }} <br>
-                  <p class="text-sm"> Pendências: 0</span>
+                  {% if accountability.is_on_execution %}
+                    <a href="{% url 'accountability:expense-reconcile' expense.id %}">
+                      <button
+                        type="button"
+                        class="
+                          text-white
+                          ml-2
+                          bg-blue-600
+                          hover:bg-blue-600
+                          focus:ring-4
+                          focus:outline-none
+                          focus:ring-blue-600
+                          font-medium
+                          rounded-full
+                          text-xs
+                          mt-2
+                          px-2.5
+                          py-1
+                          text-center
+                          inline-flex
+                          items-center
+                          me-2
+                        "
+                      >
+                        conciliar
+                      </button>
+                    </a>
+                  {% endif %}
                 </th>
                 <td class="px-6 py-4 text-sm text-left text-black whitespace-nowrap">
                   <p class="mt-1 text-sm">Paga:
@@ -81,7 +108,6 @@
                     {% else %}
                       &#10060;
                     {% endif %}
-                    
                   </p>
                 </td>
                 <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
