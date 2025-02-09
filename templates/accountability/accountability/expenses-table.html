@@ -60,32 +60,34 @@
                   {% endif %}
                 </th>
                 <td class="px-6 py-4 text-sm text-left text-black whitespace-nowrap">
-                  <p class="mt-1 text-sm">Paga:
+                  <p class="mt-1 text-sm">
                     {% if expense.paid %}
                       &#9989;
                     {% else %}
                       &#10060;
                     {% endif %}
+                    Paga
                   </p>
-                  <p class="mt-1 text-sm">Conciliada:
+                  <p class="mt-1 text-sm">
                     {% if expense.conciled %}
                       &#9989;
                     {% else %}
                       &#10060;
                     {% endif %}
+                    Conciliada
                   </p>
                 </td>
-                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
-                  <p class="mt-1 text-sm">Planejada:
+                <td class="px-6 py-4 text-sm text-black text-left whitespace-nowrap">
+                  <p class="mt-1 text-sm">
                     {% if expense.planned and accountability.is_on_execution %}
-                      &#9989; <br>
+                      &#9989; Planejada <br>
                       <button
                         type="button"
                         data-modal-target="expenses-gloss-{{ expense.id}}"
                         data-modal-toggle="expenses-gloss-{{ expense.id}}"
                         class="
                           text-white
-                          ml-2
+                          ml-4
                           bg-blue-600
                           hover:bg-blue-600
                           focus:ring-4
@@ -106,7 +108,7 @@
                         glosar
                       </button>
                     {% else %}
-                      &#10060;
+                      &#10060; Planejada
                     {% endif %}
                   </p>
                 </td>

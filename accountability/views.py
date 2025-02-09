@@ -386,6 +386,8 @@ def duplicate_accountability_expense_view(request, pk):
 
     with transaction.atomic():
         expense.id = None
+        expense.paid = False
+        expense.conciled = False
         expense.save()
         _ = ActivityLog.objects.create(
             user=request.user,
