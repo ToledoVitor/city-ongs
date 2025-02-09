@@ -12,6 +12,7 @@ from contracts.models import (
     ContractItem,
     ContractItemReview,
     ContractStep,
+    ContractItemNewValueRequest,
 )
 
 admin.site.register(Company)
@@ -25,3 +26,4 @@ admin.site.register(ContractExecutionActivity)
 admin.site.register(ContractExecutionFile)
 admin.site.register(ContractGoalReview)
 admin.site.register(ContractItemReview)
+admin.site.register(ContractItemNewValueRequest)

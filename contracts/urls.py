@@ -19,6 +19,7 @@ from contracts.views import (
     create_execution_file_view,
     update_contract_goal_view,
     update_contract_item_view,
+    item_new_value_request_view,
 )
 
 urlpatterns = [
@@ -39,6 +40,11 @@ urlpatterns = [
         "detail/<uuid:pk>/change-status/",
         contract_status_change_view,
         name="contract-status-change",
+    ),
+    path(
+        "detail/<uuid:pk>/request-new-value/",
+        item_new_value_request_view,
+        name="item-request-new-value",
     ),
     path(
         "detail/<uuid:pk>/executions/create/",

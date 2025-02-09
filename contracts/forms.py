@@ -1,4 +1,6 @@
+from decimal import Decimal
 from django import forms
+from django.db.models import Sum
 
 from accounts.models import User
 from contracts.models import (
@@ -10,6 +12,7 @@ from contracts.models import (
     ContractGoal,
     ContractItem,
     ContractStep,
+    ContractItemNewValueRequest,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -298,3 +301,80 @@ class ContractStatusUpdateForm(forms.Form):
         choices=Contract.ContractStatusChoices.choices,
         widget=BaseSelectFormWidget(),
     )
+
+
+class ContractItemValueRequestForm(forms.ModelForm):
+    month_raise = DecimalMaskedField(max_digits=12, decimal_places=2)
+    anual_raise = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = ContractItemNewValueRequest
+        fields = [
+            "downgrade_item",
+            "raise_item",
+            "month_raise",
+            "anual_raise",
+        ]
+
+        widgets = {
+            "downgrade_item": BaseSelectFormWidget(),
+            "raise_item": BaseSelectFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["downgrade_item"].queryset = ContractItem.objects.filter(contract=self.contract)
+            self.fields["raise_item"].queryset = ContractItem.objects.filter(contract=self.contract)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        downgrade_item = cleaned_data["downgrade_item"]
+        raise_item = cleaned_data["raise_item"]
+
+        if downgrade_item == raise_item:
+            raise forms.ValidationError(
+                "Escolha items diferentes."
+            )
+        
+        if (
+            raise_item.raise_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists() or
+            raise_item.downgrade_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists()
+        ):
+            raise forms.ValidationError(
+                "Já existe um solicitação de remanejamento para o item à incrementar."
+            )
+
+        if (
+            downgrade_item.raise_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists() or
+            downgrade_item.downgrade_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists()
+        ):
+            raise forms.ValidationError(
+                "Já existe um solicitação de remanejamento para o item à diminuir."
+            )
+
+        if cleaned_data["anual_raise"] < cleaned_data["month_raise"]:
+            raise forms.ValidationError(
+                "O acréscimo anual não pode ser menor do que o acréscimo mensal."
+            )
+    
+        expended_value =  downgrade_item.expenses.filter(
+            deleted_at__isnull=True
+        ).aggregate(Sum("value"))["value__sum"]
+
+        if (downgrade_item.anual_expense - cleaned_data["anual_raise"]) <= Decimal("0.00") :
+            raise forms.ValidationError(
+                "Não é possível criar a solicitação. O item à ser remanejado"
+                "ficará com valor negativo."
+            )
+
+        if expended_value < (downgrade_item.anual_expense - cleaned_data["anual_raise"]):
+            raise forms.ValidationError(
+                "Não é possível criar a solicitação. O item à ser remanejado não"
+                "atingirá o valor necessário para cobrir as despesas anuais."
+            )
+
+        return cleaned_data

@@ -708,3 +708,49 @@ class ContractExecutionFile(BaseModel):
     @property
     def file_type(self) -> str:
         return os.path.splitext(self.file.name)[1]
+
+
+class ContractItemNewValueRequest(BaseModel):
+    class ReviewStatus(models.TextChoices):
+        IN_REVIEW = "IN_REVIEW", "Em revisão"
+        REJECTED = "REJECTED", "Rejeitado"
+        APPROVED = "APPROVED", "Aprovado"
+    
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.IN_REVIEW,
+        max_length=9,
+    )
+    requested_by = models.ForeignKey(
+        User,
+        verbose_name="Solicitado por",
+        related_name="item_value_requests",
+        on_delete=models.CASCADE,
+    )
+    downgrade_item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item para diminuir valor",
+        related_name="downgrade_requests",
+        on_delete=models.CASCADE,
+    )
+    raise_item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item para aumentar valor",
+        related_name="raise_requests",
+        on_delete=models.CASCADE,
+    )
+    month_raise = models.DecimalField(
+        verbose_name="Incrementeo Mensal",
+        decimal_places=2,
+        max_digits=12,
+    )
+    anual_raise = models.DecimalField(
+        verbose_name="Incremento Anual",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    class Meta:
+        verbose_name = "Solicitação de Valor Item"
+        verbose_name_plural = "Solicitações de Valores Item"

@@ -160,6 +160,7 @@ class AccountabilityXLSXImporter:
         error = False
         try:
             with transaction.atomic():
+                # TODO: Validate here the expense items
                 Expense.objects.bulk_create(expenses, batch_size=10)
                 return error
         except:

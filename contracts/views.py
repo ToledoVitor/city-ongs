@@ -22,6 +22,7 @@ from contracts.forms import (
     ContractItemForm,
     ContractStatusUpdateForm,
     ContractStepFormSet,
+    ContractItemValueRequestForm,
 )
 from contracts.models import (
     Company,
@@ -799,3 +800,42 @@ def contract_status_change_view(request, pk):
     else:
         form = ContractStatusUpdateForm()
         return render(request, "contracts/status-update.html", {"form": form})
+
+
+def item_new_value_request_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if request.method == "POST":
+        form = ContractItemValueRequestForm(request.POST, contract=contract)
+        if form.is_valid():
+            with transaction.atomic():
+                value_request = form.save(commit=False)
+                value_request.requested_by = request.user
+                value_request.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.REQUEST_NEW_VALUE_ITEM,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
+                return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items/request-raise.html",
+                {
+                    "form": form,
+                    "contract": contract,
+                }
+            )            
+    else:
+        form = ContractItemValueRequestForm(contract=contract)
+        return render(
+            request,
+            "contracts/items/request-raise.html",
+            {
+                "form": form,
+                "contract": contract,
+            }
+        )

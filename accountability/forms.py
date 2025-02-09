@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 from accountability.models import (
     Accountability,
@@ -108,13 +108,14 @@ class ExpenseForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         planned = cleaned_data["planned"]
+        item = cleaned_data["item"]
 
-        if planned and not cleaned_data["item"]:
+        if planned and not item:
             raise forms.ValidationError(
                 "As despesas planejadas devem estar relacionadas com um item de"
                 " aquisição do contrato."
             )
-        elif not planned and cleaned_data["item"]:
+        elif not planned and item:
             raise forms.ValidationError(
                 "As despesas não planejadas não podem estar relacionadas com um item de"
                 " aquisição do contrato."
@@ -123,6 +124,16 @@ class ExpenseForm(forms.ModelForm):
             raise forms.ValidationError(
                 "As despesas não planejadas precisam ter uma natureza da despesa."
             )
+
+        if planned:
+            expended_value =  item.expenses.filter(
+                deleted_at__isnull=True
+            ).aggregate(Sum("value"))["value__sum"]
+            if (expended_value + cleaned_data["value"]) > item.anual_expense:
+                raise forms.ValidationError(
+                    "A despesa ultrapassará o custo anual planejado."
+                    "Solicite um remanejamento na página de items."
+                )
 
         return cleaned_data
 
