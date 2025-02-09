@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0013_remove_historicalaccountabilityfile_expense_and_more"),
     ]

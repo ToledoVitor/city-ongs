@@ -6,17 +6,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0014_expensefile_file_historicalexpensefile_file_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        migrations.RemoveField(model_name="expensefile", name="category",),
-        migrations.RemoveField(model_name="historicalexpensefile", name="category",),
-        migrations.RemoveField(model_name="historicalrevenuefile", name="category",),
-        migrations.RemoveField(model_name="revenuefile", name="category",),
+        migrations.RemoveField(
+            model_name="expensefile",
+            name="category",
+        ),
+        migrations.RemoveField(
+            model_name="historicalexpensefile",
+            name="category",
+        ),
+        migrations.RemoveField(
+            model_name="historicalrevenuefile",
+            name="category",
+        ),
+        migrations.RemoveField(
+            model_name="revenuefile",
+            name="category",
+        ),
         migrations.AddField(
             model_name="expensefile",
             name="created_by",

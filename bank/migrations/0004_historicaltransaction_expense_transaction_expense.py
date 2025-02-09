@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0014_expensefile_file_historicalexpensefile_file_and_more"),
         ("bank", "0003_bankaccount_origin_historicalbankaccount_origin"),

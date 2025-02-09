@@ -14,14 +14,14 @@ from accountability.views import (
     expense_delete_view,
     gloss_accountability_expense_view,
     import_accountability_view,
+    reconcile_expense_view,
     revenue_delete_view,
+    review_accountability_expenses,
+    review_accountability_revenues,
     send_accountability_review_analisys,
     send_accountability_to_analisys_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
-    review_accountability_expenses,
-    review_accountability_revenues,
-    reconcile_expense_view,
 )
 
 urlpatterns = [

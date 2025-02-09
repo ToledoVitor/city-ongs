@@ -15,17 +15,17 @@ from accountability.forms import (
     ExpenseForm,
     FavoredForm,
     ImportXLSXAccountabilityForm,
+    ReconcileExpenseForm,
     ResourceSourceCreateForm,
     RevenueForm,
-    ReconcileExpenseForm,
 )
 from accountability.models import (
     Accountability,
     Expense,
+    ExpenseFile,
     Favored,
     ResourceSource,
     Revenue,
-    ExpenseFile,
 )
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
@@ -653,11 +653,11 @@ def send_accountability_review_analisys(request, pk):
 
 
 def review_accountability_expenses(request, pk, index):
-    accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+    accountability = get_object_or_404(
+        Accountability.objects.select_related("contract"), id=pk
+    )
     expenses = list(
-        accountability
-        .expenses
-        .select_related(
+        accountability.expenses.select_related(
             "source",
             "favored",
             "item",
@@ -677,7 +677,7 @@ def review_accountability_expenses(request, pk, index):
             current_expense.status = request.POST.get("status")
             current_expense.pendencies = request.POST.get("pendencies")
             current_expense.save()
-            
+
             _ = ActivityLog.objects.create(
                 user=request.user,
                 user_email=request.user.email,
@@ -686,17 +686,24 @@ def review_accountability_expenses(request, pk, index):
                 target_content_object=current_expense,
             )
 
-
         action = request.POST.get("action")
         if action == "next":
             next_index = index + 1 if index < total_expenses - 1 else index
-            return redirect("accountability:review-expenses", pk=accountability.id, index=next_index)
+            return redirect(
+                "accountability:review-expenses", pk=accountability.id, index=next_index
+            )
         elif action == "previous":
             previous_index = index - 1 if index > 0 else 0
-            return redirect("accountability:review-expenses", pk=accountability.id, index=previous_index)
+            return redirect(
+                "accountability:review-expenses",
+                pk=accountability.id,
+                index=previous_index,
+            )
         elif action == "save_all":
-            return redirect("accountability:accountability-detail", pk=accountability.id)
-    
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
     context = {
         "accountability": accountability,
         "expense": current_expense,
@@ -711,11 +718,11 @@ def review_accountability_expenses(request, pk, index):
 
 
 def review_accountability_revenues(request, pk, index):
-    accountability = get_object_or_404(Accountability.objects.select_related("contract"), id=pk)
+    accountability = get_object_or_404(
+        Accountability.objects.select_related("contract"), id=pk
+    )
     revenues = list(
-        accountability
-        .revenues
-        .select_related(
+        accountability.revenues.select_related(
             "source",
             "bank_account",
         )
@@ -746,13 +753,21 @@ def review_accountability_revenues(request, pk, index):
         action = request.POST.get("action")
         if action == "next":
             next_index = index + 1 if index < total_revenues - 1 else index
-            return redirect("accountability:review-revenues", pk=accountability.id, index=next_index)
+            return redirect(
+                "accountability:review-revenues", pk=accountability.id, index=next_index
+            )
         elif action == "previous":
             previous_index = index - 1 if index > 0 else 0
-            return redirect("accountability:review-revenues", pk=accountability.id, index=previous_index)
+            return redirect(
+                "accountability:review-revenues",
+                pk=accountability.id,
+                index=previous_index,
+            )
         elif action == "save_all":
-            return redirect("accountability:accountability-detail", pk=accountability.id)
-    
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
     context = {
         "accountability": accountability,
         "revenue": current_revenue,
@@ -765,23 +780,22 @@ def review_accountability_revenues(request, pk, index):
         context,
     )
 
+
 def reconcile_expense_view(request, pk):
     expense = get_object_or_404(
-        Expense
-        .objects
-        .select_related(
+        Expense.objects.select_related(
             "accountability",
             "accountability__contract",
             "accountability__contract__checking_account",
             "accountability__contract__investing_account",
         ),
-        id=pk
+        id=pk,
     )
     contract = expense.accountability.contract
     if request.method == "POST":
         form = ReconcileExpenseForm(request.POST, contract=contract)
         files = request.FILES.getlist("files")
-        
+
         if not files:
             return render(
                 request,
@@ -790,7 +804,7 @@ def reconcile_expense_view(request, pk):
                     "form": form,
                     "expense": expense,
                     "missing_files": True,
-                }
+                },
             )
 
         if form.is_valid():
@@ -805,7 +819,7 @@ def reconcile_expense_view(request, pk):
                         expense=expense,
                         created_by=request.user,
                         name=file.name,
-                        file=file
+                        file=file,
                     )
 
                 _ = ActivityLog.objects.create(
@@ -815,24 +829,20 @@ def reconcile_expense_view(request, pk):
                     target_object_id=expense.id,
                     target_content_object=expense,
                 )
-                return redirect("accountability:accountability-detail", pk=expense.accountability.id)
+                return redirect(
+                    "accountability:accountability-detail", pk=expense.accountability.id
+                )
 
         else:
             return render(
                 request,
                 "accountability/expenses/reconcile.html",
-                {
-                    "form": form,
-                    "expense": expense
-                }
+                {"form": form, "expense": expense},
             )
     else:
         form = ReconcileExpenseForm(contract=contract)
         return render(
             request,
             "accountability/expenses/reconcile.html",
-            {
-                "form": form,
-                "expense": expense
-            }
+            {"form": form, "expense": expense},
         )

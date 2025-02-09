@@ -30,7 +30,7 @@ class ConsolidatedPDFExporter:
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.accountability = (accountability)
+        self.accountability = accountability
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
@@ -73,17 +73,17 @@ class ConsolidatedPDFExporter:
             [
                 "",
                 "",
-                f"**   Banco:** {self.accountability.contract.checking_account.bank_name}"
+                f"**   Banco:** {self.accountability.contract.checking_account.bank_name}",
             ],
             [
                 "",
                 "",
-                f"**   Conta:** {self.accountability.contract.checking_account.account}"
+                f"**   Conta:** {self.accountability.contract.checking_account.account}",
             ],
             [
                 "",
                 "",
-                f"**   Agência:** {self.accountability.contract.checking_account.agency}"
+                f"**   Agência:** {self.accountability.contract.checking_account.agency}",
             ],
         ]
 
@@ -110,7 +110,6 @@ class ConsolidatedPDFExporter:
 
         self.pdf.ln(8)
 
-
     def _draw_first_table_title(self):
         self.__set_helvetica_font(font_size=11, bold=True)
         self.pdf.cell(
@@ -122,14 +121,21 @@ class ConsolidatedPDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.set_y(self.pdf.get_y() + 5)
-        
+
     def _draw_balance_table(self):
         data = []
-        
+
         self.__set_helvetica_font(font_size=8, bold=True)
         self.pdf.set_fill_color(225, 225, 225)
-        self.pdf.cell(190, self.default_cell_height, "Saldos Anteriores", align="L", fill=True, border=0)
-        
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Saldos Anteriores",
+            align="L",
+            fill=True,
+            border=0,
+        )
+
         # col_widths = [90, 50, 50]
         # font = FontFace("Helvetica", "", size_pt=8)
         # with self.pdf.table(

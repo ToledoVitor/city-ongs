@@ -563,7 +563,7 @@ class RevenueFile(BaseModel):
         null=True,
         blank=True,
     )
-    
+
     name = models.CharField(
         # TODO: remove null
         verbose_name="Nome do Arquivo",
