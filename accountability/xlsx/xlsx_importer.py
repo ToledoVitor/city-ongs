@@ -196,6 +196,7 @@ class AccountabilityXLSXImporter:
                 transactions.append(
                     Transaction(
                         name="Aplicação / Resgate",
+                        memo="Aplicação / Resgate",
                         amount=Decimal(line[2]),
                         date=datetime(
                             transaction_date.year,
@@ -204,7 +205,7 @@ class AccountabilityXLSXImporter:
                         ),
                         bank_account_id=self.mapped_cbs.get(line[6]),
                         destination_source_id=self.mapped_frs.get(line[7]),
-                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
+                        transaction_type=Transaction.TransactionTypeChoices.INCOME,
                     )
                 )
 

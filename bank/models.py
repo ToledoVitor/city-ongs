@@ -144,6 +144,7 @@ class Transaction(BaseModel):
         DIRECTDEP = "DIRECTDEP", "depósito direto"
         DIRECTDEBIT = "DIRECTDEBIT", "débito automático"
         REPEATPMT = "REPEATPMT", "pagamento recorrente"
+        INCOME = "INCOME", "retorno de investimentos"
         OTHER = "OTHER", "outros"
 
     bank_account = models.ForeignKey(
