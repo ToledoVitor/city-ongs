@@ -363,7 +363,7 @@ class ContractItemValueRequestForm(forms.ModelForm):
     
         expended_value =  downgrade_item.expenses.filter(
             deleted_at__isnull=True
-        ).aggregate(Sum("value"))["value__sum"]
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
         if (downgrade_item.anual_expense - cleaned_data["anual_raise"]) <= Decimal("0.00") :
             raise forms.ValidationError(
@@ -371,10 +371,30 @@ class ContractItemValueRequestForm(forms.ModelForm):
                 "ficará com valor negativo."
             )
 
-        if expended_value < (downgrade_item.anual_expense - cleaned_data["anual_raise"]):
+        if expended_value > (downgrade_item.anual_expense - cleaned_data["anual_raise"]):
             raise forms.ValidationError(
                 "Não é possível criar a solicitação. O item à ser remanejado não"
                 "atingirá o valor necessário para cobrir as despesas anuais."
             )
 
+        return cleaned_data
+
+
+class ItemValueReviewForm(forms.ModelForm):
+    class Meta:
+        model = ContractItemNewValueRequest
+        fields = [
+            "status",
+            "rejection_reason",
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        rejected = cleaned_data["status"] == "REJECTED"
+        if rejected and not cleaned_data["rejection_reason"]:
+            raise forms.ValidationError(
+                "É necessário informar um motivo para rejeição"
+            )
+        
         return cleaned_data

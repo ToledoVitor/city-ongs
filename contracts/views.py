@@ -23,6 +23,7 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ContractItemValueRequestForm,
+    ItemValueReviewForm,
 )
 from contracts.models import (
     Company,
@@ -34,6 +35,7 @@ from contracts.models import (
     ContractGoalReview,
     ContractItem,
     ContractItemReview,
+    ContractItemNewValueRequest,
 )
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -170,6 +172,10 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
             ),
         )[:12]
+        context["value_requests"] = ContractItemNewValueRequest.objects.filter(
+            raise_item__contract=self.object,
+            status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+        ).select_related("raise_item")[:12]
         return context
 
     def post(self, request, pk, *args, **kwargs):
@@ -838,4 +844,55 @@ def item_new_value_request_view(request, pk):
                 "form": form,
                 "contract": contract,
             }
+        )
+    
+class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
+    model = ContractItemNewValueRequest
+    form_class = ItemValueReviewForm
+
+    template_name = "contracts/items/review-request.html"
+    context_object_name = "object"
+
+    login_url = "/auth/login"
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            instance = form.save(commit=False)
+
+            instance.raise_item.month_expense += instance.month_raise
+            instance.raise_item.anual_expense += instance.anual_raise
+            instance.raise_item.save()
+
+            instance.downgrade_item.month_expense -= instance.month_raise 
+            instance.downgrade_item.anual_expense -= instance.anual_raise
+            instance.downgrade_item.save()
+
+            _ = ActivityLog.objects.create(
+                user=self.request.user,
+                user_email=self.request.user.email,
+                action=ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM,
+                target_object_id=instance.raise_item.contract.id,
+                target_content_object=instance.raise_item.contract,
+            )
+
+        return super().form_valid(form)
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "requested_by",
+                "downgrade_item",
+                "raise_item",
+                "raise_item__contract",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.raise_item.contract.id}
         )

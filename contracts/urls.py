@@ -11,6 +11,7 @@ from contracts.views import (
     ContractsListView,
     ContractTimelineView,
     ContractWorkPlanView,
+    ItemValueRequestReviewView,
     contract_status_change_view,
     create_contract_execution_view,
     create_contract_goal_view,
@@ -112,4 +113,5 @@ urlpatterns = [
         CompanyCreateView.as_view(),
         name="companies-create",
     ),
+    path("requests/<uuid:pk>/review", ItemValueRequestReviewView.as_view(), name="review-value-requests")
 ]

@@ -722,6 +722,13 @@ class ContractItemNewValueRequest(BaseModel):
         default=ReviewStatus.IN_REVIEW,
         max_length=9,
     )
+    rejection_reason = models.CharField(
+        verbose_name="Motivo da rejeição",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
     requested_by = models.ForeignKey(
         User,
         verbose_name="Solicitado por",

@@ -9,7 +9,11 @@
             <ul class="my-1.5 list-disc list-inside">
                 {% for field, errors in form.errors.items %}
                     {% for error in errors %}
-                        <li>{{ field }} - {{ error }}</li>
+                        {% if field == "__all__" %}
+                            <li>{{ error }}</li>
+                        {% else %}
+                            <li>{{ field.label }} - {{ error }}</li>
+                        {% endif %}
                     {% endfor %}
                 {% endfor %}
             </ul>
