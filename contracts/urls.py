@@ -18,9 +18,9 @@ from contracts.views import (
     create_contract_item_view,
     create_execution_activity_view,
     create_execution_file_view,
+    item_new_value_request_view,
     update_contract_goal_view,
     update_contract_item_view,
-    item_new_value_request_view,
 )
 
 urlpatterns = [
@@ -113,5 +113,9 @@ urlpatterns = [
         CompanyCreateView.as_view(),
         name="companies-create",
     ),
-    path("requests/<uuid:pk>/review", ItemValueRequestReviewView.as_view(), name="review-value-requests")
+    path(
+        "requests/<uuid:pk>/review",
+        ItemValueRequestReviewView.as_view(),
+        name="review-value-requests",
+    ),
 ]

@@ -126,9 +126,9 @@ class ExpenseForm(forms.ModelForm):
             )
 
         if planned:
-            expended_value =  item.expenses.filter(
-                deleted_at__isnull=True
-            ).aggregate(Sum("value"))["value__sum"]
+            expended_value = item.expenses.filter(deleted_at__isnull=True).aggregate(
+                Sum("value")
+            )["value__sum"]
             if (expended_value + cleaned_data["value"]) > item.anual_expense:
                 raise forms.ValidationError(
                     "A despesa ultrapassará o custo anual planejado."

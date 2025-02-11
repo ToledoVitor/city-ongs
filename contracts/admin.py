@@ -10,9 +10,9 @@ from contracts.models import (
     ContractGoal,
     ContractGoalReview,
     ContractItem,
+    ContractItemNewValueRequest,
     ContractItemReview,
     ContractStep,
-    ContractItemNewValueRequest,
 )
 
 admin.site.register(Company)

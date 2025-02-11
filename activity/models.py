@@ -44,8 +44,14 @@ class ActivityLog(models.Model):
         CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Cadastrou item do contrato"
         COMMENTED_CONTRACT_ITEM = "COMMENTED_CONTRACT_ITEM", "Comentou item do contrato"
         UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
-        REQUEST_NEW_VALUE_ITEM = "REQUEST_NEW_VALUE_ITEM", "Solicitou nova valor do item"
-        ANALISED_NEW_VALUE_ITEM = "ANALISED_NEW_VALUE_ITEM", "Analisou pedido de novo valor do item"
+        REQUEST_NEW_VALUE_ITEM = (
+            "REQUEST_NEW_VALUE_ITEM",
+            "Solicitou nova valor do item",
+        )
+        ANALISED_NEW_VALUE_ITEM = (
+            "ANALISED_NEW_VALUE_ITEM",
+            "Analisou pedido de novo valor do item",
+        )
         # contract executions
         CREATED_CONTRACT_EXECUTION = (
             "CREATED_CONTRACT_EXECUTION",

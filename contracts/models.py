@@ -715,7 +715,7 @@ class ContractItemNewValueRequest(BaseModel):
         IN_REVIEW = "IN_REVIEW", "Em revisão"
         REJECTED = "REJECTED", "Rejeitado"
         APPROVED = "APPROVED", "Aprovado"
-    
+
     status = models.CharField(
         verbose_name="Status",
         choices=ReviewStatus.choices,

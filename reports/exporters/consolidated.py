@@ -8,6 +8,7 @@ from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
+from bank.models import BankStatement, Transaction
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
 from utils.choices import MonthChoices
@@ -30,7 +31,9 @@ class ConsolidatedPDFExporter:
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = (
+            accountability.contract
+        )  # TODO receive contract instead Accountability
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
@@ -45,6 +48,16 @@ class ConsolidatedPDFExporter:
         self._draw_contract_data()
         self._draw_first_table_title()
         self._draw_balance_table()
+        self._draw_rescue_advise()
+        self._draw_revenue_group_table()
+        self._draw_expenses_table()
+        self._draw_bank_transfers_table()
+        self._draw_final_balance_table()
+        self._draw_second_table_title()
+        self._draw_multi_analysis_table()
+        self._draw_public_pass_on_table()
+        self._draw_expenses_analysis_table()
+        self._draw_release_table()
 
         return self.pdf
 
@@ -64,7 +77,7 @@ class ConsolidatedPDFExporter:
 
     def _draw_contract_data(self):
         contract_data = [
-            ["", "", f"**   Projeto:** {self.accountability.contract.name}"],
+            ["", "", f"**   Projeto:** {self.contract.name}"],
             [
                 "",
                 "",
@@ -73,17 +86,17 @@ class ConsolidatedPDFExporter:
             [
                 "",
                 "",
-                f"**   Banco:** {self.accountability.contract.checking_account.bank_name}",
+                f"**   Banco:** {self.contract.checking_account.bank_name}",
             ],
             [
                 "",
                 "",
-                f"**   Conta:** {self.accountability.contract.checking_account.account}",
+                f"**   Conta:** {self.contract.checking_account.account}",
             ],
             [
                 "",
                 "",
-                f"**   Agência:** {self.accountability.contract.checking_account.agency}",
+                f"**   Agência:** {self.contract.checking_account.agency}",
             ],
         ]
 
@@ -123,7 +136,58 @@ class ConsolidatedPDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_balance_table(self):
-        data = []
+        statement_queryset = (
+            BankStatement.objects.filter(
+                Q(bank_account=self.contract.checking_account)
+                | Q(bank_account=self.contract.investing_account)
+            )
+            .filter(opening_date__gte=self.start_date)
+            .order_by("opening_date")
+            .exclude(bank_account__isnull=True)
+        )
+
+        checking_account_statement = statement_queryset.filter(
+            bank_account=self.contract.checking_account
+        ).first()
+        investing_account_statement = statement_queryset.filter(
+            bank_account=self.contract.investing_account
+        ).first()
+
+        if checking_account_statement:
+            checking_account = checking_account_statement.balance
+        else:
+            checking_account = Decimal("0.00")
+
+        if investing_account_statement:
+            investing_account = investing_account_statement.balance
+        else:
+            investing_account = Decimal("0.00")
+
+        positive_checking = checking_account >= 0
+        positive_investing = investing_account >= 0
+
+        total = checking_account + investing_account
+
+        body_data = [
+            [
+                f"{self.contract.checking_account.account_type_label}",
+                "(+)" if positive_checking else "(-)",
+                f"{format_into_brazilian_currency(checking_account)}",
+            ],
+            [
+                investing_account.account_type_label
+                if investing_account
+                else "Conta Investimento",
+                "(+)" if positive_investing else "(-)",
+                f"{format_into_brazilian_currency(investing_account)}",
+            ],
+        ]
+
+        footer_data = [
+            "**Total dos Saldos Anteriores**",
+            "",
+            f"**{format_into_brazilian_currency(total)}**",
+        ]
 
         self.__set_helvetica_font(font_size=8, bold=True)
         self.pdf.set_fill_color(225, 225, 225)
@@ -131,35 +195,738 @@ class ConsolidatedPDFExporter:
             190,
             self.default_cell_height,
             "Saldos Anteriores",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [90, 70, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=5,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+        self.pdf.ln(1)
+
+    def _draw_rescue_advise(self):
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Aplicações e Resgates dos Recursos Financeiros",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(1)
+
+    def _draw_revenue_group_table(self):
+        checking_account = self.contract.checking_account
+        investing_account = self.contract.investing_account
+
+        revenue_queryset = (
+            Revenue.objects.filter(
+                Q(bank_account=checking_account) | Q(bank_account=investing_account)
+            )
+            .filter(receive_date__gte=self.start_date, receive_date__lte=self.end_date)
+            .exclude(bank_account__isnull=True)
+        )
+
+        body_data = []
+        total = Decimal("0.00")
+
+        for revenue in revenue_queryset:
+            body_data.append(
+                [
+                    revenue.revenue_nature_label,
+                    "(+)",
+                    format_into_brazilian_currency(revenue.value),
+                ]
+            )
+
+            total += revenue.value
+
+        self.total_revenues = total
+
+        footer_data = [
+            "**Total das Receitas**",
+            "",
+            f"**{format_into_brazilian_currency(total)}**",
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Agrupamento das Receitas por Natureza de Receita",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [90, 70, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=5,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+        self.pdf.ln(1)
+
+    def _draw_expenses_table(self):
+        all_expense = Expense.objects.filter(
+            liquidation__gte=self.start_date, liquidation__lte=self.end_date
+        )
+
+        planned_expenses = all_expense.filter(planned=True)
+        not_planned_expenses = all_expense.filter(planned=False)
+        if planned_expenses.count():
+            planned = planned_expenses.aggregate(Sum("value"))["value__sum"]
+        else:
+            planned = Decimal("0.00")
+
+        if not_planned_expenses.count():
+            not_planned = not_planned_expenses.aggregate(Sum("value"))["value__sum"]
+        else:
+            not_planned = Decimal("0.00")
+
+        total = planned + not_planned
+
+        self.total_expenses = total
+
+        body_data = [
+            [
+                "Despesas Planejadas - Previstas no Plano de Trabalho \n ",
+                "(-)",
+                format_into_brazilian_currency(planned),
+            ],
+            [
+                "Despesas Não Planejadas Desconsiderando despesas com investimento (IOF, IR, etc) \n ",
+                "(-)",
+                format_into_brazilian_currency(not_planned),
+            ],
+        ]
+
+        footer_data = [
+            "**Total das Despesas**",
+            "",
+            f"**{format_into_brazilian_currency(total)}**",
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Despesas",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [90, 70, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=5,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+        self.pdf.ln(1)
+
+    def _draw_bank_transfers_table(self):
+        checking_account = self.contract.checking_account
+        investing_account = self.contract.investing_account
+
+        transaction_queryset = (
+            Transaction.objects.filter(
+                Q(bank_account=checking_account) | Q(bank_account=investing_account)
+            )
+            .filter(date__gte=self.start_date, date__lte=self.end_date)
+            .exclude(bank_account__isnull=True)
+        )
+
+        income_transaction = transaction_queryset.filter(amount__gt=Decimal("0.00"))
+        outgoing_transaction = transaction_queryset.filter(amount__lt=Decimal("0.00"))
+
+        if income_transaction.count():
+            income = income_transaction.aggregate(Sum("amount"))["amount__sum"]
+        else:
+            income = Decimal("0.00")
+
+        if outgoing_transaction.count():
+            outgoing = outgoing_transaction.aggregate(Sum("amount"))["amount__sum"]
+        else:
+            outgoing = Decimal("0.00")
+
+        body_data = [
+            [
+                "Entradas",
+                "(+)",
+                f"{format_into_brazilian_currency(income)}",
+            ],
+            [
+                "Saídas" if investing_account else "Saídas",
+                "(-)",
+                f"{format_into_brazilian_currency(outgoing)}",
+            ],
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Transferências Bancárias para outras contas",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [90, 70, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=5,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(1)
+
+    def _draw_final_balance_table(self):
+        investing_account = self.contract.investing_account
+
+        checking_amount = self.contract.checking_account.balance
+        if self.contract.investing_account:
+            investing_amount = self.contract.investing_account.balance
+        else:
+            investing_amount = Decimal("0.00")
+        positive_checking = checking_amount >= 0
+        positive_investing = investing_amount >= 0
+        total = checking_amount + investing_amount
+
+        statement_queryset = (
+            BankStatement.objects.filter(
+                Q(bank_account=self.contract.checking_account)
+                | Q(bank_account=self.contract.investing_account)
+            )
+            .filter(opening_date__gte=self.start_date)
+            .order_by("opening_date")
+            .exclude(bank_account__isnull=True)
+        )
+
+        checking_account_statement = statement_queryset.filter(
+            bank_account=self.contract.checking_account
+        ).first()
+        investing_account_statement = statement_queryset.filter(
+            bank_account=self.contract.investing_account
+        ).first()
+
+        if checking_account_statement:
+            initial_checking_account = checking_account_statement.balance
+        else:
+            initial_checking_account = Decimal("0.00")
+
+        if investing_account_statement:
+            initial_investing_account = investing_account_statement.balance
+        else:
+            initial_investing_account = Decimal("0.00")
+
+        calculated_value = (
+            initial_checking_account
+            + initial_investing_account
+            + self.total_revenues
+            + self.total_expenses
+        )
+
+        body_data = [
+            [
+                f"{self.contract.checking_account.account_type_label}",
+                "(+)" if positive_checking else "(-)",
+                f"{format_into_brazilian_currency(checking_amount)}",
+            ],
+            [
+                investing_account.account_type_label
+                if investing_account
+                else "Conta Investimento",
+                "(+)" if positive_investing else "(-)",
+                f"{format_into_brazilian_currency(investing_amount)}",
+            ],
+        ]
+
+        footer_data = [
+            [
+                "**Total dos Saldos Disponíveis (Banco)**",
+                "",
+                f"**{format_into_brazilian_currency(total)}**",
+            ],
+            [
+                "**Saldo Final Calculado\nEste saldo deverá ser igual ao Total dos Saldos Disponíveis (Banco)**",
+                "",
+                f"**{format_into_brazilian_currency(calculated_value)}**",
+            ],
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Saldos Finais",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [90, 70, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=5,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            self.pdf.set_fill_color(225, 225, 225)
+            for item in footer_data:
+                footer = table.row()
+                for text in item:
+                    footer.cell(text=text, align="C", border=0)
+
+        self.pdf.ln(self.default_cell_height)
+
+    def _draw_second_table_title(self):
+        self.__set_helvetica_font(font_size=10, bold=True)
+        self.pdf.set_fill_color(210, 210, 210)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Visão Analítica dos Lançamentos",
+            align="C",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+            fill=True,
+        )
+
+    def _draw_multi_analysis_table(self):
+        body_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "**Banco:** \n **Sistema**",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        footer_data = [
+            "",
+            "",
+            f"**R$XX.XXX,XX**",
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+    def _draw_public_pass_on_table(self):
+        body_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "**Banco:** \n **Sistema**",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        footer_data = [
+            "",
+            "",
+            f"**R$XX.XXX,XX**",
+        ]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Repasse Público",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+            for item in body_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+    def _draw_expenses_analysis_table(self):
+        total_expenses = "R$YY.YYY,YY"
+
+        planned_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "**Banco:** \n **Sistema**",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        planned_footer_data = [
+            "**Despesas Planejadas**",
+            "",
+            f"**R$XX.XXX,XX**",
+        ]
+
+        unplanned_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "**Banco:** \n **Sistema**",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        unplanned_footer_data = [
+            "**Despesas Não Planejadas**\n__Desconsiderando despesas com investimento (IOF, IR, etc)__",
+            "",
+            f"**R$XX.XXX,XX**",
+        ]
+
+        total_data = ["\nTotal Das Despesas", "", f"\n{total_expenses}"]
+
+        self.__set_helvetica_font(font_size=8, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Despesas",
+            align="C",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        # Despesas Planejadas
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+            for item in planned_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in planned_footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+        # Despesas não Planejadas
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+
+            for item in unplanned_data:
+                body = table.row()
+                for text in item:
+                    body.cell(text=text, align="C", border=0)
+
+            footer = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in unplanned_footer_data:
+                footer.cell(text=text, align="C", border=0)
+
+        # Total das Despesas
+        self.__set_helvetica_font(font_size=8, bold=True)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "B", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            total = table.row()
+            self.pdf.set_fill_color(225, 225, 225)
+            for text in total_data:
+                total.cell(text=text, align="C", border=0)
+
+        self.pdf.ln(self.default_cell_height)
+
+    def _draw_release_table(self):
+        sistem_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "ZZZ Contabilidade",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        bank_data = [
+            [
+                "**Data**",
+                "**Histórico**",
+                "**Valor**",
+            ],
+            [
+                "22/22/22",
+                "ZZZ Contabilidade",
+                "R$XX.XXX,XX",
+            ],
+        ]
+
+        self.__set_helvetica_font(font_size=9, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Lançamentos do extrato bancário não conciliados com o sistema",
             align="L",
             fill=True,
             border=0,
         )
 
-        # col_widths = [90, 50, 50]
-        # font = FontFace("Helvetica", "", size_pt=8)
-        # with self.pdf.table(
-        #     headings_style=font,
-        #     line_height=5,
-        #     align="C",
-        #     col_widths=col_widths,
-        #     repeat_headings=0,
-        #     markdown=True,
-        # ) as table:
-        #     head = table.row()
-        #     self.pdf.set_fill_color(225, 225, 225)
-        #     for text in head_data:
-        #         head.cell(text=text, align="C", border=0)
+        self.pdf.ln(self.default_cell_height)
 
-        #     self.pdf.set_fill_color(255, 255, 255)
-        #     self.__set_helvetica_font(font_size=8, bold=False)
-        #     for item in body_data:
-        #         body = table.row()
-        #         for text in item:
-        #             body.cell(text=text, align="C", border=0)
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+            for item in sistem_data:
+                unconcilied = table.row()
+                for text in item:
+                    unconcilied.cell(text=text, align="C", border=0)
 
-        #     footer = table.row()
-        #     self.pdf.set_fill_color(225, 225, 225)
-        #     self.__set_helvetica_font(font_size=8, bold=False)
-        #     for text in footer_data:
-        #         footer.cell(text=text, align="C", border=0)
+        self.__set_helvetica_font(font_size=9, bold=True)
+        self.pdf.set_fill_color(225, 225, 225)
+        self.pdf.cell(
+            190,
+            self.default_cell_height,
+            "Lançamentos do sistema não conciliados com o banco",
+            align="L",
+            fill=True,
+            border=0,
+        )
+
+        self.pdf.ln(self.default_cell_height)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
+        col_widths = [80, 80, 30]
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=self.default_cell_height,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            self.pdf.set_fill_color(255, 255, 255)
+            self.__set_helvetica_font(font_size=7, bold=False)
+            for item in bank_data:
+                unconcilied = table.row()
+                for text in item:
+                    unconcilied.cell(text=text, align="C", border=0)

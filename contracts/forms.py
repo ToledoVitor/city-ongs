@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from django import forms
 from django.db.models import Sum
 
@@ -11,8 +12,8 @@ from contracts.models import (
     ContractExecutionFile,
     ContractGoal,
     ContractItem,
-    ContractStep,
     ContractItemNewValueRequest,
+    ContractStep,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -326,8 +327,12 @@ class ContractItemValueRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.contract:
-            self.fields["downgrade_item"].queryset = ContractItem.objects.filter(contract=self.contract)
-            self.fields["raise_item"].queryset = ContractItem.objects.filter(contract=self.contract)
+            self.fields["downgrade_item"].queryset = ContractItem.objects.filter(
+                contract=self.contract
+            )
+            self.fields["raise_item"].queryset = ContractItem.objects.filter(
+                contract=self.contract
+            )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -336,21 +341,27 @@ class ContractItemValueRequestForm(forms.ModelForm):
         raise_item = cleaned_data["raise_item"]
 
         if downgrade_item == raise_item:
-            raise forms.ValidationError(
-                "Escolha items diferentes."
-            )
-        
+            raise forms.ValidationError("Escolha items diferentes.")
+
         if (
-            raise_item.raise_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists() or
-            raise_item.downgrade_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists()
+            raise_item.raise_requests.filter(
+                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW
+            ).exists()
+            or raise_item.downgrade_requests.filter(
+                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW
+            ).exists()
         ):
             raise forms.ValidationError(
                 "Já existe um solicitação de remanejamento para o item à incrementar."
             )
 
         if (
-            downgrade_item.raise_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists() or
-            downgrade_item.downgrade_requests.filter(status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW).exists()
+            downgrade_item.raise_requests.filter(
+                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW
+            ).exists()
+            or downgrade_item.downgrade_requests.filter(
+                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW
+            ).exists()
         ):
             raise forms.ValidationError(
                 "Já existe um solicitação de remanejamento para o item à diminuir."
@@ -360,18 +371,22 @@ class ContractItemValueRequestForm(forms.ModelForm):
             raise forms.ValidationError(
                 "O acréscimo anual não pode ser menor do que o acréscimo mensal."
             )
-    
-        expended_value =  downgrade_item.expenses.filter(
+
+        expended_value = downgrade_item.expenses.filter(
             deleted_at__isnull=True
         ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
-        if (downgrade_item.anual_expense - cleaned_data["anual_raise"]) <= Decimal("0.00") :
+        if (downgrade_item.anual_expense - cleaned_data["anual_raise"]) <= Decimal(
+            "0.00"
+        ):
             raise forms.ValidationError(
                 "Não é possível criar a solicitação. O item à ser remanejado"
                 "ficará com valor negativo."
             )
 
-        if expended_value > (downgrade_item.anual_expense - cleaned_data["anual_raise"]):
+        if expended_value > (
+            downgrade_item.anual_expense - cleaned_data["anual_raise"]
+        ):
             raise forms.ValidationError(
                 "Não é possível criar a solicitação. O item à ser remanejado não"
                 "atingirá o valor necessário para cobrir as despesas anuais."
@@ -393,8 +408,6 @@ class ItemValueReviewForm(forms.ModelForm):
 
         rejected = cleaned_data["status"] == "REJECTED"
         if rejected and not cleaned_data["rejection_reason"]:
-            raise forms.ValidationError(
-                "É necessário informar um motivo para rejeição"
-            )
-        
+            raise forms.ValidationError("É necessário informar um motivo para rejeição")
+
         return cleaned_data

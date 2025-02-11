@@ -20,9 +20,9 @@ from contracts.forms import (
     ContractExtraStepFormSet,
     ContractGoalForm,
     ContractItemForm,
+    ContractItemValueRequestForm,
     ContractStatusUpdateForm,
     ContractStepFormSet,
-    ContractItemValueRequestForm,
     ItemValueReviewForm,
 )
 from contracts.models import (
@@ -34,8 +34,8 @@ from contracts.models import (
     ContractGoal,
     ContractGoalReview,
     ContractItem,
-    ContractItemReview,
     ContractItemNewValueRequest,
+    ContractItemReview,
 )
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -833,8 +833,8 @@ def item_new_value_request_view(request, pk):
                 {
                     "form": form,
                     "contract": contract,
-                }
-            )            
+                },
+            )
     else:
         form = ContractItemValueRequestForm(contract=contract)
         return render(
@@ -843,9 +843,10 @@ def item_new_value_request_view(request, pk):
             {
                 "form": form,
                 "contract": contract,
-            }
+            },
         )
-    
+
+
 class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
     model = ContractItemNewValueRequest
     form_class = ItemValueReviewForm
@@ -863,7 +864,7 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
             instance.raise_item.anual_expense += instance.anual_raise
             instance.raise_item.save()
 
-            instance.downgrade_item.month_expense -= instance.month_raise 
+            instance.downgrade_item.month_expense -= instance.month_raise
             instance.downgrade_item.anual_expense -= instance.anual_raise
             instance.downgrade_item.save()
 
@@ -894,5 +895,6 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy(
-            "contracts:contracts-detail", kwargs={"pk": self.object.raise_item.contract.id}
+            "contracts:contracts-detail",
+            kwargs={"pk": self.object.raise_item.contract.id},
         )
