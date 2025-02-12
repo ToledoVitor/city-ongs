@@ -1,6 +1,5 @@
-import copy
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import Q, Sum
@@ -9,13 +8,10 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from bank.models import BankStatement, Transaction
-from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
-from utils.choices import MonthChoices
 from utils.formats import (
     format_into_brazilian_currency,
     format_into_brazilian_date,
-    get_month_range,
 )
 
 
@@ -36,6 +32,27 @@ class ConsolidatedPDFExporter:
         )  # TODO receive contract instead Accountability
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
+
+        self.checking_account = self.contract.checking_account
+        self.investing_account = self.contract.investing_account
+
+        self.transaction_queryset = (
+            Transaction.objects.filter(
+                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
+            )
+            .filter(date__gte=self.start_date, date__lte=self.end_date)
+            .exclude(bank_account__isnull=True)
+        )
+        self.statement_queryset = (
+            BankStatement.objects.filter(
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
+            )
+            .filter(opening_date__gte=self.start_date)
+            .order_by("opening_date")
+            .exclude(bank_account__isnull=True)
+        )
+
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -86,17 +103,17 @@ class ConsolidatedPDFExporter:
             [
                 "",
                 "",
-                f"**   Banco:** {self.contract.checking_account.bank_name}",
+                f"**   Banco:** {self.checking_account.bank_name}",
             ],
             [
                 "",
                 "",
-                f"**   Conta:** {self.contract.checking_account.account}",
+                f"**   Conta:** {self.checking_account.account}",
             ],
             [
                 "",
                 "",
-                f"**   Agência:** {self.contract.checking_account.agency}",
+                f"**   Agência:** {self.checking_account.agency}",
             ],
         ]
 
@@ -136,21 +153,11 @@ class ConsolidatedPDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_balance_table(self):
-        statement_queryset = (
-            BankStatement.objects.filter(
-                Q(bank_account=self.contract.checking_account)
-                | Q(bank_account=self.contract.investing_account)
-            )
-            .filter(opening_date__gte=self.start_date)
-            .order_by("opening_date")
-            .exclude(bank_account__isnull=True)
-        )
-
-        checking_account_statement = statement_queryset.filter(
-            bank_account=self.contract.checking_account
+        checking_account_statement = self.statement_queryset.filter(
+            bank_account=self.checking_account
         ).first()
-        investing_account_statement = statement_queryset.filter(
-            bank_account=self.contract.investing_account
+        investing_account_statement = self.statement_queryset.filter(
+            bank_account=self.investing_account
         ).first()
 
         if checking_account_statement:
@@ -170,7 +177,7 @@ class ConsolidatedPDFExporter:
 
         body_data = [
             [
-                f"{self.contract.checking_account.account_type_label}",
+                f"{self.checking_account.account_type_label}",
                 "(+)" if positive_checking else "(-)",
                 f"{format_into_brazilian_currency(checking_account)}",
             ],
@@ -242,12 +249,9 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_revenue_group_table(self):
-        checking_account = self.contract.checking_account
-        investing_account = self.contract.investing_account
-
         self.revenue_queryset = (
             Revenue.objects.filter(
-                Q(bank_account=checking_account) | Q(bank_account=investing_account)
+                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
             )
             .filter(receive_date__gte=self.start_date, receive_date__lte=self.end_date)
             .exclude(bank_account__isnull=True)
@@ -400,12 +404,9 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_bank_transfers_table(self):
-        checking_account = self.contract.checking_account
-        investing_account = self.contract.investing_account
-
         transaction_queryset = (
             Transaction.objects.filter(
-                Q(bank_account=checking_account) | Q(bank_account=investing_account)
+                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
             )
             .filter(date__gte=self.start_date, date__lte=self.end_date)
             .exclude(bank_account__isnull=True)
@@ -431,7 +432,7 @@ class ConsolidatedPDFExporter:
                 f"{format_into_brazilian_currency(income)}",
             ],
             [
-                "Saídas" if investing_account else "Saídas",
+                "Saídas" if self.investing_account else "Saídas",
                 "(-)",
                 f"{format_into_brazilian_currency(outgoing)}",
             ],
@@ -482,32 +483,21 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_final_balance_table(self):
-        investing_account = self.contract.investing_account
-
-        checking_amount = self.contract.checking_account.balance
-        if self.contract.investing_account:
-            investing_amount = self.contract.investing_account.balance
+        checking_amount = self.checking_account.balance
+        if self.investing_account:
+            investing_amount = self.investing_account.balance
         else:
             investing_amount = Decimal("0.00")
+
         positive_checking = checking_amount >= 0
         positive_investing = investing_amount >= 0
         total = checking_amount + investing_amount
 
-        statement_queryset = (
-            BankStatement.objects.filter(
-                Q(bank_account=self.contract.checking_account)
-                | Q(bank_account=self.contract.investing_account)
-            )
-            .filter(opening_date__gte=self.start_date)
-            .order_by("opening_date")
-            .exclude(bank_account__isnull=True)
-        )
-
-        checking_account_statement = statement_queryset.filter(
-            bank_account=self.contract.checking_account
+        checking_account_statement = self.statement_queryset.filter(
+            bank_account=self.checking_account
         ).first()
-        investing_account_statement = statement_queryset.filter(
-            bank_account=self.contract.investing_account
+        investing_account_statement = self.statement_queryset.filter(
+            bank_account=self.investing_account
         ).first()
 
         if checking_account_statement:
@@ -529,13 +519,13 @@ class ConsolidatedPDFExporter:
 
         body_data = [
             [
-                f"{self.contract.checking_account.account_type_label}",
+                f"{self.checking_account.account_type_label}",
                 "(+)" if positive_checking else "(-)",
                 f"{format_into_brazilian_currency(checking_amount)}",
             ],
             [
-                investing_account.account_type_label
-                if investing_account
+                self.investing_account.account_type_label
+                if self.investing_account
                 else "Conta Investimento",
                 "(+)" if positive_investing else "(-)",
                 f"{format_into_brazilian_currency(investing_amount)}",
@@ -607,25 +597,34 @@ class ConsolidatedPDFExporter:
         )
 
     def _draw_reimbursement_interest_table(self):
+
         reimbursement_interest_queryset = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
         )
         total_reimbursement = Decimal("0.00")
-        body_data = []
-
-        body_data.append(
+        body_data = [
             [
                 "**Data**",
                 "**Histórico**",
                 "**Valor**",
             ]
-        )
+        ]
+
+        ### SE FOR TRANSACTION
+        # for transaction in self.transaction_queryset:
+        #     body_data.append(
+        #         [
+        #             format_into_brazilian_date(transaction.date),
+        #             transaction.memo, # ou transaction.name, testar
+        #             format_into_brazilian_currency(transaction.amount),
+        #         ]
+        #     )
 
         for public_transfer in reimbursement_interest_queryset:
             body_data.append(
                 [
                     format_into_brazilian_date(public_transfer.receive_date),
-                    str(public_transfer.history),  # TODO, receio de criar a label
+                    str(public_transfer.revenue_nature_label),  # TODO, receio de criar a label
                     format_into_brazilian_currency(public_transfer.value),
                 ]
             )
