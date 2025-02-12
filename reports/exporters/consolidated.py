@@ -54,7 +54,7 @@ class ConsolidatedPDFExporter:
         self._draw_bank_transfers_table()
         self._draw_final_balance_table()
         self._draw_second_table_title()
-        self._draw_multi_analysis_table()
+        self._draw_reimbursement_interest_table()
         self._draw_public_pass_on_table()
         self._draw_expenses_analysis_table()
         self._draw_release_table()
@@ -245,7 +245,7 @@ class ConsolidatedPDFExporter:
         checking_account = self.contract.checking_account
         investing_account = self.contract.investing_account
 
-        revenue_queryset = (
+        self.revenue_queryset = (
             Revenue.objects.filter(
                 Q(bank_account=checking_account) | Q(bank_account=investing_account)
             )
@@ -256,7 +256,7 @@ class ConsolidatedPDFExporter:
         body_data = []
         total = Decimal("0.00")
 
-        for revenue in revenue_queryset:
+        for revenue in self.revenue_queryset:
             body_data.append(
                 [
                     revenue.revenue_nature_label,
@@ -313,23 +313,23 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_expenses_table(self):
-        all_expense = Expense.objects.filter(
+        self.all_expense = Expense.objects.filter(
             liquidation__gte=self.start_date, liquidation__lte=self.end_date
         )
 
-        planned_expenses = all_expense.filter(planned=True)
-        not_planned_expenses = all_expense.filter(planned=False)
-        if planned_expenses.count():
-            planned = planned_expenses.aggregate(Sum("value"))["value__sum"]
+        self.planned_expenses = self.all_expense.filter(planned=True)
+        self.unplanned_expenses = self.all_expense.filter(planned=False)
+        if self.planned_expenses.count():
+            planned = self.planned_expenses.aggregate(Sum("value"))["value__sum"]
         else:
             planned = Decimal("0.00")
 
-        if not_planned_expenses.count():
-            not_planned = not_planned_expenses.aggregate(Sum("value"))["value__sum"]
+        if self.unplanned_expenses.count():
+            unplanned = self.unplanned_expenses.aggregate(Sum("value"))["value__sum"]
         else:
-            not_planned = Decimal("0.00")
+            unplanned = Decimal("0.00")
 
-        total = planned + not_planned
+        total = planned + unplanned
 
         self.total_expenses = total
 
@@ -342,7 +342,7 @@ class ConsolidatedPDFExporter:
             [
                 "Despesas Não Planejadas Desconsiderando despesas com investimento (IOF, IR, etc) \n ",
                 "(-)",
-                format_into_brazilian_currency(not_planned),
+                format_into_brazilian_currency(unplanned),
             ],
         ]
 
@@ -606,24 +606,36 @@ class ConsolidatedPDFExporter:
             fill=True,
         )
 
-    def _draw_multi_analysis_table(self):
-        body_data = [
+    def _draw_reimbursement_interest_table(self):
+        reimbursement_interest_queryset = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
+        )
+        total_reimbursement = Decimal("0.00")
+        body_data = []
+
+        body_data.append(
             [
                 "**Data**",
                 "**Histórico**",
                 "**Valor**",
-            ],
-            [
-                "22/22/22",
-                "**Banco:** \n **Sistema**",
-                "R$XX.XXX,XX",
-            ],
-        ]
+            ]
+        )
+
+        for public_transfer in reimbursement_interest_queryset:
+            body_data.append(
+                [
+                    format_into_brazilian_date(public_transfer.receive_date),
+                    str(public_transfer.history),  # TODO, receio de criar a label
+                    format_into_brazilian_currency(public_transfer.value),
+                ]
+            )
+
+            total_reimbursement += public_transfer.value
 
         footer_data = [
             "",
             "",
-            f"**R$XX.XXX,XX**",
+            f"**{format_into_brazilian_currency(total_reimbursement)}**",
         ]
 
         self.__set_helvetica_font(font_size=8, bold=True)
@@ -639,9 +651,9 @@ class ConsolidatedPDFExporter:
 
         self.pdf.ln(self.default_cell_height)
 
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_helvetica_font(font_size=7, bold=False)
         col_widths = [80, 80, 30]
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("Helvetica", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
             line_height=self.default_cell_height,
@@ -651,7 +663,6 @@ class ConsolidatedPDFExporter:
             markdown=True,
         ) as table:
             self.pdf.set_fill_color(255, 255, 255)
-            self.__set_helvetica_font(font_size=7, bold=False)
             for item in body_data:
                 body = table.row()
                 for text in item:
@@ -663,23 +674,35 @@ class ConsolidatedPDFExporter:
                 footer.cell(text=text, align="C", border=0)
 
     def _draw_public_pass_on_table(self):
-        body_data = [
+        public_transfer_queryset = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER  # TODO não sei se tá certo
+        )
+        total_public_transfer = Decimal("0.00")
+        body_data = []
+
+        body_data.append(
             [
                 "**Data**",
                 "**Histórico**",
                 "**Valor**",
-            ],
-            [
-                "22/22/22",
-                "**Banco:** \n **Sistema**",
-                "R$XX.XXX,XX",
-            ],
-        ]
+            ]
+        )
+
+        for public_transfer in public_transfer_queryset:
+            body_data.append(
+                [
+                    format_into_brazilian_date(public_transfer.receive_date),
+                    str(public_transfer.history),  # TODO, receio de criar a label
+                    format_into_brazilian_currency(public_transfer.value),
+                ]
+            )
+
+            total_public_transfer += public_transfer.value
 
         footer_data = [
             "",
             "",
-            f"**R$XX.XXX,XX**",
+            f"**{format_into_brazilian_currency(total_public_transfer)}**",
         ]
 
         self.__set_helvetica_font(font_size=8, bold=True)
@@ -719,7 +742,19 @@ class ConsolidatedPDFExporter:
                 footer.cell(text=text, align="C", border=0)
 
     def _draw_expenses_analysis_table(self):
-        total_expenses = "R$YY.YYY,YY"
+        if self.planned_expenses.count():
+            total_planned = self.planned_expenses.aggregate(Sum("value"))["value__sum"]
+        else:
+            total_planned = Decimal("0.00")
+
+        if self.unplanned_expenses.count():
+            total_unplanned = self.unplanned_expenses.aggregate(Sum("value"))[
+                "value__sum"
+            ]
+        else:
+            total_unplanned = Decimal("0.00")
+
+        total_expenses = total_planned + total_unplanned
 
         planned_data = [
             [
@@ -727,17 +762,6 @@ class ConsolidatedPDFExporter:
                 "**Histórico**",
                 "**Valor**",
             ],
-            [
-                "22/22/22",
-                "**Banco:** \n **Sistema**",
-                "R$XX.XXX,XX",
-            ],
-        ]
-
-        planned_footer_data = [
-            "**Despesas Planejadas**",
-            "",
-            f"**R$XX.XXX,XX**",
         ]
 
         unplanned_data = [
@@ -746,17 +770,36 @@ class ConsolidatedPDFExporter:
                 "**Histórico**",
                 "**Valor**",
             ],
-            [
-                "22/22/22",
-                "**Banco:** \n **Sistema**",
-                "R$XX.XXX,XX",
-            ],
         ]
+
+        for planned in self.planned_expenses:
+            planned_data.append(
+                [
+                    format_into_brazilian_date(planned.liquidation),
+                    str(planned.history),  # TODO, receio de criar a label
+                    format_into_brazilian_currency(planned.value),
+                ]
+            )
+
+        planned_footer_data = [
+            "**Despesas Planejadas**",
+            "",
+            f"**{format_into_brazilian_currency(total_planned)}**",
+        ]
+
+        for unplanned in self.unplanned_expenses:
+            planned_data.append(
+                [
+                    format_into_brazilian_date(unplanned.liquidation),
+                    str(unplanned.history),  # TODO, receio de criar a label
+                    format_into_brazilian_currency(unplanned.value),
+                ]
+            )
 
         unplanned_footer_data = [
             "**Despesas Não Planejadas**\n__Desconsiderando despesas com investimento (IOF, IR, etc)__",
             "",
-            f"**R$XX.XXX,XX**",
+            f"**{format_into_brazilian_currency(total_unplanned)}**",
         ]
 
         total_data = ["\nTotal Das Despesas", "", f"\n{total_expenses}"]
