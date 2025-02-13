@@ -404,7 +404,7 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_bank_transfers_table(self):
-        transaction_queryset = (
+        self.transaction_queryset = (
             Transaction.objects.filter(
                 Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
             )
@@ -412,8 +412,8 @@ class ConsolidatedPDFExporter:
             .exclude(bank_account__isnull=True)
         )
 
-        income_transaction = transaction_queryset.filter(amount__gt=Decimal("0.00"))
-        outgoing_transaction = transaction_queryset.filter(amount__lt=Decimal("0.00"))
+        income_transaction = self.transaction_queryset.filter(amount__gt=Decimal("0.00"))
+        outgoing_transaction = self.transaction_queryset.filter(amount__lt=Decimal("0.00"))
 
         if income_transaction.count():
             income = income_transaction.aggregate(Sum("amount"))["amount__sum"]
@@ -600,6 +600,7 @@ class ConsolidatedPDFExporter:
 
         reimbursement_interest_queryset = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
+            # bank_account__revenues__revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST
         )
         total_reimbursement = Decimal("0.00")
         body_data = [
@@ -610,22 +611,12 @@ class ConsolidatedPDFExporter:
             ]
         ]
 
-        ### SE FOR TRANSACTION
-        # for transaction in self.transaction_queryset:
-        #     body_data.append(
-        #         [
-        #             format_into_brazilian_date(transaction.date),
-        #             transaction.memo, # ou transaction.name, testar
-        #             format_into_brazilian_currency(transaction.amount),
-        #         ]
-        #     )
-
-        for public_transfer in reimbursement_interest_queryset:
+        for reimbursement in reimbursement_interest_queryset:
             body_data.append(
                 [
-                    format_into_brazilian_date(public_transfer.receive_date),
-                    str(public_transfer.revenue_nature_label),  # TODO, receio de criar a label
-                    format_into_brazilian_currency(public_transfer.value),
+                    format_into_brazilian_date(reimbursement.receive_date),
+                    str(reimbursement.bank_account.revenue.revenue_nature_label),  # TODO, receio de criar a label
+                    format_into_brazilian_currency(reimbursement.value),
                 ]
             )
 
@@ -885,7 +876,7 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(self.default_cell_height)
 
     def _draw_release_table(self):
-        sistem_data = [
+        not_in_sistem_data = [
             [
                 "**Data**",
                 "**Histórico**",
@@ -898,7 +889,7 @@ class ConsolidatedPDFExporter:
             ],
         ]
 
-        bank_data = [
+        not_in_bank_data = [
             [
                 "**Data**",
                 "**Histórico**",
@@ -917,6 +908,7 @@ class ConsolidatedPDFExporter:
             190,
             self.default_cell_height,
             "Lançamentos do extrato bancário não conciliados com o sistema",
+            # TODO necessário interação com o Usuário
             align="L",
             fill=True,
             border=0,
@@ -937,7 +929,7 @@ class ConsolidatedPDFExporter:
         ) as table:
             self.pdf.set_fill_color(255, 255, 255)
             self.__set_helvetica_font(font_size=7, bold=False)
-            for item in sistem_data:
+            for item in not_in_sistem_data:
                 unconcilied = table.row()
                 for text in item:
                     unconcilied.cell(text=text, align="C", border=0)
@@ -948,6 +940,7 @@ class ConsolidatedPDFExporter:
             190,
             self.default_cell_height,
             "Lançamentos do sistema não conciliados com o banco",
+            # TODO necessário interação com o Usuário
             align="L",
             fill=True,
             border=0,
@@ -968,7 +961,7 @@ class ConsolidatedPDFExporter:
         ) as table:
             self.pdf.set_fill_color(255, 255, 255)
             self.__set_helvetica_font(font_size=7, bold=False)
-            for item in bank_data:
+            for item in not_in_bank_data:
                 unconcilied = table.row()
                 for text in item:
                     unconcilied.cell(text=text, align="C", border=0)
