@@ -1,12 +1,14 @@
 import copy
 from dataclasses import dataclass
+from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense
+from accountability.models import Expense, Revenue
+from bank.models import BankStatement
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency
@@ -25,7 +27,7 @@ class PassOn2PDFExporter:
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.accountability = accountability
-        self.start_date = start_date
+        self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
     def __set_helvetica_font(self, font_size=7, bold=False):
@@ -34,7 +36,27 @@ class PassOn2PDFExporter:
         else:
             self.pdf.set_font("Helvetica", "", font_size)
 
+    def __database_queries(self):
+        self.checking_account = self.accountability.contract.checking_account
+        self.investing_account = self.accountability.contract.investing_account
+
+        self.statement_queryset = (
+            BankStatement.objects.filter(
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
+            )
+            .filter(opening_date__gte=self.start_date)
+            .order_by("opening_date")
+            .exclude(bank_account__isnull=True)
+        )
+
+        self.revenue_queryset = Revenue.objects.filter(
+            Q(bank_account=self.checking_account)
+            | Q(bank_account=self.investing_account)
+        ).exclude(bank_account__isnull=True)
+
     def handle(self):
+        self.__database_queries()
         self._draw_header()
         self._draw_form()
         self._draw_table_I()
@@ -61,11 +83,12 @@ class PassOn2PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 10)
 
     def _draw_form(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
             6,
-            "ÓRGÃO CONCESSOR:",
+            text=f"**ÓRGÃO CONCESSOR:** {self.accountability.contract.organization.city_hall.name}",
+            markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -74,7 +97,38 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            "TIPO DE CONCESSÃO: (1)",
+            f"**TIPO DE CONCESSÃO (1):** {self.accountability.contract.concession_type}",
+            align="L",
+            markdown=True,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.default_cell_height
+        self.pdf.cell(
+            0,
+            6,
+            "**LEI AUTORIZADORA OU CONVÊNIO:**",  # TODO não sei o que é.
+            align="L",
+            markdown=True,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.default_cell_height
+        self.pdf.cell(
+            0,
+            6,
+            text=f"**Objeto da Parceria:** {self.accountability.contract.objective}",
+            markdown=True,
+            align="L",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.default_cell_height
+        start = self.accountability.contract.start_of_vigency
+        end = self.accountability.contract.end_of_vigency
+        self.pdf.cell(
+            text=f"**Exercício:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -83,8 +137,20 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            "LEI AUTORIZADORA OU CONVÊNIO:",
+            text=f"**ÓRGÃO BENEFICIÁRIO:** {self.accountability.contract.organization.name}",
+            markdown=True,
             align="L",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.default_cell_height
+        hired_company = self.accountability.contract.hired_company
+        self.pdf.cell(
+            0,
+            6,
+            f"**CNPJ:** {hired_company.cnpj}",
+            align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -92,8 +158,9 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            "OBJETO:",
+            text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -101,8 +168,9 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            "EXERCÍCIO:",
+            f"**RESPONSÁVEL(IS) PELO ÓRGÃO:**",  # TODO perguntar ao Felipe, quem seriam os responsáveis
             align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -110,63 +178,81 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            "ÓRGÃO BENEFICIÁRIO:",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.default_cell_height
-        self.pdf.cell(
-            0,
-            6,
-            "CNPJ:",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.default_cell_height
-        self.pdf.cell(
-            0,
-            6,
-            "ENDEREÇO E CEP:",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.default_cell_height
-        self.pdf.cell(
-            0,
-            6,
-            "RESPONSÁVEL(IS) PELO ÓRGÃO:",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.default_cell_height
-        self.pdf.cell(
-            0,
-            6,
-            "VALOR TOTAL RECEBIDO NO EXERCÍCIO: __(DEMONSTRAR POR FONTE DE RECURSO)__",
+            "**VALOR TOTAL RECEBIDO NO EXERCÍCIO.** __(DEMONSTRAR POR FONTE DE RECURSO)__",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
             markdown=True,
         )
-        self.pdf.ln(10)
+        self.pdf.ln(2)
 
     def _draw_table_I(self):
+        checking_account_statement = self.statement_queryset.filter(
+            bank_account=self.checking_account
+        ).first()
+
+        investing_account_statement = self.statement_queryset.filter(
+            bank_account=self.investing_account
+        ).first()
+
+        revenue_in_time = self.revenue_queryset.filter(
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
+        )
+        self.revenue_total = Decimal("0.00")
+
+        if checking_account_statement:
+            checking_account = checking_account_statement.balance
+        else:
+            checking_account = Decimal("0.00")
+
+        if investing_account_statement:
+            investing_account = investing_account_statement.balance
+        else:
+            investing_account = Decimal("0.00")
+
+        previous_balance = (
+            checking_account + investing_account
+        )  # TODO necessário filtrar pela data do primeiro lançamento
+        total_balance = checking_account + investing_account
+
+        contract = self.accountability.contract
         table_data = [
-            ["", "VALORES R$"],
-            ["SALDO DO EXERCÍCIO ANTERIOR", "R$"],
-            ["REPASSADOS NO EXERCÍCIO (DATA)", ""],
+            ["", format_into_brazilian_currency(contract.total_value)],
+            [
+                "SALDO DO EXERCÍCIO ANTERIOR",
+                format_into_brazilian_currency(previous_balance),
+            ],
+            [
+                "REPASSADOS NO EXERCÍCIO (DATA)",
+                "",
+            ],  # TODO perguntar ao Felipe/Ronaldo como receberia sem ser no exercício?
             ["__(INDICAR AS FONTES DO RECURSO)__", "R$"],
-            ["", "R$"],
-            ["", "R$"],
-            ["", "R$"],
-            ["RECEITA COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS", "R$"],
-            ["TOTAL", "R$"],
-            ["RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO", "R$"],
         ]
+
+        for revenue in revenue_in_time:
+            table_data.append(
+                [
+                    revenue.revenue_nature_label,
+                    format_into_brazilian_currency(revenue.value),
+                ]
+            )
+            self.revenue_total += revenue.value
+
+        table_data.append(
+            [
+                "RECEITA COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS",
+                format_into_brazilian_currency(investing_account),
+            ]
+        )  # TODO entender com Ronaldo/Felipe o que seria isto
+        table_data.append(
+            ["TOTAL", format_into_brazilian_currency(total_balance)]
+        )  # adicionar tupla a cima
+        table_data.append(
+            [
+                "RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO",
+                format_into_brazilian_currency(checking_account),
+            ]
+        )  # TODO entender com Ronaldo/Felipe o que seria isto
 
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.cell(

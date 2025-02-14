@@ -77,13 +77,13 @@ class PassOn8PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
+        hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
-            text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
+            text=f"**CNPJ**: {hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",

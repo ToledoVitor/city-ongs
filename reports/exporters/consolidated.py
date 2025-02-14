@@ -38,7 +38,8 @@ class ConsolidatedPDFExporter:
 
         self.transaction_queryset = (
             Transaction.objects.filter(
-                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
             )
             .filter(date__gte=self.start_date, date__lte=self.end_date)
             .exclude(bank_account__isnull=True)
@@ -52,7 +53,6 @@ class ConsolidatedPDFExporter:
             .order_by("opening_date")
             .exclude(bank_account__isnull=True)
         )
-
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -251,7 +251,8 @@ class ConsolidatedPDFExporter:
     def _draw_revenue_group_table(self):
         self.revenue_queryset = (
             Revenue.objects.filter(
-                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
             )
             .filter(receive_date__gte=self.start_date, receive_date__lte=self.end_date)
             .exclude(bank_account__isnull=True)
@@ -406,14 +407,19 @@ class ConsolidatedPDFExporter:
     def _draw_bank_transfers_table(self):
         self.transaction_queryset = (
             Transaction.objects.filter(
-                Q(bank_account=self.checking_account) | Q(bank_account=self.investing_account)
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
             )
             .filter(date__gte=self.start_date, date__lte=self.end_date)
             .exclude(bank_account__isnull=True)
         )
 
-        income_transaction = self.transaction_queryset.filter(amount__gt=Decimal("0.00"))
-        outgoing_transaction = self.transaction_queryset.filter(amount__lt=Decimal("0.00"))
+        income_transaction = self.transaction_queryset.filter(
+            amount__gt=Decimal("0.00")
+        )
+        outgoing_transaction = self.transaction_queryset.filter(
+            amount__lt=Decimal("0.00")
+        )
 
         if income_transaction.count():
             income = income_transaction.aggregate(Sum("amount"))["amount__sum"]
@@ -597,7 +603,6 @@ class ConsolidatedPDFExporter:
         )
 
     def _draw_reimbursement_interest_table(self):
-
         reimbursement_interest_queryset = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
             # bank_account__revenues__revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST
@@ -615,7 +620,9 @@ class ConsolidatedPDFExporter:
             body_data.append(
                 [
                     format_into_brazilian_date(reimbursement.receive_date),
-                    str(reimbursement.bank_account.revenue.revenue_nature_label),  # TODO, receio de criar a label
+                    str(
+                        reimbursement.bank_account.revenue.revenue_nature_label
+                    ),  # TODO, receio de criar a label
                     format_into_brazilian_currency(reimbursement.value),
                 ]
             )
