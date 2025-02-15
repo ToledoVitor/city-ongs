@@ -25,7 +25,7 @@ SECRET_KEY = "540-chtu=g2yja!7s3t3y&1cc6g3*d+m14-io+ff*$nszaeox^"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
