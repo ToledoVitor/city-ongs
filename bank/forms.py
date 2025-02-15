@@ -45,7 +45,7 @@ class UploadOFXForm(forms.Form):
 
 class CreateBankAccountForm(forms.ModelForm):
     closing_date = forms.DateField()
-    balance = forms.DecimalField()
+    balance = DecimalMaskedField(max_digits=12, decimal_places=2)
     value = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:
