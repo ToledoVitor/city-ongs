@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.models import Q
+from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
@@ -45,8 +45,11 @@ class PassOn2PDFExporter:
                 Q(bank_account=self.checking_account)
                 | Q(bank_account=self.investing_account)
             )
-            .filter(opening_date__gte=self.start_date)
-            .order_by("opening_date")
+            .filter(
+                Q(reference_month__gte=self.start_date.month, reference_year__gte=self.start_date.year)
+                | Q(reference_month__lt=self.start_date.month, reference_year__gt=self.start_date.year)
+            )
+            .order_by("reference_year", "reference_month")
             .exclude(bank_account__isnull=True)
         )
 
@@ -62,9 +65,9 @@ class PassOn2PDFExporter:
         self._draw_table_I()
         self._draw_signatories_notification()
         self._draw_table_II()
-        self._draw_org_notification()
-        self._draw_table_III()
-        self._draw_observation()
+        # self._draw_org_notification()
+        # self._draw_table_III()
+        # self._draw_observation()
 
         return self.pdf
 
@@ -117,7 +120,7 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            text=f"**Objeto da Parceria:** {self.accountability.contract.objective}",
+            text=f"**OBJETO DA PARCERIA:** {self.accountability.contract.objective}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
@@ -127,7 +130,7 @@ class PassOn2PDFExporter:
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**Exercício:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
@@ -187,40 +190,36 @@ class PassOn2PDFExporter:
         self.pdf.ln(2)
 
     def _draw_table_I(self):
-        checking_account_statement = self.statement_queryset.filter(
-            bank_account=self.checking_account
-        ).first()
+        opening_balance = self.statement_queryset.filter(
+            reference_month=self.start_date.month,
+            reference_year=self.start_date.year,          
+        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
+        
+        closing_checking_account = self.statement_queryset.filter(
+            reference_month=self.end_date.month,
+            reference_year=self.end_date.year,
+            bank_account=self.checking_account,         
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
+        
+        closing_investing_account = self.statement_queryset.filter(
+            reference_month=self.end_date.month,
+            reference_year=self.end_date.year,
+            bank_account=self.investing_account,           
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
-        investing_account_statement = self.statement_queryset.filter(
-            bank_account=self.investing_account
-        ).first()
+        closing_balance = closing_checking_account + closing_investing_account
 
         revenue_in_time = self.revenue_queryset.filter(
             receive_date__gte=self.start_date, receive_date__lte=self.end_date
         )
         self.revenue_total = Decimal("0.00")
-
-        if checking_account_statement:
-            checking_account = checking_account_statement.balance
-        else:
-            checking_account = Decimal("0.00")
-
-        if investing_account_statement:
-            investing_account = investing_account_statement.balance
-        else:
-            investing_account = Decimal("0.00")
-
-        previous_balance = (
-            checking_account + investing_account
-        )  # TODO necessário filtrar pela data do primeiro lançamento
-        total_balance = checking_account + investing_account
-
+    
         contract = self.accountability.contract
         table_data = [
             ["", format_into_brazilian_currency(contract.total_value)],
             [
                 "SALDO DO EXERCÍCIO ANTERIOR",
-                format_into_brazilian_currency(previous_balance),
+                format_into_brazilian_currency(opening_balance),
             ],
             [
                 "REPASSADOS NO EXERCÍCIO (DATA)",
@@ -241,18 +240,18 @@ class PassOn2PDFExporter:
         table_data.append(
             [
                 "RECEITA COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS",
-                format_into_brazilian_currency(investing_account),
+                format_into_brazilian_currency(closing_investing_account),
             ]
-        )  # TODO entender com Ronaldo/Felipe o que seria isto
+        ) 
         table_data.append(
-            ["TOTAL", format_into_brazilian_currency(total_balance)]
+            ["TOTAL", format_into_brazilian_currency(closing_balance)]
         )  # adicionar tupla a cima
         table_data.append(
             [
                 "RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO",
-                format_into_brazilian_currency(checking_account),
+                format_into_brazilian_currency(closing_checking_account),
             ]
-        )  # TODO entender com Ronaldo/Felipe o que seria isto
+        )
 
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.cell(
@@ -297,6 +296,10 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_table_II(self):
+        pass_on_queryt = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER
+        )
+        
         up_table_data = [
             [
                 "DATA DO DOCUMENTO",
@@ -305,14 +308,22 @@ class PassOn2PDFExporter:
                 "NATUREZA DA DESPESA RESUMIDAMENTE",
                 "VALORES R$",
             ],
-            ["", "", "", "", ""],
-            ["", "", "", "", ""],
-            ["", "", "", "", ""],
-            ["", "", "", "", ""],
         ]
+        
+        for revenue in pass_on_queryt:
+            up_table_data.append(
+                [
+                    revenue.receive_date, 
+                    "Perguntar ao Felipe/Ronaldo", 
+                    "Perguntar ao Felipe/Ronaldo", 
+                    "", 
+                    ""
+                ],
+            )
+                             
         down_table_data = [
             ["TOTAL DAS DESPESAS", ""],
-            ["RECURSO SO REPASSE NÃO APLICADO", ""],
+            ["RECURSO DO REPASSE NÃO APLICADO", ""],
             ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", ""],
             ["VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE", ""],
         ]
@@ -343,7 +354,7 @@ class PassOn2PDFExporter:
             for item in up_table_data:
                 up_data = table.row()
                 for text in item:
-                    up_data.cell(text)
+                    up_data.cell(text=text, align="C")
 
         col_widths = [152, 38]  # Total: 190
         font = FontFace("Helvetica", "B", size_pt=8)
@@ -359,7 +370,7 @@ class PassOn2PDFExporter:
             for item in down_table_data:
                 down_data = table.row()
                 for text in item:
-                    down_data.cell(text)
+                    down_data.cell(text=text, align="C")
 
         self.pdf.ln(10)
 
