@@ -34,15 +34,16 @@ class OFXFileParser:
         }
 
     @property
-    def balance_amount(self) -> Decimal:
+    def opening_balance_amount(self) -> Decimal:
         return self.ofx_data.bankmsgsrsv1.statements[0].balance.balamt
 
     @property
+    def closing_balance_amount(self) -> Decimal:
+        return self.ofx_data.bankmsgsrsv1.statements[0].ledgerbal.balamt
+
+    @property
     def balance_date(self) -> datetime:
-        return {
-            "date_start": self.ofx_data.bankmsgsrsv1.statements[0].dtstart,
-            "date_end": self.ofx_data.bankmsgsrsv1.statements[0].dtend,
-        }
+        return self.ofx_data.bankmsgsrsv1.statements[0].dtend
 
     @property
     def transactions_list(self) -> list:
@@ -78,7 +79,7 @@ class OFXFileParser:
                 agency=agency,
                 account=account,
                 account_type=account_type,
-                balance=self.balance_amount,
+                balance=self.closing_balance_amount,
             )
             if account_type == "CHECKING":
                 contract.checking_account = bank_account
@@ -90,12 +91,13 @@ class OFXFileParser:
 
             contract.save()
 
-            balance_date = self.balance_date
+            # TODO: if has previous statement, delete
             BankStatement.objects.create(
                 bank_account=bank_account,
-                balance=self.balance_amount,
-                opening_date=balance_date["date_start"],
-                closing_date=balance_date["date_end"],
+                opening_balance=self.opening_balance_amount,
+                closing_balance=self.closing_balance_amount,
+                reference_month=self.balance_date.month,
+                reference_year=self.balance_date.year,
             )
 
             transactions = self._updated_transactions(bank_account)

@@ -12,13 +12,7 @@
 
 <div class="my-3 mx-5">
     <label class="block mb-2 text-xl font-semibold text-black">Último Extrato:</label>
-    {% if object.last_statement_update %}
-        <b>Data Inicial:</b> {{ object.last_statement_update.start }} <br>
-        <b>Data Final:</b> {{ object.last_statement_update.end }}
-    {% else %}
-        <b>Data Inicial:</b> -<br>
-        <b>Data Final:</b> -
-    {% endif %}
+    <b>Mês de Referência:</b> {{ object.last_statement_update }} <br>
 </div>
 
 <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-500">

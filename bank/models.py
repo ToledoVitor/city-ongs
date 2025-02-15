@@ -76,14 +76,11 @@ class BankAccount(BaseModel):
 
     @property
     def last_statement_update(self):
-        last_statement = self.statements.order_by("-closing_date").first()
+        last_statement = self.statements.order_by("-reference_year", "-reference_month").first()
         if last_statement:
-            return {
-                "start": last_statement.opening_date,
-                "end": last_statement.closing_date,
-            }
-        else:
-            return None
+            return f"{last_statement.month_label} de {last_statement.reference_year}"
+
+        return "Sem Extrato Cadastrado" 
 
     @property
     def last_transactions(self):
@@ -137,6 +134,10 @@ class BankStatement(BaseModel):
     class Meta:
         verbose_name = "Extrato Bancário"
         verbose_name_plural = "Extratos Bancários"
+
+    @property
+    def month_label(self):
+        return MonthChoices(self.reference_month).label.capitalize()
 
 
 class Transaction(BaseModel):

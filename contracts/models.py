@@ -185,7 +185,7 @@ class Contract(BaseModel):
         BankAccount,
         verbose_name="Conta Corrente",
         related_name="checking_account",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
@@ -193,7 +193,7 @@ class Contract(BaseModel):
         BankAccount,
         verbose_name="Conta Investimento",
         related_name="investing_contract",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
