@@ -68,6 +68,7 @@ class UpdateOFXForm(forms.Form):
 
         return ofx_file
 
+
 class CreateBankAccountForm(forms.ModelForm):
     closing_date = forms.DateField()
     balance = DecimalMaskedField(max_digits=12, decimal_places=2)
@@ -144,7 +145,7 @@ class UpdateBankStatementForm(forms.ModelForm):
             "reference_month": BaseSelectFormWidget(),
             "reference_year": BaseNumberFormWidget(),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["reference_year"].initial = 2025

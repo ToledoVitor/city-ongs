@@ -3,7 +3,6 @@ from datetime import date, datetime
 
 from accountability.models import Accountability
 from contracts.models import Contract
-from reports.forms import ReportForm, TRANSACTION_OPTIONS
 from reports.exporters import (
     ConsolidatedPDFExporter,
     PassOn1PDFExporter,
@@ -23,6 +22,7 @@ from reports.exporters import (
     PeriodEpensesPDFExporter,
     PredictedVersusRealizedPDFExporter,
 )
+from reports.forms import TRANSACTION_OPTIONS, ReportForm
 
 
 def export_pass_on_1(accountability: Accountability, start_date: date, end_date: date):
@@ -137,9 +137,7 @@ def export_pass_on_14(accountability: Accountability, start_date: date, end_date
     ).handle()
 
 
-def export_period_expenses(
-    contract: Contract, start_date: date, end_date: date
-):
+def export_period_expenses(contract: Contract, start_date: date, end_date: date):
     return PeriodEpensesPDFExporter(
         contract=contract,
         start_date=start_date,
@@ -157,9 +155,7 @@ def export_predicted_versus_realized(
     ).handle()
 
 
-def export_consolidated(
-    contract: Contract, start_date: date, end_date: date
-):
+def export_consolidated(contract: Contract, start_date: date, end_date: date):
     return ConsolidatedPDFExporter(
         contract=contract,
         start_date=start_date,
@@ -184,14 +180,14 @@ def get_model_for_report(form: ReportForm):
             cleaned_data["start_date"],
             cleaned_data["end_date"],
         )
-    
+
     else:
         start_date, end_date = _get_start_end_date(
             month=int(cleaned_data["month"]),
             year=int(cleaned_data["year"]),
         )
         return (
-                (
+            (
                 Accountability.objects.filter(
                     month=cleaned_data["month"],
                     year=cleaned_data["year"],
@@ -208,6 +204,7 @@ def get_model_for_report(form: ReportForm):
             start_date,
             end_date,
         )
+
 
 def export_report(
     model: Accountability | Contract,
@@ -262,9 +259,7 @@ def export_report(
             return export_period_expenses(model, start_date, end_date)
 
         case "predicted_versus_realized":
-            return export_predicted_versus_realized(
-                model, start_date, end_date
-            )
+            return export_predicted_versus_realized(model, start_date, end_date)
 
         case "consolidated":
             return export_consolidated(model, start_date, end_date)

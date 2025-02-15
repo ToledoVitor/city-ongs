@@ -80,7 +80,7 @@ class ReportForm(forms.Form):
         if report_model in [opt[0] for opt in RP_OPTIONS]:
             month = cleaned_data["month"]
             year = cleaned_data["year"]
-            
+
             if not (month and year):
                 raise forms.ValidationError(
                     "É necessário informar um mês e ano de competência"
@@ -89,11 +89,10 @@ class ReportForm(forms.Form):
         elif report_model in [opt[0] for opt in TRANSACTION_OPTIONS]:
             start = cleaned_data["start_date"]
             end = cleaned_data["end_date"]
-            
+
             if not (start and end):
                 raise forms.ValidationError(
                     "É necessário informar uma data de início e de término"
                 )
-
 
         return cleaned_data

@@ -115,7 +115,7 @@ class OFXFileParser:
                 f"Bank Statement for {self.balance_date.month}/{self.balance_date.year} already exists"
             )
             raise ValidationError("Extrato bancário já cadastrada.")
-        
+
         with transaction.atomic():
             transactions = self._updated_transactions(bank_account)
             Transaction.objects.bulk_create(transactions)

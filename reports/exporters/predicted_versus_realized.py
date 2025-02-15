@@ -7,7 +7,6 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Revenue
 from contracts.models import Contract
-
 from reports.exporters.commons.exporters import BasePdf
 from utils.choices import MonthChoices
 from utils.formats import (

@@ -10,7 +10,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
 
 from activity.models import ActivityLog
-from bank.forms import CreateBankAccountForm, UpdateBankStatementForm, TransactionFormSet, UploadOFXForm, UpdateOFXForm
+from bank.forms import (
+    CreateBankAccountForm,
+    TransactionFormSet,
+    UpdateBankStatementForm,
+    UpdateOFXForm,
+    UploadOFXForm,
+)
 from bank.models import BankAccount, BankStatement
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
@@ -90,6 +96,7 @@ def create_bank_account_ofx_view(request, pk):
         request, "bank-account/ofx-create.html", {"form": form, "contract": contract}
     )
 
+
 def update_bank_account_ofx_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -98,9 +105,7 @@ def update_bank_account_ofx_view(request, pk):
             try:
                 OFXFileParser(
                     ofx_file=request.FILES["ofx_file"]
-                ).update_bank_account_balance(
-                    bank_account=bank_account
-                )
+                ).update_bank_account_balance(bank_account=bank_account)
 
                 logger.info(f"{request.user.id} - Updated bank account")
                 _ = ActivityLog.objects.create(
@@ -115,14 +120,14 @@ def update_bank_account_ofx_view(request, pk):
                 return render(
                     request,
                     "bank-account/ofx-update.html",
-                    {"form": form, "object": bank_account, "statement_exists": True}
+                    {"form": form, "object": bank_account, "statement_exists": True},
                 )
     else:
         form = UpdateOFXForm()
         return render(
             request,
             "bank-account/ofx-update.html",
-            {"form": form, "object": bank_account}
+            {"form": form, "object": bank_account},
         )
 
 
@@ -214,6 +219,7 @@ def create_bank_account_manual_view(request, pk):
         },
     )
 
+
 def update_bank_account_manual_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -223,7 +229,7 @@ def update_bank_account_manual_view(request, pk):
             if _statement_already_uploaded(
                 bank_account=bank_account,
                 month=form.cleaned_data["reference_month"],
-                year=form.cleaned_data["reference_year"]
+                year=form.cleaned_data["reference_year"],
             ):
                 return render(
                     request,
@@ -235,7 +241,7 @@ def update_bank_account_manual_view(request, pk):
                         "statement_exists": True,
                     },
                 )
-            
+
             with django_transaction.atomic():
                 BankStatement.objects.create(
                     bank_account=bank_account,
@@ -273,11 +279,10 @@ def update_bank_account_manual_view(request, pk):
             },
         )
 
+
 def _statement_already_uploaded(bank_account: BankAccount, month: int, year: int):
     return BankStatement.objects.filter(
-        bank_account=bank_account,
-        reference_month=month,
-        reference_year=year
+        bank_account=bank_account, reference_month=month, reference_year=year
     ).exists()
 
 

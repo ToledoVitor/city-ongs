@@ -1,12 +1,11 @@
-from datetime import datetime
 from dataclasses import dataclass
-
+from datetime import datetime
 
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from contracts.models import Contract
 from accountability.models import Revenue
+from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
 

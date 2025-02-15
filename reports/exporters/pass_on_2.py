@@ -1,4 +1,3 @@
-import copy
 from dataclasses import dataclass
 from datetime import timedelta
 from decimal import Decimal
@@ -7,9 +6,8 @@ from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense, Revenue
+from accountability.models import Revenue
 from bank.models import BankStatement
-from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency
 
@@ -46,8 +44,14 @@ class PassOn2PDFExporter:
                 | Q(bank_account=self.investing_account)
             )
             .filter(
-                Q(reference_month__gte=self.start_date.month, reference_year__gte=self.start_date.year)
-                | Q(reference_month__lt=self.start_date.month, reference_year__gt=self.start_date.year)
+                Q(
+                    reference_month__gte=self.start_date.month,
+                    reference_year__gte=self.start_date.year,
+                )
+                | Q(
+                    reference_month__lt=self.start_date.month,
+                    reference_year__gt=self.start_date.year,
+                )
             )
             .order_by("reference_year", "reference_month")
             .exclude(bank_account__isnull=True)
@@ -171,7 +175,7 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             6,
-            f"**RESPONSÁVEL(IS) PELO ÓRGÃO:**",  # TODO perguntar ao Felipe, quem seriam os responsáveis
+            "**RESPONSÁVEL(IS) PELO ÓRGÃO:**",  # TODO perguntar ao Felipe, quem seriam os responsáveis
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
@@ -192,19 +196,19 @@ class PassOn2PDFExporter:
     def _draw_table_I(self):
         opening_balance = self.statement_queryset.filter(
             reference_month=self.start_date.month,
-            reference_year=self.start_date.year,          
+            reference_year=self.start_date.year,
         ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
-        
+
         closing_checking_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
-            bank_account=self.checking_account,         
+            bank_account=self.checking_account,
         ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
-        
+
         closing_investing_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
-            bank_account=self.investing_account,           
+            bank_account=self.investing_account,
         ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
         closing_balance = closing_checking_account + closing_investing_account
@@ -213,7 +217,7 @@ class PassOn2PDFExporter:
             receive_date__gte=self.start_date, receive_date__lte=self.end_date
         )
         self.revenue_total = Decimal("0.00")
-    
+
         contract = self.accountability.contract
         table_data = [
             ["", format_into_brazilian_currency(contract.total_value)],
@@ -242,7 +246,7 @@ class PassOn2PDFExporter:
                 "RECEITA COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS",
                 format_into_brazilian_currency(closing_investing_account),
             ]
-        ) 
+        )
         table_data.append(
             ["TOTAL", format_into_brazilian_currency(closing_balance)]
         )  # adicionar tupla a cima
@@ -299,7 +303,7 @@ class PassOn2PDFExporter:
         pass_on_queryt = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.PUBLIC_TRANSFER
         )
-        
+
         up_table_data = [
             [
                 "DATA DO DOCUMENTO",
@@ -309,18 +313,18 @@ class PassOn2PDFExporter:
                 "VALORES R$",
             ],
         ]
-        
+
         for revenue in pass_on_queryt:
             up_table_data.append(
                 [
-                    revenue.receive_date, 
-                    "Perguntar ao Felipe/Ronaldo", 
-                    "Perguntar ao Felipe/Ronaldo", 
-                    "", 
-                    ""
+                    revenue.receive_date,
+                    "Perguntar ao Felipe/Ronaldo",
+                    "Perguntar ao Felipe/Ronaldo",
+                    "",
+                    "",
                 ],
             )
-                             
+
         down_table_data = [
             ["TOTAL DAS DESPESAS", ""],
             ["RECURSO DO REPASSE NÃO APLICADO", ""],
@@ -448,7 +452,7 @@ class PassOn2PDFExporter:
         self.pdf.multi_cell(
             0,
             0,
-            f"RESPONSÁVEL: NOME, CARGO E ASSINATURA",
+            "RESPONSÁVEL: NOME, CARGO E ASSINATURA",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,

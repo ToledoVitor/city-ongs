@@ -4,21 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bank", "0005_alter_historicaltransaction_transaction_type_and_more"),
     ]
 
     operations = [
-        migrations.RemoveField(model_name="bankstatement", name="balance",),
-        migrations.RemoveField(model_name="bankstatement", name="closing_date",),
-        migrations.RemoveField(model_name="bankstatement", name="opening_date",),
-        migrations.RemoveField(model_name="historicalbankstatement", name="balance",),
         migrations.RemoveField(
-            model_name="historicalbankstatement", name="closing_date",
+            model_name="bankstatement",
+            name="balance",
         ),
         migrations.RemoveField(
-            model_name="historicalbankstatement", name="opening_date",
+            model_name="bankstatement",
+            name="closing_date",
+        ),
+        migrations.RemoveField(
+            model_name="bankstatement",
+            name="opening_date",
+        ),
+        migrations.RemoveField(
+            model_name="historicalbankstatement",
+            name="balance",
+        ),
+        migrations.RemoveField(
+            model_name="historicalbankstatement",
+            name="closing_date",
+        ),
+        migrations.RemoveField(
+            model_name="historicalbankstatement",
+            name="opening_date",
         ),
         migrations.AddField(
             model_name="bankstatement",

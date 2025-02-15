@@ -2,8 +2,8 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from activity.models import ActivityLog
-from utils.models import BaseModel
 from utils.choices import MonthChoices
+from utils.models import BaseModel
 
 
 class BankAccount(BaseModel):
@@ -76,11 +76,13 @@ class BankAccount(BaseModel):
 
     @property
     def last_statement_update(self):
-        last_statement = self.statements.order_by("-reference_year", "-reference_month").first()
+        last_statement = self.statements.order_by(
+            "-reference_year", "-reference_month"
+        ).first()
         if last_statement:
             return f"{last_statement.month_label} de {last_statement.reference_year}"
 
-        return "Sem Extrato Cadastrado" 
+        return "Sem Extrato Cadastrado"
 
     @property
     def last_transactions(self):

@@ -155,8 +155,7 @@ class ActivityLog(models.Model):
 
 
 class Notification(models.Model):
-    class Category(models.TextChoices):
-        ...
+    class Category(models.TextChoices): ...
 
     recipient = models.ForeignKey(
         User,

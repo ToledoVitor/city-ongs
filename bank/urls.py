@@ -2,8 +2,8 @@ from django.urls import path
 
 from bank.views import (
     BankAccountDetailView,
-    update_bank_account_ofx_view,
     update_bank_account_manual_view,
+    update_bank_account_ofx_view,
 )
 
 urlpatterns = [
