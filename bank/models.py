@@ -112,7 +112,7 @@ class BankStatement(BaseModel):
     )
     closing_balance = models.DecimalField(
         # TODO: REMOVE NULL
-        verbose_name="Saldo no Dia de Fechamento",
+        verbose_name="Saldo no Dia Final",
         decimal_places=2,
         max_digits=12,
         null=True,

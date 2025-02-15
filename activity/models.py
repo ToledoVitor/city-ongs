@@ -152,3 +152,37 @@ class ActivityLog(models.Model):
         indexes = [
             models.Index(fields=["user_email", "action"]),
         ]
+
+
+class Notification(models.Model):
+    class Category(models.TextChoices):
+        ...
+
+    recipient = models.ForeignKey(
+        User,
+        verbose_name="Destinatário",
+        related_name="notifications",
+        on_delete=models.CASCADE,
+    )
+    read_at = models.DateTimeField(
+        verbose_name="Lida em:",
+        null=True,
+        blank=True,
+    )
+
+    category = models.CharField(
+        verbose_name="Categoria",
+        choices=Category.choices,
+        max_length=1,
+    )
+    object_id = models.UUIDField(
+        verbose_name="ID do objeto",
+    )
+    text = models.CharField(
+        verbose_name="Texto",
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = "Notificação"
+        verbose_name_plural = "Notificações"

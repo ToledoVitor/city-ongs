@@ -45,16 +45,80 @@
       {{ form.report_model }}
     </div>
 
-    <div class="my-3">
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Mês de Competência</label>
-          {{ form.month }}
+    <hr class="h-px my-4 border-0 bg-gray-500">
+
+    <div id="rpFields" style="display: none;">
+      <div class="my-3">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Mês de Competência</label>
+            {{ form.month }}
+          </div>
+    
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Ano</label>
+            {{ form.year }}
+          </div>
         </div>
-  
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Ano</label>
-          {{ form.year }}
+      </div>
+    </div>
+
+    <div id="transactionsFields" style="display: none;">
+      <div class="my-3">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg
+                class="w-4 h-4 text-gray-900 dark:text-gray-800"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+              </svg>
+            </div>
+    
+            <input
+              id="id_start_date"
+              name="start_date"
+              type="text"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Data Inicial"
+              required
+              datepicker
+              datepicker-autohide
+              datepicker-format="dd/mm/yyyy"
+            >
+          </div>
+    
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg
+                class="w-4 h-4 text-gray-900 dark:text-gray-800"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+              </svg>
+            </div>
+    
+            <input
+              id="id_end_date"
+              name="end_date"
+              type="text"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Data final"
+              required
+              datepicker
+              datepicker-autohide
+              datepicker-format="dd/mm/yyyy"
+            >
+          </div>
+
         </div>
       </div>
     </div>
@@ -127,5 +191,54 @@
     {% endif %}
 </form>
 
+<script>
+  const reportModelSelect = document.querySelector('[name="report_model"]');
+  const rpFields = document.getElementById('rpFields');
+  const transactionsFields = document.getElementById('transactionsFields');
+  
+  function toggleInputFields() {
+    const selected = reportModelSelect.value;
+    debugger
+    if (selected.startsWith("rp_")) {
+
+      rpFields.style.display = 'block';
+      rpFields.querySelectorAll('input').forEach(input => {
+        input.required = true;
+      });
+
+      transactionsFields.style.display = 'none';
+      transactionsFields.querySelectorAll('input').forEach(input => {
+        input.required = false;
+      });
+
+    } else if (selected) {
+
+      rpFields.style.display = 'none';
+      rpFields.querySelectorAll('input').forEach(input => {
+        input.required = false;
+      });
+
+      transactionsFields.style.display = 'block';
+      transactionsFields.querySelectorAll('input').forEach(input => {
+        input.required = true;
+      });
+
+    } else {
+      rpFields.style.display = 'none';
+      rpFields.querySelectorAll('input').forEach(input => {
+        input.required = false;
+      });
+
+      transactionsFields.style.display = 'none';
+      transactionsFields.querySelectorAll('input').forEach(input => {
+        input.required = false;
+      });
+    }
+  }
+  
+  reportModelSelect.addEventListener('change', toggleInputFields);
+  
+  toggleInputFields();
+</script>
 
 {% endblock %}

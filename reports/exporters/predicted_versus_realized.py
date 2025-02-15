@@ -1,19 +1,17 @@
-import copy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from decimal import Decimal
 
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense, Revenue
-from contracts.choices import NatureCategories
+from accountability.models import Revenue
+from contracts.models import Contract
+
 from reports.exporters.commons.exporters import BasePdf
 from utils.choices import MonthChoices
 from utils.formats import (
     format_into_brazilian_currency,
-    format_into_brazilian_date,
     get_month_range,
 )
 
@@ -23,16 +21,14 @@ class PredictedVersusRealizedPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.contract = (
-            accountability.contract
-        )  # TODO receive contract instead of accountability
+        self.contract = contract
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
@@ -69,7 +65,7 @@ class PredictedVersusRealizedPDFExporter:
             [
                 "",
                 "",
-                f"**   Fonte Recurso:** Consolidado de todas as fontes",
+                "**   Fonte Recurso:** Consolidado de todas as fontes",
             ],
             [
                 "",

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from reports.forms import ReportForm
-from reports.services import export_report, get_accountability
+from reports.services import export_report, get_model_for_report
 
 
 class ReportsView(TemplateView):
@@ -21,12 +21,8 @@ class ReportsView(TemplateView):
     def post(self, request, *args, **kwargs):
         form = ReportForm(request.POST, request=self.request)
         if form.is_valid():
-            accountability = get_accountability(
-                contract=form.cleaned_data["contract"],
-                month=form.cleaned_data["month"],
-                year=form.cleaned_data["year"],
-            )
-            if not accountability:
+            model, start_date, end_date = get_model_for_report(form)
+            if not model:
                 return self.render_to_response(
                     self.get_context_data(
                         form=form,
@@ -34,13 +30,17 @@ class ReportsView(TemplateView):
                     ),
                 )
 
-            report_model = form.cleaned_data["report_model"]
             buffer = BytesIO()
+
+            report_model = form.cleaned_data["report_model"]
             report = export_report(
-                accountability=accountability,
+                model=model,
+                start_date=start_date,
+                end_date=end_date,
                 report_model=report_model,
             )
             report.output(buffer)
+
             buffer.seek(0)
 
             response = HttpResponse(buffer, content_type="application/pdf")

@@ -105,8 +105,22 @@ class OFXFileParser:
 
             return bank_account
 
-    def update_bank_account_balance(self) -> bool:
-        return ...
+    def update_bank_account_balance(self, bank_account: BankAccount) -> bool:
+        if BankStatement.objects.filter(
+            bank_account=bank_account,
+            reference_month=self.balance_date.month,
+            reference_year=self.balance_date.year,
+        ).exists():
+            logger.warning(
+                f"Bank Statement for {self.balance_date.month}/{self.balance_date.year} already exists"
+            )
+            raise ValidationError("Extrato bancário já cadastrada.")
+        
+        with transaction.atomic():
+            transactions = self._updated_transactions(bank_account)
+            Transaction.objects.bulk_create(transactions)
+
+            return
 
     def _updated_transactions(self, bank_account: BankAccount) -> None:
         return [

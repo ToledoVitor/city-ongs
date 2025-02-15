@@ -21,9 +21,13 @@
 
 <div class="my-3 mx-5">
     <p class="mb-2">Para atualizar o saldo atual, extrato e transações, suba um novo arquivo com o período posterior ao ultimo extrato.</p>
-    <button
-    class="px-3 py-2 text-sm font-medium text-center inline-flex text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    <a
+        href="{% url 'bank:bank-statements-update' object.id %}"
     >
-    Atualizar
-    </button>
+        <button
+        class="px-3 py-2 text-sm font-medium text-center inline-flex text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+        Atualizar
+        </button>
+    </a>
 </div>

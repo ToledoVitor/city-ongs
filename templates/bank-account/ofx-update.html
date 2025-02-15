@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Contas Bancárias - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Atualizar Extrato
+</p>
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <li class="inline-flex items-center">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+          </svg>
+          Inicio
+        </a>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Contratos</a>
+        </div>
+      </li>
+      <li aria-current="page">
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="{% url 'contracts:contracts-detail' object.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ object.contract.trailing_code }}</a>
+        </div>
+      </li>
+      <li aria-current="page">
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Atualizar Extrato</span>
+        </div>
+      </li>
+    </ol>
+</nav>
+
+<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto">
+  {% csrf_token %}
+  
+  <div class="my-3">
+    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">
+        Conta: {{ object }}
+    </label>
+  </div>
+
+  <div class="mt-6 mb-3">
+    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black dark:text-black">Arquivo Bancário (OFX):</label>
+    {{ form.ofx_file }}
+    <p class="mt-1 text-sm text-black dark:text-black" id="file_input_help">Apenas arquivos tipo .ofx</p>
+  </div>
+
+  <div class="mb-6 text-base text-justify">
+    O sistema criará sua conta com base nas informações do arquivo. Após criada, você poderá
+    <b>atualizar os extratos na página de detalhes da conta.</b>
+  </div>
+
+  <hr class="h-px my-4 border-0 bg-gray-500">
+
+  <div class="flex mb-2 items-start">
+    <p class="text-sm">
+      Em alguns casos, a instituição bancária pode não disponibilizar o extrato no formato OFX para contas do tipo investimento. Se esse for o caso,
+      <a href="{% url 'bank:bank-statements-manual-update' object.id %}" class="text-sm hover:underline text-blue-500">atualize manualmente a conta.</a>
+    </p>
+  </div>
+
+  {% include 'commons/form-errors.html' with form=form %}
+
+  {% if statement_exists %}
+  <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-50 dark:bg-gray-300 dark:text-red-600" role="alert">
+      <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+      </svg>
+      <span class="sr-only">Danger</span>
+      <div>
+          <span class="font-medium">Erro ao criar conta</span>
+          <ul class="my-1.5 list-disc list-inside">
+              <li class="my-1">Já existe um extrato cadastrado para essa data</li>
+          </ul>
+      </div>
+
+      <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-red-50 text-white rounded-lg focus:ring-2 focus:ring-white p-1.5 hover:bg-white inline-flex items-center justify-center h-8 w-8 dark:bg-gray-400 dark:text-white dark:hover:bg-gray-300" data-dismiss-target="#alert" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+      </button>
+
+  </div>
+  {% endif %}
+
+  <button
+    type="submit"
+    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    style="display: flex; justify-self: center;"
+  >
+    Atualizar Extrato
+  </button>
+
+</form>
+
+{% endblock %}

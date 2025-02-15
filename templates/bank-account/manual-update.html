@@ -7,7 +7,7 @@
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-  Criar Nova Conta Bancária
+  Atualizar Conta Bancária
 </p>
 
 <!-- Breadcrumb -->
@@ -34,7 +34,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ contract.trailing_code }}</a>
+          <a href="{% url 'contracts:contracts-detail' object.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ object.contract.trailing_code }}</a>
         </div>
       </li>
       <li aria-current="page">
@@ -42,7 +42,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Criar nova conta</span>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Atualizar Extrato</span>
         </div>
       </li>
     </ol>
@@ -50,7 +50,6 @@
 
 <form method="post" class="max-w-lg mx-auto" id="multistep-form">
   {% csrf_token %}
-
 
     <!-- Step 1 -->
     <div class="step" id="step-1">
@@ -115,79 +114,41 @@
         </p>
 
         <div class="mb-3">
-          <label for="id_account_type" class="block mb-2 text-base font-medium text-black dark:text-black">Tipo de Conta</label>
-          {{ form.account_type }}
+            <label for="id_reference_month" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Mês</label>
+            {{ form.reference_month }}
+        </div>
+    
+        <div class="mb-3">
+            <label for="id_reference_year" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Ano</label>
+            {{ form.reference_year }}
+        </div>
+    
+        <div class="mb-3">
+            <label class="block mb-2 text-base font-medium text-black">Saldo no Dia Inicial</label>
+            <input
+                type="text"
+                id="id_opening_balance"
+                name="opening_balance"
+                placeholder="000,00"
+                oninput="formatMoney(this)"
+                class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+                required
+            />
         </div>
 
         <div class="mb-3">
-          <label for="id_origin" class="block mb-2 text-base font-medium text-black dark:text-black">Origem da Receita</label>
-          {{ form.origin }}
+            <label class="block mb-2 text-base font-medium text-black">Saldo no Dia Final</label>
+            <input
+                type="text"
+                id="id_closing_balance"
+                name="closing_balance"
+                placeholder="000,00"
+                oninput="formatMoney(this)"
+                class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+                required
+            />
         </div>
 
-        <div class="my-3">
-            <div class="grid gap-6 mb-6 md:grid-cols-2">
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-black">Nome do Banco</label>
-                {{ form.bank_name }}
-              </div>
-        
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-black">Código Bancário</label>
-                {{ form.bank_id }}
-              </div>
-            </div>
-        </div>
-
-        <div class="my-3">
-            <div class="grid gap-6 mb-6 md:grid-cols-2">
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-black">Número da Conta</label>
-                {{ form.account }}
-              </div>
-        
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-black">Agência</label>
-                {{ form.agency }}
-              </div>
-            </div>
-        </div>
-
-        <div class="my-3">
-            <div class="grid gap-6 mb-6 md:grid-cols-2">
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Data do Último Extrato</label>
-                <div class="relative max-w-sm">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                      <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                      </svg>
-                    </div>
-                    <input 
-                        datepicker
-                        datepicker-format="dd/mm/yyyy"
-                        id="id_closing_date"
-                        name="closing_date"
-                        type="text"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    >
-                </div>
-              </div>
-    
-              <div class="relative">
-                <label class="block mb-2 text-base font-medium text-black">Saldo no Dia</label>
-                <input
-                    type="text"
-                    id="id_balance"
-                    name="balance"
-                    placeholder="000,00"
-                    oninput="formatMoney(this)"
-                    class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
-                    required
-                />
-              </div>
-            </div>
-        </div>
-        
         <div class="flex justify-end">
             <button
                 type="button"
@@ -437,16 +398,16 @@
 
     {% include 'commons/form-errors.html' with form=form subform=transactions_formset %}
 
-    {% if account_exists %}
+    {% if statement_exists %}
       <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-red-50 dark:bg-gray-300 dark:text-red-600" role="alert">
           <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
           </svg>
           <span class="sr-only">Danger</span>
           <div>
-              <span class="font-medium">Erro ao criar conta</span>
+              <span class="font-medium">Erro ao atualizar conta</span>
               <ul class="my-1.5 list-disc list-inside">
-                  <li class="my-1">Já existe um conta desse tipo cadastrada</li>
+                  <li class="my-1">Já existe um extrato cadastrado para esse período</li>
               </ul>
           </div>
 
@@ -513,20 +474,16 @@ document.getElementById("next-button").addEventListener("click", () => {
     const step1 = document.getElementById("step-1");
     const step2 = document.getElementById("step-2");
 
-    const formBankName = document.getElementById("id_bank_name")
-    const formBankId = document.getElementById("id_bank_id")
-    const formAccount = document.getElementById("id_account")
-    const formAgency = document.getElementById("id_agency")
-    const formClosingDate = document.getElementById("id_closing_date")
-    const formBalance = document.getElementById("id_balance")
+    const formMonth = document.getElementById("id_reference_month")
+    const formYear = document.getElementById("id_reference_year")
+    const formOpeningBalance = document.getElementById("id_opening_balance")
+    const formClosingBalance = document.getElementById("id_closing_balance")
 
     if (
-        !!formBankName.value &&
-        !!formBankId.value &&
-        !!formAccount.value &&
-        !!formAgency.value &&
-        !!formClosingDate.value &&
-        !!formBalance.value
+        !!formMonth.value &&
+        !!formYear.value &&
+        !!formOpeningBalance.value &&
+        !!formClosingBalance.value
     ) {
         step1.classList.add("hidden")
         step2.classList.remove("hidden")

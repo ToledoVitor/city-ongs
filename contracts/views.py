@@ -664,7 +664,7 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        ActivityLog.objects.create(
+        _ = ActivityLog.objects.create(
             user=self.request.user,
             user_email=self.request.user.email,
             action=ActivityLog.ActivityLogChoices.CREATED_EXECUTION_ACTIVITY,

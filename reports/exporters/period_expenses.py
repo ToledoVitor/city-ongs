@@ -1,14 +1,12 @@
-import copy
-from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
+from dataclasses import dataclass
 
-from django.db.models import Q
+
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense
-from contracts.choices import NatureCategories
+from contracts.models import Contract
+from accountability.models import Revenue
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
 
@@ -18,14 +16,14 @@ class PeriodEpensesPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
@@ -56,8 +54,8 @@ class PeriodEpensesPDFExporter:
             new_y=YPos.NEXT,
         )
         self.__set_helvetica_font(font_size=8, bold=False)
-        start = self.accountability.contract.start_of_vigency
-        end = self.accountability.contract.end_of_vigency
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
             0,
             10,
@@ -72,36 +70,36 @@ class PeriodEpensesPDFExporter:
 
     def _draw_informations(self):
         self.pdf.cell(
-            text=f"**Órgão Concessor:** {self.accountability.contract.organization.city_hall.name}",
+            text=f"**Órgão Concessor:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Tipo de Concessão:** {self.accountability.contract.concession_type}",
+            text=f"**Tipo de Concessão:** {self.contract.concession_type}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Nº:** {self.accountability.contract.code}",
+            text=f"**Nº:** {self.contract.code}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Entidade Beneficiária:** {self.accountability.contract.organization.name}",
+            text=f"**Entidade Beneficiária:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
+            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        hired_company = self.accountability.contract.hired_company
+        hired_company = self.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
@@ -110,7 +108,7 @@ class PeriodEpensesPDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.multi_cell(
-            text=f"**Objeto da Parceria:** {self.accountability.contract.objective}",
+            text=f"**Objeto da Parceria:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -123,26 +121,26 @@ class PeriodEpensesPDFExporter:
 
     def _draw_account_data(self):
         account_data = [
-            ["", "", f"**   Conta:** {self.accountability.contract.checking_account}"],
+            ["", "", f"**   Conta:** {self.contract.checking_account}"],
             [
                 "",
                 "",
-                f"**   Banco:** {self.accountability.contract.checking_account.bank_name}",
+                f"**   Banco:** {self.contract.checking_account.bank_name}",
             ],
             [
                 "",
                 "",
-                f"**   Agência:** {self.accountability.contract.checking_account.agency}",
+                f"**   Agência:** {self.contract.checking_account.agency}",
             ],
             [
                 "",
                 "",
-                f"**   Nº da Conta** {self.accountability.contract.checking_account.account}",
+                f"**   Nº da Conta** {self.contract.checking_account.account}",
             ],
             [
                 "",
                 "",
-                f"**   Fontes de Recurso:** {self.accountability.contract.checking_account.origin}",
+                f"**   Fontes de Recurso:** {self.contract.checking_account.origin}",
             ],
         ]
 
@@ -188,6 +186,11 @@ class PeriodEpensesPDFExporter:
             "**Recebimento**",
         ]
 
+        revenues = Revenue.objects.filter(
+            accountability__contract=self.contract,
+            receive_date__gte=self.start_date,
+            receive_date__lte=self.end_date,
+        )
         pass_on_data = [
             *[
                 [
@@ -197,7 +200,7 @@ class PeriodEpensesPDFExporter:
                     format_into_brazilian_date(revenue.competency),
                     format_into_brazilian_date(revenue.receive_date),
                 ]
-                for revenue in self.accountability.revenues.all()
+                for revenue in revenues
             ]
         ]
 
@@ -260,7 +263,7 @@ class PeriodEpensesPDFExporter:
                     expense.identification,
                     expense.liquidation_form_label,
                     format_into_brazilian_date(expense.liquidation),
-                    self.accountability.contract.code,
+                    self.contract.code,
                     format_into_brazilian_currency(expense.value),
                 ]
                 for expense in self.accountability.expenses.all()

@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
 
 from activity.models import ActivityLog
-from bank.forms import CreateBankAccountForm, TransactionFormSet, UploadOFXForm
+from bank.forms import CreateBankAccountForm, UpdateBankStatementForm, TransactionFormSet, UploadOFXForm, UpdateOFXForm
 from bank.models import BankAccount, BankStatement
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
@@ -90,6 +90,41 @@ def create_bank_account_ofx_view(request, pk):
         request, "bank-account/ofx-create.html", {"form": form, "contract": contract}
     )
 
+def update_bank_account_ofx_view(request, pk):
+    bank_account = get_object_or_404(BankAccount, id=pk)
+    if request.method == "POST":
+        form = UpdateOFXForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                OFXFileParser(
+                    ofx_file=request.FILES["ofx_file"]
+                ).update_bank_account_balance(
+                    bank_account=bank_account
+                )
+
+                logger.info(f"{request.user.id} - Updated bank account")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPLOADED_BALANCE_FILE,
+                    target_object_id=bank_account.id,
+                    target_content_object=bank_account,
+                )
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
+            except ValidationError:
+                return render(
+                    request,
+                    "bank-account/ofx-update.html",
+                    {"form": form, "object": bank_account, "statement_exists": True}
+                )
+    else:
+        form = UpdateOFXForm()
+        return render(
+            request,
+            "bank-account/ofx-update.html",
+            {"form": form, "object": bank_account}
+        )
+
 
 def create_bank_account_manual_view(request, pk):
     contract = get_object_or_404(Contract, id=pk)
@@ -107,6 +142,7 @@ def create_bank_account_manual_view(request, pk):
                         "form": form,
                         "contract": contract,
                         "transactions_formset": transactions_formset,
+                        "account_exists": True,
                     },
                 )
 
@@ -138,8 +174,9 @@ def create_bank_account_manual_view(request, pk):
                 )
                 BankStatement.objects.create(
                     bank_account=bank_account,
-                    balance=form.cleaned_data["balance"],
-                    closing_date=form.cleaned_data["closing_date"],
+                    closing_balance=form.cleaned_data["balance"],
+                    reference_month=form.cleaned_data["closing_date"].month,
+                    reference_year=form.cleaned_data["closing_date"].year,
                 )
 
                 transactions = transactions_formset.save(commit=False)
@@ -162,14 +199,7 @@ def create_bank_account_manual_view(request, pk):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                _ = ActivityLog.objects.create(
-                    user=request.user,
-                    user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.UPLOADED_BALANCE_FILE,
-                    target_object_id=bank_account.id,
-                    target_content_object=bank_account,
-                )
-                return redirect("contracts:contracts-detail", pk=contract.id)
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
     else:
         form = CreateBankAccountForm()
         transactions_formset = TransactionFormSet()
@@ -183,6 +213,72 @@ def create_bank_account_manual_view(request, pk):
             "transactions_formset": transactions_formset,
         },
     )
+
+def update_bank_account_manual_view(request, pk):
+    bank_account = get_object_or_404(BankAccount, id=pk)
+    if request.method == "POST":
+        form = UpdateBankStatementForm(request.POST)
+        transactions_formset = TransactionFormSet(request.POST)
+        if form.is_valid() and transactions_formset.is_valid():
+            if _statement_already_uploaded(
+                bank_account=bank_account,
+                month=form.cleaned_data["reference_month"],
+                year=form.cleaned_data["reference_year"]
+            ):
+                return render(
+                    request,
+                    "bank-account/manual-update.html",
+                    {
+                        "form": form,
+                        "object": bank_account,
+                        "transactions_formset": transactions_formset,
+                        "statement_exists": True,
+                    },
+                )
+            
+            with django_transaction.atomic():
+                BankStatement.objects.create(
+                    bank_account=bank_account,
+                    reference_month=form.cleaned_data["reference_month"],
+                    reference_year=form.cleaned_data["reference_year"],
+                    opening_balance=form.cleaned_data["opening_balance"],
+                    closing_balance=form.cleaned_data["closing_balance"],
+                )
+
+                transactions = transactions_formset.save(commit=False)
+                for transaction in transactions:
+                    transaction.bank_account = bank_account
+                    transaction.save()
+
+                logger.info(f"{request.user.id} - Updated bank account")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_BANK_ACCOUNT,
+                    target_object_id=bank_account.id,
+                    target_content_object=bank_account,
+                )
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
+
+    else:
+        form = UpdateBankStatementForm()
+        transactions_formset = TransactionFormSet()
+        return render(
+            request,
+            "bank-account/manual-update.html",
+            {
+                "form": form,
+                "object": bank_account,
+                "transactions_formset": transactions_formset,
+            },
+        )
+
+def _statement_already_uploaded(bank_account: BankAccount, month: int, year: int):
+    return BankStatement.objects.filter(
+        bank_account=bank_account,
+        reference_month=month,
+        reference_year=year
+    ).exists()
 
 
 def _account_type_already_created(contract: Contract, account_type: str):
