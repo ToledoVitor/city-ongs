@@ -3,6 +3,7 @@ from simple_history.models import HistoricalRecords
 
 from activity.models import ActivityLog
 from utils.models import BaseModel
+from utils.choices import MonthChoices
 
 
 class BankAccount(BaseModel):
@@ -105,18 +106,30 @@ class BankStatement(BaseModel):
         on_delete=models.CASCADE,
     )
 
-    balance = models.DecimalField(
-        verbose_name="Saldo no Dia",
+    opening_balance = models.DecimalField(
+        verbose_name="Saldo no Dia Inicial",
         decimal_places=2,
         max_digits=12,
-    )
-    opening_date = models.DateField(
-        verbose_name="Data Inicial do Extrato",
         null=True,
         blank=True,
     )
-    closing_date = models.DateField(
-        verbose_name="Data Final do extrato",
+    closing_balance = models.DecimalField(
+        # TODO: REMOVE NULL
+        verbose_name="Saldo no Dia de Fechamento",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
+
+    reference_month = models.IntegerField(
+        verbose_name="Mês",
+        choices=MonthChoices,
+        default=MonthChoices.JAN,
+    )
+    reference_year = models.IntegerField(
+        verbose_name="Ano",
+        default=0,
     )
 
     history = HistoricalRecords()
