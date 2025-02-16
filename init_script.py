@@ -53,8 +53,8 @@ o2 = Organization.objects.create(
 )
 
 super_user = User.objects.create(
-    first_name="Vitor",
-    last_name="Toledo",
+    first_name="Admin",
+    last_name="Admildo",
     username="admin@admin.com",
     email="admin@admin.com",
     is_superuser=True,
@@ -69,7 +69,7 @@ super_user.areas.add(a2)
 super_user.areas.add(a3)
 
 Company.objects.create(
-    name="Empresa Contratente",
+    name="Empresa Contratante",
     cnpj="24479422000150",
     street="Rua Fausto Silveira Pires",
     number=93,

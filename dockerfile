@@ -15,6 +15,8 @@ RUN poetry config virtualenvs.create false && poetry install --no-root
 # Copia o restante do projeto
 COPY . /app/
 
+COPY db.sqlite3 /app/db.sqlite3
+
 # Expõe a porta 8080 para o Cloud Run
 EXPOSE 8080
 
