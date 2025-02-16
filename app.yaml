@@ -1,0 +1,13 @@
+# [START gaeflex_py_django_app_yaml]
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT core.wsgi
+
+runtime_config:
+    operating_system: "ubuntu22"
+    runtime_version: "3.12"
+
+beta_settings:
+    cloud_sql_instances: sitts-project:southamerica-east1:sitts-database
+
+# [END gaeflex_py_django_app_yaml]
