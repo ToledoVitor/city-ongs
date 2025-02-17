@@ -68,7 +68,7 @@ class ContractCreateForm(forms.ModelForm):
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
-            "file": BaseFileFormWidget(),
+            "file": BaseFileFormWidget(required=False), # TODO remover required=False após resolver Bucket
         }
 
     def __init__(self, *args, **kwargs):
