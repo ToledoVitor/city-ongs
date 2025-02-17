@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_REGISTRY: us-east1-docker.pkg.dev
-  DOCKER_REPO: sitts-project/city-ongs
+  DOCKER_REGISTRY: southamerica-east1-docker.pkg.dev
+  DOCKER_REPO: sitts-project/cloud-run-source-deploy
   REGION: southamerica-east1
   SERVICE: sitts
   PROJECT_ID: sitts-project

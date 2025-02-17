@@ -2,6 +2,8 @@ FROM python:3.12
 
 WORKDIR /app
 
+RUN pip install --upgrade pip
+
 RUN pip install --no-cache-dir poetry
 
 COPY pyproject.toml poetry.lock /app/
