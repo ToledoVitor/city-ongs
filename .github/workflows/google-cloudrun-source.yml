@@ -32,7 +32,7 @@ name: 'Deploy to Cloud Run from Source'
 on:
   push:
     branches:
-      - '"production"'
+      - 'production'
 
 env:
   PROJECT_ID: 'sitts-project'
