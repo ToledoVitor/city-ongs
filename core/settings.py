@@ -112,27 +112,16 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
-
-# [START gaeflex_py_django_database_config]
-# Use django-environ to parse the connection string
-DATABASES = {"default": env.db()}
-
-# If the flag as been set, configure to use proxy
-if os.getenv("USE_CLOUD_SQL_AUTH_PROXY", None):
-    DATABASES["default"]["HOST"] = "127.0.0.1"
-    DATABASES["default"]["PORT"] = 5432
-
-# [END gaeflex_py_django_database_config]
-
-# Use a in-memory sqlite3 database when testing in CI systems
-if os.getenv("TRAMPOLINE_CI", None):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT", default="5432"),
     }
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

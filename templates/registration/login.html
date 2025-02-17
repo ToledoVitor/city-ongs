@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 
@@ -8,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
 
+  <link rel="shortcut icon" type="image/png" href="{% static 'static/images/favicon.png' %}" >
 
   <title>{% block title %}Portal SITTS{% endblock %}</title>
 </head>

@@ -8,6 +8,6 @@ runtime_config:
     runtime_version: "3.12"
 
 beta_settings:
-    cloud_sql_instances: sitts-project:southamerica-east1:sitts-database
+    cloud_sql_instances: sitts-project:REGION:postgres
 
 # [END gaeflex_py_django_app_yaml]
