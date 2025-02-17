@@ -29,7 +29,7 @@ jobs:
           export_environment_variables: true
           project_id: "${{ env.PROJECT_ID}}"
           token_format: "access_token"
-          workload_identity_provider: "projects/sitts-project/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          workload_identity_provider: "projects/455340212401/locations/global/workloadIdentityPools/github-pool/providers/115435798932566112631"
           service_account: "github-deploy@sitts-project.iam.gserviceaccount.com"
 
       - name: "Set up Cloud SDK"
