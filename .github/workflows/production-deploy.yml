@@ -1,0 +1,105 @@
+name: Production
+
+on:
+  workflow_dispatch:
+
+env:
+  DOCKER_REGISTRY: us-east1-docker.pkg.dev
+  DOCKER_REPO: sitts-project/city-ongs
+  REGION: southamerica-east1
+  SERVICE: sitts
+  PROJECT_ID: sitts-project
+  ENV: production
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: "write"
+      id-token: "write"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Google auth
+        id: auth
+        uses: "google-github-actions/auth@v2"
+        with:
+          export_environment_variables: true
+          project_id: "${{ env.PROJECT_ID}}"
+          token_format: "access_token"
+          workload_identity_provider: "projects/sitts-project/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "github-deploy@sitts-project.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+        with:
+          version: ">= 452.0.0"
+
+      - name: Pre-deploy (migrate and collectstatic)
+        run: |
+          gcloud run jobs update ${{ env.SERVICE }}-pre-deploy \
+            --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
+            --set-env-vars=ENV=${{ env.ENV }} \
+            --region=${{ env.REGION }} \
+            --image=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            --execute-now \
+            --wait
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          project_id: ${{ env.PROJECT_ID}}
+          image: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }}
+          revision_traffic: 'LATEST=100'
+          labels: |-
+            application=${{ env.SERVICE }}
+            component=api
+          env_vars: |
+            ENV=${{ env.ENV }}
+
+      - name: Tag production docker image
+        run: |
+          gcloud artifacts docker tags add \
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:production
+          gcloud artifacts docker tags add \
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:latest
+
+  update_release:
+    name: Update release
+    needs: production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "write"
+      id-token: "write"
+    steps:
+      - name: Create github release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const latestRelease = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            const releaseNotes = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "${{ github.ref_name }}",
+              previous_tag_name: latestRelease.data.tag_name,
+            });
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "${{ github.ref_name }}",
+              name: releaseNotes.data.name,
+              body: releaseNotes.data.body,
+              prerelease: false,
+            })

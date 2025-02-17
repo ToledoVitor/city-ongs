@@ -32,34 +32,42 @@ class ConsolidatedPDFExporter:
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
-        self.checking_account = self.contract.checking_account
-        self.investing_account = self.contract.investing_account
-
-        self.transaction_queryset = (
-            Transaction.objects.filter(
-                Q(bank_account=self.checking_account)
-                | Q(bank_account=self.investing_account)
-            )
-            .filter(date__gte=self.start_date, date__lte=self.end_date)
-            .exclude(bank_account__isnull=True)
-        )
-        self.statement_queryset = (
-            BankStatement.objects.filter(
-                Q(bank_account=self.checking_account)
-                | Q(bank_account=self.investing_account)
-            )
-            .filter(opening_date__gte=self.start_date)
-            .order_by("opening_date")
-            .exclude(bank_account__isnull=True)
-        )
-
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
+            
+    def __database_queries(self):
+        self.checking_account = self.contract.checking_account
+        self.investing_account = self.contract.investing_account
+
+        self.statement_queryset = (
+            BankStatement.objects.filter(
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
+            )
+            .filter(
+                Q(
+                    reference_month__gte=self.start_date.month,
+                    reference_year__gte=self.start_date.year,
+                )
+                | Q(
+                    reference_month__lt=self.start_date.month,
+                    reference_year__gt=self.start_date.year,
+                )
+            )
+            .order_by("reference_year", "reference_month")
+            .exclude(bank_account__isnull=True)
+        )
+        
+        self.revenue_queryset = Revenue.objects.filter(
+            Q(bank_account=self.checking_account)
+            | Q(bank_account=self.investing_account)
+        ).exclude(bank_account__isnull=True)
 
     def handle(self):
+        self.__database_queries()
         self._draw_header()
         self._draw_contract_data()
         self._draw_first_table_title()
@@ -152,47 +160,47 @@ class ConsolidatedPDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_balance_table(self):
-        checking_account_statement = self.statement_queryset.filter(
-            bank_account=self.checking_account
-        ).first()
-        investing_account_statement = self.statement_queryset.filter(
-            bank_account=self.investing_account
-        ).first()
+        self.opening_balance = self.statement_queryset.filter(
+            reference_month=self.start_date.month,
+            reference_year=self.start_date.year,
+        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
 
-        if checking_account_statement:
-            checking_account = checking_account_statement.balance
-        else:
-            checking_account = Decimal("0.00")
+        self.closing_checking_account = self.statement_queryset.filter(
+            reference_month=self.end_date.month,
+            reference_year=self.end_date.year,
+            bank_account=self.checking_account,
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
-        if investing_account_statement:
-            investing_account = investing_account_statement.balance
-        else:
-            investing_account = Decimal("0.00")
+        self.closing_investing_account = self.statement_queryset.filter(
+            reference_month=self.end_date.month,
+            reference_year=self.end_date.year,
+            bank_account=self.investing_account,
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
-        positive_checking = checking_account >= 0
-        positive_investing = investing_account >= 0
-
-        total = checking_account + investing_account
-
+        self.closing_balance = self.closing_checking_account + self.closing_investing_account
+    
+        revenue_in_time = self.revenue_queryset.filter(
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
+        )
         body_data = [
             [
                 f"{self.checking_account.account_type_label}",
-                "(+)" if positive_checking else "(-)",
-                f"{format_into_brazilian_currency(checking_account)}",
+                "(+)" if self.closing_checking_account >= 0 else "(-)",
+                f"{format_into_brazilian_currency(self.closing_checking_account)}",
             ],
             [
-                investing_account.account_type_label
-                if investing_account
+                self.investing_account.account_type_label
+                if self.investing_account
                 else "Conta Investimento",
-                "(+)" if positive_investing else "(-)",
-                f"{format_into_brazilian_currency(investing_account)}",
+                "(+)" if self.closing_investing_account >= 0 else "(-)",
+                f"{format_into_brazilian_currency(self.closing_investing_account)}",
             ],
         ]
 
         footer_data = [
             "**Total dos Saldos Anteriores**",
             "",
-            f"**{format_into_brazilian_currency(total)}**",
+            f"**{format_into_brazilian_currency(self.closing_balance)}**",
         ]
 
         self.__set_helvetica_font(font_size=8, bold=True)
@@ -488,36 +496,19 @@ class ConsolidatedPDFExporter:
         self.pdf.ln(1)
 
     def _draw_final_balance_table(self):
-        checking_amount = self.checking_account.balance
-        if self.investing_account:
-            investing_amount = self.investing_account.balance
+        checking_amount = self.closing_checking_account
+        if self.closing_investing_account:
+            investing_amount = self.closing_investing_account
         else:
             investing_amount = Decimal("0.00")
 
         positive_checking = checking_amount >= 0
         positive_investing = investing_amount >= 0
+        
         total = checking_amount + investing_amount
 
-        checking_account_statement = self.statement_queryset.filter(
-            bank_account=self.checking_account
-        ).first()
-        investing_account_statement = self.statement_queryset.filter(
-            bank_account=self.investing_account
-        ).first()
-
-        if checking_account_statement:
-            initial_checking_account = checking_account_statement.balance
-        else:
-            initial_checking_account = Decimal("0.00")
-
-        if investing_account_statement:
-            initial_investing_account = investing_account_statement.balance
-        else:
-            initial_investing_account = Decimal("0.00")
-
         calculated_value = (
-            initial_checking_account
-            + initial_investing_account
+            self.opening_balance
             + self.total_revenues
             + self.total_expenses
         )
