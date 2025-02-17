@@ -4,7 +4,7 @@ from datetime import datetime
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Revenue
+from accountability.models import Revenue, Expense
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
@@ -251,6 +251,11 @@ class PeriodEpensesPDFExporter:
             "**Valor**",
         ]
 
+        expenses = Expense.objects.filter(
+            accountability__contract=self.contract,
+            due_date__gte=self.start_date,
+            due_date__lte=self.end_date,
+        )
         expenses_data = [
             *[
                 [
@@ -265,7 +270,7 @@ class PeriodEpensesPDFExporter:
                     self.contract.code,
                     format_into_brazilian_currency(expense.value),
                 ]
-                for expense in self.accountability.expenses.all()
+                for expense in expenses
             ]
         ]
 
