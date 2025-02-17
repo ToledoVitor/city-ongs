@@ -111,7 +111,7 @@ class ActivityLog(models.Model):
     )
     user_email = models.CharField(
         verbose_name="Email do Usuário",
-        max_length=32,
+        max_length=128,
         null=True,
         blank=True,
     )
@@ -119,7 +119,7 @@ class ActivityLog(models.Model):
     action = models.CharField(
         verbose_name="Ação",
         choices=ActivityLogChoices,
-        max_length=32,
+        max_length=128,
     )
 
     target_content_type = models.ForeignKey(
@@ -131,7 +131,7 @@ class ActivityLog(models.Model):
     )
     target_object_id = models.CharField(
         verbose_name="ID do alvo",
-        max_length=32,
+        max_length=128,
         null=True,
         blank=True,
     )

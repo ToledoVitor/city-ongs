@@ -88,7 +88,7 @@ class Contract(BaseModel):
     concession_type = models.CharField(
         # TODO: remove null
         verbose_name="Tipo de Concessão",
-        max_length=32,
+        max_length=128,
         null=True,
         blank=True,
     )
@@ -107,7 +107,7 @@ class Contract(BaseModel):
     bidding = models.CharField(
         # TODO: remove null
         verbose_name="Licitação",
-        max_length=32,
+        max_length=128,
         null=True,
         blank=True,
     )
@@ -478,7 +478,7 @@ class ContractItem(BaseModel):
     )
     unit_type = models.CharField(
         verbose_name="Tipo da Unidade",
-        max_length=32,
+        max_length=128,
     )
     nature = models.CharField(
         verbose_name="Natureza da Despesa",
@@ -646,7 +646,7 @@ class ContractExecutionActivity(BaseModel):
     )
     name = models.CharField(
         verbose_name="Nome",
-        max_length=32,
+        max_length=128,
     )
     description = models.CharField(
         # TODO: remove null
@@ -687,7 +687,7 @@ class ContractExecutionFile(BaseModel):
     )
     name = models.CharField(
         verbose_name="Nome",
-        max_length=32,
+        max_length=128,
         null=True,
         blank=True,
     )
