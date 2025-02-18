@@ -274,7 +274,10 @@ def create_contract_item_view(request, pk):
             with transaction.atomic():
                 item = form.save(commit=False)
                 item.contract = contract
-                item.file = request.FILES["file"]
+
+                if request.FILES:
+                    item.file = request.FILES["file"]
+    
                 item.save()
 
                 _ = ActivityLog.objects.create(
