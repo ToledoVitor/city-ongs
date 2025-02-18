@@ -80,10 +80,9 @@ jobs:
           gcloud artifacts docker tags add \
             ${{ steps.docker_build.outputs.IMAGE_NAME }} \
             ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:production
+
           gcloud artifacts docker tags add \
             ${{ steps.docker_build.outputs.IMAGE_NAME }} \
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:latest
-
             ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:latest
 
   update_release:
