@@ -87,16 +87,27 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const latestRelease = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            })
+            let previousTag = null;
+
+            try {
+              const latestRelease = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              previousTag = latestRelease.data.tag_name;
+            } catch (error) {
+              if (error.status === 404) {
+                console.log("Nenhuma release anterior encontrada. Criando a primeira release.");
+              } else {
+                throw error;
+              }
+            }
 
             const releaseNotes = await github.rest.repos.generateReleaseNotes({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: "${{ github.ref_name }}",
-              previous_tag_name: latestRelease.data.tag_name,
+              previous_tag_name: previousTag,
             });
 
             await github.rest.repos.createRelease({
@@ -106,4 +117,4 @@ jobs:
               name: releaseNotes.data.name,
               body: releaseNotes.data.body,
               prerelease: false,
-            })
+            });
