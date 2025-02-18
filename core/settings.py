@@ -11,13 +11,10 @@ env = environ.Env(DEBUG=(bool, False), PRODUCTION=(bool, False))
 env_file = os.path.join(BASE_DIR, ".env")
 
 if os.path.isfile(env_file):
-    # Use a local secret file, if provided
     env.read_env(env_file)
 
 # [START_EXCLUDE]
 elif os.getenv("TRAMPOLINE_CI", None):
-    # Create local settings if running with CI, for unit testing
-
     placeholder = (
         f"SECRET_KEY=a\n"
         "GS_BUCKET_NAME=None\n"
@@ -27,7 +24,6 @@ elif os.getenv("TRAMPOLINE_CI", None):
 # [END_EXCLUDE]
 
 elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
-    # Pull secrets from Secret Manager
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
     client = secretmanager.SecretManagerServiceClient()
@@ -41,17 +37,11 @@ else:
 # [END gaeflex_py_django_secret_config]
 
 SECRET_KEY = env("SECRET_KEY")
-# SECURITY WARNING: don't run with debug turned on in production!
-# Change this to "False" when you are ready for production
 DEBUG = env("DEBUG")
 
-# SECURITY WARNING: App Engine's security features ensure that it is safe to
-# have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
-# app not on App Engine, make sure to set an appropriate host here.
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
-
 INSTALLED_APPS = [
     # Django
     "django.contrib.admin",
@@ -119,7 +109,7 @@ DATABASES = {
         "USER": env("DB_USER"),
         "PASSWORD": env("DB_PASSWORD"),
         "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT", default="5432"),
+        "PORT": env("DB_PORT", default=None),
     }
 }
 
@@ -159,8 +149,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # [START gaeflex_py_django_static_config]
 # Define static storage via django-storages[google]
-GS_BUCKET_NAME = env("GS_BUCKET_NAME")
-STATIC_URL = "/static/"
+STATIC_URL = env("STATIC_URL")
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
@@ -169,7 +158,11 @@ STORAGES = {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
     },
 }
-GS_DEFAULT_ACL = "publicRead"
+GS_QUERYSTRING_AUTH = False
+GS_BUCKET_NAME = env("GS_BUCKET_NAME")
+GS_DEFAULT_ACL = None
+STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 # [END gaeflex_py_django_static_config]
 
 # Default primary key field type
