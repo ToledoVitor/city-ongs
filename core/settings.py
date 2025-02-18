@@ -5,22 +5,16 @@ import environ
 from google.cloud import secretmanager
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-env = environ.Env(DEBUG=(bool, False), PRODUCTION=(bool, False))
 
-# [START gaeflex_py_django_secret_config]
-# local env file path
+env = environ.Env(DEBUG=(bool, False), DEVELOPMENT=(bool, False))
 env_file = os.path.join(BASE_DIR, ".env")
-# gcloud env file path
-secret_path = "/secrets/DJANGO_SETTINGS"
 
-if os.path.isfile(secret_path):
-    env.read_env(secret_path)
+DEVELOPMENT = env("DEVELOPMENT")
 
-elif os.path.isfile(env_file):
+if DEVELOPMENT:
     env.read_env(env_file)
-
-elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
-    print("found GOOGLE_CLOUD_PROJECT")
+else:
+    print("reading gcloud env settings")
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
     client = secretmanager.SecretManagerServiceClient()
@@ -29,9 +23,6 @@ elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
     payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
 
     env.read_env(io.StringIO(payload))
-else:
-    raise Exception("No local .env or GOOGLE_CLOUD_PROJECT detected. No secrets found.")
-# [END gaeflex_py_django_secret_config]
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
