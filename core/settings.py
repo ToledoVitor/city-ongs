@@ -13,6 +13,17 @@ DEVELOPMENT = env("DEVELOPMENT")
 
 if DEVELOPMENT:
     env.read_env(env_file)
+    # Database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": env("DB_PORT", default=None),
+        }
+    }
 else:
     print("reading gcloud env settings")
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "sitts-project")
@@ -23,6 +34,18 @@ else:
     name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
     payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
     env.read_env(io.StringIO(payload))
+
+    # Database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": "",
+        }
+    }
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
@@ -92,18 +115,6 @@ LOGOUT_REDIRECT_URL = "home"
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
-# Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT", default=None),
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
