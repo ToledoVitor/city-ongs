@@ -19,21 +19,12 @@ if os.path.isfile(secret_path):
 elif os.path.isfile(env_file):
     env.read_env(env_file)
 
-# [START_EXCLUDE]
-elif os.getenv("TRAMPOLINE_CI", None):
-    placeholder = (
-        f"SECRET_KEY=a\n"
-        "GS_BUCKET_NAME=None\n"
-        f"DATABASE_URL=sqlite://{os.path.join(BASE_DIR, 'db.sqlite3')}"
-    )
-    env.read_env(io.StringIO(placeholder))
-# [END_EXCLUDE]
-
 elif os.environ.get("GOOGLE_CLOUD_PROJECT", None):
+    print("found GOOGLE_CLOUD_PROJECT")
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
 
     client = secretmanager.SecretManagerServiceClient()
-    settings_name = os.environ.get("SETTINGS_NAME", "django_settings")
+    settings_name = "django_settings"
     name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
     payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
 
