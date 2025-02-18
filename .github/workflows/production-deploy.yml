@@ -41,9 +41,13 @@ jobs:
         run: |
           gcloud run jobs update ${{ env.SERVICE }}-pre-deploy \
             --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
-            --set-env-vars=ENV=${{ env.ENV }} \
+            --set-env-vars=ENV=${{ env.ENV }},GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
+            --set-secrets=DJANGO_SETTINGS=django_settings:latest \
             --region=${{ env.REGION }} \
             --image=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            --command="sh" \
+            --args="-c" \
+            --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; poetry run python manage.py migrate && poetry run python manage.py collectstatic --noinput" \
             --execute-now \
             --wait
 
