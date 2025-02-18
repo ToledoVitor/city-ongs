@@ -37,19 +37,33 @@ jobs:
         with:
           version: ">= 452.0.0"
 
+      - name: Build and Push Docker Image
+        id: docker_build
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          IMAGE_NAME="${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:$TIMESTAMP"
+      
+          gcloud auth configure-docker ${{ env.DOCKER_REGISTRY }} --quiet
+      
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+      
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
       - name: Pre-deploy (migrate and collectstatic)
         run: |
           gcloud run jobs update ${{ env.SERVICE }}-pre-deploy \
-            --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
-            --set-env-vars=ENV=${{ env.ENV }},GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
-            --set-secrets=DJANGO_SETTINGS=django_settings:latest \
-            --region=${{ env.REGION }} \
-            --image=${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
-            --command="sh" \
-            --args="-c" \
-            --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; poetry run python manage.py migrate && poetry run python manage.py collectstatic --noinput" \
-            --execute-now \
-            --wait
+          --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
+          --set-env-vars=ENV=${{ env.ENV }},GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
+          --set-secrets=DJANGO_SETTINGS=django_settings:latest \
+          --region=${{ env.REGION }} \
+          --image=${{ env.IMAGE_NAME }} \
+          --command="sh" \
+          --args="-c" \
+          --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; poetry run python manage.py migrate && poetry run python manage.py collectstatic --noinput" \
+          --execute-now \
+          --wait
 
       - name: Deploy to Cloud Run
         id: deploy
@@ -87,23 +101,28 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+            const tagName = `release-${timestamp}`;
+
             const latestRelease = await github.rest.repos.getLatestRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-            })
+            }).catch(() => null);
+
+            const previousTag = latestRelease ? latestRelease.data.tag_name : null;
 
             const releaseNotes = await github.rest.repos.generateReleaseNotes({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: "${{ github.ref_name }}",
-              previous_tag_name: latestRelease.data.tag_name,
+              tag_name: tagName,
+              previous_tag_name: previousTag,
             });
 
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: "${{ github.ref_name }}",
-              name: releaseNotes.data.name,
+              tag_name: tagName,
+              name: `Release ${timestamp}`,
               body: releaseNotes.data.body,
               prerelease: false,
-            })
+            });
