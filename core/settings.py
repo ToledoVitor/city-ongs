@@ -5,12 +5,18 @@ import environ
 from google.cloud import secretmanager
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env = environ.Env(DEBUG=(bool, False), PRODUCTION=(bool, False))
 
 # [START gaeflex_py_django_secret_config]
-env = environ.Env(DEBUG=(bool, False), PRODUCTION=(bool, False))
+# local env file path
 env_file = os.path.join(BASE_DIR, ".env")
+# gcloud env file path
+secret_path = "/secrets/DJANGO_SETTINGS"
 
-if os.path.isfile(env_file):
+if os.path.isfile(secret_path):
+    env.read_env(secret_path)
+
+elif os.path.isfile(env_file):
     env.read_env(env_file)
 
 # [START_EXCLUDE]
