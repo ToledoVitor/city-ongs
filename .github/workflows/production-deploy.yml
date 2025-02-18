@@ -55,7 +55,7 @@ jobs:
         run: |
           gcloud run jobs update ${{ env.SERVICE }}-pre-deploy \
           --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
-          --set-env-vars=ENV=${{ env.ENV }},GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }} \
+          --set-env-vars="ENV=production,GOOGLE_CLOUD_PROJECT=sitts-project" \
           --set-secrets=DJANGO_SETTINGS=django_settings:latest \
           --region=${{ env.REGION }} \
           --image=${{ env.IMAGE_NAME }} \
@@ -78,10 +78,12 @@ jobs:
       - name: Tag production docker image
         run: |
           gcloud artifacts docker tags add \
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            ${{ steps.docker_build.outputs.IMAGE_NAME }} \
             ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:production
           gcloud artifacts docker tags add \
-            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }} \
+            ${{ steps.docker_build.outputs.IMAGE_NAME }} \
+            ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:latest
+
             ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:latest
 
   update_release:

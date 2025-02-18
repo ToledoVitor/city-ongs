@@ -15,13 +15,13 @@ if DEVELOPMENT:
     env.read_env(env_file)
 else:
     print("reading gcloud env settings")
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-
-    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "sitts-project")
     settings_name = "django_settings"
+
+    # Pull secrets from Secret Manager
+    client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
     payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
-
     env.read_env(io.StringIO(payload))
 
 SECRET_KEY = env("SECRET_KEY")
