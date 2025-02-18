@@ -29,6 +29,10 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://sitts-455340212401.southamerica-east1.run.app"
+]
+
 # Application definition
 INSTALLED_APPS = [
     # Django
