@@ -14,6 +14,6 @@ RUN poetry config virtualenvs.in-project false && poetry install --no-root
 
 COPY . /app/
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["sh", "-c", "poetry run gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers=2 --threads=4 --timeout 0"]
+CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "0", "core.wsgi"]

@@ -71,14 +71,9 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          project_id: ${{ env.PROJECT_ID}}
-          image: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_REPO }}/${{ env.SERVICE }}:${{ github.ref_name }}
+          project_id: ${{ env.PROJECT_ID }}
+          image: ${{ steps.docker_build.outputs.IMAGE_NAME }}
           revision_traffic: 'LATEST=100'
-          labels: |-
-            application=${{ env.SERVICE }}
-            component=api
-          env_vars: |
-            ENV=${{ env.ENV }}
 
       - name: Tag production docker image
         run: |
