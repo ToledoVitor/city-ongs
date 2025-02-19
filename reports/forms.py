@@ -5,7 +5,6 @@ from utils.choices import MonthChoices
 from utils.widgets import BaseNumberFormWidget, BaseSelectFormWidget
 
 RP_OPTIONS = [
-    ("rp_1", "Repasses: Terceiro Setor (RP) - 1"),
     ("rp_2", "Repasses: Terceiro Setor (RP) - 2"),
     ("rp_3", "Repasses: Terceiro Setor (RP) - 3"),
     ("rp_4", "Repasses: Terceiro Setor (RP) - 4"),
@@ -22,6 +21,7 @@ RP_OPTIONS = [
 ]
 
 TRANSACTION_OPTIONS = [
+    ("pass_on_1", "Repasses: Terceiro Setor (RP) - 1"),
     ("period_expenses", "Despesas: Realizadas no Período"),
     (
         "predicted_versus_realized",

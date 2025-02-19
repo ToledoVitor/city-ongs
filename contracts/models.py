@@ -112,6 +112,29 @@ class Contract(BaseModel):
         blank=True,
     )
 
+    # Law and Agreement
+    law_num = models.IntegerField(
+        verbose_name="Número da Lei",
+        null=True,
+        blank=True,
+    )
+    law_date = models.DateField(
+        verbose_name="Data da Lei",
+        null=True,
+        blank=True,        
+    )
+
+    agreement_num = models.IntegerField(
+        verbose_name="Número do Convênio",
+        null=True,
+        blank=True,
+    )
+    agreement_date = models.DateField(
+        verbose_name="Data do Convênio",
+        null=True,
+        blank=True,        
+    )
+
     # Dates and values
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
