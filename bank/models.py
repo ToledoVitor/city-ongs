@@ -185,7 +185,7 @@ class Transaction(BaseModel):
         choices=TransactionTypeChoices.choices,
         default=TransactionTypeChoices.OTHER,
     )
-    transaction_id = models.CharField(
+    transaction_number = models.CharField(
         verbose_name="Id da Transação",
         max_length=32,
         null=True,
@@ -238,10 +238,10 @@ class Transaction(BaseModel):
 
         constraints = [
             models.UniqueConstraint(
-                fields=["transaction_id"],
-                name="unique__transaction_id",
+                fields=["transaction_number"],
+                name="unique__transaction_number",
                 condition=models.Q(
-                    transaction_id__isnull=False,
+                    transaction_number__isnull=False,
                     deleted_at__isnull=True,
                 ),
             ),

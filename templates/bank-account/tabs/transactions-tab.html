@@ -18,7 +18,7 @@
                 </span>
                 <time class="block ml-2 mb-2 text-sm font-normal leading-none text-black">{{ transaction.date }}</time>
                 <p class="ml-2 text-base font-normal text-red-600">R${{ transaction.amount|intcomma }}</p>
-                <p class="ml-2 text-base font-normal text-red-600">{{ transaction.transaction_id|default_if_none:"N/A" }} - {{ transaction.transaction_type }}</p>
+                <p class="ml-2 text-base font-normal text-red-600">{{ transaction.transaction_number|default_if_none:"S.N." }} - {{ transaction.transaction_type }}</p>
                 <p class="ml-2 text-base font-normal text-red-600">{{ transaction.memo }}</p>
             </li>
         {% else %}
@@ -30,7 +30,7 @@
                 </span>
                 <time class="block ml-2 mb-2 text-sm font-normal leading-none text-black">{{ transaction.date }}</time>
                 <p class="ml-2 text-base font-normal text-green-600">R${{ transaction.amount|intcomma }}</p>
-                <p class="ml-2 text-base font-normal text-green-600">{{ transaction.transaction_id }} - {{ transaction.transaction_type }}</p>
+                <p class="ml-2 text-base font-normal text-green-600">{{ transaction.transaction_number }} - {{ transaction.transaction_type }}</p>
                 <p class="ml-2 text-base font-normal text-green-600">{{ transaction.memo }}</p>
             </li>
         {% endif %}

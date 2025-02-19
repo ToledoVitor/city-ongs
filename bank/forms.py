@@ -110,7 +110,7 @@ class TransactionForm(forms.ModelForm):
             "memo",
             "amount",
             "transaction_type",
-            "transaction_id",
+            "transaction_number",
             "date",
         ]
 
@@ -118,7 +118,7 @@ class TransactionForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "memo": BaseCharFieldFormWidget(),
             "amount": BaseNumberFormWidget(),
-            "transaction_id": BaseCharFieldFormWidget(required=False),
+            "transaction_number": BaseCharFieldFormWidget(required=False),
             "transaction_type": BaseSelectFormWidget(),
             "date": forms.DateInput(attrs={"type": "date"}, format="%d/%m/%Y"),
         }

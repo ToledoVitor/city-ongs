@@ -127,7 +127,7 @@ class OFXFileParser:
             Transaction(
                 bank_account=bank_account,
                 transaction_type=transaction.trntype,
-                transaction_id=transaction.fitid,
+                transaction_number=transaction.checknum,
                 name=transaction.name,
                 amount=transaction.trnamt,
                 date=transaction.dtposted,
