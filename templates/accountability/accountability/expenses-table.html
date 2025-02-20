@@ -27,7 +27,7 @@
     <tbody>
         {% if expenses_page %}
           {% for expense in expenses_page %}
-            <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
+            <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
                   {{ expense.identification }} <br>
                   {% if accountability.is_on_execution %}
@@ -124,7 +124,22 @@
                 <td class="px-6 py-4 text-sm flex justify-end">
                   <a
                     href="{% url 'accountability:expense-update' expense.id %}"
-                    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    class="
+                      px-3
+                      py-2
+                      text-sm
+                      font-medium
+                      text-center
+                      inline-flex
+                      items-center
+                      text-white
+                      rounded-lg
+                      focus:ring-4
+                      focus:outline-none
+                      bg-blue-600
+                      hover:bg-blue-700
+                      focus:ring-blue-800
+                    "
                   >
                     Visualizar
                   </a>
@@ -152,7 +167,7 @@
                       me-2
                     "
                   >
-                    <svg class="w-[20px] h-[20px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                       <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
                       <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
                     </svg>
@@ -215,7 +230,7 @@
                   <!-- Modal content -->
                   <div class="relative rounded-lg shadow bg-gray-300">
                     <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
                           <h3 class="text-xl font-semibold text-black">
                               Duplicar despesa?
                           </h3>
@@ -329,7 +344,7 @@
                   <!-- Modal content -->
                   <div class="relative rounded-lg shadow bg-gray-300">
                     <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
                           <h3 class="text-xl font-semibold text-black">
                               Duplicar despesa?
                           </h3>
@@ -439,7 +454,7 @@
                   <!-- Modal content -->
                   <div class="relative rounded-lg shadow bg-gray-300">
                     <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
                           <h3 class="text-xl font-semibold text-black">
                               Deletar despesa?
                           </h3>
@@ -526,8 +541,8 @@
 
           {% endfor %}
         {% else %}
-          <tr class="bg-white border-b dark:bg-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-400">
-            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-black">
+          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
                 Nenhum resultado encontrado
             </th>
             <td class="px-6 py-4">
@@ -557,10 +572,25 @@
   <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
     <a
       href="{% url 'accountability:expenses-create' accountability.id %}"
-      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-center
+        inline-flex
+        items-center
+        text-white
+        rounded-lg
+        focus:ring-4
+        focus:outline-none
+        bg-blue-600
+        hover:bg-blue-700
+        focus:ring-blue-800
+      "
     >
       Adicionar nova
-      <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
       </svg>
     </a>
@@ -568,7 +598,7 @@
 {% endif %}
 
 <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200" aria-label="Table navigation">
-  <span class="text-base font-normal text-black dark:text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
+  <span class="text-base font-normal text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
     Página
     <span class="font-bold text-black whitespace-nowrap">{{ expenses_page.number }}</span>
     de
@@ -580,7 +610,23 @@
       <li>
         <a
           href="?expenses_page=1&revenues_page={{ revenue_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
+          class="
+            flex
+            items-center
+            justify-center
+            px-3
+            h-8
+            ms-0
+            leading-tight
+            text-black
+            border
+            rounded-s-lg
+            bg-gray-200
+            border-gray-700
+            text-black
+            hover:bg-gray-800
+            hover:text-white
+          "
         >
           Primeira
         </a>
@@ -589,7 +635,21 @@
       <li>
         <a
           href="?revenues_page={{ revenue_page_number}}&expenses_page={{ expenses_page.previous_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
+          class="
+            flex
+            items-center
+            justify-center
+            px-3
+            h-8
+            ms-0
+            leading-tight
+            text-black
+            border
+            bg-gray-200
+            border-gray-700
+            hover:bg-gray-800
+            hover:text-white
+          "
         >
           Anterior
         </a>
@@ -602,7 +662,19 @@
           <a
             href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}"
             aria-current="page"
-            class="flex items-center justify-center px-3 h-8 text-white border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            class="
+              flex
+              items-center
+              justify-center
+              px-3
+              h-8
+              border
+              hover:bg-blue-100
+              hover:text-white
+              border-gray-700
+              bg-gray-800
+              text-white
+            "
           >
             {{ num }}
           </a>
@@ -611,7 +683,20 @@
         <li>
           <a
             href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}"
-            class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
+            class="
+              flex
+              items-center
+              justify-center
+              px-3
+              h-8
+              leading-tight
+              text-black
+              border
+              bg-gray-200
+              border-gray-700
+              hover:bg-gray-800
+              hover:text-white
+            "
           >
             {{ num }}
           </a>
@@ -623,7 +708,20 @@
       <li>
         <a
           href="?revenues_page={{ revenue_page_number }}&expenses_page={{ expenses_page.next_page_number }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
+          class="
+            flex
+            items-center
+            justify-center
+            px-3
+            h-8
+            leading-tight
+            text-black
+            border
+            bg-gray-200
+            border-gray-700
+            hover:bg-gray-800
+            hover:text-white
+          "
         >
           Próxima
         </a>
@@ -632,7 +730,21 @@
       <li>
         <a
           href="?revenues_page={{ revenue_page_number }}&expenses_page={{ expenses_page.paginator.num_pages }}&q={{ q }}"
-          class="flex items-center justify-center px-3 h-8 leading-tight text-black bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-white dark:bg-gray-200 dark:border-gray-700 dark:text-black dark:hover:bg-gray-800 dark:hover:text-white"
+          class="
+            flex
+            items-center
+            justify-center
+            px-3
+            h-8
+            leading-tight
+            text-black
+            border
+            rounded-e-lg
+            bg-gray-200
+            border-gray-700
+            hover:bg-gray-800
+            hover:text-white
+          "
         >
           Última
         </a>
