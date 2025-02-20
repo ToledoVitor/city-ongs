@@ -5,6 +5,10 @@ from utils.regex import password_is_valid
 from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget
 
 
+def email_exists(email: str) -> bool:
+    return User.objects.filter(email=email).exists()
+
+
 class FolderManagerCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="Senha")
     confirm_password = forms.CharField(
@@ -23,6 +27,7 @@ class FolderManagerCreateForm(forms.ModelForm):
             "cpf",
             "first_name",
             "last_name",
+            "position",
             "areas",
         ]
 
@@ -31,6 +36,7 @@ class FolderManagerCreateForm(forms.ModelForm):
             "cpf": BaseCharFieldFormWidget(placeholder="xxx.xxx.xxx-xx"),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
+            "position": BaseCharFieldFormWidget(placeholder=""),
         }
 
     def __init__(self, *args, **kwargs):
@@ -42,9 +48,13 @@ class FolderManagerCreateForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        email = cleaned_data.get("email")
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
         areas = cleaned_data.get("areas", [])
+
+        if email_exists(email):
+            self.add_error("email", "Já existe uma conta cadastrada com esse email.")
 
         if not password_is_valid(password):
             self.add_error("password", "A senha não atende aos critérios.")
@@ -77,6 +87,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
             "cpf",
             "first_name",
             "last_name",
+            "position",
             "areas",
         ]
 
@@ -85,6 +96,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
             "cpf": BaseCharFieldFormWidget(placeholder="xxx.xxx.xxx-xx"),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
+            "position": BaseCharFieldFormWidget(placeholder=""),
         }
 
     def __init__(self, *args, **kwargs):
@@ -96,9 +108,13 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        email = cleaned_data.get("email")
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
         areas = cleaned_data.get("areas", [])
+
+        if email_exists(email):
+            self.add_error("email", "Já existe uma conta cadastrada com esse email.")
 
         if not password_is_valid(password):
             self.add_error("password", "A senha não atende aos critérios.")

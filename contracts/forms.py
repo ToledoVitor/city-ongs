@@ -34,6 +34,10 @@ class ContractCreateForm(forms.ModelForm):
             "name",
             "concession_type",
             "bidding",
+            "law_num",
+            "law_date",
+            "agreement_num",
+            "agreement_date",
             "objective",
             "total_value",
             "start_of_vigency",
@@ -52,6 +56,8 @@ class ContractCreateForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
             "concession_type": BaseCharFieldFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
+            "law_num": BaseCharFieldFormWidget(),
+            "agreement_num": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
             "contractor_company": BaseSelectFormWidget(
                 placeholder="Empresa Contratante"
