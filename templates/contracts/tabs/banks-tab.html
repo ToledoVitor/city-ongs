@@ -50,7 +50,7 @@
 
     </div>
 
-    {% if user.has_admin_access %}
+    {% if not contract.checking_account or not contract.investing_account %}
         <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
         <a
             href="{% url 'contracts:contracts-accounts-auto-create' contract.id %}"

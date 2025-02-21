@@ -2,12 +2,12 @@ import copy
 from dataclasses import dataclass
 from decimal import Decimal
 
-from django.db.models import Q
+from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense
 from contracts.choices import NatureCategories
+from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency
 
@@ -17,14 +17,14 @@ class PassOn1PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
@@ -34,7 +34,14 @@ class PassOn1PDFExporter:
         else:
             self.pdf.set_font("Helvetica", "", font_size)
 
+    def __database_queries(self):
+        self.contracts_queryset = Contract.objects.all().order_by("start_of_vigency")
+        self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
+            Sum("total_value")
+        )["total_value__sum"] or Decimal("0.00")
+
     def handle(self):
+        self.__database_queries()
         self._draw_header()
         self._draw_up_informations()
         self._draw_table()
@@ -58,11 +65,14 @@ class PassOn1PDFExporter:
 
     def _draw_up_informations(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_helvetica_font(font_size=8, bold=False)
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
             0,
             7,
-            "EXERCÍCIO:",
+            text=f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -71,12 +81,12 @@ class PassOn1PDFExporter:
         self.pdf.cell(
             0,
             0,
-            "ÓRGÃO CONCESSOR:",
+            f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
             align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(6)
 
     def _draw_table(self):
         data_up_header = ["", "LEI", "CONVÊNIO", ""]
@@ -93,12 +103,25 @@ class PassOn1PDFExporter:
             "FONTE (**)",
             "VALOR EM REAIS",
         ]
-        data_body = [
-            ["", "", "", "", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", "", "", "", ""],
-        ]
-        data_footer = ["Total", ""]
+        data_body = []
+        hired_company = self.contract.hired_company
+        for paper in self.contracts_queryset:
+            data_body.append(
+                [
+                    f"{paper.concession_type}",  # Tipo de Concessão
+                    f"{paper.organization.name}",  # BENEFICIARIO
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",  # ENDEREÇO
+                    f"Lei nº ",  # N° da Lei TODO criar campo
+                    f"paper.law_date",  # DATA da Lei TODO criar campo
+                    f"paper.agreement_num",  # N° do Convênio TODO criar campo
+                    f"paper.agreement_date",  # DATA do Convênio TODO criar campo
+                    f"{paper.objective}",  # FINALIDADE
+                    f"{paper.end_of_vigency}",  # DATA DO PAGAMENTO TODO verificar com Felipe se a data está correta
+                    f"{paper.checking_account.origin}",  # FONTE
+                    f"{paper.total_value}",  # VALOR EM REAIS
+                ]
+            )
+        data_footer = ["Total:", f"{self.all_values_in_contracts}"]
 
         self.pdf.ln(10)
         sub_col_widths = [61, 29, 29, 73]  # Total: 190
@@ -135,7 +158,7 @@ class PassOn1PDFExporter:
                 for item in data_body:
                     body = table.row()
                     for text in item:
-                        body.cell(text)
+                        body.cell(text=text, align="L")
 
         self.default_cell_height
         footer_col_widths = [170, 20]  # Total: 190
@@ -150,7 +173,7 @@ class PassOn1PDFExporter:
         ) as table:
             total = table.row()
             for text in data_footer:
-                total.cell(text, align="R")
+                total.cell(text=text, align="R")
         self.pdf.ln(10)
 
     def _draw_down_informations(self):

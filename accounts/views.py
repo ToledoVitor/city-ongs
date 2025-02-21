@@ -20,7 +20,7 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
     model = User
     context_object_name = "managers_list"
     paginate_by = 10
-    ordering = "-created_at"
+    ordering = "email"
 
     template_name = "accounts/folder-managers/list.html"
     login_url = "/auth/login"
@@ -36,7 +36,7 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
                 | Q(first_name__icontains=query)
                 | Q(last_name__icontains=query)
             )
-        return queryset
+        return queryset.order_by("email")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,12 +82,13 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
         if form.is_valid():
             with transaction.atomic():
                 new_user = User.objects.create(
-                    email=form.cleaned_data["email"],
-                    cpf=form.cleaned_data["cpf"],
-                    username=form.cleaned_data["email"],
-                    first_name=form.cleaned_data["first_name"],
-                    last_name=form.cleaned_data["last_name"],
-                    password=form.cleaned_data["password"],
+                    email=form.cleaned_data.get("email"),
+                    position=form.cleaned_data.get("position"),
+                    cpf=form.cleaned_data.get("cpf"),
+                    username=form.cleaned_data.get("email"),
+                    first_name=form.cleaned_data.get("first_name"),
+                    last_name=form.cleaned_data.get("last_name"),
+                    password=form.cleaned_data.get("password"),
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.FOLDER_MANAGER,
                 )
@@ -110,7 +111,7 @@ class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
     model = User
     context_object_name = "accountants_list"
     paginate_by = 10
-    ordering = "-created_at"
+    ordering = "email"
 
     template_name = "accounts/organization-accountants/list.html"
     login_url = "/auth/login"
@@ -126,7 +127,7 @@ class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
                 | Q(first_name__icontains=query)
                 | Q(last_name__icontains=query)
             )
-        return queryset
+        return queryset.order_by("email")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -172,12 +173,13 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
         if form.is_valid():
             with transaction.atomic():
                 new_user = User.objects.create(
-                    email=form.cleaned_data["email"],
-                    cpf=form.cleaned_data["cpf"],
-                    username=form.cleaned_data["email"],
-                    first_name=form.cleaned_data["first_name"],
-                    last_name=form.cleaned_data["last_name"],
-                    password=form.cleaned_data["password"],
+                    email=form.cleaned_data.get("email"),
+                    position=form.cleaned_data.get("position"),
+                    cpf=form.cleaned_data.get("cpf"),
+                    username=form.cleaned_data.get("email"),
+                    first_name=form.cleaned_data.get("first_name"),
+                    last_name=form.cleaned_data.get("last_name"),
+                    password=form.cleaned_data.get("password"),
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
                 )

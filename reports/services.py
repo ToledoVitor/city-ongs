@@ -25,9 +25,9 @@ from reports.exporters import (
 from reports.forms import TRANSACTION_OPTIONS, ReportForm
 
 
-def export_pass_on_1(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_1(contract: Contract, start_date: date, end_date: date):
     return PassOn1PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
@@ -213,7 +213,7 @@ def export_report(
     report_model: str,
 ):
     match report_model:
-        case "rp_1":
+        case "pass_on_1":
             return export_pass_on_1(model, start_date, end_date)
 
         case "rp_2":

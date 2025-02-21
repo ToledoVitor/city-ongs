@@ -112,6 +112,31 @@ class Contract(BaseModel):
         blank=True,
     )
 
+    # Law and Agreement
+    law_num = models.CharField(
+        verbose_name="Número da Lei",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    law_date = models.DateField(
+        verbose_name="Data da Lei",
+        null=True,
+        blank=True,
+    )
+
+    agreement_num = models.CharField(
+        verbose_name="Número do Convênio",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    agreement_date = models.DateField(
+        verbose_name="Data do Convênio",
+        null=True,
+        blank=True,  
+    )
+
     # Dates and values
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
@@ -202,6 +227,7 @@ class Contract(BaseModel):
     accountability_autority = models.ForeignKey(
         User,
         related_name="accountability_contracts",
+        verbose_name="Responsável Contábil",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -209,6 +235,7 @@ class Contract(BaseModel):
     supervision_autority = models.ForeignKey(
         User,
         related_name="supervision_contracts",
+        verbose_name="Responsável Fiscal",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

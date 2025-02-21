@@ -37,7 +37,7 @@ class ConsolidatedPDFExporter:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
-            
+
     def __database_queries(self):
         self.checking_account = self.contract.checking_account
         self.investing_account = self.contract.investing_account
@@ -60,7 +60,7 @@ class ConsolidatedPDFExporter:
             .order_by("reference_year", "reference_month")
             .exclude(bank_account__isnull=True)
         )
-        
+
         self.revenue_queryset = Revenue.objects.filter(
             Q(bank_account=self.checking_account)
             | Q(bank_account=self.investing_account)
@@ -177,8 +177,10 @@ class ConsolidatedPDFExporter:
             bank_account=self.investing_account,
         ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
-        self.closing_balance = self.closing_checking_account + self.closing_investing_account
-    
+        self.closing_balance = (
+            self.closing_checking_account + self.closing_investing_account
+        )
+
         revenue_in_time = self.revenue_queryset.filter(
             receive_date__gte=self.start_date, receive_date__lte=self.end_date
         )
@@ -504,13 +506,11 @@ class ConsolidatedPDFExporter:
 
         positive_checking = checking_amount >= 0
         positive_investing = investing_amount >= 0
-        
+
         total = checking_amount + investing_amount
 
         calculated_value = (
-            self.opening_balance
-            + self.total_revenues
-            + self.total_expenses
+            self.opening_balance + self.total_revenues + self.total_expenses
         )
 
         body_data = [
