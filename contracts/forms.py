@@ -235,11 +235,12 @@ class CompanyCreateForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "cnpj": BaseCharFieldFormWidget(),
             "street": BaseCharFieldFormWidget(),
+            "number": BaseNumberFormWidget(),
             "complement": BaseCharFieldFormWidget(required=False),
             "district": BaseCharFieldFormWidget(),
             "city": BaseCharFieldFormWidget(),
             "uf": BaseSelectFormWidget(),
-            "postal_code": BaseCharFieldFormWidget(),
+            "postal_code": BaseNumberFormWidget(),
         }
 
 

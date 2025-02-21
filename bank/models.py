@@ -82,7 +82,7 @@ class BankAccount(BaseModel):
         if last_statement:
             return f"{last_statement.month_label} de {last_statement.reference_year}"
 
-        return "Sem Extrato Cadastrado"
+        return "---"
 
     @property
     def last_transactions(self):
