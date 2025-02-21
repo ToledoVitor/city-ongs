@@ -105,7 +105,7 @@ class Favored(BaseModel):
         verbose_name="Nome",
         max_length=64,
     )
-    document = models.IntegerField(
+    document = models.CharField(
         verbose_name="CPF/CNPJ",
         null=True,
         blank=True,
@@ -113,6 +113,13 @@ class Favored(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.document is not None:
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
+            self.document = str(string_doc)
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Favorecido"

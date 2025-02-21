@@ -14,7 +14,7 @@
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
     <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
         <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
           <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
         </svg>
@@ -26,7 +26,7 @@
         <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <a href="{% url 'accountability:favoreds-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Favorecidos</a>
+        <a href="{% url 'accountability:favoreds-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Favorecidos</a>
       </div>
     </li>
     <li aria-current="page">
@@ -34,7 +34,7 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Criar favorecido</span>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">Criar favorecido</span>
       </div>
     </li>
   </ol>
@@ -44,25 +44,17 @@
 <form method="post" class="max-w-lg mx-auto">
   {% csrf_token %}
 
-  <label class="block mb-2 text-2xl font-bold text-black">Dados da Favorecido</label>
+  <label class="block mb-2 text-2xl font-bold text-black">Dados do Favorecido</label>
 
   <div class="mb-3">
-    <label for="id_name" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Nome</label>
+    <label for="id_name" class="block mb-2 text-base font-medium text-black">Nome</label>
     {{ form.name }}
   </div>
 
   <div class="mb-3">
-    <label for="id_document" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">CNPJ ou CPF</label>
-    <input
-      type="number"
-      id="id_document"
-      name="document"
-      step="1"
-      placeholder=""
-      class="block w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
-      required
-    />
-    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+    <label for="id_document" class="block mb-2 text-base font-medium text-black">CNPJ ou CPF</label>
+    {{ form.document }}
+    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">
       Escreva somente os números do documento, sem pontuação.
     </p>
   </div>
@@ -71,10 +63,25 @@
 
   <button
     type="submit"
-    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    class="
+      px-3
+      py-2
+      text-sm
+      font-medium
+      text-center
+      inline-flex
+      items-center
+      text-white
+      rounded-lg
+      focus:ring-4
+      focus:outline-none
+      bg-blue-600
+      hover:bg-blue-700
+      focus:ring-blue-800
+    "
     style="display: flex; justify-self: center;"
   >
-    Criar
+    Criar Favorecido
   </button>
 
 </form>

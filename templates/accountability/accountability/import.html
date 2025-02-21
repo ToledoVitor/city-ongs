@@ -26,7 +26,7 @@
           <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Contratos</a>
+          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
         </div>
       </li>
       <li>
@@ -34,7 +34,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">{{ accountability.contract.trailing_code }}</a>
+          <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ accountability.contract.trailing_code }}</a>
         </div>
       </li>
       <li>
@@ -42,7 +42,7 @@
           <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
+          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
         </div>
       </li>
       <li aria-current="page">
@@ -50,7 +50,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Importar Dados</span>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2">Importar Dados</span>
         </div>
       </li>
     </ol>
@@ -74,7 +74,7 @@
     style="display: flex; justify-self: center;"
   >
     Baixar Modelo
-    <svg class="ml-2 w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2m-8 1V4m0 12-4-4m4 4 4-4"/>
     </svg>
   </button>
@@ -95,7 +95,7 @@
   <input type="hidden" name="step" value="upload">
 
   {{ form.xlsx_file }}
-  <p class="mt-1 text-sm text-black dark:text-black" id="file_input_help">Apenas arquivos tipo .xlsx</p>
+  <p class="mt-1 text-sm text-black" id="file_input_help">Apenas arquivos tipo .xlsx</p>
 
   {% if imported %}
   <div class="flex items-center p-4 my-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-100" role="alert">
@@ -124,7 +124,28 @@
             </ul>
         </div>
 
-        <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-red-50 text-white rounded-lg focus:ring-2 focus:ring-white p-1.5 hover:bg-white inline-flex items-center justify-center h-8 w-8 dark:bg-gray-400 dark:text-white dark:hover:bg-gray-300" data-dismiss-target="#alert-revenue" aria-label="Close">
+        <button
+          type="button"
+          class="
+            ms-auto
+            -mx-1.5
+            -my-1.5
+            text-white
+            rounded-lg
+            focus:ring-2
+            focus:ring-white
+            p-1.5
+            inline-flex
+            items-center
+            justify-center
+            h-8
+            w-8
+            bg-gray-400
+            hover:bg-gray-300
+          "
+          data-dismiss-target="#alert-revenue"
+          aria-label="Close"
+        >
             <span class="sr-only">Close</span>
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -147,7 +168,28 @@
             </ul>
         </div>
 
-        <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-red-50 text-white rounded-lg focus:ring-2 focus:ring-white p-1.5 hover:bg-white inline-flex items-center justify-center h-8 w-8 dark:bg-gray-400 dark:text-white dark:hover:bg-gray-300" data-dismiss-target="#alert-expense" aria-label="Close">
+        <button
+          type="button"
+          class="
+            ms-auto
+            -mx-1.5
+            -my-1.5
+            text-white
+            rounded-lg
+            focus:ring-2
+            focus:ring-white
+            p-1.5
+            inline-flex
+            items-center
+            justify-center
+            h-8
+            w-8
+            bg-gray-400
+            hover:bg-gray-300
+          "
+            data-dismiss-target="#alert-expense"
+            aria-label="Close"
+          >
             <span class="sr-only">Close</span>
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -170,7 +212,28 @@
           </ul>
       </div>
 
-      <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-red-50 text-white rounded-lg focus:ring-2 focus:ring-white p-1.5 hover:bg-white inline-flex items-center justify-center h-8 w-8 dark:bg-gray-400 dark:text-white dark:hover:bg-gray-300" data-dismiss-target="#alert-application" aria-label="Close">
+      <button
+        type="button"
+        class="
+          ms-auto
+          -mx-1.5
+          -my-1.5
+          text-white
+          rounded-lg
+          focus:ring-2
+          focus:ring-white
+          p-1.5
+          inline-flex
+          items-center
+          justify-center
+          h-8
+          w-8
+          bg-gray-400
+          hover:bg-gray-300
+        "
+        data-dismiss-target="#alert-application"
+        aria-label="Close"
+      >
           <span class="sr-only">Close</span>
           <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -182,7 +245,22 @@
 
   <button
     type="submit"
-    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    class="
+      px-3
+      py-2
+      text-sm
+      font-medium
+      text-center
+      inline-flex
+      items-center
+      text-white
+      rounded-lg
+      focus:ring-4
+      focus:outline-none
+      bg-blue-600
+      hover:bg-blue-700
+      focus:ring-blue-800
+    "
     style="display: flex; justify-self: center;"
   >
     Importar Arquivo
