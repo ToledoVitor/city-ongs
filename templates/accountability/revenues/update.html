@@ -14,7 +14,7 @@
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
           <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
           </svg>
@@ -26,7 +26,7 @@
           <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'accountability:accountability-detail' revenue.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Prestação {{ revenue.accountability.month }}/{{ revenue.accountability.year }}</a>
+          <a href="{% url 'accountability:accountability-detail' revenue.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Prestação {{ revenue.accountability.month }}/{{ revenue.accountability.year }}</a>
         </div>
       </li>
       <li aria-current="page">
@@ -34,7 +34,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">Atualizar Receita</span>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2">Atualizar Receita</span>
         </div>
       </li>
     </ol>
@@ -46,12 +46,12 @@
   <label class="block mb-2 text-2xl font-bold text-black">Identificação</label>
 
   <div class="mb-3">
-    <label for="id_identification" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Identificação</label>
+    <label for="id_identification" class="block mb-2 text-base font-medium text-black">Identificação</label>
     {{ form.identification }}
   </div>
 
   <div class="mb-3">
-    <label for="id_observations" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Observações</label>
+    <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
     {{ form.observations }}
   </div>
 
@@ -62,10 +62,10 @@
   <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="relative">
-        <label for="id_value" class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Valor da Receita</label>
+        <label for="id_value" class="block mb-2 text-base font-medium text-black">Valor da Receita</label>
         <div class="relative w-full">
           <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-            <svg class="w-4 h-4 text-gray-900 dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+            <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
             </svg>
           </div>
@@ -75,18 +75,36 @@
             name="value"
             placeholder="000,00"
             oninput="formatMoney(this)"
-            class="block p-2.5 w-full z-20 ps-10 text-sm text-gray-900 bg-gray-50 rounded-s-lg border-e-gray-50 border-e-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-300 dark:border-e-gray-700  dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:border-blue-500"
+            class="
+              block
+              p-2.5
+              w-full
+              z-20
+              ps-10
+              text-sm
+              text-gray-900
+              rounded-s-lg
+              border-e-2
+              border
+              focus:ring-blue-500
+              bg-gray-300
+              border-e-gray-700
+              border-gray-600
+              placeholder-gray-800
+              text-black
+              focus:border-blue-500
+            "
             required
           />  
         </div>  
-        <p id="helper-text-explanation" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">
           Escreva somente os números, sem o R$, seperados por vírgula
         </p>
 
       </div>
 
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Conta Bancária</label>
+        <label class="block mb-2 text-base font-medium text-black">Conta Bancária</label>
         {{ form.bank_account }}
       </div>
     </div>
@@ -95,10 +113,10 @@
   <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Competência</label>
+        <label class="block mb-2 text-base font-medium text-black">Competência</label>
         <div class="relative max-w-sm">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
             </div>
@@ -108,16 +126,30 @@
                 id="id_competency"
                 name="competency"
                 type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="
+                  border
+                  text-sm
+                  rounded-lg
+                  block
+                  w-full
+                  ps-10
+                  p-2.5
+                  bg-gray-300
+                  border-gray-600
+                  placeholder-gray-800
+                  text-black
+                  focus:ring-blue-500
+                  focus:border-blue-500
+                "
             >
         </div>
       </div>
 
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Data Recebimento</label>
+        <label class="block mb-2 text-base font-medium text-black">Data Recebimento</label>
         <div class="relative max-w-sm">
             <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
             </div>
@@ -127,7 +159,21 @@
                 id="id_receive_date"
                 name="receive_date"
                 type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-300 dark:border-gray-600 dark:placeholder-gray-800 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="
+                  border
+                  text-sm
+                  rounded-lg
+                  block
+                  w-full
+                  ps-10
+                  p-2.5
+                  bg-gray-300
+                  border-gray-600
+                  placeholder-gray-800
+                  text-black
+                  focus:ring-blue-500
+                  focus:border-blue-500
+                "
             >
         </div>
       </div>
@@ -142,13 +188,13 @@
   <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Fonte de Receita</label>
+        <label class="block mb-2 text-base font-medium text-black">Fonte de Receita</label>
         {{ form.source }}
         <a href="{% url 'accountability:sources-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar fonte</a>
       </div>
 
       <div class="relative">
-        <label class="block mb-2 text-base font-medium text-gray-900 dark:text-black">Natureza da Receita</label>
+        <label class="block mb-2 text-base font-medium text-black">Natureza da Receita</label>
         {{ form.revenue_nature }}
       </div>
     </div>
@@ -158,7 +204,22 @@
 
   <button
     type="submit"
-    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+    class="
+      px-3
+      py-2
+      text-sm
+      font-medium
+      text-center
+      inline-flex
+      items-center
+      text-white
+      rounded-lg
+      focus:ring-4
+      focus:outline-none
+      bg-blue-600
+      hover:bg-blue-700
+      focus:ring-blue-800
+    "
     style="display: flex; justify-self: center;"
   >
     Atualizar Receita

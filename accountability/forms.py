@@ -205,6 +205,7 @@ class FavoredForm(forms.ModelForm):
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
+            "document": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
         }
 
     def clean(self):
