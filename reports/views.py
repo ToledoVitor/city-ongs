@@ -5,6 +5,7 @@ from typing import Any
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 
+from contracts.models import Contract
 from reports.forms import ReportForm
 from reports.services import export_report, get_model_for_report
 
@@ -16,12 +17,22 @@ class ReportsView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["form"] = ReportForm(request=self.request)
         context["missing_accountability"] = kwargs.get("missing_accountability", False)
+        context["missing_banks"] = kwargs.get("missing_banks", False)
         return context
 
     def post(self, request, *args, **kwargs):
         form = ReportForm(request.POST, request=self.request)
         if form.is_valid():
             model, start_date, end_date = get_model_for_report(form)
+
+            if type(model) is Contract and (not model.checking_account and not model.investing_account):
+                return self.render_to_response(
+                    self.get_context_data(
+                        form=form,
+                        missing_banks=True,
+                    ),
+                )
+
             if not model:
                 return self.render_to_response(
                     self.get_context_data(
