@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import timedelta, date
 from decimal import Decimal
 
 from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Revenue
+from accountability.models import Expense, Revenue
 from bank.models import BankStatement
+from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency
+from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
 
 
 @dataclass
@@ -62,6 +63,14 @@ class PassOn2PDFExporter:
             | Q(bank_account=self.investing_account)
         ).exclude(bank_account__isnull=True)
 
+        self.expense_queryset = Expense.objects.filter(
+            accountability__contract=self.accountability.contract,
+            liquidation__gte=self.start_date,
+            liquidation__lte=self.end_date,
+        )
+
+        self.paid_expenses = self.expense_queryset.filter(paid=True)
+
     def handle(self):
         self.__database_queries()
         self._draw_header()
@@ -69,9 +78,9 @@ class PassOn2PDFExporter:
         self._draw_table_I()
         self._draw_signatories_notification()
         self._draw_table_II()
-        # self._draw_org_notification()
-        # self._draw_table_III()
-        # self._draw_observation()
+        self._draw_org_notification()
+        self._draw_table_III()
+        self._draw_observation()
 
         return self.pdf
 
@@ -300,10 +309,6 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_table_II(self):
-        pass_on_queryt = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER
-        )
-
         up_table_data = [
             [
                 "DATA DO DOCUMENTO",
@@ -314,22 +319,30 @@ class PassOn2PDFExporter:
             ],
         ]
 
-        for revenue in pass_on_queryt:
+        total_expense_value = Decimal("0.00")
+        for expense in self.paid_expenses:
             up_table_data.append(
                 [
-                    revenue.receive_date,
-                    "Perguntar ao Felipe/Ronaldo",
-                    "Perguntar ao Felipe/Ronaldo",
-                    "",
-                    "",
+                    format_into_brazilian_date(expense.liquidation),
+                    "Tipo do documento (Holerite, Nota Fiscal, etc...)",  # TODO <-
+                    expense.favored.name,
+                    expense.nature_label,
+                    format_into_brazilian_currency(expense.value),
                 ],
             )
+            total_expense_value += expense.value
 
         down_table_data = [
-            ["TOTAL DAS DESPESAS", ""],
-            ["RECURSO DO REPASSE NÃO APLICADO", ""],
-            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", ""],
-            ["VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE", ""],
+            [
+                "TOTAL DAS DESPESAS",
+                f"{format_into_brazilian_currency(total_expense_value)}",
+            ],
+            ["RECURSO DO REPASSE NÃO APLICADO", f"O que sobrou do contrato"],  # TODO
+            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", f"Valor glosado"],  # TODO
+            [
+                "VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE",
+                f"Recurso - Devolvido",
+            ],  # TODO
         ]
 
         self.__set_helvetica_font(font_size=7, bold=True)
@@ -401,19 +414,25 @@ class PassOn2PDFExporter:
                 "FONTE (5)",
                 "VALOR GLOBAL DO AJUSTE",
             ],
-            ["", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", ""],
         ]
+        table_data.append(  # TODO Após adendo (Ajuste = Adendo), necessário criar tabela
+            [
+                f"{...}",
+                f"{...}",
+                f"{...}",
+                f"{...}",
+                f"{...}",
+                f"{...}",
+                f"{...}",
+            ]
+        )
 
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
             "III - AJUSTES VINCULADOS ÀS DESPESAS CUSTEADAS COM RECURSOS DO REPASSE (3)",
-            align="L",
+            align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
             border=1,
@@ -434,28 +453,42 @@ class PassOn2PDFExporter:
             for item in table_data:
                 data = table.row()
                 for text in item:
-                    data.cell(text)
+                    data.cell(text=text, align="C")
 
-        self.pdf.ln(3)
+        self.pdf.ln(10)
 
     def _draw_observation(self):
         self.__set_helvetica_font(font_size=8, bold=True)
+        contractor_company = self.accountability.contract.contractor_company
         self.pdf.cell(
             0,
             0,
-            "LOCAL e DATA:",
+            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | {contractor_company.street}, nº {contractor_company.number} - {contractor_company.district}",  # ENDEREÇO
             align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(6)
+        self.pdf.ln(self.default_cell_height)
+        today = date.today()
+        self.pdf.cell(
+            0,
+            0,
+            f"DATA: {format_into_brazilian_date(today)}",
+            align="L",
+            markdown=True,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(20)
         self.pdf.multi_cell(
             0,
             0,
-            "RESPONSÁVEL: NOME, CARGO E ASSINATURA",
+            f"**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
+            markdown=True,
         )
         self.pdf.ln(8)
         self.pdf.cell(190, 10, "", ln=True, align="C")
