@@ -294,4 +294,3 @@ class PassOn3PDFExporter:
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(10)

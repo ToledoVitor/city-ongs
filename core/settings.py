@@ -53,7 +53,8 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://sitts-455340212401.southamerica-east1.run.app"
+    "https://sitts-455340212401.southamerica-east1.run.app",
+    "https://gestao-sitts-web.com",
 ]
 
 # Application definition
@@ -178,3 +179,6 @@ DATE_INPUT_FORMATS = [
     "%d/%m/%Y",
     "%Y-%m-%d",  # ISO
 ]
+
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_API_KEY = env("SENDGRID_API_KEY", default="")

@@ -1,5 +1,6 @@
 import copy
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 
 from django.db.models import Q, Sum
@@ -9,7 +10,11 @@ from fpdf.fonts import FontFace
 from contracts.choices import NatureCategories
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency
+from utils.choices import MonthChoices
+from utils.formats import (
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 
 @dataclass
@@ -104,24 +109,30 @@ class PassOn1PDFExporter:
             "VALOR EM REAIS",
         ]
         data_body = []
+
         hired_company = self.contract.hired_company
-        for paper in self.contracts_queryset:
+        date_law = self.contract.law_date
+        date_agreement = self.contract.agreement_date
+        for contract in self.contracts_queryset:
             data_body.append(
                 [
-                    f"{paper.concession_type}",  # Tipo de Concessão
-                    f"{paper.organization.name}",  # BENEFICIARIO
+                    f"{contract.concession_type}",  # Tipo de Concessão
+                    f"{contract.organization.name}",  # BENEFICIARIO
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",  # ENDEREÇO
-                    f"Lei nº ",  # N° da Lei TODO criar campo
-                    f"paper.law_date",  # DATA da Lei TODO criar campo
-                    f"paper.agreement_num",  # N° do Convênio TODO criar campo
-                    f"paper.agreement_date",  # DATA do Convênio TODO criar campo
-                    f"{paper.objective}",  # FINALIDADE
-                    f"{paper.end_of_vigency}",  # DATA DO PAGAMENTO TODO verificar com Felipe se a data está correta
-                    f"{paper.checking_account.origin}",  # FONTE
-                    f"{paper.total_value}",  # VALOR EM REAIS
+                    f"Lei nº {contract.law_num}",  # N° da Lei
+                    f"De {date_law.day} de {MonthChoices(date_law.month).label.capitalize()} de {date_law.year}",  # DATA da Lei TODO month como Choices
+                    f"{contract.agreement_num}/{date_agreement.year}",  # N° do Convênio
+                    f"{format_into_brazilian_date(contract.agreement_date)}",  # DATA do Convênio
+                    f"{contract.objective}",  # FINALIDADE
+                    f"{contract.end_of_vigency}",  # DATA DO PAGAMENTO TODO verificar com Felipe se a data está correta
+                    f"{contract.checking_account.origin}",  # FONTE
+                    f"{format_into_brazilian_currency(contract.total_value)}",  # VALOR EM REAIS
                 ]
             )
-        data_footer = ["Total:", f"{self.all_values_in_contracts}"]
+        data_footer = [
+            "Total:",
+            f"{format_into_brazilian_currency(self.all_values_in_contracts)}",
+        ]
 
         self.pdf.ln(10)
         sub_col_widths = [61, 29, 29, 73]  # Total: 190
@@ -129,7 +140,7 @@ class PassOn1PDFExporter:
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="C",
             col_widths=sub_col_widths,
             repeat_headings=0,
@@ -161,12 +172,12 @@ class PassOn1PDFExporter:
                         body.cell(text=text, align="L")
 
         self.default_cell_height
-        footer_col_widths = [170, 20]  # Total: 190
+        footer_col_widths = [154, 36]  # Total: 190
         font = FontFace("Helvetica", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="R",
             col_widths=footer_col_widths,
             repeat_headings=0,
@@ -178,11 +189,24 @@ class PassOn1PDFExporter:
 
     def _draw_down_informations(self):
         self.__set_helvetica_font(font_size=8, bold=True)
+        contractor_company = self.contract.contractor_company
         self.pdf.cell(
             0,
             0,
-            "LOCAL e DATA:",
+            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | {contractor_company.street}, nº {contractor_company.number} - {contractor_company.district}",  # ENDEREÇO
             align="L",
+            markdown=True,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(self.default_cell_height)
+        today = date.today()
+        self.pdf.cell(
+            0,
+            0,
+            f"DATA: {format_into_brazilian_date(today)}",
+            align="L",
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )

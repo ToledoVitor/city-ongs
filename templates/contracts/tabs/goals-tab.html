@@ -5,13 +5,13 @@
         <thead class="text-xs uppercase bg-gray-500 text-white">
             <tr>
                 <th scope="col" class="px-6 py-3" />
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center ">
                     Meta
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center ">
                     Objetivo
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center ">
                     Status
                 </th>
                 <th />
@@ -21,15 +21,17 @@
             {% if contract.goals.count %}
               {% for goal in contract.goals.all %}
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
+                  <td
+                    scope="row"
+                    class="text-sm text-black max-w-24"
+                  >
 
-                    {% if user.can_change_statuses %}
+                    {% if user.can_change_statuses and contract.is_on_planning %}
                       <!-- goals approve Modal toggle -->
                       <button
                         data-modal-target="goals-modal-{{ goal.id}}"
                         data-modal-toggle="goals-modal-{{ goal.id}}"
                         class="
-                          ml-4
                           block
                           text-white
                           focus:ring-4
@@ -43,48 +45,88 @@
                           bg-blue-600
                           hover:bg-blue-700
                           focus:ring-blue-800
+                          flex
+                          justify-self-center
                         "
                         type="button"
                       >
                         Avaliar
                       </button>
-                    {% else %}
-
+                    {% elif contract.is_on_planning %}
                       <div class="grid grid-cols-1 gap-0 sm:grid-cols-2">
                         <!-- goals detail Modal toggle -->
-                        <button
-                          data-modal-target="goals-modal-{{ goal.id}}"
-                          data-modal-toggle="goals-modal-{{ goal.id}}"
-                          type="button"
-                        >
-                          <svg class="w-6 h-6 ml-4 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>
-                            <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                          </svg>
-                        </button>
+                        <a>
+                          <button
+                            data-modal-target="goals-modal-{{ goal.id}}"
+                            data-modal-toggle="goals-modal-{{ goal.id}}"
+                            type="button"
+                            class="
+                              text-white
+                              ml-4
+                              bg-blue-600
+                              hover:bg-blue-600
+                              focus:ring-4
+                              focus:outline-none
+                              focus:ring-blue-600
+                              font-medium
+                              rounded-full
+                              text-xs
+                              mt-2
+                              px-2.5
+                              py-1
+                              text-center
+                              inline-flex
+                              items-center
+                              me-2
+                            "
+                          >
+                            Detalhes
+                          </button>
+                        </a>
                         
                         {% if contract.is_on_planning %}
                           <a
                             href="{% url 'contracts:contracts-goals-update' contract.id goal.id %}"
                           >
-                            <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
-                            </svg>
+                            <button
+                              type="button"
+                              class="
+                                text-white
+                                ml-4
+                                bg-blue-600
+                                hover:bg-blue-600
+                                focus:ring-4
+                                focus:outline-none
+                                focus:ring-blue-600
+                                font-medium
+                                rounded-full
+                                text-xs
+                                mt-2
+                                px-2.5
+                                py-1
+                                text-center
+                                inline-flex
+                                items-center
+                                me-2
+                              "
+                            >
+                              Editar
+                            </button>
                           </a>
                         {% endif %}
                       </div>         
                     {% endif %}
                   </td>
 
-                  <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
+                  <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-center text-black max-w-48">
                     {{ goal.name }}
                   </th>
 
-                  <td class="px-6 py-4 text-sm text-black max-w-48">
+                  <td class="px-6 py-4 text-sm text-black text-center max-w-48">
                     {{ goal.objective }}
                   </td>
 
-                  <td class="px-6 py-4 align-center text-sm text-black">
+                  <td class="px-6 py-4 align-center text-sm text-center text-black">
                     {% if goal.status == "ANALYZING" %}
                       <span
                         class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100"
@@ -118,7 +160,7 @@
                     {% endif %}
                   </td>
                   
-                  <td class="pr-3 py-4">
+                  <td class="pr-3 py-4 flex justify-end">
                     <button 
                     class="expand-btn text-blue-600 hover:underline mr-2 flex items-center" 
                     data-target="#details-{{ goal.id }}"
@@ -189,8 +231,8 @@
                                   bg-transparent
                                   rounded-lg
                                   text-sm
-                                  w-8
-                                  h-8
+                                  w-6
+                                  h-6
                                   ms-auto
                                   inline-flex
                                   justify-center

@@ -6,10 +6,10 @@ from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense
+from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency
+from utils.formats import format_into_brazilian_currency, format_into_brazilian_date, document_mask
 
 
 @dataclass
@@ -22,7 +22,6 @@ class PassOn6PDFExporter:
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
-        pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.accountability = accountability
         self.start_date = start_date
@@ -33,20 +32,32 @@ class PassOn6PDFExporter:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
+            
+    def __database_queries(self):
+        self.checking_account = self.accountability.contract.checking_account
+        self.investing_account = self.accountability.contract.investing_account
+
+        self.revenue_queryset = Revenue.objects.filter(
+            Q(bank_account=self.checking_account)
+            | Q(bank_account=self.investing_account),
+            receive_date__gte=self.start_date,
+            receive_date__lte=self.end_date
+        ).exclude(bank_account__isnull=True)
 
     def handle(self):
+        self.__database_queries()
         self._draw_header()
         self._draw_informations()
         self._draw_first_table()
         self._draw_partners_data()
         self._draw_documents_table()
         self._draw_header_resources_table()
-        self._draw_resources_table()
-        self._draw_resources_footer()
-        self._draw_expenses_table()
-        self._draw_expenses_footer()
-        self._draw_financial_table()
-        self._draw_last_informations()
+        # self._draw_resources_table()
+        # self._draw_resources_footer()
+        # self._draw_expenses_table()
+        # self._draw_expenses_footer()
+        # self._draw_financial_table()
+        # self._draw_last_informations()
 
         return self.pdf
 
@@ -97,12 +108,16 @@ class PassOn6PDFExporter:
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
 
     def _draw_first_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         table_data = [
-            ["Nome", "Papel", "CPF"],
+            [
+                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}", 
+                f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável", 
+                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}"
+            ],
         ]
 
         col_widths = [70, 60, 60]
@@ -133,7 +148,7 @@ class PassOn6PDFExporter:
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=f"**EXERCÍCIO (1):** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
             h=self.default_cell_height,
             new_x=XPos.LMARGIN,
@@ -147,53 +162,49 @@ class PassOn6PDFExporter:
         self.pdf.ln(4)
 
     def _draw_documents_table(self):
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_helvetica_font(font_size=7, bold=False)
         self.pdf.ln()
-        headers = ["DOCUMENTO", "DATA", "VIGÊNCIA", "VALOR - R$"]
         table_data = [
             [
-                "Termo de Colaboração nº 10/2023",
-                "26/09/2023",
-                "26/09/2023 - 26/09/2024",
-                "R$ 761.992,32",
+                "**DOCUMENTO**", 
+                "**DATA**", 
+                "**VIGÊNCIA**", 
+                "**VALOR - R$**"
             ],
             [
-                "Aditamento Nº 1",
-                "25/09/2024",
-                "26/09/2024 - 25/09/2025",
-                "R$ 776.193,00",
+                f"Criar Termo de Colaboração", # TODO criar campo
+                f"data", # TODO após criar campo
+                f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
+                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
+            ],
+            [
+                "Criar classe de aditamento", # TODO criar Classe
+                "dd/mm/aaaa",
+                "dd/mm/aaaa",
+                "R$ xx.xxx,xx",
             ],
         ]
 
         col_widths = [75, 19, 65, 31]
-        self.__set_helvetica_font(font_size=8, bold=True)
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="C",
+            markdown=True,
+            col_widths=col_widths,
+        ) as table:
+            for item in table_data:
+                data = table.row()
+                for text in item:
+                    data.cell(text=text, align="C")
 
-        for col_index, header in enumerate(headers):
-            self.pdf.cell(
-                col_widths[col_index],
-                h=self.default_cell_height,
-                text=header,
-                border=1,
-                align="C",
-            )
         self.pdf.ln()
-
-        self.__set_helvetica_font()
-        for row in table_data:
-            for col_index, col_text in enumerate(row):
-                self.pdf.cell(
-                    col_widths[col_index],
-                    h=self.default_cell_height,
-                    text=col_text,
-                    border=1,
-                    align="C",
-                )
-            self.pdf.ln()
-
+        
     def _draw_header_resources_table(self):
         self.pdf.ln(7)
 
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -203,24 +214,27 @@ class PassOn6PDFExporter:
         )
         self.pdf.ln(self.default_cell_height)
 
-        headers = [
-            "DATA PREVISTA PARA O REPASSE (2)",
-            "VALORES PREVISTOS (R$)",
-            "DATA DO REPASSE",
-            "NÚMERO DO DOCUMENTO DE CRÉDITO",
-            "VALORES REPASSADOS (R$)",
-        ]
         table_data = [
             [
-                "10/2024",
-                "64.682,75",
-                "05/11/2024",
-                "552766000230001",
-                "64.682,75",
-            ],
+                "**DATA PREVISTA PARA O REPASSE (2)**",
+                "**VALORES PREVISTOS (R$)**",
+                "**DATA DO REPASSE**",
+                "**NÚMERO DO DOCUMENTO DE CRÉDITO**",
+                "**VALORES REPASSADOS (R$)**",
+            ]
         ]
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"dd/mm/aa", # TODO criar campo de data prevista
+                    f"64.682,75",
+                    f"05/11/2024",
+                    f"552766000230001",
+                    f"64.682,75",
+                ],
+            )
+            
         col_widths = [40, 35, 25, 50, 40]
-
         for col_index, header in enumerate(headers):
             x = self.pdf.get_x()
             y = self.pdf.get_y()

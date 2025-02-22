@@ -8,14 +8,14 @@
     <b>Origem da Receita:</b> {{ object.origin }}
 </div>
 
-<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-500">
+<hr class="h-px my-8 border-0 bg-gray-500">
 
 <div class="my-3 mx-5">
     <label class="block mb-2 text-xl font-semibold text-black">Último Extrato:</label>
     <b>Mês de Referência:</b> {{ object.last_statement_update }} <br>
 </div>
 
-<hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-500">
+<hr class="h-px my-8 border-0 bg-gray-500">
 
 <label class="block mx-5 mb-2 text-2xl font-bold text-black">Atualizar extrato:</label>
 
@@ -25,7 +25,21 @@
         href="{% url 'bank:bank-statements-update' object.id %}"
     >
         <button
-        class="px-3 py-2 text-sm font-medium text-center inline-flex text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        class="
+            px-3
+            py-2
+            text-sm
+            font-medium
+            text-center
+            inline-flex
+            text-white
+            rounded-lg
+            focus:ring-4
+            focus:outline-none
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+        "
         >
         Atualizar
         </button>

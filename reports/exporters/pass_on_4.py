@@ -6,10 +6,10 @@ from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense
+from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency
+from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
 
 
 @dataclass
@@ -22,7 +22,6 @@ class PassOn4PDFExporter:
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)
-        pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.accountability = accountability
         self.start_date = start_date
@@ -33,8 +32,24 @@ class PassOn4PDFExporter:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
+            
+    def __background_gray_color(self, gray):
+        if gray:
+            self.pdf.set_fill_color(233, 234, 236)
+        else:
+            self.pdf.set_fill_color(255, 255, 255)
+
+    def __database_queries(self):
+        self.checking_account = self.accountability.contract.checking_account
+        self.investing_account = self.accountability.contract.investing_account
+
+        self.revenue_queryset = Revenue.objects.filter(
+            Q(bank_account=self.checking_account)
+            | Q(bank_account=self.investing_account)
+        ).exclude(bank_account__isnull=True)
 
     def handle(self):
+        self.__database_queries()
         self._draw_header()
         self._draw_informations()
         self._draw_manager_table()
@@ -93,280 +108,402 @@ class PassOn4PDFExporter:
         self.pdf.ln(12)
 
     def _draw_manager_table(self):
-        self.__set_helvetica_font(font_size=7, bold=True)
+        pass_on_in_time_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        )
+
         self.pdf.ln()
-        headers = [
-            ("Contrato de Gestão Nº"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        header_data = [
+            "**Contrato de Gestão Nº**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte:**",
+            "**Valor Repassado no Exercício**",
         ]
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
         table_data = []
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        total_revenue_value = Decimal("0.00")
+        for revenue in pass_on_in_time_queryset:
+            table_data.append(
+                [
+                    f"{contract.code}",
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{contract.end_of_vigency}",
+                    f"Valor Global do Ajuste - Valor do adendo",
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        footer_data = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
+        data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
-            col_widths=col_widths,
+            line_height=4,
+            align="C",
+            markdown=True,
+            col_widths=data_col_widths,
+            repeat_headings=0,
         ) as table:
+            self.__background_gray_color(gray=True)
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
-                data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+            for text in header_data:
+                header.cell(text=text, align="C")
 
-        col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+            self.__set_helvetica_font(self.default_cell_height)
+            for item in table_data:
+                self.__background_gray_color(gray=False)
+                data = table.row()
+                for text in item:
+                    data.cell(text=text, align="C")
+
+        footer_col_widths = [178, 22]
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
-            col_widths=col_widths,
+            col_widths=footer_col_widths,
+            markdown=True,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
+            self.__background_gray_color(gray=True)
+            footer = table.row()
+            for text in footer_data:
+                footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_partner_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        headers = [
-            ("Termo de Parceria Nº"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        table_header = [
+            "**Termo de Parceria Nº**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte**",
+            "**Valor Repassado no Exercício**",
         ]
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
         table_data = []
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        total_revenue_value = Decimal("0.00")
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"Confirmar valor", # TODO Rep 
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"ClassAdendo", # TODO criar classe adendo
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        table_footer = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
+            self.__background_gray_color(gray=True)
+            for text in table_header:
+                header.cell(text=text, align="C")
+                
+            self.__background_gray_color(gray=False)
+            self.__set_helvetica_font(7, bold=False)
+            for item in table_data:
                 data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+                for text in item:
+                    data.cell(text=text, align="C")
 
-        col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        col_widths = [158, 42]
+        font = FontFace("Helvetica", "B", size_pt=7)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="R",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
+            footer = table.row()
+            self.__background_gray_color(gray=True)
+            for text in table_footer:
+                footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_collaborator_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        headers = [
-            ("Termo de Colaboração Nº"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        table_header = [
+            "**Termo de Colaboração Nº**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte**",
+            "**Valor Repassado no Exercício**",
         ]
-        table_data = [
-            ("10/2023"),
-            ("Associação Comunidade Varzina - Eco & Vida (Meio Ambiente)"),
-            ("02.834.119/0001-95"),
-            (
-                "Rua Feres Sada, 82 - Loteamento Parque Empresarial São Luiz, Várzea Paulista - null, Brasil"
-            ),
-            ("26/09/2023"),
-            ("26/09/2023"),
-            ("R$ 1.538.185,32"),
-            (
-                "Executar a coleta de recicláveis no município de Várzea Paulista - SP, em acordo com a Política Nacional de Resíduos Sólidos (PNRS)"
-            ),
-            ("Consolidado de todas as fontes"),
-            ("R$ 0,00"),
-        ]
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
+        table_data = []
+        total_revenue_value = Decimal("0.00")
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"Confirmar valor", # TODO Rep 
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"ClassAdendo", # TODO criar classe adendo
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        table_footer = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
-                self.pdf.set_font("Helvetica", "", 5)
+            self.__background_gray_color(gray=True)
+            for text in table_header:
+                header.cell(text=text, align="C")
+                
+            self.pdf.set_font("Helvetica", "", 7)
+            self.__background_gray_color(gray=False)
+            for item in table_data:
                 data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+                for text in item:
+                    data.cell(text=text, align="C")
 
         col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
+            footer = table.row()
+            self.__background_gray_color(gray=True)
+            for text in table_footer:
+                footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_promotion_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln(3)
-        headers = [
-            ("Contrato de Fomento Nº"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        table_header = [
+            "**Contrato de Fomento Nº**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte**",
+            "**Valor Repassado no Exercício**",
         ]
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
         table_data = []
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        total_revenue_value = Decimal("0.00")
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"Confirmar valor", # TODO Rep 
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"ClassAdendo", # TODO criar classe adendo
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        table_footer = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
+            self.__background_gray_color(gray=True)
+            for text in table_header:
+                header.cell(text=text, align="C")
+                
+            self.pdf.set_font("Helvetica", "", 7)
+            self.__background_gray_color(gray=False)
+            for item in table_data:
                 data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+                for text in item:
+                    data.cell(text=text, align="C")
 
         col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
+            footer = table.row()
+            self.__background_gray_color(gray=True)
+            for text in table_footer:
+                footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_agreement_table(self):
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        headers = [
-            ("Convênio Nº"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        table_header = [
+            "**Convênio Nº**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte**",
+            "**Valor Repassado no Exercício**",
         ]
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
         table_data = []
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        total_revenue_value = Decimal("0.00")
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"{contract.agreement_num}",
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"ClassAdendo", # TODO criar classe adendo
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        table_footer = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
+            self.__background_gray_color(gray=True)
+            for text in table_header:
+                header.cell(text=text, align="C")
+                
+            self.pdf.set_font("Helvetica", "", 7)
+            self.__background_gray_color(gray=False)
+            for item in table_data:
                 data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+                for text in item:
+                    data.cell(text=text, align="C")
 
         col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
+            footer = table.row()
+            self.__background_gray_color(gray=True)
+            for text in table_footer:
+                footer.cell(text=text, align="R")
 
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(10)
 
     def _draw_concession_table(self):
         self.__set_helvetica_font(font_size=8, bold=True)
@@ -378,51 +515,76 @@ class PassOn4PDFExporter:
         self.pdf.ln(2)
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        headers = [
-            ("Tipo da Concessão"),
-            ("Beneficiário"),
-            ("CNPJ"),
-            ("Endereço"),
-            ("Data"),
-            ("Vigência até"),
-            ("Valor Global do Ajuste"),
-            ("Objeto"),
-            ("Fonte"),
-            ("Valor Repassado no Exercício"),
+        table_header = [
+            "**Tipo da Concessão**",
+            "**Beneficiário**",
+            "**CNPJ**",
+            "**Endereço**",
+            "**Data**",
+            "**Vigência até**",
+            "**Valor Global do Ajuste**",
+            "**Objeto**",
+            "**Fonte**",
+            "**Valor Repassado no Exercício**",
         ]
+        hired_company = self.accountability.contract.hired_company
+        contract = self.accountability.contract
         table_data = []
-        total_line = [
-            ("Total:"),
-            ("R$ 0,00"),
+        total_revenue_value = Decimal("0.00")
+        for revenue in self.revenue_queryset:
+            table_data.append(
+                [
+                    f"{contract.concession_type}",
+                    f"{contract.organization.name}",
+                    f"{hired_company.cnpj}",
+                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+                    f"{revenue.receive_date}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"ClassAdendo", # TODO criar classe adendo
+                    f"{contract.objective}",
+                    f"{revenue.source}",
+                    f"{format_into_brazilian_currency(revenue.value)}",
+                ]
+            )
+            total_revenue_value += revenue.value
+            
+        table_footer = [
+            "**Total:**",
+            f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
             header = table.row()
-            for datum_index, datum_text in enumerate(headers):
-                header.cell(datum_text)
-            if table_data != []:
+            self.__background_gray_color(gray=True)
+            for text in table_header:
+                header.cell(text=text, align="C")
+                
+            self.pdf.set_font("Helvetica", "", 7)
+            self.__background_gray_color(gray=False)
+            for item in table_data:
                 data = table.row()
-                for datum_index, datum_text in enumerate(table_data):
-                    data.cell(datum_text)
+                for text in item:
+                    data.cell(text=text, align="C")
 
         col_widths = [178, 22]
-        font = FontFace("Helvetica", "B", size_pt=6)
+        font = FontFace("Helvetica", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
+            line_height=4,
             align="L",
+            markdown=True,
             col_widths=col_widths,
         ) as table:
-            total = table.row()
-            for datum_index, datum_text in enumerate(total_line):
-                total.cell(datum_text)
-
-        self.pdf.ln(self.default_cell_height)
+            footer = table.row()
+            self.__background_gray_color(gray=True)
+            for text in table_footer:
+                footer.cell(text=text, align="R")

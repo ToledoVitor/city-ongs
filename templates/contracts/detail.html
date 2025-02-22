@@ -14,7 +14,7 @@
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
     <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500 dark:text-black dark:hover:text-gray-500">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
         <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
           <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
         </svg>
@@ -26,7 +26,7 @@
         <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2 dark:text-black dark:hover:text-gray-500">Contratos</a>
+        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
       </div>
     </li>
     <li aria-current="page">
@@ -34,19 +34,19 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2 dark:text-black">{{ contract.trailing_code }}</span>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">{{ contract.trailing_code }}</span>
       </div>
     </li>
   </ol>
 </nav>
 
-<div class="mb-4 mr-10 border-b border-gray-200 dark:border-gray-700">
+<div class="mb-4 mr-10 border-b border-gray-700">
   <ul
     class="flex flex-wrap -mb-px text-sm font-medium text-center"
     id="default-styled-tab"
     data-tabs-toggle="#default-styled-tab-content" 
     data-tabs-active-classes="text-white hover:text-gray-800 rounded-t-lg active bg-blue-600"
-    data-tabs-inactive-classes="dark:border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
+    data-tabs-inactive-classes="border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
     role="tablist"
   >
     <li class="me-2" role="presentation">
@@ -65,7 +65,7 @@
 
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="accounts-tab"
         data-tabs-target="#accounts"
         type="button"
@@ -79,7 +79,7 @@
 
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="goals-tab"
         data-tabs-target="#goals"
         type="button"
@@ -93,7 +93,7 @@
 
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="items-tab"
         data-tabs-target="#items"
         type="button"
@@ -107,7 +107,7 @@
 
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="accountability-tab"
         data-tabs-target="#accountability"
         type="button"
@@ -121,7 +121,7 @@
 
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="execution-tab"
         data-tabs-target="#execution"
         type="button"
@@ -135,7 +135,7 @@
   
     <li class="me-2" role="presentation">
       <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black dark:hover:black"
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="addendums-tab"
         data-tabs-target="#addendums"
         type="button"
@@ -151,56 +151,38 @@
 
 <div class="mr-10" id="default-styled-tab-content">
   <!-- Details Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
+  <div class="hidden p-4 rounded-lg bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
     {% include 'contracts/tabs/details-tab.html' with contract=contract %}
   </div>
 
   <!-- Bank Accounts Tab -->
-  <div class="hidden p-4 rounded-lg dark:bg-gray-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+  <div class="hidden p-4 rounded-lg bg-gray-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
     {% include 'contracts/tabs/banks-tab.html' with contract=contract %}
   </div>
 
   <!-- Goals Tab -->
-  <div class="hidden rounded-lg dark:bg-gray-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
+  <div class="hidden rounded-lg bg-gray-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
     {% include 'contracts/tabs/goals-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>  
 
   <!-- Items Tab -->
-  <div class="hidden rounded-lg dark:bg-gray-200" id="items" role="tabpanel" aria-labelledby="items-tab">
+  <div class="hidden rounded-lg bg-gray-200" id="items" role="tabpanel" aria-labelledby="items-tab">
     {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>  
 
   <!-- Month Accountability Tab -->
-  <div class="hidden rounded-lg dark:bg-gray-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
+  <div class="hidden rounded-lg bg-gray-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
     {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
   
   <!-- Execution Tab -->
-  <div class="hidden rounded-lg dark:bg-gray-200" id="execution" role="tabpanel" aria-labelledby="execution-tab">
+  <div class="hidden rounded-lg bg-gray-200" id="execution" role="tabpanel" aria-labelledby="execution-tab">
     {% include 'contracts/tabs/execution-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
 
   <!-- Addendums Tab -->
-  <div class="hidden p-4 rounded-lg dark:bg-gray-200" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
-    {% if contract.addendums.count %}
-      <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">Dashboard tab's associated content</strong>. Clicking another tab will toggle the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
-    {% else %}
-      <p class="text-lg my-4 font-bold text-black">Nenhum aditivo cadastrado.</p>
-    {% endif %}
-
-    {% if user.has_admin_access %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 px-4 bg-gray-200">
-        <a
-          href="{% url 'accountability:sources-create' %}"
-          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-          Adicionar aditivo
-          <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
+  <div class="hidden p-4 rounded-lg bg-gray-200" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
+    <p class="text-lg my-4 font-bold text-black">Nenhum aditivo cadastrado.</p>
   </div>
   
 </div>
@@ -209,32 +191,32 @@
 <p class="text-3xl mt-6 font-bold">
   Histórico de Edições
 </p>
-<p id="helper-text-explanation" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+<p id="helper-text-explanation" class="mb-6 text-sm text-gray-400">
   Apenas as 10 ultimas alterações são exibidas
 </p>
 
-<ol class="ml-4 mt-6 relative border-s border-gray-200 dark:border-gray-700">
+<ol class="ml-4 mt-6 relative border-s border-gray-700">
   {% if contract.recent_logs %}
     {% for log in contract.recent_logs %}
     <li class="mb-8 ms-6">
         <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-500 bg-gray-500">
-            <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-2.5 h-2.5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
             </svg>
         </span>
-        <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{ log.created_at }}</time>
-        <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">{{ log.user_email}} - {{ log.action_label }}</p>
+        <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-500">{{ log.created_at }}</time>
+        <p class="ml-2 text-base font-normal text-gray-400">{{ log.user_email}} - {{ log.action_label }}</p>
     </li>
     {% endfor %}
   {% else %}
     <li class="mb-8 ms-6">
       <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-8 ring-gray-500 bg-gray-500">
-          <svg class="w-2.5 h-2.5 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-2.5 h-2.5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
               <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
           </svg>
       </span>
-      <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">Sem registros recentes</time>
-      <p class="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">-</p>
+      <time class="block ml-2 mb-2 text-sm font-normal leading-none text-gray-500">Sem registros recentes</time>
+      <p class="ml-2 text-base font-normal text-gray-400">-</p>
     </li>
   {% endif%}
 </ol>

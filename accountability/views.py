@@ -38,7 +38,7 @@ class ResourceSourceListView(LoginRequiredMixin, ListView):
     model = ResourceSource
     context_object_name = "sources"
     paginate_by = 10
-    ordering = "-created_at"
+    ordering = "name"
 
     template_name = "accountability/sources/list.html"
     login_url = "/auth/login"
@@ -54,7 +54,7 @@ class ResourceSourceListView(LoginRequiredMixin, ListView):
                 | Q(first_name__icontains=query)
                 | Q(last_name__icontains=query)
             )
-        return queryset
+        return queryset.order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -428,7 +428,7 @@ class FavoredListView(LoginRequiredMixin, ListView):
     model = Favored
     context_object_name = "favoreds_list"
     paginate_by = 10
-    ordering = "-created_at"
+    ordering = "name"
 
     template_name = "accountability/favoreds/list.html"
     login_url = "/auth/login"
@@ -442,7 +442,7 @@ class FavoredListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(document__icontains=query)
             )
-        return queryset
+        return queryset.order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

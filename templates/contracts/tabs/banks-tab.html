@@ -4,7 +4,7 @@
     <p class="text-2xl mb-2 font-bold text-black">Contas Bancárias Cadastradas</p>
 </div>
 
-<hr class="h-px mb-8 bg-gray-200 border-0 dark:bg-gray-500">
+<hr class="h-px mb-8 border-0 bg-gray-500">
 
 <div class="my-3 mx-5">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -17,7 +17,23 @@
             <b>Origem da Receita:</b> {{ contract.checking_account.origin }}<br>
             <a
                 href="{% url 'bank:bank-accounts-detail' contract.checking_account.id %}"
-                class="px-3 py-1 my-4 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                class="
+                    px-3
+                    py-1
+                    my-4
+                    text-sm
+                    font-medium
+                    text-center
+                    inline-flex
+                    items-center
+                    text-white
+                    rounded-lg
+                    focus:ring-4
+                    focus:outline-none
+                    bg-blue-600
+                    hover:bg-blue-700
+                    focus:ring-blue-800
+                "
             >
                 Visualizar
             </a>
@@ -37,7 +53,23 @@
             <b>Origem da Receita:</b> {{ contract.investing_account.origin }}<br>
             <a
                 href="{% url 'bank:bank-accounts-detail' contract.investing_account.id %}"
-                class="px-3 py-1 my-4 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                class="
+                    px-3
+                    py-1
+                    my-4
+                    text-sm
+                    font-medium
+                    text-center
+                    inline-flex
+                    items-center
+                    text-white
+                    rounded-lg
+                    focus:ring-4
+                    focus:outline-none
+                    bg-blue-600
+                    hover:bg-blue-700
+                    focus:ring-blue-800
+                "
             >
                 Visualizar
             </a>
@@ -54,10 +86,25 @@
         <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
         <a
             href="{% url 'contracts:contracts-accounts-auto-create' contract.id %}"
-            class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            class="
+                px-3
+                py-2
+                text-sm
+                font-medium
+                text-center
+                inline-flex
+                items-center
+                text-white
+                rounded-lg
+                focus:ring-4
+                focus:outline-none
+                bg-blue-600
+                hover:bg-blue-700
+                focus:ring-blue-800
+            "
         >
             Adicionar conta
-            <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
             </svg>
         </a>

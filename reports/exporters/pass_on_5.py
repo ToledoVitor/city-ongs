@@ -43,7 +43,6 @@ class PassOn5PDFExporter:
         self._draw_beneficiary_authority()
         self._draw_conclusion_signature_owner()
         self._draw_account_signature_owner()
-        self._draw_footer()
 
         return self.pdf
 
@@ -301,10 +300,3 @@ class PassOn5PDFExporter:
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(10)
-
-    def _draw_footer(self):
-        # Rodapé
-        self.pdf.set_y(-15)
-        self.pdf.set_font("Helvetica", "I", 8)
-        self.pdf.cell(0, 10, f"Page {self.pdf.page_no()}", align="C")
