@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import timedelta, date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db.models import Q, Sum
@@ -58,10 +58,12 @@ class PassOn2PDFExporter:
             .exclude(bank_account__isnull=True)
         )
 
-        self.revenue_queryset = Revenue.objects.filter(
-            Q(bank_account=self.checking_account)
-            | Q(bank_account=self.investing_account)
-        ).exclude(bank_account__isnull=True)
+        self.revenue_queryset = (
+            Revenue.objects.filter(  # TODO como filtrar por contrato
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
+            ).exclude(bank_account__isnull=True)
+        )
 
         self.expense_queryset = Expense.objects.filter(
             accountability__contract=self.accountability.contract,
