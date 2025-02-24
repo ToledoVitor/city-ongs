@@ -181,4 +181,7 @@ DATE_INPUT_FORMATS = [
 ]
 
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+
+WEBSITE_URL = env("WEBSITE_URL", default="localhost")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY", default="")
+SENDGRID_ACCOUNT_SENDER = env("SENDGRID_ACCOUNT_SENDER", default="")
