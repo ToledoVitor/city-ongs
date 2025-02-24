@@ -193,4 +193,4 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"{super().__str__()} {self.email}"
+        return f"{self.get_full_name()} -  {self.email}"

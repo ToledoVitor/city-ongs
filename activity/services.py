@@ -6,6 +6,7 @@ from django.conf import settings
 from activity.models import ActivityLog, Notification
 from contracts.models import Contract
 from sendgrid_client.client import SendGridClient
+from django.template.loader import render_to_string
 
 
 logger = logging.getLogger(__name__)
@@ -48,12 +49,15 @@ class ActivityLogEmailNotificationHandler:
                 
                 logger.info(f"Notifying users for action {activity_log.action}")
 
-            sendgrid_client = SendGridClient()
-            sendgrid_client.notify(
-                subject=subject,
-                html_content=html_content,
-                recipients=recipients,
-            )
+            try:
+                sendgrid_client = SendGridClient()
+                sendgrid_client.notify(
+                    subject=subject,
+                    html_content=html_content,
+                    recipients=recipients,
+                )
+            except Exception as error:
+                logger.error(f"Error when sending email notification: {error}")
 
     def build_accountability_created_log(self, activity_log: ActivityLog) -> Tuple[str, str, list[str]]:
         ...
@@ -71,19 +75,14 @@ class ActivityLogEmailNotificationHandler:
         contract: Contract = activity_log.target_content_object
 
         subject = "Novo contrato cadastrado"
-        html_content = f"""
-            <p class="header">Olá,</p>
-            <p class="content">
-                Um novo contrato foi cadastrado por {activity_log.user_email}.
-                Confira os detalhes clicando no botão abaixo:
-            </p>
-            <div class="button-container">
-                <a href="{self.website_url}/contracts/" class="button">Ver Contrato</a>
-            </div>
-            <p class="footer">Este é um e-mail automático. Por favor, não responda.</p>
-        """
-        recipients = [contract.accountability_autority, contract.supervision_autority]
+        context = {
+            "contract_name": contract.name,
+            "created_by": activity_log.user_email,
+            "link": self.website_url,
+        }
+        html_content = render_to_string("email/new_contract_email.html", context)
 
+        recipients = [contract.accountability_autority, contract.supervision_autority]
         for recipient in recipients:
             if recipient is None:
                 continue

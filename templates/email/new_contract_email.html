@@ -1,0 +1,17 @@
+{% extends "email/base_email.html" %}
+
+{% block content %}
+    <p class="header">Olá,</p>
+    <p class="content">Um novo contrato, <b>{{ contract_name }}</b>, foi cadastrado por {{ created_by }}.
+        Confira os detalhes clicando no botão abaixo:
+    </p>
+    <div class="button-container">
+        <a
+            href="{{ link }}"
+            class="button"
+            style="color: #ffffff !important; text-align: center; display: inline-block;"
+        >
+            Ver Contrato
+        </a>
+    </div>
+{% endblock %}
