@@ -155,7 +155,8 @@ class ActivityLog(models.Model):
 
 
 class Notification(models.Model):
-    class Category(models.TextChoices): ...
+    class Category(models.TextChoices):
+        CONTRACT_CREATED = "CONTRACT_CREATED", "Um novo contrato foi criado"
 
     recipient = models.ForeignKey(
         User,
@@ -172,7 +173,7 @@ class Notification(models.Model):
     category = models.CharField(
         verbose_name="Categoria",
         choices=Category.choices,
-        max_length=1,
+        max_length=16,
     )
     object_id = models.UUIDField(
         verbose_name="ID do objeto",

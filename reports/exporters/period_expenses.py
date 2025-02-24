@@ -4,7 +4,7 @@ from datetime import datetime
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Revenue, Expense
+from accountability.models import Expense, Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date

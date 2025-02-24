@@ -2,14 +2,18 @@ import copy
 from dataclasses import dataclass
 from decimal import Decimal
 
-from django.db.models import Q
+from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency, format_into_brazilian_date, document_mask
+from utils.formats import (
+    document_mask,
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 
 @dataclass
@@ -32,17 +36,45 @@ class PassOn6PDFExporter:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
-            
+
     def __database_queries(self):
         self.checking_account = self.accountability.contract.checking_account
         self.investing_account = self.accountability.contract.investing_account
 
+        # Queries para Receitas
         self.revenue_queryset = Revenue.objects.filter(
             Q(bank_account=self.checking_account)
             | Q(bank_account=self.investing_account),
             receive_date__gte=self.start_date,
-            receive_date__lte=self.end_date
+            receive_date__lte=self.end_date,
         ).exclude(bank_account__isnull=True)
+
+        self.all_pass_on_values = self.revenue_queryset.aggregate(Sum("value"))[
+            "value__sum"
+        ] or Decimal("0.00")
+
+        self.previous_balance = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.PREVIOUS_BALANCE
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.investment_income = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.INVESTMENT_INCOME
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.own_resources = self.revenue_queryset.filter(
+            revenue_nature=Revenue.Nature.OWN_RESOURCES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        # Queries para Despesas
+        self.expense_queryset = Expense.objects.filter(
+            accountability__contract=self.accountability.contract,
+            liquidation__gte=self.start_date,
+            liquidation__lte=self.end_date,
+        )
+
+        self.all_expenses_value = self.expense_queryset.aggregate(Sum("value"))[
+            "value__sum"
+        ] or Decimal("0.00")
 
     def handle(self):
         self.__database_queries()
@@ -52,12 +84,12 @@ class PassOn6PDFExporter:
         self._draw_partners_data()
         self._draw_documents_table()
         self._draw_header_resources_table()
-        # self._draw_resources_table()
-        # self._draw_resources_footer()
-        # self._draw_expenses_table()
-        # self._draw_expenses_footer()
-        # self._draw_financial_table()
-        # self._draw_last_informations()
+        self._draw_resources_table()
+        self._draw_resources_footer()
+        self._draw_expenses_table()
+        self._draw_expenses_footer()
+        self._draw_financial_table()
+        self._draw_last_informations()
 
         return self.pdf
 
@@ -114,9 +146,9 @@ class PassOn6PDFExporter:
         self.__set_helvetica_font(font_size=7, bold=True)
         table_data = [
             [
-                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}", 
-                f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável", 
-                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}"
+                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
+                f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
             ],
         ]
 
@@ -165,20 +197,15 @@ class PassOn6PDFExporter:
         self.__set_helvetica_font(font_size=7, bold=False)
         self.pdf.ln()
         table_data = [
+            ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
-                "**DOCUMENTO**", 
-                "**DATA**", 
-                "**VIGÊNCIA**", 
-                "**VALOR - R$**"
-            ],
-            [
-                f"Criar Termo de Colaboração", # TODO criar campo
-                f"data", # TODO após criar campo
+                f"Criar Termo de Colaboração",  # TODO criar campo
+                f"data",  # TODO após criar campo
                 f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
                 f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
             ],
             [
-                "Criar classe de aditamento", # TODO criar Classe
+                "Criar classe de aditamento",  # TODO criar Classe
                 "dd/mm/aaaa",
                 "dd/mm/aaaa",
                 "R$ xx.xxx,xx",
@@ -200,7 +227,7 @@ class PassOn6PDFExporter:
                     data.cell(text=text, align="C")
 
         self.pdf.ln()
-        
+
     def _draw_header_resources_table(self):
         self.pdf.ln(7)
 
@@ -208,8 +235,9 @@ class PassOn6PDFExporter:
         self.pdf.cell(
             190,
             h=self.default_cell_height,
-            text="DEMONSTRATIVO DOS RECURSOS DISPONÍVEIS NO EXERCÍCIO",
+            text="**DEMONSTRATIVO DOS RECURSOS DISPONÍVEIS NO EXERCÍCIO**",
             border=1,
+            markdown=True,
             align="C",
         )
         self.pdf.ln(self.default_cell_height)
@@ -221,127 +249,125 @@ class PassOn6PDFExporter:
                 "**DATA DO REPASSE**",
                 "**NÚMERO DO DOCUMENTO DE CRÉDITO**",
                 "**VALORES REPASSADOS (R$)**",
-            ]
+            ],
+            [
+                f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
+                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
+                f"dd/mm/aa",  # TODO seria o mesmoque end_of_vigency?
+                f"Nao sei o que é",
+                f"{format_into_brazilian_currency(self.all_pass_on_values)}",
+            ],
         ]
-        for revenue in self.revenue_queryset:
-            table_data.append(
-                [
-                    f"dd/mm/aa", # TODO criar campo de data prevista
-                    f"64.682,75",
-                    f"05/11/2024",
-                    f"552766000230001",
-                    f"64.682,75",
-                ],
-            )
-            
-        col_widths = [40, 35, 25, 50, 40]
-        for col_index, header in enumerate(headers):
-            x = self.pdf.get_x()
-            y = self.pdf.get_y()
-            self.pdf.multi_cell(col_widths[col_index], 4, header, border=1, align="C")
-            self.pdf.set_xy(x + col_widths[col_index], y)
-        self.pdf.ln(8)
 
-        self.__set_helvetica_font()
-        for row in table_data:
-            for col_index, col_text in enumerate(row):
-                if col_index == 4:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="R",
-                    )
-                else:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="C",
-                    )
-            self.pdf.ln()
+        col_widths = [40, 35, 25, 50, 40]
+        font = FontFace("Helvetica", "", size_pt=7)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            for item in table_data:
+                data = table.row()
+                for text in item:
+                    data.cell(text=text, align="C")
 
         # Linha cinza
+        self.pdf.set_fill_color(233, 234, 236)
         self.pdf.cell(
             190, h=self.default_cell_height, text="", border=1, align="C", fill=True
         )
+        self.pdf.set_fill_color(255, 255, 255)
         self.pdf.ln(self.default_cell_height)
 
     def _draw_resources_table(self):
         extern_revenue_data = [
-            ["(A) SALDO DO EXERCÍCIO ANTERIOR", "", "R$ 42.554,87"],
-            ["(B) REPASSES PÚBLICOS NO EXERCÍCIO", "", "R$ 64.682,75"],
+            [
+                "(A) SALDO DO EXERCÍCIO ANTERIOR",
+                "",
+                f"{format_into_brazilian_currency(self.previous_balance)}",
+            ],
+            [
+                "(B) REPASSES PÚBLICOS NO EXERCÍCIO",
+                "",
+                f"{format_into_brazilian_currency(self.all_pass_on_values)}",
+            ],
             [
                 "(C) RECEITAS COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS",
                 "",
-                "R$ 0,00",
+                f"{format_into_brazilian_currency(self.investment_income)}",
             ],
             [
                 "(D) OUTRAS RECEITAS DECORRENTES DA EXECUÇÃO DO AJUSTE (3)",
                 "",
-                "R$ 0,00",
+                "R$XX.XXX,YZ",  #  TODO Classe de adtamento
             ],
-            ["(E) TOTAL DE RECURSOS PÚBLICOS (A + B + C + D)", "", "R$ 107.237,62"],
-            ["", "", ""],
         ]
+
+        sum_items_a_to_d = (
+            self.previous_balance + self.all_pass_on_values + self.investment_income
+        )  # TODO inserir valor de D
+
+        extern_revenue_data.append(
+            [
+                "(E) TOTAL DE RECURSOS PÚBLICOS (A + B + C + D)",
+                "",
+                f"{format_into_brazilian_currency(sum_items_a_to_d)}",
+            ]
+        )
+
+        extern_revenue_data.append(
+            ["", "", ""],
+        )
+
         intern_revenue_data = [
-            ["(F) RECURSOS PRÓPRIOS DA ENTIDADE PARCEIRA", "", "R$ 0,00"],
+            [
+                "(F) RECURSOS PRÓPRIOS DA ENTIDADE PARCEIRA",
+                "",
+                f"{format_into_brazilian_currency(self.own_resources)}",
+            ],
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEIS NO EXERCÍCIO (E + F)",
                 "",
-                "R$ 107.237,62",
+                f"{format_into_brazilian_currency(sum_items_a_to_d+self.own_resources)}",
             ],
         ]
 
-        self.__set_helvetica_font()
         col_widths = [100, 50, 40]
+        self.__set_helvetica_font(7)
+        font = FontFace("Helvetica", "", size_pt=7)
+        self.pdf.set_fill_color(255, 255, 255)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="C",
+            col_widths=col_widths,
+            repeat_headings=0,
+            markdown=True,
+        ) as table:
+            for item in extern_revenue_data:
+                enxtern = table.row()
+                for id, text in enumerate(item):
+                    if id == 0:
+                        text_align = "L"
+                    else:
+                        text_align = "R"
+                    enxtern.cell(text=text, align=text_align)
 
-        for row in extern_revenue_data:
-            for col_index, col_text in enumerate(row):
-                if col_index == 2:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="R",
-                    )
-                else:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="L",
-                    )
-            self.pdf.ln()
-
-        for row_index, row in enumerate(intern_revenue_data):
-            for col_index, col_text in enumerate(row):
-                if col_index == 2:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="R",
-                    )
-                else:
-                    self.pdf.cell(
-                        col_widths[col_index],
-                        h=self.default_cell_height,
-                        text=col_text,
-                        border=1,
-                        align="L",
-                    )
-            if row_index != len(intern_revenue_data) - 1:
-                self.pdf.ln()
+            for item in intern_revenue_data:
+                intern = table.row()
+                for id, text in enumerate(item):
+                    if id == 0:
+                        text_align = "L"
+                    else:
+                        text_align = "R"
+                    intern.cell(text=text, align=text_align)
 
     def _draw_resources_footer(self):
         self.pdf.ln(self.default_cell_height)
-        self.__set_helvetica_font()
+        self.__set_helvetica_font(7)
         self.pdf.cell(
             text="(1) Verba: Federal, Estadual ou Municipal, devendo ser elaborado um anexo para cada fonte de recurso.",
             h=self.default_cell_height,
@@ -503,12 +529,13 @@ class PassOn6PDFExporter:
         ]
 
         col_widths = [40, 30, 30, 30, 30, 30]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
-        (self.pdf.set_fill_color(255, 255, 255),)
+        font = FontFace("Helvetica", "B", size_pt=7)
+        self.pdf.set_fill_color(255, 255, 255)
+
         with self.pdf.table(
             headings_style=font,
             line_height=4,
-            align="L",
+            align="C",
             col_widths=col_widths,
             repeat_headings=0,
         ) as table:
@@ -519,12 +546,20 @@ class PassOn6PDFExporter:
                 self.pdf.set_font("Helvetica", "", 7)
                 for item in table_data:
                     body = table.row()
-                    for text in item:
-                        body.cell(text)
-            self.pdf.set_font("Helvetica", "B", 8)
+                    for id, text in enumerate(item):
+                        if id == 0:
+                            text_align = "L"
+                        else:
+                            text_align = "R"
+                        body.cell(text=text, align=text_align)
+            self.pdf.set_font("Helvetica", "B", 7)
             total = table.row()
-            for text in line_total:
-                total.cell(text)
+            for id, text in enumerate(line_total):
+                if id == 0:
+                    text_align = "L"
+                else:
+                    text_align = "R"
+                total.cell(text=text, align=text_align)
 
     def _draw_expenses_footer(self):
         self.__set_helvetica_font()
@@ -586,41 +621,44 @@ class PassOn6PDFExporter:
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
-                "R$ 38.343,81",
+                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
             ],
             [
                 "(J) DESPESAS PAGAS NO EXERCÍCIO (H+I)",
-                "R$0,00",
+                f"{format_into_brazilian_currency(self.all_expenses_value)}",
             ],
             [
                 "(K) RECURSO PÚBLICO NÃO APLICADO [E - (J - F)]",
-                "R$ 38.343,81",
+                f"Campo de dinheiro em ainda em conta",  # TODO
             ],
             [
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
-                "R$0,00",
+                f"Não encontrei o campo",  # TODO
             ],
             [
                 "(M) VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE (K - L)",
-                "R$ 38.343,81",
+                f"Necessário valores anteriores",  # TODO
             ],
         ]
 
         col_widths = [160, 30]  # Total: 190
         font = FontFace("Helvetica", "", 7)
-        # self.pdf.set_fill_color(255, 255, 255),
         with self.pdf.table(
             headings_style=font,
-            line_height=6,
-            align="L",
+            line_height=4,
+            align="C",
             col_widths=col_widths,
             repeat_headings=0,
         ) as table:
             self.pdf.set_font("Helvetica", "", 7)
             for item in table_data:
                 body = table.row()
-                for text in item:
-                    body.cell(text)
+                for id, text in enumerate(item):
+                    if id == 0:
+                        text_align = "L"
+                    else:
+                        text_align = "R"
+                    body.cell(text=text, align=text_align)
 
     def _draw_last_informations(self):
         self.pdf.ln(7)

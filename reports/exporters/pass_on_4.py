@@ -32,7 +32,7 @@ class PassOn4PDFExporter:
             self.pdf.set_font("Helvetica", "B", font_size)
         else:
             self.pdf.set_font("Helvetica", "", font_size)
-            
+
     def __background_gray_color(self, gray):
         if gray:
             self.pdf.set_fill_color(233, 234, 236)
@@ -145,7 +145,7 @@ class PassOn4PDFExporter:
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -211,20 +211,20 @@ class PassOn4PDFExporter:
         for revenue in self.revenue_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor", # TODO Rep 
+                    f"Confirmar valor",  # TODO Rep
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo", # TODO criar classe adendo
+                    f"ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         table_footer = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -244,7 +244,7 @@ class PassOn4PDFExporter:
             self.__background_gray_color(gray=True)
             for text in table_header:
                 header.cell(text=text, align="C")
-                
+
             self.__background_gray_color(gray=False)
             self.__set_helvetica_font(7, bold=False)
             for item in table_data:
@@ -290,20 +290,20 @@ class PassOn4PDFExporter:
         for revenue in self.revenue_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor", # TODO Rep 
+                    f"Confirmar valor",  # TODO Rep
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo", # TODO criar classe adendo
+                    f"ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         table_footer = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -323,7 +323,7 @@ class PassOn4PDFExporter:
             self.__background_gray_color(gray=True)
             for text in table_header:
                 header.cell(text=text, align="C")
-                
+
             self.pdf.set_font("Helvetica", "", 7)
             self.__background_gray_color(gray=False)
             for item in table_data:
@@ -369,20 +369,20 @@ class PassOn4PDFExporter:
         for revenue in self.revenue_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor", # TODO Rep 
+                    f"Confirmar valor",  # TODO Rep
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo", # TODO criar classe adendo
+                    f"ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         table_footer = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -402,7 +402,7 @@ class PassOn4PDFExporter:
             self.__background_gray_color(gray=True)
             for text in table_header:
                 header.cell(text=text, align="C")
-                
+
             self.pdf.set_font("Helvetica", "", 7)
             self.__background_gray_color(gray=False)
             for item in table_data:
@@ -454,14 +454,14 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo", # TODO criar classe adendo
+                    f"ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         table_footer = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -481,7 +481,7 @@ class PassOn4PDFExporter:
             self.__background_gray_color(gray=True)
             for text in table_header:
                 header.cell(text=text, align="C")
-                
+
             self.pdf.set_font("Helvetica", "", 7)
             self.__background_gray_color(gray=False)
             for item in table_data:
@@ -540,14 +540,14 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo", # TODO criar classe adendo
+                    f"ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
                 ]
             )
             total_revenue_value += revenue.value
-            
+
         table_footer = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
@@ -567,7 +567,7 @@ class PassOn4PDFExporter:
             self.__background_gray_color(gray=True)
             for text in table_header:
                 header.cell(text=text, align="C")
-                
+
             self.pdf.set_font("Helvetica", "", 7)
             self.__background_gray_color(gray=False)
             for item in table_data:

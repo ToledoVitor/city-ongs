@@ -40,7 +40,9 @@ class PassOn1PDFExporter:
             self.pdf.set_font("Helvetica", "", font_size)
 
     def __database_queries(self):
-        self.contracts_queryset = Contract.objects.all().order_by("start_of_vigency")
+        self.contracts_queryset = Contract.objects.filter(
+            area__city_hall=self.contract.area.city_hall, checking_account__isnull=False
+        ).order_by("start_of_vigency")
         self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
             Sum("total_value")
         )["total_value__sum"] or Decimal("0.00")
