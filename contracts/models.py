@@ -134,7 +134,7 @@ class Contract(BaseModel):
     agreement_date = models.DateField(
         verbose_name="Data do Convênio",
         null=True,
-        blank=True,  
+        blank=True,
     )
 
     # Dates and values
@@ -784,6 +784,10 @@ class ContractItemNewValueRequest(BaseModel):
         decimal_places=2,
         max_digits=12,
     )
+
+    @property
+    def status_label(self) -> str:
+        return ContractItemNewValueRequest.ReviewStatus(self.status).label
 
     class Meta:
         verbose_name = "Solicitação de Valor Item"

@@ -2,7 +2,16 @@
 
 {% block content %}
     <p class="header">Olá,</p>
-    <p class="content">Um novo contrato, <b>{{ contract_name }}</b>, foi cadastrado por {{ created_by }}. <br>
+    <p class="content">
+        Uma solicitação de remanejamento de gastos para o contrato <b>{{ contract_name }}</b> foi feita por {{ created_by }}.
+    </p>
+    <ul>
+        <li>Diminuir de: {{ downgrade_item }}</li>
+        <li>Aumentar em: {{ raise_item }}</li>
+        <li>Mensal: {{ month_raise }}</li>
+        <li>Anual: {{ anual_raise }}</li>
+    </p>
+    <p class="content">
         Confira os detalhes clicando no botão abaixo:
     </p>
     <div class="button-container">

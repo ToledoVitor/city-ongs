@@ -277,7 +277,7 @@ def create_contract_item_view(request, pk):
 
                 if request.FILES:
                     item.file = request.FILES["file"]
-    
+
                 item.save()
 
                 _ = ActivityLog.objects.create(

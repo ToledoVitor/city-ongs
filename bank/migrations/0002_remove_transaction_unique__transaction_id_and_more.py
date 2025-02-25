@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0002_initial"),
         ("bank", "0001_initial"),
@@ -12,7 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveConstraint(
-            model_name="transaction", name="unique__transaction_id",
+            model_name="transaction",
+            name="unique__transaction_id",
         ),
         migrations.RenameField(
             model_name="historicaltransaction",

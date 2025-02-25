@@ -25,7 +25,9 @@ class ReportsView(TemplateView):
         if form.is_valid():
             model, start_date, end_date = get_model_for_report(form)
 
-            if type(model) is Contract and (not model.checking_account and not model.investing_account):
+            if type(model) is Contract and (
+                not model.checking_account and not model.investing_account
+            ):
                 return self.render_to_response(
                     self.get_context_data(
                         form=form,

@@ -156,7 +156,40 @@ class ActivityLog(models.Model):
 
 class Notification(models.Model):
     class Category(models.TextChoices):
+        ACCOUNTABILITY_CREATED = (
+            "ACCOUNTABILITY_CREATED",
+            "Uma nova prestação foi criada",
+        )
+        ACCOUNTABILITY_ANALISYS = (
+            "ACCOUNTABILITY_ANALISYS",
+            "Prestação enviada para análise",
+        )
+        ACCOUNTABILITY_CORRECTING = (
+            "ACCOUNTABILITY_CORRECTING",
+            "Prestação enviada para correção",
+        )
+        ACCOUNTABILITY_FINISHED = (
+            "ACCOUNTABILITY_FINISHED",
+            "Prestação marcada como finalizada",
+        )
         CONTRACT_CREATED = "CONTRACT_CREATED", "Um novo contrato foi criado"
+        CONTRACT_STATUS = "CONTRACT_STATUS", "O Status do contrato foi atualizado"
+        CONTRACT_GOAL_COMMENTED = (
+            "CONTRACT_GOAL_COMMENTED",
+            "Meta do contrato comentada",
+        )
+        CONTRACT_ITEM_COMMENTED = (
+            "CONTRACT_ITEM_COMMENTED",
+            "Item do contrato comentada",
+        )
+        CONTRACT_ITEM_VALUE_REQUESTED = (
+            "CONTRACT_ITEM_VALUE_REQUESTED",
+            "Pedido de remanejamento de gastos feito",
+        )
+        CONTRACT_ITEM_VALUE_REVIEWED = (
+            "CONTRACT_ITEM_VALUE_REVIEWED",
+            "Pedido de remanejamento de gastos revisado",
+        )
 
     recipient = models.ForeignKey(
         User,
@@ -173,7 +206,7 @@ class Notification(models.Model):
     category = models.CharField(
         verbose_name="Categoria",
         choices=Category.choices,
-        max_length=16,
+        max_length=32,
     )
     object_id = models.UUIDField(
         verbose_name="ID do objeto",

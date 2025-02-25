@@ -1,11 +1,10 @@
+import logging
+
+from django.conf import settings
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-from django.conf import settings
 from accounts.models import User
-
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -16,15 +15,11 @@ class SendGridClient:
         self.sendgrid_account_sender = settings.SENDGRID_ACCOUNT_SENDER
 
     def notify(self, subject: str, html_content: str, recipients: list[User]):
-        if not (
-            self.sendgrid_api_key and self.sendgrid_account_sender
-        ):
+        if not (self.sendgrid_api_key and self.sendgrid_account_sender):
             logger.error("Missing sendgrid credentials for sending email.")
             return
 
-        if not (
-            subject and html_content
-        ):
+        if not (subject and html_content):
             logger.error("Missing subject or html content", subject, html_content)
             return
 

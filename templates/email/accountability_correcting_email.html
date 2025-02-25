@@ -2,7 +2,8 @@
 
 {% block content %}
     <p class="header">Olá,</p>
-    <p class="content">Um novo contrato, <b>{{ contract_name }}</b>, foi cadastrado por {{ created_by }}. <br>
+    <p class="content">A contabilidade do contrato <b>{{ contract_name }}</b>, para o mês <b>{{ period }}</b>,
+        foi enviada para correção por {{ created_by }}. <br>
         Confira os detalhes clicando no botão abaixo:
     </p>
     <div class="button-container">
@@ -11,7 +12,7 @@
             class="button"
             style="color: #ffffff !important; text-align: center; display: inline-block;"
         >
-            Ver Contrato
+            Ver Prestação
         </a>
     </div>
 {% endblock %}
