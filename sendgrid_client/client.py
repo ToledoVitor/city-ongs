@@ -30,7 +30,6 @@ class SendGridClient:
             subject=subject,
             html_content=html_content,
         )
-        print(html_content)
         try:
             logger.error(f"Sending email with subject: {subject} for {to_emails}")
             sendgrid_client = SendGridAPIClient(self.sendgrid_api_key)
