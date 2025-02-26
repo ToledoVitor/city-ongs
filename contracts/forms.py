@@ -54,7 +54,7 @@ class ContractCreateForm(forms.ModelForm):
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
-            "concession_type": BaseCharFieldFormWidget(),
+            "concession_type": BaseSelectFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
             "law_num": BaseCharFieldFormWidget(),
             "agreement_num": BaseCharFieldFormWidget(),

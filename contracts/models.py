@@ -82,16 +82,24 @@ class Contract(BaseModel):
         PLANNING = "PLANNING", "planejamento"
         EXECUTION = "EXECUTION", "em execução"
         FINISHED = "FINISHED", "finalizado"
+  
+    class ConcessionChoices(models.TextChoices):
+        MANAGEMENT = "MANAGEMENT", "Contrato de Gestão"
+        PARTNERSHIP = "PARTNERSHIP", "Termo de Parceria"
+        COLLABORATION = "COLLABORATION", "Termo de Colaboraçã"
+        DEVELOPMENTO = "DEVELOPMENTO", "Contrato de Fomento"
+        AGREEMENT = "AGREEMENT", "Convênio"
+        GRANT = "GRANT", "Concessão"
 
     # Specifications
     name = models.CharField(verbose_name="Nome do contrato", max_length=128)
     concession_type = models.CharField(
-        # TODO: remove null
         verbose_name="Tipo de Concessão",
+        choices=ConcessionChoices.choices,
+        default=ConcessionChoices.MANAGEMENT,
         max_length=128,
-        null=True,
-        blank=True,
     )
+    # TODO: remove null
     code = models.CharField(
         verbose_name="Código do contrato",
         max_length=16,
