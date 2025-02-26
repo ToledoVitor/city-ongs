@@ -184,6 +184,10 @@ class User(AbstractUser):
             self.AccessChoices.MASTER,
             self.AccessChoices.FOLDER_MANAGER,
         }
+    
+    @property
+    def recent_notifications(self):
+        return self.notifications.order_by("-created_at")[:10]
 
     def save(self, *args, **kwargs):
         if self.cpf is not None:

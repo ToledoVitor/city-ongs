@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from utils.models import BaseModel
 from accounts.models import User
 
 
@@ -154,7 +155,7 @@ class ActivityLog(models.Model):
         ]
 
 
-class Notification(models.Model):
+class Notification(BaseModel):
     class Category(models.TextChoices):
         ACCOUNTABILITY_CREATED = (
             "ACCOUNTABILITY_CREATED",
