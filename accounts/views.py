@@ -10,8 +10,10 @@ from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import FolderManagerCreateForm, OrganizationAccountantCreateForm
 from accounts.models import User
+from accounts.services import notify_user_account_created
 from activity.models import ActivityLog
 from utils.mixins import AdminRequiredMixin
+from utils.password import generate_random_password
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +83,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
         form = FolderManagerCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
+                password = generate_random_password()
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
@@ -88,10 +91,11 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
                     last_name=form.cleaned_data.get("last_name"),
-                    password=form.cleaned_data.get("password"),
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.FOLDER_MANAGER,
                 )
+                new_user.set_password(password)
+                new_user.save()
                 new_user.areas.set(form.cleaned_data["areas"])
 
                 logger.info(f"{request.user.id} - Created new folder manager")
@@ -102,7 +106,10 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                     target_object_id=new_user.id,
                     target_content_object=new_user,
                 )
-                return redirect("accounts:folder-managers-list")
+
+                notify_user_account_created(new_user, password)
+
+            return redirect("accounts:folder-managers-list")
 
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -172,6 +179,7 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
         form = OrganizationAccountantCreateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
+                password = generate_random_password()
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
@@ -179,10 +187,11 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
                     last_name=form.cleaned_data.get("last_name"),
-                    password=form.cleaned_data.get("password"),
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
                 )
+                new_user.set_password(password)
+                new_user.save()
                 new_user.areas.set(form.cleaned_data["areas"])
 
                 logger.info(f"{request.user.id} - Created new organization accountant")
@@ -193,6 +202,9 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                     target_object_id=new_user.id,
                     target_content_object=new_user,
                 )
+
+                notify_user_account_created(new_user, password)
+
             return redirect("accounts:organization-accountants-list")
 
         return self.render_to_response(self.get_context_data(form=form))

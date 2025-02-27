@@ -82,7 +82,7 @@ class Contract(BaseModel):
         PLANNING = "PLANNING", "planejamento"
         EXECUTION = "EXECUTION", "em execução"
         FINISHED = "FINISHED", "finalizado"
-  
+
     class ConcessionChoices(models.TextChoices):
         MANAGEMENT = "MANAGEMENT", "Contrato de Gestão"
         PARTNERSHIP = "PARTNERSHIP", "Termo de Parceria"

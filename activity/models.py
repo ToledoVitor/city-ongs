@@ -2,8 +2,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from utils.models import BaseModel
 from accounts.models import User
+from utils.models import BaseModel
 
 
 class ActivityLog(models.Model):

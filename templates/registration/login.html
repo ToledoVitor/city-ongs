@@ -49,7 +49,7 @@
             </label>
             <input
               type="email"
-              name="email"
+              name="username"
               id="email"
               class="
                 border
@@ -100,6 +100,8 @@
         <div class="flex items-start">
           <a href="{% url 'password_reset' %}" class="text-sm ms-auto hover:underline text-blue-800">Esqueci minha senha</a>
         </div>
+
+        {% include 'commons/form-errors.html' with form=form error_message="Erro ao fazer login"%}
 
         <button
           type="submit"

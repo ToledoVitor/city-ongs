@@ -4,11 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("activity", "0004_alter_notification_category"),
     ]
 
     operations = [
-        migrations.DeleteModel(name="Notification",),
+        migrations.DeleteModel(
+            name="Notification",
+        ),
     ]

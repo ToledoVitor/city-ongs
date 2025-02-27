@@ -1,0 +1,20 @@
+{% extends "email/base_email.html" %}
+
+{% block content %}
+    <p class="header">Olá, {{ user_name }}!</p>
+    <p class="content">
+        Sejá bem vindo ao sistema. Aqui está sua senha de acesso:
+    </p>
+    <div class="password">
+        {{ password }}
+    </div>
+    <div class="button-container">
+        <a
+            href="{{ website_url }}"
+            class="button"
+            style="color: #ffffff !important; text-align: center; display: inline-block;"
+        >
+            Acessar site
+        </a>
+    </div>
+{% endblock %}
