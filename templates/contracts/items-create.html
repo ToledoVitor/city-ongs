@@ -267,7 +267,6 @@
               type="text"
               id="id_anual_expense"
               name="anual_expense"
-              oninput="formatMoney(this)"
               placeholder="000,00"
               class="
                 block
@@ -280,14 +279,14 @@
                 border-e-2
                 border
                 focus:ring-blue-500
-                bg-gray-300
+                bg-gray-100
                 border-e-gray-700
-                border-gray-600
+                border-gray-300
                 placeholder-gray-800
                 text-black
                 focus:border-blue-500
               "
-              required
+              disabled
             />  
           </div>  
         </div>
@@ -350,6 +349,38 @@
 
     input.value = value;
   }
+
+  function parseCurrency(value) {
+    return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+  }
+
+  function calculateAnnualExpense() {
+      var monthQuantity = document.getElementById('id_month_quantity').value.trim();
+      var quantity = document.getElementById('id_quantity').value.trim();
+      var monthExpense = document.getElementById('id_month_expense').value.trim();
+
+      if (!monthQuantity || !quantity || !monthExpense) {
+          document.getElementById('id_anual_expense').value = "";
+          return;
+      }
+
+      var mQuantity = parseFloat(monthQuantity) || 0;
+      var q = parseFloat(quantity) || 0;
+      var mExpense = parseCurrency(monthExpense);
+
+      var annualExpense = mQuantity * q * mExpense;
+
+      var formattedAnnualExpense = annualExpense.toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+      });
+
+      document.getElementById('id_anual_expense').value = formattedAnnualExpense;
+  }
+
+  document.getElementById('id_month_quantity').addEventListener('input', calculateAnnualExpense);
+  document.getElementById('id_quantity').addEventListener('input', calculateAnnualExpense);
+  document.getElementById('id_month_expense').addEventListener('input', calculateAnnualExpense);
 </script>
 
 {% endblock %}

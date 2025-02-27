@@ -112,7 +112,6 @@ class ContractCreateForm(forms.ModelForm):
 
 class ContractItemForm(forms.ModelForm):
     month_expense = DecimalMaskedField(max_digits=12, decimal_places=2)
-    anual_expense = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:
         model = ContractItem
@@ -124,7 +123,6 @@ class ContractItemForm(forms.ModelForm):
             "quantity",
             "month_quantity",
             "month_expense",
-            "anual_expense",
             "unit_type",
             "nature",
             "file",

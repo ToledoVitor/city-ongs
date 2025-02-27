@@ -5,28 +5,28 @@
         <thead class="text-xs uppercase bg-gray-500 text-white">
             <tr>
                 <th scope="col" class="px-6 py-3" />
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Item
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Natureza
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Período (meses)
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Unidade
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Quantidade
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Custo Mensal
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Custo Total
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Status
                 </th>
           </tr>
@@ -34,10 +34,12 @@
         <tbody>
             {% if contract.items.count %}
               {% for item in contract.items.all %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
-                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
-
-                    {% if user.can_change_statuses %}
+                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center align-center">
+                  <td
+                    scope="row"
+                    class="text-sm text-black w-24"
+                  >
+                    {% if not user.can_change_statuses %}
                       <!-- items approve Modal toggle -->
                       <button
                         data-modal-target="items-modal-{{ item.id }}"
@@ -65,35 +67,72 @@
                     {% else %}
 
                       <div class="grid grid-cols-1 gap-0 sm:grid-cols-2">
-                        <!-- items detail Modal toggle -->
-                        <button
-                          data-modal-target="items-modal-{{ item.id }}"
-                          data-modal-toggle="items-modal-{{ item.id }}"
-                          type="button"
-                        >
-                          <svg class="w-6 h-6 ml-4 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>
-                            <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                          </svg>
-                        </button>
+                        <a>
+                          <button
+                            data-modal-target="items-modal-{{ item.id }}"
+                            data-modal-toggle="items-modal-{{ item.id }}"
+                            type="button"
+                            class="
+                              text-white
+                              ml-4
+                              bg-blue-600
+                              hover:bg-blue-600
+                              focus:ring-4
+                              focus:outline-none
+                              focus:ring-blue-600
+                              font-medium
+                              rounded-full
+                              text-xs
+                              mt-2
+                              px-2.5
+                              py-1
+                              text-center
+                              inline-flex
+                              items-center
+                              me-2
+                            "
+                          >
+                            Detalhes
+                          </button>
+                        </a>
                         
                         {% if contract.is_on_planning %}
-                          <a
-                            class="ml-4"
-                            href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
+                        <br>
+                        <a
+                          href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
+                        >
+                          <button
+                            type="button"
+                            class="
+                              text-white
+                              ml-4
+                              bg-blue-600
+                              hover:bg-blue-600
+                              focus:ring-4
+                              focus:outline-none
+                              focus:ring-blue-600
+                              font-medium
+                              rounded-full
+                              text-xs
+                              mt-2
+                              px-2.5
+                              py-1
+                              text-center
+                              inline-flex
+                              items-center
+                              me-2
+                            "
                           >
-                            <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
-                            </svg>
-                          </a>
+                            Editar
+                          </button>
                         {% endif %}
                       </div>         
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black max-w-48">
+                  <th class="px-6 py-4 text-sm text-black max-w-48">
                     {{ item.name }}
-                  </td>
+                  </th>
 
                   <td class="px-6 py-4 text-sm text-black max-w-48">
                     {{ item.nature_label }}
