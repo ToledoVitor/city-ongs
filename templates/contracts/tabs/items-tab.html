@@ -499,7 +499,7 @@
       </a>
       {% endif %}
 
-      {% if user.has_admin_access and contract.is_on_planning %}
+      {% if contract.is_on_planning %}
         <a
           href="{% url 'contracts:contracts-item-create' contract.id %}"
           class="

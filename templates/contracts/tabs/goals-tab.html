@@ -416,7 +416,7 @@
         </tbody>
     </table>
   
-    {% if user.has_admin_access and contract.is_on_planning %}
+    {% if contract.is_on_planning %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
         <a
           href="{% url 'contracts:contracts-goals-create' contract.id %}"
