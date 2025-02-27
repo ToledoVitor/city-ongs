@@ -1,5 +1,5 @@
 import logging
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -279,8 +279,6 @@ def create_contract_item_view(request, pk):
                     item.quantity * item.month_quantity * item.month_expense
                 ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-
-
                 if request.FILES:
                     item.file = request.FILES["file"]
 
@@ -323,7 +321,9 @@ def update_contract_item_view(request, pk, item_pk):
             with transaction.atomic():
                 contract_item: ContractItem = form.save(commit=False)
                 contract_item.anual_expense = (
-                    contract_item.quantity * contract_item.month_quantity * contract_item.month_expense
+                    contract_item.quantity
+                    * contract_item.month_quantity
+                    * contract_item.month_expense
                 ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                 contract_item.save()
 
