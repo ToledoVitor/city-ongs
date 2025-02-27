@@ -133,11 +133,11 @@ class ContractItemForm(forms.ModelForm):
         widgets = {
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
-            "methodology": BaseTextAreaFormWidget(),
-            "observations": BaseTextAreaFormWidget(),
+            "methodology": BaseTextAreaFormWidget(required=False),
+            "observations": BaseTextAreaFormWidget(required=False),
             "quantity": BaseNumberFormWidget(),
             "month_quantity": BaseNumberFormWidget(),
-            "unit_type": BaseCharFieldFormWidget(),
+            "unit_type": BaseCharFieldFormWidget(required=False),
             "nature": BaseSelectFormWidget(),
             "file": BaseFileFormWidget(required=False),
         }

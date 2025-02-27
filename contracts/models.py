@@ -483,6 +483,8 @@ class ContractItem(BaseModel):
     methodology = models.CharField(
         verbose_name="Metodologia",
         max_length=256,
+        null=True,
+        blank=True,
     )
     observations = models.CharField(
         verbose_name="Observações",
@@ -514,6 +516,8 @@ class ContractItem(BaseModel):
     unit_type = models.CharField(
         verbose_name="Tipo da Unidade",
         max_length=128,
+        null=True,
+        blank=True,
     )
     nature = models.CharField(
         verbose_name="Natureza da Despesa",
