@@ -44,7 +44,8 @@ class PassOn6PDFExporter:
         # Queries para Receitas
         self.revenue_queryset = Revenue.objects.filter(
             Q(bank_account=self.checking_account)
-            | Q(bank_account=self.investing_account),
+            | Q(bank_account=self.investing_account)
+        ).filter(
             receive_date__gte=self.start_date,
             receive_date__lte=self.end_date,
         ).exclude(bank_account__isnull=True)
@@ -129,7 +130,6 @@ class PassOn6PDFExporter:
         self.pdf.ln(4)
         hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
-            # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             markdown=True,
             h=self.default_cell_height,
@@ -254,7 +254,7 @@ class PassOn6PDFExporter:
                 f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
                 f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
                 f"dd/mm/aa",  # TODO seria o mesmoque end_of_vigency?
-                f"Nao sei o que é",
+                f"{self.checking_account.bank_id}",
                 f"{format_into_brazilian_currency(self.all_pass_on_values)}",
             ],
         ]

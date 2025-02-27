@@ -27,6 +27,7 @@ class PassOn3PDFExporter:
         self.accountability = accountability
         self.start_date = start_date
         self.end_date = end_date
+        self.government_link = "https://doe.tce.sp.gov.br/" # TODO criar variável em models de contrato
 
     def __set_helvetica_font(self, font_size=7, bold=False):
         if bold:
@@ -137,7 +138,7 @@ class PassOn3PDFExporter:
         self.pdf.ln(1)
         self.__set_helvetica_font(font_size=8)
         self.pdf.multi_cell(
-            text="c) além de disponíveis no processo eletrônico todos os Despachos e Decisões que vierem a ser tomados relativamente ao aludido processo serão publicados no Diário Oficial do Estado Caderno do Poder Legislativo parte do Tribunal de Contas do Estado de São Paulo em conformidade com o artigo 90 da Lei Complementar nº 709 de 14 de janeiro de 1993 iniciando-se a partir de então a contagem dos prazos processuais conforme regras do Código de Processo Civil;",
+            text=f"c) além de disponíveis no processo eletrônico todos os Despachos e Decisões que vierem a ser tomados relativamente ao aludido processo serão publicados no Diário Oficial do Estado Caderno do Poder Legislativo parte do Tribunal de Contas do Estado de São Paulo([{self.government_link}]({self.government_link})), em conformidade com o artigo 90 da Lei Complementar nº 709 de 14 de janeiro de 1993 iniciando-se a partir de então a contagem dos prazos processuais conforme regras do Código de Processo Civil;",
             markdown=True,
             w=190,
             h=self.default_cell_height,
