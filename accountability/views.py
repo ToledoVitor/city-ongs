@@ -4,7 +4,7 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -180,7 +180,9 @@ def accountability_detail_view(request, pk):
     context = {
         "object": accountability,
         "expenses_page": expenses_page,
+        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"],
         "revenues_page": revenues_page,
+        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"],
         "search_query": query,
     }
     return render(request, "accountability/accountability/detail.html", context)

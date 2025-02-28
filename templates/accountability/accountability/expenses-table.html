@@ -7,13 +7,13 @@
                 Identificação
             </th>
             <th scope="col" class="px-6 py-3">
+                Valor
+            </th>
+            <th scope="col" class="px-6 py-3">
                 Status
             </th>
             <th scope="col" class="px-6 py-3">
                 Planejada?
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Valor
             </th>
             <th scope="col" class="px-6 py-3">
                 Item Relacionado
@@ -59,6 +59,9 @@
                     </a>
                   {% endif %}
                 </th>
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
+                  R${{ expense.value|intcomma }}
+                </td>
                 <td class="px-6 py-4 text-sm text-left text-black whitespace-nowrap">
                   <p class="mt-1 text-sm">
                     {% if expense.paid %}
@@ -111,9 +114,6 @@
                       &#10060; Planejada
                     {% endif %}
                   </p>
-                </td>
-                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
-                  R${{ expense.value|intcomma }}
                 </td>
                 <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
                   {{ expense.item.name }}
@@ -566,6 +566,19 @@
           </tr>
         {% endif %}     
     </tbody>
+    <tfoot class="bg-gray-500 text-white font-base">
+      <tr>
+          <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
+          <th scope="row" class="px-6 py-3 text-center">
+            <span class="text-sm font-normal">Cadastrado Mensal:</span> <br> R${{ expenses_total|intcomma }}
+          </th>
+          <th scope="row" class="px-6 py-3" />
+          <th scope="row" class="px-6 py-3" />
+          <th scope="row" class="px-6 py-3" />
+          <th scope="row" class="px-6 py-3" />
+          <th scope="row" class="px-6 py-3" />
+      </tr>
+    </tfoot>
 </table>
 
 {% if accountability.is_on_execution %}
