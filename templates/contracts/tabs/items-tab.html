@@ -440,8 +440,26 @@
               </tr>
             {% endif %}     
         </tbody>
+        <tfoot class="bg-gray-500 text-white font-base">
+          <tr>
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
+              <th scope="row" class="px-6 py-3 text-center">
+                <span class="text-sm font-normal">Cadastrado Mensal:</span> <br> R${{ items_totals.total_month|intcomma }}
+              </th>
+              <th scope="row" class="px-6 py-3 text-center">
+                <span class="text-sm font-normal">Cadastrado Anual:</span> <br> R${{ items_totals.total_year|intcomma }}
+              </td>
+              <th scope="row" class="px-6 py-3 text-center">
+                <span class="text-sm font-normal">Valor Contrato:</span> <br> R${{ contract.total_value|intcomma }}
+              </td>
+          </tr>
+      </tfoot>
     </table>
-  
+
     <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
       {% if user.can_change_statuses %}
       <button

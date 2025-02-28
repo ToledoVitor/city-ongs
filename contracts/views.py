@@ -4,8 +4,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, Q
-from django.db.models.base import Model as Model
+from django.db.models import Count, Q, Sum
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -177,6 +176,10 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             raise_item__contract=self.object,
             status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
         ).select_related("raise_item")[:12]
+        context["items_totals"] = self.object.items.aggregate(
+            total_month=Sum("month_expense"),
+            total_year=Sum("anual_expense")
+        )
         return context
 
     def post(self, request, pk, *args, **kwargs):
