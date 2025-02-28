@@ -42,13 +42,17 @@ class PassOn6PDFExporter:
         self.investing_account = self.accountability.contract.investing_account
 
         # Queries para Receitas
-        self.revenue_queryset = Revenue.objects.filter(
-            Q(bank_account=self.checking_account)
-            | Q(bank_account=self.investing_account)
-        ).filter(
-            receive_date__gte=self.start_date,
-            receive_date__lte=self.end_date,
-        ).exclude(bank_account__isnull=True)
+        self.revenue_queryset = (
+            Revenue.objects.filter(
+                Q(bank_account=self.checking_account)
+                | Q(bank_account=self.investing_account)
+            )
+            .filter(
+                receive_date__gte=self.start_date,
+                receive_date__lte=self.end_date,
+            )
+            .exclude(bank_account__isnull=True)
+        )
 
         self.all_pass_on_values = self.revenue_queryset.aggregate(Sum("value"))[
             "value__sum"

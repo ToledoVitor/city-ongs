@@ -163,6 +163,16 @@ def export_consolidated(contract: Contract, start_date: date, end_date: date):
     ).handle()
 
 
+def export_predicted_versus_realized(
+    accountability: Accountability, start_date: date, end_date: date
+):
+    return PredictedVersusRealizedPDFExporter(
+        accountability=accountability,
+        start_date=start_date,
+        end_date=end_date,
+    ).handle()
+
+
 def _get_start_end_date(month: int, year: int):
     last_day = calendar.monthrange(year, month)[1]
 
@@ -263,6 +273,11 @@ def export_report(
 
         case "consolidated":
             return export_consolidated(model, start_date, end_date)
+
+        case "predicted_versus_realized":
+            return export_predicted_versus_realized(
+                accountability, start_date, end_date
+            )
 
         case _:
             raise ValueError(f"Report model {report_model} is not a valid option")
