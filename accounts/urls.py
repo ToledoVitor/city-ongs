@@ -1,6 +1,8 @@
 from django.urls import path
 
 from accounts.views import (
+    user_unread_notifications,
+    read_notification_view,
     FolderManagerCreateView,
     FolderManagersDetailView,
     FolderManagersListView,
@@ -11,6 +13,16 @@ from accounts.views import (
 
 urlpatterns = [
     # Folder Managers Views
+    path(
+        "notifications/",
+        user_unread_notifications,
+        name="user-notifications",
+    ),
+    path(
+        "notifications/<uuid:pk>/read",
+        read_notification_view,
+        name="user-read-notifications",
+    ),
     path(
         "folder-managers/",
         FolderManagersListView.as_view(),

@@ -217,6 +217,10 @@ class Notification(BaseModel):
         max_length=255,
     )
 
+    @property
+    def category_label(self) -> str:
+        return Notification.Category(self.category).label
+
     class Meta:
         verbose_name = "Notificação"
         verbose_name_plural = "Notificações"

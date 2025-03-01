@@ -186,8 +186,8 @@ class User(AbstractUser):
         }
 
     @property
-    def recent_notifications(self):
-        return self.notifications.order_by("-created_at")[:10]
+    def unread_notifications(self):
+        return self.notifications.filter(read_at__isnull=True).count()
 
     def save(self, *args, **kwargs):
         if self.cpf is not None:

@@ -1,17 +1,22 @@
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 import logging
 from typing import Any
+
+from django.http import JsonResponse
+from django.utils import timezone
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import FolderManagerCreateForm, OrganizationAccountantCreateForm
 from accounts.models import User
 from accounts.services import notify_user_account_created
-from activity.models import ActivityLog
+from activity.models import ActivityLog, Notification
 from utils.mixins import AdminRequiredMixin
 from utils.password import generate_random_password
 
@@ -208,3 +213,46 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
             return redirect("accounts:organization-accountants-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+@login_required
+def user_unread_notifications(request):
+    unread_notifications = request.user.notifications.filter(read_at__isnull=True)
+
+    notifications = [
+        {
+            "id": notification.id,
+            "category": notification.category_label,
+            "text": notification.text,
+            "created_at": notification.created_at.strftime("%d/%m/%Y %H:%M"),
+            "read_url": reverse('accounts:user-read-notifications', args=[str(notification.id)])
+        } for notification in unread_notifications
+    ]
+
+    return JsonResponse({"notifications": notifications})
+
+
+@login_required
+def read_notification_view(request, pk):
+    notification = get_object_or_404(Notification, id=pk, recipient=request.user)
+
+    notification.read_at = timezone.now()
+    notification.save()
+
+    redirects = {
+        Notification.Category.ACCOUNTABILITY_CREATED: "accountability:accountability-detail",
+        Notification.Category.ACCOUNTABILITY_ANALISYS: "accountability:accountability-detail",
+        Notification.Category.ACCOUNTABILITY_CORRECTING: "accountability:accountability-detail",
+        Notification.Category.ACCOUNTABILITY_FINISHED: "accountability:accountability-detail",
+        Notification.Category.CONTRACT_CREATED: "contracts:contracts-detail",
+        Notification.Category.CONTRACT_STATUS: "contracts:contracts-detail",
+        Notification.Category.CONTRACT_GOAL_COMMENTED: "contracts:contracts-detail",
+        Notification.Category.CONTRACT_ITEM_COMMENTED: "contracts:contracts-detail",
+        Notification.Category.CONTRACT_ITEM_VALUE_REQUESTED: "contracts:contracts-detail",
+        Notification.Category.CONTRACT_ITEM_VALUE_REVIEWED: "contracts:contracts-detail",
+    }
+    destiny_url = redirects.get(notification.category, None)
+    if not destiny_url:
+        return redirect("home")
+
+    return redirect(destiny_url, pk=notification.object_id)
