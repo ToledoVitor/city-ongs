@@ -22,10 +22,7 @@ from accountability.forms import (
 from accountability.models import (
     Accountability,
     Expense,
-<<<<<<< Updated upstream
     ExpenseFile,
-=======
->>>>>>> Stashed changes
     Favored,
     ResourceSource,
     Revenue,
@@ -571,14 +568,7 @@ def import_accountability_view(request, pk):
 
 def expense_delete_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
-<<<<<<< Updated upstream
     if not expense.accountability.is_on_execution:
-=======
-    if (
-        not expense.accountability.is_on_wip
-        and not expense.accountability.is_correcting
-    ):
->>>>>>> Stashed changes
         return redirect(
             "accountability:accountability-detail", pk=expense.accountability.id
         )
@@ -599,7 +589,6 @@ def expense_delete_view(request, pk):
 
 def revenue_delete_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
-<<<<<<< Updated upstream
     if not revenue.accountability.is_on_execution:
         return redirect(
             "accountability:accountability-detail", pk=revenue.accountability.id
@@ -700,15 +689,6 @@ def review_accountability_expenses(request, pk, index):
                 target_object_id=current_expense.id,
                 target_content_object=current_expense,
             )
-=======
-    if (
-        not revenue.accountability.is_on_wip
-        and not revenue.accountability.is_correcting
-    ):
-        return redirect(
-            "accountability:accountability-detail", pk=revenue.accountability.id
-        )
->>>>>>> Stashed changes
 
         action = request.POST.get("action")
         if action == "next":

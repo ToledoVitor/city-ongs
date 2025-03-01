@@ -27,7 +27,6 @@ TRANSACTION_OPTIONS = [
         "predicted_versus_realized",
         "Demonstrativo de Repasses: Previsto versus Reaizado",
     ),
-<<<<<<< Updated upstream
     (
         "consolidated",
         "Consolidado das Conciliações Bancárias",
@@ -37,8 +36,6 @@ TRANSACTION_OPTIONS = [
 REPORTS_OPTIONS = [
     *RP_OPTIONS,
     *TRANSACTION_OPTIONS,
-=======
->>>>>>> Stashed changes
 ]
 
 

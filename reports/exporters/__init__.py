@@ -36,8 +36,5 @@ __all__ = [
     "PassOn14PDFExporter",
     "PeriodEpensesPDFExporter",
     "PredictedVersusRealizedPDFExporter",
-<<<<<<< Updated upstream
     "ConsolidatedPDFExporter",
-=======
->>>>>>> Stashed changes
 ]

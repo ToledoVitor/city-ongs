@@ -9,17 +9,12 @@ from accountability.views import (
     create_accountability_expense_view,
     create_accountability_revenue_view,
     create_contract_accountability_view,
-<<<<<<< Updated upstream
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
     gloss_accountability_expense_view,
     import_accountability_view,
     reconcile_expense_view,
-=======
-    expense_delete_view,
-    import_accountability_view,
->>>>>>> Stashed changes
     revenue_delete_view,
     review_accountability_expenses,
     review_accountability_revenues,
