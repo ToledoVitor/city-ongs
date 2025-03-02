@@ -104,7 +104,7 @@ class PassOn6PDFExporter:
         self.pdf.multi_cell(
             0,
             4,
-            "ANEXO RP-06 - DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS \n (CONTRATO DE GESTÃO)",
+            "ANEXO RP-06 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS \n CONTRATO DE GESTÃO",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -140,7 +140,7 @@ class PassOn6PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Responsáveis pela Organização Social:** {self.accountability.contract.hired_manager.name}",
+            text=f"**Responsáveis pela Organização Social:**",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -151,7 +151,7 @@ class PassOn6PDFExporter:
         table_data = [
             [
                 f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
-                f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                f"Papel: {self.accountability.contract.supervision_autority.position}",
                 f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
             ],
         ]
@@ -184,7 +184,7 @@ class PassOn6PDFExporter:
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**EXERCÍCIO (1):** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
+            text=f"**EXERCÍCIO:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
             h=self.default_cell_height,
             new_x=XPos.LMARGIN,
@@ -203,8 +203,8 @@ class PassOn6PDFExporter:
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
-                f"Criar Termo de Colaboração",  # TODO criar campo
-                f"data",  # TODO após criar campo
+                f"{self.accountability.contract.name_with_code}",  # TODO verificar campo
+                f"{format_into_brazilian_date(self.accountability.contract.start_of_vigency)}",  # TODO após criar campo
                 f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
                 f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
             ],
@@ -390,7 +390,7 @@ class PassOn6PDFExporter:
 
     def _draw_expenses_table(self):
         self.pdf.multi_cell(
-            text="O(s) signatário(s), na qualidade de representante(s) da Associação Comunidade Varzina - Eco & Vida (Meio Ambiente) vem indicar, na forma abaixo detalhada, as despesas incorridas e pagas no exerício 01/01/2025 a 31/12/2025 bem como as despesas a pagar no exercício seguinte.",
+            text=f"O(s) signatário(s), na qualidade de representante(s) do(a) {self.accountability.contract.name} vem indicar, na forma abaixo detalhada, as despesas incorridas e pagas no exerício {format_into_brazilian_date(self.start_date)} a {format_into_brazilian_date(self.end_date)} bem como as despesas a pagar no exercício seguinte.",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -633,7 +633,7 @@ class PassOn6PDFExporter:
             ],
             [
                 "(K) RECURSO PÚBLICO NÃO APLICADO [E - (J - F)]",
-                f"Campo de dinheiro em ainda em conta",  # TODO
+                f"Campo de dinheiro ainda em conta",  # TODO
             ],
             [
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
@@ -668,7 +668,7 @@ class PassOn6PDFExporter:
         self.pdf.ln(7)
         self.__set_helvetica_font()
         self.pdf.multi_cell(
-            text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Parceiro.",
+            text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Contratante.",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -677,11 +677,45 @@ class PassOn6PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.ln(9)
+        self.pdf.multi_cell(
+            text="**LOCAL:**",
+            markdown=True,
+            h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(4)
+        self.pdf.multi_cell(
+            text="**DATA:**",
+            markdown=True,
+            h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(8)
+        self.pdf.multi_cell(
+            text="**Responsáveis pela Contratada:**",
+            markdown=True,
+            h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(5)
         self.pdf.cell(
-            text="Prefeitura Municipal de Várzea Paulista, Quarta-feira, 15 de Janeiro de 2025",
+            text=f"Nome: {self.accountability.contract.hired_manager}",
             h=self.default_cell_height,
         )
-        self.pdf.ln(7)
+        self.pdf.ln(5)
+        self.pdf.cell(
+            text=f"Cargo: - Necessário criar campo -Position- para o responsável",
+            h=self.default_cell_height,
+        )
 
     def __categorize_expenses(self) -> dict:
         expenses = Expense.objects.filter(

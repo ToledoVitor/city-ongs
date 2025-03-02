@@ -66,7 +66,7 @@ class PassOn3PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.cell(
             0,
             10,
@@ -98,7 +98,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** R$ {self.accountability.contract.total_value_with_point}",
+            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** {format_into_brazilian_currency(self.accountability.contract.total_value)}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -238,7 +238,7 @@ class PassOn3PDFExporter:
     def _draw_grantor_authority(self):
         self.__set_helvetica_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO/ENTIDADE CONCESSOR:",
+            text="AUTORIDADE MÁXIMA DO ÓRGÃO CONCESSOR:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -301,7 +301,7 @@ class PassOn3PDFExporter:
     def _draw_beneficiary_authority(self):
         self.__set_helvetica_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO/ENTIDADE BENEFICIÁRIO:",
+            text="AUTORIDADE MÁXIMA DO ÓRGÃO BENEFICIÁRIO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -334,7 +334,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"PELO ÓRGÃO/ENTIDADE CONTRATANTE:",
+            text=f"PELO ÓRGÃO CONTRATANTE:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -367,7 +367,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"PELO ÓRGÃO/ENTIDADE BENEFICIÁRIO:",
+            text=f"PELO ÓRGÃO BENEFICIÁRIO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)

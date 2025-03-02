@@ -1,16 +1,15 @@
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
-from django.contrib.auth.decorators import login_required
 import logging
 from typing import Any
 
-from django.http import JsonResponse
-from django.utils import timezone
-
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import FolderManagerCreateForm, OrganizationAccountantCreateForm
@@ -225,8 +224,11 @@ def user_unread_notifications(request):
             "category": notification.category_label,
             "text": notification.text,
             "created_at": notification.created_at.strftime("%d/%m/%Y %H:%M"),
-            "read_url": reverse('accounts:user-read-notifications', args=[str(notification.id)])
-        } for notification in unread_notifications
+            "read_url": reverse(
+                "accounts:user-read-notifications", args=[str(notification.id)]
+            ),
+        }
+        for notification in unread_notifications
     ]
 
     return JsonResponse({"notifications": notifications})

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0006_alter_contract_concession_type_and_more"),
     ]

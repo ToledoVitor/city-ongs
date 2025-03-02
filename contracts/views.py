@@ -177,8 +177,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
         ).select_related("raise_item")[:12]
         context["items_totals"] = self.object.items.aggregate(
-            total_month=Sum("month_expense"),
-            total_year=Sum("anual_expense")
+            total_month=Sum("month_expense"), total_year=Sum("anual_expense")
         )
         return context
 

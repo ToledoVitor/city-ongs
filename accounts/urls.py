@@ -1,14 +1,14 @@
 from django.urls import path
 
 from accounts.views import (
-    user_unread_notifications,
-    read_notification_view,
     FolderManagerCreateView,
     FolderManagersDetailView,
     FolderManagersListView,
     OrganizationAccountantCreateView,
     OrganizationAccountantsDetailView,
     OrganizationAccountantsListView,
+    read_notification_view,
+    user_unread_notifications,
 )
 
 urlpatterns = [
