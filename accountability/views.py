@@ -156,7 +156,7 @@ def accountability_detail_view(request, pk):
         "item", "source"
     )
     revenues_list = accountability.revenues.order_by("-value").select_related(
-        "bank_account", "source"
+        "bank_account",
     )
 
     query = request.GET.get("q", "")
@@ -206,7 +206,7 @@ def create_accountability_revenue_view(request, pk):
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
     if request.method == "POST":
-        form = RevenueForm(request.POST, request=request)
+        form = RevenueForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save(commit=False)
@@ -230,7 +230,7 @@ def create_accountability_revenue_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = RevenueForm(request=request)
+        form = RevenueForm()
         return render(
             request,
             "accountability/revenues/create.html",
@@ -249,7 +249,7 @@ def update_accountability_revenue_view(request, pk):
         )
 
     if request.method == "POST":
-        form = RevenueForm(request.POST, instance=revenue, request=request)
+        form = RevenueForm(request.POST, instance=revenue)
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save()
@@ -270,7 +270,7 @@ def update_accountability_revenue_view(request, pk):
                 {"revenue": revenue, "form": form},
             )
     else:
-        form = RevenueForm(request=request, instance=revenue)
+        form = RevenueForm(instance=revenue)
         return render(
             request,
             "accountability/revenues/update.html",
@@ -736,7 +736,6 @@ def review_accountability_revenues(request, pk, index):
     )
     revenues = list(
         accountability.revenues.select_related(
-            "source",
             "bank_account",
         )
         .prefetch_related("files")

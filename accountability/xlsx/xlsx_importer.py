@@ -9,7 +9,7 @@ import pandas as pd
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 
-from accountability.models import Accountability, Expense, Revenue
+from accountability.models import Accountability, Expense, Revenue, Favored
 from bank.models import Transaction
 from contracts.choices import NatureChoices
 
@@ -29,10 +29,11 @@ class AccountabilityXLSXImporter:
         except ValueError:
             raise ValueError("Excel sheets are not in the right format")
 
-        self._store_fr_ids()
+        self._store_fd_ids()
         self._store_cb_ids()
         self._store_fv_ids()
         self._store_ia_ids()
+        self._store_fr_choices()
         self._store_nr_choices()
         self._store_nd_choices()
         self._store_td_choices()
@@ -45,13 +46,13 @@ class AccountabilityXLSXImporter:
 
         return imported, revenues_error, expenses_error, applications_error
 
-    def _store_fr_ids(self) -> None:
-        df = pd.read_excel(self.file, sheet_name="FR")
-        mapped_frs = {}
+    def _store_fd_ids(self) -> None:
+        df = pd.read_excel(self.file, sheet_name="FD")
+        mapped_fds = {}
         for line in df.values.tolist():
-            mapped_frs[line[0]] = line[1]
+            mapped_fds[line[0]] = line[1]
 
-        self.mapped_frs = mapped_frs
+        self.mapped_fds = mapped_fds
 
     def _store_cb_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="CB")
@@ -64,8 +65,17 @@ class AccountabilityXLSXImporter:
     def _store_fv_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="FV")
         mapped_fvs = {}
+
         for line in df.values.tolist():
-            mapped_fvs[line[0]] = line[1]
+            fv_id = line[1]
+            if not fv_id:
+                fv = Favored.objects.create(
+                    organization=self.accountability.contract.organization,
+                    name=line[0],
+                )
+                fv_id = fv.id
+
+            mapped_fvs[line[0]] = fv_id
 
         self.mapped_fvs = mapped_fvs
 
@@ -76,6 +86,9 @@ class AccountabilityXLSXImporter:
             mapped_ias[line[0]] = line[1]
 
         self.mapped_ias = mapped_ias
+
+    def _store_fr_choices(self) -> None:
+        self.mapped_frs = {label: value for value, label in Revenue.RevenueSource.choices}
 
     def _store_nr_choices(self) -> None:
         self.mapped_nrs = {label: value for value, label in Revenue.Nature.choices}
@@ -109,7 +122,7 @@ class AccountabilityXLSXImporter:
                     competency=datetime(
                         competency.year, competency.month, competency.day
                     ),
-                    source_id=self.mapped_frs.get(line[6]),
+                    source=self.mapped_frs.get(line[6]),
                     bank_account_id=self.mapped_cbs.get(line[7]),
                     revenue_nature=self.mapped_nrs.get(line[8]),
                     observations=line[9],
@@ -147,9 +160,9 @@ class AccountabilityXLSXImporter:
                     competency=datetime(
                         competency.year, competency.month, competency.day
                     ),
-                    source_id=self.mapped_frs.get(line[6], None),
+                    source_id=self.mapped_fds.get(line[6], None),
                     nature=self.mapped_nds.get(line[7], None),
-                    favored_id=self.mapped_frs.get(line[8], None),
+                    favored_id=self.mapped_fvs.get(line[8], None),
                     item_id=self.mapped_ias.get(line[9], None),
                     document_type=self.mapped_tds.get(line[10], None),
                     document_number=line[11],
@@ -187,7 +200,7 @@ class AccountabilityXLSXImporter:
                             transaction_date.day,
                         ),
                         bank_account_id=self.mapped_cbs.get(line[4]),
-                        origin_source_id=self.mapped_frs.get(line[5]),
+                        origin_source_id=self.mapped_fds.get(line[5]),
                         transaction_type=Transaction.TransactionTypeChoices.OTHER,
                     )
                 )
@@ -205,7 +218,7 @@ class AccountabilityXLSXImporter:
                             transaction_date.day,
                         ),
                         bank_account_id=self.mapped_cbs.get(line[6]),
-                        destination_source_id=self.mapped_frs.get(line[7]),
+                        destination_source_id=self.mapped_fds.get(line[7]),
                         transaction_type=Transaction.TransactionTypeChoices.INCOME,
                     )
                 )
