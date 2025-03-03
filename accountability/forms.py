@@ -149,8 +149,8 @@ class RevenueForm(forms.ModelForm):
             "value",
             "competency",
             "receive_date",
-            "source",
             "bank_account",
+            "source",
             "revenue_nature",
         ]
 
@@ -162,19 +162,6 @@ class RevenueForm(forms.ModelForm):
             "source": BaseSelectFormWidget(),
             "revenue_nature": BaseSelectFormWidget(),
         }
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
-
-        if self.request:
-            self.fields[
-                "source"
-            ].queryset = self.request.user.organization.resource_sources.all()
-        else:
-            self.fields[
-                "source"
-            ].queryset = self.request.user.organization.resource_sources.none()
 
 
 class AccountabilityCreateForm(forms.ModelForm):

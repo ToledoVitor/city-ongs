@@ -407,6 +407,10 @@ class ExpenseAnalysis(BaseModel):
 
 
 class Revenue(BaseModel):
+    class RevenueSource(models.TextChoices):
+        CITY_HALL = "CITY_HALL", "Prefeitura"
+        COUNTERPART = "COUNTERPART", "Contrapartida"
+
     class ReviewStatus(models.TextChoices):
         IN_ANALISIS = "IN_ANALISIS", "Em Análise"
         REJECTED = "REJECTED", "Rejeitada"
@@ -483,13 +487,10 @@ class Revenue(BaseModel):
         blank=True,
     )
 
-    source = models.ForeignKey(
-        ResourceSource,
+    source = models.CharField(
         verbose_name="Fonte de Recurso",
-        related_name="revenues",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        choices=RevenueSource.choices,
+        default=RevenueSource.CITY_HALL,
     )
     bank_account = models.ForeignKey(
         BankAccount,
@@ -508,6 +509,10 @@ class Revenue(BaseModel):
 
     def __str__(self) -> str:
         return f"Receita {self.identification}"
+
+    @property
+    def source_label(self) -> str:
+        return Revenue.RevenueSource(self.source).label
 
     @property
     def revenue_nature_label(self) -> str:

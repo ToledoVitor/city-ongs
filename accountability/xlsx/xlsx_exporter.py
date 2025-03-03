@@ -26,12 +26,14 @@ class AccountabilityXLSXExporter:
 
         self._build_worksheets()
         self.workbook.define_name("fr_tab", "FR!$A$2:$A$100")
+        self.workbook.define_name("fd_tab", "FD!$A$2:$A$100")
         self.workbook.define_name("cb_tab", "CB!$A$2:$A$100")
         self.workbook.define_name("nr_tab", "NR!$A$2:$A$100")
         self.workbook.define_name("nd_tab", "ND!$A$2:$A$100")
         self.workbook.define_name("fv_tab", "FV!$A$2:$A$100")
         self.workbook.define_name("ia_tab", "IA!$A$2:$A$100")
         self.workbook.define_name("td_tab", "TD!$A$2:$A$100")
+
         self.workbook.close()
 
         output.seek(0)
@@ -103,7 +105,8 @@ class AccountabilityXLSXExporter:
             self.__build_receipt_worksheet,
             self.__build_expense_worksheet,
             self.__build_application_worksheet,
-            self.__build_revenue_worksheet,
+            self.__build_revenue_source_worksheet,
+            self.__build_expense_source_worksheet,
             self.__build_bank_account_worksheet,
             self.__build_nature_category_worksheet,
             self.__build_expense_category_worksheet,
@@ -340,7 +343,7 @@ class AccountabilityXLSXExporter:
                 6,
                 options={
                     "validate": "list",
-                    "source": "=fr_tab",
+                    "source": "=fd_tab",
                     "input_message": "Escolha da lista",
                     "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
                 },
@@ -526,8 +529,8 @@ class AccountabilityXLSXExporter:
         application_worksheet.autofit()
         return application_worksheet
 
-    def __build_revenue_worksheet(self):
-        revenue_worksheet = self.workbook.add_worksheet(name="FR")
+    def __build_expense_source_worksheet(self):
+        revenue_worksheet = self.workbook.add_worksheet(name="FD")
         revenue_worksheet.write(0, 0, "Nome", self.yellow_body_format)
         revenue_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
@@ -539,6 +542,19 @@ class AccountabilityXLSXExporter:
 
         revenue_worksheet.autofit()
         return revenue_worksheet
+
+    def __build_revenue_source_worksheet(self):
+        rev_source_worksheet = self.workbook.add_worksheet(name="FR")
+        rev_source_worksheet.write(0, 0, "Nome", self.yellow_body_format)
+
+        current_line = 1
+        sources = [source.label for source in Revenue.RevenueSource]
+        for source in sources:
+            rev_source_worksheet.write(current_line, 0, source)
+            current_line += 1
+
+        rev_source_worksheet.autofit()
+        return rev_source_worksheet
 
     def __build_bank_account_worksheet(self):
         bank_account_worksheet = self.workbook.add_worksheet(name="CB")
