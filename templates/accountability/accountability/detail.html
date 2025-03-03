@@ -46,7 +46,56 @@
   </ol>
 </nav>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por identificação, item, fonte, origem..." %}
+<form class="my-5" method="get">
+  <div class="relative">
+    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+      <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+      </svg>
+    </div>
+    <input
+      class="block w-full p-4 ps-10 text-sm border rounded-lg bg-gray-300 border-gray-600 placeholder-gray-600 text-black focus:ring-blue-500 focus:border-blue-500"
+      type="search"
+      id="id-search-input"
+      name="q"
+      value="{{ search_query }}"
+      placeholder="Pesquisar por identificação, item, fonte, origem..."
+    />
+    <button
+      type="submit"
+      class="text-white absolute end-2.5 bottom-2.5 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+    >
+      Buscar
+    </button>
+  </div>
+
+  <input type="hidden" id="id-paid" name="paid" value="{{ request.GET.paid|default:'all' }}">
+
+  <div class="mt-2 inline-flex rounded-md shadow-xs" role="group">
+    <button
+      type="button"
+      data-flag="all"
+      class="status-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-xs font-medium border border-gray-400 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+    >
+      Todos
+    </button>
+    <button
+      type="button"
+      data-flag="true"
+      class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border-t border-b border-gray-400 rounded-none focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+    >
+      Conciliados
+    </button>
+    <button
+      type="button"
+      data-flag="false"
+      class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border border-gray-400 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+    >
+      Pendentes
+    </button>
+  </div>
+</form>
+
 
 <div class="my-3">
   <div class="grid gap-6 mb-6 md:grid-cols-2">
@@ -449,5 +498,41 @@
     </li>
   {% endif%}
 </ol>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const flagInput = document.getElementById("id-paid");
+    const flagButtons = document.querySelectorAll(".status-btn");
+  
+    // Atualiza a aparência dos botões de acordo com o valor atual do hidden
+    flagButtons.forEach(button => {
+      if (button.getAttribute("data-flag") === flagInput.value) {
+        button.classList.remove("bg-gray-200", "text-gray-700");
+        button.classList.add("bg-blue-600", "text-white");
+      } else {
+        button.classList.remove("bg-blue-600", "text-white");
+        button.classList.add("bg-gray-200", "text-gray-700");
+      }
+    });
+  
+    flagButtons.forEach(button => {
+      button.addEventListener("click", function() {
+        flagInput.value = button.getAttribute("data-flag");
+  
+        flagButtons.forEach(btn => {
+          if (btn === button) {
+            btn.classList.remove("bg-gray-200", "text-gray-700");
+            btn.classList.add("bg-blue-600", "text-white");
+          } else {
+            btn.classList.remove("bg-blue-600", "text-white");
+            btn.classList.add("bg-gray-200", "text-gray-700");
+          }
+        });
+  
+        button.closest("form").submit();
+      });
+    });
+  });  
+</script>
 
 {% endblock %}

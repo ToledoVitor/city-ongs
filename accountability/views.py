@@ -170,6 +170,14 @@ def accountability_detail_view(request, pk):
             Q(identification__icontains=query) | Q(source__name__icontains=query)
         )
 
+    status_flag = request.GET.get("paid", "all")
+    if status_flag == "true":
+        expenses_list = expenses_list.filter(conciled=True)
+        revenues_list = revenues_list.filter(conciled=True)
+    elif status_flag == "false":
+        expenses_list = expenses_list.filter(conciled=False)
+        revenues_list = revenues_list.filter(conciled=False)
+
     expenses_paginator = Paginator(expenses_list, 10)
     expenses_page_number = request.GET.get("expenses_page")
     expenses_page = expenses_paginator.get_page(expenses_page_number)
