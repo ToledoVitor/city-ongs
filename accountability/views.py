@@ -1,3 +1,4 @@
+from decimal import Decimal
 import logging
 from typing import Any
 
@@ -180,9 +181,9 @@ def accountability_detail_view(request, pk):
     context = {
         "object": accountability,
         "expenses_page": expenses_page,
-        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"],
+        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"] or Decimal("0.00"),
         "revenues_page": revenues_page,
-        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"],
+        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"] or Decimal("0.00"),
         "search_query": query,
     }
     return render(request, "accountability/accountability/detail.html", context)

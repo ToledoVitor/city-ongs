@@ -452,6 +452,10 @@ class Revenue(BaseModel):
         blank=True,
     )
 
+    # flags
+    paid = models.BooleanField(verbose_name="Pago?", default=False)
+    conciled = models.BooleanField(verbose_name="Conciliado?", default=False)
+
     # specifications
     identification = models.CharField(
         verbose_name="Identificação da Despesa",
