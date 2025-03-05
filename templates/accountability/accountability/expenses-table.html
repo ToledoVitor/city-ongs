@@ -30,7 +30,7 @@
             <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
                   {{ expense.identification }} <br>
-                  {% if accountability.is_on_execution %}
+                  {% if accountability.is_on_execution and not expense.conciled %}
                     <a href="{% url 'accountability:expense-reconcile' expense.id %}">
                       <button
                         type="button"

@@ -420,9 +420,7 @@ class AccountabilityXLSXExporter:
             [" VALOR ", self.header_format],
             [" DATA DA TRANSFERÊNCIA ", self.header_breaking_line_format],
             ["CONTA BANCÁRIA DE ORIGEM", self.header_breaking_line_format],
-            ["FONTE DE RECURSO DE ORIGEM", self.header_breaking_line_format],
             ["CONTA BANCÁRIA DE DESTINO", self.header_breaking_line_format],
-            ["FONTE DE RECURSO DE DESTINO", self.header_breaking_line_format],
         )
 
         col = 0
@@ -492,35 +490,7 @@ class AccountabilityXLSXExporter:
                 5,
                 options={
                     "validate": "list",
-                    "source": "=fr_tab",
-                    "input_message": "Escolha da lista",
-                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
-                },
-            )
-
-            application_worksheet.write(line, 6, "", self.locked_cell_format)
-            application_worksheet.data_validation(
-                line,
-                6,
-                line,
-                6,
-                options={
-                    "validate": "list",
                     "source": "=cb_tab",
-                    "input_message": "Escolha da lista",
-                    "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
-                },
-            )
-
-            application_worksheet.write(line, 7, "", self.locked_cell_format)
-            application_worksheet.data_validation(
-                line,
-                7,
-                line,
-                7,
-                options={
-                    "validate": "list",
-                    "source": "=fr_tab",
                     "input_message": "Escolha da lista",
                     "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
                 },

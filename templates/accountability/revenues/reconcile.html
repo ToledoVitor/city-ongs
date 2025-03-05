@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Despesas - Portal SITTS{% endblock %}
+{% block title %}Receitas - Portal SITTS{% endblock %}
 
 {% block customcss %}
 <style>
@@ -38,10 +38,10 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
         <a
-            href="{% url 'accountability:accountability-detail' expense.accountability.id %}"
+            href="{% url 'accountability:accountability-detail' revenue.accountability.id %}"
             class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2"
         >
-            Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}
+            Prestação {{ revenue.accountability.month }}/{{ revenue.accountability.year }}
         </a>
         </div>
     </li>
@@ -73,46 +73,23 @@
 
     <div class="mb-2 text-base flex justify-between">
         <b>Identificação: </b>
-        <a href="{% url 'accountability:expense-update' expense.id %}" class="ms-auto hover:underline font-medium text-blue-800">
-            {{ expense.identification }}
+        <a href="{% url 'accountability:expense-update' revenue.id %}" class="ms-auto hover:underline font-medium text-blue-800">
+            {{ revenue.identification }}
         </a>
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> {{ expense.observations }}
+        <b>Observações: </b> {{ revenue.observations }}
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Valor: </b> R${{ expense.value|intcomma }}
+        <b>Valor: </b> R${{ revenue.value|intcomma }}
     </div>
 
     <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
 
     <div class="my-3">
-        <label class="block text-xl mb-2 font-medium text-black">Arquivos</label>
-        <input
-            class="
-                block
-                w-full
-                text-sm
-                text-gray-900
-                border
-                border-gray-500
-                rounded-lg
-                cursor-pointer
-                bg-gray-300
-                focus:outline-none
-            "
-            id="files"
-            name="files"
-            type="file"
-            multiple
-        >
-    </div>
-
-    <div class="my-3">
         <label class="block text-xl font-medium text-black">Transações</label>
         <p id="helper-text-explanation" class="mb-2 text-sm text-gray-400">
-            A despesa pode corresponder a uma ou mais transações. <br>
-            Ao vincular com uma transação, a despesa será marcada como conciliada.
+            Ao vincular com uma transação, a receita será marcada como conciliada.
         </p>
         
         <div class="relative mb-4">
@@ -149,7 +126,7 @@
         </div>
     </div>
 
-    {% include 'commons/form-errors.html' with form=form error_message="Erro ao Conciliar Despesa" %}
+    {% include 'commons/form-errors.html' with form=form error_message="Erro ao Conciliar Receita" %}
 
     {% if missing_files %}
     <div id="alert-revenue" class="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">

@@ -29,7 +29,35 @@
           {% for revenue in revenues_page %}
             <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
-                  {{ revenue.identification }} 
+                  {{ revenue.identification }} <br>
+                  {% if accountability.is_on_execution and not revenue.conciled %}
+                    <a href="{% url 'accountability:revenue-reconcile' revenue.id %}">
+                      <button
+                        type="button"
+                        class="
+                          text-white
+                          ml-2
+                          bg-blue-600
+                          hover:bg-blue-600
+                          focus:ring-4
+                          focus:outline-none
+                          focus:ring-blue-600
+                          font-medium
+                          rounded-full
+                          text-xs
+                          mt-2
+                          px-2.5
+                          py-1
+                          text-center
+                          inline-flex
+                          items-center
+                          me-2
+                        "
+                      >
+                        conciliar
+                      </button>
+                    </a>
+                  {% endif %}
                 </th>
                 <td class="px-6 py-4 text-sm text-black">
                   R${{ revenue.value|intcomma }}

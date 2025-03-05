@@ -15,6 +15,7 @@ from accountability.views import (
     gloss_accountability_expense_view,
     import_accountability_view,
     reconcile_expense_view,
+    reconcile_revenue_view,
     revenue_delete_view,
     review_accountability_expenses,
     review_accountability_revenues,
@@ -110,4 +111,9 @@ urlpatterns = [
         name="revenue-duplicate",
     ),
     path("revenues/<uuid:pk>/delete/", revenue_delete_view, name="revenue-delete"),
+    path(
+        "revenues/<uuid:pk>/reconcile/",
+        reconcile_revenue_view,
+        name="revenue-reconcile",
+    ),
 ]

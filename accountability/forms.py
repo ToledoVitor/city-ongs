@@ -17,6 +17,7 @@ from utils.widgets import (
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
+    CustomCheckboxSelectMultiple,
 )
 
 
@@ -236,17 +237,15 @@ class ImportXLSXAccountabilityForm(forms.Form):
 
 class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        return (
-            f"Data: {obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}"
-        )
+        return f"{obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}"
 
 
 class ReconcileExpenseForm(forms.Form):
     transactions = CustomTransactionMultipleChoiceField(
         queryset=Transaction.objects.none(),
-        widget=forms.CheckboxSelectMultiple(
-            attrs={
-                "style": "max-height: 200px; overflow-y: scroll;",
+        widget=CustomCheckboxSelectMultiple(
+            input_attrs={
+                "class": "w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-400 border-gray-500"
             }
         ),
         required=True,
@@ -260,10 +259,84 @@ class ReconcileExpenseForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.contract = kwargs.pop("contract", None)
+        self.expense = kwargs.pop("expense", None)
         super().__init__(*args, **kwargs)
 
         if self.contract:
-            self.fields["transactions"].queryset = Transaction.objects.filter(
-                Q(bank_account=self.contract.checking_account)
-                | Q(bank_account=self.contract.investing_account)
-            ).filter(expense__isnull=True)
+            self.fields["transactions"].queryset = (
+                Transaction.objects.filter(
+                    Q(bank_account=self.contract.checking_account)
+                    | Q(bank_account=self.contract.investing_account)
+                )
+                .filter(
+                    expense__isnull=True,
+                    revenue__isnull=True,
+                    amount__lte=0,
+                )
+                .order_by("date")
+            )
+
+    def clean_transactions(self):
+        transactions = self.cleaned_data.get("transactions")
+
+        if not transactions:
+            raise forms.ValidationError("Informe as transações correspondentes")
+
+        amount = sum([transaction.amount for transaction in transactions])
+        if amount != self.expense.value:
+            raise forms.ValidationError(
+                "Soma das transações diferente do valor da despesa."
+            )
+
+        return transactions
+
+
+class ReconcileRevenueForm(forms.Form):
+    transactions = CustomTransactionMultipleChoiceField(
+        queryset=Transaction.objects.none(),
+        widget=CustomCheckboxSelectMultiple(
+            input_attrs={
+                "class": "w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-400 border-gray-500"
+            }
+        ),
+        required=True,
+    )
+
+    class Meta:
+        model: Revenue
+        fields = [
+            "transactions",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        self.revenue = kwargs.pop("revenue", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["transactions"].queryset = (
+                Transaction.objects.filter(
+                    Q(bank_account=self.contract.checking_account)
+                    | Q(bank_account=self.contract.investing_account)
+                )
+                .filter(
+                    expense__isnull=True,
+                    revenue__isnull=True,
+                    amount__gte=0,
+                )
+                .order_by("date")
+            )
+
+    def clean_transactions(self):
+        transactions = self.cleaned_data.get("transactions")
+
+        if not transactions:
+            raise forms.ValidationError("Informe as transações correspondentes")
+
+        amount = sum([transaction.amount for transaction in transactions])
+        if amount != self.revenue.value:
+            raise forms.ValidationError(
+                "Soma das transações diferente do valor da receita."
+            )
+
+        return transactions

@@ -9,7 +9,7 @@ import pandas as pd
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 
-from accountability.models import Accountability, Expense, Revenue, Favored
+from accountability.models import Accountability, Expense, Favored, Revenue
 from bank.models import Transaction
 from contracts.choices import NatureChoices
 
@@ -88,7 +88,9 @@ class AccountabilityXLSXImporter:
         self.mapped_ias = mapped_ias
 
     def _store_fr_choices(self) -> None:
-        self.mapped_frs = {label: value for value, label in Revenue.RevenueSource.choices}
+        self.mapped_frs = {
+            label: value for value, label in Revenue.RevenueSource.choices
+        }
 
     def _store_nr_choices(self) -> None:
         self.mapped_nrs = {label: value for value, label in Revenue.Nature.choices}
@@ -192,16 +194,17 @@ class AccountabilityXLSXImporter:
                 transaction_date = line[3]
                 transactions.append(
                     Transaction(
+                        bank_account_id=self.mapped_cbs.get(line[4]),
+                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
+                        # transaction_number=...
                         name="Aplicação / Resgate",
+                        memo="Aplicação / Resgate",
                         amount=Decimal(line[2] * -1),
                         date=datetime(
                             transaction_date.year,
                             transaction_date.month,
                             transaction_date.day,
                         ),
-                        bank_account_id=self.mapped_cbs.get(line[4]),
-                        origin_source_id=self.mapped_fds.get(line[5]),
-                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
                     )
                 )
 
@@ -209,6 +212,9 @@ class AccountabilityXLSXImporter:
                 transaction_date = line[3]
                 transactions.append(
                     Transaction(
+                        bank_account_id=self.mapped_cbs.get(line[6]),
+                        transaction_type=Transaction.TransactionTypeChoices.INCOME,
+                        # transaction_number=...
                         name="Aplicação / Resgate",
                         memo="Aplicação / Resgate",
                         amount=Decimal(line[2]),
@@ -217,9 +223,6 @@ class AccountabilityXLSXImporter:
                             transaction_date.month,
                             transaction_date.day,
                         ),
-                        bank_account_id=self.mapped_cbs.get(line[6]),
-                        destination_source_id=self.mapped_fds.get(line[7]),
-                        transaction_type=Transaction.TransactionTypeChoices.INCOME,
                     )
                 )
 

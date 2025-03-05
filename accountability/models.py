@@ -329,7 +329,7 @@ class Expense(BaseModel):
         max_length=18,
     )
 
-    # douments
+    # documents
     document_type = models.CharField(
         verbose_name="Tipo de Documento",
         choices=DocumentChoices.choices,

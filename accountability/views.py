@@ -1,5 +1,5 @@
-from decimal import Decimal
 import logging
+from decimal import Decimal
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +17,7 @@ from accountability.forms import (
     FavoredForm,
     ImportXLSXAccountabilityForm,
     ReconcileExpenseForm,
+    ReconcileRevenueForm,
     ResourceSourceCreateForm,
     RevenueForm,
 )
@@ -189,9 +190,11 @@ def accountability_detail_view(request, pk):
     context = {
         "object": accountability,
         "expenses_page": expenses_page,
-        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"] or Decimal("0.00"),
+        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"]
+        or Decimal("0.00"),
         "revenues_page": revenues_page,
-        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"] or Decimal("0.00"),
+        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"]
+        or Decimal("0.00"),
         "search_query": query,
     }
     return render(request, "accountability/accountability/detail.html", context)
@@ -804,8 +807,16 @@ def reconcile_expense_view(request, pk):
         id=pk,
     )
     contract = expense.accountability.contract
+
+    total_expenses = Expense.objects.filter(
+        accountability=expense.accountability
+    ).count()
+    conciled_expenses = Expense.objects.filter(
+        accountability=expense.accountability, conciled=True
+    ).count()
+
     if request.method == "POST":
-        form = ReconcileExpenseForm(request.POST, contract=contract)
+        form = ReconcileExpenseForm(request.POST, contract=contract, expense=expense)
         files = request.FILES.getlist("files")
 
         if not files:
@@ -823,6 +834,7 @@ def reconcile_expense_view(request, pk):
             with transaction.atomic():
                 expense.conciled = True
                 expense.paid = True
+                expense.liquidation = form.cleaned_data["transactions"][0].date
                 expense.save()
                 expense.transactions.set(form.cleaned_data["transactions"])
 
@@ -849,12 +861,88 @@ def reconcile_expense_view(request, pk):
             return render(
                 request,
                 "accountability/expenses/reconcile.html",
-                {"form": form, "expense": expense},
+                {
+                    "form": form,
+                    "expense": expense,
+                    "total": total_expenses,
+                    "conciled": conciled_expenses,
+                },
             )
     else:
         form = ReconcileExpenseForm(contract=contract)
         return render(
             request,
             "accountability/expenses/reconcile.html",
-            {"form": form, "expense": expense},
+            {
+                "form": form,
+                "expense": expense,
+                "total": total_expenses,
+                "conciled": conciled_expenses,
+            },
+        )
+
+
+def reconcile_revenue_view(request, pk):
+    revenue = get_object_or_404(
+        Revenue.objects.select_related(
+            "accountability",
+            "accountability__contract",
+            "accountability__contract__checking_account",
+            "accountability__contract__investing_account",
+        ),
+        id=pk,
+    )
+    contract = revenue.accountability.contract
+
+    total_revenues = Revenue.objects.filter(
+        accountability=revenue.accountability
+    ).count()
+    conciled_revenues = Revenue.objects.filter(
+        accountability=revenue.accountability, conciled=True
+    ).count()
+
+    if request.method == "POST":
+        form = ReconcileRevenueForm(request.POST, contract=contract, revenue=revenue)
+
+        if form.is_valid():
+            with transaction.atomic():
+                revenue.conciled = True
+                revenue.paid = True
+                revenue.liquidation = form.cleaned_data["transactions"][0].date
+                revenue.save()
+                revenue.transactions.set(form.cleaned_data["transactions"])
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.RECONCILED_REVENUE,
+                    target_object_id=revenue.id,
+                    target_content_object=revenue,
+                )
+                return redirect(
+                    "accountability:accountability-detail", pk=revenue.accountability.id
+                )
+
+        else:
+            return render(
+                request,
+                "accountability/revenues/reconcile.html",
+                {
+                    "form": form,
+                    "revenue": revenue,
+                    "total": total_revenues,
+                    "conciled": conciled_revenues,
+                },
+            )
+    else:
+        form = ReconcileRevenueForm(contract=contract)
+        return render(
+            request,
+            "accountability/revenues/reconcile.html",
+            {
+                "form": form,
+                "revenue": revenue,
+                "total": total_revenues,
+                "conciled": conciled_revenues,
+            },
         )
