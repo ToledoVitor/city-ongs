@@ -199,7 +199,7 @@ class AccountabilityXLSXImporter:
                         # transaction_number=...
                         name="Aplicação / Resgate",
                         memo="Aplicação / Resgate",
-                        amount=Decimal(line[2] * -1),
+                        amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
                         date=datetime(
                             transaction_date.year,
                             transaction_date.month,
@@ -217,7 +217,7 @@ class AccountabilityXLSXImporter:
                         # transaction_number=...
                         name="Aplicação / Resgate",
                         memo="Aplicação / Resgate",
-                        amount=Decimal(line[2]),
+                        amount=Decimal(abs(line[2])).quantize(Decimal("0.01")),
                         date=datetime(
                             transaction_date.year,
                             transaction_date.month,
