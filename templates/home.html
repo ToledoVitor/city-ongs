@@ -4,29 +4,121 @@
 
 {% block content %}
 
-<section class="pt-8 lg:pt-32">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative text-center">
-      <h1
-          class="max-w-2xl mx-auto text-center font-manrope font-bold text-4xl text-gray-900 mb-5 md:text-5xl leading-[50px]">
-          Olá <span class="text-blue-600">{{ user.get_full_name }}</span>. Seja bem vindo novamente!
-        </h1>
-        <div class="border border-blue-600 p-1 w-60 mx-auto rounded-full flex items-center justify-between mb-4">
-          <span class="font-inter text-base font-medium text-gray-900 ml-3">
-            Acessar meus contratos
-          </span>
-          <a href="{% url 'contracts:contracts-list' %}" class="w-8 h-8 rounded-full flex justify-center items-center bg-blue-600">
-            <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M2.83398 8.00019L12.9081 8.00019M9.75991 11.778L13.0925 8.44541C13.3023 8.23553 13.4073 8.13059 13.4073 8.00019C13.4073 7.86979 13.3023 7.76485 13.0925 7.55497L9.75991 4.22241"
-                stroke="white"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </a>
+
+<section>
+  <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16">
+    <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-12 mb-8">
+        <h1 class="text-gray-900 text-3xl md:text-5xl font-extrabold mb-4">Olá <span class="text-blue-600">{{ user.get_full_name }}</span>. Bom te ver de volta!</h1>
+        <p class="text-lg font-normal text-gray-500">
+          Aqui você pode gerenciar contratos, acompanhar prestações de conta e manter tudo organizado em um só lugar. <br>
+          Veja as últimas atualizações, pendências e contratos em andamento para não perder nada importante.
+        </p>
+    </div>
+
+    <h1 class="text-gray-900 text-2xl md:text-2xl font-extrabold mb-2 underline">
+      Continue de onde você parou:
+    </h1>
+    {% if user.unread_notifications %}
+      <span class="text-lg font-medium bg-blue-50 inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
+        <svg class="w-4 h-4 me-1.5 mr-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+          <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
+          <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
+        </svg>
+        Você tem&nbsp;<b> {{ user.unread_notifications }} novas notificações</b>&nbsp;— não esqueça de conferi-las!
+      </span>
+    {% endif %}
+
+    <div class="mt-4 grid md:grid-cols-2 gap-8">
+      <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-12">
+        <a href="#" class="bg-green-100 text-green-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
+          <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+            <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
+          </svg>
+          <b>Contratos</b>
+        </a>
+        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Contratos</h2>
+        <p class="text-lg font-normal text-gray-500 mb-4">Visualize, edite e gerencie todos os contratos em um só lugar.</p>
+        <a href="{% url 'contracts:contracts-list' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Contratos
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-12">
+
+        <a href="#" class="bg-purple-100 text-purple-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
+          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+            <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
+            <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
+          </svg>
+          <b>Contábil</b>
+        </a>
+        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Prestações de Conta</h2>
+        <p class="text-lg font-normal text-gray-500 mb-4">Acompanhe despesas, valide faturas e garanta transparência financeira.</p>
+        <a href="{% url 'accountability:accountabilities-list' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Prestações
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-12">
+        <a href="#" class="bg-purple-100 text-purple-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
+          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+            <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
+            <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
+          </svg>
+          <b>Contábil</b>
+        </a>
+        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Empresas</h2>
+        <p class="text-lg font-normal text-gray-500 mb-4">Mantenha os dados das empresas atualizados e acessíveis.</p>
+        <a href="{% url 'contracts:companies-list' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Empresas
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-12">
+        <a href="#" class="bg-pink-100 text-pink-800 text-xs font-medium inline-flex items-center justify-center px-2.5 py-1 rounded-md mb-2">
+          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
+          </svg>          
+          <b>Métricas</b>
+        </a>
+        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Relatórios</h2>
+        <p class="text-lg font-normal text-gray-500 mb-4">Gere relatórios, confira o progresso, status, despesas, valores finais de maneira rápida.</p>
+        <a href="{% url 'reports:reports-page' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Relatórios
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+        </a>
       </div>
     </div>
+  </div>
 </section>
+
+
+{% comment %} <section class="pt-8 lg:pt-32">
+  <h2 class="py-4 pl-4 mt-4 mb-2 font-semibold text-2xl text-left underline">O que vamos fazer hoje?<h2>
+
+  <div class="border border-blue-600 p-1 w-60 mx-auto rounded-full flex items-center justify-between mb-4">
+    <span class="font-inter text-base font-medium text-gray-900 ml-3">
+      Acessar meus contratos
+    </span>
+    <a href="{% url 'contracts:contracts-list' %}" class="w-8 h-8 rounded-full flex justify-center items-center bg-blue-600">
+      <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M2.83398 8.00019L12.9081 8.00019M9.75991 11.778L13.0925 8.44541C13.3023 8.23553 13.4073 8.13059 13.4073 8.00019C13.4073 7.86979 13.3023 7.76485 13.0925 7.55497L9.75991 4.22241"
+          stroke="white"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </a>
+  </div>
+</section> {% endcomment %}
 
 {% endblock %}

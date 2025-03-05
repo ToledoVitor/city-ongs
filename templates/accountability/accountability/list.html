@@ -1,34 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Prestações - Portal SITTS{% endblock %}
+
+{% block content %}
+
 {% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Prestações de Conta
+</p>
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Inicio
+      </a>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">Prestações</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+{% include 'commons/search-bar.html' with placeholder="Pesquisar por contrato..." %}
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-white bg-gray-500">
             Contabilidade Mensal
-            <p class="mt-1 text-sm font-normal text-gray-200">Confira o andamento das prestações dos últimos meses, ou inicie uma para um novo mês.</p>
+            <p class="mt-1 text-sm font-normal text-gray-200">
+                Confira o andamento das prestações dos últimos meses, referente aos contratos de sua organização.
+            </p>
         </caption>
         <thead class="text-xs text-white uppercase bg-gray-500">
             <tr>
                 <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
-                  Prestação
+                    Contrato
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Receitas
+                    Prestação
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Despesas
+                    Receitas
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Items com Pendências
+                    Despesas
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Status
+                    Items com Pendências
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Status
                 </th>
             </tr>
         </thead>
         <tbody>
-            {% if accountabilities.count %}
-              {% for accountability in accountabilities.all %}
+            {% if accountabilities %}
+              {% for accountability in accountabilities %}
                 <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
                   <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
                       <a
@@ -55,6 +94,10 @@
                       </a>
                   </td>
 
+                  <th class="pl-2 pr-6 py-4 text-sm text-center text-black max-w-48">
+                    {{ accountability.contract.name }}
+                  </td>
+
                   <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
                     Prestação {{ accountability.month }}/{{ accountability.year }}
                   </th>
@@ -69,7 +112,7 @@
                     Valor: R${{ accountability.sum_expenses|intcomma }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-left text-black max-w-48">
+                  <td class="px-6 py-4 text-sm text-center text-black">
                   </td>
 
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
@@ -114,19 +157,16 @@
             {% else %}
               <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhuma prestação cadastrada
+                    Nenhuma prestação encontrada
                 </th>
                 <td class="px-6 py-4">
                     -
                 </td>
                 <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
                   -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
                 </td>
                 <td class="px-6 py-4">
                   -
@@ -136,33 +176,8 @@
         </tbody>
     </table>
 
-    {% if contract.is_on_execution %}  
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
-        <a
-          href="{% url 'accountability:accountability-create' contract.id %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Iniciar nova
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
+    {% include 'commons/paginator.html' with page_obje=page_obj %}
       
 </div>
+
+{% endblock %}

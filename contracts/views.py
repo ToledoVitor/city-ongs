@@ -4,7 +4,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, Q, Sum, Value
+from django.db.models import Count, Q, Sum, Value, DecimalField
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
@@ -171,6 +171,16 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             ),
             count_expenses=Count(
                 "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
+            ),
+            sum_revenues=Coalesce(
+                Sum("revenues__value", filter=Q(revenues__deleted_at__isnull=True)),
+                0,
+                output_field=DecimalField()
+            ),
+            sum_expenses=Coalesce(
+                Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True)),
+                0,
+                output_field=DecimalField()
             ),
         )[:12]
         context["value_requests"] = ContractItemNewValueRequest.objects.filter(

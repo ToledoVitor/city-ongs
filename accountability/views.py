@@ -5,7 +5,8 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count, DecimalField
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -35,6 +36,52 @@ from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
 
+
+class AccountabilityListView(LoginRequiredMixin, ListView):
+    model = Accountability
+    context_object_name = "accountabilities"
+    paginate_by = 10
+    ordering = "month"
+
+    template_name = "accountability/accountability/list.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = self.model.objects.select_related(
+            "contract",
+        ).filter(
+            contract__organization=self.request.user.organization
+        )
+
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(contract__name__icontains=query)
+            )
+
+        return queryset.annotate(
+            count_revenues=Count(
+                "revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True
+            ),
+            count_expenses=Count(
+                "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
+            ),
+            sum_revenues=Coalesce(
+                Sum("revenues__value", filter=Q(revenues__deleted_at__isnull=True)),
+                0,
+                output_field=DecimalField()
+            ),
+            sum_expenses=Coalesce(
+                Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True)),
+                0,
+                output_field=DecimalField()
+            ),
+        ).order_by("-year", "-month")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
 
 class ResourceSourceListView(LoginRequiredMixin, ListView):
     model = ResourceSource

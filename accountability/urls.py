@@ -1,6 +1,7 @@
 from django.urls import path
 
 from accountability.views import (
+    AccountabilityListView,
     FavoredCreateView,
     FavoredListView,
     ResourceSourceCreateView,
@@ -26,6 +27,7 @@ from accountability.views import (
 )
 
 urlpatterns = [
+    path("accountabilities/", AccountabilityListView.as_view(), name="accountabilities-list"),
     path("sources/", ResourceSourceListView.as_view(), name="sources-list"),
     path(
         "sources/create/",
