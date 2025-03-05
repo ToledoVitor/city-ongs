@@ -419,6 +419,7 @@ class AccountabilityXLSXExporter:
             [" CÓDIGO DO CONTRATO ", self.header_breaking_line_format],
             [" VALOR ", self.header_format],
             [" DATA DA TRANSFERÊNCIA ", self.header_breaking_line_format],
+            [" Nº DOCUMENTO ", self.header_breaking_line_format],
             ["CONTA BANCÁRIA DE ORIGEM", self.header_breaking_line_format],
             ["CONTA BANCÁRIA DE DESTINO", self.header_breaking_line_format],
         )
@@ -468,12 +469,14 @@ class AccountabilityXLSXExporter:
                 },
             )
 
-            application_worksheet.write(line, 4, "", self.locked_cell_format)
+            application_worksheet.write(line, 4, "", self.body_format)
+
+            application_worksheet.write(line, 5, "", self.locked_cell_format)
             application_worksheet.data_validation(
                 line,
-                4,
+                5,
                 line,
-                4,
+                5,
                 options={
                     "validate": "list",
                     "source": "=cb_tab",
@@ -482,12 +485,12 @@ class AccountabilityXLSXExporter:
                 },
             )
 
-            application_worksheet.write(line, 5, "", self.locked_cell_format)
+            application_worksheet.write(line, 6, "", self.locked_cell_format)
             application_worksheet.data_validation(
                 line,
-                5,
+                6,
                 line,
-                5,
+                6,
                 options={
                     "validate": "list",
                     "source": "=cb_tab",

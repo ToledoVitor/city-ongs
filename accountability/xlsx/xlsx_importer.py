@@ -194,17 +194,17 @@ class AccountabilityXLSXImporter:
                 transaction_date = line[3]
                 transactions.append(
                     Transaction(
-                        bank_account_id=self.mapped_cbs.get(line[4]),
-                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
-                        # transaction_number=...
                         name="Aplicação / Resgate",
                         memo="Aplicação / Resgate",
-                        amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
+                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
                         date=datetime(
                             transaction_date.year,
                             transaction_date.month,
                             transaction_date.day,
                         ),
+                        amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
+                        transaction_number=line[4],
+                        bank_account_id=self.mapped_cbs.get(line[5]),
                     )
                 )
 
@@ -212,17 +212,17 @@ class AccountabilityXLSXImporter:
                 transaction_date = line[3]
                 transactions.append(
                     Transaction(
-                        bank_account_id=self.mapped_cbs.get(line[6]),
                         transaction_type=Transaction.TransactionTypeChoices.INCOME,
-                        # transaction_number=...
                         name="Aplicação / Resgate",
                         memo="Aplicação / Resgate",
-                        amount=Decimal(abs(line[2])).quantize(Decimal("0.01")),
                         date=datetime(
                             transaction_date.year,
                             transaction_date.month,
                             transaction_date.day,
                         ),
+                        amount=Decimal(abs(line[2])).quantize(Decimal("0.01")),
+                        transaction_number=line[4],
+                        bank_account_id=self.mapped_cbs.get(line[6]),
                     )
                 )
 
