@@ -266,6 +266,27 @@
 </form>
 
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('#id_start_date, #id_end_date');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 8) value = value.slice(0, 8);
+
+        if (value.length > 4) {
+          value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+        } else if (value.length > 2) {
+          value = `${value.slice(0, 2)}/${value.slice(2)}`;
+        }
+
+        e.target.value = value;
+      });
+    });
+  });
+</script>
+
+<script>
   const reportModelSelect = document.querySelector('[name="report_model"]');
   const rpFields = document.getElementById('rpFields');
   const transactionsFields = document.getElementById('transactionsFields');
