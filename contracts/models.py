@@ -647,6 +647,25 @@ class ContractExecution(BaseModel):
         return f"Execution {self.month}/{self.year}"
 
     @property
+    def status_label(self) -> bool:
+        return ContractExecution.ReviewStatus(self.status).label
+
+    @property
+    def is_on_execution(self) -> bool:
+        return self.status in {
+            ContractExecution.ReviewStatus.WIP,
+            ContractExecution.ReviewStatus.CORRECTING,
+        }
+
+    @property
+    def is_sent(self) -> bool:
+        return self.status == ContractExecution.ReviewStatus.SENT
+
+    @property
+    def is_finished(self) -> bool:
+        return self.status == ContractExecution.ReviewStatus.FINISHED
+
+    @property
     def month_text(self) -> str:
         return MonthChoices(self.month).label
 

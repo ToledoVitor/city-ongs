@@ -926,3 +926,52 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
             "contracts:contracts-detail",
             kwargs={"pk": self.object.raise_item.contract.id},
         )
+
+
+def send_execution_to_analisys_view(request, pk):
+    execution = get_object_or_404(ContractExecution, id=pk)
+    if execution.is_finished:
+        return redirect("home")
+
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.EXECUTION_TO_ANALISYS,
+            target_object_id=execution.id,
+            target_content_object=execution,
+        )
+        execution.status = ContractExecution.ReviewStatus.SENT
+        execution.save()
+        return redirect("contracts:executions-detail", pk=execution.id)
+
+
+def send_accountability_review_analisys(request, pk):
+    execution = get_object_or_404(ContractExecution, id=pk)
+    if not execution.is_sent:
+        return redirect("contracts:executions-detail", pk=execution.id)
+
+    if not request.user or not request.user.can_change_statuses:
+        return redirect("contracts:executions-detail", pk=execution.id)
+
+    with transaction.atomic():
+        review_status = request.POST.get("review_status")
+
+        if review_status == ContractExecution.ReviewStatus.CORRECTING:
+            action = ActivityLog.ActivityLogChoices.EXECUTION_SENT_TO_CORRECT
+        elif review_status == ContractExecution.ReviewStatus.FINISHED:
+            action = ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED
+        else:
+            raise ValueError(f"{review_status} - Is an unnknow status review")
+
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=action,
+            target_object_id=execution.id,
+            target_content_object=execution,
+        )
+        execution.status = review_status
+        execution.save()
+        return redirect("contracts:executions-detail", pk=execution.id)
+

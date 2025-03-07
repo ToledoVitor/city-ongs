@@ -101,7 +101,7 @@
   <div class="grid gap-6 mb-6 md:grid-cols-2">
     <div class="relative text-lg font-semibold pt-2">
       Status:
-      <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-white bg-indigo-700">{{ object.status_label }}</span>
+      <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-purple-800 bg-purple-100">{{ object.status_label }}</span>
     </div>
 
     <div class="relative text-right">
@@ -116,8 +116,8 @@
           focus:outline-none
           font-medium
           rounded-lg
-          text-sm
-          px-5
+          text-xs
+          px-3
           py-2.5
           text-center
           inline-flex
@@ -129,7 +129,7 @@
         "
       >
         Enviar para Análise
-        <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
           <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
           <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
         </svg>
@@ -137,22 +137,22 @@
       <a href="{% url 'accountability:accountability-import' object.id %}">
         <button
           type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
         >
           Importar Dados
-          <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5h7.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H4V9h5a2 2 0 0 0 2-2Z" clip-rule="evenodd"/>
           </svg>          
         </button>
       </a>
-      {% elif object.is_sent %}
+      {% elif object.is_sent and user.can_change_statuses %}
       <a href="{% url 'accountability:review-expenses' object.id 0 %}">
         <button
           type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
         >
           Revisar Despesas
-          <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
             <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
             <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
@@ -162,45 +162,47 @@
       <a href="{% url 'accountability:review-revenues' object.id 0 %}">
         <button
           type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
         >
           Revisar Receitas
-          <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z" clip-rule="evenodd"/>
             <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z" clip-rule="evenodd"/>
           </svg>
         </button>
       </a>
-      <button
-        type="button"
-        data-modal-target="send-review-analisys"
-        data-modal-toggle="send-review-analisys"
-        class="
-          text-white
-          focus:ring-4
-          focus:outline-none
-          font-medium
-          rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-          inline-flex
-          items-center
-          me-2
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        Emitir Análise
-        <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
-          <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
-        </svg>
-      </button>
+      <a>
+        <button
+          type="button"
+          data-modal-target="send-review-analisys"
+          data-modal-toggle="send-review-analisys"
+          class="
+            text-white
+            focus:ring-4
+            focus:outline-none
+            font-medium
+            rounded-lg
+            text-xs
+            px-3
+            py-2.5
+            text-center
+            inline-flex
+            items-center
+            me-1
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Emitir Análise
+          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </a>
       {% endif %}
-  </div>
+    </div>
 </div>
 
 {% if object.is_on_execution %}
@@ -263,7 +265,6 @@
         <div class="p-4 md:p-5">
             <form class="space-y-4"  method="post" action="{% url 'accountability:send-to-analisys' object.id %}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                <input type="hidden" name="expense_id" value="{{ expense.id }}">
 
                 <span class="text-base">
                   Depois de enviado a prestação será análisada pelo usuário encarregado.
@@ -316,7 +317,7 @@
     </div>
   </div>
 </div>
-{% elif object.is_sent %}
+{% elif object.is_sent and user.can_change_statuses %}
 <div
   id="send-review-analisys"
   tabindex="-1"

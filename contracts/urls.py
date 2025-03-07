@@ -21,6 +21,8 @@ from contracts.views import (
     item_new_value_request_view,
     update_contract_goal_view,
     update_contract_item_view,
+    send_execution_to_analisys_view,
+    send_accountability_review_analisys,
 )
 
 urlpatterns = [
@@ -61,6 +63,16 @@ urlpatterns = [
         "executions/detail/<uuid:pk>/",
         ContractExecutionDetailView.as_view(),
         name="executions-detail",
+    ),
+    path(
+        "executions/detail/<uuid:pk>/send-to-analisys",
+        send_execution_to_analisys_view,
+        name="send-execution-to-analisys",
+    ),
+    path(
+        "executions/detail/<uuid:pk>/send-review-analisys",
+        send_accountability_review_analisys,
+        name="send-execution-review-analisys",
     ),
     path(
         "executions/detail/<uuid:pk>/activities/create",

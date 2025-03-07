@@ -56,7 +56,19 @@ class ActivityLog(models.Model):
         # contract executions
         CREATED_CONTRACT_EXECUTION = (
             "CREATED_CONTRACT_EXECUTION",
-            "Criou Relatório de Execução",
+            "Criou relatório de execução",
+        )
+        EXECUTION_TO_ANALISYS = (
+            "EXECUTION_TO_ANALISYS",
+            "Enviou relatório para análise",
+        )
+        EXECUTION_SENT_TO_CORRECT = (
+            "EXECUTION_SENT_TO_CORRECT",
+            "Enviou relatório para correção",
+        )
+        EXECUTION_MARKED_AS_FINISHED = (
+            "EXECUTION_MARKED_AS_FINISHED",
+            "Marcou relatório como finalizada",
         )
         # contract executions activities
         CREATED_EXECUTION_ACTIVITY = (
@@ -190,6 +202,18 @@ class Notification(BaseModel):
         CONTRACT_ITEM_VALUE_REVIEWED = (
             "CONTRACT_ITEM_VALUE_REVIEWED",
             "Pedido de remanejamento de gastos revisado",
+        )
+        EXECUTION_ANALISYS = (
+            "EXECUTION_ANALISYS",
+            "Execução enviada para análise",
+        )
+        EXECUTION_CORRECTING = (
+            "EXECUTION_CORRECTING",
+            "Execução enviada para correção",
+        )
+        EXECUTION_FINISHED = (
+            "EXECUTION_FINISHED",
+            "Execução marcada como finalizada",
         )
 
     recipient = models.ForeignKey(

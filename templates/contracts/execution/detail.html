@@ -48,7 +48,12 @@
   </ol>
 </nav>
 
-<div class="mb-4 mr-10 border-b border-gray-700">
+<div class="relative text-lg font-semibold my-4 py-2">
+  Status:
+  <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-purple-800 bg-purple-100">{{ execution.status_label }}</span>
+</div>
+
+<div class="my-4 mr-10 border-b border-gray-700">
   <ul
     class="flex flex-wrap -mb-px text-sm font-medium text-center"
     id="default-styled-tab"
@@ -86,6 +91,68 @@
       </button>
     </li>
 
+    <li class="me-2 ml-auto self-center" role="presentation">
+      <div class="relative text-right">
+        {% if execution.is_on_execution %}
+        <button
+          type="button"
+          data-modal-target="send-to-review-modal"
+          data-modal-toggle="send-to-review-modal"
+          class="
+            text-white
+            focus:ring-4
+            focus:outline-none
+            font-medium
+            rounded-lg
+            text-sm
+            px-5
+            py-2.5
+            text-center
+            inline-flex
+            items-center
+            me-2
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Enviar para Análise
+          <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        {% elif execution.is_sent %}
+        <button
+          type="button"
+          data-modal-target="send-review-analisys"
+          data-modal-toggle="send-review-analisys"
+          class="
+            text-white
+            focus:ring-4
+            focus:outline-none
+            font-medium
+            rounded-lg
+            text-sm
+            px-5
+            py-2.5
+            text-center
+            inline-flex
+            items-center
+            me-2
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Emitir Análise
+          <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v3c0 .5523.44772 1 1 1h8v-8m-9 4v-4m0 4h9m-9-4V6c0-.55228.44772-1 1-1h16c.5523 0 1 .44772 1 1v4M3 11h11m6.25 5c0 1.2426-1.0073 2.25-2.25 2.25M20.25 16c0-1.2426-1.0073-2.25-2.25-2.25M20.25 16H21m-3 2.25c-1.2426 0-2.25-1.0074-2.25-2.25M18 18.25V19m-2.25-3c0-1.2426 1.0074-2.25 2.25-2.25M15.75 16H15m3-2.25V13m-1.591 1.409-.5303-.5303m4.2426 4.2426-.5303-.5303m-3.182 0-.5303.5303m4.2426-4.2426-.5303.5303"/>
+          </svg>
+        </button>
+        {% endif %}
+      </div>
+    </li>
 
   </ul>
 </div>
@@ -97,51 +164,33 @@
         <table class="w-full text-sm text-left rtl:text-right text-gray-400">
             <thead class="text-xs text-white uppercase bg-gray-500">
                 <tr>
-                    <th scope="col" class="px-6 py-3" />
-                    <th scope="col" class="px-6 py-3">
-                      Atividade
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                      Etapa
-                    </th>
-                    <th scope="col" class="px-6 py-3" />
+                  <th scope="col" class="px-6 py-3">
+                    Etapa
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                    Atividade
+                  </th>
+                  <th scope="col" class="px-6 py-3">
+                    Descrição
+                  </th>
+                  <th scope="col" class="px-6 py-3" />
+                  <th scope="col" class="px-6 py-3" />
               </tr>
             </thead>
             <tbody>
                 {% if execution.activities.count %}
                   {% for activity in execution.activities.all %}
                     <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
-                      <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
-                        <a
-                          href="{% url 'contracts:activities-detail' activity.id %}"
-                          class="
-                            ml-4
-                            px-3
-                            py-2
-                            text-sm
-                            font-medium
-                            text-center
-                            inline-flex
-                            items-center
-                            text-white
-                            rounded-lg
-                            focus:ring-4
-                            focus:outline-none
-                            bg-blue-600
-                            hover:bg-blue-700
-                            focus:ring-blue-800
-                          "
-                        >
-                          Conferir
-                        </a>
+                      <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                        {{ activity.step.name }}
                       </td>
                       <td class="px-6 py-4 text-sm text-black text-left max-w-48">
                         {{ activity.name }}
                       </td>
                       <td class="px-6 py-4 text-sm text-black text-left max-w-48">
-                        {{ activity.step.name }}
+                        {{ activity.description }}
                       </td>
-                      <td class="px-6 py-4 text-sm text-black">
+                      <td class="px-6 py-4 text-sm w-800 text-black">
                         <div class="flex justify-between mb-1">
                           <span class="text-sm text-black">Progresso:</span>
                           <span class="text-sm font-bold text-blue-700">{{ activity.percentage }}%</span>
@@ -150,8 +199,33 @@
                           <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ activity.percentage }}%"></div>
                         </div>                    
                       </td>
+                      <td scope="row" class="max-w-48 px-6 py-4 text-base text-sm flex justify-end">
+                        {% if execution.is_on_execution %}
+                          <a
+                            href="{% url 'contracts:activities-detail' activity.id %}"
+                            class="
+                              ml-4
+                              px-3
+                              py-2
+                              text-sm
+                              font-medium
+                              text-center
+                              inline-flex
+                              items-center
+                              text-white
+                              rounded-lg
+                              focus:ring-4
+                              focus:outline-none
+                              bg-blue-600
+                              hover:bg-blue-700
+                              focus:ring-blue-800
+                            "
+                          >
+                            Editar
+                          </a>
+                        {% endif %}
+                      </td>
                     </tr>
-    
                   {% endfor %}
                 {% else %}
                   <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
@@ -167,11 +241,15 @@
                     <td class="px-6 py-4">
                       -
                     </td>
+                    <td class="px-6 py-4">
+                      -
+                    </td>
                   </tr>
                 {% endif %}     
             </tbody>
         </table>
       
+        {% if execution.is_on_execution %}
         <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
             <a
                 href="{% url 'contracts:execution-items-create' execution.id %}"
@@ -198,6 +276,7 @@
                 </svg>
             </a>
         </div>
+        {% endif %}
     </div>
   </div>
 
@@ -311,6 +390,255 @@
   </div>
 </div>
 
+{% if execution.is_on_execution %}
+<div
+  id="send-to-review-modal"
+  tabindex="-1"
+  data-modal-backdrop="static"
+  aria-hidden="true"
+  class="
+    hidden
+    overflow-y-auto
+    overflow-x-hidden
+    fixed
+    top-0
+    right-0
+    left-0
+    z-50
+    justify-center
+    items-center
+    w-full
+    md:inset-0
+    h-[calc(100%-1rem)]
+    max-h-full
+  "
+  >
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <!-- Modal content -->
+    <div class="relative rounded-lg shadow bg-gray-300">
+      <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 rounded-t border-b border-gray-600">
+            <h3 class="text-xl font-semibold text-black">
+                Enviar para análise?
+            </h3>
+            <button
+              type="button"
+              data-modal-hide="send-to-review-modal"
+              class="
+                end-2.5
+                text-black
+                hover:bg-gray-600
+                hover:text-black
+                bg-transparent
+                rounded-lg
+                text-sm
+                w-6
+                h-6
+                ms-auto
+                inline-flex
+                justify-center
+                items-center
+              "
+            >
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Fechar modal</span>
+            </button>
+        </div>
+        <!-- Modal body -->
+        <div class="p-4 md:p-5">
+            <form class="space-y-4"  method="post" action="{% url 'contracts:send-execution-to-analisys' execution.id %}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <span class="text-base">
+                  Depois de enviado o relatório será análisada pelo usuário encarregado.
+                  Você não conseguirá alterar ou cadastrar novas atividades e documentos.
+                </span>
+
+                <div class="grid gap-6 mb-10 my-6 md:grid-cols-2">
+                  <button
+                    type="button"
+                    data-modal-hide="send-to-review-modal"
+                    class="
+                      w-full
+                      text-white
+                      bg-gray-700
+                      hover:bg-gray-800
+                      focus:ring-4
+                      focus:outline-none
+                      focus:ring-gray-300
+                      font-medium rounded-lg
+                      text-sm
+                      px-5
+                      py-2.5
+                      text-center
+                    "
+                  >
+                      Cancelar
+                  </button>
+                  <button
+                      type="submit"
+                      class="
+                        w-full
+                        text-white
+                        bg-blue-700
+                        hover:bg-blue-800
+                        focus:ring-4
+                        focus:outline-none
+                        focus:ring-blue-300
+                        font-medium rounded-lg
+                        text-sm
+                        px-5
+                        py-2.5
+                        text-center
+                      "
+                  >
+                      Enviar
+                  </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+{% elif execution.is_sent and user.can_change_statuses %}
+<div
+  id="send-review-analisys"
+  tabindex="-1"
+  data-modal-backdrop="static"
+  aria-hidden="true"
+  class="
+    hidden
+    overflow-y-auto
+    overflow-x-hidden
+    fixed
+    top-0
+    right-0
+    left-0
+    z-50
+    justify-center
+    items-center
+    w-full
+    md:inset-0
+    h-[calc(100%-1rem)]
+    max-h-full
+  "
+  >
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <!-- Modal content -->
+    <div class="relative rounded-lg shadow bg-gray-300">
+      <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+            <h3 class="text-xl font-semibold text-black">
+                Emitir análise?
+            </h3>
+            <button
+              type="button"
+              data-modal-hide="send-review-analisys"
+              class="
+                end-2.5
+                text-black
+                hover:bg-gray-600
+                hover:text-black
+                bg-transparent
+                rounded-lg
+                text-sm
+                w-6
+                h-6
+                ms-auto
+                inline-flex
+                justify-center
+                items-center
+              "
+            >
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Fechar modal</span>
+            </button>
+        </div>
+        <!-- Modal body -->
+        <div class="p-4 md:p-5">
+            <form class="space-y-4"  method="post" action="{% url 'contracts:send-execution-review-analisys' object.id %}">
+                <select
+                  id="review_status"
+                  name="review_status"
+                  class="
+                    border
+                    text-sm
+                    rounded-lg
+                    block
+                    w-full p-2.5
+                    bg-gray-300
+                    border-gray-600
+                    text-black
+                    focus:ring-blue-500
+                    focus:border-blue-500
+                  "
+                  required
+                >
+                  <option selected value="">Status</option>
+                  <option value="CORRECTING">Corrigir</option>
+                  <option value="FINISHED">Finalizada / Aprovada</option>
+                </select>
+
+                <br>
+
+                <span class="py-10 my-10 text-base">
+                  Se a execução for aprovada ela não poderá mais ser alterada.
+                </span>
+
+                <div class="grid gap-6 my-6 md:grid-cols-2">
+                  <button
+                    type="button"
+                    data-modal-hide="send-review-analisys"
+                    class="
+                      w-full
+                      text-white
+                      bg-gray-700
+                      hover:bg-gray-800
+                      focus:ring-4
+                      focus:outline-none
+                      focus:ring-gray-300
+                      font-medium rounded-lg
+                      text-sm
+                      px-5
+                      py-2.5
+                      text-center
+                    "
+                  >
+                      Cancelar
+                  </button>
+                  <button
+                      type="submit"
+                      class="
+                        w-full
+                        text-white
+                        bg-blue-700
+                        hover:bg-blue-800
+                        focus:ring-4
+                        focus:outline-none
+                        focus:ring-blue-300
+                        font-medium rounded-lg
+                        text-sm
+                        px-5
+                        py-2.5
+                        text-center
+                      "
+                  >
+                      Emitir
+                  </button>
+                </div>
+
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="hidden" name="execution_id" value="{{ execution.id }}">
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <p class="text-3xl mt-6 font-bold">
   Histórico de Atualizações

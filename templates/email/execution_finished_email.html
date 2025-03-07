@@ -1,0 +1,18 @@
+{% extends "email/base_email.html" %}
+
+{% block content %}
+    <p class="header">Olá,</p>
+    <p class="content">O relatório de execução mensal do contrato <b>{{ contract_name }}</b>,
+        foi marcado como finalizado por {{ created_by }}. <br>
+        Confira os detalhes clicando no botão abaixo:
+    </p>
+    <div class="button-container">
+        <a
+            href="{{ link }}"
+            class="button"
+            style="color: #ffffff !important; text-align: center; display: inline-block;"
+        >
+            Ver Relatório
+        </a>
+    </div>
+{% endblock %}

@@ -12,6 +12,7 @@ from contracts.models import (
     ContractGoal,
     ContractItem,
     ContractItemNewValueRequest,
+    ContractExecution,
 )
 from sendgrid_client.client import SendGridClient
 from utils.formats import format_into_brazilian_currency
@@ -30,7 +31,11 @@ class ActivityLogEmailNotificationHandler:
             ActivityLog.ActivityLogChoices.CREATED_ACCOUNTABILITY: self.build_accountability_created_log,
             ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS: self.build_accountability_analisys_log,
             ActivityLog.ActivityLogChoices.SENT_TO_CORRECT: self.build_accountability_correct_log,
-            # ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED: self.build_accountability_finished_log,
+            ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED: self.build_accountability_finished_log,
+            # Execution
+            ActivityLog.ActivityLogChoices.EXECUTION_TO_ANALISYS: self.build_execution_analisys_log,
+            ActivityLog.ActivityLogChoices.EXECUTION_SENT_TO_CORRECT: self.build_execution_correct_log,
+            ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED: self.build_execution_finished_log,
             # Contract
             ActivityLog.ActivityLogChoices.CREATED_CONTRACT: self.build_contract_created_log,
             ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_STATUS: self.build_contract_status_log,
@@ -172,7 +177,92 @@ class ActivityLogEmailNotificationHandler:
             category=Notification.Category.ACCOUNTABILITY_FINISHED,
             recipient=recipient,
             object_id=accountability.id,
-            text=f"Prestação {accountability.month}/{accountability.year} para o contrato {contract.name} enviada para correção",
+            text=f"Prestação {accountability.month}/{accountability.year} para o contrato {contract.name} finalizada",
+        )
+        recipients = [recipient]
+
+        return subject, html_content, recipients
+
+
+    def build_execution_analisys_log(
+        self, activity_log: ActivityLog
+    ) -> Tuple[str, str, list[str]]:
+        execution: ContractExecution = activity_log.target_content_object
+        contract: Contract = execution.contract
+
+        subject = "Execução Enviada para Análise"
+        context = {
+            "period": f"{execution.month}/{execution.year}",
+            "contract_name": contract.name,
+            "created_by": activity_log.user_email,
+            "link": f"{self.website_url}/executions/detail/{execution.id}/",
+        }
+        html_content = render_to_string(
+            "email/accountability_analisys_email.html", context
+        )
+
+        recipient = execution.contract.supervision_autority
+        Notification.objects.create(
+            category=Notification.Category.EXECUTION_ANALISYS,
+            recipient=recipient,
+            object_id=execution.id,
+            text=f"Relatório {execution.month}/{execution.year} para o contrato {contract.name} enviada para análise",
+        )
+        recipients = [recipient]
+
+        return subject, html_content, recipients
+
+    def build_execution_correct_log(
+        self, activity_log: ActivityLog
+    ) -> Tuple[str, str, list[str]]:
+        execution: ContractExecution = activity_log.target_content_object
+        contract: Contract = execution.contract
+
+        subject = "Execução Enviada para Correção"
+        context = {
+            "period": f"{execution.month}/{execution.year}",
+            "contract_name": contract.name,
+            "created_by": activity_log.user_email,
+            "link": f"{self.website_url}/executions/detail/{execution.id}/",
+        }
+        html_content = render_to_string(
+            "email/execution_correcting_email.html", context
+        )
+
+        recipient = execution.contract.accountability_autority
+        Notification.objects.create(
+            category=Notification.Category.EXECUTION_CORRECTING,
+            recipient=recipient,
+            object_id=execution.id,
+            text=f"Relatório {execution.month}/{execution.year} para o contrato {contract.name} enviada para correção",
+        )
+        recipients = [recipient]
+
+        return subject, html_content, recipients
+
+    def build_execution_finished_log(
+        self, activity_log: ActivityLog
+    ) -> Tuple[str, str, list[str]]:
+        execution: ContractExecution = activity_log.target_content_object
+        contract: Contract = execution.contract
+
+        subject = "Prestação Finalizada"
+        context = {
+            "period": f"{execution.month}/{execution.year}",
+            "contract_name": contract.name,
+            "created_by": activity_log.user_email,
+            "link": f"{self.website_url}/execution/detail/{execution.id}/",
+        }
+        html_content = render_to_string(
+            "email/execution_finished_email.html", context
+        )
+
+        recipient = execution.contract.accountability_autority
+        Notification.objects.create(
+            category=Notification.Category.EXECUTION_FINISHED,
+            recipient=recipient,
+            object_id=execution.id,
+            text=f"Relatório {execution.month}/{execution.year} para o contrato {contract.name} finalizada",
         )
         recipients = [recipient]
 
