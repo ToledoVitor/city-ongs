@@ -34,7 +34,8 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por contrato..." %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+<div class="relative">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">    
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-white bg-gray-500">
             Contabilidade Mensal
@@ -44,62 +45,34 @@
         </caption>
         <thead class="text-xs text-white uppercase bg-gray-500">
             <tr>
-                <th scope="col" class="px-6 py-3" />
                 <th scope="col" class="px-6 py-3">
-                    Contrato
+                  Contrato
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Prestação
+                  Prestação
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Receitas
+                  Receitas
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Despesas
+                  Despesas
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Items com Pendências
+                  Status
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    Status
-                </th>
+                <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500 border-l border-gray-300"></th>
             </tr>
         </thead>
         <tbody>
             {% if accountabilities %}
               {% for accountability in accountabilities %}
                 <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                  <td scope="row" class="py-4 text-sm whitespace-nowrap text-black">
-                      <a
-                        href="{% url 'accountability:accountability-detail' accountability.id %}"
-                        class="
-                          ml-4
-                          px-3
-                          py-2
-                          text-sm
-                          font-medium
-                          text-center
-                          inline-flex
-                          items-center
-                          text-white
-                          rounded-lg
-                          focus:ring-4
-                          focus:outline-none
-                          bg-blue-600
-                          hover:bg-blue-700
-                          focus:ring-blue-800
-                        "
-                      >
-                        Conferir
-                      </a>
-                  </td>
-
-                  <th class="pl-2 pr-6 py-4 text-sm text-center text-black max-w-48">
+                  <th class="pl-10 pr-6 py-4 text-sm text-center text-black max-w-48">
                     {{ accountability.contract.name }}
-                  </td>
+                  </th>
 
                   <th class="pl-2 pr-6 py-4 text-sm whitespace-nowrap text-black max-w-48">
-                    Prestação {{ accountability.month }}/{{ accountability.year }}
+                    {{ accountability.month_label }} {{ accountability.year }}
                   </th>
 
                   <td class="px-6 py-4 text-sm text-left text-black max-w-48">
@@ -110,9 +83,6 @@
                   <td class="px-6 py-4 text-sm text-left text-black max-w-48">
                     Cadastradas: {{ accountability.count_expenses }} <br>
                     Valor: R${{ accountability.sum_expenses|intcomma }}
-                  </td>
-
-                  <td class="px-6 py-4 text-sm text-center text-black">
                   </td>
 
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
@@ -152,6 +122,31 @@
                     {% endif %}
                   </td>
 
+                  <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+                    <a
+                      href="{% url 'accountability:accountability-detail' accountability.id %}"
+                      class="
+                        ml-4
+                        px-3
+                        py-2
+                        text-sm
+                        font-medium
+                        text-center
+                        inline-flex
+                        items-center
+                        text-white
+                        rounded-lg
+                        focus:ring-4
+                        focus:outline-none
+                        bg-blue-600
+                        hover:bg-blue-700
+                        focus:ring-blue-800
+                      "
+                    >
+                      Conferir
+                    </a>
+                  </td>
+
                 </tr>
               {% endfor %}
             {% else %}
@@ -171,13 +166,17 @@
                 <td class="px-6 py-4">
                   -
                 </td>
+                <td class="px-6 py-4 sticky right-0 z-10 bg-gray-100 hover:bg-gray-400 border-l border-gray-300" />
+                  -
+                </td>
               </tr>
             {% endif %}     
         </tbody>
     </table>
+  </div>
 
-    {% include 'commons/paginator.html' with page_obje=page_obj %}
-      
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
+
 </div>
 
 {% endblock %}

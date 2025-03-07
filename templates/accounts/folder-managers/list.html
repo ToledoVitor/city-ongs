@@ -34,7 +34,8 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome ou email..." %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+<div class="relative">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <thead class="text-xs text-white uppercase bg-gray-500">
             <tr>
@@ -53,7 +54,7 @@
                 <th scope="col" class="px-6 py-3">
                     Areas de Trabalho
                 </th>
-                <th scope="col" class="px-6 py-3" />
+                <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500 border-l border-gray-300"></th>
             </tr>
         </thead>
         <tbody>
@@ -81,7 +82,7 @@
                         -
                       {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-base flex justify-end">
+                    <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
                       <a
                         href="{% url 'accounts:folder-managers-detail' manager.id %}"
                         class="
@@ -123,45 +124,45 @@
                 <td class="px-6 py-4">
                     -
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 sticky right-0 z-10 bg-gray-100 hover:bg-gray-400 border-l border-gray-300" />
                     -
                 </td>
               </tr>
             {% endif %}     
         </tbody>
     </table>
+  </div>
   
-    {% if user.has_admin_access %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
-        <a
-        href="{% url 'accounts:folder-managers-create' %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Adicionar novo
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
-  
-    {% include 'commons/paginator.html' with page_obje=page_obj %}
+  {% if user.has_admin_access %}
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+      <a
+      href="{% url 'accounts:folder-managers-create' %}"
+        class="
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-center
+          inline-flex
+          items-center
+          text-white
+          rounded-lg
+          focus:ring-4
+          focus:outline-none
+          bg-blue-600
+          hover:bg-blue-700
+          focus:ring-blue-800
+        "
+      >
+        Adicionar novo
+        <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
 
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
 </div>
   
 {% endblock %}

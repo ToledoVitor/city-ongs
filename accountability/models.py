@@ -47,6 +47,10 @@ class Accountability(BaseModel):
         return f"Prestação mês {self.month}"
 
     @property
+    def month_label(self):
+        return MonthChoices(self.month).label.capitalize()
+
+    @property
     def is_on_execution(self) -> bool:
         return self.status in {
             Accountability.ReviewStatus.WIP,

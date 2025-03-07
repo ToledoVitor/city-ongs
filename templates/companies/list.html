@@ -34,7 +34,8 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome da empresa, cnpj..." %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+<div class="relative">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <thead class="text-xs text-white uppercase bg-gray-500">
             <tr>
@@ -97,38 +98,38 @@
             {% endif %}     
         </tbody>
     </table>
-  
-    {% if user.has_admin_access %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
-        <a
-          href="{% url 'contracts:companies-create' %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Adicionar nova
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
-  
-    {% include 'commons/paginator.html' with page_obje=page_obj %}
+  </div>
 
+  {% if user.has_admin_access %}
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+      <a
+        href="{% url 'contracts:companies-create' %}"
+        class="
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-center
+          inline-flex
+          items-center
+          text-white
+          rounded-lg
+          focus:ring-4
+          focus:outline-none
+          bg-blue-600
+          hover:bg-blue-700
+          focus:ring-blue-800
+        "
+      >
+        Adicionar nova
+        <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
+  
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
 </div>
   
 {% endblock %}

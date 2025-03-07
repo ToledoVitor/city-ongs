@@ -216,7 +216,7 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
 
 @login_required
 def user_unread_notifications(request):
-    unread_notifications = request.user.notifications.filter(read_at__isnull=True)
+    unread_notifications = request.user.notifications.filter(read_at__isnull=True).order_by("-created_at")
 
     notifications = [
         {

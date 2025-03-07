@@ -192,6 +192,7 @@
                   </td>
                 </tr>
 
+                {% if user.can_change_statuses and contract.is_on_planning %}
                 <!-- goals approve modal -->
                 <div
                     id="goals-modal-{{ goal.id }}"
@@ -395,6 +396,8 @@
                       </div>
                   </div>
                 </div>
+                {% endif %}
+
               {% endfor %}
             {% else %}
               <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
