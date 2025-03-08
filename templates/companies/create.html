@@ -83,6 +83,11 @@
     </p>
   </div>
 
+  <div class="mb-3">
+    <label for="id_phone_number" class="block mb-2 text-base font-medium text-black">Telefone</label>
+    {{ form.phone_number }}
+  </div>
+
   <hr class="h-px my-4 border-0 bg-gray-500">
 
   <label class="block mb-2 text-2xl font-bold text-black">Endereço</label>
@@ -160,5 +165,14 @@
   </button>
 
 </form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('[data-mask]').mask('(00) 00000-0000');
+  });
+</script>
 
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from simple_history.models import HistoricalRecords
+from phonenumber_field.modelfields import PhoneNumberField
 
 from utils.fields import LowerCaseEmailField
 from utils.models import BaseModel
@@ -125,6 +126,13 @@ class User(AbstractUser):
         verbose_name="Cpf",
         max_length=16,
     )
+    phone_number = PhoneNumberField(
+        region="BR",
+        help_text="Telefone pessoal do usuário",
+        null=True,
+        blank=True,
+    )
+
     password_expires_at = models.DateTimeField(
         null=True,
         default=None,
@@ -161,6 +169,12 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+
+    @property
+    def masked_phone(self) -> str:
+        if not self.phone_number:
+            return ""
+        return self.phone_number.as_national
 
     @property
     def has_admin_access(self) -> bool:

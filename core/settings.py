@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     "health_check",
     "health_check.db",
     "simple_history",
+    "phonenumber_field",
 ]
 
 MIDDLEWARE = [

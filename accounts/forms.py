@@ -1,7 +1,7 @@
 from django import forms
 
 from accounts.models import Area, User
-from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget
+from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget, CustomPhoneNumberField
 
 
 def email_exists(email: str) -> bool:
@@ -14,12 +14,15 @@ class FolderManagerCreateForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=True,
     )
+    phone_number = CustomPhoneNumberField()
+
 
     class Meta:
         model = User
         fields = [
             "email",
             "cpf",
+            "phone_number",
             "first_name",
             "last_name",
             "position",
@@ -61,12 +64,14 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=True,
     )
+    phone_number = CustomPhoneNumberField()
 
     class Meta:
         model = User
         fields = [
             "email",
             "cpf",
+            "phone_number",
             "first_name",
             "last_name",
             "position",

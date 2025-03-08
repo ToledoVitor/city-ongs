@@ -23,6 +23,7 @@ from utils.widgets import (
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
+    CustomPhoneNumberField,
 )
 
 
@@ -215,11 +216,14 @@ ContractStepFormSet = forms.inlineformset_factory(
 
 
 class CompanyCreateForm(forms.ModelForm):
+    phone_number = CustomPhoneNumberField()
+
     class Meta:
         model = Company
         fields = [
             "name",
             "cnpj",
+            "phone_number",
             # Address
             "street",
             "number",

@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
 from simple_history.models import HistoricalRecords
+from phonenumber_field.modelfields import PhoneNumberField
 
 from accounts.models import Area, Organization, User
 from activity.models import ActivityLog
@@ -19,6 +20,12 @@ class Company(BaseModel):
     # Info
     name = models.CharField(verbose_name="Nome", max_length=128)
     cnpj = CNPJField(masked=True)
+    phone_number = PhoneNumberField(
+        region="BR",
+        help_text="Telefone da empresa",
+        null=True,
+        blank=True,
+    )
 
     # Address
     street = models.CharField(
@@ -71,6 +78,32 @@ class Company(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.name} - {self.cnpj}"
+
+    @property
+    def masked_cnpj(self) -> str:
+        cnpj = self.cnpj.number
+        return f"{cnpj[0:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
+
+    @property
+    def masked_phone(self) -> str:
+        if not self.phone_number:
+            return ""
+        return self.phone_number.as_national
+
+    @property
+    def full_address(self) -> str:
+        address_parts = [
+            self.street,
+            self.number,
+            self.complement,
+            self.district,
+            self.city,
+            self.uf,
+            self.postal_code,
+        ]
+        return ", ".join([
+            str(part).title() for part in address_parts if part is not None
+        ])
 
     class Meta:
         verbose_name = "Empresa"

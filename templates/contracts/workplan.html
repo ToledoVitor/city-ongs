@@ -1,5 +1,7 @@
 {% load static %}
 
+{% load humanize %}
+
 <!DOCTYPE html>
 <html>
 
@@ -16,10 +18,175 @@
   {% block customcss %} {% endblock customcss %}
 </head>
 
-<body> 
-  <div class="mx-6 my-4 text-center border border-gray-300 print:border-0">
-    <h1 class="text-2xl font-thin">Plano de Trabalho </h1>
-    <h2 class="text-xl font-medium">{{ contract.name }}</h1>
+<body class="bg-gray-100 p-4">
+  <div class="mx-6 px-4 border border-gray-300 print:border-0">
+    <div class="my-4 text-center">
+      <p class="text-xl font-thin">Plano de Trabalho </p>
+      <p class="text-2xl font-normal">{{ contract.name }}</[]>
+
+      <p class="pt-1 text-sm font-normal">
+        Vigência do Contrato: {{ contract.start_of_vigency|date:'d/m/Y' }} a {{ contract.end_of_vigency|date:'d/m/Y' }}
+      </p>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Dados Cadastrais</h2>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="col-span-2">
+          <p class="font-semibold">Contratado</p>
+          <p>{{ contract.hired_company.name }}</p>
+        </div>
+        <div>
+          <p class="font-semibold">CNPJ</p>
+          <p>{{ contract.hired_company.masked_cnpj }}</p>
+        </div>
+      </div>
+      <p class="font-semibold mt-2">Endereço</p>
+      <p>{{ contract.hired_company.full_address }}</p>
+    </div>
+
+    <!-- Equipe do Projeto -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Equipe do Projeto</h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6">Nome</th>
+            <th class="py-3 px-6">Perfil</th>
+            <th class="py-3 px-6">Telefone</th>
+            <th class="py-3 px-6">Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for interested in contract.interested_parts.all %}
+            <tr class="bg-white border-b">
+              <td class="py-4 px-6">{{ interested.user.get_full_name }}</td>
+              <td class="py-4 px-6">{{ interested.interest_label }}</td>
+              <td class="py-4 px-6">{{ interested.user.masked_phone }}</td>
+              <td class="py-4 px-6">{{ interested.user.email }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Descrição do Plano de Trabalho -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Descrição do Plano de Trabalho</h2>
+      <div class="grid grid-cols-3 gap-4">
+          <div class="col-span-2">
+            <p class="font-semibold">Nome</p>
+              <p>{{ contract.name }}</p>
+              <p class="font-semibold mt-2">Objeto</p>
+              <p>{{ contract.objective }}</p>
+          </div>
+          <div>
+              <p class="font-semibold">Vigência do Contrato</p>
+              <p>{{ contract.start_of_vigency|date:'d/m/Y' }} a {{ contract.end_of_vigency|date:'d/m/Y' }}</p>
+          </div>
+      </div>
+    </div>
+
+    <!-- Cronograma Físico -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Cronograma Físico</h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6">Meta</th>
+            <th class="py-3 px-6">Objetivo</th>
+            <th class="py-3 px-6">Metodologia</th>
+            <th class="py-3 px-6">Início</th>
+            <th class="py-3 px-6">Término</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for goal in contract.goals.all %}
+            <tr class="bg-gray-100 border-b">
+              <td class="py-4 px-6">Meta: {{ goal.name }}</td>
+              <td class="py-4 px-6">{{ goal.objective }}</td>
+              <td class="py-4 px-6">{{ goal.methodology }}</td>
+              <td class="py-4 px-6">{{ contract.start_of_vigency|date:'d/m/Y' }}</td>
+              <td class="py-4 px-6">{{ contract.end_of_vigency|date:'d/m/Y' }}</td>
+            </tr>
+
+            {% for step in goal.steps.all %}
+              <tr class="bg-white border-b">
+                <td colspan="5" class="px-6 py-4 ml-4 text-sm text-black text-left">
+                  <div class="grid grid-cols-4 gap-4 pb-3">
+                    <p><strong>Etapa:</strong> {{ step.name }}</p>
+                    <p><strong>Objetivo:</strong> {{ step.objective }}</p>
+                    <p><strong>Metodologia:</strong> {{ step.methodology }}</p>
+                    <p><strong>Recursos:</strong> {{ step.resources }}</p>
+                  </div>
+                </td>
+              </tr>
+            {% endfor%}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Fontes de Recurso -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Fontes de Recurso</h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6">Fonte de Recurso</th>
+            <th class="py-3 px-6">Tipo</th>
+            <th class="py-3 px-6">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Exemplo de linha clara -->
+          <tr class="bg-white border-b">
+            <td class="py-4 px-6">
+              Associação Comunidade Varzina - Eco & Vida (Social)
+            </td>
+            <td class="py-4 px-6">Contrapartida Entidade Parceira</td>
+            <td class="py-4 px-6">R$ 60.000,00</td>
+          </tr>
+          <!-- Exemplo de linha cinza clara alternada -->
+          <tr class="bg-gray-100 border-b">
+            <td class="py-4 px-6">
+              Prefeitura Municipal de Várzea Paulista
+            </td>
+            <td class="py-4 px-6">Municipal</td>
+            <td class="py-4 px-6">R$ 1.478.185,32</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Plano de Aplicação -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">
+        Plano de Aplicação
+      </h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6">Bem/Serviço</th>
+            <th class="py-3 px-6">Natureza de Despesa</th>
+            <th class="py-3 px-6">Qtd</th>
+            <th class="py-3 px-6">Custo Unitário</th>
+            <th class="py-3 px-6">Custo Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in contract.items.all %}
+          <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
+            <td class="py-4 px-6">{{ item.name }}</td>
+            <td class="py-4 px-6">{{ item.nature_label }}</td>
+            <td class="py-4 px-6 whitespace-nowrap">{{ item.quantity}} {{item.unit_type|default_if_none:""}}</td>
+            <td class="py-4 px-6">R${{ item.month_expense|intcomma }}</td>
+            <td class="py-4 px-6">R${{ item.anual_expense|intcomma }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
     <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
       <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">

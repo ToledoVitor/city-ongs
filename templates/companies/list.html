@@ -46,13 +46,10 @@
                     CNPJ
                 </th>
                 <th scope="col" class="px-6 py-3">
+                    Telefone
+                </th>
+                <th scope="col" class="px-6 py-3">
                     Endereço
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Cep
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Cidade
                 </th>
             </tr>
         </thead>
@@ -60,20 +57,17 @@
             {% if companies_list %}
               {% for company in companies_list %}
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                    <td class="px-6 py-4 text-base text-black">
+                    <td class="px-6 py-4 text-base text-black max-w-60">
                       {{ company.name }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
+                    <td class="px-6 py-4 text-sm text-black">
                       {{ company.cnpj }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
-                      {{ company.street }} - {{ company.number }}
+                    <td class="px-6 py-4 text-sm text-black">
+                      {{ company.masked_phone }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
-                      {{ company.postal_code }}
-                    </td>
-                    <td class="px-6 py-4 text-base text-black">
-                      {{ company.city }}
+                    <td class="px-6 py-4 text-sm text-black max-w-60">
+                      {{ company.full_address }}
                     </td>
                 </tr>
               {% endfor %}
@@ -90,9 +84,6 @@
                 </td>
                 <td class="px-6 py-4">
                   -
-                </td>
-                <td class="px-6 py-4">
-                    -
                 </td>
               </tr>
             {% endif %}     

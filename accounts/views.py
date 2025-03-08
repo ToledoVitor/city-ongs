@@ -91,6 +91,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
+                    phone_number=str(form.cleaned_data["phone_number"].national_number),
                     cpf=form.cleaned_data.get("cpf"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
@@ -187,6 +188,7 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
+                    phone_number=str(form.cleaned_data["phone_number"].national_number),
                     cpf=form.cleaned_data.get("cpf"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),

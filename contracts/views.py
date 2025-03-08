@@ -527,17 +527,18 @@ class CompanyCreateView(LoginRequiredMixin, TemplateView):
         form = CompanyCreateForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                source = form.save(commit=False)
-                source.organization = request.user.organization
-                source.save()
+                company = form.save(commit=False)
+                company.organization = request.user.organization
+                company.phone_number = str(form.cleaned_data["phone_number"].national_number)
+                company.save()
 
                 logger.info(f"{request.user.id} - Created new company")
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
                     action=ActivityLog.ActivityLogChoices.CREATED_COMPANY,
-                    target_object_id=source.id,
-                    target_content_object=source,
+                    target_object_id=company.id,
+                    target_content_object=company,
                 )
                 return redirect("contracts:companies-list")
 
@@ -774,11 +775,16 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super().get_queryset()
-            # .select_related(
-            # )
-            # .prefetch_related(
-            # )
+            super().get_queryset().select_related(
+                "hired_company",
+                "hired_company",
+            )
+            .prefetch_related(
+                "interested_parts",
+                "interested_parts__user",
+                "goals",
+                "items",
+            )
         )
 
     def get_object(self, queryset=None):
