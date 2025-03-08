@@ -118,7 +118,7 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             self.default_cell_height,
-            f"**TIPO DE CONCESSÃO (1):** {self.accountability.contract.concession_type}",
+            f"**TIPO DE CONCESSÃO (1):** {self.accountability.contract.get_concession_type_display()}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,

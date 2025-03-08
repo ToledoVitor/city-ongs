@@ -8,6 +8,7 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
+from contracts.models import ContractAddendum
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import (
     document_mask,
@@ -25,9 +26,6 @@ class PassOn14PDFExporter:
         pdf = BasePdf(
             orientation="portrait", unit="mm", format="A4"
         )  # Querie para Aditivos
-        self.addendum_queryset = ContractAddendum.objects.filter(
-            contract=self.accountability.contract,
-        )
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.set_font("Helvetica", "", 8)

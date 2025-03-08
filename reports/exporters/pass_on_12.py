@@ -8,6 +8,7 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
+from contracts.models import ContractAddendum
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import (
     document_mask,

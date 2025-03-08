@@ -86,7 +86,7 @@ class Contract(BaseModel):
     class ConcessionChoices(models.TextChoices):
         MANAGEMENT = "MANAGEMENT", "Contrato de Gestão"
         PARTNERSHIP = "PARTNERSHIP", "Termo de Parceria"
-        COLLABORATION = "COLLABORATION", "Termo de Colaboraçã"
+        COLLABORATION = "COLLABORATION", "Termo de Colaboração"
         DEVELOPMENTO = "DEVELOPMENTO", "Contrato de Fomento"
         AGREEMENT = "AGREEMENT", "Convênio"
         GRANT = "GRANT", "Concessão"
