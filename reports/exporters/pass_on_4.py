@@ -8,6 +8,7 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
+from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
 
@@ -63,7 +64,7 @@ class PassOn4PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=11, bold=True)
+        self.__set_helvetica_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -72,7 +73,6 @@ class PassOn4PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=10, bold=False)
         self.pdf.cell(
             0,
             10,
@@ -85,7 +85,7 @@ class PassOn4PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
-        self.__set_helvetica_font(font_size=8)
+        self.__set_helvetica_font(font_size=8, bold=False)
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
@@ -108,8 +108,10 @@ class PassOn4PDFExporter:
         self.pdf.ln(12)
 
     def _draw_manager_table(self):
-        pass_on_in_time_queryset = self.revenue_queryset.filter(
+        manager_queryset = self.revenue_queryset.filter(
             Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.MANAGEMENT # Não é Revenue
         )
 
         self.pdf.ln()
@@ -129,7 +131,7 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in pass_on_in_time_queryset:
+        for revenue in manager_queryset:
             table_data.append(
                 [
                     f"{contract.code}",
@@ -190,9 +192,14 @@ class PassOn4PDFExporter:
         self.pdf.ln(10)
 
     def _draw_partner_table(self):
+        partner_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.PARTNERSHIP
+        )
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        table_header = [
+        header_data = [
             "**Termo de Parceria Nº**",
             "**Beneficiário**",
             "**CNPJ**",
@@ -208,16 +215,16 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in self.revenue_queryset:
+        for revenue in partner_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor",  # TODO Rep
+                    f"{contract.code}",
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
-                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo",  # TODO criar classe adendo
+                    f"{contract.end_of_vigency}",
+                    f"Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -225,53 +232,58 @@ class PassOn4PDFExporter:
             )
             total_revenue_value += revenue.value
 
-        table_footer = [
+        footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         font = FontFace("Helvetica", "", size_pt=7)
 
+        data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
             markdown=True,
-            col_widths=col_widths,
+            col_widths=data_col_widths,
+            repeat_headings=0,
         ) as table:
-            header = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_header:
+            header = table.row()
+            for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__background_gray_color(gray=False)
-            self.__set_helvetica_font(7, bold=False)
+            self.__set_helvetica_font(self.default_cell_height)
             for item in table_data:
+                self.__background_gray_color(gray=False)
                 data = table.row()
                 for text in item:
                     data.cell(text=text, align="C")
 
-        col_widths = [158, 42]
-        font = FontFace("Helvetica", "B", size_pt=7)
+        footer_col_widths = [178, 22]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
-            align="R",
+            align="L",
+            col_widths=footer_col_widths,
             markdown=True,
-            col_widths=col_widths,
         ) as table:
-            footer = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_footer:
+            footer = table.row()
+            for text in footer_data:
                 footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_collaborator_table(self):
+        collaborator_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.COLLABORATION
+        )
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        table_header = [
+        header_data = [
             "**Termo de Colaboração Nº**",
             "**Beneficiário**",
             "**CNPJ**",
@@ -287,16 +299,16 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in self.revenue_queryset:
+        for revenue in collaborator_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor",  # TODO Rep
+                    f"{contract.code}",
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
-                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo",  # TODO criar classe adendo
+                    f"{contract.end_of_vigency}",
+                    f"Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -304,53 +316,58 @@ class PassOn4PDFExporter:
             )
             total_revenue_value += revenue.value
 
-        table_footer = [
+        footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         font = FontFace("Helvetica", "", size_pt=7)
 
+        data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
             markdown=True,
-            col_widths=col_widths,
+            col_widths=data_col_widths,
+            repeat_headings=0,
         ) as table:
-            header = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_header:
+            header = table.row()
+            for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.pdf.set_font("Helvetica", "", 7)
-            self.__background_gray_color(gray=False)
+            self.__set_helvetica_font(self.default_cell_height)
             for item in table_data:
+                self.__background_gray_color(gray=False)
                 data = table.row()
                 for text in item:
                     data.cell(text=text, align="C")
 
-        col_widths = [178, 22]
-        font = FontFace("Helvetica", "", size_pt=7)
+        footer_col_widths = [178, 22]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="L",
+            col_widths=footer_col_widths,
             markdown=True,
-            col_widths=col_widths,
         ) as table:
-            footer = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_footer:
+            footer = table.row()
+            for text in footer_data:
                 footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_promotion_table(self):
+        promotion_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.DEVELOPMENTO
+        )
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln(3)
-        table_header = [
+        header_data = [
             "**Contrato de Fomento Nº**",
             "**Beneficiário**",
             "**CNPJ**",
@@ -366,16 +383,16 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in self.revenue_queryset:
+        for revenue in promotion_queryset:
             table_data.append(
                 [
-                    f"Confirmar valor",  # TODO Rep
+                    f"{contract.code}",
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
-                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo",  # TODO criar classe adendo
+                    f"{contract.end_of_vigency}",
+                    f"Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -383,53 +400,58 @@ class PassOn4PDFExporter:
             )
             total_revenue_value += revenue.value
 
-        table_footer = [
+        footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         font = FontFace("Helvetica", "", size_pt=7)
 
+        data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
             markdown=True,
-            col_widths=col_widths,
+            col_widths=data_col_widths,
+            repeat_headings=0,
         ) as table:
-            header = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_header:
+            header = table.row()
+            for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.pdf.set_font("Helvetica", "", 7)
-            self.__background_gray_color(gray=False)
+            self.__set_helvetica_font(self.default_cell_height)
             for item in table_data:
+                self.__background_gray_color(gray=False)
                 data = table.row()
                 for text in item:
                     data.cell(text=text, align="C")
 
-        col_widths = [178, 22]
-        font = FontFace("Helvetica", "", size_pt=7)
+        footer_col_widths = [178, 22]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="L",
+            col_widths=footer_col_widths,
             markdown=True,
-            col_widths=col_widths,
         ) as table:
-            footer = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_footer:
+            footer = table.row()
+            for text in footer_data:
                 footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_agreement_table(self):
+        agreement_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.AGREEMENT
+        )
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        table_header = [
+        header_data = [
             "**Convênio Nº**",
             "**Beneficiário**",
             "**CNPJ**",
@@ -445,16 +467,16 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in self.revenue_queryset:
+        for revenue in agreement_queryset:
             table_data.append(
                 [
-                    f"{contract.agreement_num}",
+                    f"{contract.code}",
                     f"{contract.organization.name}",
                     f"{hired_company.cnpj}",
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
-                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo",  # TODO criar classe adendo
+                    f"{contract.end_of_vigency}",
+                    f"Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -462,50 +484,55 @@ class PassOn4PDFExporter:
             )
             total_revenue_value += revenue.value
 
-        table_footer = [
+        footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         font = FontFace("Helvetica", "", size_pt=7)
 
+        data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
             markdown=True,
-            col_widths=col_widths,
+            col_widths=data_col_widths,
+            repeat_headings=0,
         ) as table:
-            header = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_header:
+            header = table.row()
+            for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.pdf.set_font("Helvetica", "", 7)
-            self.__background_gray_color(gray=False)
+            self.__set_helvetica_font(self.default_cell_height)
             for item in table_data:
+                self.__background_gray_color(gray=False)
                 data = table.row()
                 for text in item:
                     data.cell(text=text, align="C")
 
-        col_widths = [178, 22]
-        font = FontFace("Helvetica", "", size_pt=7)
+        footer_col_widths = [178, 22]
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="L",
+            col_widths=footer_col_widths,
             markdown=True,
-            col_widths=col_widths,
         ) as table:
-            footer = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_footer:
+            footer = table.row()
+            for text in footer_data:
                 footer.cell(text=text, align="R")
 
         self.pdf.ln(10)
 
     def _draw_concession_table(self):
+        concession_queryset = self.revenue_queryset.filter(
+            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+        ).filter(
+            accountability__contract__concession_type=Contract.ConcessionChoices.GRANT
+        )
         self.__set_helvetica_font(font_size=8, bold=True)
         self.pdf.cell(
             text="II - AUXÍLIOS, SUBVENÇÕES E/OU CONTRIBUIÇÕES PAGOS:",
@@ -515,7 +542,7 @@ class PassOn4PDFExporter:
         self.pdf.ln(2)
         self.__set_helvetica_font(font_size=7, bold=True)
         self.pdf.ln()
-        table_header = [
+        header_data = [
             "**Tipo da Concessão**",
             "**Beneficiário**",
             "**CNPJ**",
@@ -531,7 +558,7 @@ class PassOn4PDFExporter:
         contract = self.accountability.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
-        for revenue in self.revenue_queryset:
+        for revenue in concession_queryset:
             table_data.append(
                 [
                     f"{contract.concession_type}",
@@ -548,7 +575,7 @@ class PassOn4PDFExporter:
             )
             total_revenue_value += revenue.value
 
-        table_footer = [
+        footer_data = [
             "**Total:**",
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
@@ -565,7 +592,7 @@ class PassOn4PDFExporter:
         ) as table:
             header = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_header:
+            for text in header_data:
                 header.cell(text=text, align="C")
 
             self.pdf.set_font("Helvetica", "", 7)
@@ -586,5 +613,5 @@ class PassOn4PDFExporter:
         ) as table:
             footer = table.row()
             self.__background_gray_color(gray=True)
-            for text in table_footer:
+            for text in footer_data:
                 footer.cell(text=text, align="R")

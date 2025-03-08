@@ -76,6 +76,11 @@ class PassOn12PDFExporter:
             "value__sum"
         ] or Decimal("0.00")
 
+        # Querie para Aditivos
+        self.addendum_queryset = ContractAddendum.objects.filter(
+            contract=self.accountability.contract,
+        )
+
     def handle(self):
         self.__database_queries()
         self._draw_header()
@@ -222,18 +227,26 @@ class PassOn12PDFExporter:
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
-                f"Criar Termo de Colaboração",  # TODO criar campo
-                f"data",  # TODO após criar campo
-                f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
-                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
-            ],
-            [
-                "Criar classe de aditamento",  # TODO criar Classe
-                "dd/mm/aaaa",
-                "dd/mm/aaaa",
-                "R$ xx.xxx,xx",
+                self.accountability.contract.name_with_code,
+                format_into_brazilian_date(
+                    self.accountability.contract.start_of_vigency
+                ),
+                format_into_brazilian_date(self.accountability.contract.end_of_vigency),
+                format_into_brazilian_currency(
+                    self.accountability.contract.total_value
+                ),
             ],
         ]
+
+        for addendum in self.addendum_queryset:
+            table_data.append(
+                [
+                    addendum.contract.name_with_code,
+                    format_into_brazilian_date(addendum.start_of_vigency),
+                    format_into_brazilian_date(addendum.end_of_vigency),
+                    format_into_brazilian_currency(addendum.contract.validate_unique),
+                ]
+            )
 
         col_widths = [75, 19, 65, 31]
         font = FontFace("Helvetica", "", size_pt=8)
