@@ -23,6 +23,9 @@ from contracts.views import (
     send_execution_to_analisys_view,
     update_contract_goal_view,
     update_contract_item_view,
+    create_contract_interested_view,
+    update_contract_interested_view,
+    interested_delete_view,
 )
 
 urlpatterns = [
@@ -94,6 +97,17 @@ urlpatterns = [
         update_contract_item_view,
         name="contracts-item-update",
     ),
+    path(
+        "detail/<uuid:pk>/interesteds/create/",
+        create_contract_interested_view,
+        name="contracts-interesteds-create",
+    ),
+    path(
+        "detail/<uuid:pk>/interesteds/update/<uuid:item_pk>",
+        update_contract_interested_view,
+        name="contracts-interesteds-update",
+    ),
+    path("detail/<uuid:pk>/interesteds/delete/", interested_delete_view, name="interested-delete"),
     path(
         "detail/<uuid:pk>/goals/create/",
         create_contract_goal_view,

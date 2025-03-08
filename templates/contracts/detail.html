@@ -66,6 +66,20 @@
     <li class="me-2" role="presentation">
       <button
         class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
+        id="interesteds-tab"
+        data-tabs-target="#interesteds"
+        type="button"
+        role="tab"
+        aria-controls="interesteds"
+        aria-selected="false"
+      >
+        Interessados
+      </button>
+    </li>
+
+    <li class="me-2" role="presentation">
+      <button
+        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
         id="accounts-tab"
         data-tabs-target="#accounts"
         type="button"
@@ -153,6 +167,11 @@
   <!-- Details Tab -->
   <div class="hidden p-4 rounded-lg bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
     {% include 'contracts/tabs/details-tab.html' with contract=contract %}
+  </div>
+
+  <!-- Interesteds Tab -->
+  <div class="hidden rounded-lg bg-gray-200" id="interesteds" role="tabpanel" aria-labelledby="interesteds-tab">
+    {% include 'contracts/tabs/interesteds-tab.html' with contract=contract %}
   </div>
 
   <!-- Bank Accounts Tab -->

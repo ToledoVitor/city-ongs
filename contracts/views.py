@@ -25,6 +25,7 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
+    ContractInterestedForm,
 )
 from contracts.models import (
     Company,
@@ -37,6 +38,7 @@ from contracts.models import (
     ContractItem,
     ContractItemNewValueRequest,
     ContractItemReview,
+    ContractInterestedPart,
 )
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
@@ -135,6 +137,8 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "items",
                 "items__items_reviews",
                 "items__items_reviews__reviewer",
+                "interested_parts",
+                "interested_parts__user",
                 "goals",
                 "goals__goals_reviews",
                 "goals__goals_reviews__reviewer",
@@ -974,3 +978,91 @@ def send_accountability_review_analisys(request, pk):
         execution.status = review_status
         execution.save()
         return redirect("contracts:executions-detail", pk=execution.id)
+
+
+def create_contract_interested_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+ 
+    if request.method == "POST":
+        form = ContractInterestedForm(request.POST, contract=contract)
+        if form.is_valid():
+            with transaction.atomic():
+                interested: ContractInterestedPart = form.save(commit=False)
+                interested.contract = contract
+                interested.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_INTERESTED,
+                    target_object_id=interested.id,
+                    target_content_object=interested,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/interesteds-create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = ContractInterestedForm(contract=contract)
+        return render(
+            request, "contracts/interesteds-create.html", {"contract": contract, "form": form}
+        )
+
+
+def update_contract_interested_view(request, pk, item_pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    interested = get_object_or_404(ContractInterestedPart, id=item_pk)
+
+    if request.method == "POST":
+        form = ContractInterestedForm(request.POST, instance=interested, contract=contract)
+        if form.is_valid():
+            with transaction.atomic():
+                interested: ContractInterestedPart = form.save()
+                interested.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_INTERESTED,
+                    target_object_id=interested.id,
+                    target_content_object=interested,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/interesteds-create.html",
+                {"contract": contract, "interested": interested, "form": form},
+            )
+    else:
+        form = ContractInterestedForm(instance=interested, contract=contract)
+        return render(
+            request,
+            "contracts/interesteds-create.html",
+            {"contract": contract, "interested": interested, "form": form},
+        )
+
+
+def interested_delete_view(request, pk):
+    interested = get_object_or_404(ContractInterestedPart.objects.select_related("contract"), id=pk)
+
+    contract_id = interested.contract.id
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DELETED_CONTRACT_INTERESTED,
+            target_object_id=interested.id,
+            target_content_object=interested,
+        )
+        interested.delete()
+        return redirect("contracts:contracts-detail", pk=contract_id)

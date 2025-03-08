@@ -309,6 +309,8 @@
       {{ form.file }}      
     </div>
 
+    {% include 'commons/form-errors.html' with form=form %}
+
     <button
         type="submit"
         class="
@@ -333,7 +335,6 @@
     </button>
 </form>
 
-{% include 'commons/form-errors.html' with form=form %}
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

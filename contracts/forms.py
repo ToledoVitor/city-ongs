@@ -14,6 +14,7 @@ from contracts.models import (
     ContractItem,
     ContractItemNewValueRequest,
     ContractStep,
+    ContractInterestedPart,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -416,3 +417,23 @@ class ItemValueReviewForm(forms.ModelForm):
             raise forms.ValidationError("É necessário informar um motivo para rejeição")
 
         return cleaned_data
+
+
+class ContractInterestedForm(forms.ModelForm):
+    class Meta:
+        model = ContractInterestedPart
+        fields = [
+            "user",
+            "interest",
+        ]
+
+        widgets = {
+            "user": BaseSelectFormWidget(),
+            "interest": BaseSelectFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["user"].queryset = User.objects.filter(organization=self.contract.organization)

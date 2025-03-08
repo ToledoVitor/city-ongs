@@ -314,12 +314,20 @@ class Contract(BaseModel):
             target_object_id__in=accountability_ids,
         )
 
+        interested_ids = [
+            str(id) for id in self.interested_parts.values_list("id", flat=True)[:10]
+        ]
+        interested_logs = ActivityLog.objects.filter(
+            target_object_id__in=interested_ids,
+        )
+
         combined_querset = (
             contract_logs
             | addendum_logs
             | goals_logs
             | items_logs
             | accountability_logs
+            | interested_logs
         ).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
@@ -337,6 +345,45 @@ class Contract(BaseModel):
             self.internal_code = 1 if max_code is None else max_code + 1
         super().save(*args, **kwargs)
 
+
+class ContractInterestedPart(BaseModel):
+    class InterestLevel(models.TextChoices):
+        PROJECT_MANAGER = "PROJECT_MANAGER", "Gestor de Projeto"
+        FINANCIAL_MANAGER = "FINANCIAL_MANAGER", "Gestor Financeiro"
+        TECHNICAL_MANAGER = "TECHNICAL_MANAGER", "Responsável Técnico"
+        PROJECT_COORDINATOR = "PROJECT_COORDINATOR", "Coordenador do Projeto"
+        ENTITY_RESPONSIBLE = "ENTITY_RESPONSIBLE", "Responsável pela Entidade"
+        FISCAL_COUNCIL = "FISCAL_COUNCIL", "Conselho Fiscal"
+        VICE_PRESIDENT = "VICE_PRESIDENT", "Vice Presidente"
+        TREASURER = "TREASURER", "Tesoureiro"
+        SECRETARY = "SECRETARY", "Secretário"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Contrato",
+        related_name="interested_parts",
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        User,
+        verbose_name="Usuario",
+        related_name="interested_parts",
+        on_delete=models.CASCADE,
+    )
+    interest = models.CharField(
+        verbose_name="Interesse",
+        choices=InterestLevel.choices,
+        default=InterestLevel.PROJECT_MANAGER,
+        max_length=19,
+    )
+
+    @property
+    def interest_label(self) -> str:
+        return ContractInterestedPart.InterestLevel(self.interest).label
+
+    class Meta:
+        verbose_name = "Parte Interessada"
+        verbose_name = "Partes Interessadas"
 
 class ContractAddendum(BaseModel):
     contract = models.ForeignKey(
