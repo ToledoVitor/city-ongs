@@ -34,7 +34,13 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2">Criar nova fonte</span>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">
+          {% if source %}
+          Atualizar fonte
+          {% else %}
+          Criar nova fonte
+          {% endif %}
+        </span>
       </div>
     </li>
   </ol>
@@ -50,35 +56,7 @@
 
   <div class="mb-3">
     <label for="id_document" class="block mb-2 text-base font-medium text-black">CPF ou CNPJ da fonte</label>
-    <div class="relative w-full">
-      <input
-        type="number"
-        id="id_document"
-        name="document"
-        step="1"
-        placeholder=""
-        class="
-          block
-          p-2.5
-          w-full
-          z-20
-          ps-10
-          text-sm
-          bg-gray-50
-          rounded-s-lg
-          border-e-2
-          border
-          focus:ring-blue-500
-          bg-gray-300
-          border-e-gray-700
-          border-gray-600
-          placeholder-gray-800
-          text-black
-          focus:border-blue-500
-        "
-        required
-      />  
-    </div>  
+    {{ form.document }}
     <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">
       Escreva somente os números do documento, sem pontuação.
     </p>
@@ -116,7 +94,11 @@
     "
     style="display: flex; justify-self: center;"
   >
-    Criar
+    {% if source %}
+    Atualizar fonte
+    {% else %}
+    Criar fonte
+    {% endif %}
   </button>
 
 </form>

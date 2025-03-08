@@ -45,7 +45,7 @@
                     Documento
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Cadastrado em
+                    Atualizado em
                 </th>
                 <th scope="col" class="px-6 py-3" />
             </tr>
@@ -63,8 +63,31 @@
                     <td class="px-6 py-4 text-base text-black">
                       {{ favored.updated_at.date }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
-                      Editar
+                    <td class="px-6 py-4 text-sm flex justify-end">
+                      <a
+                        href="{% url 'accountability:favoreds-update' favored.id %}"
+                      >
+                        <button
+                          class="
+                            px-3
+                            py-2
+                            text-sm
+                            font-medium
+                            text-center
+                            inline-flex
+                            items-center
+                            text-white
+                            rounded-lg
+                            focus:ring-4
+                            focus:outline-none
+                            bg-blue-600
+                            hover:bg-blue-700
+                            focus:ring-blue-800
+                          "
+                        >
+                        Editar
+                        </button>
+                      </a>
                     </td>
                   </tr>
               {% endfor %}

@@ -102,6 +102,10 @@ class ActivityLog(models.Model):
             "CREATED_RESOURCES_SOURCE",
             "Cadastrou fonte de recurso",
         )
+        UPDATED_RESOURCES_SOURCE = (
+            "UPDATED_RESOURCES_SOURCE",
+            "Atualizou fonte de recurso",
+        )
         DELETED_RESOURCES_SOURCE = "DELETED_RESOURCES_SOURCE", "Apagou fonte de recurso"
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"

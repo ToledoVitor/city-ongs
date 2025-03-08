@@ -9,8 +9,9 @@ from django.db.models import Q, Sum, Count, DecimalField
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, UpdateView
 
 from accountability.forms import (
     AccountabilityCreateForm,
@@ -19,7 +20,7 @@ from accountability.forms import (
     ImportXLSXAccountabilityForm,
     ReconcileExpenseForm,
     ReconcileRevenueForm,
-    ResourceSourceCreateForm,
+    ResourceSourceForm,
     RevenueForm,
 )
 from accountability.models import (
@@ -118,13 +119,13 @@ class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = ResourceSourceCreateForm()
+            context["form"] = ResourceSourceForm()
 
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: should check any user access?
-        form = ResourceSourceCreateForm(request.POST)
+        form = ResourceSourceForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 source = form.save(commit=False)
@@ -142,6 +143,33 @@ class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("accountability:sources-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class ResourceSourceUpdateView(LoginRequiredMixin, UpdateView):
+    model = ResourceSource
+    form_class = ResourceSourceForm
+    template_name = "accountability/sources/create.html"
+    context_object_name = "source"
+
+    login_url = "/auth/login"
+
+    def form_valid(self, form):
+        _ = ActivityLog.objects.create(
+            user=self.request.user,
+            user_email=self.request.user.email,
+            action=ActivityLog.ActivityLogChoices.UPDATED_RESOURCES_SOURCE,
+            target_object_id=form.instance.id,
+            target_content_object=form.instance,
+        )
+
+        return super().form_valid(form)
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy("accountability:sources-list")
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
+
 
 
 def create_contract_accountability_view(request, pk):
@@ -542,6 +570,31 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("accountability:favoreds-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+class FavoredUpdateView(LoginRequiredMixin, UpdateView):
+    model = Favored
+    form_class = FavoredForm
+    template_name = "accountability/favoreds/create.html"
+    context_object_name = "favored"
+
+    login_url = "/auth/login"
+
+    def form_valid(self, form):
+        _ = ActivityLog.objects.create(
+            user=self.request.user,
+            user_email=self.request.user.email,
+            action=ActivityLog.ActivityLogChoices.UPDATED_FAVORED,
+            target_object_id=form.instance.id,
+            target_content_object=form.instance,
+        )
+
+        return super().form_valid(form)
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy("accountability:favoreds-list")
+
+    def get_object(self, queryset=None):
+        return self.model.objects.get(id=self.kwargs["pk"])
 
 
 def import_accountability_view(request, pk):

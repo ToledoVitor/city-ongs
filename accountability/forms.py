@@ -21,7 +21,7 @@ from utils.widgets import (
 )
 
 
-class ResourceSourceCreateForm(forms.ModelForm):
+class ResourceSourceForm(forms.ModelForm):
     class Meta:
         model = ResourceSource
         fields = [
@@ -33,6 +33,7 @@ class ResourceSourceCreateForm(forms.ModelForm):
 
         widgets = {
             "name": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
+            "document": BaseCharFieldFormWidget(placeholder="Fonte xxxx"),
             "origin": BaseSelectFormWidget(),
             "category": BaseSelectFormWidget(),
         }
@@ -42,7 +43,11 @@ class ResourceSourceCreateForm(forms.ModelForm):
         name = cleaned_data.get("name")
         document = cleaned_data.get("document")
 
-        if ResourceSource.objects.filter(name=name, document=document).exists():
+        queryset = ResourceSource.objects.filter(name=name, document=document)
+        if self.instance:
+            queryset = queryset.exclude(id=self.instance.id)
+
+        if queryset.exists():
             raise forms.ValidationError(
                 "Já existe uma fonte criada com esse nome e documento."
             )
@@ -201,7 +206,11 @@ class FavoredForm(forms.ModelForm):
         name = cleaned_data.get("name")
         document = cleaned_data.get("document")
 
-        if Favored.objects.filter(name=name, document=document).exists():
+        queryset = Favored.objects.filter(name=name, document=document)
+        if self.instance:
+            queryset = queryset.exclude(id=self.instance.id)
+
+        if queryset.exists():
             raise forms.ValidationError(
                 "Já existe uma fonte criada com esse nome e documento."
             )

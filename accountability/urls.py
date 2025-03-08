@@ -4,8 +4,10 @@ from accountability.views import (
     AccountabilityListView,
     FavoredCreateView,
     FavoredListView,
+    FavoredUpdateView,
     ResourceSourceCreateView,
     ResourceSourceListView,
+    ResourceSourceUpdateView,
     accountability_detail_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
@@ -33,6 +35,11 @@ urlpatterns = [
         "sources/create/",
         ResourceSourceCreateView.as_view(),
         name="sources-create",
+    ),
+    path(
+        "sources/update/<uuid:pk>/",
+        ResourceSourceUpdateView.as_view(),
+        name="sources-update",
     ),
     path(
         "<uuid:pk>/accountability/import",
@@ -80,6 +87,11 @@ urlpatterns = [
         "favoreds/create/",
         FavoredCreateView.as_view(),
         name="favoreds-create",
+    ),
+    path(
+        "favoreds/update/<uuid:pk>/",
+        FavoredUpdateView.as_view(),
+        name="favoreds-update",
     ),
     path(
         "expenses/<uuid:pk>/update/",

@@ -191,6 +191,10 @@ class ResourceSource(BaseModel):
         return self.name
 
     @property
+    def origin_label(self) -> str:
+        return ResourceSource.OriginChoices(self.origin).label
+
+    @property
     def category_label(self) -> str:
         return ResourceSource.CategoryChoices(self.category).label
 
