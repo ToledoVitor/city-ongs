@@ -11,8 +11,10 @@
                     {% for error in errors %}
                         {% if field == "__all__" %}
                             <li>{{ error }}</li>
-                        {% else %}
+                        {% elif field.label is not none %}
                             <li>{{ field.label }} - {{ error }}</li>
+                        {% else %}
+                            <li>{{ error }}</li>
                         {% endif %}
                     {% endfor %}
                 {% endfor %}

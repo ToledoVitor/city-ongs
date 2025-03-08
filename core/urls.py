@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path, re_path
 
-from core.views import CustomPasswordResetView, HomeView
+from core.views import CustomPasswordResetView, HomeView, force_password_change_view
 
 urlpatterns = [
     # Internal
@@ -29,6 +29,7 @@ urlpatterns = [
     ),
     # Domain apps
     path("", HomeView.as_view(), name="home"),
+    path("auth/force-password-change/", force_password_change_view, name="force-password-change"),
     path(
         "accountability/",
         include(("accountability.urls", "accountability"), namespace="accountability"),

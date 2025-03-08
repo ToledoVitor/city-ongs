@@ -130,6 +130,11 @@ class User(AbstractUser):
         default=None,
         blank=True,
     )
+    password_redefined = models.BooleanField(
+        verbose_name="Senha Redefinida",
+        help_text="Usuário já mudou a senha inicial?",
+        default=False,
+    )
     access_level = models.CharField(
         verbose_name="Nível de Acesso",
         choices=AccessChoices,
