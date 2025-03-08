@@ -89,7 +89,7 @@ class PassOn4PDFExporter:
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=f"**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
             h=self.default_cell_height,
         )

@@ -9,10 +9,10 @@ from accountability.models import Accountability
 from activity.models import ActivityLog, Notification
 from contracts.models import (
     Contract,
+    ContractExecution,
     ContractGoal,
     ContractItem,
     ContractItemNewValueRequest,
-    ContractExecution,
 )
 from sendgrid_client.client import SendGridClient
 from utils.formats import format_into_brazilian_currency
@@ -183,7 +183,6 @@ class ActivityLogEmailNotificationHandler:
 
         return subject, html_content, recipients
 
-
     def build_execution_analisys_log(
         self, activity_log: ActivityLog
     ) -> Tuple[str, str, list[str]]:
@@ -253,9 +252,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/execution/detail/{execution.id}/",
         }
-        html_content = render_to_string(
-            "email/execution_finished_email.html", context
-        )
+        html_content = render_to_string("email/execution_finished_email.html", context)
 
         recipient = execution.contract.accountability_autority
         Notification.objects.create(

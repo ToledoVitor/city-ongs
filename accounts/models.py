@@ -194,6 +194,10 @@ class User(AbstractUser):
     def unread_notifications(self):
         return self.notifications.filter(read_at__isnull=True).count()
 
+    @property
+    def last_actions(self):
+        return
+
     def save(self, *args, **kwargs):
         if self.cpf is not None:
             string_doc = "".join([i for i in str(self.cpf) if i.isdigit()])

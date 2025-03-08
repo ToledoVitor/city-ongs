@@ -10,7 +10,11 @@ from accountability.models import Expense, Revenue
 from bank.models import BankStatement
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
+from utils.formats import (
+    document_mask,
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 
 @dataclass
@@ -104,98 +108,143 @@ class PassOn2PDFExporter:
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             text=f"**ÓRGÃO CONCESSOR:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             f"**TIPO DE CONCESSÃO (1):** {self.accountability.contract.concession_type}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
+        if self.accountability.contract.law_num:
+            law_or_agreement = str(self.accountability.contract.law_num)
+        else:
+            law_or_agreement = str(self.accountability.contract.agreement_num)
         self.pdf.cell(
             0,
-            6,
-            "**LEI AUTORIZADORA OU CONVÊNIO:**",  # TODO não sei o que é.
+            self.default_cell_height,
+            f"**LEI AUTORIZADORA OU CONVÊNIO:** {law_or_agreement}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             text=f"**OBJETO DA PARCERIA:** {self.accountability.contract.objective}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            0,
+            self.default_cell_height,
+            text=f"**EXERCÍCIO:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             text=f"**ÓRGÃO BENEFICIÁRIO:** {self.accountability.contract.organization.name}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             f"**CNPJ:** {hired_company.cnpj}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
         self.pdf.cell(
             0,
-            6,
-            "**RESPONSÁVEL(IS) PELO ÓRGÃO:**",  # TODO perguntar ao Felipe, quem seriam os responsáveis
+            self.default_cell_height,
+            "**RESPONSÁVEL(IS) PELO ÓRGÃO:**",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.default_cell_height
+        self.__set_helvetica_font(font_size=7, bold=False)
+        table_data = []
+        table_data.append(
+            [
+                "",
+                "",
+                " ",
+                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
+            ]
+        )
+        (
+            table_data.append(
+                [
+                    "",
+                    "",
+                    " ",
+                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                ]
+            ),
+        )
+        table_data.append(
+            [
+                "",
+                "",
+                " ",
+                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
+            ]
+        )
+
+        col_widths = [1, 2, 2, 185]  # Total de 190
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="L",
+            markdown=True,
+            col_widths=col_widths,
+        ) as table:
+            for item in table_data:
+                data = table.row()
+                for id, text in enumerate(item):
+                    if id == 1:
+                        self.pdf.set_fill_color(220, 220, 220)
+                    else:
+                        self.pdf.set_fill_color(255, 255, 255)
+                    data.cell(text=text, align="L", border=0)
+
+        self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
-            6,
+            self.default_cell_height,
             "**VALOR TOTAL RECEBIDO NO EXERCÍCIO.** __(DEMONSTRAR POR FONTE DE RECURSO)__",
             align="L",
             new_x=XPos.LMARGIN,

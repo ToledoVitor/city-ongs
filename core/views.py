@@ -1,15 +1,13 @@
 import logging
 
-
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
@@ -73,7 +71,7 @@ class CustomPasswordResetView(PasswordResetView):
 
 @login_required
 def force_password_change_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
             user = form.save()

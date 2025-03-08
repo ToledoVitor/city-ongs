@@ -29,7 +29,11 @@ urlpatterns = [
     ),
     # Domain apps
     path("", HomeView.as_view(), name="home"),
-    path("auth/force-password-change/", force_password_change_view, name="force-password-change"),
+    path(
+        "auth/force-password-change/",
+        force_password_change_view,
+        name="force-password-change",
+    ),
     path(
         "accountability/",
         include(("accountability.urls", "accountability"), namespace="accountability"),

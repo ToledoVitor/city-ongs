@@ -5,12 +5,12 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Sum, Count, DecimalField
+from django.db.models import Count, DecimalField, Q, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, UpdateView
 
 from accountability.forms import (
@@ -50,15 +50,11 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.select_related(
             "contract",
-        ).filter(
-            contract__organization=self.request.user.organization
-        )
+        ).filter(contract__organization=self.request.user.organization)
 
         query = self.request.GET.get("q")
         if query:
-            queryset = queryset.filter(
-                Q(contract__name__icontains=query)
-            )
+            queryset = queryset.filter(Q(contract__name__icontains=query))
 
         return queryset.annotate(
             count_revenues=Count(
@@ -70,12 +66,12 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
             sum_revenues=Coalesce(
                 Sum("revenues__value", filter=Q(revenues__deleted_at__isnull=True)),
                 0,
-                output_field=DecimalField()
+                output_field=DecimalField(),
             ),
             sum_expenses=Coalesce(
                 Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True)),
                 0,
-                output_field=DecimalField()
+                output_field=DecimalField(),
             ),
         ).order_by("-year", "-month")
 
@@ -83,6 +79,7 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["search_query"] = self.request.GET.get("q", "")
         return context
+
 
 class ResourceSourceListView(LoginRequiredMixin, ListView):
     model = ResourceSource
@@ -163,13 +160,12 @@ class ResourceSourceUpdateView(LoginRequiredMixin, UpdateView):
         )
 
         return super().form_valid(form)
-    
+
     def get_success_url(self) -> str:
         return reverse_lazy("accountability:sources-list")
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
-
 
 
 def create_contract_accountability_view(request, pk):
@@ -571,6 +567,7 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
 
         return self.render_to_response(self.get_context_data(form=form))
 
+
 class FavoredUpdateView(LoginRequiredMixin, UpdateView):
     model = Favored
     form_class = FavoredForm
@@ -589,7 +586,7 @@ class FavoredUpdateView(LoginRequiredMixin, UpdateView):
         )
 
         return super().form_valid(form)
-    
+
     def get_success_url(self) -> str:
         return reverse_lazy("accountability:favoreds-list")
 

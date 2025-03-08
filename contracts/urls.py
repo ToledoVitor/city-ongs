@@ -19,10 +19,10 @@ from contracts.views import (
     create_execution_activity_view,
     create_execution_file_view,
     item_new_value_request_view,
+    send_accountability_review_analisys,
+    send_execution_to_analisys_view,
     update_contract_goal_view,
     update_contract_item_view,
-    send_execution_to_analisys_view,
-    send_accountability_review_analisys,
 )
 
 urlpatterns = [

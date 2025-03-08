@@ -29,7 +29,11 @@ from accountability.views import (
 )
 
 urlpatterns = [
-    path("accountabilities/", AccountabilityListView.as_view(), name="accountabilities-list"),
+    path(
+        "accountabilities/",
+        AccountabilityListView.as_view(),
+        name="accountabilities-list",
+    ),
     path("sources/", ResourceSourceListView.as_view(), name="sources-list"),
     path(
         "sources/create/",

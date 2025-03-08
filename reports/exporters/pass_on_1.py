@@ -122,11 +122,11 @@ class PassOn1PDFExporter:
                     f"{contract.organization.name}",  # BENEFICIARIO
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",  # ENDEREÇO
                     f"Lei nº {contract.law_num}",  # N° da Lei
-                    f"De {date_law.day} de {MonthChoices(date_law.month).label.capitalize()} de {date_law.year}",  # DATA da Lei TODO month como Choices
+                    f"De {date_law.day} de {MonthChoices(date_law.month).label.capitalize()} de {date_law.year}",  # DATA da Lei
                     f"{contract.agreement_num}/{date_agreement.year}",  # N° do Convênio
                     f"{format_into_brazilian_date(contract.agreement_date)}",  # DATA do Convênio
                     f"{contract.objective}",  # FINALIDADE
-                    f"{contract.end_of_vigency}",  # DATA DO PAGAMENTO TODO verificar com Felipe se a data está correta
+                    f"{contract.end_of_vigency}",  # DATA DO PAGAMENTO
                     f"{contract.checking_account.origin}",  # FONTE
                     f"{format_into_brazilian_currency(contract.total_value)}",  # VALOR EM REAIS
                 ]

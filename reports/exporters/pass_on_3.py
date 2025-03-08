@@ -79,30 +79,37 @@ class PassOn3PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
+        self.__set_helvetica_font(font_size=7, bold=False)
         self.pdf.cell(
             text=f"**ÓRGÃO CONCESSOR:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
             text=f"**ÓRGÃO BENEFICIÁRIO:** {self.accountability.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**Nº** {self.accountability.contract.name}",
+            text=f"**INTERVENIENTE (se houver):**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
+        self.pdf.cell(
+            text=f"**Nº DO CONVÊNIO** {self.accountability.contract.name}",
+            markdown=True,
+            h=self.default_cell_height,
+        )
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
             text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** {format_into_brazilian_currency(self.accountability.contract.total_value)}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
@@ -110,9 +117,9 @@ class PassOn3PDFExporter:
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**ADVOGADO(S) / Nº OAB / E-MAIL(4): ** ",  # TODO Criar campo "advogados"
+            text=f"**ADVOGADO(S) / Nº OAB / E-MAIL(4): ** ",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -272,25 +279,24 @@ class PassOn3PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: A criar",  # TODO classe ou variável de ordenapor
+            text=f"Nome: {self.accountability.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: A criar",
+            text=f"Cargo: {self.accountability.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
-                # str(self.accountability.contract.organization.city_hall.document)
-                "A criar"
+                str(self.accountability.contract.supervision_autority.cpf)
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(5)
+        self.pdf.ln(8)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
             text=f"Assinatura: ___________________________",
@@ -319,9 +325,7 @@ class PassOn3PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(
-                str(self.accountability.contract.organization.document)
-            ),  # TODO
+            text=document_mask(str(self.accountability.contract.organization.document)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)

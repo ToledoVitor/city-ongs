@@ -280,21 +280,20 @@ class PassOn5PDFExporter:
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: A criar",  # TODO classe ou variável de ordenapor
+            text=f"Nome: {self.accountability.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: A criar",
+            text=f"Cargo: {self.accountability.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_helvetica_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
-                # str(self.accountability.contract.organization.city_hall.document)
-                "A criar"
+                str(self.accountability.contract.supervision_autority.cpf)
             ),
             h=self.default_cell_height,
         )
@@ -462,7 +461,7 @@ class PassOn5PDFExporter:
         )
         self.pdf.ln(1)
         self.pdf.multi_cell(
-            text="Facultativo. Indicar quando já constituído.",
+            text="(2) Facultativo. Indicar quando já constituído.",
             w=190,
             h=4,
             markdown=True,

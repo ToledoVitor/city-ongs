@@ -96,46 +96,37 @@ class PassOn10PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=11, bold=True)
-        self.pdf.cell(
+        self.__set_helvetica_font(font_size=10, bold=True)
+        self.pdf.multi_cell(
             0,
-            0,
-            "ANEXO RP-10 - REPASSES AO TERCEIRO SETOR",
+            self.default_cell_height,
+            "ANEXO RP-10 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS TERMO DE COLABORAÇÃO/FOMENTO",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=10, bold=False)
-        self.pdf.cell(
-            0,
-            10,
-            "DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS - TERMO DE COLABORAÇÃO/FOMENTO",
-            align="C",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        # Espaçamento do título pro próximo dado
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
+        self.__set_helvetica_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"**Órgão Público:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
             text=f"**Organização da Sociedade Civil:** {self.accountability.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
             text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         hired_company = self.accountability.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
@@ -143,36 +134,61 @@ class PassOn10PDFExporter:
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**Responsáveis pela OSC:**",
+            text=f"**Responsável(is) pela OSC:**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.pdf.ln(self.default_cell_height)
 
     def _draw_first_table(self):
-        self.__set_helvetica_font(font_size=7, bold=True)
-        table_data = [
+        self.__set_helvetica_font(font_size=7, bold=False)
+        table_data = []
+        table_data.append(
             [
+                "",
+                "",
+                " ",
                 f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
-                f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+            ]
+        )
+        (
+            table_data.append(
+                [
+                    "",
+                    "",
+                    " ",
+                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                ]
+            ),
+        )
+        table_data.append(
+            [
+                "",
+                "",
+                " ",
                 f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
-            ],
-        ]
+            ]
+        )
 
-        col_widths = [70, 60, 60]
-
-        for row in table_data:
-            for col_index, col_text in enumerate(row):
-                self.pdf.cell(
-                    col_widths[col_index],
-                    h=self.default_cell_height,
-                    text=col_text,
-                    border=1,
-                    align="L",
-                )
-            self.pdf.ln()
+        col_widths = [1, 2, 2, 185]  # Total de 190
+        font = FontFace("Helvetica", "", size_pt=8)
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="L",
+            markdown=True,
+            col_widths=col_widths,
+        ) as table:
+            for item in table_data:
+                data = table.row()
+                for id, text in enumerate(item):
+                    if id == 1:
+                        self.pdf.set_fill_color(220, 220, 220)
+                    else:
+                        self.pdf.set_fill_color(255, 255, 255)
+                    data.cell(text=text, align="L", border=0)
 
     def _draw_partners_data(self):
         self.pdf.ln(3)
@@ -311,7 +327,7 @@ class PassOn10PDFExporter:
             ],
         ]
 
-        sum_items_a_to_d = (
+        self.sum_items_a_to_d = (
             self.previous_balance + self.all_pass_on_values + self.investment_income
         )  # TODO inserir valor de D
 
@@ -319,7 +335,7 @@ class PassOn10PDFExporter:
             [
                 "(E) TOTAL DE RECURSOS PÚBLICOS (A + B + C + D)",
                 "",
-                f"{format_into_brazilian_currency(sum_items_a_to_d)}",
+                f"{format_into_brazilian_currency(self.sum_items_a_to_d)}",
             ]
         )
 
@@ -336,7 +352,7 @@ class PassOn10PDFExporter:
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEIS NO EXERCÍCIO (E + F)",
                 "",
-                f"{format_into_brazilian_currency(sum_items_a_to_d+self.own_resources)}",
+                f"{format_into_brazilian_currency(self.sum_items_a_to_d+self.own_resources)}",
             ],
         ]
 
@@ -435,60 +451,20 @@ class PassOn10PDFExporter:
 
         table_data = [
             [
-                "Bens e Materiais permanentes",
-                expenses_dict["PERMANENT_GOODS"]["accounted_on"],
-                expenses_dict["PERMANENT_GOODS"]["not_accounted"],
-                expenses_dict["PERMANENT_GOODS"]["accounted_and_paid"],
-                expenses_dict["PERMANENT_GOODS"]["paid_on"],
-                expenses_dict["PERMANENT_GOODS"]["not_paid"],
+                "Recursos humanos (5)",
+                expenses_dict["HUMAN_RESOURCES"]["accounted_on"],
+                expenses_dict["HUMAN_RESOURCES"]["not_accounted"],
+                expenses_dict["HUMAN_RESOURCES"]["accounted_and_paid"],
+                expenses_dict["HUMAN_RESOURCES"]["paid_on"],
+                expenses_dict["HUMAN_RESOURCES"]["not_paid"],
             ],
             [
-                "Combustível",
-                expenses_dict["FUEL"]["accounted_on"],
-                expenses_dict["FUEL"]["not_accounted"],
-                expenses_dict["FUEL"]["accounted_and_paid"],
-                expenses_dict["FUEL"]["paid_on"],
-                expenses_dict["FUEL"]["not_paid"],
-            ],
-            [
-                "Despesas financeiras e bancárias",
-                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_on"],
-                expenses_dict["FINANCIAL_AND_BANKING"]["not_accounted"],
-                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_and_paid"],
-                expenses_dict["FINANCIAL_AND_BANKING"]["paid_on"],
-                expenses_dict["FINANCIAL_AND_BANKING"]["not_paid"],
-            ],
-            [
-                "Gêneros Alimentícios",
-                expenses_dict["FOODSTUFFS"]["accounted_on"],
-                expenses_dict["FOODSTUFFS"]["not_accounted"],
-                expenses_dict["FOODSTUFFS"]["accounted_and_paid"],
-                expenses_dict["FOODSTUFFS"]["paid_on"],
-                expenses_dict["FOODSTUFFS"]["not_paid"],
-            ],
-            [
-                "Locação de Imóveis",
-                expenses_dict["REAL_STATE"]["accounted_on"],
-                expenses_dict["REAL_STATE"]["not_accounted"],
-                expenses_dict["REAL_STATE"]["accounted_and_paid"],
-                expenses_dict["REAL_STATE"]["paid_on"],
-                expenses_dict["REAL_STATE"]["not_paid"],
-            ],
-            [
-                "Locações Diversas",
-                expenses_dict["MISCELLANEOUS"]["accounted_on"],
-                expenses_dict["MISCELLANEOUS"]["not_accounted"],
-                expenses_dict["MISCELLANEOUS"]["accounted_and_paid"],
-                expenses_dict["MISCELLANEOUS"]["paid_on"],
-                expenses_dict["MISCELLANEOUS"]["not_paid"],
-            ],
-            [
-                "Material Médico e Hospitalar",
-                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_on"],
-                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_accounted"],
-                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_and_paid"],
-                expenses_dict["MEDICAL_AND_HOSPITAL"]["paid_on"],
-                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_paid"],
+                "Recursos humanos (6)",
+                expenses_dict["OTHER_HUMAN_RESOURCES"]["accounted_on"],
+                expenses_dict["OTHER_HUMAN_RESOURCES"]["not_accounted"],
+                expenses_dict["OTHER_HUMAN_RESOURCES"]["accounted_and_paid"],
+                expenses_dict["OTHER_HUMAN_RESOURCES"]["paid_on"],
+                expenses_dict["OTHER_HUMAN_RESOURCES"]["not_paid"],
             ],
             [
                 "Medicamentos",
@@ -499,6 +475,86 @@ class PassOn10PDFExporter:
                 expenses_dict["MEDICINES"]["not_paid"],
             ],
             [
+                "Material médico e hospitalar (*)",
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_on"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_accounted"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["accounted_and_paid"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["paid_on"],
+                expenses_dict["MEDICAL_AND_HOSPITAL"]["not_paid"],
+            ],
+            [
+                "Gêneros alimentícios",
+                expenses_dict["FOODSTUFFS"]["accounted_on"],
+                expenses_dict["FOODSTUFFS"]["not_accounted"],
+                expenses_dict["FOODSTUFFS"]["accounted_and_paid"],
+                expenses_dict["FOODSTUFFS"]["paid_on"],
+                expenses_dict["FOODSTUFFS"]["not_paid"],
+            ],
+            [
+                "Outros materiais de consumo",
+                expenses_dict["OTHER_CONSUMABLES"]["accounted_on"],
+                expenses_dict["OTHER_CONSUMABLES"]["not_accounted"],
+                expenses_dict["OTHER_CONSUMABLES"]["accounted_and_paid"],
+                expenses_dict["OTHER_CONSUMABLES"]["paid_on"],
+                expenses_dict["OTHER_CONSUMABLES"]["not_paid"],
+            ],
+            [
+                "Serviços médicos (*)",
+                expenses_dict["MEDICAL_SERVICES"]["accounted_on"],
+                expenses_dict["MEDICAL_SERVICES"]["not_accounted"],
+                expenses_dict["MEDICAL_SERVICES"]["accounted_and_paid"],
+                expenses_dict["MEDICAL_SERVICES"]["paid_on"],
+                expenses_dict["MEDICAL_SERVICES"]["not_paid"],
+            ],
+            [
+                "Outros serviços de terceiros",
+                expenses_dict["OTHER_THIRD_PARTY"]["accounted_on"],
+                expenses_dict["OTHER_THIRD_PARTY"]["not_accounted"],
+                expenses_dict["OTHER_THIRD_PARTY"]["accounted_and_paid"],
+                expenses_dict["OTHER_THIRD_PARTY"]["paid_on"],
+                expenses_dict["OTHER_THIRD_PARTY"]["not_paid"],
+            ],
+            [
+                "Locação de imóveis",
+                expenses_dict["REAL_STATE"]["accounted_on"],
+                expenses_dict["REAL_STATE"]["not_accounted"],
+                expenses_dict["REAL_STATE"]["accounted_and_paid"],
+                expenses_dict["REAL_STATE"]["paid_on"],
+                expenses_dict["REAL_STATE"]["not_paid"],
+            ],
+            [
+                "Locações diversas",
+                expenses_dict["MISCELLANEOUS"]["accounted_on"],
+                expenses_dict["MISCELLANEOUS"]["not_accounted"],
+                expenses_dict["MISCELLANEOUS"]["accounted_and_paid"],
+                expenses_dict["MISCELLANEOUS"]["paid_on"],
+                expenses_dict["MISCELLANEOUS"]["not_paid"],
+            ],
+            [
+                "Utilidades públicas (7)",
+                expenses_dict["PUBLIC_UTILITIES"]["accounted_on"],
+                expenses_dict["PUBLIC_UTILITIES"]["not_accounted"],
+                expenses_dict["PUBLIC_UTILITIES"]["accounted_and_paid"],
+                expenses_dict["PUBLIC_UTILITIES"]["paid_on"],
+                expenses_dict["PUBLIC_UTILITIES"]["not_paid"],
+            ],
+            [
+                "Combustível",
+                expenses_dict["FUEL"]["accounted_on"],
+                expenses_dict["FUEL"]["not_accounted"],
+                expenses_dict["FUEL"]["accounted_and_paid"],
+                expenses_dict["FUEL"]["paid_on"],
+                expenses_dict["FUEL"]["not_paid"],
+            ],
+            [
+                "Bens e materiais permanentes",
+                expenses_dict["PERMANENT_GOODS"]["accounted_on"],
+                expenses_dict["PERMANENT_GOODS"]["not_accounted"],
+                expenses_dict["PERMANENT_GOODS"]["accounted_and_paid"],
+                expenses_dict["PERMANENT_GOODS"]["paid_on"],
+                expenses_dict["PERMANENT_GOODS"]["not_paid"],
+            ],
+            [
                 "Obras",
                 expenses_dict["WORKS"]["accounted_on"],
                 expenses_dict["WORKS"]["not_accounted"],
@@ -507,20 +563,20 @@ class PassOn10PDFExporter:
                 expenses_dict["WORKS"]["not_paid"],
             ],
             [
+                "Despesas financeiras e bancárias",
+                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_on"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["not_accounted"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["accounted_and_paid"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["paid_on"],
+                expenses_dict["FINANCIAL_AND_BANKING"]["not_paid"],
+            ],
+            [
                 "Outras despesas",
                 expenses_dict["OTHER_EXPENSES"]["accounted_on"],
                 expenses_dict["OTHER_EXPENSES"]["not_accounted"],
                 expenses_dict["OTHER_EXPENSES"]["accounted_and_paid"],
                 expenses_dict["OTHER_EXPENSES"]["paid_on"],
                 expenses_dict["OTHER_EXPENSES"]["not_paid"],
-            ],
-            [
-                "Outros Materiais de Consumo",
-                expenses_dict["OTHER_CONSUMABLES"]["accounted_on"],
-                expenses_dict["OTHER_CONSUMABLES"]["not_accounted"],
-                expenses_dict["OTHER_CONSUMABLES"]["accounted_and_paid"],
-                expenses_dict["OTHER_CONSUMABLES"]["paid_on"],
-                expenses_dict["OTHER_CONSUMABLES"]["not_paid"],
             ],
         ]
 
@@ -623,6 +679,13 @@ class PassOn10PDFExporter:
             new_y=YPos.NEXT,
         )
 
+        expenses_dict = self.__categorize_expenses()
+        j_value = (
+            expenses_dict["TOTAL"]["accounted_and_paid"]
+            + expenses_dict["TOTAL"]["paid_on"]
+        )
+        k_value = self.sum_items_a_to_d - (j_value - self.own_resources)
+
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
@@ -630,11 +693,11 @@ class PassOn10PDFExporter:
             ],
             [
                 "(J) DESPESAS PAGAS NO EXERCÍCIO (H+I)",
-                f"{format_into_brazilian_currency(self.all_expenses_value)}",
+                format_into_brazilian_currency(j_value),
             ],
             [
                 "(K) RECURSO PÚBLICO NÃO APLICADO [E - (J - F)]",
-                f"Campo de dinheiro em ainda em conta",  # TODO
+                format_into_brazilian_currency(k_value),
             ],
             [
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
@@ -669,7 +732,7 @@ class PassOn10PDFExporter:
         self.pdf.ln(7)
         self.__set_helvetica_font()
         self.pdf.multi_cell(
-            text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Parceiro.",
+            text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Contratante.",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -678,11 +741,80 @@ class PassOn10PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.ln(9)
-        self.pdf.cell(
-            text="Prefeitura Municipal de Várzea Paulista, Quarta-feira, 15 de Janeiro de 2025",
+        self.pdf.multi_cell(
+            text="**LOCAL:**",
+            markdown=True,
             h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
         )
-        self.pdf.ln(7)
+        self.pdf.ln(4)
+        self.pdf.multi_cell(
+            text="**DATA:**",
+            markdown=True,
+            h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(8)
+        self.pdf.multi_cell(
+            text="**Responsáveis pela Contratada:**",
+            markdown=True,
+            h=self.default_cell_height,
+            w=190,
+            max_line_height=4,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        table_data = []
+        table_data.append(
+            [
+                "",
+                "",
+                " ",
+                f"Nome: {self.accountability.contract.supervision_autority.get_full_name()} - Confirmar campo",
+            ]
+        )
+        (
+            table_data.append(
+                [
+                    "",
+                    "",
+                    " ",
+                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                ]
+            ),
+        )
+        table_data.append(
+            [
+                "",
+                "",
+                " ",
+                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
+            ]
+        )
+
+        col_widths = [1, 2, 2, 185]  # Total de 190
+        font = FontFace("Helvetica", "")
+        with self.pdf.table(
+            headings_style=font,
+            line_height=4,
+            align="L",
+            markdown=True,
+            col_widths=col_widths,
+        ) as table:
+            for item in table_data:
+                data = table.row()
+                for id, text in enumerate(item):
+                    if id == 1:
+                        self.pdf.set_fill_color(220, 220, 220)
+                    else:
+                        self.pdf.set_fill_color(255, 255, 255)
+                    data.cell(text=text, align="L", border=0)
 
     def __categorize_expenses(self) -> dict:
         expenses = Expense.objects.filter(
@@ -698,13 +830,18 @@ class PassOn10PDFExporter:
             "not_paid": Decimal(0.00),
         }
         categorized_expenses = {
+            "HUMAN_RESOURCES": copy.deepcopy(base_empty_dict),
+            "OTHER_HUMAN_RESOURCES": copy.deepcopy(base_empty_dict),
             "PERMANENT_GOODS": copy.deepcopy(base_empty_dict),
+            "OTHER_THIRD_PARTY": copy.deepcopy(base_empty_dict),
+            "PUBLIC_UTILITIES": copy.deepcopy(base_empty_dict),
             "FUEL": copy.deepcopy(base_empty_dict),
             "FINANCIAL_AND_BANKING": copy.deepcopy(base_empty_dict),
             "FOODSTUFFS": copy.deepcopy(base_empty_dict),
             "REAL_STATE": copy.deepcopy(base_empty_dict),
             "MISCELLANEOUS": copy.deepcopy(base_empty_dict),
             "MEDICAL_AND_HOSPITAL": copy.deepcopy(base_empty_dict),
+            "MEDICAL_SERVICES": copy.deepcopy(base_empty_dict),
             "MEDICINES": copy.deepcopy(base_empty_dict),
             "WORKS": copy.deepcopy(base_empty_dict),
             "OTHER_EXPENSES": copy.deepcopy(base_empty_dict),
@@ -757,8 +894,20 @@ class PassOn10PDFExporter:
         if not expense.nature:
             return None
 
+        if expense.nature in NatureCategories.HUMAN_RESOURCES:
+            return "HUMAN_RESOURCES"
+
+        if expense.nature in NatureCategories.OTHER_HUMAN_RESOURCES:
+            return "OTHER_HUMAN_RESOURCES"
+
         if expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PERMANENT_GOODS"
+
+        if expense.nature in NatureCategories.PERMANENT_GOODS:
+            return "OTHER_THIRD_PARTY"
+
+        if expense.nature in NatureCategories.PERMANENT_GOODS:
+            return "PUBLIC_UTILITIES"
 
         if expense.nature in NatureCategories.FUEL:
             return "FUEL"
@@ -777,6 +926,9 @@ class PassOn10PDFExporter:
 
         if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
             return "MEDICAL_AND_HOSPITAL"
+
+        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
+            return "MEDICAL_SERVICES"
 
         if expense.nature in NatureCategories.MEDICINES:
             return "MEDICINES"
