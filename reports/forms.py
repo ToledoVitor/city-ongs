@@ -25,7 +25,7 @@ TRANSACTION_OPTIONS = [
     ("period_expenses", "Despesas: Realizadas no Período"),
     (
         "predicted_versus_realized",
-        "Demonstrativo de Repasses: Previsto versus Reaizado",
+        "Demonstrativo de Repasses: Previsto versus Realizado",
     ),
     (
         "consolidated",

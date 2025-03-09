@@ -343,7 +343,7 @@ class AccountabilityXLSXExporter:
                 6,
                 options={
                     "validate": "list",
-                    "source": "=fd_tab",
+                    "source": "=fr_tab",
                     "input_message": "Escolha da lista",
                     "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
                 },
