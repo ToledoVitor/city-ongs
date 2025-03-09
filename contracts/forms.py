@@ -11,10 +11,10 @@ from contracts.models import (
     ContractExecutionActivity,
     ContractExecutionFile,
     ContractGoal,
+    ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
     ContractStep,
-    ContractInterestedPart,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -468,4 +468,6 @@ class ContractInterestedForm(forms.ModelForm):
         self.contract = kwargs.pop("contract", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["user"].queryset = User.objects.filter(organization=self.contract.organization)
+        self.fields["user"].queryset = User.objects.filter(
+            organization=self.contract.organization
+        )

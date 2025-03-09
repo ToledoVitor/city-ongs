@@ -20,12 +20,12 @@ from contracts.forms import (
     ContractExecutionFileForm,
     ContractExtraStepFormSet,
     ContractGoalForm,
+    ContractInterestedForm,
     ContractItemForm,
     ContractItemValueRequestForm,
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
-    ContractInterestedForm,
 )
 from contracts.models import (
     Company,
@@ -35,10 +35,10 @@ from contracts.models import (
     ContractExecutionFile,
     ContractGoal,
     ContractGoalReview,
+    ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
     ContractItemReview,
-    ContractInterestedPart,
 )
 from contracts.choices import NatureCategories
 from utils.choices import StatusChoices
@@ -1040,7 +1040,7 @@ def create_contract_interested_view(request, pk):
         return redirect("/accounts-login/")
 
     contract = get_object_or_404(Contract, id=pk)
- 
+
     if request.method == "POST":
         form = ContractInterestedForm(request.POST, contract=contract)
         if form.is_valid():
@@ -1066,7 +1066,9 @@ def create_contract_interested_view(request, pk):
     else:
         form = ContractInterestedForm(contract=contract)
         return render(
-            request, "contracts/interesteds-create.html", {"contract": contract, "form": form}
+            request,
+            "contracts/interesteds-create.html",
+            {"contract": contract, "form": form},
         )
 
 
@@ -1078,7 +1080,9 @@ def update_contract_interested_view(request, pk, item_pk):
     interested = get_object_or_404(ContractInterestedPart, id=item_pk)
 
     if request.method == "POST":
-        form = ContractInterestedForm(request.POST, instance=interested, contract=contract)
+        form = ContractInterestedForm(
+            request.POST, instance=interested, contract=contract
+        )
         if form.is_valid():
             with transaction.atomic():
                 interested: ContractInterestedPart = form.save()
@@ -1108,7 +1112,9 @@ def update_contract_interested_view(request, pk, item_pk):
 
 
 def interested_delete_view(request, pk):
-    interested = get_object_or_404(ContractInterestedPart.objects.select_related("contract"), id=pk)
+    interested = get_object_or_404(
+        ContractInterestedPart.objects.select_related("contract"), id=pk
+    )
 
     contract_id = interested.contract.id
     with transaction.atomic():

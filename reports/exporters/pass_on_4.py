@@ -111,7 +111,7 @@ class PassOn4PDFExporter:
         manager_queryset = self.revenue_queryset.filter(
             Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
         ).filter(
-            accountability__contract__concession_type=Contract.ConcessionChoices.MANAGEMENT # Não é Revenue
+            accountability__contract__concession_type=Contract.ConcessionChoices.MANAGEMENT  # Não é Revenue
         )
 
         self.pdf.ln()

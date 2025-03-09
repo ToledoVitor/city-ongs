@@ -38,9 +38,18 @@ class ActivityLog(models.Model):
             "Atualizou status do contrato",
         )
         # contract interested
-        CREATED_CONTRACT_INTERESTED = "CREATED_CONTRACT_INTERESTED", "Cadastrou interessado no contrato"
-        UPDATED_CONTRACT_INTERESTED = "UPDATED_CONTRACT_INTERESTED", "Atualizou interessado no contrato"
-        DELETED_CONTRACT_INTERESTED = "DELETED_CONTRACT_INTERESTED", "Deletou interessado no contrato"
+        CREATED_CONTRACT_INTERESTED = (
+            "CREATED_CONTRACT_INTERESTED",
+            "Cadastrou interessado no contrato",
+        )
+        UPDATED_CONTRACT_INTERESTED = (
+            "UPDATED_CONTRACT_INTERESTED",
+            "Atualizou interessado no contrato",
+        )
+        DELETED_CONTRACT_INTERESTED = (
+            "DELETED_CONTRACT_INTERESTED",
+            "Deletou interessado no contrato",
+        )
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
         COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"

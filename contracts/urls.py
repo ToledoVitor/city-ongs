@@ -15,17 +15,17 @@ from contracts.views import (
     contract_status_change_view,
     create_contract_execution_view,
     create_contract_goal_view,
+    create_contract_interested_view,
     create_contract_item_view,
     create_execution_activity_view,
     create_execution_file_view,
+    interested_delete_view,
     item_new_value_request_view,
     send_accountability_review_analisys,
     send_execution_to_analisys_view,
     update_contract_goal_view,
-    update_contract_item_view,
-    create_contract_interested_view,
     update_contract_interested_view,
-    interested_delete_view,
+    update_contract_item_view,
 )
 
 urlpatterns = [
@@ -107,7 +107,11 @@ urlpatterns = [
         update_contract_interested_view,
         name="contracts-interesteds-update",
     ),
-    path("detail/<uuid:pk>/interesteds/delete/", interested_delete_view, name="interested-delete"),
+    path(
+        "detail/<uuid:pk>/interesteds/delete/",
+        interested_delete_view,
+        name="interested-delete",
+    ),
     path(
         "detail/<uuid:pk>/goals/create/",
         create_contract_goal_view,

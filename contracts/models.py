@@ -432,6 +432,7 @@ class ContractInterestedPart(BaseModel):
         verbose_name = "Parte Interessada"
         verbose_name = "Partes Interessadas"
 
+
 class ContractAddendum(BaseModel):
     contract = models.ForeignKey(
         Contract,
