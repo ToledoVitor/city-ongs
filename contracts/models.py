@@ -476,8 +476,30 @@ class ContractAddendum(BaseModel):
         related_name="addendums",
         on_delete=models.CASCADE,
     )
+
+    # Datas
     start_of_vigency = models.DateField(verbose_name="Começo da vigência")
     end_of_vigency = models.DateField(verbose_name="Fim da vigência")
+
+    # Values
+    total_value = models.DecimalField(
+        verbose_name="Valor do contrato",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    municipal_value = models.DecimalField(
+        verbose_name="Valor repassado pelo município",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    counterpart_value = models.DecimalField(
+        verbose_name="Valor repassado por contrapartida de parceiro",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
 
     history = HistoricalRecords()
 

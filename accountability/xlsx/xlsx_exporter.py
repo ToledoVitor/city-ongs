@@ -25,14 +25,14 @@ class AccountabilityXLSXExporter:
         self.__build_formats()
 
         self._build_worksheets()
-        self.workbook.define_name("fr_tab", "FR!$A$2:$A$100")
-        self.workbook.define_name("fd_tab", "FD!$A$2:$A$100")
-        self.workbook.define_name("cb_tab", "CB!$A$2:$A$100")
-        self.workbook.define_name("nr_tab", "NR!$A$2:$A$100")
-        self.workbook.define_name("nd_tab", "ND!$A$2:$A$100")
-        self.workbook.define_name("fv_tab", "FV!$A$2:$A$100")
-        self.workbook.define_name("ia_tab", "IA!$A$2:$A$100")
-        self.workbook.define_name("td_tab", "TD!$A$2:$A$100")
+        self.workbook.define_name("fr_tab", "FR!$A$2:$A$5000")
+        self.workbook.define_name("fd_tab", "FD!$A$2:$A$5000")
+        self.workbook.define_name("cb_tab", "CB!$A$2:$A$5000")
+        self.workbook.define_name("nr_tab", "NR!$A$2:$A$5000")
+        self.workbook.define_name("nd_tab", "ND!$A$2:$A$5000")
+        self.workbook.define_name("fv_tab", "FV!$A$2:$A$5000")
+        self.workbook.define_name("ia_tab", "IA!$A$2:$A$5000")
+        self.workbook.define_name("td_tab", "TD!$A$2:$A$5000")
 
         self.workbook.close()
 
@@ -343,7 +343,7 @@ class AccountabilityXLSXExporter:
                 6,
                 options={
                     "validate": "list",
-                    "source": "=fr_tab",
+                    "source": "=fd_tab",
                     "input_message": "Escolha da lista",
                     "error_message": "Favor selecionar um dos itens listados ao clicar em  ▽  ao lado da célula",
                 },
