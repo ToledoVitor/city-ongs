@@ -2,12 +2,12 @@ FROM python:3.12
 
 RUN apt-get update && \
     apt-get install -y locales && \
-    locale-gen pt_BR.UTF-8 && \
-    update-locale LANG=pt_BR.UTF-8
+    echo "pt_BR.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen pt_BR.UTF-8
 
-ENV LANG pt_BR.UTF-8  
-ENV LANGUAGE pt_BR:pt  
-ENV LC_ALL pt_BR.UTF-8
+ENV LANG=pt_BR.UTF-8 \
+    LANGUAGE=pt_BR:pt \
+    LC_ALL=pt_BR.UTF-8
 
 RUN mkdir -p /secrets
 
