@@ -14,12 +14,24 @@
 
   <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png" >
 
-  <title>{% block title %}Portal SITTS{% endblock %}</title>
-  {% block customcss %} {% endblock customcss %}
+  <title>Plano de Trabalho - Portal SITTS</title>
+  
+  <style>
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100 p-4">
-  <div class="mx-6 px-4 border border-gray-300 print:border-0">
+<body class="bg-gray-100 m-4">
+  <div class="mx-6 px-4 border border-gray-300">
     <div class="my-4 text-center">
       <p class="text-xl font-thin">Plano de Trabalho </p>
       <p class="text-2xl font-normal">{{ contract.name }}</[]>
@@ -45,6 +57,23 @@
       <p>{{ contract.hired_company.full_address }}</p>
     </div>
 
+    <!-- Descrição do Plano de Trabalho -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Descrição do Plano de Trabalho</h2>
+      <div class="grid grid-cols-3 gap-4">
+          <div class="col-span-2">
+            <p class="font-semibold">Nome</p>
+              <p>{{ contract.name }}</p>
+              <p class="font-semibold mt-2">Objeto</p>
+              <p>{{ contract.objective }}</p>
+          </div>
+          <div>
+              <p class="font-semibold">Vigência do Contrato</p>
+              <p>{{ contract.start_of_vigency|date:'d/m/Y' }} a {{ contract.end_of_vigency|date:'d/m/Y' }}</p>
+          </div>
+      </div>
+    </div>
+
     <!-- Equipe do Projeto -->
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <h2 class="text-xl font-bold mb-4">Equipe do Projeto</h2>
@@ -68,23 +97,6 @@
           {% endfor %}
         </tbody>
       </table>
-    </div>
-
-    <!-- Descrição do Plano de Trabalho -->
-    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-      <h2 class="text-xl font-bold mb-4">Descrição do Plano de Trabalho</h2>
-      <div class="grid grid-cols-3 gap-4">
-          <div class="col-span-2">
-            <p class="font-semibold">Nome</p>
-              <p>{{ contract.name }}</p>
-              <p class="font-semibold mt-2">Objeto</p>
-              <p>{{ contract.objective }}</p>
-          </div>
-          <div>
-              <p class="font-semibold">Vigência do Contrato</p>
-              <p>{{ contract.start_of_vigency|date:'d/m/Y' }} a {{ contract.end_of_vigency|date:'d/m/Y' }}</p>
-          </div>
-      </div>
     </div>
 
     <!-- Cronograma Físico -->
@@ -139,21 +151,19 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Exemplo de linha clara -->
           <tr class="bg-white border-b">
             <td class="py-4 px-6">
-              Associação Comunidade Varzina - Eco & Vida (Social)
-            </td>
-            <td class="py-4 px-6">Contrapartida Entidade Parceira</td>
-            <td class="py-4 px-6">R$ 60.000,00</td>
-          </tr>
-          <!-- Exemplo de linha cinza clara alternada -->
-          <tr class="bg-gray-100 border-b">
-            <td class="py-4 px-6">
-              Prefeitura Municipal de Várzea Paulista
+              {{ contract.area.city_hall.name }}
             </td>
             <td class="py-4 px-6">Municipal</td>
-            <td class="py-4 px-6">R$ 1.478.185,32</td>
+            <td class="py-4 px-6">R${{ contract.municipal_value|intcomma }}</td>
+          </tr>
+          <tr class="bg-gray-100 border-b">
+            <td class="py-4 px-6">
+              {{ contract.hired_company.name }}
+            </td>
+            <td class="py-4 px-6">Contrapartida Entidade Parceira</td>
+            <td class="py-4 px-6">R${{ contract.counterpart_value|intcomma }}</td>
           </tr>
         </tbody>
       </table>
@@ -176,24 +186,72 @@
         </thead>
         <tbody>
           {% for item in contract.items.all %}
-          <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
-            <td class="py-4 px-6">{{ item.name }}</td>
-            <td class="py-4 px-6">{{ item.nature_label }}</td>
-            <td class="py-4 px-6 whitespace-nowrap">{{ item.quantity}} {{item.unit_type|default_if_none:""}}</td>
-            <td class="py-4 px-6">R${{ item.month_expense|intcomma }}</td>
-            <td class="py-4 px-6">R${{ item.anual_expense|intcomma }}</td>
-          </tr>
+            <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
+              <td class="py-4 px-6" rowspan="2">{{ item.name }}</td>
+              <td class="py-4 px-6">{{ item.nature_label }}</td>
+              <td class="py-4 px-6 whitespace-nowrap">
+                {{ item.quantity }} {{ item.unit_type|default_if_none:"" }}
+              </td>
+              <td class="py-4 px-6">R${{ item.month_expense|intcomma }}</td>
+              <td class="py-4 px-6">R${{ item.anual_expense|intcomma }}</td>
+            </tr>
+            <tr class="bg-blue-200  border-b">
+              <td class="py-2 px-6" colspan="3">
+                <span class="py-1">
+                  Fonte de Recurso: <b>{{ item.source_label }}</b>
+                </span>
+              </td>
+              <td class="py-2 px-6">R${{ item.anual_expense|intcomma }}</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
+    <!-- Natureza das Despesas -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">
+        Natureza das Aplicações
+      </h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6" style="width: 80%;">Natureza da Despesa</th>
+            <th class="py-3 px-6">Custo Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for nature, data in groupped_natures.items %}
+            <tr class="bg-gray-100 border-b">
+              <td class="py-4 px-6 font-semibold">{{ nature }}</td>
+              <td class="py-4 px-6 font-semibold">R${{ data.total|intcomma }}</td>
+            </tr>
+ 
+            {% for subnature, value in data.items %}
+              {% if subnature != 'total' %}
+                <tr class="text-sm bg-white border-b">
+                  <td class="py-3 px-6 pl-10">
+                    - {{ subnature }}
+                  </td>
+                  <td class="py-3 px-6">
+                    R${{ value|intcomma }}
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+      
     <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
       <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
         <button
           type="button"
           data-tooltip-target="tooltip-share"
           data-tooltip-placement="left"
+          onclick="navigator.clipboard.writeText(window.location.href)"
           class="
             flex
             justify-center

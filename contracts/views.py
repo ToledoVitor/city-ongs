@@ -40,6 +40,7 @@ from contracts.models import (
     ContractItemReview,
     ContractInterestedPart,
 )
+from contracts.choices import NatureCategories
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -776,6 +777,8 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
     def get_queryset(self) -> QuerySet[Any]:
         return (
             super().get_queryset().select_related(
+                "area",
+                "area__city_hall",
                 "hired_company",
                 "hired_company",
             )
@@ -790,8 +793,54 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
 
+    def group_nature_expenses(self) -> dict:
+        groupped_expenses = {
+            "Bens Permanentes": {"total": Decimal("0.00")},
+            "Combustível": {"total": Decimal("0.00")},
+            "Locações Diversas": {"total": Decimal("0.00")},
+            "Outras despesas": {"total": Decimal("0.00")},
+            "Outros Materiais de Consumo": {"total": Decimal("0.00")},
+            "Outros Serviços de Terceiros": {"total": Decimal("0.00")},
+            "Recursos Humanos (5)": {"total": Decimal("0.00")},
+            "Recursos Humanos (6)": {"total": Decimal("0.00")},
+            "Utilidades Públicas (7)": {"total": Decimal("0.00")},
+        }
+
+        for item in self.object.items.all():
+            if item.nature in NatureCategories.PERMANENT_GOODS:
+                group = "Bens Permanentes"
+            elif item.nature in NatureCategories.FUEL:
+                group = "Combustível"
+            elif item.nature in NatureCategories.MISCELLANEOUS:
+                group = "Locações Diversas"
+            elif item.nature in NatureCategories.OTHER_EXPENSES:
+                group = "Outras despesas"
+            elif item.nature in NatureCategories.OTHER_CONSUMABLES:
+                group = "Outros Materiais de Consumo"
+            elif item.nature in NatureCategories.OTHER_THIRD_PARTY:
+                group = "Outros Serviços de Terceiros"
+            elif item.nature in NatureCategories.HUMAN_RESOURCES:
+                group = "Recursos Humanos (5)"
+            elif item.nature in NatureCategories.OTHER_HUMAN_RESOURCES:
+                group = "Recursos Humanos (6)"
+            elif item.nature in NatureCategories.PUBLIC_UTILITIES:
+                group = "Utilidades Públicas (7)"
+            else:
+                continue
+
+            if item.nature_label in groupped_expenses[group]:
+                groupped_expenses[group][item.nature_label] += item.anual_expense
+                groupped_expenses[group]["total"] += item.anual_expense
+            else:
+                groupped_expenses[group][item.nature_label] = item.anual_expense
+                groupped_expenses[group]["total"] += item.anual_expense
+            
+        return groupped_expenses
+
     def get_context_data(self, **kwargs) -> dict:
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context["groupped_natures"] = self.group_nature_expenses()
+        return context
 
 
 class ContractTimelineView(LoginRequiredMixin, DetailView):

@@ -178,12 +178,26 @@ class Contract(BaseModel):
         blank=True,
     )
 
-    # Dates and values
+    # Values
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
         decimal_places=2,
         max_digits=12,
     )
+    municipal_value = models.DecimalField(
+        verbose_name="Valor repassado pelo município",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    counterpart_value = models.DecimalField(
+        verbose_name="Valor repassado por contrapartida de parceiro",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+
+    # Dates
     start_of_vigency = models.DateField(verbose_name="Começo da vigência")
     end_of_vigency = models.DateField(verbose_name="Fim da vigência")
     status = models.CharField(
@@ -544,11 +558,21 @@ class ContractStep(BaseModel):
 
 
 class ContractItem(BaseModel):
+    class ResourceSource(models.TextChoices):
+        CITY_HALL = "CITY_HALL", "Prefeitura"
+        COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
         related_name="items",
         on_delete=models.CASCADE,
+    )
+    source = models.CharField(
+        verbose_name="Fonte do Recurso",
+        choices=ResourceSource.choices,
+        default=ResourceSource.CITY_HALL,
+        max_length=11,
     )
 
     # ITEM ESPECIFICATION
@@ -639,6 +663,10 @@ class ContractItem(BaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def source_label(self) -> str:
+        return ContractItem.ResourceSource(self.source).label
 
     @property
     def status_label(self) -> str:
