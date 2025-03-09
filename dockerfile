@@ -1,5 +1,14 @@
 FROM python:3.12
 
+RUN apt-get update && \
+    apt-get install -y locales && \
+    locale-gen pt_BR.UTF-8 && \
+    update-locale LANG=pt_BR.UTF-8
+
+ENV LANG pt_BR.UTF-8  
+ENV LANGUAGE pt_BR:pt  
+ENV LC_ALL pt_BR.UTF-8
+
 RUN mkdir -p /secrets
 
 WORKDIR /app
