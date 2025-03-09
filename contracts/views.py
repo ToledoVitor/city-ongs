@@ -848,6 +848,7 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context["groupped_natures"] = self.group_nature_expenses()
+        context["transfers"] = get_monthly_transfers(self.object)
         return context
 
 

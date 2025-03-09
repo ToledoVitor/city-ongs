@@ -88,7 +88,7 @@
         </thead>
         <tbody>
           {% for interested in contract.interested_parts.all %}
-            <tr class="bg-white border-b">
+            <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
               <td class="py-4 px-6">{{ interested.user.get_full_name }}</td>
               <td class="py-4 px-6">{{ interested.interest_label }}</td>
               <td class="py-4 px-6">{{ interested.user.masked_phone }}</td>
@@ -240,6 +240,33 @@
               {% endif %}
             {% endfor %}
 
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cronograma de Repasses -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">
+        Cronograma de Repasses
+      </h2>
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 text-center uppercase bg-blue-100">
+          <tr>
+            <th class="py-3 px-6">Mês</th>
+            <th class="py-3 px-6">Repasse do Município</th>
+            <th class="py-3 px-6">Repasse da Contrapartida</th>
+            <th class="py-3 px-6">Repasse Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in transfers %}
+            <tr class="{% cycle 'bg-white' 'bg-gray-100' %} text-center border-b">              <td class="py-4 px-6 font-semibold">{{ data.month }}</td>
+              <td class="py-4 px-6 font-semibold">R${{ data.city_hall|intcomma }}</td>
+              <td class="py-4 px-6 font-semibold">R${{ data.counterpart|intcomma }}</td>
+              <td class="py-4 px-6 font-semibold">R${{ data.total|intcomma }}</td>
+            </tr>
+ 
           {% endfor %}
         </tbody>
       </table>
