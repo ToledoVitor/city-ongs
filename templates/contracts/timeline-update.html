@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Cronograma Repasses - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Cronograma de Repasses
+</p>
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Inicio
+      </a>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Contratos</a>
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">{{ contract.trailing_code }}</a>
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'contracts:contract-timeline' contract.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Cronograma de Repasse</a>
+      </div>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium md:ms-2 text-black">Atualizar Cronograma</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+<div class="container mx-auto p-4">
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h1 class="text-2xl font-bold mb-2">Repasses  do Contrato</h1>
+    
+        <div class="text-left">
+          <div class="mb-1 text-base flex justify-between">
+            <b>Período:</b> {{ contract.start_of_vigency|date:'d/m/Y' }} a {{ contract.end_of_vigency|date:'d/m/Y' }}
+          </div>
+          <div class="mb-1 text-base flex justify-between">
+            <b>Valor Repassado pelo Município:</b> R${{ contract.municipal_value|intcomma }}
+          </div>
+          <div class="mb-1 text-base flex justify-between">
+            <b>Valor Repassado por Contrapartida de parceiro:</b> R${{ contract.counterpart_value|intcomma }}
+          </div>
+          <div class="mb-1 text-base flex justify-between">
+            <b>Valor Total do Contrato:</b> R${{ contract.total_value|intcomma }}
+          </div>
+        </div>
+    </div>
+  
+    {% load l10n %}
+    {% localize off %}
+    <button
+      type="button"
+      onclick="autoDivide({{ contract.municipal_value }}, {{ contract.counterpart_value }})"
+      class="
+        px-3
+        py-2
+        mb-4
+        text-sm
+        font-medium
+        text-center
+        inline-flex
+        items-center
+        text-white
+        rounded-lg
+        focus:ring-4
+        focus:outline-none
+        bg-blue-600
+        hover:bg-blue-700
+        focus:ring-blue-800
+      "
+    >
+      Dividir valores automaticamente
+      <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 20V10m0 10-3-3m3 3 3-3m5-13v10m0-10 3 3m-3-3-3 3"/>
+      </svg>
+    </button>
+    {% endlocalize %}
+
+  
+    {% if wrong_values %}
+      <div id="alert-revenue" class="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">
+          <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+          <span class="sr-only">Danger</span>
+          <div>
+              <span class="font-medium">Erro ao criar repasses</span>
+              <ul class="my-1.5 list-disc list-inside">
+                  <li class="my-1">A soma dos valores mensais diferem do valores totais do contrato</li>
+              </ul>
+          </div>
+
+          <button
+            type="button"
+            class="
+              ms-auto
+              -mx-1.5
+              -my-1.5
+              bg-red-300
+              text-white
+              rounded-lg
+              focus:ring-2
+              focus:ring-white
+              hover:bg-red-500
+              p-1.5
+              inline-flex
+              items-center
+              justify-center
+              h-6
+              w-6
+            "
+            data-dismiss-target="#alert-revenue"
+            aria-label="Close"
+          >
+              <span class="sr-only">Close</span>
+              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+              </svg>
+          </button>
+
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-4 relative overflow-x-auto shadow-lg rounded-2xl"> 
+
+        <table class="min-w-full bg-white border border-gray-300 p-2 rounded-lg">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="py-2 px-4 border-b text-center">Mês</th>
+              <th class="py-2 px-4 border-b">Valor Prefeitura</th>
+              <th class="py-2 px-4 border-b">Valor Contrapartida</th>
+              <th class="py-2 px-4 border-b">Total Mensal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month in months %}
+            <tr>
+              <td class="py-2 px-4 border-b text-center">{{ month }}</td>
+              <td class="py-2 px-4 border-b">
+                <input
+                  type="number"
+                  step="0.01"
+                  name="city_hall_{{ forloop.counter }}"
+                  class="w-full border rounded p-2"
+                  oninput="updateRowSum({{ forloop.counter }})"
+                >
+              </td>
+              <td class="py-2 px-4 border-b">
+                <input
+                  type="number"
+                  step="0.01"
+                  name="counterpart_{{ forloop.counter }}"
+                  class="w-full border rounded p-2"
+                  oninput="updateRowSum({{ forloop.counter }})"
+                >
+              </td>
+              <td class="py-2 px-4 border-b">
+                <input
+                  type="number"
+                  step="0.01"
+                  name="total_{{ forloop.counter }}"
+                  class="w-full border rounded p-2 bg-gray-300"
+                  disabled
+                >
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="bg-gray-200">
+            <tr>
+              <td class="py-2 px-4 border-t font-bold text-center">Total</td>
+              <td class="py-2 px-4 border-t">
+                <input
+                  type="number"
+                  step="0.01"
+                  id="total_city_hall"
+                  value="0.00"
+                  class="w-full border rounded p-2 bg-gray-300"
+                  disabled
+                >
+              </td>
+              <td class="py-2 px-4 border-t">
+                <input
+                  type="number"
+                  step="0.01"
+                  id="total_counterpart"
+                  value="0.00"
+                  class="w-full border rounded p-2 bg-gray-300"
+                  disabled
+                >
+              </td>
+              <td class="py-2 px-4 border-t">
+                <input
+                  type="number"
+                  step="0.01"
+                  id="total_general"
+                  value="0.00"
+                  class="w-full border rounded p-2 bg-gray-300"
+                  disabled
+                >
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+  
+      {% include 'commons/form-errors.html' with form=form %}
+
+      <button
+        type="submit"
+        class="
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-center
+          inline-flex
+          items-center
+          text-white
+          rounded-lg
+          focus:ring-4
+          focus:outline-none
+          bg-blue-600
+          hover:bg-blue-700
+          focus:ring-blue-800
+        "
+        style="display: flex; justify-self: center;"
+      >
+        Atualizar Repasses
+      </button>
+    </form>
+  </div>
+  
+<script>
+const numberOfMonths = {{ months|length }};
+
+function updateRowSum(index) {
+    const cityHallInput = document.querySelector(`input[name="city_hall_${index}"]`);
+    const counterPartInput = document.querySelector(`input[name="counterpart_${index}"]`);
+    const totalInput = document.querySelector(`input[name="total_${index}"]`);
+    const cityHall = parseFloat(cityHallInput.value) || 0;
+    const counterPart = parseFloat(counterPartInput.value) || 0;
+    totalInput.value = (cityHall + counterPart).toFixed(2);
+    recalcTotals();
+}
+
+function recalcTotals() {
+    let totalCityHall = 0;
+    let totalCounterPart = 0;
+    for (let i = 1; i <= numberOfMonths; i++) {
+        const repInput = document.querySelector(`input[name="city_hall_${i}"]`);
+        const injInput = document.querySelector(`input[name="counterpart_${i}"]`);
+        totalCityHall += parseFloat(repInput.value) || 0;
+        totalCounterPart += parseFloat(injInput.value) || 0;
+    }
+    document.getElementById('total_city_hall').value = totalCityHall.toFixed(2);
+    document.getElementById('total_counterpart').value = totalCounterPart.toFixed(2);
+    document.getElementById('total_general').value = (totalCityHall + totalCounterPart).toFixed(2);
+}
+
+function autoDivide(totalCityHall, totalCounterPart) {
+    const cityHallPerMonth = totalCityHall / numberOfMonths;
+    const counterPartPerMonth = totalCounterPart / numberOfMonths;
+    for (let i = 1; i <= numberOfMonths; i++) {
+        const repInput = document.querySelector(`input[name="city_hall_${i}"]`);
+        const injInput = document.querySelector(`input[name="counterpart_${i}"]`);
+        repInput.value = cityHallPerMonth.toFixed(2);
+        injInput.value = counterPartPerMonth.toFixed(2);
+        updateRowSum(i);
+    }
+}
+</script>
+
+{% endblock %}

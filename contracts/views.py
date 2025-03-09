@@ -1,10 +1,16 @@
+from django.db.models import Sum
+from calendar import month_abbr
+
+import locale
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from dateutil.relativedelta import relativedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, DecimalField, Q, Sum, Value
+from django.db.models import Count, DecimalField, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
@@ -35,10 +41,11 @@ from contracts.models import (
     ContractExecutionFile,
     ContractGoal,
     ContractGoalReview,
-    ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
     ContractItemReview,
+    ContractInterestedPart,
+    ContractMonthTransfer,
 )
 from contracts.choices import NatureCategories
 from utils.choices import StatusChoices
@@ -843,6 +850,39 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
         return context
 
 
+def get_monthly_transfers(contract):
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+
+    transfers = (
+        contract.month_transfers.values("month", "year", "source")
+        .annotate(total_value=Sum("value"))
+        .order_by("year", "month")
+    )
+    
+    monthly_data = {}
+    for transfer in transfers:
+        month_year = f"{month_abbr[transfer["month"]]}/{transfer["year"]}"
+        if month_year not in monthly_data:
+            monthly_data[month_year] = {
+                "month": month_year,
+                "city_hall": Decimal(0),
+                "counterpart": Decimal(0),
+                "total": Decimal(0),
+            }
+        
+        if transfer["source"] == ContractMonthTransfer.TransferSource.CITY_HALL:
+            monthly_data[month_year]["city_hall"] = transfer["total_value"]
+        elif transfer["source"] == ContractMonthTransfer.TransferSource.COUNTERPART:
+            monthly_data[month_year]["counterpart"] = transfer["total_value"]
+        
+        monthly_data[month_year]["total"] = (
+            monthly_data[month_year]["city_hall"] +
+            monthly_data[month_year]["counterpart"]
+        )
+
+    return list(monthly_data.values())
+
+
 class ContractTimelineView(LoginRequiredMixin, DetailView):
     model = Contract
 
@@ -853,18 +893,137 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super().get_queryset()
-            # .select_related(
-            # )
-            # .prefetch_related(
-            # )
+            super().get_queryset().prefetch_related(
+                "month_transfers",
+            )
         )
 
     def get_object(self, queryset=None):
         return self.model.objects.get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context["transfers"] = get_monthly_transfers(self.object)
+        return context
+
+
+def _get_months_list(contract: Contract):
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+
+    months = []
+    current_date = contract.start_of_vigency
+
+    while current_date <= contract.end_of_vigency:
+        months.append(current_date.strftime("%b/%Y"))
+        current_date += relativedelta(months=1)
+    return months
+
+
+def _groupped_list_values(request):
+    city_hall_values = []
+    counterpart_values = []
+
+    for key, value in request.POST.items():
+        if key.startswith("city_hall_"):
+            city_hall_values.append(Decimal(str(value)))
+        elif key.startswith("counterpart_"):
+            counterpart_values.append(Decimal(str(value)))
+
+    city_hall_values = [value for _, value in sorted(
+        ((int(key.split("_")[2]), Decimal(str(value)))
+        for key, value in request.POST.items() if key.startswith("city_hall_")),
+        key=lambda x: x[0]
+    )]
+
+    counterpart_values = [value for _, value in sorted(
+        ((int(key.split("_")[1]), Decimal(str(value)))
+        for key, value in request.POST.items() if key.startswith("counterpart_")),
+        key=lambda x: x[0]
+    )]
+
+    return city_hall_values, counterpart_values
+
+def contract_timeline_update_view(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    months = _get_months_list(contract)
+    if request.method == "POST":
+        city_hall_values, counterpart_values = _groupped_list_values(request)
+        wrong_values = False
+        
+        if sum(city_hall_values) != contract.municipal_value:
+            wrong_values = True
+        if sum(counterpart_values) != contract.counterpart_value:
+            wrong_values = True
+        if sum([*city_hall_values, *counterpart_values]) != contract.total_value:
+            wrong_values = True
+
+        if wrong_values:
+            context = {
+                "contract": contract,
+                "months": months,
+                "wrong_values": True,
+            }
+            return render(request, "contracts/timeline-update.html", context)
+        else:
+            with transaction.atomic():
+                month_transfers = []
+                months_map = {
+                    "Jan": 1,
+                    "Fev": 2,
+                    "Mar": 3,
+                    "Abr": 4,
+                    "Mai": 5,
+                    "Jun": 6,
+                    "Jul": 7,
+                    "Ago": 8,
+                    "Set": 9,
+                    "Out": 10,
+                    "Nov": 11,
+                    "Dez": 12,
+                }
+
+                for idx, month in enumerate(months):
+                    m, y = month.split("/")
+                    month_transfers.append(
+                        ContractMonthTransfer(
+                            contract=contract,
+                            month=months_map.get(m),
+                            year=int(y),
+                            source=ContractMonthTransfer.TransferSource.CITY_HALL,
+                            value=city_hall_values[idx],
+                        )
+                    )
+                    month_transfers.append(
+                        ContractMonthTransfer(
+                            contract=contract,
+                            month=months_map.get(m),
+                            year=int(y),
+                            source=ContractMonthTransfer.TransferSource.COUNTERPART,
+                            value=counterpart_values[idx],
+                        )
+                    )
+                
+                contract.month_transfers.all().delete()
+                ContractMonthTransfer.objects.bulk_create(month_transfers)
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_MONTH_TRASNFER,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
+
+            return redirect("contracts:contract-timeline", pk=contract.id)
+    else:
+        context = {
+            "contract": contract,
+            "months": months,
+        }
+        return render(request, "contracts/timeline-update.html", context)
 
 
 def contract_status_change_view(request, pk):

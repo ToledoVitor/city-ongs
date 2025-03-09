@@ -13,6 +13,7 @@ from contracts.views import (
     ContractWorkPlanView,
     ItemValueRequestReviewView,
     contract_status_change_view,
+    contract_timeline_update_view,
     create_contract_execution_view,
     create_contract_goal_view,
     create_contract_interested_view,
@@ -41,6 +42,11 @@ urlpatterns = [
         "detail/<uuid:pk>/timeline/",
         ContractTimelineView.as_view(),
         name="contract-timeline",
+    ),
+    path(
+        "detail/<uuid:pk>/timeline/update",
+        contract_timeline_update_view,
+        name="timeline-update",
     ),
     path(
         "detail/<uuid:pk>/change-status/",

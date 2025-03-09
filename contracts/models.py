@@ -433,6 +433,42 @@ class ContractInterestedPart(BaseModel):
         verbose_name = "Partes Interessadas"
 
 
+class ContractMonthTransfer(BaseModel):
+    class TransferSource(models.TextChoices):
+        CITY_HALL = "CITY_HALL", "Prefeitura"
+        COUNTERPART = "COUNTERPART", "Contrapartida"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Contrato",
+        related_name="month_transfers",
+        on_delete=models.CASCADE,
+    )
+    month = models.IntegerField(
+        verbose_name="Mês",
+        choices=MonthChoices,
+        default=MonthChoices.JAN,
+    )
+    year = models.IntegerField(
+        verbose_name="Ano",
+        default=0,
+    )
+    source = models.CharField(
+        verbose_name="Fonte do Repasse",
+        choices=TransferSource.choices,
+        default=TransferSource.CITY_HALL,
+    )
+    value = models.DecimalField(
+        verbose_name="Valor do Repasse",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    class Meta:
+        verbose_name = "Repasse Mensal"
+        verbose_name_plural = "Repasses Mensais"
+
+
 class ContractAddendum(BaseModel):
     contract = models.ForeignKey(
         Contract,

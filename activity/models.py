@@ -50,6 +50,8 @@ class ActivityLog(models.Model):
             "DELETED_CONTRACT_INTERESTED",
             "Deletou interessado no contrato",
         )
+        # contract month transfer
+        UPDATED_CONTRACT_MONTH_TRASNFER = "UPDATED_CONTRACT_MONTH_TRASNFER", "Atualizou repasse mensal"
         # contract goals
         CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
         COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"
