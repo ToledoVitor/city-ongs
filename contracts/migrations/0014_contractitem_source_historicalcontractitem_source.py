@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0013_alter_contract_counterpart_value_and_more"),
     ]

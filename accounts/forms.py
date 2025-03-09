@@ -1,7 +1,11 @@
 from django import forms
 
 from accounts.models import Area, User
-from utils.widgets import BaseCharFieldFormWidget, BaseEmailFormWidget, CustomPhoneNumberField
+from utils.widgets import (
+    BaseCharFieldFormWidget,
+    BaseEmailFormWidget,
+    CustomPhoneNumberField,
+)
 
 
 def email_exists(email: str) -> bool:
@@ -15,7 +19,6 @@ class FolderManagerCreateForm(forms.ModelForm):
         required=True,
     )
     phone_number = CustomPhoneNumberField()
-
 
     class Meta:
         model = User

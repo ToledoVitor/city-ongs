@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from simple_history.models import HistoricalRecords
 from phonenumber_field.modelfields import PhoneNumberField
+from simple_history.models import HistoricalRecords
 
 from utils.fields import LowerCaseEmailField
 from utils.models import BaseModel

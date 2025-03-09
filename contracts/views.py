@@ -1,16 +1,13 @@
-from django.db.models import Sum
-from calendar import month_abbr
-
 import locale
 import logging
+from calendar import month_abbr
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from dateutil.relativedelta import relativedelta
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, DecimalField, Q, Value
+from django.db.models import Count, DecimalField, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,6 +15,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from activity.models import ActivityLog
+from contracts.choices import NatureCategories
 from contracts.forms import (
     CompanyCreateForm,
     ContractCreateForm,
@@ -41,13 +39,12 @@ from contracts.models import (
     ContractExecutionFile,
     ContractGoal,
     ContractGoalReview,
+    ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
     ContractItemReview,
-    ContractInterestedPart,
     ContractMonthTransfer,
 )
-from contracts.choices import NatureCategories
 from utils.choices import StatusChoices
 from utils.mixins import AdminRequiredMixin
 
@@ -537,7 +534,9 @@ class CompanyCreateView(LoginRequiredMixin, TemplateView):
             with transaction.atomic():
                 company = form.save(commit=False)
                 company.organization = request.user.organization
-                company.phone_number = str(form.cleaned_data["phone_number"].national_number)
+                company.phone_number = str(
+                    form.cleaned_data["phone_number"].national_number
+                )
                 company.save()
 
                 logger.info(f"{request.user.id} - Created new company")
@@ -783,7 +782,9 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super().get_queryset().select_related(
+            super()
+            .get_queryset()
+            .select_related(
                 "area",
                 "area__city_hall",
                 "hired_company",
@@ -841,7 +842,7 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
             else:
                 groupped_expenses[group][item.nature_label] = item.anual_expense
                 groupped_expenses[group]["total"] += item.anual_expense
-            
+
         return groupped_expenses
 
     def get_context_data(self, **kwargs) -> dict:
@@ -851,14 +852,14 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
 
 
 def get_monthly_transfers(contract):
-    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+    locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
     transfers = (
         contract.month_transfers.values("month", "year", "source")
         .annotate(total_value=Sum("value"))
         .order_by("year", "month")
     )
-    
+
     monthly_data = {}
     for transfer in transfers:
         month_year = f"{month_abbr[transfer["month"]]}/{transfer["year"]}"
@@ -869,15 +870,15 @@ def get_monthly_transfers(contract):
                 "counterpart": Decimal(0),
                 "total": Decimal(0),
             }
-        
+
         if transfer["source"] == ContractMonthTransfer.TransferSource.CITY_HALL:
             monthly_data[month_year]["city_hall"] = transfer["total_value"]
         elif transfer["source"] == ContractMonthTransfer.TransferSource.COUNTERPART:
             monthly_data[month_year]["counterpart"] = transfer["total_value"]
-        
+
         monthly_data[month_year]["total"] = (
-            monthly_data[month_year]["city_hall"] +
-            monthly_data[month_year]["counterpart"]
+            monthly_data[month_year]["city_hall"]
+            + monthly_data[month_year]["counterpart"]
         )
 
     return list(monthly_data.values())
@@ -893,7 +894,9 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self) -> QuerySet[Any]:
         return (
-            super().get_queryset().prefetch_related(
+            super()
+            .get_queryset()
+            .prefetch_related(
                 "month_transfers",
             )
         )
@@ -908,7 +911,7 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
 
 def _get_months_list(contract: Contract):
-    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+    locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
     months = []
     current_date = contract.start_of_vigency
@@ -929,19 +932,32 @@ def _groupped_list_values(request):
         elif key.startswith("counterpart_"):
             counterpart_values.append(Decimal(str(value)))
 
-    city_hall_values = [value for _, value in sorted(
-        ((int(key.split("_")[2]), Decimal(str(value)))
-        for key, value in request.POST.items() if key.startswith("city_hall_")),
-        key=lambda x: x[0]
-    )]
+    city_hall_values = [
+        value
+        for _, value in sorted(
+            (
+                (int(key.split("_")[2]), Decimal(str(value)))
+                for key, value in request.POST.items()
+                if key.startswith("city_hall_")
+            ),
+            key=lambda x: x[0],
+        )
+    ]
 
-    counterpart_values = [value for _, value in sorted(
-        ((int(key.split("_")[1]), Decimal(str(value)))
-        for key, value in request.POST.items() if key.startswith("counterpart_")),
-        key=lambda x: x[0]
-    )]
+    counterpart_values = [
+        value
+        for _, value in sorted(
+            (
+                (int(key.split("_")[1]), Decimal(str(value)))
+                for key, value in request.POST.items()
+                if key.startswith("counterpart_")
+            ),
+            key=lambda x: x[0],
+        )
+    ]
 
     return city_hall_values, counterpart_values
+
 
 def contract_timeline_update_view(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
@@ -952,7 +968,7 @@ def contract_timeline_update_view(request, pk):
     if request.method == "POST":
         city_hall_values, counterpart_values = _groupped_list_values(request)
         wrong_values = False
-        
+
         if sum(city_hall_values) != contract.municipal_value:
             wrong_values = True
         if sum(counterpart_values) != contract.counterpart_value:
@@ -1005,7 +1021,7 @@ def contract_timeline_update_view(request, pk):
                             value=counterpart_values[idx],
                         )
                     )
-                
+
                 contract.month_transfers.all().delete()
                 ContractMonthTransfer.objects.bulk_create(month_transfers)
 

@@ -5,8 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Max
 from django_cpf_cnpj.fields import CNPJField
-from simple_history.models import HistoricalRecords
 from phonenumber_field.modelfields import PhoneNumberField
+from simple_history.models import HistoricalRecords
 
 from accounts.models import Area, Organization, User
 from activity.models import ActivityLog
@@ -101,9 +101,9 @@ class Company(BaseModel):
             self.uf,
             self.postal_code,
         ]
-        return ", ".join([
-            str(part).title() for part in address_parts if part is not None
-        ])
+        return ", ".join(
+            [str(part).title() for part in address_parts if part is not None]
+        )
 
     class Meta:
         verbose_name = "Empresa"

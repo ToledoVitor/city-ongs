@@ -123,18 +123,15 @@ class ContractCreateForm(forms.ModelForm):
         counterpart_value = cleaned_data.get("counterpart_value")
 
         if not all([bool(total_value), bool(total_value), bool(total_value)]):
-            self.add_error(
-                "total_value",
-                "Valores repassados não podem ser nulos."
-            )
+            self.add_error("total_value", "Valores repassados não podem ser nulos.")
 
         if total_value != (municipal_value + counterpart_value):
             self.add_error(
                 "total_value",
                 "A soma dos valores repassados pelo município e contrapartida "
-                "são diferentes do valor total do contrato"
+                "são diferentes do valor total do contrato",
             )
-        
+
         return cleaned_data
 
 

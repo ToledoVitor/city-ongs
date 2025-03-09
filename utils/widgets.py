@@ -1,6 +1,7 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 
+
 class BaseCharFieldFormWidget(forms.TextInput):
     def __init__(
         self, *args, placeholder=None, is_password=False, required=True, **kwargs
@@ -183,27 +184,33 @@ class CustomCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
         option["attrs"].update(self.input_attrs)
         return option
 
+
 class CustomPhoneNumberField(PhoneNumberField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("region", "BR")
-        kwargs.setdefault("widget", forms.TextInput(attrs={
-            "class": " ".join(
-                [
-                    "w-full",
-                    "p-2.5",
-                    "block",
-                    "text-sm",
-                    "border",
-                    "rounded-lg",
-                    "placeholder-gray-600",
-                    "bg-gray-300",
-                    "border-gray-600",
-                    "text-black",
-                    "focus:ring-blue-500",
-                    "focus:border-blue-500",
-                ]
+        kwargs.setdefault(
+            "widget",
+            forms.TextInput(
+                attrs={
+                    "class": " ".join(
+                        [
+                            "w-full",
+                            "p-2.5",
+                            "block",
+                            "text-sm",
+                            "border",
+                            "rounded-lg",
+                            "placeholder-gray-600",
+                            "bg-gray-300",
+                            "border-gray-600",
+                            "text-black",
+                            "focus:ring-blue-500",
+                            "focus:border-blue-500",
+                        ]
+                    ),
+                    "placeholder": "(00) 00000-0000",
+                    "data-mask": "(00) 00000-0000",
+                }
             ),
-            "placeholder": "(00) 00000-0000",
-            "data-mask": "(00) 00000-0000"
-        }))
+        )
         super().__init__(*args, **kwargs)
