@@ -249,7 +249,7 @@ class PassOn14PDFExporter:
                     addendum.contract.name_with_code,
                     format_into_brazilian_date(addendum.start_of_vigency),
                     format_into_brazilian_date(addendum.end_of_vigency),
-                    format_into_brazilian_currency(addendum.contract.validate_unique),
+                    format_into_brazilian_currency(addendum.total_value),
                 ]
             )
 
