@@ -28,6 +28,8 @@ from utils.widgets import (
 
 
 class ContractCreateForm(forms.ModelForm):
+    municipal_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+    counterpart_value = DecimalMaskedField(max_digits=12, decimal_places=2)
     total_value = DecimalMaskedField(max_digits=12, decimal_places=2)
 
     class Meta:
@@ -42,6 +44,8 @@ class ContractCreateForm(forms.ModelForm):
             "agreement_date",
             "objective",
             "total_value",
+            "municipal_value",
+            "counterpart_value",
             "start_of_vigency",
             "end_of_vigency",
             "contractor_company",
@@ -55,7 +59,7 @@ class ContractCreateForm(forms.ModelForm):
         ]
 
         widgets = {
-            "name": BaseCharFieldFormWidget(placeholder="TC 10/23 - Teste"),
+            "name": BaseCharFieldFormWidget(placeholder="Contrato xxxxx"),
             "concession_type": BaseSelectFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
             "law_num": BaseCharFieldFormWidget(),
@@ -111,6 +115,28 @@ class ContractCreateForm(forms.ModelForm):
 
         return file
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        total_value = cleaned_data.get("total_value")
+        municipal_value = cleaned_data.get("municipal_value")
+        counterpart_value = cleaned_data.get("counterpart_value")
+
+        if not all([bool(total_value), bool(total_value), bool(total_value)]):
+            self.add_error(
+                "total_value",
+                "Valores repassados não podem ser nulos."
+            )
+
+        if total_value != (municipal_value + counterpart_value):
+            self.add_error(
+                "total_value",
+                "A soma dos valores repassados pelo município e contrapartida "
+                "são diferentes do valor total do contrato"
+            )
+        
+        return cleaned_data
+
 
 class ContractItemForm(forms.ModelForm):
     month_expense = DecimalMaskedField(max_digits=12, decimal_places=2)
@@ -127,6 +153,7 @@ class ContractItemForm(forms.ModelForm):
             "month_expense",
             "unit_type",
             "nature",
+            "source",
             "file",
             "start_date",
             "end_date",
@@ -141,6 +168,7 @@ class ContractItemForm(forms.ModelForm):
             "month_quantity": BaseNumberFormWidget(),
             "unit_type": BaseCharFieldFormWidget(required=False),
             "nature": BaseSelectFormWidget(),
+            "source": BaseSelectFormWidget(),
             "file": BaseFileFormWidget(required=False),
         }
 
