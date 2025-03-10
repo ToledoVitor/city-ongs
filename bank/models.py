@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -46,6 +47,7 @@ class BankAccount(BaseModel):
         verbose_name="Saldo Atual",
         decimal_places=2,
         max_digits=12,
+        default=Decimal("0.00"),
     )
     origin = models.CharField(
         verbose_name="Origem da Fonte",

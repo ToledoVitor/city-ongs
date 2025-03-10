@@ -9,38 +9,26 @@ from utils.widgets import (
 )
 
 
-class UploadOFXForm(forms.Form):
-    account_type = forms.ChoiceField(
-        choices=BankAccount.AccountTypeChoices.choices,
-        widget=BaseSelectFormWidget(),
-    )
-    origin = forms.ChoiceField(
-        choices=BankAccount.OriginChoices.choices,
-        widget=BaseSelectFormWidget(),
-    )
-    ofx_file = forms.FileField(
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
-            }
-        )
-    )
+class BankAccountForm(forms.ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = [
+            "bank_name",
+            "bank_id",
+            "account",
+            "account_type",
+            "agency",
+            "origin",
+        ]
 
-    def clean_ofx_file(self):
-        ofx_file = self.cleaned_data.get("ofx_file")
-
-        if ofx_file:
-            if not ofx_file.name.lower().endswith(".ofx"):
-                raise forms.ValidationError(
-                    "Somente arquivos do tipo OFX são permitidos."
-                )
-
-            if ofx_file.size > 5 * 1024 * 1024:  # Limite de 5 MB
-                raise forms.ValidationError(
-                    "O tamanho máximo permitido para o arquivo é 5MB."
-                )
-
-        return ofx_file
+        widgets = {
+            "bank_name": BaseCharFieldFormWidget(),
+            "bank_id": BaseCharFieldFormWidget(),
+            "account": BaseCharFieldFormWidget(),
+            "account_type": BaseSelectFormWidget(),
+            "agency": BaseCharFieldFormWidget(),
+            "origin": BaseCharFieldFormWidget(),
+        }
 
 
 class UpdateOFXForm(forms.Form):

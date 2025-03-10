@@ -70,8 +70,29 @@
 
   <button
     type="submit"
-    class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+    class="
+      text-white
+      focus:ring-4
+      focus:outline-none
+      font-medium
+      rounded-lg
+      text-sm
+      px-5
+      py-2.5
+      text-center
+      inline-flex
+      items-center
+      me-2
+      {% if not contract.checking_account%}
+      bg-gray-400
+      {% else %}
+      bg-blue-600
+      hover:bg-blue-700
+      focus:ring-blue-800
+      {% endif %}
+    "
     style="display: flex; justify-self: center;"
+    {% if not contract.checking_account%}disabled{% endif %}
   >
     Baixar Modelo
     <svg class="ml-2 w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -249,6 +270,30 @@
   </div>
   {% endif %}
 
+  {% if not contract.checking_account %}
+  <div id="alert-application" class="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">
+      <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+      </svg>
+      <span class="sr-only">Danger</span>
+      <div>
+        <span class="font-medium">Impossível importar dados</span>
+        <ul class="my-1.5 list-disc list-inside">
+          <li class="my-1">
+            É necessário
+            <a
+              href="{% url 'contracts:contracts-accounts-create' accountability.contract.id %}"
+              class="text-sm hover:underline text-blue-500" target="_blank"
+              >
+              cadastrar uma conta bancária
+            </a>
+            ao projeto primeiramente.
+          </li>
+        </ul>        
+      </div>
+  </div>
+  {% endif %}
+
   <button
     type="submit"
     class="
@@ -263,10 +308,15 @@
       rounded-lg
       focus:ring-4
       focus:outline-none
+      {% if not contract.checking_account%}
+      bg-gray-400
+      {% else %}
       bg-blue-600
       hover:bg-blue-700
       focus:ring-blue-800
+      {% endif %}
     "
+    {% if not contract.checking_account%}disabled{% endif %}
     style="display: flex; justify-self: center;"
   >
     Importar Arquivo

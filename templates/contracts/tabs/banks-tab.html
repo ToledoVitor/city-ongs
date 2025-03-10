@@ -47,7 +47,7 @@
       <div class="relative">
         <p class="text-xl mb-2 font-bold text-black">Conta Investimento</p>
         {% if contract.investing_account %}
-            <b>Banco:</b> {{ contract.investing_account.bank_id }} - {{ contract.investing_account.bank_name }}<br>
+            <b>Banco:</b> {{ contract.investing_account.bank_name }} - {{ contract.investing_account.bank_id }}<br>
             <b>Conta:</b> {{ contract.investing_account.account }}<br>
             <b>Agência:</b> {{ contract.investing_account.agency }}<br>
             <b>Origem da Receita:</b> {{ contract.investing_account.origin }}<br>
@@ -85,7 +85,7 @@
     {% if not contract.checking_account or not contract.investing_account %}
         <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
         <a
-            href="{% url 'contracts:contracts-accounts-auto-create' contract.id %}"
+            href="{% url 'contracts:contracts-accounts-create' contract.id %}"
             class="
                 px-3
                 py-2
