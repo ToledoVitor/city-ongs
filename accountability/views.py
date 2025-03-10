@@ -950,6 +950,24 @@ def reconcile_expense_view(request, pk):
                     target_object_id=expense.id,
                     target_content_object=expense,
                 )
+
+            action = request.POST.get("action")
+            if action == "next":
+                next_expense = Expense.objects.filter(
+                    accountability=expense.accountability,
+                    conciled=False,
+                    paid=False,
+                ).first()
+                if next_expense:
+                    return redirect(
+                        "accountability:expense-reconcile", pk=next_expense.id
+                    )
+                else:
+                    return redirect(
+                        "accountability:accountability-detail",
+                        pk=expense.accountability.id,
+                    )
+            else:
                 return redirect(
                     "accountability:accountability-detail", pk=expense.accountability.id
                 )
@@ -1016,6 +1034,24 @@ def reconcile_revenue_view(request, pk):
                     target_object_id=revenue.id,
                     target_content_object=revenue,
                 )
+
+            action = request.POST.get("action")
+            if action == "next":
+                next_revenue = Revenue.objects.filter(
+                    accountability=revenue.accountability,
+                    conciled=False,
+                    paid=False,
+                ).first()
+                if next_revenue:
+                    return redirect(
+                        "accountability:revenue-reconcile", pk=next_revenue.id
+                    )
+                else:
+                    return redirect(
+                        "accountability:accountability-detail",
+                        pk=revenue.accountability.id,
+                    )
+            else:
                 return redirect(
                     "accountability:accountability-detail", pk=revenue.accountability.id
                 )

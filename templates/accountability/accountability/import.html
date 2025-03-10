@@ -95,7 +95,7 @@
   <input type="hidden" name="step" value="upload">
 
   {{ form.xlsx_file }}
-  <p class="mt-1 text-sm text-black" id="file_input_help">Apenas arquivos tipo .xlsx</p>
+  <p class="mt-1 mb-2 text-sm text-black" id="file_input_help">Apenas arquivos tipo .xlsx</p>
 
   {% if imported %}
   <div class="flex items-center p-4 my-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-100" role="alert">
@@ -120,7 +120,9 @@
         <div>
             <span class="font-medium">Erro ao importar receitas</span>
             <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">Confira se os dados estão corretos e se a planilha está no formato correto</li>
+              {% for error in revenues_error %}
+                <li class="my-1">{{error}}</li>
+              {% endfor %}
             </ul>
         </div>
 
@@ -164,7 +166,9 @@
         <div>
             <span class="font-medium">Erro ao importar despesas</span>
             <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">Confira se os dados estão corretos e se a planilha está no formato correto</li>
+              {% for error in expenses_error %}
+                <li class="my-1">{{error}}</li>
+              {% endfor %}
             </ul>
         </div>
 
@@ -208,7 +212,9 @@
       <div>
           <span class="font-medium">Erro ao importar aplicações e resgates</span>
           <ul class="my-1.5 list-disc list-inside">
-              <li class="my-1">Confira se os dados estão corretos e se a planilha está no formato correto</li>
+            {% for error in applications_error %}
+              <li class="my-1">{{error}}</li>
+            {% endfor %}
           </ul>
       </div>
 

@@ -6,6 +6,7 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
 
@@ -107,44 +108,49 @@ class AccountabilityXLSXImporter:
         revenues_df = revenues_df.replace({np.nan: None})
 
         revenues = []
-        for line in revenues_df.values.tolist()[1:]:
+        errors = []
+        for index, line in enumerate(revenues_df.values.tolist()[1:], start=2):
             if not line[2]:
                 break
 
             receive_date = line[4]
             competency = line[5]
-            revenues.append(
-                Revenue(
-                    accountability=self.accountability,
-                    identification=line[2],
-                    value=Decimal(line[3]),
-                    receive_date=datetime(
-                        receive_date.year, receive_date.month, receive_date.day
-                    ),
-                    competency=datetime(
-                        competency.year, competency.month, competency.day
-                    ),
-                    source=self.mapped_frs.get(line[6]),
-                    bank_account_id=self.mapped_cbs.get(line[7]),
-                    revenue_nature=self.mapped_nrs.get(line[8]),
-                    observations=line[9],
-                )
+            revenue = Revenue(
+                accountability=self.accountability,
+                identification=line[2],
+                value=Decimal(line[3]),
+                receive_date=datetime(
+                    receive_date.year, receive_date.month, receive_date.day
+                ),
+                competency=datetime(competency.year, competency.month, competency.day),
+                source=self.mapped_frs.get(line[6]),
+                bank_account_id=self.mapped_cbs.get(line[7]),
+                revenue_nature=self.mapped_nrs.get(line[8]),
+                observations=line[9],
             )
 
-        error = False
+        try:
+            revenue.full_clean()
+            revenues.append(revenue)
+        except ValidationError as e:
+            errors.append(f"Linha {index}: {" ".join(e.messages)}")
+
+        if errors:
+            return errors
+
         try:
             with transaction.atomic():
-                Revenue.objects.bulk_create(revenues, batch_size=10)
-                return error
-        except:
-            error = True
-            return error
+                Revenue.objects.bulk_create(revenues, batch_size=100)
+            return []
+        except Exception:
+            return errors
 
     def _create_expenses(self, expenses_df: pd.DataFrame) -> dict:
         expenses_df = expenses_df.replace({np.nan: None})
 
         expenses = []
-        for line in expenses_df.values.tolist()[1:]:
+        errors = []
+        for index, line in enumerate(expenses_df.values.tolist()[1:], start=2):
             if not line[2]:
                 break
 
@@ -152,88 +158,94 @@ class AccountabilityXLSXImporter:
 
             due_date = line[4]
             competency = line[5]
-            expenses.append(
-                Expense(
-                    accountability=self.accountability,
-                    planned=planned,
-                    identification=line[2],
-                    value=Decimal(line[3]),
-                    due_date=datetime(due_date.year, due_date.month, due_date.day),
-                    competency=datetime(
-                        competency.year, competency.month, competency.day
-                    ),
-                    source_id=self.mapped_fds.get(line[6], None),
-                    nature=self.mapped_nds.get(line[7], None),
-                    favored_id=self.mapped_fvs.get(line[8], None),
-                    item_id=self.mapped_ias.get(line[9], None),
-                    document_type=self.mapped_tds.get(line[10], None),
-                    document_number=line[11],
-                    observations=line[12],
-                )
+            expense = Expense(
+                accountability=self.accountability,
+                planned=planned,
+                identification=line[2],
+                value=Decimal(line[3]),
+                due_date=datetime(due_date.year, due_date.month, due_date.day),
+                competency=datetime(competency.year, competency.month, competency.day),
+                source_id=self.mapped_fds.get(line[6], None),
+                nature=self.mapped_nds.get(line[7], None),
+                favored_id=self.mapped_fvs.get(line[8], None),
+                item_id=self.mapped_ias.get(line[9], None),
+                document_type=self.mapped_tds.get(line[10], None),
+                document_number=line[11],
+                observations=line[12],
             )
 
-        error = False
+            try:
+                expense.full_clean()
+                expenses.append(expense)
+            except ValidationError as e:
+                errors.append(f"Linha {index}: {" ".join(e.messages)}")
+
+        if errors:
+            return errors
+
         try:
             with transaction.atomic():
-                # TODO: Validate here the expense items
                 Expense.objects.bulk_create(expenses, batch_size=10)
-                return error
+                return []
         except:
-            error = True
-            return error
+            return errors
 
     def _create_applications(self, applications_df: pd.DataFrame) -> dict:
         applications_df = applications_df.replace({np.nan: None})
 
         transactions = []
-        for line in applications_df.values.tolist()[1:]:
+        errors = []
+        for index, line in enumerate(applications_df.values.tolist()[1:], start=2):
             if not line[2]:
                 break
 
             if line[4]:
                 transaction_date = line[3]
-                transactions.append(
-                    Transaction(
-                        name="Aplicação / Resgate",
-                        memo="Aplicação / Resgate",
-                        transaction_type=Transaction.TransactionTypeChoices.OTHER,
-                        date=datetime(
-                            transaction_date.year,
-                            transaction_date.month,
-                            transaction_date.day,
-                        ),
-                        amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
-                        transaction_number=line[4],
-                        bank_account_id=self.mapped_cbs.get(line[5]),
-                    )
+                transaction = Transaction(
+                    name="Aplicação / Resgate",
+                    memo="Aplicação / Resgate",
+                    transaction_type=Transaction.TransactionTypeChoices.OTHER,
+                    date=datetime(
+                        transaction_date.year,
+                        transaction_date.month,
+                        transaction_date.day,
+                    ),
+                    amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
+                    transaction_number=line[4],
+                    bank_account_id=self.mapped_cbs.get(line[5]),
                 )
 
             elif line[6]:
                 transaction_date = line[3]
-                transactions.append(
-                    Transaction(
-                        transaction_type=Transaction.TransactionTypeChoices.INCOME,
-                        name="Aplicação / Resgate",
-                        memo="Aplicação / Resgate",
-                        date=datetime(
-                            transaction_date.year,
-                            transaction_date.month,
-                            transaction_date.day,
-                        ),
-                        amount=Decimal(abs(line[2])).quantize(Decimal("0.01")),
-                        transaction_number=line[4],
-                        bank_account_id=self.mapped_cbs.get(line[6]),
-                    )
+                transaction = Transaction(
+                    transaction_type=Transaction.TransactionTypeChoices.INCOME,
+                    name="Aplicação / Resgate",
+                    memo="Aplicação / Resgate",
+                    date=datetime(
+                        transaction_date.year,
+                        transaction_date.month,
+                        transaction_date.day,
+                    ),
+                    amount=Decimal(abs(line[2])).quantize(Decimal("0.01")),
+                    transaction_number=line[4],
+                    bank_account_id=self.mapped_cbs.get(line[6]),
                 )
 
             else:
                 continue
 
-        error = False
+            try:
+                transaction.full_clean()
+                transactions.append(transaction)
+            except ValidationError as e:
+                errors.append(f"Linha {index}: {" ".join(e.messages)}")
+
+        if errors:
+            return errors
+
         try:
             with transaction.atomic():
                 Transaction.objects.bulk_create(transactions, batch_size=10)
-                return error
+                return []
         except:
-            error = True
-            return error
+            return errors

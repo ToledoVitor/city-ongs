@@ -64,6 +64,9 @@ class ContractsListView(LoginRequiredMixin, ListView):
         queryset = (
             super()
             .get_queryset()
+            .filter(
+                organization=self.request.user.organization,
+            )
             .select_related(
                 "contractor_manager",
                 "hired_manager",
@@ -153,7 +156,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         )
 
     def get_object(self, queryset=None):
-        return self.model.objects.get(id=self.kwargs["pk"])
+        return self.model.objects.filter(
+            organization=self.request.user.organization
+        ).get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
