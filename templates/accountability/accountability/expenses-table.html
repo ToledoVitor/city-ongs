@@ -1,39 +1,156 @@
 {% load humanize %}
 
-<table class="w-full text-sm text-left rtl:text-right text-center text-gray-400">
-    <thead class="text-xs uppercase bg-gray-500 text-white">
-        <tr>
-            <th scope="col" class="px-6 py-3">
-                Identificação
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Valor
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Status
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Planejada?
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Item Relacionado
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Natureza
-            </th>
-            <th scope="col" class="px-6 py-3" />
-        </tr>
-    </thead>
-    <tbody>
-        {% if expenses_page %}
-          {% for expense in expenses_page %}
-            <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 text-base whitespace-nowrap text-black">
-                  {{ expense.identification }} <br>
-                  {% if accountability.is_on_execution and not expense.conciled %}
-                    <a href="{% url 'accountability:expense-reconcile' expense.id %}">
+<div class="relative">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+    <table class="w-full text-sm text-left rtl:text-right text-center text-gray-400">
+        <thead class="text-xs uppercase bg-gray-500 text-white">
+            <tr>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Identificação
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Valor
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Status
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Planejada?
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Item Relacionado
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48">
+                    Natureza
+                </th>
+                <th scope="col" class="px-6 py-3 max-w-48" />
+            </tr>
+        </thead>
+        <tbody>
+            {% if expenses_page %}
+              {% for expense in expenses_page %}
+                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+                    <th scope="row" class="px-6 py-4 text-sm whitespace-nowrap max-w-48 text-black">
+                      {{ expense.identification }} <br>
+                      {% if accountability.is_on_execution and not expense.conciled %}
+                        <a href="{% url 'accountability:expense-reconcile' expense.id %}">
+                          <button
+                            type="button"
+                            class="
+                              text-white
+                              ml-2
+                              bg-blue-600
+                              hover:bg-blue-600
+                              focus:ring-4
+                              focus:outline-none
+                              focus:ring-blue-600
+                              font-medium
+                              rounded-full
+                              text-xs
+                              mt-2
+                              px-2.5
+                              py-1
+                              text-center
+                              inline-flex
+                              items-center
+                              me-2
+                            "
+                          >
+                            conciliar
+                          </button>
+                        </a>
+                      {% endif %}
+                    </th>
+                    <td class="px-6 py-4 text-sm text-black max-w-48">
+                      R${{ expense.value|intcomma }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-left text-black max-w-48">
+                      <p class="mt-1 text-sm">
+                        {% if expense.paid %}
+                          &#9989;
+                        {% else %}
+                          &#10060;
+                        {% endif %}
+                        Paga
+                      </p>
+                      <p class="mt-1 text-sm">
+                        {% if expense.conciled %}
+                          &#9989;
+                        {% else %}
+                          &#10060;
+                        {% endif %}
+                        Conciliada
+                      </p>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black text-left max-w-48">
+                      <p class="mt-1 text-sm">
+                        {% if expense.planned and accountability.is_on_execution %}
+                          &#9989; Planejada <br>
+                          <button
+                            type="button"
+                            data-modal-target="expenses-gloss-{{ expense.id}}"
+                            data-modal-toggle="expenses-gloss-{{ expense.id}}"
+                            class="
+                              text-white
+                              ml-4
+                              bg-blue-600
+                              hover:bg-blue-600
+                              focus:ring-4
+                              focus:outline-none
+                              focus:ring-blue-600
+                              font-medium
+                              rounded-full
+                              text-xs
+                              mt-2
+                              px-2.5
+                              py-1
+                              text-center
+                              inline-flex
+                              items-center
+                              me-2
+                            "
+                          >
+                            glosar
+                          </button>
+                        {% else %}
+                          &#10060; Planejada
+                        {% endif %}
+                      </p>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black max-w-48">
+                      {{ expense.item.name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-black max-w-48">
+                      {{ expense.nature_label }}
+                    </td>
+                    <td class="px-6 py-4 text-sm flex justify-end max-w-48">
+                      <a
+                        href="{% url 'accountability:expense-update' expense.id %}"
+                        class="
+                          px-3
+                          py-2
+                          text-sm
+                          font-medium
+                          text-center
+                          inline-flex
+                          items-center
+                          text-white
+                          rounded-lg
+                          focus:ring-4
+                          focus:outline-none
+                          bg-blue-600
+                          hover:bg-blue-700
+                          focus:ring-blue-800
+                        "
+                      >
+                        Visualizar
+                      </a>
+                      {% if accountability.is_on_execution %}
+
                       <button
                         type="button"
+                        data-modal-target="expenses-duplicate-{{ expense.id}}"
+                        data-modal-toggle="expenses-duplicate-{{ expense.id}}"
                         class="
                           text-white
                           ml-2
@@ -44,542 +161,429 @@
                           focus:ring-blue-600
                           font-medium
                           rounded-full
-                          text-xs
-                          mt-2
-                          px-2.5
-                          py-1
+                          text-sm
+                          p-2.5
                           text-center
                           inline-flex
                           items-center
                           me-2
                         "
                       >
-                        conciliar
+                        <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
+                          <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
+                        </svg>
                       </button>
-                    </a>
-                  {% endif %}
-                </th>
-                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
-                  R${{ expense.value|intcomma }}
-                </td>
-                <td class="px-6 py-4 text-sm text-left text-black whitespace-nowrap">
-                  <p class="mt-1 text-sm">
-                    {% if expense.paid %}
-                      &#9989;
-                    {% else %}
-                      &#10060;
-                    {% endif %}
-                    Paga
-                  </p>
-                  <p class="mt-1 text-sm">
-                    {% if expense.conciled %}
-                      &#9989;
-                    {% else %}
-                      &#10060;
-                    {% endif %}
-                    Conciliada
-                  </p>
-                </td>
-                <td class="px-6 py-4 text-sm text-black text-left whitespace-nowrap">
-                  <p class="mt-1 text-sm">
-                    {% if expense.planned and accountability.is_on_execution %}
-                      &#9989; Planejada <br>
+
                       <button
                         type="button"
-                        data-modal-target="expenses-gloss-{{ expense.id}}"
-                        data-modal-toggle="expenses-gloss-{{ expense.id}}"
+                        data-modal-target="expenses-delete-{{ expense.id}}"
+                        data-modal-toggle="expenses-delete-{{ expense.id}}"
                         class="
                           text-white
-                          ml-4
-                          bg-blue-600
-                          hover:bg-blue-600
+                          ml-2
+                          bg-red-600
+                          hover:bg-red-600
                           focus:ring-4
                           focus:outline-none
-                          focus:ring-blue-600
+                          focus:ring-red-600
                           font-medium
                           rounded-full
-                          text-xs
-                          mt-2
-                          px-2.5
-                          py-1
+                          text-sm
+                          p-2.5
                           text-center
                           inline-flex
                           items-center
                           me-2
                         "
                       >
-                        glosar
+                        <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                        </svg>                                      
                       </button>
-                    {% else %}
-                      &#10060; Planejada
-                    {% endif %}
-                  </p>
-                </td>
-                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
-                  {{ expense.item.name }}
-                </td>
-                <td class="px-6 py-4 text-sm text-black whitespace-nowrap">
-                  {{ expense.nature_label }}
-                </td>
-                <td class="px-6 py-4 text-sm flex justify-end">
-                  <a
-                    href="{% url 'accountability:expense-update' expense.id %}"
+                      {% endif %}
+                    </td>
+                </tr>
+
+                {% if expense.planned and accountability.is_on_execution %}
+                <div
+                    id="expenses-gloss-{{ expense.id}}"
+                    tabindex="-1"
+                    data-modal-backdrop="static"
+                    aria-hidden="true"
                     class="
-                      px-3
-                      py-2
-                      text-sm
-                      font-medium
-                      text-center
-                      inline-flex
+                      hidden
+                      overflow-y-auto
+                      overflow-x-hidden
+                      fixed
+                      top-0
+                      right-0
+                      left-0
+                      z-50
+                      justify-center
                       items-center
-                      text-white
-                      rounded-lg
-                      focus:ring-4
-                      focus:outline-none
-                      bg-blue-600
-                      hover:bg-blue-700
-                      focus:ring-blue-800
+                      w-full
+                      md:inset-0
+                      h-[calc(100%-1rem)]
+                      max-h-full
                     "
-                  >
-                    Visualizar
-                  </a>
-                  {% if accountability.is_on_execution %}
+                >
+                  <div class="relative p-4 w-full max-w-md max-h-full">
+                      <!-- Modal content -->
+                      <div class="relative rounded-lg shadow bg-gray-300">
+                        <!-- Modal header -->
+                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+                              <h3 class="text-xl font-semibold text-black">
+                                  Duplicar despesa?
+                              </h3>
+                              <button
+                                type="button"
+                                data-modal-hide="expenses-gloss-{{ expense.id}}"
+                                class="
+                                  end-2.5
+                                  text-black
+                                  hover:bg-gray-600
+                                  hover:text-black
+                                  bg-transparent
+                                  rounded-lg
+                                  text-sm
+                                  w-6
+                                  h-6
+                                  ms-auto
+                                  inline-flex
+                                  justify-center
+                                  items-center
+                                "
+                              >
+                                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                  </svg>
+                                  <span class="sr-only">Fechar modal</span>
+                              </button>
+                          </div>
+                          <!-- Modal body -->
+                          <div class="p-4 md:p-5">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.pk %}">
+                                  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
 
-                  <button
-                    type="button"
-                    data-modal-target="expenses-duplicate-{{ expense.id}}"
-                    data-modal-toggle="expenses-duplicate-{{ expense.id}}"
-                    class="
-                      text-white
-                      ml-2
-                      bg-blue-600
-                      hover:bg-blue-600
-                      focus:ring-4
-                      focus:outline-none
-                      focus:ring-blue-600
-                      font-medium
-                      rounded-full
-                      text-sm
-                      p-2.5
-                      text-center
-                      inline-flex
-                      items-center
-                      me-2
-                    "
-                  >
-                    <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
-                      <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
-                    </svg>
-                  </button>
+                                  <span class="py-10 my-10 text-base">
+                                    A despesa será marcada como não planejada, e o item será desacossiado.
+                                  </span>
 
-                  <button
-                    type="button"
-                    data-modal-target="expenses-delete-{{ expense.id}}"
-                    data-modal-toggle="expenses-delete-{{ expense.id}}"
-                    class="
-                      text-white
-                      ml-2
-                      bg-red-600
-                      hover:bg-red-600
-                      focus:ring-4
-                      focus:outline-none
-                      focus:ring-red-600
-                      font-medium
-                      rounded-full
-                      text-sm
-                      p-2.5
-                      text-center
-                      inline-flex
-                      items-center
-                      me-2
-                    "
-                  >
-                    <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
-                    </svg>                                      
-                  </button>
-                  {% endif %}
-                </td>
-            </tr>
-
-            {% if expense.planned and accountability.is_on_execution %}
-            <div
-                id="expenses-gloss-{{ expense.id}}"
-                tabindex="-1"
-                data-modal-backdrop="static"
-                aria-hidden="true"
-                class="
-                  hidden
-                  overflow-y-auto
-                  overflow-x-hidden
-                  fixed
-                  top-0
-                  right-0
-                  left-0
-                  z-50
-                  justify-center
-                  items-center
-                  w-full
-                  md:inset-0
-                  h-[calc(100%-1rem)]
-                  max-h-full
-                "
-            >
-              <div class="relative p-4 w-full max-w-md max-h-full">
-                  <!-- Modal content -->
-                  <div class="relative rounded-lg shadow bg-gray-300">
-                    <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-                          <h3 class="text-xl font-semibold text-black">
-                              Duplicar despesa?
-                          </h3>
-                          <button
-                            type="button"
-                            data-modal-hide="expenses-gloss-{{ expense.id}}"
-                            class="
-                              end-2.5
-                              text-black
-                              hover:bg-gray-600
-                              hover:text-black
-                              bg-transparent
-                              rounded-lg
-                              text-sm
-                              w-6
-                              h-6
-                              ms-auto
-                              inline-flex
-                              justify-center
-                              items-center
-                            "
-                          >
-                              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                              </svg>
-                              <span class="sr-only">Fechar modal</span>
-                          </button>
-                      </div>
-                      <!-- Modal body -->
-                      <div class="p-4 md:p-5">
-                          <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.pk %}">
-                              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                              <input type="hidden" name="expense_id" value="{{ expense.id }}">
-
-                              <span class="py-10 my-10 text-base">
-                                A despesa será marcada como não planejada, e o item será desacossiado.
-                              </span>
-
-                              <div class="grid gap-6 my-6 md:grid-cols-2">
-                                <button
-                                  type="button"
-                                  data-modal-hide="expenses-gloss-{{ expense.id}}"
-                                  class="
-                                    w-full
-                                    text-white
-                                    bg-gray-700
-                                    hover:bg-gray-800
-                                    focus:ring-4
-                                    focus:outline-none
-                                    focus:ring-gray-300
-                                    font-medium rounded-lg
-                                    text-sm
-                                    px-5
-                                    py-2.5
-                                    text-center
-                                  "
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    class="
-                                      w-full
-                                      text-white
-                                      bg-blue-700
-                                      hover:bg-blue-800
-                                      focus:ring-4
-                                      focus:outline-none
-                                      focus:ring-blue-300
-                                      font-medium rounded-lg
-                                      text-sm
-                                      px-5
-                                      py-2.5
-                                      text-center
-                                    "
-                                >
-                                    Glosar
-                                </button>
-                              </div>
-                          </form>
+                                  <div class="grid gap-6 my-6 md:grid-cols-2">
+                                    <button
+                                      type="button"
+                                      data-modal-hide="expenses-gloss-{{ expense.id}}"
+                                      class="
+                                        w-full
+                                        text-white
+                                        bg-gray-700
+                                        hover:bg-gray-800
+                                        focus:ring-4
+                                        focus:outline-none
+                                        focus:ring-gray-300
+                                        font-medium rounded-lg
+                                        text-sm
+                                        px-5
+                                        py-2.5
+                                        text-center
+                                      "
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="
+                                          w-full
+                                          text-white
+                                          bg-blue-700
+                                          hover:bg-blue-800
+                                          focus:ring-4
+                                          focus:outline-none
+                                          focus:ring-blue-300
+                                          font-medium rounded-lg
+                                          text-sm
+                                          px-5
+                                          py-2.5
+                                          text-center
+                                        "
+                                    >
+                                        Glosar
+                                    </button>
+                                  </div>
+                              </form>
+                          </div>
                       </div>
                   </div>
-              </div>
-            </div>
-            {% endif %}
+                </div>
+                {% endif %}
 
-            {% if accountability.is_on_execution %}
-            <div
-                id="expenses-duplicate-{{ expense.id}}"
-                tabindex="-1"
-                data-modal-backdrop="static"
-                aria-hidden="true"
-                class="
-                  hidden
-                  overflow-y-auto
-                  overflow-x-hidden
-                  fixed
-                  top-0
-                  right-0
-                  left-0
-                  z-50
-                  justify-center
-                  items-center
-                  w-full
-                  md:inset-0
-                  h-[calc(100%-1rem)]
-                  max-h-full
-                "
-            >
-              <div class="relative p-4 w-full max-w-md max-h-full">
-                  <!-- Modal content -->
-                  <div class="relative rounded-lg shadow bg-gray-300">
-                    <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-                          <h3 class="text-xl font-semibold text-black">
-                              Duplicar despesa?
-                          </h3>
-                          <button
-                            type="button"
-                            data-modal-hide="expenses-duplicate-{{ expense.id}}"
-                            class="
-                              end-2.5
-                              text-black
-                              hover:bg-gray-600
-                              hover:text-black
-                              bg-transparent
-                              rounded-lg
-                              text-sm
-                              w-6
-                              h-6
-                              ms-auto
-                              inline-flex
-                              justify-center
-                              items-center
-                            "
-                          >
-                              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                              </svg>
-                              <span class="sr-only">Fechar modal</span>
-                          </button>
-                      </div>
-                      <!-- Modal body -->
-                      <div class="p-4 md:p-5">
-                          <form class="space-y-4"  method="post" action="{% url 'accountability:expense-duplicate' expense.pk %}">
-                              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                              <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                {% if accountability.is_on_execution %}
+                <div
+                    id="expenses-duplicate-{{ expense.id}}"
+                    tabindex="-1"
+                    data-modal-backdrop="static"
+                    aria-hidden="true"
+                    class="
+                      hidden
+                      overflow-y-auto
+                      overflow-x-hidden
+                      fixed
+                      top-0
+                      right-0
+                      left-0
+                      z-50
+                      justify-center
+                      items-center
+                      w-full
+                      md:inset-0
+                      h-[calc(100%-1rem)]
+                      max-h-full
+                    "
+                >
+                  <div class="relative p-4 w-full max-w-md max-h-full">
+                      <!-- Modal content -->
+                      <div class="relative rounded-lg shadow bg-gray-300">
+                        <!-- Modal header -->
+                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+                              <h3 class="text-xl font-semibold text-black">
+                                  Duplicar despesa?
+                              </h3>
+                              <button
+                                type="button"
+                                data-modal-hide="expenses-duplicate-{{ expense.id}}"
+                                class="
+                                  end-2.5
+                                  text-black
+                                  hover:bg-gray-600
+                                  hover:text-black
+                                  bg-transparent
+                                  rounded-lg
+                                  text-sm
+                                  w-6
+                                  h-6
+                                  ms-auto
+                                  inline-flex
+                                  justify-center
+                                  items-center
+                                "
+                              >
+                                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                  </svg>
+                                  <span class="sr-only">Fechar modal</span>
+                              </button>
+                          </div>
+                          <!-- Modal body -->
+                          <div class="p-4 md:p-5">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-duplicate' expense.pk %}">
+                                  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
 
-                              <span class="py-10 my-10 text-base">Todos os dados, exceto os arquivos, serão copiados.</span>
+                                  <span class="py-10 my-10 text-base">Todos os dados, exceto os arquivos, serão copiados.</span>
 
-                              <div class="grid gap-6 my-6 md:grid-cols-2">
-                                <button
-                                  type="button"
-                                  data-modal-hide="expenses-duplicate-{{ expense.id}}"
-                                  class="
-                                    w-full
-                                    text-white
-                                    bg-gray-700
-                                    hover:bg-gray-800
-                                    focus:ring-4
-                                    focus:outline-none
-                                    focus:ring-gray-300
-                                    font-medium rounded-lg
-                                    text-sm
-                                    px-5
-                                    py-2.5
-                                    text-center
-                                  "
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    class="
-                                      w-full
-                                      text-white
-                                      bg-blue-700
-                                      hover:bg-blue-800
-                                      focus:ring-4
-                                      focus:outline-none
-                                      focus:ring-blue-300
-                                      font-medium rounded-lg
-                                      text-sm
-                                      px-5
-                                      py-2.5
-                                      text-center
-                                    "
-                                >
-                                    Duplicar
-                                </button>
-                              </div>
-                          </form>
-                      </div>
-                  </div>
-              </div>
-            </div>
-
-            <div
-                id="expenses-delete-{{ expense.id}}"
-                tabindex="-1"
-                data-modal-backdrop="static"
-                aria-hidden="true"
-                class="
-                  hidden
-                  overflow-y-auto
-                  overflow-x-hidden
-                  fixed
-                  top-0
-                  right-0
-                  left-0
-                  z-50
-                  justify-center
-                  items-center
-                  w-full
-                  md:inset-0
-                  h-[calc(100%-1rem)]
-                  max-h-full
-                "
-            >
-              <div class="relative p-4 w-full max-w-md max-h-full">
-                  <!-- Modal content -->
-                  <div class="relative rounded-lg shadow bg-gray-300">
-                    <!-- Modal header -->
-                      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-                          <h3 class="text-xl font-semibold text-black">
-                              Deletar despesa?
-                          </h3>
-                          <button
-                            type="button"
-                            data-modal-hide="expenses-delete-{{ expense.id}}"
-                            class="
-                              end-2.5
-                              text-black
-                              hover:bg-gray-600
-                              hover:text-black
-                              bg-transparent
-                              rounded-lg
-                              text-sm
-                              w-6
-                              h-6
-                              ms-auto
-                              inline-flex
-                              justify-center
-                              items-center
-                            "
-                          >
-                              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                              </svg>
-                              <span class="sr-only">Fechar modal</span>
-                          </button>
-                      </div>
-                      <!-- Modal body -->
-                      <div class="p-4 md:p-5">
-                          <form class="space-y-4"  method="post" action="{% url 'accountability:expense-delete' expense.pk %}">
-                              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                              <input type="hidden" name="expense_id" value="{{ expense.id }}">
-
-                              <span class="py-10 my-10 text-base">Não é possível reverter essa ação depois.</span>
-
-                              <div class="grid gap-6 my-6 md:grid-cols-2">
-                                <button
-                                  type="button"
-                                  data-modal-hide="expenses-delete-{{ expense.id}}"
-                                  class="
-                                    w-full
-                                    text-white
-                                    bg-gray-700
-                                    hover:bg-gray-800
-                                    focus:ring-4
-                                    focus:outline-none
-                                    focus:ring-gray-300
-                                    font-medium rounded-lg
-                                    text-sm
-                                    px-5
-                                    py-2.5
-                                    text-center
-                                  "
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    class="
-                                      w-full
-                                      text-white
-                                      bg-red-700
-                                      hover:bg-red-800
-                                      focus:ring-4
-                                      focus:outline-none
-                                      focus:ring-red-300
-                                      font-medium rounded-lg
-                                      text-sm
-                                      px-5
-                                      py-2.5
-                                      text-center
-                                    "
-                                >
-                                    Deletar
-                                </button>
-                              </div>
-                          </form>
+                                  <div class="grid gap-6 my-6 md:grid-cols-2">
+                                    <button
+                                      type="button"
+                                      data-modal-hide="expenses-duplicate-{{ expense.id}}"
+                                      class="
+                                        w-full
+                                        text-white
+                                        bg-gray-700
+                                        hover:bg-gray-800
+                                        focus:ring-4
+                                        focus:outline-none
+                                        focus:ring-gray-300
+                                        font-medium rounded-lg
+                                        text-sm
+                                        px-5
+                                        py-2.5
+                                        text-center
+                                      "
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="
+                                          w-full
+                                          text-white
+                                          bg-blue-700
+                                          hover:bg-blue-800
+                                          focus:ring-4
+                                          focus:outline-none
+                                          focus:ring-blue-300
+                                          font-medium rounded-lg
+                                          text-sm
+                                          px-5
+                                          py-2.5
+                                          text-center
+                                        "
+                                    >
+                                        Duplicar
+                                    </button>
+                                  </div>
+                              </form>
+                          </div>
                       </div>
                   </div>
-              </div>
-            </div>
-            {% endif %}
+                </div>
 
-          {% endfor %}
-        {% else %}
-          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                Nenhum resultado encontrado
-            </th>
-            <td class="px-6 py-4">
-                -
-            </td>
-            <td class="px-6 py-4">
-                -
-            </td>
-            <td class="px-6 py-4">
-                -
-            </td>
-            <td class="px-6 py-4">
-                -
-            </td>
-            <td class="px-6 py-4">
-                -
-            </td>
-            <td class="px-6 py-4">
-                -
-            </td>
+                <div
+                    id="expenses-delete-{{ expense.id}}"
+                    tabindex="-1"
+                    data-modal-backdrop="static"
+                    aria-hidden="true"
+                    class="
+                      hidden
+                      overflow-y-auto
+                      overflow-x-hidden
+                      fixed
+                      top-0
+                      right-0
+                      left-0
+                      z-50
+                      justify-center
+                      items-center
+                      w-full
+                      md:inset-0
+                      h-[calc(100%-1rem)]
+                      max-h-full
+                    "
+                >
+                  <div class="relative p-4 w-full max-w-md max-h-full">
+                      <!-- Modal content -->
+                      <div class="relative rounded-lg shadow bg-gray-300">
+                        <!-- Modal header -->
+                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+                              <h3 class="text-xl font-semibold text-black">
+                                  Deletar despesa?
+                              </h3>
+                              <button
+                                type="button"
+                                data-modal-hide="expenses-delete-{{ expense.id}}"
+                                class="
+                                  end-2.5
+                                  text-black
+                                  hover:bg-gray-600
+                                  hover:text-black
+                                  bg-transparent
+                                  rounded-lg
+                                  text-sm
+                                  w-6
+                                  h-6
+                                  ms-auto
+                                  inline-flex
+                                  justify-center
+                                  items-center
+                                "
+                              >
+                                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                  </svg>
+                                  <span class="sr-only">Fechar modal</span>
+                              </button>
+                          </div>
+                          <!-- Modal body -->
+                          <div class="p-4 md:p-5">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-delete' expense.pk %}">
+                                  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
+
+                                  <span class="py-10 my-10 text-base">Não é possível reverter essa ação depois.</span>
+
+                                  <div class="grid gap-6 my-6 md:grid-cols-2">
+                                    <button
+                                      type="button"
+                                      data-modal-hide="expenses-delete-{{ expense.id}}"
+                                      class="
+                                        w-full
+                                        text-white
+                                        bg-gray-700
+                                        hover:bg-gray-800
+                                        focus:ring-4
+                                        focus:outline-none
+                                        focus:ring-gray-300
+                                        font-medium rounded-lg
+                                        text-sm
+                                        px-5
+                                        py-2.5
+                                        text-center
+                                      "
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="
+                                          w-full
+                                          text-white
+                                          bg-red-700
+                                          hover:bg-red-800
+                                          focus:ring-4
+                                          focus:outline-none
+                                          focus:ring-red-300
+                                          font-medium rounded-lg
+                                          text-sm
+                                          px-5
+                                          py-2.5
+                                          text-center
+                                        "
+                                    >
+                                        Deletar
+                                    </button>
+                                  </div>
+                              </form>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+                {% endif %}
+
+              {% endfor %}
+            {% else %}
+              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+                    Nenhum resultado encontrado
+                </th>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+                <td class="px-6 py-4">
+                    -
+                </td>
+              </tr>
+            {% endif %}     
+        </tbody>
+        <tfoot class="bg-gray-500 text-white font-base">
+          <tr>
+              <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
+              <th scope="row" class="px-6 py-3 text-center">
+                <span class="text-sm font-normal">Cadastrado:</span> <br> R${{ expenses_total|intcomma }}
+              </th>
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="px-6 py-3" />
           </tr>
-        {% endif %}     
-    </tbody>
-    <tfoot class="bg-gray-500 text-white font-base">
-      <tr>
-          <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
-          <th scope="row" class="px-6 py-3 text-center">
-            <span class="text-sm font-normal">Cadastrado:</span> <br> R${{ expenses_total|intcomma }}
-          </th>
-          <th scope="row" class="px-6 py-3" />
-          <th scope="row" class="px-6 py-3" />
-          <th scope="row" class="px-6 py-3" />
-          <th scope="row" class="px-6 py-3" />
-          <th scope="row" class="px-6 py-3" />
-      </tr>
-    </tfoot>
-</table>
+        </tfoot>
+    </table>
+  </div>
+</div>
 
 {% if accountability.is_on_execution %}
   <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">

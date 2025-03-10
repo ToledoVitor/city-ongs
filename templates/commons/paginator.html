@@ -1,155 +1,90 @@
-<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200" aria-label="Table navigation">
-    <span class="text-base font-normal text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
-      Página
-      <span class="font-bold text-black">{{ page_obj.number }}</span>
-      de
-      <span class="font-bold text-black">{{ page_obj.paginator.num_pages }}</span>
-    </span>
+<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200">
+  <span class="text-base font-normal text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
+    Página
+    <span class="font-bold text-black">{{ page_obj.number }}</span>
+    de
+    <span class="font-bold text-black">{{ page_obj.paginator.num_pages }}</span>
+  </span>
 
-    <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-        {% if page_obj.has_previous %}
+  <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+    {% if page_obj.has_previous %}
+      <li>
+        <a
+          href="?page={{ page_obj.previous_page_number }}"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black border rounded-s-lg bg-gray-200 border-gray-700 hover:bg-gray-800 hover:text-white"
+        >
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+
+      {% if num == 1 or num == page_obj.paginator.num_pages %}
+
+        {% if num == page_obj.number %}
           <li>
             <a
-              href="?page=1"
-              class="
-                flex
-                items-center
-                justify-center
-                px-3
-                h-8
-                ms-0
-                leading-tight
-                text-black
-                border
-                rounded-s-lg
-                bg-gray-200
-                border-gray-700
-                hover:bg-gray-800
-                hover:text-white
-              "
+              href="?page={{ num }}"
+              class="flex items-center justify-center px-3 h-8 text-white border bg-gray-800 border-gray-700"
             >
-              Primeira
+              {{ num }}
             </a>
           </li>
-
+        {% else %}
           <li>
             <a
-              href="?page={{ page_obj.previous_page_number }}"
-              class="
-                flex
-                items-center
-                justify-center
-                px-3
-                h-8
-                ms-0
-                leading-tight
-                text-black
-                border
-                rounded-s-lg
-                bg-gray-200
-                border-gray-700
-                hover:bg-gray-800
-                hover:text-white
-              "
+              href="?page={{ num }}"
+              class="flex items-center justify-center px-3 h-8 leading-tight text-black border bg-gray-200 border-gray-700 hover:bg-gray-800 hover:text-white"
             >
-              Anterior
+              {{ num }}
             </a>
           </li>
         {% endif %}
 
-        {% for num in page_obj.paginator.page_range %}
-          {% if num == page_obj.number %}
-            <li>
-              <a
-                href="?page={{ num }}"
-                aria-current="page"
-                class="
-                  flex
-                  items-center
-                  justify-center
-                  px-3
-                  h-8
-                  text-white
-                  border
-                  hover:bg-blue-100
-                  hover:text-white
-                  border-gray-700
-                  bg-gray-800
-                "
-              >
-                {{ num }}
-              </a>
-            </li>
-          {% else %}
-            <li>
-              <a
-                href="?page={{ num }}"
-                class="
-                  flex
-                  items-center
-                  justify-center
-                  px-3
-                  h-8
-                  leading-tight
-                  text-black
-                  border
-                  hover:text-white
-                  bg-gray-200
-                  border-gray-700
-                  hover:bg-gray-800
-                "
-              >
-                {{ num }}
-              </a>
-            </li>
-          {% endif %}
-        {% endfor %}
+      {% elif num >= page_obj.number|add:'-1' and num <= page_obj.number|add:'1' %}
 
-        {% if page_obj.has_next %}
+        {% if num == page_obj.number %}
           <li>
             <a
-              href="?page={{ page_obj.next_page_number }}"
-              class="
-                flex
-                items-center
-                justify-center
-                px-3
-                h-8
-                leading-tight
-                border
-                bg-gray-200
-                border-gray-700
-                text-black
-                hover:bg-gray-800
-                hover:text-white
-              "
+              href="?page={{ num }}"
+              class="flex items-center justify-center px-3 h-8 text-white border bg-gray-800 border-gray-700"
             >
-              Próxima
+              {{ num }}
             </a>
           </li>
-
+        {% else %}
           <li>
             <a
-              href="?page={{ page_obj.paginator.num_pages }}"
-              class="
-                flex
-                items-center
-                justify-center
-                px-3
-                h-8
-                leading-tight
-                text-black
-                border
-                rounded-e-lg
-                bg-gray-200
-                border-gray-700
-                hover:bg-gray-800
-                hover:text-white
-              "
+              href="?page={{ num }}"
+              class="flex items-center justify-center px-3 h-8 leading-tight text-black border bg-gray-200 border-gray-700 hover:bg-gray-800 hover:text-white"
             >
-              Última
+              {{ num }}
             </a>
           </li>
         {% endif %}
-    </ul>
+
+      {% elif num == 2 or num == page_obj.paginator.num_pages|add:'-1' %}
+        <li>
+          <span
+            class="flex items-center justify-center px-3 h-8 leading-tight text-black border bg-gray-200 border-gray-700"
+          >
+            ...
+          </span>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li>
+        <a
+          href="?page={{ page_obj.next_page_number }}"
+          class="flex items-center justify-center px-3 h-8 leading-tight text-black border bg-gray-200 border-gray-700 hover:bg-gray-800 hover:text-white"
+        >
+          Próximo
+        </a>
+      </li>
+    {% endif %}
+
+  </ul>
 </nav>

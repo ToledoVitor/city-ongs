@@ -107,7 +107,7 @@ class Favored(BaseModel):
     )
     name = models.CharField(
         verbose_name="Nome",
-        max_length=64,
+        max_length=128,
     )
     document = models.CharField(
         verbose_name="CPF/CNPJ",

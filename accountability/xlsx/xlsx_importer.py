@@ -1,5 +1,6 @@
 # ruff: noqa: E722
 
+import re
 from datetime import datetime
 from decimal import Decimal
 from typing import Tuple
@@ -65,19 +66,48 @@ class AccountabilityXLSXImporter:
 
     def _store_fv_ids(self) -> None:
         df = pd.read_excel(self.file, sheet_name="FV")
-        mapped_fvs = {}
+        organization = self.accountability.contract.organization
 
-        for line in df.values.tolist():
-            fv_id = line[1]
-            if not fv_id:
-                fv = Favored.objects.create(
-                    organization=self.accountability.contract.organization,
-                    name=line[0],
+        records = [
+            {
+                "name": row[0],
+                "document": re.sub(r"\D", "", str(row[1])) if row[1] else None,
+            }
+            for row in df.values.tolist()
+            if row[0]
+        ]
+        documents = [record["document"] for record in records if record["document"]]
+        existing_favored = Favored.objects.filter(
+            organization=organization,
+            document__in=documents,
+        )
+
+        existing_map = {fav.document: fav for fav in existing_favored}
+        new_favoreds = []
+        for record in records:
+            doc = record.get("document")
+            # Favored already exists
+            if doc and doc in existing_map:
+                continue
+
+            # New Favored
+            new_favoreds.append(
+                Favored(
+                    organization=organization,
+                    name=str(record["name"])[:127],
+                    document=doc,
                 )
-                fv_id = fv.id
+            )
 
-            mapped_fvs[line[0]] = fv_id
+        if new_favoreds:
+            Favored.objects.bulk_create(new_favoreds)
 
+        all_favored = Favored.objects.filter(
+            organization=organization,
+            document__in=documents,
+        )
+
+        mapped_fvs = {fav.name: str(fav.id) for fav in all_favored}
         self.mapped_fvs = mapped_fvs
 
     def _store_ia_ids(self) -> None:
@@ -118,7 +148,7 @@ class AccountabilityXLSXImporter:
             revenue = Revenue(
                 accountability=self.accountability,
                 identification=line[2],
-                value=Decimal(line[3]),
+                value=Decimal(line[3]).quantize(Decimal("0.01")),
                 receive_date=datetime(
                     receive_date.year, receive_date.month, receive_date.day
                 ),
@@ -162,7 +192,7 @@ class AccountabilityXLSXImporter:
                 accountability=self.accountability,
                 planned=planned,
                 identification=line[2],
-                value=Decimal(line[3]),
+                value=Decimal(line[3]).quantize(Decimal("0.01")),
                 due_date=datetime(due_date.year, due_date.month, due_date.day),
                 competency=datetime(competency.year, competency.month, competency.day),
                 source_id=self.mapped_fds.get(line[6], None),

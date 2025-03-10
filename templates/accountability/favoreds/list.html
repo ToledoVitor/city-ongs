@@ -54,13 +54,13 @@
             {% if favoreds_list %}
               {% for favored in favoreds_list %}
                 <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                    <td class="px-6 py-4 text-base text-black">
+                    <td class="px-6 py-4 text-sm text-black">
                       {{ favored.name }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
+                    <td class="px-6 py-4 text-sm text-black">
                       {{ favored.document }}
                     </td>
-                    <td class="px-6 py-4 text-base text-black">
+                    <td class="px-6 py-4 text-sm text-black">
                       {{ favored.updated_at.date }}
                     </td>
                     <td class="px-6 py-4 text-sm flex justify-end">

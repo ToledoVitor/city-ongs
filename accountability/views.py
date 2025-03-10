@@ -639,18 +639,23 @@ def import_accountability_view(request, pk):
                         accountability=accountability,
                     )
                 )
-                return render(
-                    request,
-                    "accountability/accountability/import.html",
-                    {
-                        "accountability": accountability,
-                        "form": form,
-                        "imported": imported,
-                        "revenues_error": revenues_error,
-                        "expenses_error": expenses_error,
-                        "applications_error": applications_error,
-                    },
-                )
+                if any[(revenues_error, expenses_error, applications_error)]:
+                    return render(
+                        request,
+                        "accountability/accountability/import.html",
+                        {
+                            "accountability": accountability,
+                            "form": form,
+                            "imported": imported,
+                            "revenues_error": revenues_error,
+                            "expenses_error": expenses_error,
+                            "applications_error": applications_error,
+                        },
+                    )
+                else:
+                    return redirect(
+                        "accountability:accountability-detail", pk=accountability.id
+                    )
             else:
                 return render(
                     request,

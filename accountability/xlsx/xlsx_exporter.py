@@ -537,19 +537,31 @@ class AccountabilityXLSXExporter:
         current_line = 1
         if self.contract.checking_account:
             bank_account_worksheet.write(
-                current_line, 0, self.contract.checking_account.account
+                current_line,
+                0,
+                "CONTA CORRENTE",
+                self.locked_cell_format,
             )
             bank_account_worksheet.write(
-                current_line, 1, str(self.contract.checking_account.id)
+                current_line,
+                1,
+                str(self.contract.checking_account.id),
+                self.locked_cell_format,
             )
             current_line += 1
 
         if self.contract.investing_account:
             bank_account_worksheet.write(
-                current_line, 0, self.contract.investing_account.account
+                current_line,
+                0,
+                "CONTA INVESTIMENTO",
+                self.locked_cell_format,
             )
             bank_account_worksheet.write(
-                current_line, 1, str(self.contract.investing_account.id)
+                current_line,
+                1,
+                str(self.contract.investing_account.id),
+                self.locked_cell_format,
             )
             current_line += 1
 
@@ -585,12 +597,12 @@ class AccountabilityXLSXExporter:
     def __build_favored_worksheet(self):
         favored_worksheet = self.workbook.add_worksheet(name="FV")
         favored_worksheet.write(0, 0, "Nome", self.yellow_body_format)
-        favored_worksheet.write(0, 1, "ID", self.yellow_body_format)
+        favored_worksheet.write(0, 1, "Documento", self.yellow_body_format)
 
         current_line = 1
         for favored in self.organization.favoreds.all():
             favored_worksheet.write(current_line, 0, favored.name)
-            favored_worksheet.write(current_line, 1, str(favored.id))
+            favored_worksheet.write(current_line, 1, str(favored.document))
             current_line += 1
 
         favored_worksheet.autofit()
