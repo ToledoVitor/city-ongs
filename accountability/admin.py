@@ -8,6 +8,7 @@ from accountability.models import (
     ResourceSource,
     Revenue,
     RevenueFile,
+    Favored,
 )
 
 admin.site.register(Accountability)
@@ -17,3 +18,4 @@ admin.site.register(ExpenseAnalysis)
 admin.site.register(Revenue)
 admin.site.register(ExpenseFile)
 admin.site.register(RevenueFile)
+admin.site.register(Favored)
