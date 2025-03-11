@@ -5,8 +5,7 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, DecimalField, Q, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -62,16 +61,6 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
             ),
             count_expenses=Count(
                 "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
-            ),
-            sum_revenues=Coalesce(
-                Sum("revenues__value", filter=Q(revenues__deleted_at__isnull=True)),
-                0,
-                output_field=DecimalField(),
-            ),
-            sum_expenses=Coalesce(
-                Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True)),
-                0,
-                output_field=DecimalField(),
             ),
         ).order_by("-year", "-month")
 
@@ -653,6 +642,13 @@ def import_accountability_view(request, pk):
                         },
                     )
                 else:
+                    _ = ActivityLog.objects.create(
+                        user=request.user,
+                        user_email=request.user.email,
+                        action=ActivityLog.ActivityLogChoices.IMPORTED_ACCOUNTABILITY_FILE,
+                        target_object_id=accountability.id,
+                        target_content_object=accountability,
+                    )
                     return redirect(
                         "accountability:accountability-detail", pk=accountability.id
                     )

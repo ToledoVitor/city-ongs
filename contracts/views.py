@@ -7,7 +7,7 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, DecimalField, Q, Sum, Value
+from django.db.models import Count, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
@@ -177,26 +177,24 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             .prefetch_related("activities", "files")
             .order_by("-year", "-month")[:12]
         )
-        context["accountabilities"] = self.object.accountabilities.filter(
-            deleted_at__isnull=True
-        ).annotate(
-            count_revenues=Count(
-                "revenues", filter=Q(revenues__deleted_at__isnull=True), distinct=True
-            ),
-            count_expenses=Count(
-                "expenses", filter=Q(expenses__deleted_at__isnull=True), distinct=True
-            ),
-            sum_revenues=Coalesce(
-                Sum("revenues__value", filter=Q(revenues__deleted_at__isnull=True)),
-                0,
-                output_field=DecimalField(),
-            ),
-            sum_expenses=Coalesce(
-                Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True)),
-                0,
-                output_field=DecimalField(),
-            ),
-        )[:12]
+        context["accountabilities"] = (
+            self.object.accountabilities.filter(deleted_at__isnull=True)
+            .prefetch_related(
+                "revenues", "expenses",
+            )
+            .annotate(
+                count_revenues=Count(
+                    "revenues",
+                    filter=Q(revenues__deleted_at__isnull=True) & Q(deleted_at__isnull=True),
+                    distinct=True,
+                ),
+                count_expenses=Count(
+                    "expenses",
+                    filter=Q(expenses__deleted_at__isnull=True) & Q(deleted_at__isnull=True),
+                    distinct=True,
+                ),
+            )[:12]
+        )
         context["value_requests"] = ContractItemNewValueRequest.objects.filter(
             raise_item__contract=self.object,
             status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,

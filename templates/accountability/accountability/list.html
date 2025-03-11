@@ -77,12 +77,12 @@
 
                   <td class="px-6 py-4 text-sm text-left text-black max-w-48">
                     Cadastradas: {{ accountability.count_revenues }} <br>
-                    Valor: R${{ accountability.sum_revenues|intcomma }}
+                    {% comment %} Valor: R${{ accountability.sum_revenues|intcomma }} {% endcomment %}
                   </td>
 
                   <td class="px-6 py-4 text-sm text-left text-black max-w-48">
                     Cadastradas: {{ accountability.count_expenses }} <br>
-                    Valor: R${{ accountability.sum_expenses|intcomma }}
+                    {% comment %} Valor: R${{ accountability.sum_expenses|intcomma }} {% endcomment %}
                   </td>
 
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
