@@ -901,6 +901,7 @@ def reconcile_expense_view(request, pk):
             "accountability__contract",
             "accountability__contract__checking_account",
             "accountability__contract__investing_account",
+            "favored",
         ),
         id=pk,
     )
@@ -912,9 +913,20 @@ def reconcile_expense_view(request, pk):
     conciled_expenses = Expense.objects.filter(
         accountability=expense.accountability, conciled=True
     ).count()
+    unpaid_expenses = Expense.objects.filter(
+        accountability=expense.accountability,
+        paid=False,
+        conciled=False,
+    ).prefetch_related("favored").exclude(id=expense.id)
 
     if request.method == "POST":
-        form = ReconcileExpenseForm(request.POST, contract=contract, expense=expense)
+        relateds = Expense.objects.filter(id__in=request.POST.getlist("related_expenses", []))
+        form = ReconcileExpenseForm(
+            request.POST,
+            contract=contract,
+            expense=expense,
+            relateds=relateds,
+        )
         files = request.FILES.getlist("files")
 
         if form.is_valid():
@@ -923,7 +935,14 @@ def reconcile_expense_view(request, pk):
                 expense.paid = True
                 expense.liquidation = form.cleaned_data["transactions"][0].date
                 expense.save()
-                expense.transactions.set(form.cleaned_data["transactions"])
+                expense.bank_transactions.set(form.cleaned_data["transactions"])
+
+                for related in relateds:
+                    related.conciled = True
+                    related.paid = True
+                    related.liquidation = form.cleaned_data["transactions"][0].date
+                    related.save()
+                    related.bank_transactions.set(form.cleaned_data["transactions"])
 
                 for file in files:
                     ExpenseFile.objects.create(
@@ -932,6 +951,13 @@ def reconcile_expense_view(request, pk):
                         name=file.name,
                         file=file,
                     )
+                    for related in relateds:
+                        ExpenseFile.objects.create(
+                            expense=related,
+                            created_by=request.user,
+                            name=file.name,
+                            file=file,
+                        )
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -971,6 +997,7 @@ def reconcile_expense_view(request, pk):
                     "expense": expense,
                     "total": total_expenses,
                     "conciled": conciled_expenses,
+                    "unpaid_expenses": unpaid_expenses,
                 },
             )
     else:
@@ -983,6 +1010,7 @@ def reconcile_expense_view(request, pk):
                 "expense": expense,
                 "total": total_expenses,
                 "conciled": conciled_expenses,
+                "unpaid_expenses": unpaid_expenses,
             },
         )
 

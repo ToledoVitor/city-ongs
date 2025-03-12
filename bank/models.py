@@ -225,6 +225,17 @@ class Transaction(BaseModel):
         on_delete=models.SET_NULL,
     )
 
+    expenses = models.ManyToManyField(
+        "accountability.Expense",
+        verbose_name="Despesas",
+        related_name="bank_transactions",
+    )
+    revenues = models.ManyToManyField(
+        "accountability.Revenue",
+        verbose_name="Receitas",
+        related_name="bank_transactions",
+    )
+
     history = HistoricalRecords()
 
     class Meta:
