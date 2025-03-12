@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView, UpdateView
@@ -29,6 +30,7 @@ from accountability.models import (
     Favored,
     ResourceSource,
     Revenue,
+    RevenueFile,
 )
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
@@ -215,9 +217,17 @@ def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     expenses_list = accountability.expenses.order_by("-value").select_related(
         "item", "source"
+    ).prefetch_related("files").annotate(
+        count_files=Count(
+            "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+        ),
     )
     revenues_list = accountability.revenues.order_by("-value").select_related(
         "bank_account",
+    ).prefetch_related("files").annotate(
+        count_files=Count(
+            "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+        ),
     )
 
     query = request.GET.get("q", "")
@@ -450,6 +460,51 @@ def update_accountability_expense_view(request, pk):
             {"expense": expense, "form": form},
         )
 
+
+@require_POST
+def upload_expense_file_view(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=expense.accountability.id
+        )
+    
+    files = request.FILES.getlist("files")
+    with transaction.atomic():
+        for file in files:
+            ExpenseFile.objects.create(
+                expense=expense,
+                created_by=request.user,
+                name=file.name,
+                file=file,
+            )
+
+    return redirect(
+        "accountability:accountability-detail", pk=expense.accountability.id
+    )
+
+
+@require_POST
+def upload_revenue_file_view(request, pk):
+    revenue = get_object_or_404(Revenue, pk=pk)
+    if not revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=revenue.accountability.id
+        )
+
+    files = request.FILES.getlist("files")
+    with transaction.atomic():
+        for file in files:
+            RevenueFile.objects.create(
+                revenue=revenue,
+                created_by=request.user,
+                name=file.name,
+                file=file,
+            )
+
+    return redirect(
+        "accountability:accountability-detail", pk=revenue.accountability.id
+    )
 
 def duplicate_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)

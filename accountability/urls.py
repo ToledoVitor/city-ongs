@@ -16,6 +16,8 @@ from accountability.views import (
     duplicate_accountability_revenue_view,
     expense_delete_view,
     gloss_accountability_expense_view,
+    upload_expense_file_view,
+    upload_revenue_file_view,
     import_accountability_view,
     reconcile_expense_view,
     reconcile_revenue_view,
@@ -103,6 +105,11 @@ urlpatterns = [
         name="expense-update",
     ),
     path(
+        "expenses/<uuid:pk>/file-upload/",
+        upload_expense_file_view,
+        name="expense-file",
+    ),
+    path(
         "expenses/<uuid:pk>/reconcile/",
         reconcile_expense_view,
         name="expense-reconcile",
@@ -122,6 +129,11 @@ urlpatterns = [
         "revenues/<uuid:pk>/update/",
         update_accountability_revenue_view,
         name="revenue-update",
+    ),
+    path(
+        "revenues/<uuid:pk>/file-upload/",
+        upload_revenue_file_view,
+        name="revenue-file",
     ),
     path(
         "revenues/<uuid:pk>/duplicate/",
