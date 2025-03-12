@@ -95,8 +95,11 @@
         <b>Identificação: </b> {{ expense.identification }}
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> {{ expense.observations }}
+        <b>Observações: </b> {{ expense.observations|default_if_none:"Sem Observações" }}
     </div>
+    <div class="mb-2 text-base flex justify-between">
+      <b>Favorecido: </b> {{ expense.favored.name }}
+  </div>
     <div class="mb-2 text-base flex justify-between">
         <b>Valor: </b> R${{ expense.value|intcomma }}
     </div>
