@@ -292,7 +292,7 @@ class ReconcileExpenseForm(forms.Form):
             raise forms.ValidationError("Informe as transações correspondentes")
 
         amount = sum([transaction.amount for transaction in transactions])
-        if amount != self.expense.value:
+        if abs(amount) != abs(self.expense.value):
             raise forms.ValidationError(
                 "Soma das transações diferente do valor da despesa."
             )

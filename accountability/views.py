@@ -917,17 +917,6 @@ def reconcile_expense_view(request, pk):
         form = ReconcileExpenseForm(request.POST, contract=contract, expense=expense)
         files = request.FILES.getlist("files")
 
-        if not files:
-            return render(
-                request,
-                "accountability/expenses/reconcile.html",
-                {
-                    "form": form,
-                    "expense": expense,
-                    "missing_files": True,
-                },
-            )
-
         if form.is_valid():
             with transaction.atomic():
                 expense.conciled = True
