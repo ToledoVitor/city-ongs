@@ -279,8 +279,8 @@ class ReconcileExpenseForm(forms.Form):
                     | Q(bank_account=self.contract.investing_account)
                 )
                 .filter(
-                    expense__isnull=True,
-                    revenue__isnull=True,
+                    expenses=None,
+                    revenues=None,
                     amount__lte=0,
                 )
                 .order_by("date")
@@ -334,8 +334,8 @@ class ReconcileRevenueForm(forms.Form):
                     | Q(bank_account=self.contract.investing_account)
                 )
                 .filter(
-                    expense__isnull=True,
-                    revenue__isnull=True,
+                    expenses=None,
+                    revenues=None,
                     amount__gte=0,
                 )
                 .order_by("date")
