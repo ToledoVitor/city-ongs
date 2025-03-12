@@ -231,13 +231,3 @@ class Transaction(BaseModel):
         verbose_name = "Movimentação Bancária"
         verbose_name_plural = "Movimentações Bancárias"
 
-        constraints = [
-            models.UniqueConstraint(
-                fields=["transaction_number"],
-                name="unique__transaction_number",
-                condition=models.Q(
-                    transaction_number__isnull=False,
-                    deleted_at__isnull=True,
-                ),
-            ),
-        ]
