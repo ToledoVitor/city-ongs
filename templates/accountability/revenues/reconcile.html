@@ -78,7 +78,10 @@
         </a>
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> {{ revenue.observations }}
+        <b>Observações: </b> {{ revenue.observations|default_if_none:"Sem Observações" }}
+    </div>
+    <div class="mb-2 text-base flex justify-between">
+        <b>Favorecido: </b> {{ revenue.favored.name }}
     </div>
     <div class="mb-2 text-base flex justify-between">
         <b>Valor: </b> R${{ revenue.value|intcomma }}

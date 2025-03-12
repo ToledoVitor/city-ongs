@@ -246,7 +246,7 @@ class ImportXLSXAccountabilityForm(forms.Form):
 
 class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        return f"{obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}"
+        return f"{obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}, {obj.memo}, {obj.name}"
 
 
 class ReconcileExpenseForm(forms.Form):
@@ -269,6 +269,7 @@ class ReconcileExpenseForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.contract = kwargs.pop("contract", None)
         self.expense = kwargs.pop("expense", None)
+        self.relateds = kwargs.pop("relateds", [])
         super().__init__(*args, **kwargs)
 
         if self.contract:
@@ -291,8 +292,12 @@ class ReconcileExpenseForm(forms.Form):
         if not transactions:
             raise forms.ValidationError("Informe as transações correspondentes")
 
-        amount = sum([transaction.amount for transaction in transactions])
-        if abs(amount) != abs(self.expense.value):
+        transaction_amount = sum([transaction.amount for transaction in transactions])
+        expenses_amount = self.expense.value
+        for related_expense in self.relateds:
+            expenses_amount += related_expense.value
+
+        if abs(transaction_amount) != abs(expenses_amount):
             raise forms.ValidationError(
                 "Soma das transações diferente do valor da despesa."
             )
