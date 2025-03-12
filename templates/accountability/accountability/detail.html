@@ -102,6 +102,7 @@
     <div class="relative text-lg font-semibold pt-2">
       Status:
       <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-purple-800 bg-purple-100">{{ object.status_label }}</span>
+      <a href="{% url 'accountability:accountability-pendencies' object.id %}" class="text-sm hover:underline text-blue-500">Ver Pendências</a>
     </div>
 
     <div class="relative text-right">

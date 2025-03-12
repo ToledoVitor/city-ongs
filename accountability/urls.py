@@ -8,6 +8,7 @@ from accountability.views import (
     ResourceSourceCreateView,
     ResourceSourceListView,
     ResourceSourceUpdateView,
+    accountability_pendencies_view,
     accountability_detail_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
@@ -67,6 +68,11 @@ urlpatterns = [
         "detail/<uuid:pk>/import",
         create_contract_accountability_view,
         name="accountability-create",
+    ),
+    path(
+        "detail/<uuid:pk>/pendencies",
+        accountability_pendencies_view,
+        name="accountability-pendencies",
     ),
     path(
         "<uuid:pk>/accountability/expenses/create",

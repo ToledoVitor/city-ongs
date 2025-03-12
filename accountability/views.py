@@ -1152,3 +1152,25 @@ def reconcile_revenue_view(request, pk):
                 "conciled": conciled_revenues,
             },
         )
+
+
+def accountability_pendencies_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    expenses = Expense.objects.filter(
+        accountability=accountability,
+        pendencies__isnull=False,
+    ).select_related("favored")
+    revenues = Revenue.objects.filter(
+        accountability=accountability,
+        pendencies__isnull=False,
+    )
+
+    return render(
+        request,
+        "accountability/accountability/pendencies-list.html",
+        {
+            "accountability": accountability,
+            "expenses": expenses,
+            "revenues": revenues,
+        },
+    )
