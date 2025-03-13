@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load humanize %}
+
 {% block content %}
 
 <!-- Breadcrumb -->
@@ -104,15 +106,15 @@
         {% for day in statement_days %}
         <tr>
           <td class="px-6 py-4 whitespace-nowrap">{{ day.date }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.open_balance }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.close_balance }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.open_balance|intcomma }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.close_balance|intcomma }}</td>
           <td class="px-6 py-4 whitespace-nowrap">
             <ul class="list-disc pl-5 text-sm text-gray-600">
               {% for transaction in day.transactions %}
               <li>
                 {{ transaction.date }} -
                 {{ transaction.get_transaction_type_display }} -
-                R$ {{ transaction.amount }}
+                R$ {{ transaction.amount|intcomma }}
               </li>
               {% endfor %}
             </ul>
