@@ -308,6 +308,8 @@
                                             Anexado em: {{ file.created_at }}
                                           </p>
                                       </div>
+
+                                      {% if accountability.is_on_execution %}
                                       <form method="post" action="{% url 'accountability:revenue-file-delete' file.id %}">
                                         {% csrf_token %}
                                         <button
@@ -335,6 +337,8 @@
                                           </svg>                                      
                                         </button>
                                       </form>
+                                      {% endif %}
+
                                     </div>
                                   </li>
                                 {% empty %}
