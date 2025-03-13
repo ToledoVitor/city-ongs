@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Inicio
+      </a>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
+      </div>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'contracts:contracts-detail' account.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ account.contract.trailing_code }}</a>
+      </div>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">Extrato</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+<div class="container mx-auto px-4 py-6">
+  <h1 class="text-2xl font-bold mb-6">Extrato da Conta: {{ account.bank_name }} - {{ account.account }} / {{ account.account_type_label }}</h1>
+
+  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label for="start_date" class="block text-sm font-medium text-gray-700">Data de Início</label>
+      <input
+        type="date"
+        name="start_date"
+        id="start_date"
+        value="{{ start_date }}"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      >
+    </div>
+    <div>
+      <label for="end_date" class="block text-sm font-medium text-gray-700">Data de Término</label>
+      <input
+        type="date"
+        name="end_date"
+        id="end_date"
+        value="{{ end_date }}"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      >
+    </div>
+    <div class="flex items-end">
+      <button type="submit"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        Filtrar
+      </button>
+    </div>
+  </form>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-500 text-white">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Data
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Saldo Inicial
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Saldo Final
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Transações
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for day in statement_days %}
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap">{{ day.date }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.open_balance }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.close_balance }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <ul class="list-disc pl-5 text-sm text-gray-600">
+              {% for transaction in day.transactions %}
+              <li>
+                {{ transaction.date }} -
+                {{ transaction.get_transaction_type_display }} -
+                R$ {{ transaction.amount }}
+              </li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+            Nenhuma transação encontrada para o período selecionado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

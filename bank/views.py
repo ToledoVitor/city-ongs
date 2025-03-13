@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 
+from itertools import groupby
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
@@ -211,3 +213,39 @@ def _account_type_already_created(contract: Contract, account_type: str):
         return contract.investing_account is not None
 
     return True
+
+
+def bank_statement_view(request, pk):
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    
+    account = get_object_or_404(BankAccount, id=pk)
+    
+    transactions = account.transactions.filter(date__range=[start_date, end_date]).order_by("-date")
+    
+    grouped_transactions = []
+    for day, group in groupby(transactions, key=lambda t: t.date):
+        grouped_transactions.append((day, list(group)))
+    
+    statement_days = []
+    current_balance = account.balance
+    for day, transacoes in grouped_transactions:
+        total_day = sum(t.amount for t in transacoes)
+        close_balance = current_balance
+        open_balance = close_balance - total_day
+        
+        statement_days.append({
+            "date": day,
+            "open_balance": open_balance,
+            "close_balance": close_balance,
+            "transactions": transacoes,
+        })
+        current_balance = open_balance
+
+    context = {
+        "account": account,
+        "statement_days": statement_days,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    return render(request, "bank-account/statement.html", context)
