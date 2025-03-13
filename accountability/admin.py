@@ -5,10 +5,10 @@ from accountability.models import (
     Expense,
     ExpenseAnalysis,
     ExpenseFile,
+    Favored,
     ResourceSource,
     Revenue,
     RevenueFile,
-    Favored,
 )
 
 admin.site.register(Accountability)

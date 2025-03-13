@@ -8,9 +8,9 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
-from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, TemplateView, UpdateView
 
 from accountability.forms import (
@@ -215,19 +215,27 @@ def create_contract_accountability_view(request, pk):
 
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
-    expenses_list = accountability.expenses.order_by("-value").select_related(
-        "item", "source"
-    ).prefetch_related("files").annotate(
-        count_files=Count(
-            "files", filter=Q(files__deleted_at__isnull=True), distinct=True
-        ),
+    expenses_list = (
+        accountability.expenses.order_by("-value")
+        .select_related("item", "source")
+        .prefetch_related("files")
+        .annotate(
+            count_files=Count(
+                "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+            ),
+        )
     )
-    revenues_list = accountability.revenues.order_by("-value").select_related(
-        "bank_account",
-    ).prefetch_related("files").annotate(
-        count_files=Count(
-            "files", filter=Q(files__deleted_at__isnull=True), distinct=True
-        ),
+    revenues_list = (
+        accountability.revenues.order_by("-value")
+        .select_related(
+            "bank_account",
+        )
+        .prefetch_related("files")
+        .annotate(
+            count_files=Count(
+                "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+            ),
+        )
     )
 
     query = request.GET.get("q", "")
@@ -279,7 +287,7 @@ def create_accountability_revenue_view(request, pk):
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
     if request.method == "POST":
-        form = RevenueForm(request.POST)
+        form = RevenueForm(request.POST, accountability=accountability)
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save(commit=False)
@@ -303,7 +311,7 @@ def create_accountability_revenue_view(request, pk):
                 {"accountability": accountability, "form": form},
             )
     else:
-        form = RevenueForm()
+        form = RevenueForm(accountability=accountability)
         return render(
             request,
             "accountability/revenues/create.html",
@@ -468,7 +476,7 @@ def upload_expense_file_view(request, pk):
         return redirect(
             "accountability:accountability-detail", pk=expense.accountability.id
         )
-    
+
     files = request.FILES.getlist("files")
     with transaction.atomic():
         for file in files:
@@ -481,6 +489,20 @@ def upload_expense_file_view(request, pk):
 
     return redirect(
         "accountability:accountability-detail", pk=expense.accountability.id
+    )
+
+
+@require_POST
+def delete_expense_file_view(request, pk):
+    file = get_object_or_404(ExpenseFile, pk=pk)
+    if not file.expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=file.expense.accountability.id
+        )
+
+    file.delete()
+    return redirect(
+        "accountability:accountability-detail", pk=file.expense.accountability.id
     )
 
 
@@ -505,6 +527,21 @@ def upload_revenue_file_view(request, pk):
     return redirect(
         "accountability:accountability-detail", pk=revenue.accountability.id
     )
+
+
+@require_POST
+def delete_revenue_file_view(request, pk):
+    file = get_object_or_404(RevenueFile, pk=pk)
+    if not file.revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail", pk=file.revenue.accountability.id
+        )
+
+    file.delete()
+    return redirect(
+        "accountability:accountability-detail", pk=file.revenue.accountability.id
+    )
+
 
 def duplicate_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
@@ -968,14 +1005,20 @@ def reconcile_expense_view(request, pk):
     conciled_expenses = Expense.objects.filter(
         accountability=expense.accountability, conciled=True
     ).count()
-    unpaid_expenses = Expense.objects.filter(
-        accountability=expense.accountability,
-        paid=False,
-        conciled=False,
-    ).prefetch_related("favored").exclude(id=expense.id)
+    unpaid_expenses = (
+        Expense.objects.filter(
+            accountability=expense.accountability,
+            paid=False,
+            conciled=False,
+        )
+        .prefetch_related("favored")
+        .exclude(id=expense.id)
+    )
 
     if request.method == "POST":
-        relateds = Expense.objects.filter(id__in=request.POST.getlist("related_expenses", []))
+        relateds = Expense.objects.filter(
+            id__in=request.POST.getlist("related_expenses", [])
+        )
         form = ReconcileExpenseForm(
             request.POST,
             contract=contract,

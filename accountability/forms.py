@@ -8,7 +8,7 @@ from accountability.models import (
     ResourceSource,
     Revenue,
 )
-from bank.models import Transaction
+from bank.models import BankAccount, Transaction
 from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
@@ -168,6 +168,20 @@ class RevenueForm(forms.ModelForm):
             "source": BaseSelectFormWidget(),
             "revenue_nature": BaseSelectFormWidget(),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.accountability: Accountability = kwargs.pop("accountability", None)
+        super().__init__(*args, **kwargs)
+
+        checking_account_id = getattr(
+            self.accountability.contract.checking_account, "id", None
+        )
+        investing_account_id = getattr(
+            self.accountability.contract.investing_account, "id", None
+        )
+        self.fields["bank_account"].queryset = BankAccount.objects.filter(
+            Q(id=checking_account_id) | Q(id=investing_account_id)
+        )
 
 
 class AccountabilityCreateForm(forms.ModelForm):

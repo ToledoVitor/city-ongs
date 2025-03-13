@@ -20,7 +20,10 @@ class ActivityLog(models.Model):
         SENT_TO_ANALISYS = "SENT_TO_ANALISYS", "Enviou para análise"
         SENT_TO_CORRECT = "SENT_TO_CORRECT", "Enviou para correção"
         MARKED_AS_FINISHED = "MARKED_AS_FINISHED", "Marcou como finalizada"
-        IMPORTED_ACCOUNTABILITY_FILE = "IMPORTED_ACCOUNTABILITY_FILE", "Importou arquivo de prestação"
+        IMPORTED_ACCOUNTABILITY_FILE = (
+            "IMPORTED_ACCOUNTABILITY_FILE",
+            "Importou arquivo de prestação",
+        )
         # bank
         CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "Criou conta bancária"
         UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "Atualizou conta bancária"

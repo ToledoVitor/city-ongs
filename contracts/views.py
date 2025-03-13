@@ -180,17 +180,20 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         context["accountabilities"] = (
             self.object.accountabilities.filter(deleted_at__isnull=True)
             .prefetch_related(
-                "revenues", "expenses",
+                "revenues",
+                "expenses",
             )
             .annotate(
                 count_revenues=Count(
                     "revenues",
-                    filter=Q(revenues__deleted_at__isnull=True) & Q(deleted_at__isnull=True),
+                    filter=Q(revenues__deleted_at__isnull=True)
+                    & Q(deleted_at__isnull=True),
                     distinct=True,
                 ),
                 count_expenses=Count(
                     "expenses",
-                    filter=Q(expenses__deleted_at__isnull=True) & Q(deleted_at__isnull=True),
+                    filter=Q(expenses__deleted_at__isnull=True)
+                    & Q(deleted_at__isnull=True),
                     distinct=True,
                 ),
             )[:12]

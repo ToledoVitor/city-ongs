@@ -308,6 +308,33 @@
                                             Anexado em: {{ file.created_at }}
                                           </p>
                                       </div>
+                                      <form method="post" action="{% url 'accountability:revenue-file-delete' file.id %}">
+                                        {% csrf_token %}
+                                        <button
+                                          type="submit"
+                                          class="
+                                            text-white
+                                            ml-2
+                                            bg-red-600
+                                            hover:bg-red-600
+                                            focus:ring-4
+                                            focus:outline-none
+                                            focus:ring-red-600
+                                            font-medium
+                                            rounded-full
+                                            text-sm
+                                            p-2
+                                            text-center
+                                            inline-flex
+                                            items-center
+                                            me-2
+                                          "
+                                        >
+                                          <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                                          </svg>                                      
+                                        </button>
+                                      </form>
                                     </div>
                                   </li>
                                 {% empty %}
@@ -372,7 +399,7 @@
                               </button>
                               <button
                                 type="button"
-                                id="btnShowUploadForm-{{ revenue.id }}"
+                                id="btnShowRevenueUploadForm-{{ revenue.id }}"
                                   class="
                                   w-full
                                   text-white
@@ -392,7 +419,7 @@
                               </button>
                             </div>
           
-                          <div id="uploadFormContainer-{{ revenue.id }}" class="hidden mb-4">
+                          <div id="uploadRevenueFormContainer-{{ revenue.id }}" class="hidden mb-4">
                             <form method="post" action="{% url 'accountability:revenue-file' revenue.pk %}" enctype="multipart/form-data">
                               {% csrf_token %}
                               <div class="my-3">
@@ -888,10 +915,10 @@
 </nav>
 
 <script>
-  document.querySelectorAll('[id^="btnShowUploadForm-"]').forEach(function(button) {
+  document.querySelectorAll('[id^="btnShowRevenueUploadForm-"]').forEach(function(button) {
     button.addEventListener('click', function() {
-        const revenueId = this.id.replace("btnShowUploadForm-", "");
-        const container = document.getElementById('uploadFormContainer-' + revenueId);
+        const revenueId = this.id.replace("btnShowRevenueUploadForm-", "");
+        const container = document.getElementById('uploadRevenueFormContainer-' + revenueId);
         container.classList.toggle('hidden');
     });
   });

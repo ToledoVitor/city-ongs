@@ -137,6 +137,7 @@ class ResourceSource(BaseModel):
         MUNICIPAL = "MUNICIPAL", "Municipal"
         COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
         PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
+        PARLIAMENTARY = "PARLIAMENTARY", "Emenda Parlamentar"
 
     class CategoryChoices(models.TextChoices):
         NOT_APPLIABLE = "NOT_APPLIABLE", "Não Aplicavél"
