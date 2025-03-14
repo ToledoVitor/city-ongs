@@ -2,6 +2,7 @@ import logging
 from decimal import Decimal
 from typing import Any
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -159,6 +160,7 @@ class ResourceSourceUpdateView(LoginRequiredMixin, UpdateView):
         return self.model.objects.get(id=self.kwargs["pk"])
 
 
+@login_required
 def create_contract_accountability_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -213,6 +215,7 @@ def create_contract_accountability_view(request, pk):
         )
 
 
+@login_required
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     expenses_list = (
@@ -278,6 +281,7 @@ def accountability_detail_view(request, pk):
     return render(request, "accountability/accountability/detail.html", context)
 
 
+@login_required
 def create_accountability_revenue_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -319,6 +323,7 @@ def create_accountability_revenue_view(request, pk):
         )
 
 
+@login_required
 def update_accountability_revenue_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -359,6 +364,7 @@ def update_accountability_revenue_view(request, pk):
         )
 
 
+@login_required
 def duplicate_accountability_revenue_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
     if not revenue.accountability.is_on_execution:
@@ -381,6 +387,7 @@ def duplicate_accountability_revenue_view(request, pk):
         )
 
 
+@login_required
 def create_accountability_expense_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -422,6 +429,7 @@ def create_accountability_expense_view(request, pk):
         )
 
 
+@login_required
 def update_accountability_expense_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -470,12 +478,13 @@ def update_accountability_expense_view(request, pk):
 
 
 @require_POST
+@login_required
 def upload_expense_file_view(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not expense.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
     files = request.FILES.getlist("files")
     with transaction.atomic():
@@ -487,32 +496,30 @@ def upload_expense_file_view(request, pk):
                 file=file,
             )
 
-    return redirect(
-        "accountability:accountability-detail", pk=expense.accountability.id
-    )
+    return redirect(next_url, pk=expense.accountability.id)
 
 
 @require_POST
+@login_required
 def delete_expense_file_view(request, pk):
     file = get_object_or_404(ExpenseFile, pk=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not file.expense.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=file.expense.accountability.id
-        )
+        return redirect(next_url, pk=file.expense.accountability.id)
 
     file.delete()
-    return redirect(
-        "accountability:accountability-detail", pk=file.expense.accountability.id
-    )
+    return redirect(next_url, pk=file.expense.accountability.id)
 
 
 @require_POST
+@login_required
 def upload_revenue_file_view(request, pk):
     revenue = get_object_or_404(Revenue, pk=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not revenue.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=revenue.accountability.id
-        )
+        return redirect(next_url, pk=revenue.accountability.id)
 
     files = request.FILES.getlist("files")
     with transaction.atomic():
@@ -524,25 +531,23 @@ def upload_revenue_file_view(request, pk):
                 file=file,
             )
 
-    return redirect(
-        "accountability:accountability-detail", pk=revenue.accountability.id
-    )
+    return redirect(next_url, pk=revenue.accountability.id)
 
 
 @require_POST
+@login_required
 def delete_revenue_file_view(request, pk):
     file = get_object_or_404(RevenueFile, pk=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not file.revenue.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=file.revenue.accountability.id
-        )
+        return redirect(next_url, pk=file.revenue.accountability.id)
 
     file.delete()
-    return redirect(
-        "accountability:accountability-detail", pk=file.revenue.accountability.id
-    )
+    return redirect(next_url, pk=file.revenue.accountability.id)
 
 
+@login_required
 def duplicate_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     if not expense.accountability.is_on_execution:
@@ -567,6 +572,7 @@ def duplicate_accountability_expense_view(request, pk):
         )
 
 
+@login_required
 def gloss_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     if not expense.accountability.is_on_execution:
@@ -675,6 +681,7 @@ class FavoredUpdateView(LoginRequiredMixin, UpdateView):
         return self.model.objects.get(id=self.kwargs["pk"])
 
 
+@login_required
 def import_accountability_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -768,6 +775,8 @@ def import_accountability_view(request, pk):
         )
 
 
+@login_required
+@require_POST
 def expense_delete_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     if not expense.accountability.is_on_execution:
@@ -775,6 +784,7 @@ def expense_delete_view(request, pk):
             "accountability:accountability-detail", pk=expense.accountability.id
         )
 
+    next_url = request.POST.get("next", "accountability:accountability-detail")
     with transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
@@ -784,11 +794,11 @@ def expense_delete_view(request, pk):
             target_content_object=expense,
         )
         expense.delete()
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
 
+@login_required
+@require_POST
 def revenue_delete_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
     if not revenue.accountability.is_on_execution:
@@ -796,6 +806,7 @@ def revenue_delete_view(request, pk):
             "accountability:accountability-detail", pk=revenue.accountability.id
         )
 
+    next_url = request.POST.get("next", "accountability:accountability-detail")
     with transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
@@ -805,11 +816,10 @@ def revenue_delete_view(request, pk):
             target_content_object=revenue,
         )
         revenue.delete()
-        return redirect(
-            "accountability:accountability-detail", pk=revenue.accountability.id
-        )
+        return redirect(next_url, pk=revenue.accountability.id)
 
 
+@login_required
 def send_accountability_to_analisys_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     if accountability.is_finished:
@@ -986,6 +996,7 @@ def review_accountability_revenues(request, pk, index):
     )
 
 
+@login_required
 def reconcile_expense_view(request, pk):
     expense = get_object_or_404(
         Expense.objects.select_related(
@@ -1113,6 +1124,7 @@ def reconcile_expense_view(request, pk):
         )
 
 
+@login_required
 def reconcile_revenue_view(request, pk):
     revenue = get_object_or_404(
         Revenue.objects.select_related(
@@ -1197,6 +1209,7 @@ def reconcile_revenue_view(request, pk):
         )
 
 
+@login_required
 def accountability_pendencies_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     expenses = Expense.objects.filter(

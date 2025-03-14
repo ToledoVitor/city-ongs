@@ -5,6 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Count, Q, Sum, Value
@@ -290,6 +291,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         return redirect("contracts:contracts-detail", pk=contract.id)
 
 
+@login_required
 def create_contract_item_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -334,6 +336,7 @@ def create_contract_item_view(request, pk):
         )
 
 
+@login_required
 def update_contract_item_view(request, pk, item_pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -379,6 +382,7 @@ def update_contract_item_view(request, pk, item_pk):
         )
 
 
+@login_required
 def create_contract_goal_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -435,6 +439,7 @@ def create_contract_goal_view(request, pk):
         )
 
 
+@login_required
 def update_contract_goal_view(request, pk, goal_pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -587,6 +592,7 @@ class ContractItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required
 def create_contract_execution_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -660,6 +666,7 @@ class ContractExecutionDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required
 def create_execution_activity_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -740,6 +747,7 @@ class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
         return self.model.objects.get(id=self.kwargs["pk"])
 
 
+@login_required
 def create_execution_file_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -966,6 +974,7 @@ def _groupped_list_values(request):
     return city_hall_values, counterpart_values
 
 
+@login_required
 def contract_timeline_update_view(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if not contract.is_on_planning:
@@ -1049,6 +1058,7 @@ def contract_timeline_update_view(request, pk):
         return render(request, "contracts/timeline-update.html", context)
 
 
+@login_required
 def contract_status_change_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -1077,6 +1087,7 @@ def contract_status_change_view(request, pk):
         return render(request, "contracts/status-update.html", {"form": form})
 
 
+@login_required
 def item_new_value_request_view(request, pk):
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
@@ -1169,6 +1180,7 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
         )
 
 
+@login_required
 def send_execution_to_analisys_view(request, pk):
     execution = get_object_or_404(ContractExecution, id=pk)
     if execution.is_finished:
@@ -1217,6 +1229,7 @@ def send_accountability_review_analisys(request, pk):
         return redirect("contracts:executions-detail", pk=execution.id)
 
 
+@login_required
 def create_contract_interested_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -1254,6 +1267,7 @@ def create_contract_interested_view(request, pk):
         )
 
 
+@login_required
 def update_contract_interested_view(request, pk, item_pk):
     if not request.user:
         return redirect("/accounts-login/")
@@ -1293,6 +1307,7 @@ def update_contract_interested_view(request, pk, item_pk):
         )
 
 
+@login_required
 def interested_delete_view(request, pk):
     interested = get_object_or_404(
         ContractInterestedPart.objects.select_related("contract"), id=pk

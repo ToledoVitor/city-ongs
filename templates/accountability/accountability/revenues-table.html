@@ -312,6 +312,7 @@
                                       {% if accountability.is_on_execution %}
                                       <form method="post" action="{% url 'accountability:revenue-file-delete' file.id %}">
                                         {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                         <button
                                           type="submit"
                                           class="
@@ -380,6 +381,42 @@
                               </ul>
                             </div>
                 
+                            <div id="uploadRevenueFormContainer-{{ revenue.id }}" class="hidden mb-6">
+                              <form method="post" action="{% url 'accountability:revenue-file' revenue.pk %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <div class="my-3">
+                                  <label class="block text-xl mb-2 font-medium text-black">Arquivos</label>
+                                  <input
+                                      class="
+                                          block
+                                          w-full
+                                          text-sm
+                                          text-gray-900
+                                          border
+                                          border-gray-500
+                                          rounded-lg
+                                          cursor-pointer
+                                          bg-gray-300
+                                          focus:outline-none
+                                      "
+                                      id="files"
+                                      name="files"
+                                      type="file"
+                                      multiple
+                                  >
+                                </div>
+                                <div class="flex justify-end">
+                                  <button
+                                    type="submit"
+                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
+                                  >
+                                    Enviar Documento
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+
                             <div class="grid gap-6 mb-10 my-6 md:grid-cols-2">
                               <button
                                 type="button"
@@ -423,41 +460,6 @@
                               </button>
                             </div>
           
-                          <div id="uploadRevenueFormContainer-{{ revenue.id }}" class="hidden mb-4">
-                            <form method="post" action="{% url 'accountability:revenue-file' revenue.pk %}" enctype="multipart/form-data">
-                              {% csrf_token %}
-                              <div class="my-3">
-                                <label class="block text-xl mb-2 font-medium text-black">Arquivos</label>
-                                <input
-                                    class="
-                                        block
-                                        w-full
-                                        text-sm
-                                        text-gray-900
-                                        border
-                                        border-gray-500
-                                        rounded-lg
-                                        cursor-pointer
-                                        bg-gray-300
-                                        focus:outline-none
-                                    "
-                                    id="files"
-                                    name="files"
-                                    type="file"
-                                    multiple
-                                >
-                              </div>
-                              <div class="flex justify-end">
-                                <button
-                                  type="submit"
-                                  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
-                                >
-                                  Enviar Documento
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-
                         </div>
                     </div>
                   </div>

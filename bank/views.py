@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
@@ -55,6 +56,7 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required
 def update_bank_account_ofx_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -89,6 +91,7 @@ def update_bank_account_ofx_view(request, pk):
         )
 
 
+@login_required
 def create_bank_account_view(request, pk):
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
@@ -138,6 +141,7 @@ def create_bank_account_view(request, pk):
     )
 
 
+@login_required
 def update_bank_account_manual_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -214,6 +218,7 @@ def _account_type_already_created(contract: Contract, account_type: str):
     return True
 
 
+@login_required
 def bank_statement_view(request, pk):
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
