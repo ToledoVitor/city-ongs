@@ -1,12 +1,11 @@
 import logging
+from datetime import datetime
 from typing import Any
-
-from itertools import groupby
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Sum
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
@@ -216,36 +215,94 @@ def _account_type_already_created(contract: Contract, account_type: str):
 
 
 def bank_statement_view(request, pk):
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-    
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    status_filter = request.GET.get("status", "all")  # "all", "reconciled" ou "pending"
+
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    else:
+        start_date = datetime(1900, 1, 1).date()
+
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    else:
+        end_date = datetime.today().date()
+
     account = get_object_or_404(BankAccount, id=pk)
-    
-    transactions = account.transactions.filter(date__range=[start_date, end_date]).order_by("-date")
-    
-    grouped_transactions = []
-    for day, group in groupby(transactions, key=lambda t: t.date):
-        grouped_transactions.append((day, list(group)))
-    
+    all_transactions = (
+        account.transactions.filter(date__gte=start_date)
+        .prefetch_related(
+            "expenses",
+            "revenues",
+        )
+        .order_by("-date")
+    )
+
+    daily_totals = (
+        all_transactions.values("date")
+        .annotate(total_day=Sum("amount"))
+        .order_by("-date")
+    )
+    daily_totals_dict = {item["date"]: item["total_day"] for item in daily_totals}
+
     statement_days = []
     current_balance = account.balance
-    for day, transacoes in grouped_transactions:
-        total_day = sum(t.amount for t in transacoes)
+    sorted_dates_desc = sorted(daily_totals_dict.keys(), reverse=True)
+    for day in sorted_dates_desc:
+        total_day = daily_totals_dict[day]
         close_balance = current_balance
         open_balance = close_balance - total_day
-        
-        statement_days.append({
-            "date": day,
-            "open_balance": open_balance,
-            "close_balance": close_balance,
-            "transactions": transacoes,
-        })
+
+        transactions_day = [t for t in all_transactions if t.date == day]
+        statement_days.append(
+            {
+                "date": day,
+                "open_balance": open_balance,
+                "close_balance": close_balance,
+                "all_transactions": transactions_day,
+            }
+        )
         current_balance = open_balance
+    statement_days.reverse()
+
+    display_statement_days = []
+    for day_info in statement_days:
+        if not (start_date <= day_info["date"] <= end_date):
+            continue
+
+        displayed_transactions = []
+        for t in day_info["all_transactions"]:
+            trans_status = (
+                "Conciliada"
+                if (t.expenses.exists() or t.revenues.exists())
+                else "Pendente"
+            )
+            if (
+                status_filter == "all"
+                or (
+                    status_filter == "reconciled"
+                    and (t.expenses.exists() or t.revenues.exists())
+                )
+                or (
+                    status_filter == "pending"
+                    and not (t.expenses.exists() or t.revenues.exists())
+                )
+            ):
+                displayed_transactions.append(
+                    {
+                        "obj": t,
+                        "status": trans_status,
+                    }
+                )
+        day_info["transactions"] = displayed_transactions
+        display_statement_days.append(day_info)
 
     context = {
         "account": account,
-        "statement_days": statement_days,
-        "start_date": start_date,
-        "end_date": end_date,
+        "statement_days": display_statement_days,
+        "start_date": start_date_str,
+        "end_date": end_date_str,
+        "status": status_filter,
     }
     return render(request, "bank-account/statement.html", context)

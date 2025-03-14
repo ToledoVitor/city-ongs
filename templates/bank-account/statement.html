@@ -55,9 +55,20 @@
         name="start_date"
         id="start_date"
         value="{{ start_date }}"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        class="
+          mt-1
+          block
+          w-full
+          rounded-md
+          bg-gray-300
+          border-gray-600
+          shadow-sm
+          focus:border-blue-500
+          focus:ring-blue-500
+        "
       >
     </div>
+
     <div>
       <label for="end_date" class="block text-sm font-medium text-gray-700">Data de Término</label>
       <input
@@ -65,9 +76,45 @@
         name="end_date"
         id="end_date"
         value="{{ end_date }}"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      >
+        class="
+          mt-1
+          block
+          w-full
+          rounded-md
+          bg-gray-300
+          border-gray-600
+          shadow-sm
+          focus:border-blue-500
+          focus:ring-blue-500
+        "
+        >
     </div>
+
+    <div>
+      <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+      <select
+        name="status"
+        id="status"
+        class="
+          mt-1
+          border
+          text-sm
+          rounded-lg
+          block
+          w-full p-2.5
+          bg-gray-300
+          border-gray-600
+          text-black
+          focus:ring-blue-500
+          focus:border-blue-500
+        "
+      >
+        <option value="all" {% if status == 'all' %}selected{% endif %}>Todas</option>
+        <option value="reconciled" {% if status == 'reconciled' %}selected{% endif %}>Conciliadas</option>
+        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pendentes</option>
+      </select>
+    </div>
+
     <div class="flex items-end">
       <button type="submit"
         class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -88,44 +135,48 @@
           <th
             scope="col"
             class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Saldo Inicial
+            Nome
           </th>
           <th
             scope="col"
             class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Saldo Final
+            Valor
           </th>
           <th
             scope="col"
             class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Transações
+            Tipo
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+            Status
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         {% for day in statement_days %}
-        <tr>
-          <td class="px-6 py-4 whitespace-nowrap">{{ day.date }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.open_balance|intcomma }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">R$ {{ day.close_balance|intcomma }}</td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <ul class="list-disc pl-5 text-sm text-gray-600">
-              {% for transaction in day.transactions %}
-              <li>
-                {{ transaction.date }} -
-                {{ transaction.get_transaction_type_display }} -
-                R$ {{ transaction.amount|intcomma }}
-              </li>
-              {% endfor %}
-            </ul>
-          </td>
-        </tr>
+          <tr>
+            <td class="px-6 py-4 font-bold bg-gray-200" colspan="5">
+              {{ day.date }} &mdash; Saldo Inicial: R$ {{ day.open_balance|intcomma }} | Saldo Final: R$ {{ day.close_balance|intcomma }}
+            </td>
+          </tr>
+
+          {% for transaction in day.transactions %}
+            <tr>
+              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.obj.date }}</td>
+              <td class="px-6 py-4 text-xs">{{ transaction.obj.memo|default:"-" }}</td>
+              <td class="px-6 py-4 text-xs whitespace-nowrap">R$ {{ transaction.obj.amount|intcomma }}</td>
+              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.obj.get_transaction_type_display }}</td>
+              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.status }}</td>
+            </tr>
+          {% endfor %}
         {% empty %}
-        <tr>
-          <td colspan="4" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-            Nenhuma transação encontrada para o período selecionado.
-          </td>
-        </tr>
+          <tr>
+            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+              Nenhuma transação encontrada para o período selecionado.
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
