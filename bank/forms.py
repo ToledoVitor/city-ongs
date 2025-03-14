@@ -27,7 +27,7 @@ class BankAccountForm(forms.ModelForm):
             "account": BaseCharFieldFormWidget(),
             "account_type": BaseSelectFormWidget(),
             "agency": BaseCharFieldFormWidget(),
-            "origin": BaseCharFieldFormWidget(),
+            "origin": BaseSelectFormWidget(),
         }
 
 

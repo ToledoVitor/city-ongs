@@ -75,6 +75,10 @@ class BankAccount(BaseModel):
         return BankAccount.AccountTypeChoices(self.account_type).label
 
     @property
+    def origin_label(self):
+        return BankAccount.OriginChoices(self.origin).label
+
+    @property
     def last_statement_update(self):
         last_statement = self.statements.order_by(
             "-reference_year", "-reference_month"

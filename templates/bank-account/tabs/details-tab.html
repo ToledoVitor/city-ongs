@@ -5,7 +5,7 @@
     <b>Tipo de conta:</b> {{ object.account_type_label }} <br>
     <b>Agência:</b> {{ object.agency|default_if_none:"N/A" }} <br>
     <b>Saldo:</b> R${{ object.balance|intcomma }} <br>
-    <b>Origem da Receita:</b> {{ object.origin }}
+    <b>Origem da Receita:</b> {{ object.origin_label }}
 </div>
 
 <hr class="h-px my-8 border-0 bg-gray-500">
