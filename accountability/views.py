@@ -367,10 +367,10 @@ def update_accountability_revenue_view(request, pk):
 @login_required
 def duplicate_accountability_revenue_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not revenue.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=revenue.accountability.id
-        )
+        return redirect(next_url, pk=revenue.accountability.id)
 
     with transaction.atomic():
         revenue.id = None
@@ -382,9 +382,7 @@ def duplicate_accountability_revenue_view(request, pk):
             target_object_id=revenue.id,
             target_content_object=revenue,
         )
-        return redirect(
-            "accountability:accountability-detail", pk=revenue.accountability.id
-        )
+        return redirect(next_url, pk=revenue.accountability.id)
 
 
 @login_required
@@ -550,10 +548,10 @@ def delete_revenue_file_view(request, pk):
 @login_required
 def duplicate_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not expense.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
     with transaction.atomic():
         expense.id = None
@@ -567,18 +565,16 @@ def duplicate_accountability_expense_view(request, pk):
             target_object_id=expense.id,
             target_content_object=expense,
         )
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
 
 @login_required
 def gloss_accountability_expense_view(request, pk):
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not expense.accountability.is_on_execution:
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
     with transaction.atomic():
         expense.planned = False
@@ -591,9 +587,7 @@ def gloss_accountability_expense_view(request, pk):
             target_object_id=expense.id,
             target_content_object=expense,
         )
-        return redirect(
-            "accountability:accountability-detail", pk=expense.accountability.id
-        )
+        return redirect(next_url, pk=expense.accountability.id)
 
 
 class FavoredListView(LoginRequiredMixin, ListView):

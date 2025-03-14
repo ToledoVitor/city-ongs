@@ -550,6 +550,7 @@
                               <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.pk %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                                   <span class="py-10 my-10 text-base">
                                     A despesa será marcada como não planejada, e o item será desacossiado.
@@ -664,6 +665,7 @@
                               <form class="space-y-4"  method="post" action="{% url 'accountability:expense-duplicate' expense.pk %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                                   <span class="py-10 my-10 text-base">Todos os dados, exceto os arquivos, serão copiados.</span>
 
@@ -774,6 +776,7 @@
                               <form class="space-y-4"  method="post" action="{% url 'accountability:expense-delete' expense.pk %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                                   <span class="py-10 my-10 text-base">Não é possível reverter essa ação depois.</span>
 

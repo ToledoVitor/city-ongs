@@ -529,6 +529,7 @@
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="form_type" value="revenues_delete">
                                   <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
+                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                                   <span class="py-10 my-10 text-base">Todos os dados, exceto os arquivos, serão copiados.</span>
 
@@ -641,6 +642,7 @@
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="form_type" value="revenues_delete">
                                   <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
+                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
 
                                   <span class="py-10 my-10 text-base">Não é possível reverter essa ação depois.</span>
 
