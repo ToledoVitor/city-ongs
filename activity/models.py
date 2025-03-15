@@ -17,6 +17,8 @@ class ActivityLog(models.Model):
         )
         # accountability
         CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "Criou prestação mensal"
+        CREATED_ACCOUNTABILITY_FILE = "CREATED_ACCOUNTABILITY_FILE", "Subiu documento de prestação"
+        DELETED_ACCOUNTABILITY_FILE = "DELETED_ACCOUNTABILITY_FILE", "Deletou documento de prestação"
         SENT_TO_ANALISYS = "SENT_TO_ANALISYS", "Enviou para análise"
         SENT_TO_CORRECT = "SENT_TO_CORRECT", "Enviou para correção"
         MARKED_AS_FINISHED = "MARKED_AS_FINISHED", "Marcou como finalizada"

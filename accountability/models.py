@@ -98,6 +98,44 @@ class Accountability(BaseModel):
         unique_together = ("contract", "month", "year")
 
 
+class AccountabilityFile(BaseModel):
+    accountability = models.ForeignKey(
+        Accountability,
+        verbose_name="Prestação",
+        related_name="files",
+        on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        User,
+        verbose_name="Criado por",
+        related_name="accountability_files",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/accountabilities/",
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(
+        verbose_name="Nome do Arquivo",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Arquivo de Prestação {self.id}"
+
+    class Meta:
+        verbose_name = "Arquivo de Prestação"
+        verbose_name_plural = "Arquivo de Prestações"
+
+
 class Favored(BaseModel):
     organization = models.ForeignKey(
         Organization,

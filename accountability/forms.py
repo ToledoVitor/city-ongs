@@ -3,6 +3,7 @@ from django.db.models import Q, Sum
 
 from accountability.models import (
     Accountability,
+    AccountabilityFile,
     Expense,
     Favored,
     ResourceSource,
@@ -17,6 +18,7 @@ from utils.widgets import (
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
+    BaseFileFormWidget,
     CustomCheckboxSelectMultiple,
 )
 
@@ -368,3 +370,17 @@ class ReconcileRevenueForm(forms.Form):
             )
 
         return transactions
+
+
+class AccountabilityFileForm(forms.ModelForm):
+    class Meta:
+        model = AccountabilityFile
+        fields = [
+            "name",
+            "file",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="Arquivo xxxxx"),
+            "file": BaseFileFormWidget(),
+        }

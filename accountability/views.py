@@ -16,6 +16,7 @@ from django.views.generic import ListView, TemplateView, UpdateView
 
 from accountability.forms import (
     AccountabilityCreateForm,
+    AccountabilityFileForm,
     ExpenseForm,
     FavoredForm,
     ImportXLSXAccountabilityForm,
@@ -26,6 +27,7 @@ from accountability.forms import (
 )
 from accountability.models import (
     Accountability,
+    AccountabilityFile,
     Expense,
     ExpenseFile,
     Favored,
@@ -240,6 +242,9 @@ def accountability_detail_view(request, pk):
             ),
         )
     )
+    documents_list = (
+        accountability.files.select_related("created_by")
+    )
 
     query = request.GET.get("q", "")
     if query:
@@ -270,6 +275,7 @@ def accountability_detail_view(request, pk):
 
     context = {
         "object": accountability,
+        "documents": documents_list,
         "expenses_page": expenses_page,
         "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"]
         or Decimal("0.00"),
@@ -279,6 +285,68 @@ def accountability_detail_view(request, pk):
         "search_query": query,
     }
     return render(request, "accountability/accountability/detail.html", context)
+
+
+@login_required
+def create_accountability_file_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not accountability.is_on_execution:
+        return redirect("accountability:accountability-detail", pk=accountability.id)
+    
+    if request.method == "POST":
+        form = AccountabilityFileForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                file = AccountabilityFile.objects.create(
+                    accountability=accountability,
+                    created_by=request.user,
+                    name=form.cleaned_data["name"],
+                    file=request.FILES["file"],
+                )
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_ACCOUNTABILITY_FILE,
+                    target_object_id=file.id,
+                    target_content_object=file,
+                )
+                return redirect("accountability:accountability-detail", pk=accountability.id)
+        else:
+            return render(
+                request,
+                "accountability/files/create.html",
+                {"accountability": accountability, "form": form},
+            )
+    else:
+        form = AccountabilityFileForm()
+        return render(
+            request,
+            "accountability/files/create.html",
+            {"accountability": accountability, "form": form},
+        )
+
+
+@login_required
+@require_POST
+def accountability_file_delete_view(request, pk):
+    file = get_object_or_404(AccountabilityFile.objects.select_related("accountability"), id=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
+    if not file.accountability.is_on_execution:
+        return redirect(next_url, pk=file.accountability.id)
+
+    with transaction.atomic():
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DELETED_ACCOUNTABILITY_FILE,
+            target_object_id=file.id,
+            target_content_object=file,
+        )
+        file.delete()
+        return redirect(next_url, pk=file.accountability.id)
+
 
 
 @login_required

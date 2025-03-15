@@ -468,6 +468,12 @@
   {% include 'accountability/accountability/revenues-table.html' with accountability=object revenues_page=revenues_page expenses_page_number=expenses_page.number q=search_query csrf_token=csrf_token %}
 </div>
 
+<p class="text-xl my-4 font-bold text-black">Documentos Adicionais</p>
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+  {% include 'accountability/accountability/documents-table.html' with accountability=object csrf_token=csrf_token %}
+</div>
+
 <p class="text-3xl mt-6 font-bold">
   Histórico de Edições
 </p>

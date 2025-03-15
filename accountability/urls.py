@@ -10,8 +10,10 @@ from accountability.views import (
     ResourceSourceUpdateView,
     accountability_detail_view,
     accountability_pendencies_view,
+    accountability_file_delete_view,
     create_accountability_expense_view,
     create_accountability_revenue_view,
+    create_accountability_file_view,
     create_contract_accountability_view,
     delete_expense_file_view,
     delete_revenue_file_view,
@@ -70,6 +72,16 @@ urlpatterns = [
         "detail/<uuid:pk>/import",
         create_contract_accountability_view,
         name="accountability-create",
+    ),
+    path(
+        "detail/<uuid:pk>/files",
+        create_accountability_file_view,
+        name="accountability-file-create",
+    ),
+    path(
+        "accountability-file/<uuid:pk>/delete",
+        accountability_file_delete_view,
+        name="accountability-file-delete",
     ),
     path(
         "detail/<uuid:pk>/pendencies",
