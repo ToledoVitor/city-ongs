@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
 from django.db.models import Prefetch, Sum
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now as tz_now
 from django.views.generic import DetailView
 
 from activity.models import ActivityLog
@@ -19,6 +21,7 @@ from bank.forms import (
     UpdateOFXForm,
 )
 from bank.models import BankAccount, BankStatement
+from bank.services.ofx_exporter import OFXStatementExporter
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
 
@@ -224,17 +227,21 @@ def bank_statement_view(request, pk):
     end_date_str = request.GET.get("end_date")
     status_filter = request.GET.get("status", "all")  # "all", "reconciled" ou "pending"
 
-    if start_date_str:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-    else:
-        start_date = datetime(1900, 1, 1).date()
-
-    if end_date_str:
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-    else:
-        end_date = datetime.today().date()
-
     account = get_object_or_404(BankAccount, id=pk)
+
+    if not (start_date_str and end_date_str):
+        context = {
+            "account": account,
+            "statement_days": [],
+            "start_date": start_date_str,
+            "end_date": end_date_str,
+            "status": status_filter,
+        }
+        return render(request, "bank-account/statement.html", context)
+
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
     all_transactions = (
         account.transactions.filter(date__gte=start_date)
         .prefetch_related(
@@ -311,3 +318,34 @@ def bank_statement_view(request, pk):
         "status": status_filter,
     }
     return render(request, "bank-account/statement.html", context)
+
+
+def bank_statement_ofx_export_view(request, pk):
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    else:
+        start_date = tz_now().date() - timedelta(days=30)
+
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    else:
+        end_date = tz_now().date()
+
+    account = get_object_or_404(BankAccount, id=pk)
+    transactions = account.transactions.filter(
+        date__range=[start_date, end_date]
+    ).order_by("date")
+
+    ofx_content = OFXStatementExporter.handle(
+        account=account,
+        transactions=transactions,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    response = HttpResponse(ofx_content, content_type="application/x-ofx")
+    filename = f"extrato_{account.account}.ofx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

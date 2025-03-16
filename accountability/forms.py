@@ -15,10 +15,10 @@ from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseFileFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
-    BaseFileFormWidget,
     CustomCheckboxSelectMultiple,
 )
 

@@ -6,6 +6,41 @@
 
 {% block content %}
 
+<style>
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body * {
+      visibility: hidden;
+    }
+    #printable, #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .no-print, #printButton {
+      display: none !important;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 8pt;
+    }
+    th, td {
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      line-height: 1.2;
+    }
+  }
+</style>
+
 <!-- Breadcrumb -->
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
@@ -44,10 +79,10 @@
   </ol>
 </nav>
 
-<div class="container mx-auto px-4 py-6">
+<div id="printable" class="container mx-auto px-4 py-6">
   <h1 class="text-2xl font-bold mb-6">Extrato da Conta: {{ account.bank_name }} - {{ account.account }} / {{ account.account_type_label }}</h1>
 
-  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
     <div>
       <label for="start_date" class="block text-sm font-medium text-gray-700">Data de Início</label>
       <input
@@ -181,6 +216,177 @@
       </tbody>
     </table>
   </div>
+</div>
+
+<div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
+  <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
+    <button
+      type="button"
+      data-tooltip-target="tooltip-share"
+      data-tooltip-placement="left"
+      onclick="navigator.clipboard.writeText(window.location.href)"
+      class="
+        flex
+        justify-center
+        items-center
+        w-[52px]
+        h-[52px]
+        text-gray-500
+        hover:text-gray-900
+        bg-white
+        rounded-full
+        border
+        border-gray-200
+        shadow-xs
+        hover:bg-gray-50
+        focus:ring-4
+        focus:ring-gray-300
+        focus:outline-none
+      "
+    >
+      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+        <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
+      </svg>
+      <span class="sr-only">Compartilhar</span>
+    </button>
+    <div
+      id="tooltip-share"
+      role="tooltip"
+      class="
+        absolute
+        z-10
+        invisible
+        inline-block
+        w-auto
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-white
+        transition-opacity
+        duration-300
+        bg-gray-900
+        rounded-lg
+        shadow-xs
+        opacity-0
+        tooltip
+      "
+    >
+      Compartilhar
+      <div class="tooltip-arrow" data-popper-arrow></div>
+    </div>
+
+    <a href="{% url 'bank:bank-accounts-ofx-statement' account.id %}?start_date={{ start_date }}&end_date={{ end_date }}&status={{ status }}">
+      <button
+        type="button"
+        data-tooltip-target="tooltip-ofx"
+        data-tooltip-placement="left"
+        class="
+          flex
+          justify-center
+          items-center
+          w-[52px]
+          h-[52px]
+          text-gray-500
+          hover:text-gray-900
+          bg-white
+          rounded-full
+          border
+          border-gray-200
+          shadow-xs
+          hover:bg-gray-50
+          focus:ring-4
+          focus:ring-gray-300
+          focus:outline-none
+        "
+      >
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+          <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Zm3 2h2.01v2.01h-2V8h2v2.01h-2V12h2v2.01h-2V16h2v2.01h-2v2H12V18h2v-1.99h-2V14h2v-1.99h-2V10h2V8.01h-2V6h2V4Z" clip-rule="evenodd"/>
+        </svg>
+        <span class="sr-only">Exportar OFX</span>
+      </button>
+    </a>
+    <div
+      id="tooltip-ofx"
+      role="tooltip"
+      class="
+        absolute
+        z-10
+        invisible
+        inline-block
+        w-auto
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-white
+        transition-opacity
+        duration-300
+        bg-gray-900
+        rounded-lg
+        shadow-xs
+        opacity-0
+        tooltip
+      "
+    >
+      Exportar OFX
+      <div class="tooltip-arrow" data-popper-arrow></div>
+    </div>
+
+    <button
+      type="button"
+      data-tooltip-target="tooltip-print"
+      data-tooltip-placement="left"
+      onclick="window.print()"
+      class="
+        flex
+        justify-center
+        items-center
+        w-[52px]
+        h-[52px]
+        text-gray-500
+        hover:text-gray-900
+        bg-white
+        rounded-full
+        border
+        border-gray-200
+        shadow-xs
+        hover:bg-gray-50
+        focus:ring-4
+        focus:ring-gray-300
+        focus:outline-none
+      "
+    >
+      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
+          <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
+      </svg>
+      <span class="sr-only">Imprimir</span>
+    </button>
+    <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
+      Imprimir
+      <div class="tooltip-arrow" data-popper-arrow></div>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    data-dial-toggle="speed-dial-menu-default"
+    aria-controls="speed-dial-menu-default"
+    aria-expanded="false"
+    class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
+  >
+      <svg
+        class="w-5 h-5 transition-transform group-hover:rotate-45"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 18 18"
+      >
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+      </svg>
+      <span class="sr-only">Ações</span>
+  </button>
 </div>
 
 {% endblock %}

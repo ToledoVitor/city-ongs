@@ -242,9 +242,7 @@ def accountability_detail_view(request, pk):
             ),
         )
     )
-    documents_list = (
-        accountability.files.select_related("created_by")
-    )
+    documents_list = accountability.files.select_related("created_by")
 
     query = request.GET.get("q", "")
     if query:
@@ -292,7 +290,7 @@ def create_accountability_file_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
         return redirect("accountability:accountability-detail", pk=accountability.id)
-    
+
     if request.method == "POST":
         form = AccountabilityFileForm(request.POST)
         if form.is_valid():
@@ -311,7 +309,9 @@ def create_accountability_file_view(request, pk):
                     target_object_id=file.id,
                     target_content_object=file,
                 )
-                return redirect("accountability:accountability-detail", pk=accountability.id)
+                return redirect(
+                    "accountability:accountability-detail", pk=accountability.id
+                )
         else:
             return render(
                 request,
@@ -330,7 +330,9 @@ def create_accountability_file_view(request, pk):
 @login_required
 @require_POST
 def accountability_file_delete_view(request, pk):
-    file = get_object_or_404(AccountabilityFile.objects.select_related("accountability"), id=pk)
+    file = get_object_or_404(
+        AccountabilityFile.objects.select_related("accountability"), id=pk
+    )
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
     if not file.accountability.is_on_execution:
@@ -346,7 +348,6 @@ def accountability_file_delete_view(request, pk):
         )
         file.delete()
         return redirect(next_url, pk=file.accountability.id)
-
 
 
 @login_required
