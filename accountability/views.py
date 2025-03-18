@@ -911,6 +911,7 @@ def send_accountability_review_analisys(request, pk):
 
     with transaction.atomic():
         review_status = request.POST.get("review_status")
+        review_pendencies = request.POST.get("review_pendencies")
 
         if review_status == Accountability.ReviewStatus.CORRECTING:
             action = ActivityLog.ActivityLogChoices.SENT_TO_CORRECT
@@ -927,6 +928,7 @@ def send_accountability_review_analisys(request, pk):
             target_content_object=accountability,
         )
         accountability.status = review_status
+        accountability.pendencies = review_pendencies
         accountability.save()
         return redirect("accountability:accountability-detail", pk=accountability.id)
 

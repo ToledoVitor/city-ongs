@@ -33,6 +33,12 @@ class Accountability(BaseModel):
         related_name="accountabilities",
         on_delete=models.CASCADE,
     )
+    pendencies = models.CharField(
+        verbose_name="Pendências",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(
         verbose_name="Status",
