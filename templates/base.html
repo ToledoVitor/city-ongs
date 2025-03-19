@@ -17,6 +17,16 @@
 </head>
 
 <body class="bg-gray-100">
+  <div id="loader-overlay" class="hidden fixed inset-0 flex items-center justify-center p-8 bg-gray-800 rounded-lg bg-opacity-50 z-50">
+    <div class="text-white text-xl flex items-center bg-gray-600 p-8 rounded-lg">
+      <svg class="animate-spin h-8 w-8 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+      Processando...
+    </div>
+  </div>
+
   <button
     data-drawer-target="separator-sidebar"
     data-drawer-toggle="separator-sidebar"
@@ -359,8 +369,6 @@
         </div>
     </div>
   </div>
-
-
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
@@ -414,6 +422,22 @@
       }
   });
 });
+</script>
+
+<script>
+  function showLoader(event) {
+    event.target.disabled = true;
+    document.getElementById('loader-overlay').classList.remove('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function(event) {
+        showLoader(event);
+      });
+    });
+  });
 </script>
 
 </html>
