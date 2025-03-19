@@ -159,11 +159,11 @@ class AccountabilityXLSXImporter:
                 observations=line[9],
             )
 
-        try:
-            revenue.full_clean()
-            revenues.append(revenue)
-        except ValidationError as e:
-            errors.append(f"Linha {index}: {" ".join(e.messages)}")
+            try:
+                revenue.full_clean()
+                revenues.append(revenue)
+            except ValidationError as e:
+                errors.append(f"Linha {index}: {" ".join(e.messages)}")
 
         if errors:
             return errors
