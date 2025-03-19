@@ -1,6 +1,8 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 
+from django.conf import settings
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
@@ -8,6 +10,9 @@ from accountability.models import Expense, Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
+
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -19,18 +24,19 @@ class PeriodEpensesPDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def handle(self):
         self._draw_header()
@@ -43,7 +49,7 @@ class PeriodEpensesPDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=11, bold=True)
+        self.__set_font(font_size=11, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -52,7 +58,7 @@ class PeriodEpensesPDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         self.pdf.cell(
@@ -143,7 +149,7 @@ class PeriodEpensesPDFExporter:
             ],
         ]
 
-        self.__set_helvetica_font(font_size=10, bold=True)
+        self.__set_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -153,9 +159,9 @@ class PeriodEpensesPDFExporter:
             align="L",
         )
 
-        self.__set_helvetica_font(font_size=9, bold=False)
+        self.__set_font(font_size=9, bold=False)
         col_widths = [1, 2, 187]
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -203,7 +209,7 @@ class PeriodEpensesPDFExporter:
             ]
         ]
 
-        self.__set_helvetica_font(font_size=10, bold=True)
+        self.__set_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -213,9 +219,9 @@ class PeriodEpensesPDFExporter:
             align="L",
         )
 
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         col_widths = [43, 34, 33, 40, 40]  # Total: 190
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -274,7 +280,7 @@ class PeriodEpensesPDFExporter:
             ]
         ]
 
-        self.__set_helvetica_font(font_size=10, bold=True)
+        self.__set_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -284,9 +290,9 @@ class PeriodEpensesPDFExporter:
             align="L",
         )
 
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         col_widths = [18, 20, 20, 15, 27, 20, 20, 20, 15, 15]  # Total: 190
-        font = FontFace("Helvetica", "", size_pt=6)
+        font = FontFace("FreeSans", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -308,7 +314,7 @@ class PeriodEpensesPDFExporter:
 
         self.pdf.ln(8)
 
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
             0,
             self.default_cell_height,

@@ -977,7 +977,7 @@ def review_accountability_single_expense(request, pk, expense_pk):
         return render(
             request,
             "accountability/expenses/review-single.html",
-            { "expense": expense },
+            {"expense": expense},
         )
 
 
@@ -1045,6 +1045,7 @@ def review_accountability_expenses(request, pk, index):
         context,
     )
 
+
 def review_accountability_single_revenue(request, pk, revenue_pk):
     revenue = get_object_or_404(
         Revenue.objects.select_related(
@@ -1075,7 +1076,7 @@ def review_accountability_single_revenue(request, pk, revenue_pk):
         return render(
             request,
             "accountability/revenues/review-single.html",
-            { "revenue": revenue },
+            {"revenue": revenue},
         )
 
 

@@ -1,6 +1,8 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.db.models import Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
@@ -14,6 +16,9 @@ from utils.formats import (
     get_month_range,
 )
 
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+
 
 @dataclass
 class PredictedVersusRealizedPDFExporter:
@@ -24,18 +29,19 @@ class PredictedVersusRealizedPDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.contract = contract
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def handle(self):
         self._draw_header()
@@ -46,7 +52,7 @@ class PredictedVersusRealizedPDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=11, bold=True)
+        self.__set_font(font_size=11, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -73,9 +79,9 @@ class PredictedVersusRealizedPDFExporter:
             ],
         ]
 
-        self.__set_helvetica_font(font_size=9, bold=False)
+        self.__set_font(font_size=9, bold=False)
         col_widths = [1, 2, 187]
-        font = FontFace("Helvetica", "", size_pt=9)
+        font = FontFace("FreeSans", "", size_pt=9)
         with self.pdf.table(
             headings_style=font,
             line_height=5,
@@ -133,7 +139,7 @@ class PredictedVersusRealizedPDFExporter:
             )
 
         col_widths = [90, 50, 50]
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=5,
@@ -148,7 +154,7 @@ class PredictedVersusRealizedPDFExporter:
                 head.cell(text=text, align="C", border=0)
 
             self.pdf.set_fill_color(255, 255, 255)
-            self.__set_helvetica_font(font_size=8, bold=False)
+            self.__set_font(font_size=8, bold=False)
             for item in body_data:
                 body = table.row()
                 for text in item:
@@ -156,6 +162,6 @@ class PredictedVersusRealizedPDFExporter:
 
             footer = table.row()
             self.pdf.set_fill_color(225, 225, 225)
-            self.__set_helvetica_font(font_size=8, bold=False)
+            self.__set_font(font_size=8, bold=False)
             for text in footer_data:
                 footer.cell(text=text, align="C", border=0)

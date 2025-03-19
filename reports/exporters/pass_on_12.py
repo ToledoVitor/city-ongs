@@ -1,7 +1,9 @@
 import copy
+import os
 from dataclasses import dataclass
 from decimal import Decimal
 
+from django.conf import settings
 from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
@@ -16,6 +18,9 @@ from utils.formats import (
     format_into_brazilian_date,
 )
 
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+
 
 @dataclass
 class PassOn12PDFExporter:
@@ -26,17 +31,19 @@ class PassOn12PDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
+        pdf.set_font("FreeSans", "", 8)
         self.pdf = pdf
         self.accountability = accountability
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def __database_queries(self):
         self.checking_account = self.accountability.contract.checking_account
@@ -101,7 +108,7 @@ class PassOn12PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=10, bold=True)
+        self.__set_font(font_size=10, bold=True)
         self.pdf.multi_cell(
             0,
             self.default_cell_height,
@@ -113,7 +120,7 @@ class PassOn12PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 10)
 
     def _draw_informations(self):
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"**Órgão Público Convenente:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
@@ -140,14 +147,14 @@ class PassOn12PDFExporter:
         )
         self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**Responsável(is) pela Conveniada:**",
+            text="**Responsável(is) pela Conveniada:**",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(self.default_cell_height)
 
     def _draw_first_table(self):
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         table_data = []
         table_data.append(
             [
@@ -177,7 +184,7 @@ class PassOn12PDFExporter:
         )
 
         col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -196,7 +203,7 @@ class PassOn12PDFExporter:
 
     def _draw_partners_data(self):
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text=f"**Objeto da Parceria:** {self.accountability.contract.objective}",
             markdown=True,
@@ -216,14 +223,14 @@ class PassOn12PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.cell(
-            text=f"**Origem dos Recursos (1):** Consolidado de todas as fontes",
+            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
 
     def _draw_documents_table(self):
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         self.pdf.ln()
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
@@ -250,7 +257,7 @@ class PassOn12PDFExporter:
             )
 
         col_widths = [75, 19, 65, 31]
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -268,7 +275,7 @@ class PassOn12PDFExporter:
     def _draw_header_resources_table(self):
         self.pdf.ln(7)
 
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -290,14 +297,14 @@ class PassOn12PDFExporter:
             [
                 f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
                 f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
-                f"dd/mm/aa",  # TODO seria o mesmoque end_of_vigency?
-                f"Nao sei o que é",
+                "dd/mm/aa",  # TODO seria o mesmoque end_of_vigency?
+                "Nao sei o que é",
                 f"{format_into_brazilian_currency(self.all_pass_on_values)}",
             ],
         ]
 
         col_widths = [40, 35, 25, 50, 40]
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -373,8 +380,8 @@ class PassOn12PDFExporter:
         ]
 
         col_widths = [100, 50, 40]
-        self.__set_helvetica_font(7)
-        font = FontFace("Helvetica", "", size_pt=7)
+        self.__set_font(7)
+        font = FontFace("FreeSans", "", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -404,7 +411,7 @@ class PassOn12PDFExporter:
 
     def _draw_resources_footer(self):
         self.pdf.ln(self.default_cell_height)
-        self.__set_helvetica_font(7)
+        self.__set_font(7)
         self.pdf.cell(
             text="(1) Verba: Federal, Estadual ou Municipal, devendo ser elaborado um anexo para cada fonte de recurso.",
             h=self.default_cell_height,
@@ -433,7 +440,7 @@ class PassOn12PDFExporter:
         )
 
         self.pdf.ln(7)
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -606,7 +613,7 @@ class PassOn12PDFExporter:
         ]
 
         col_widths = [40, 30, 30, 30, 30, 30]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=7)
+        font = FontFace("FreeSans", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
 
         with self.pdf.table(
@@ -620,7 +627,7 @@ class PassOn12PDFExporter:
             for text in headers:
                 header.cell(text=text, align="C")
             if table_data != []:
-                self.pdf.set_font("Helvetica", "", 7)
+                self.pdf.set_font("FreeSans", "", 7)
                 for item in table_data:
                     body = table.row()
                     for id, text in enumerate(item):
@@ -629,7 +636,7 @@ class PassOn12PDFExporter:
                         else:
                             text_align = "R"
                         body.cell(text=text, align=text_align)
-            self.pdf.set_font("Helvetica", "B", 7)
+            self.pdf.set_font("FreeSans", "B", 7)
             total = table.row()
             for id, text in enumerate(line_total):
                 if id == 0:
@@ -639,7 +646,7 @@ class PassOn12PDFExporter:
                 total.cell(text=text, align=text_align)
 
     def _draw_expenses_footer(self):
-        self.__set_helvetica_font()
+        self.__set_font()
         self.pdf.cell(
             text="(4) Verba: Federal, Estadual, Municipal e Recursos Próprios, devendo ser elaborado um anexo para cada fonte de recurso.",
             h=self.default_cell_height,
@@ -684,7 +691,7 @@ class PassOn12PDFExporter:
 
     def _draw_financial_table(self):
         self.pdf.ln(7)
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -706,20 +713,20 @@ class PassOn12PDFExporter:
             ],
             [
                 "(K) RECURSO PÚBLICO NÃO APLICADO [E - (J - F)]",
-                f"Campo de dinheiro em ainda em conta",  # TODO
+                "Campo de dinheiro em ainda em conta",  # TODO
             ],
             [
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
-                f"Não encontrei o campo",  # TODO
+                "Não encontrei o campo",  # TODO
             ],
             [
                 "(M) VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE (K - L)",
-                f"Necessário valores anteriores",  # TODO
+                "Necessário valores anteriores",  # TODO
             ],
         ]
 
         col_widths = [160, 30]  # Total: 190
-        font = FontFace("Helvetica", "", 7)
+        font = FontFace("FreeSans", "", 7)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -727,7 +734,7 @@ class PassOn12PDFExporter:
             col_widths=col_widths,
             repeat_headings=0,
         ) as table:
-            self.pdf.set_font("Helvetica", "", 7)
+            self.pdf.set_font("FreeSans", "", 7)
             for item in table_data:
                 body = table.row()
                 for id, text in enumerate(item):
@@ -739,7 +746,7 @@ class PassOn12PDFExporter:
 
     def _draw_last_informations(self):
         self.pdf.ln(7)
-        self.__set_helvetica_font()
+        self.__set_font()
         self.pdf.multi_cell(
             text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Contratante.",
             markdown=True,
@@ -808,7 +815,7 @@ class PassOn12PDFExporter:
         )
 
         col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("Helvetica", "")
+        font = FontFace("FreeSans", "")
         with self.pdf.table(
             headings_style=font,
             line_height=4,

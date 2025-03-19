@@ -1,16 +1,19 @@
-import copy
+import os
 from dataclasses import dataclass
 from decimal import Decimal
 
+from django.conf import settings
 from django.db.models import Q
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense, Revenue
-from contracts.choices import NatureCategories
+from accountability.models import Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
+
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -22,17 +25,19 @@ class PassOn4PDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
+        pdf.set_font("FreeSans", "", 8)
         self.pdf = pdf
         self.accountability = accountability
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def __background_gray_color(self, gray):
         if gray:
@@ -64,7 +69,7 @@ class PassOn4PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=10, bold=True)
+        self.__set_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -85,7 +90,7 @@ class PassOn4PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         start = self.accountability.contract.start_of_vigency
         end = self.accountability.contract.end_of_vigency
         self.pdf.cell(
@@ -140,7 +145,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    f"Valor Global do Ajuste - Valor do adendo",
+                    "Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -153,7 +158,7 @@ class PassOn4PDFExporter:
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
@@ -169,7 +174,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_helvetica_font(self.default_cell_height)
+            self.__set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -197,7 +202,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.PARTNERSHIP
         )
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Termo de Parceria Nº**",
@@ -224,7 +229,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    f"Valor Global do Ajuste - Valor do adendo",
+                    "Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -237,7 +242,7 @@ class PassOn4PDFExporter:
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
@@ -253,7 +258,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_helvetica_font(self.default_cell_height)
+            self.__set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -281,7 +286,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.COLLABORATION
         )
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Termo de Colaboração Nº**",
@@ -308,7 +313,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    f"Valor Global do Ajuste - Valor do adendo",
+                    "Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -321,7 +326,7 @@ class PassOn4PDFExporter:
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
@@ -337,7 +342,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_helvetica_font(self.default_cell_height)
+            self.__set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -365,7 +370,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.DEVELOPMENTO
         )
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.ln(3)
         header_data = [
             "**Contrato de Fomento Nº**",
@@ -392,7 +397,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    f"Valor Global do Ajuste - Valor do adendo",
+                    "Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -405,7 +410,7 @@ class PassOn4PDFExporter:
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
@@ -421,7 +426,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_helvetica_font(self.default_cell_height)
+            self.__set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -449,7 +454,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.AGREEMENT
         )
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Convênio Nº**",
@@ -476,7 +481,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    f"Valor Global do Ajuste - Valor do adendo",
+                    "Valor Global do Ajuste - Valor do adendo",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -489,7 +494,7 @@ class PassOn4PDFExporter:
             f"**{format_into_brazilian_currency(total_revenue_value)}**",
         ]
 
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         data_col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
         with self.pdf.table(
@@ -505,7 +510,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_helvetica_font(self.default_cell_height)
+            self.__set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -533,14 +538,14 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.GRANT
         )
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="II - AUXÍLIOS, SUBVENÇÕES E/OU CONTRIBUIÇÕES PAGOS:",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(2)
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Tipo da Concessão**",
@@ -567,7 +572,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    f"ClassAdendo",  # TODO criar classe adendo
+                    "ClassAdendo",  # TODO criar classe adendo
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -581,7 +586,7 @@ class PassOn4PDFExporter:
         ]
 
         col_widths = [15, 20, 10, 15, 15, 15, 20, 30, 20, 20]
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
 
         with self.pdf.table(
             headings_style=font,
@@ -595,7 +600,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.pdf.set_font("Helvetica", "", 7)
+            self.pdf.set_font("FreeSans", "", 7)
             self.__background_gray_color(gray=False)
             for item in table_data:
                 data = table.row()
@@ -603,7 +608,7 @@ class PassOn4PDFExporter:
                     data.cell(text=text, align="C")
 
         col_widths = [178, 22]
-        font = FontFace("Helvetica", "", size_pt=7)
+        font = FontFace("FreeSans", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
