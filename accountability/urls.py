@@ -25,7 +25,9 @@ from accountability.views import (
     reconcile_expense_view,
     reconcile_revenue_view,
     revenue_delete_view,
+    review_accountability_single_expense,
     review_accountability_expenses,
+    review_accountability_single_revenue,
     review_accountability_revenues,
     send_accountability_review_analisys,
     send_accountability_to_analisys_view,
@@ -99,14 +101,24 @@ urlpatterns = [
         name="revenues-create",
     ),
     path(
+        "<uuid:pk>/accountability/review-expenses/<uuid:expense_pk>/",
+        review_accountability_single_expense,
+        name="review-single-expense",
+    ),
+    path(
         "<uuid:pk>/accountability/review-expenses/<int:index>/",
         review_accountability_expenses,
-        name="review-expenses",
+        name="review-all-expenses",
+    ),
+    path(
+        "<uuid:pk>/accountability/review-revenues/<uuid:revenue_pk>/",
+        review_accountability_single_revenue,
+        name="review-single-revenue",
     ),
     path(
         "<uuid:pk>/accountability/review-revenues/<int:index>/",
         review_accountability_revenues,
-        name="review-revenues",
+        name="review-all-revenues",
     ),
     path("favoreds/", FavoredListView.as_view(), name="favoreds-list"),
     path(

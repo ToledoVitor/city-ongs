@@ -12,16 +12,16 @@
                     Valor
                 </th>
                 <th scope="col" class="px-6 py-3">
-                  Status
+                    Status
+                </th>
+                <th scope="col" class="px-6 py-3">
+                  Análise
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Conta Bancária
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Origem
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Natureza
                 </th>
                 <th scope="col" class="px-6 py-3" />
             </tr>
@@ -113,6 +113,9 @@
                         Conciliada
                       </p>
                     </td>
+                    <td class="px-6 py-4 text-sm text-center text-black whitespace-nowrap">
+                      {{ revenue.status_label }}
+                    </td>
                     <td class="px-6 py-4 text-sm text-black">
                       <a
                         href="{% url 'bank:bank-accounts-detail' revenue.bank_account.id %}"
@@ -126,10 +129,8 @@
                     <td class="px-6 py-4 text-sm text-black">
                       {{ revenue.source_label }} <br>
                     </td>
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ revenue.revenue_nature_label }}
-                    </td>
                     <td class="px-6 py-4 text-sm flex justify-end">
+                      {% if accountability.is_on_execution %}
                       <a
                         href="{% url 'accountability:revenue-update' revenue.id %}"
                         class="
@@ -151,7 +152,6 @@
                       >
                         Visualizar
                       </a>
-                      {% if accountability.is_on_execution %}
 
                       <button
                         type="button"
@@ -207,6 +207,28 @@
                           <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
                         </svg>                                      
                       </button>                  
+                      {% elif accountability.is_sent %}
+                      <a
+                        href="{% url 'accountability:review-single-revenue' revenue.accountability.id revenue.id %}"
+                        class="
+                          px-3
+                          py-2
+                          text-xs
+                          font-medium
+                          text-center
+                          inline-flex
+                          items-center
+                          text-white
+                          rounded-lg
+                          focus:ring-4
+                          focus:outline-none
+                          bg-blue-600
+                          hover:bg-blue-700
+                          focus:ring-blue-800
+                        "
+                      >
+                        Revisar
+                      </a>
                       {% endif %}
                     </td>
                 </tr>

@@ -256,12 +256,24 @@ def accountability_detail_view(request, pk):
         )
 
     status_flag = request.GET.get("paid", "all")
+    review_flag = request.GET.get("reviwed", "all")
+
     if status_flag == "true":
         expenses_list = expenses_list.filter(conciled=True)
         revenues_list = revenues_list.filter(conciled=True)
     elif status_flag == "false":
         expenses_list = expenses_list.filter(conciled=False)
         revenues_list = revenues_list.filter(conciled=False)
+
+    if review_flag == "pending":
+        expenses_list = expenses_list.filter(status=Revenue.ReviewStatus.IN_ANALISIS)
+        revenues_list = revenues_list.filter(status=Expense.ReviewStatus.IN_ANALISIS)
+    elif review_flag == "rejected":
+        expenses_list = expenses_list.filter(status=Revenue.ReviewStatus.REJECTED)
+        revenues_list = revenues_list.filter(status=Expense.ReviewStatus.REJECTED)
+    elif review_flag == "approved":
+        expenses_list = expenses_list.filter(status=Revenue.ReviewStatus.APPROVED)
+        revenues_list = revenues_list.filter(status=Expense.ReviewStatus.APPROVED)
 
     expenses_paginator = Paginator(expenses_list, 10)
     expenses_page_number = request.GET.get("expenses_page")
@@ -790,7 +802,7 @@ def import_accountability_view(request, pk):
                         accountability=accountability,
                     )
                 )
-                if any[(revenues_error, expenses_error, applications_error)]:
+                if any([revenues_error, expenses_error, applications_error]):
                     return render(
                         request,
                         "accountability/accountability/import.html",
@@ -933,6 +945,42 @@ def send_accountability_review_analisys(request, pk):
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
 
+def review_accountability_single_expense(request, pk, expense_pk):
+    expense = get_object_or_404(
+        Expense.objects.select_related(
+            "accountability",
+            "accountability__contract",
+            "source",
+            "favored",
+            "item",
+        ),
+        id=expense_pk,
+    )
+
+    if request.method == "POST":
+        with transaction.atomic():
+            expense.status = request.POST.get("status")
+            expense.pendencies = request.POST.get("pendencies")
+            expense.save()
+
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.REVIEWED_EXPENSE,
+                target_object_id=expense.id,
+                target_content_object=expense,
+            )
+            return redirect(
+                "accountability:accountability-detail", pk=expense.accountability.id
+            )
+    else:
+        return render(
+            request,
+            "accountability/expenses/review-single.html",
+            { "expense": expense },
+        )
+
+
 def review_accountability_expenses(request, pk, index):
     accountability = get_object_or_404(
         Accountability.objects.select_related("contract"), id=pk
@@ -944,8 +992,8 @@ def review_accountability_expenses(request, pk, index):
             "item",
         )
         .prefetch_related("files")
-        .all()
-        .order_by("-created_at")
+        .filter(status=Expense.ReviewStatus.IN_ANALISIS)
+        .order_by("-value")
     )
     total_expenses = len(expenses)
 
@@ -997,6 +1045,39 @@ def review_accountability_expenses(request, pk, index):
         context,
     )
 
+def review_accountability_single_revenue(request, pk, revenue_pk):
+    revenue = get_object_or_404(
+        Revenue.objects.select_related(
+            "accountability",
+            "accountability__contract",
+            "bank_account",
+        ),
+        id=revenue_pk,
+    )
+
+    if request.method == "POST":
+        with transaction.atomic():
+            revenue.status = request.POST.get("status")
+            revenue.pendencies = request.POST.get("pendencies")
+            revenue.save()
+
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.REVIEWED_REVENUE,
+                target_object_id=revenue.id,
+                target_content_object=revenue,
+            )
+            return redirect(
+                "accountability:accountability-detail", pk=revenue.accountability.id
+            )
+    else:
+        return render(
+            request,
+            "accountability/revenues/review-single.html",
+            { "revenue": revenue },
+        )
+
 
 def review_accountability_revenues(request, pk, index):
     accountability = get_object_or_404(
@@ -1007,8 +1088,8 @@ def review_accountability_revenues(request, pk, index):
             "bank_account",
         )
         .prefetch_related("files")
-        .all()
-        .order_by("-created_at")
+        .filter(status=Revenue.ReviewStatus.IN_ANALISIS)
+        .order_by("-value")
     )
     total_revenues = len(revenues)
 
