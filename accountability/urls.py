@@ -9,9 +9,14 @@ from accountability.views import (
     ResourceSourceListView,
     ResourceSourceUpdateView,
     accountability_detail_view,
+    accountability_file_delete_view,
+    accountability_pendencies_view,
     create_accountability_expense_view,
+    create_accountability_file_view,
     create_accountability_revenue_view,
     create_contract_accountability_view,
+    delete_expense_file_view,
+    delete_revenue_file_view,
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
@@ -26,6 +31,8 @@ from accountability.views import (
     send_accountability_to_analisys_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
+    upload_expense_file_view,
+    upload_revenue_file_view,
 )
 
 urlpatterns = [
@@ -67,6 +74,21 @@ urlpatterns = [
         name="accountability-create",
     ),
     path(
+        "detail/<uuid:pk>/files",
+        create_accountability_file_view,
+        name="accountability-file-create",
+    ),
+    path(
+        "accountability-file/<uuid:pk>/delete",
+        accountability_file_delete_view,
+        name="accountability-file-delete",
+    ),
+    path(
+        "detail/<uuid:pk>/pendencies",
+        accountability_pendencies_view,
+        name="accountability-pendencies",
+    ),
+    path(
         "<uuid:pk>/accountability/expenses/create",
         create_accountability_expense_view,
         name="expenses-create",
@@ -103,6 +125,11 @@ urlpatterns = [
         name="expense-update",
     ),
     path(
+        "expenses/<uuid:pk>/file-upload/",
+        upload_expense_file_view,
+        name="expense-file",
+    ),
+    path(
         "expenses/<uuid:pk>/reconcile/",
         reconcile_expense_view,
         name="expense-reconcile",
@@ -119,9 +146,19 @@ urlpatterns = [
     ),
     path("expenses/<uuid:pk>/delete/", expense_delete_view, name="expense-delete"),
     path(
+        "expense-file/<uuid:pk>/delete/",
+        delete_expense_file_view,
+        name="expense-file-delete",
+    ),
+    path(
         "revenues/<uuid:pk>/update/",
         update_accountability_revenue_view,
         name="revenue-update",
+    ),
+    path(
+        "revenues/<uuid:pk>/file-upload/",
+        upload_revenue_file_view,
+        name="revenue-file",
     ),
     path(
         "revenues/<uuid:pk>/duplicate/",
@@ -129,6 +166,11 @@ urlpatterns = [
         name="revenue-duplicate",
     ),
     path("revenues/<uuid:pk>/delete/", revenue_delete_view, name="revenue-delete"),
+    path(
+        "revenue-file/<uuid:pk>/delete/",
+        delete_revenue_file_view,
+        name="revenue-file-delete",
+    ),
     path(
         "revenues/<uuid:pk>/reconcile/",
         reconcile_revenue_view,

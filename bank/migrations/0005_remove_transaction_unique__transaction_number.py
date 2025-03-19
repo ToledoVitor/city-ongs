@@ -4,13 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bank", "0004_alter_bankaccount_balance_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name="transaction", name="unique__transaction_number",
+            model_name="transaction",
+            name="unique__transaction_number",
         ),
     ]

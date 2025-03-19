@@ -72,10 +72,11 @@ class BankAccount(BaseModel):
 
     @property
     def account_type_label(self):
-        types = {
-            "CHECKING": "Conta Corrente",
-        }
-        return types.get(self.account_type, self.account_type)
+        return BankAccount.AccountTypeChoices(self.account_type).label
+
+    @property
+    def origin_label(self):
+        return BankAccount.OriginChoices(self.origin).label
 
     @property
     def last_statement_update(self):
@@ -241,4 +242,3 @@ class Transaction(BaseModel):
     class Meta:
         verbose_name = "Movimentação Bancária"
         verbose_name_plural = "Movimentações Bancárias"
-

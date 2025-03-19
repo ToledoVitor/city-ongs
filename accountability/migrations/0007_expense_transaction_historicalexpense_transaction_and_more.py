@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accountability", "0006_alter_favored_name"),
         ("bank", "0005_remove_transaction_unique__transaction_number"),

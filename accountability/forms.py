@@ -3,17 +3,19 @@ from django.db.models import Q, Sum
 
 from accountability.models import (
     Accountability,
+    AccountabilityFile,
     Expense,
     Favored,
     ResourceSource,
     Revenue,
 )
-from bank.models import Transaction
+from bank.models import BankAccount, Transaction
 from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseFileFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
@@ -169,6 +171,20 @@ class RevenueForm(forms.ModelForm):
             "revenue_nature": BaseSelectFormWidget(),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.accountability: Accountability = kwargs.pop("accountability", None)
+        super().__init__(*args, **kwargs)
+
+        checking_account_id = getattr(
+            self.accountability.contract.checking_account, "id", None
+        )
+        investing_account_id = getattr(
+            self.accountability.contract.investing_account, "id", None
+        )
+        self.fields["bank_account"].queryset = BankAccount.objects.filter(
+            Q(id=checking_account_id) | Q(id=investing_account_id)
+        )
+
 
 class AccountabilityCreateForm(forms.ModelForm):
     class Meta:
@@ -279,8 +295,8 @@ class ReconcileExpenseForm(forms.Form):
                     | Q(bank_account=self.contract.investing_account)
                 )
                 .filter(
-                    expense__isnull=True,
-                    revenue__isnull=True,
+                    expenses=None,
+                    revenues=None,
                     amount__lte=0,
                 )
                 .order_by("date")
@@ -334,8 +350,8 @@ class ReconcileRevenueForm(forms.Form):
                     | Q(bank_account=self.contract.investing_account)
                 )
                 .filter(
-                    expense__isnull=True,
-                    revenue__isnull=True,
+                    expenses=None,
+                    revenues=None,
                     amount__gte=0,
                 )
                 .order_by("date")
@@ -354,3 +370,17 @@ class ReconcileRevenueForm(forms.Form):
             )
 
         return transactions
+
+
+class AccountabilityFileForm(forms.ModelForm):
+    class Meta:
+        model = AccountabilityFile
+        fields = [
+            "name",
+            "file",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="Arquivo xxxxx"),
+            "file": BaseFileFormWidget(),
+        }

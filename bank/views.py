@@ -1,12 +1,16 @@
 import logging
+from datetime import datetime, timedelta
 from typing import Any
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Sum
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now as tz_now
 from django.views.generic import DetailView
 
 from activity.models import ActivityLog
@@ -17,6 +21,7 @@ from bank.forms import (
     UpdateOFXForm,
 )
 from bank.models import BankAccount, BankStatement
+from bank.services.ofx_exporter import OFXStatementExporter
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
 
@@ -54,6 +59,7 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required
 def update_bank_account_ofx_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -88,6 +94,7 @@ def update_bank_account_ofx_view(request, pk):
         )
 
 
+@login_required
 def create_bank_account_view(request, pk):
     contract = get_object_or_404(Contract, id=pk)
     if request.method == "POST":
@@ -137,6 +144,7 @@ def create_bank_account_view(request, pk):
     )
 
 
+@login_required
 def update_bank_account_manual_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -211,3 +219,133 @@ def _account_type_already_created(contract: Contract, account_type: str):
         return contract.investing_account is not None
 
     return True
+
+
+@login_required
+def bank_statement_view(request, pk):
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    status_filter = request.GET.get("status", "all")  # "all", "reconciled" ou "pending"
+
+    account = get_object_or_404(BankAccount, id=pk)
+
+    if not (start_date_str and end_date_str):
+        context = {
+            "account": account,
+            "statement_days": [],
+            "start_date": start_date_str,
+            "end_date": end_date_str,
+            "status": status_filter,
+        }
+        return render(request, "bank-account/statement.html", context)
+
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+    all_transactions = (
+        account.transactions.filter(date__gte=start_date)
+        .prefetch_related(
+            "expenses",
+            "revenues",
+        )
+        .order_by("-date")
+    )
+
+    daily_totals = (
+        all_transactions.values("date")
+        .annotate(total_day=Sum("amount"))
+        .order_by("-date")
+    )
+    daily_totals_dict = {item["date"]: item["total_day"] for item in daily_totals}
+
+    statement_days = []
+    current_balance = account.balance
+    sorted_dates_desc = sorted(daily_totals_dict.keys(), reverse=True)
+    for day in sorted_dates_desc:
+        total_day = daily_totals_dict[day]
+        close_balance = current_balance
+        open_balance = close_balance - total_day
+
+        transactions_day = [t for t in all_transactions if t.date == day]
+        statement_days.append(
+            {
+                "date": day,
+                "open_balance": open_balance,
+                "close_balance": close_balance,
+                "all_transactions": transactions_day,
+            }
+        )
+        current_balance = open_balance
+    statement_days.reverse()
+
+    display_statement_days = []
+    for day_info in statement_days:
+        if not (start_date <= day_info["date"] <= end_date):
+            continue
+
+        displayed_transactions = []
+        for t in day_info["all_transactions"]:
+            trans_status = (
+                "Conciliada"
+                if (t.expenses.exists() or t.revenues.exists())
+                else "Pendente"
+            )
+            if (
+                status_filter == "all"
+                or (
+                    status_filter == "reconciled"
+                    and (t.expenses.exists() or t.revenues.exists())
+                )
+                or (
+                    status_filter == "pending"
+                    and not (t.expenses.exists() or t.revenues.exists())
+                )
+            ):
+                displayed_transactions.append(
+                    {
+                        "obj": t,
+                        "status": trans_status,
+                    }
+                )
+        day_info["transactions"] = displayed_transactions
+        display_statement_days.append(day_info)
+
+    context = {
+        "account": account,
+        "statement_days": display_statement_days,
+        "start_date": start_date_str,
+        "end_date": end_date_str,
+        "status": status_filter,
+    }
+    return render(request, "bank-account/statement.html", context)
+
+
+def bank_statement_ofx_export_view(request, pk):
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    else:
+        start_date = tz_now().date() - timedelta(days=30)
+
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    else:
+        end_date = tz_now().date()
+
+    account = get_object_or_404(BankAccount, id=pk)
+    transactions = account.transactions.filter(
+        date__range=[start_date, end_date]
+    ).order_by("date")
+
+    ofx_content = OFXStatementExporter.handle(
+        account=account,
+        transactions=transactions,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    response = HttpResponse(ofx_content, content_type="application/x-ofx")
+    filename = f"extrato_{account.account}.ofx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

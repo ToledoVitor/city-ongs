@@ -33,6 +33,12 @@ class Accountability(BaseModel):
         related_name="accountabilities",
         on_delete=models.CASCADE,
     )
+    pendencies = models.CharField(
+        verbose_name="Pendências",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(
         verbose_name="Status",
@@ -98,6 +104,44 @@ class Accountability(BaseModel):
         unique_together = ("contract", "month", "year")
 
 
+class AccountabilityFile(BaseModel):
+    accountability = models.ForeignKey(
+        Accountability,
+        verbose_name="Prestação",
+        related_name="files",
+        on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        User,
+        verbose_name="Criado por",
+        related_name="accountability_files",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/accountabilities/",
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(
+        verbose_name="Nome do Arquivo",
+        max_length=128,
+        null=True,
+        blank=True,
+    )
+
+    history = HistoricalRecords()
+
+    def __str__(self) -> str:
+        return f"Arquivo de Prestação {self.id}"
+
+    class Meta:
+        verbose_name = "Arquivo de Prestação"
+        verbose_name_plural = "Arquivo de Prestações"
+
+
 class Favored(BaseModel):
     organization = models.ForeignKey(
         Organization,
@@ -137,6 +181,7 @@ class ResourceSource(BaseModel):
         MUNICIPAL = "MUNICIPAL", "Municipal"
         COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
         PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
+        PARLIAMENTARY = "PARLIAMENTARY", "Emenda Parlamentar"
 
     class CategoryChoices(models.TextChoices):
         NOT_APPLIABLE = "NOT_APPLIABLE", "Não Aplicavél"

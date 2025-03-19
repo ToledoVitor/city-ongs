@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "accountability",
@@ -13,8 +12,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="expense", name="transaction",),
-        migrations.RemoveField(model_name="historicalexpense", name="transaction",),
-        migrations.RemoveField(model_name="historicalrevenue", name="transaction",),
-        migrations.RemoveField(model_name="revenue", name="transaction",),
+        migrations.RemoveField(
+            model_name="expense",
+            name="transaction",
+        ),
+        migrations.RemoveField(
+            model_name="historicalexpense",
+            name="transaction",
+        ),
+        migrations.RemoveField(
+            model_name="historicalrevenue",
+            name="transaction",
+        ),
+        migrations.RemoveField(
+            model_name="revenue",
+            name="transaction",
+        ),
     ]

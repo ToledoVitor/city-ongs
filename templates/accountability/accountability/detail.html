@@ -102,6 +102,7 @@
     <div class="relative text-lg font-semibold pt-2">
       Status:
       <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-purple-800 bg-purple-100">{{ object.status_label }}</span>
+      <a href="{% url 'accountability:accountability-pendencies' object.id %}" class="text-sm hover:underline text-blue-500">Ver Pendências</a>
     </div>
 
     <div class="relative text-right">
@@ -398,6 +399,34 @@
                   <option value="FINISHED">Finalizada / Aprovada</option>
                 </select>
 
+                <div class="mb-3">
+                  <label for="review_pendencies">Pendências:</label>
+                  <textarea
+                    id="review_pendencies"
+                    name="review_pendencies"
+                    rows="4"
+                    maxlength="254"
+                    class="
+                        block
+                        p-2.5
+                        mt-2
+                        w-full
+                        text-sm
+                        text-gray-900
+                        bg-gray-300
+                        border-gray-600
+                        rounded-lg
+                        border
+                        focus:ring-blue-500
+                        focus:border-blue-500
+                    "
+                    placeholder="Motivo ..."
+                  ></textarea>
+                  <p id="helper-text-explanation" class="mt-2 text-sm text-black">
+                    Caso rejeite a prestação, escreva aqui a razão
+                  </p>
+                </div>
+              
                 <br>
 
                 <span class="py-10 my-10 text-base">
@@ -465,6 +494,12 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
   {% include 'accountability/accountability/revenues-table.html' with accountability=object revenues_page=revenues_page expenses_page_number=expenses_page.number q=search_query csrf_token=csrf_token %}
+</div>
+
+<p class="text-xl my-4 font-bold text-black">Documentos Adicionais</p>
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+  {% include 'accountability/accountability/documents-table.html' with accountability=object csrf_token=csrf_token %}
 </div>
 
 <p class="text-3xl mt-6 font-bold">

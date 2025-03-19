@@ -11,7 +11,6 @@ from django.db import transaction
 from ofxtools.Parser import OFXTree
 
 from bank.models import BankAccount, BankStatement, Transaction
-from contracts.models import Contract
 
 logger = logging.getLogger(__name__)
 
@@ -49,61 +48,58 @@ class OFXFileParser:
     def transactions_list(self) -> list:
         return self.ofx_data.statements[0].transactions
 
-    def is_account_already_created(self) -> bool:
-        return False
+    # def create_bank_account(self, contract: Contract, account_type: str) -> bool:
+    #     account_data = self.account_data
 
-    def create_bank_account(self, contract: Contract, account_type: str) -> bool:
-        account_data = self.account_data
+    #     bank_name = account_data["bank_name"]
+    #     bank_id = account_data["bank_id"]
+    #     agency = account_data["agency_id"]
+    #     account = account_data["account_id"]
 
-        bank_name = account_data["bank_name"]
-        bank_id = account_data["bank_id"]
-        agency = account_data["agency_id"]
-        account = account_data["account_id"]
+    #     if BankAccount.objects.filter(
+    #         bank_name=bank_name,
+    #         bank_id=bank_id,
+    #         agency=agency,
+    #         account=account,
+    #         account_type=account_type,
+    #     ).exists():
+    #         logger.warning(
+    #             f"Bank Account {account_data["account_id"]} - Already exists"
+    #         )
+    #         raise ValidationError("Conta bancária já cadastrada.")
 
-        if BankAccount.objects.filter(
-            bank_name=bank_name,
-            bank_id=bank_id,
-            agency=agency,
-            account=account,
-            account_type=account_type,
-        ).exists():
-            logger.warning(
-                f"Bank Account {account_data["account_id"]} - Already exists"
-            )
-            raise ValidationError("Conta bancária já cadastrada.")
+    #     with transaction.atomic():
+    #         bank_account = BankAccount.objects.create(
+    #             bank_name=bank_name,
+    #             bank_id=bank_id,
+    #             agency=agency,
+    #             account=account,
+    #             account_type=account_type,
+    #             balance=self.closing_balance_amount,
+    #         )
+    #         if account_type == "CHECKING":
+    #             contract.checking_account = bank_account
+    #         elif account_type == "INVESTING":
+    #             contract.investing_account = bank_account
+    #         else:
+    #             logger.info(f"Account type of {account_type} is not a valid type")
+    #             raise ValidationError(f"Conta tipo {account_type} não é valida")
 
-        with transaction.atomic():
-            bank_account = BankAccount.objects.create(
-                bank_name=bank_name,
-                bank_id=bank_id,
-                agency=agency,
-                account=account,
-                account_type=account_type,
-                balance=self.closing_balance_amount,
-            )
-            if account_type == "CHECKING":
-                contract.checking_account = bank_account
-            elif account_type == "INVESTING":
-                contract.investing_account = bank_account
-            else:
-                logger.info(f"Account type of {account_type} is not a valid type")
-                raise ValidationError(f"Conta tipo {account_type} não é valida")
+    #         contract.save()
 
-            contract.save()
+    #         # TODO: if has previous statement, delete
+    #         BankStatement.objects.create(
+    #             bank_account=bank_account,
+    #             opening_balance=self.opening_balance_amount,
+    #             closing_balance=self.closing_balance_amount,
+    #             reference_month=self.balance_date.month,
+    #             reference_year=self.balance_date.year,
+    #         )
 
-            # TODO: if has previous statement, delete
-            BankStatement.objects.create(
-                bank_account=bank_account,
-                opening_balance=self.opening_balance_amount,
-                closing_balance=self.closing_balance_amount,
-                reference_month=self.balance_date.month,
-                reference_year=self.balance_date.year,
-            )
+    #         transactions = self._updated_transactions(bank_account)
+    #         Transaction.objects.bulk_create(transactions)
 
-            transactions = self._updated_transactions(bank_account)
-            Transaction.objects.bulk_create(transactions)
-
-            return bank_account
+    #         return bank_account
 
     def update_bank_account_balance(self, bank_account: BankAccount) -> bool:
         if BankStatement.objects.filter(
@@ -117,6 +113,17 @@ class OFXFileParser:
             raise ValidationError("Extrato bancário já cadastrada.")
 
         with transaction.atomic():
+            bank_account.balance = self.closing_balance_amount
+            bank_account.save()
+
+            BankStatement.objects.create(
+                bank_account=bank_account,
+                opening_balance=self.opening_balance_amount,
+                closing_balance=self.closing_balance_amount,
+                reference_month=self.balance_date.month,
+                reference_year=self.balance_date.year,
+            )
+
             transactions = self._updated_transactions(bank_account)
             Transaction.objects.bulk_create(transactions)
 
