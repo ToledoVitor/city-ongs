@@ -114,7 +114,139 @@
                       </p>
                     </td>
                     <td class="px-6 py-4 text-sm text-center text-black whitespace-nowrap">
-                      {{ revenue.status_label }}
+                      {{ revenue.status_label }} <br>
+                      {% if revenue.is_rejected %}
+                        <button
+                          type="button"
+                          data-modal-target="revenues-errors-{{ revenue.id}}"
+                          data-modal-toggle="revenues-errors-{{ revenue.id}}"
+                          class="
+                            text-white
+                            ml-4
+                            bg-red-600
+                            hover:bg-red-600
+                            focus:ring-4
+                            focus:outline-none
+                            focus:ring-red-600
+                            font-medium
+                            rounded-full
+                            text-xs
+                            mt-1
+                            px-2.5
+                            py-1
+                            text-center
+                            inline-flex
+                            items-center
+                            me-2
+                          "
+                        >
+                          pendência
+                        </button>
+
+                        <div
+                            id="revenues-errors-{{ revenue.id}}"
+                            tabindex="-1"
+                            data-modal-backdrop="static"
+                            aria-hidden="true"
+                            class="
+                              hidden
+                              overflow-y-auto
+                              overflow-x-hidden
+                              fixed
+                              top-0
+                              right-0
+                              left-0
+                              z-50
+                              justify-center
+                              items-center
+                              w-full
+                              md:inset-0
+                              h-[calc(100%-1rem)]
+                              max-h-full
+                            "
+                        >
+                          <div class="relative p-4 w-full max-w-md max-h-full">
+                              <!-- Modal content -->
+                              <div class="relative rounded-lg shadow bg-gray-300">
+                                <!-- Modal header -->
+                                  <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+                                      <h3 class="text-xl font-semibold text-black">
+                                          Detalhes da Análise
+                                      </h3>
+                                      <button
+                                        type="button"
+                                        data-modal-hide="revenues-errors-{{ revenue.id}}"
+                                        class="
+                                          end-2.5
+                                          text-black
+                                          hover:bg-gray-600
+                                          hover:text-black
+                                          bg-transparent
+                                          rounded-lg
+                                          text-sm
+                                          w-6
+                                          h-6
+                                          ms-auto
+                                          inline-flex
+                                          justify-center
+                                          items-center
+                                        "
+                                      >
+                                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                          </svg>
+                                          <span class="sr-only">Fechar modal</span>
+                                      </button>
+                                  </div>
+                                  <!-- Modal body -->
+                                  <div class="p-4 md:p-5">
+                                    <span class="flex mb-2 text-left text-base">Pendência reportada pelo avaliador:</span>
+                                    <textarea
+                                      rows="4"
+                                      maxlength="254"
+                                      disabled
+                                      class="
+                                          block
+                                          p-2.5
+                                          mt-2
+                                          w-full
+                                          text-sm
+                                          text-gray-900
+                                          bg-gray-400
+                                          border-gray-600
+                                          rounded-lg
+                                          border
+                                          focus:ring-blue-500
+                                          focus:border-blue-500
+                                      "
+                                    >{{ revenue.pendencies }}</textarea>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    data-modal-hide="revenues-errors-{{ revenue.id}}"
+                                    class="
+                                      space-y-4
+                                      text-white
+                                      bg-gray-700
+                                      hover:bg-gray-800
+                                      focus:ring-4
+                                      focus:outline-none
+                                      focus:ring-gray-300
+                                      font-medium rounded-lg
+                                      text-sm
+                                      px-5
+                                      py-2.5
+                                      m-2
+                                      text-center
+                                    "
+                                  >
+                                    Fechar
+                                  </button>
+                              </div>
+                          </div>
+                        </div>
+    
+                      {% endif %}
                     </td>
                     <td class="px-6 py-4 text-sm text-black">
                       <a

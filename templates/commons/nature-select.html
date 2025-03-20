@@ -15,420 +15,420 @@
     "
     required
 >
-    <option selected value="">----</option>
+    <option value="" {% if not selected_value %}selected{% endif %}>----</option>
     
     <optgroup label="Bens e Materiais permanentes">
-        <option value="PERMANENT_GOODS_AND_MATERIALS">
+        <option value="PERMANENT_GOODS_AND_MATERIALS" {% if selected_value == "PERMANENT_GOODS_AND_MATERIALS" %}selected{% endif %}>
             Bens e Materiais permanentes
         </option>
 
-        <option value="COMPUTER_GOODS_AND_EQUIPMENT">
+        <option value="COMPUTER_GOODS_AND_EQUIPMENT" {% if selected_value == "COMPUTER_GOODS_AND_EQUIPMENT" %}selected{% endif %}>
             Bens e equipamentos de informática
         </option>
 
-        <option value="HOSPITAL_GOODS_AND_EQUIPMENT">
+        <option value="HOSPITAL_GOODS_AND_EQUIPMENT" {% if selected_value == "HOSPITAL_GOODS_AND_EQUIPMENT" %}selected{% endif %}>
             Bens e equipamentos hospitalares
         </option>
     </optgroup>
 
     <optgroup label="Combustível">
-        <option value="FUEL">
+        <option value="FUEL" {% if selected_value == "FUEL" %}selected{% endif %}>
             Combustível
         </option>
     </optgroup>
 
     <optgroup label="Despesas financeiras e bancárias">
-        <option value="BANKING_EXPENSES">
+        <option value="BANKING_EXPENSES" {% if selected_value == "BANKING_EXPENSES" %}selected{% endif %}>
             Despesas bancárias
         </option>
 
-        <option value="BANKING_IOF">
+        <option value="BANKING_IOF" {% if selected_value == "BANKING_IOF" %}selected{% endif %}>
             IOF
         </option>
 
-        <option value="BANKING_IRRF">
+        <option value="BANKING_IRRF" {% if selected_value == "BANKING_IRRF" %}selected{% endif %}>
             IRRF
         </option>
 
-        <option value="INTEREST">
+        <option value="INTEREST" {% if selected_value == "INTEREST" %}selected{% endif %}>
             Juros
         </option>
     </optgroup>
 
     <optgroup label="Gêneros Alimentícios">
-        <option value="FOODSTUFS">
+        <option value="FOODSTUFS" {% if selected_value == "FOODSTUFS" %}selected{% endif %}>
             Gêneros Alimentícios
         </option>
     </optgroup>
 
     <optgroup label="Locação de Imóveis">
-        <option value="REAL_ESTATE_LEASE">
+        <option value="REAL_ESTATE_LEASE" {% if selected_value == "REAL_ESTATE_LEASE" %}selected{% endif %}>
             Locação de Imóveis
         </option>
     </optgroup>
 
     <optgroup label="Locações Diversas">
-        <option value="AMBULANCES">
+        <option value="AMBULANCES" {% if selected_value == "AMBULANCES" %}selected{% endif %}>
             Ambulâncias
         </option>
 
-        <option value="COMPUTER_EQUIPMENT">
+        <option value="COMPUTER_EQUIPMENT" {% if selected_value == "COMPUTER_EQUIPMENT" %}selected{% endif %}>
             Equipamento de informática
         </option>
 
-        <option value="HOSPITCAL_MEDICAL_EQUIPMENT">
+        <option value="HOSPITCAL_MEDICAL_EQUIPMENT" {% if selected_value == "HOSPITCAL_MEDICAL_EQUIPMENT" %}selected{% endif %}>
             Equipamento médico hospitalar
         </option>
 
-        <option value="LAUNDRY_LINEN">
+        <option value="LAUNDRY_LINEN" {% if selected_value == "LAUNDRY_LINEN" %}selected{% endif %}>
             Lavanderia e enxoval
         </option>
 
-        <option value="CAR_LEASE">
+        <option value="CAR_LEASE" {% if selected_value == "CAR_LEASE" %}selected{% endif %}>
             Locação de Carro
         </option>
 
-        <option value="MISCELLANOUS_LEASES">
+        <option value="MISCELLANOUS_LEASES" {% if selected_value == "MISCELLANOUS_LEASES" %}selected{% endif %}>
             Locações Diversas
         </option>
 
-        <option value="SOFTWARE_SYSTEM">
+        <option value="SOFTWARE_SYSTEM" {% if selected_value == "SOFTWARE_SYSTEM" %}selected{% endif %}>
             Sistema de software
         </option>
     </optgroup>
 
     <optgroup label="Material Médico e Hospitalar">
-        <option value="MEDICAL_HOSPITAL_SUPPLIES">
+        <option value="MEDICAL_HOSPITAL_SUPPLIES" {% if selected_value == "MEDICAL_HOSPITAL_SUPPLIES" %}selected{% endif %}>
             Material Médico e Hospitalar
         </option>
     </optgroup>
 
     <optgroup label="Medicamentos">
-        <option value="MEDICINES">
+        <option value="MEDICINES" {% if selected_value == "MEDICINES" %}selected{% endif %}>
             Medicamentos
         </option>
     </optgroup>
 
     <optgroup label="Obras">
-        <option value="WORKS">
+        <option value="WORKS" {% if selected_value == "WORKS" %}selected{% endif %}>
             Obras
         </option>
     </optgroup>
 
     <optgroup label="Outras despesas">
-        <option value="OTHER_ADMINISTRATIVE_EXPENSES">
+        <option value="OTHER_ADMINISTRATIVE_EXPENSES" {% if selected_value == "OTHER_ADMINISTRATIVE_EXPENSES" %}selected{% endif %}>
             Despesas Administrativas
         </option>
 
-        <option value="RETURN_OF_FUNDS">
+        <option value="RETURN_OF_FUNDS" {% if selected_value == "RETURN_OF_FUNDS" %}selected{% endif %}>
             Devolução de Recurso ao Órgão Concedente
         </option>
 
-        <option value="PARKING_DRIVING_TAXI">
+        <option value="PARKING_DRIVING_TAXI" {% if selected_value == "PARKING_DRIVING_TAXI" %}selected{% endif %}>
             Estacionamento/condução/táxi
         </option>
 
-        <option value="IPTU">
+        <option value="IPTU" {% if selected_value == "IPTU" %}selected{% endif %}>
             IPTU
         </option>
 
-        <option value="TAXES_FEES_CONTRIBUTIONS">
+        <option value="TAXES_FEES_CONTRIBUTIONS" {% if selected_value == "TAXES_FEES_CONTRIBUTIONS" %}selected{% endif %}>
             Impostos, Taxas e Contribuições
         </option>
 
-        <option value="OTHER_EXPENSES">
+        <option value="OTHER_EXPENSES" {% if selected_value == "OTHER_EXPENSES" %}selected{% endif %}>
             Outras despesas - Diversos
         </option>
 
-        <option value="INSURANCE">
+        <option value="INSURANCE" {% if selected_value == "INSURANCE" %}selected{% endif %}>
             Seguros
         </option>
 
-        <option value="TRAVEL_TICKET_STAY">
+        <option value="TRAVEL_TICKET_STAY" {% if selected_value == "TRAVEL_TICKET_STAY" %}selected{% endif %}>
             Viagens (passagem, hospedagem)
         </option>
     </optgroup>
 
     <optgroup label="Outros Materiais de Consumo">
-        <option value="COOKING_GAS">
+        <option value="COOKING_GAS" {% if selected_value == "COOKING_GAS" %}selected{% endif %}>
             Gás de Cozinha
         </option>
 
-        <option value="COMPUTER_SUPPLIES">
+        <option value="COMPUTER_SUPPLIES" {% if selected_value == "COMPUTER_SUPPLIES" %}selected{% endif %}>
             Materiais de Informática
         </option>
 
-        <option value="MATERIALS_FOR_SMALL_REPAIRS">
+        <option value="MATERIALS_FOR_SMALL_REPAIRS" {% if selected_value == "MATERIALS_FOR_SMALL_REPAIRS" %}selected{% endif %}>
             Materiais para Pequenos Reparos
         </option>
 
-        <option value="EDUCATIONAL_MATERIAL">
+        <option value="EDUCATIONAL_MATERIAL" {% if selected_value == "EDUCATIONAL_MATERIAL" %}selected{% endif %}>
             Material Pedagógico
         </option>
 
-        <option value="HYGIENE_CLEANING_SUPPLIES_UNIFORMS">
+        <option value="HYGIENE_CLEANING_SUPPLIES_UNIFORMS" {% if selected_value == "HYGIENE_CLEANING_SUPPLIES_UNIFORMS" %}selected{% endif %}>
             Material de Higiene/Limpeza/Uniformes
         </option>
 
-        <option value="SPORTS_EQUIPMENTS">
+        <option value="SPORTS_EQUIPMENTS" {% if selected_value == "SPORTS_EQUIPMENTS" %}selected{% endif %}>
             Material esportivo
         </option>
 
-        <option value="UTENSILS">
+        <option value="UTENSILS" {% if selected_value == "UTENSILS" %}selected{% endif %}>
             Utensílios
         </option>
 
-        <option value="OFFICE_SUPPLIES_1">
+        <option value="OFFICE_SUPPLIES_1" {% if selected_value == "OFFICE_SUPPLIES_1" %}selected{% endif %}>
             Materiais de Expediente
         </option>
 
-        <option value="OFFICE_SUPPLIES_2">
+        <option value="OFFICE_SUPPLIES_2" {% if selected_value == "OFFICE_SUPPLIES_2" %}selected{% endif %}>
             Material de Escritório
         </option>
 
-        <option value="OFFICE_SUPPLIES_3">
+        <option value="OFFICE_SUPPLIES_3" {% if selected_value == "OFFICE_SUPPLIES_3" %}selected{% endif %}>
             Material de expediente/correio/fotocópias
         </option>
 
-        <option value="OTHER_CONSUMABLES">
+        <option value="OTHER_CONSUMABLES" {% if selected_value == "OTHER_CONSUMABLES" %}selected{% endif %}>
             Outros Materiais de Consumo
         </option>
     </optgroup>
 
     <optgroup label="Outros Serviços de Terceiros">
-        <option value="COMMON_WASTE_COLLECT">
+        <option value="COMMON_WASTE_COLLECT" {% if selected_value == "COMMON_WASTE_COLLECT" %}selected{% endif %}>
             Coleta de lixo comum
         </option>
 
-        <option value="HOSPITAL_WASTE_COLLECT">
+        <option value="HOSPITAL_WASTE_COLLECT" {% if selected_value == "HOSPITAL_WASTE_COLLECT" %}selected{% endif %}>
             Coleta de lixo hospitalar
         </option>
 
-        <option value="CONSULTING_LEGAL_ADVICE">
+        <option value="CONSULTING_LEGAL_ADVICE" {% if selected_value == "CONSULTING_LEGAL_ADVICE" %}selected{% endif %}>
             Consultoria/assessoria jurídica
         </option>
 
-        <option value="CLEANING_MAINTENANCE">
+        <option value="CLEANING_MAINTENANCE" {% if selected_value == "CLEANING_MAINTENANCE" %}selected{% endif %}>
             Limpeza e conservação
         </option>
 
-        <option value="MAINTENANCE_HOSPITAL_EQUIPMENT">
+        <option value="MAINTENANCE_HOSPITAL_EQUIPMENT" {% if selected_value == "MAINTENANCE_HOSPITAL_EQUIPMENT" %}selected{% endif %}>
             Manutenção - Equipamento Médico Hospitalar
         </option>
 
-        <option value="MAINTENANCE_COMPUTER_EQUIPMENT">
+        <option value="MAINTENANCE_COMPUTER_EQUIPMENT" {% if selected_value == "MAINTENANCE_COMPUTER_EQUIPMENT" %}selected{% endif %}>
             Manutenção - Equipamento de Informática
         </option>
 
-        <option value="MAINTENANCE_BUILDING">
+        <option value="MAINTENANCE_BUILDING" {% if selected_value == "MAINTENANCE_BUILDING" %}selected{% endif %}>
             Manutenção - predial e Imobiliário
         </option>
 
-        <option value="MAINTENANCE_VEHICLE">
+        <option value="MAINTENANCE_VEHICLE" {% if selected_value == "MAINTENANCE_VEHICLE" %}selected{% endif %}>
             Manutenção de veículos
         </option>
 
-        <option value="CONSTRUCTION">
+        <option value="CONSTRUCTION" {% if selected_value == "CONSTRUCTION" %}selected{% endif %}>
             Obras
         </option>
 
-        <option value="MAINTENANCE_OTHERS">
+        <option value="MAINTENANCE_OTHERS" {% if selected_value == "MAINTENANCE_OTHERS" %}selected{% endif %}>
             Outras Manutenções
         </option>
 
-        <option value="LEGAL_THIRD_PARTY_SERVICES">
+        <option value="LEGAL_THIRD_PARTY_SERVICES" {% if selected_value == "LEGAL_THIRD_PARTY_SERVICES" %}selected{% endif %}>
             Outros serviços de terceiros pessoa jurídica
         </option>
 
-        <option value="ADVERTISING_PUBILICITY">
+        <option value="ADVERTISING_PUBILICITY" {% if selected_value == "ADVERTISING_PUBILICITY" %}selected{% endif %}>
             Publicidade e propaganda
         </option>
 
-        <option value="THERAPEUTIC_SUPPORT_SERVICE">
+        <option value="THERAPEUTIC_SUPPORT_SERVICE" {% if selected_value == "THERAPEUTIC_SUPPORT_SERVICE" %}selected{% endif %}>
             Serviço de apoio diagnóstico terapêutico (sadt)
         </option>
 
-        <option value="SERVICES_ACCOUNTING">
+        <option value="SERVICES_ACCOUNTING" {% if selected_value == "SERVICES_ACCOUNTING" %}selected{% endif %}>
             Serviços Contábeis
         </option>
 
-        <option value="SERVICES_AUDITING">
+        <option value="SERVICES_AUDITING" {% if selected_value == "SERVICES_AUDITING" %}selected{% endif %}>
             Serviços de auditoria
         </option>
 
-        <option value="SERVIECS_IT">
+        <option value="SERVIECS_IT" {% if selected_value == "SERVIECS_IT" %}selected{% endif %}>
             Serviços de tecnologia da informação (TI)
         </option>
 
-        <option value="SERVICES_SURVEILLANCES">
+        <option value="SERVICES_SURVEILLANCES" {% if selected_value == "SERVICES_SURVEILLANCES" %}selected{% endif %}>
             Vigilância
         </option>
     </optgroup>
 
     <optgroup label="Recursos Humanos">
-        <option value="THIRTHEENTH_SALARY">
+        <option value="THIRTHEENTH_SALARY" {% if selected_value == "THIRTHEENTH_SALARY" %}selected{% endif %}>
             13º Salário
         </option>
 
-        <option value="APPRENTICES">
+        <option value="APPRENTICES" {% if selected_value == "APPRENTICES" %}selected{% endif %}>
             Aprendizes
         </option>
 
-        <option value="MEDICAL_ASSISTENCE">
+        <option value="MEDICAL_ASSISTENCE" {% if selected_value == "MEDICAL_ASSISTENCE" %}selected{% endif %}>
             Assistência médica
         </option>
 
-        <option value="ADVANCE_NOTICE">
+        <option value="ADVANCE_NOTICE" {% if selected_value == "ADVANCE_NOTICE" %}selected{% endif %}>
             Aviso prévio
         </option>
 
-        <option value="BENEFITS">
+        <option value="BENEFITS" {% if selected_value == "BENEFITS" %}selected{% endif %}>
             Benefícios
         </option>
 
-        <option value="INTERNSHIP_ALLOWANCE">
+        <option value="INTERNSHIP_ALLOWANCE" {% if selected_value == "INTERNSHIP_ALLOWANCE" %}selected{% endif %}>
             Bolsa Auxílio - estagiários
         </option>
 
-        <option value="INSS_CONTRIBUTION_SHARE">
+        <option value="INSS_CONTRIBUTION_SHARE" {% if selected_value == "INSS_CONTRIBUTION_SHARE" %}selected{% endif %}>
             Contribuição ao INSS - Cota Patronal
         </option>
 
-        <option value="PIS_CONTRIBUTION">
+        <option value="PIS_CONTRIBUTION" {% if selected_value == "PIS_CONTRIBUTION" %}selected{% endif %}>
             Contribuição ao PIS
         </option>
 
-        <option value="SOCIAL_CONTRIBUTIONS">
+        <option value="SOCIAL_CONTRIBUTIONS" {% if selected_value == "SOCIAL_CONTRIBUTIONS" %}selected{% endif %}>
             Contribuições Sociais
         </option>
 
-        <option value="COURSES_TRAINING_RETRAINING">
+        <option value="COURSES_TRAINING_RETRAINING" {% if selected_value == "COURSES_TRAINING_RETRAINING" %}selected{% endif %}>
             Cursos/treinamento/reciclagem
         </option>
 
-        <option value="PERSONNEL_EXPENSES">
+        <option value="PERSONNEL_EXPENSES" {% if selected_value == "PERSONNEL_EXPENSES" %}selected{% endif %}>
             Despesas com Pessoal
         </option>
 
-        <option value="COLLECTIVE_BARGAINING">
+        <option value="COLLECTIVE_BARGAINING" {% if selected_value == "COLLECTIVE_BARGAINING" %}selected{% endif %}>
             Dissídio coletivo
         </option>
 
-        <option value="SOCIAL_CHARGES">
+        <option value="SOCIAL_CHARGES" {% if selected_value == "SOCIAL_CHARGES" %}selected{% endif %}>
             Encargos Sociais
         </option>
 
-        <option value="FGTS">
+        <option value="FGTS" {% if selected_value == "FGTS" %}selected{% endif %}>
             FGTS
         </option>
 
-        <option value="RESERVE_FUND">
+        <option value="RESERVE_FUND" {% if selected_value == "RESERVE_FUND" %}selected{% endif %}>
             Fundo de Reserva
         </option>
 
-        <option value="VACATIONS">
+        <option value="VACATIONS" {% if selected_value == "VACATIONS" %}selected{% endif %}>
             Férias
         </option>
 
-        <option value="BONUSES">
+        <option value="BONUSES" {% if selected_value == "BONUSES" %}selected{% endif %}>
             Gratificações
         </option>
 
-        <option value="HR_INSS">
+        <option value="HR_INSS" {% if selected_value == "HR_INSS" %}selected{% endif %}>
             INSS
         </option>
 
-        <option value="HR_IRRF">
+        <option value="HR_IRRF" {% if selected_value == "HR_IRRF" %}selected{% endif %}>
             IRRF
         </option>
 
-        <option value="COMPENSATIONS">
+        <option value="COMPENSATIONS" {% if selected_value == "COMPENSATIONS" %}selected{% endif %}>
             Indenizações
         </option>
 
-        <option value="TERMINATION_EMPLOYMENT_CONTRACT">
+        <option value="TERMINATION_EMPLOYMENT_CONTRACT" {% if selected_value == "TERMINATION_EMPLOYMENT_CONTRACT" %}selected{% endif %}>
             Rescisão de Contrato de Trabalho - TRCT
         </option>
 
-        <option value="MISCELLANOUS_WITHHOLDINGS">
+        <option value="MISCELLANOUS_WITHHOLDINGS" {% if selected_value == "MISCELLANOUS_WITHHOLDINGS" %}selected{% endif %}>
             Retenções Diversas
         </option>
 
-        <option value="MANAGEMENT_SALARY">
+        <option value="MANAGEMENT_SALARY" {% if selected_value == "MANAGEMENT_SALARY" %}selected{% endif %}>
             Salário diretoria (salários e ordenados)
         </option>
 
-        <option value="SALARIES_AND_WAGES">
+        <option value="SALARIES_AND_WAGES" {% if selected_value == "SALARIES_AND_WAGES" %}selected{% endif %}>
             Salários e ordenados (exceto diretoria)
         </option>
 
-        <option value="UNIFORMS">
+        <option value="UNIFORMS" {% if selected_value == "UNIFORMS" %}selected{% endif %}>
             Uniformes
         </option>
 
-        <option value="FOOD_VOUCHERS">
+        <option value="FOOD_VOUCHERS" {% if selected_value == "FOOD_VOUCHERS" %}selected{% endif %}>
             Vale Alimentação
         </option>
 
-        <option value="MEAL_VOUCHERS">
+        <option value="MEAL_VOUCHERS" {% if selected_value == "MEAL_VOUCHERS" %}selected{% endif %}>
             Vale Refeição
         </option>
 
-        <option value="TRANSPORTATION_VOUCHERS">
+        <option value="TRANSPORTATION_VOUCHERS" {% if selected_value == "TRANSPORTATION_VOUCHERS" %}selected{% endif %}>
             Vale Transporte
         </option>
     </optgroup>
 
     <optgroup label="Recursos Humanos">
-        <option value="INTERN_REMUNERATION">
+        <option value="INTERN_REMUNERATION" {% if selected_value == "INTERN_REMUNERATION" %}selected{% endif %}>
             Remuneração de Estagiários
         </option>
 
-        <option value="SERVICES_PF_THIRD_PARTIES">
+        <option value="SERVICES_PF_THIRD_PARTIES" {% if selected_value == "SERVICES_PF_THIRD_PARTIES" %}selected{% endif %}>
             Serviços Prestados por Terceiro - PF
         </option>
 
-        <option value="SERVICES_PJ_THIRD_PARTIES">
+        <option value="SERVICES_PJ_THIRD_PARTIES" {% if selected_value == "SERVICES_PJ_THIRD_PARTIES" %}selected{% endif %}>
             Serviços Prestados por Terceiro - PJ
         </option>
     </optgroup>
 
     <optgroup label="Serviços médicos">
-        <option value="MEDICAL_SERVICES">
+        <option value="MEDICAL_SERVICES" {% if selected_value == "MEDICAL_SERVICES" %}selected{% endif %}>
             Serviços médicos (*)
         </option>
 
-        <option value="MEDICAL_SERVICES_FOR_INDIVIDUALS">
+        <option value="MEDICAL_SERVICES_FOR_INDIVIDUALS" {% if selected_value == "MEDICAL_SERVICES_FOR_INDIVIDUALS" %}selected{% endif %}>
             Serviços médicos pessoa física
         </option>
     
-        <option value="MEDICAL_SERVICES_FOR_ENTITIES">
+        <option value="MEDICAL_SERVICES_FOR_ENTITIES" {% if selected_value == "MEDICAL_SERVICES_FOR_ENTITIES" %}selected{% endif %}>
             Serviços médicos pessoa jurídica
         </option>
     </optgroup>
 
     <optgroup label="Utilidades Públicas">
-        <option value="PUBLIC_ADMINISTRATIVE_EXPENSES">
+        <option value="PUBLIC_ADMINISTRATIVE_EXPENSES" {% if selected_value == "PUBLIC_ADMINISTRATIVE_EXPENSES" %}selected{% endif %}>
             Despesas Administrativas
         </option>
 
-        <option value="ELECTRICITY">
+        <option value="ELECTRICITY" {% if selected_value == "ELECTRICITY" %}selected{% endif %}>
             Energia Elétrica
         </option>
 
-        <option value="INTERNET_TV">
+        <option value="INTERNET_TV" {% if selected_value == "INTERNET_TV" %}selected{% endif %}>
             Internet/TV a cabo
         </option>
 
-        <option value="TELEPHONE">
+        <option value="TELEPHONE" {% if selected_value == "TELEPHONE" %}selected{% endif %}>
             Telefone
         </option>
 
-        <option value="PUBLIC_UTILITIES">
+        <option value="PUBLIC_UTILITIES" {% if selected_value == "PUBLIC_UTILITIES" %}selected{% endif %}>
             Utilidade Publica
         </option>
 
-        <option value="WATER_SEWAGE">
+        <option value="WATER_SEWAGE" {% if selected_value == "WATER_SEWAGE" %}selected{% endif %}>
             Água e Esgoto
         </option>
     </optgroup>

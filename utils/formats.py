@@ -2,8 +2,6 @@ import re
 from datetime import date, datetime
 from decimal import Decimal
 
-from utils.choices import MonthChoices
-
 
 def format_into_brazilian_currency(value: Decimal | None):
     if not value:

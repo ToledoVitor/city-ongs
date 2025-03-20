@@ -416,7 +416,7 @@ def update_accountability_revenue_view(request, pk):
         )
 
     if request.method == "POST":
-        form = RevenueForm(request.POST, instance=revenue)
+        form = RevenueForm(request.POST, instance=revenue, accountability=revenue.accountability)
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save()
@@ -437,7 +437,7 @@ def update_accountability_revenue_view(request, pk):
                 {"revenue": revenue, "form": form},
             )
     else:
-        form = RevenueForm(instance=revenue)
+        form = RevenueForm(instance=revenue, accountability=revenue.accountability)
         return render(
             request,
             "accountability/revenues/update.html",
@@ -1363,10 +1363,14 @@ def accountability_pendencies_view(request, pk):
     expenses = Expense.objects.filter(
         accountability=accountability,
         pendencies__isnull=False,
+    ).exclude(
+        pendencies="",
     ).select_related("favored")
     revenues = Revenue.objects.filter(
         accountability=accountability,
         pendencies__isnull=False,
+    ).exclude(
+        pendencies="",
     )
 
     return render(

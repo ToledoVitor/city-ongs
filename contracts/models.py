@@ -609,7 +609,7 @@ class ContractStep(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return self.name
+        return f"Etapa: {self.name} | Meta: {self.goal.name}"
 
     class Meta:
         verbose_name = "Etapa"

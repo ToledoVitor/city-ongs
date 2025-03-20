@@ -313,7 +313,7 @@ class ContractExecutionActivityForm(forms.ModelForm):
         if self.execution:
             self.fields["step"].queryset = ContractStep.objects.filter(
                 goal__contract=self.execution.contract
-            )
+            ).select_related("goal")
         else:
             self.fields["step"].queryset = ContractExecution.objects.none()
 
