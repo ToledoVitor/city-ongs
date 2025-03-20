@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0010_accountabilityfile_historicalaccountabilityfile'),
+        ("accountability", "0010_accountabilityfile_historicalaccountabilityfile"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accountability',
-            name='pendencies',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Pendências'),
+            model_name="accountability",
+            name="pendencies",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Pendências"
+            ),
         ),
         migrations.AddField(
-            model_name='historicalaccountability',
-            name='pendencies',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Pendências'),
+            model_name="historicalaccountability",
+            name="pendencies",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Pendências"
+            ),
         ),
     ]

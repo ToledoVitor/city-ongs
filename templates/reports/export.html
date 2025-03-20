@@ -32,7 +32,7 @@
     </ol>
 </nav>
 
-<form method="post" class="max-w-lg mx-auto">
+<form method="post" target="download_iframe" class="max-w-lg mx-auto">
     {% csrf_token %}
   
     <div class="mb-3">
@@ -293,7 +293,6 @@
   
   function toggleInputFields() {
     const selected = reportModelSelect.value;
-    debugger
     if (selected.startsWith("rp_")) {
 
       rpFields.style.display = 'block';

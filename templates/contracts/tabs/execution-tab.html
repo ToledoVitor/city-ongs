@@ -4,17 +4,17 @@
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <thead class="text-xs text-white uppercase bg-gray-500">
             <tr>
-                <th scope="col" class="px-6 py-3" />
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center" />
+                <th scope="col" class="px-6 py-3 text-center">
                     Período
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Atividades
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Documentos
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 text-center">
                     Status
                 </th>
           </tr>
@@ -52,15 +52,15 @@
                     Relatório {{ execution.month_text }} de {{execution.year }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
+                  <td class="px-6 py-4 text-sm text-black text-center">
                     {{ execution.count_activities }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
+                  <td class="px-6 py-4 text-sm text-black text-center">
                     {{ execution.count_files }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
+                  <td class="px-6 py-4 text-sm text-black text-center">
                     {% if execution.status == "WIP" %}
                       <span
                         class="
@@ -79,19 +79,55 @@
                       </span>
                     {% elif execution.status == "SENT" %}
                       <span
-                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="
+                          bg-indigo-100
+                          border
+                          boder-indigo-500
+                          whitespace-nowrap
+                          text-indigo-800
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                        "
                       >
                         Em análise
                       </span>
                     {% elif execution.status == "CORRECTING" %}
                       <span
-                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="
+                          bg-yellow-300
+                          border
+                          boder-yellow-500
+                          whitespace-nowrap
+                          text-yellow-800
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                        "
                       >
                         Em correção
                       </span>
                     {% elif execution.status == "FINISHED" %}
                       <span
-                        class="bg-green-300 whitespace-nowrap text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="
+                          bg-green-300
+                          border
+                          boder-green-500
+                          whitespace-nowrap
+                          text-gray-800
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                        "
                       >
                         Finalizado
                       </span>

@@ -10,9 +10,11 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction
+from django.db.models import Sum
 
 from accountability.models import Accountability, Expense, Favored, Revenue
 from bank.models import Transaction
+from contracts.models import ContractItem
 from contracts.choices import NatureChoices
 
 
@@ -23,18 +25,19 @@ class AccountabilityXLSXImporter:
 
     def handle(self) -> Tuple[bool, bool, bool, bool]:
         try:
-            revenues_df = pd.read_excel(self.file, sheet_name="1. RECEITAS")
-            expenses_df = pd.read_excel(self.file, sheet_name="2. DESPESAS")
+            xls = pd.ExcelFile(self.file)
+            revenues_df = pd.read_excel(xls, sheet_name="1. RECEITAS")
+            expenses_df = pd.read_excel(xls, sheet_name="2. DESPESAS")
             applications_df = pd.read_excel(
-                self.file, sheet_name="3. APLICACOES E RESGATES"
+                xls, sheet_name="3. APLICACOES E RESGATES"
             )
         except ValueError:
             raise ValueError("Excel sheets are not in the right format")
 
-        self._store_fd_ids()
-        self._store_cb_ids()
-        self._store_fv_ids()
-        self._store_ia_ids()
+        self._store_fd_ids(xls)
+        self._store_cb_ids(xls)
+        self._store_fv_ids(xls)
+        self._store_ia_ids(xls)
         self._store_fr_choices()
         self._store_nr_choices()
         self._store_nd_choices()
@@ -45,27 +48,26 @@ class AccountabilityXLSXImporter:
         applications_error = self._create_applications(applications_df)
 
         imported = False in [revenues_error, expenses_error, applications_error]
-
         return imported, revenues_error, expenses_error, applications_error
 
-    def _store_fd_ids(self) -> None:
-        df = pd.read_excel(self.file, sheet_name="FD")
+    def _store_fd_ids(self, xls: pd.ExcelFile) -> None:
+        df = pd.read_excel(xls, sheet_name="FD")
         mapped_fds = {}
         for line in df.values.tolist():
             mapped_fds[line[0]] = line[1]
 
         self.mapped_fds = mapped_fds
 
-    def _store_cb_ids(self) -> None:
-        df = pd.read_excel(self.file, sheet_name="CB")
+    def _store_cb_ids(self, xls: pd.ExcelFile) -> None:
+        df = pd.read_excel(xls, sheet_name="CB")
         mapped_cbs = {}
         for line in df.values.tolist():
             mapped_cbs[line[0]] = line[1]
 
         self.mapped_cbs = mapped_cbs
 
-    def _store_fv_ids(self) -> None:
-        df = pd.read_excel(self.file, sheet_name="FV")
+    def _store_fv_ids(self, xls: pd.ExcelFile) -> None:
+        df = pd.read_excel(xls, sheet_name="FV")
         organization = self.accountability.contract.organization
 
         records = [
@@ -110,8 +112,8 @@ class AccountabilityXLSXImporter:
         mapped_fvs = {fav.name: str(fav.id) for fav in all_favored}
         self.mapped_fvs = mapped_fvs
 
-    def _store_ia_ids(self) -> None:
-        df = pd.read_excel(self.file, sheet_name="IA")
+    def _store_ia_ids(self, xls: pd.ExcelFile) -> None:
+        df = pd.read_excel(xls, sheet_name="IA")
         mapped_ias = {}
         for line in df.values.tolist():
             mapped_ias[line[0]] = line[1]
@@ -163,7 +165,7 @@ class AccountabilityXLSXImporter:
                 revenue.full_clean()
                 revenues.append(revenue)
             except ValidationError as e:
-                errors.append(f"Linha {index}: {" ".join(e.messages)}")
+                errors.append(f"Receita {line[0]}: {" ".join(e.messages)}")
 
         if errors:
             return errors
@@ -177,17 +179,24 @@ class AccountabilityXLSXImporter:
 
     def _create_expenses(self, expenses_df: pd.DataFrame) -> dict:
         expenses_df = expenses_df.replace({np.nan: None})
-
         expenses = []
         errors = []
+
+        new_expense_per_item = {}
+
         for index, line in enumerate(expenses_df.values.tolist()[1:], start=2):
             if not line[2]:
                 break
 
             planned = bool(line[9])
-
             due_date = line[4]
             competency = line[5]
+            item_id = self.mapped_ias.get(line[9], None)
+
+            if planned and not item_id:
+                errors.append(f"Despesa {line[0]}: Despesa planejada precisa ter um item associado.")
+                continue
+
             expense = Expense(
                 accountability=self.accountability,
                 planned=planned,
@@ -198,7 +207,7 @@ class AccountabilityXLSXImporter:
                 source_id=self.mapped_fds.get(line[6], None),
                 nature=self.mapped_nds.get(line[7], None),
                 favored_id=self.mapped_fvs.get(line[8], None),
-                item_id=self.mapped_ias.get(line[9], None),
+                item_id=item_id,
                 document_type=self.mapped_tds.get(line[10], None),
                 document_number=line[11],
                 observations=line[12],
@@ -207,8 +216,25 @@ class AccountabilityXLSXImporter:
             try:
                 expense.full_clean()
                 expenses.append(expense)
+                if planned:
+                    new_expense_per_item.setdefault(item_id, Decimal('0.00'))
+                    new_expense_per_item[item_id] += expense.value
             except ValidationError as e:
-                errors.append(f"Linha {index}: {" ".join(e.messages)}")
+                errors.append(f"Despesa {line[0]}: {" ".join(e.messages)}")
+
+        for item_id, new_value in new_expense_per_item.items():
+            existing_expenses = Expense.objects.filter(
+                item_id=item_id,
+                planned=True,
+                accountability__contract=self.accountability.contract,
+            ).aggregate(total=Sum("value"))["total"] or Decimal("0.00")
+
+            contract_item = ContractItem.objects.get(pk=item_id)
+            total_planned = existing_expenses + new_value
+            if total_planned > contract_item.anual_expense:
+                errors.append(
+                    f"O total de despesas para o item '{contract_item}' ({total_planned}) ultrapassa o limite anual de {contract_item.anual_expense}."
+                )
 
         if errors:
             return errors
@@ -268,7 +294,7 @@ class AccountabilityXLSXImporter:
                 transaction.full_clean()
                 transactions.append(transaction)
             except ValidationError as e:
-                errors.append(f"Linha {index}: {" ".join(e.messages)}")
+                errors.append(f"Aplicação {line[0]}: {" ".join(e.messages)}")
 
         if errors:
             return errors

@@ -1,15 +1,14 @@
-import copy
+import os
 from dataclasses import dataclass
-from decimal import Decimal
 
-from django.db.models import Q
+from django.conf import settings
 from fpdf import XPos, YPos
-from fpdf.fonts import FontFace
 
-from accountability.models import Expense
-from contracts.choices import NatureCategories
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import document_mask, format_into_brazilian_currency
+
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -21,7 +20,9 @@ class PassOn5PDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
+        pdf.set_font("FreeSans", "", 8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.accountability = accountability
@@ -31,11 +32,11 @@ class PassOn5PDFExporter:
             "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
         )
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def handle(self):
         self._draw_header()
@@ -56,7 +57,7 @@ class PassOn5PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=11, bold=True)
+        self.__set_font(font_size=11, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -65,7 +66,7 @@ class PassOn5PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.cell(
             0,
             10,
@@ -78,7 +79,7 @@ class PassOn5PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
             text=f"**CONTRATANTE:** {self.accountability.contract.organization.city_hall.name}",
             markdown=True,
@@ -128,21 +129,21 @@ class PassOn5PDFExporter:
 
     def _draw_notification(self):
         self.pdf.ln(3)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text="Pelo presente TERMO, nós, abaixo identificados:",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=9)
+        self.__set_font(font_size=9)
         self.pdf.cell(
             text="**1.  Estamos CIENTES de que:**",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="a) o ajuste acima referido e seus aditamentos, bem como o processo das respectivas prestações de contas estarão sujeitos a análise e julgamento pelo Tribunal de Contas do Estado de São Paulo cujo trâmite processual ocorrerá pelo sistema eletrônico;",
             markdown=True,
@@ -150,7 +151,7 @@ class PassOn5PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="b) poderemos ter acesso ao processo tendo vista e extraindo cópias das manifestações de interesse Despachos e Decisões mediante regular cadastramento no Sistema de Processo Eletrônico conforme dados abaixo indicados em consonância com o estabelecido na Resolução nº01/2011 do TCESP;",
             markdown=True,
@@ -158,7 +159,7 @@ class PassOn5PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text=f"c) além de disponíveis no processo eletrônico todos os Despachos e Decisões que vierem a ser tomados relativamente ao aludido processo serão publicados no Diário Oficial do Estado Caderno do Poder Legislativo parte do Tribunal de Contas do Estado de São Paulo([{self.government_link}]({self.government_link})), em conformidade com o artigo 90 da Lei Complementar nº 709 de 14 de janeiro de 1993 iniciando-se a partir de então a contagem dos prazos processuais conforme regras do Código de Processo Civil;",
             markdown=True,
@@ -166,7 +167,7 @@ class PassOn5PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="d) as informações pessoais dos responsáveis pelo órgão concessor e entidade beneficiária estão cadastradas no módulo eletrônico do 'Cadastro Corporativo TCESP - CadTCESP' nos termos previstos no Artigo 2º das Instruções nº01/2020 conforme 'Declaração(ões) de Atualização Cadastral' anexa (s);",
             markdown=True,
@@ -176,13 +177,13 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_notificated(self):
-        self.__set_helvetica_font(font_size=9, bold=True)
+        self.__set_font(font_size=9, bold=True)
         self.pdf.cell(
             text="2.    Damo-nos por NOTIFICADOS para:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.multi_cell(
             text="a) O acompanhamento dos atos do processo até seu julgamento final e consequente publicação;",
             w=190,
@@ -192,7 +193,7 @@ class PassOn5PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="b) Se for o caso e de nosso interesse nos prazos e nas formas legais e regimentais exercer o direito de defesa interpor recursos e o que mais couber.",
             w=190,
@@ -202,7 +203,7 @@ class PassOn5PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="c) Este termo corresponde à situação prevista no inciso II do artigo 30 da Lei Complementar nº 709, de 14 de janeiro de 1993, em que, se houver débito, determinando a notificação do responsável para, no prazo estabelecido no Regimento Interno, apresentar defesa ou recolher a importância devida;",
             w=190,
@@ -212,7 +213,7 @@ class PassOn5PDFExporter:
             new_y=YPos.NEXT,
         )
         self.pdf.ln(1)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text="d) A notificação pessoal só ocorrerá caso a defesa apresentada seja rejeitada, mantida a determinação de recolhimento, conforme §1º do artigo 30 da citada Lei.",
             w=190,
@@ -223,7 +224,7 @@ class PassOn5PDFExporter:
         )
         self.pdf.ln(10)
 
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.multi_cell(
             text=f"**LOCAL:** {self.accountability.contract.hired_company.city}",
             w=190,
@@ -234,7 +235,7 @@ class PassOn5PDFExporter:
         )
         self.pdf.ln(3)
         self.pdf.multi_cell(
-            text=f"**DATA:**",  # É preenchido pelo Usuário
+            text="**DATA:**",  # É preenchido pelo Usuário
             w=190,
             h=4,
             markdown=True,
@@ -244,25 +245,25 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_grantor_authority(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO CONTRATANTE:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"Nome: {self.accountability.contract.organization.city_hall.mayor}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=f"Cargo: {self.accountability.contract.organization.city_hall.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
                 str(self.accountability.contract.organization.city_hall.document)
@@ -272,25 +273,25 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="ORDENADOR DE DESPESAS DO ÓRGÃO PÚBLICO CONTRATANTE:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"Nome: {self.accountability.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=f"Cargo: {self.accountability.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
                 str(self.accountability.contract.supervision_autority.cpf)
@@ -298,33 +299,33 @@ class PassOn5PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(5)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Assinatura: ___________________________",
+            text="Assinatura: ___________________________",
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
 
     def _draw_beneficiary_authority(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="AUTORIDADE MÁXIMA DA ENTIDADE BENEFICIÁRIA:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"Nome: {self.accountability.contract.organization.owner}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=f"Cargo: {self.accountability.contract.organization.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
                 str(self.accountability.contract.organization.document)
@@ -334,30 +335,30 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_conclusion_signature_owner(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text=f"Responsáveis que assinaram o ajuste e/ou Parecer Conclusivo:",
+            text="Responsáveis que assinaram o ajuste e/ou Parecer Conclusivo:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"Pelo ÓRGÃO PÚBLICO CONTRATANTE:",
+            text="Pelo ÓRGÃO PÚBLICO CONTRATANTE:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"Nome: {self.accountability.contract.supervision_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=f"Cargo: {self.accountability.contract.supervision_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
                 str(self.accountability.contract.supervision_autority.cpf)
@@ -367,30 +368,30 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_account_signature_owner(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text=f"Responsáveis que assinaram o ajuste e/ou prestação de contas:",
+            text="Responsáveis que assinaram o ajuste e/ou prestação de contas:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"Pela ORGANIZAÇÃO SOCIAL:",
+            text="Pela ORGANIZAÇÃO SOCIAL:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=f"Cargo: {self.accountability.contract.accountability_autority.position}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_helvetica_font(font_size=8)
+        self.__set_font(font_size=8)
         self.pdf.cell(
             text=document_mask(
                 str(self.accountability.contract.accountability_autority.cpf)
@@ -406,31 +407,31 @@ class PassOn5PDFExporter:
         self.pdf.ln(10)
 
     def _draw_other_responsable(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="DEMAIS RESPONSÁVEIS (*):",
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text="Tipo de ato sob sua responsabilidade:",
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             text="Nome:",
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
         self.pdf.cell(
-            text=f"Cargo:",
+            text="Cargo:",
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
         self.pdf.cell(
-            text=f"CPF:",
+            text="CPF:",
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
@@ -450,7 +451,7 @@ class PassOn5PDFExporter:
         self.pdf.ln(1)
 
     def _draw_footnote(self):
-        self.__set_helvetica_font(font_size=6)
+        self.__set_font(font_size=6)
         self.pdf.multi_cell(
             text="(1) Valor repassado e exercício, quando se tratar de processo de prestação de contas.",
             w=190,

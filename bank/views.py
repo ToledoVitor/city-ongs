@@ -348,4 +348,5 @@ def bank_statement_ofx_export_view(request, pk):
     response = HttpResponse(ofx_content, content_type="application/x-ofx")
     filename = f"extrato_{account.account}.ofx"
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response.set_cookie("fileDownload", "true", max_age=60)
     return response

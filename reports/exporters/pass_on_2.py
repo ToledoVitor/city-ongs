@@ -1,20 +1,24 @@
+import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from bank.models import BankStatement
-from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import (
     document_mask,
     format_into_brazilian_currency,
     format_into_brazilian_date,
 )
+
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -26,18 +30,19 @@ class PassOn2PDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.accountability = accountability
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def __database_queries(self):
         self.checking_account = self.accountability.contract.checking_account
@@ -92,7 +97,7 @@ class PassOn2PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=9, bold=True)
+        self.__set_font(font_size=9, bold=True)
         self.pdf.multi_cell(
             0,
             4,
@@ -105,7 +110,7 @@ class PassOn2PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 10)
 
     def _draw_form(self):
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -194,7 +199,7 @@ class PassOn2PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         table_data = []
         table_data.append(
             [
@@ -224,7 +229,7 @@ class PassOn2PDFExporter:
         )
 
         col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("Helvetica", "", size_pt=8)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
@@ -241,7 +246,7 @@ class PassOn2PDFExporter:
                         self.pdf.set_fill_color(255, 255, 255)
                     data.cell(text=text, align="L", border=0)
 
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -317,7 +322,7 @@ class PassOn2PDFExporter:
             ]
         )
 
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -330,7 +335,7 @@ class PassOn2PDFExporter:
 
         self.default_cell_height
         col_widths = [150, 40]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
+        font = FontFace("FreeSans", "B", size_pt=8)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -348,7 +353,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(15)
 
     def _draw_signatories_notification(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.multi_cell(
             190,
             5,
@@ -388,15 +393,15 @@ class PassOn2PDFExporter:
                 "TOTAL DAS DESPESAS",
                 f"{format_into_brazilian_currency(total_expense_value)}",
             ],
-            ["RECURSO DO REPASSE NÃO APLICADO", f"O que sobrou do contrato"],  # TODO
-            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", f"Valor glosado"],  # TODO
+            ["RECURSO DO REPASSE NÃO APLICADO", "O que sobrou do contrato"],  # TODO
+            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", "Valor glosado"],  # TODO
             [
                 "VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE",
-                f"Recurso - Devolvido",
+                "Recurso - Devolvido",
             ],  # TODO
         ]
 
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -409,7 +414,7 @@ class PassOn2PDFExporter:
 
         self.default_cell_height
         col_widths = [38, 38, 38, 38, 38]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=7)
+        font = FontFace("FreeSans", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -425,7 +430,7 @@ class PassOn2PDFExporter:
                     up_data.cell(text=text, align="C")
 
         col_widths = [152, 38]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=8)
+        font = FontFace("FreeSans", "B", size_pt=8)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -443,7 +448,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_org_notification(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         self.pdf.multi_cell(
             190,
             5,
@@ -478,7 +483,7 @@ class PassOn2PDFExporter:
             ]
         )
 
-        self.__set_helvetica_font(font_size=7, bold=True)
+        self.__set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -491,7 +496,7 @@ class PassOn2PDFExporter:
 
         self.default_cell_height
         col_widths = [27, 25, 30, 27, 27, 27, 27]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=7)
+        font = FontFace("FreeSans", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -509,7 +514,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_observation(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         contractor_company = self.accountability.contract.contractor_company
         self.pdf.cell(
             0,
@@ -535,7 +540,7 @@ class PassOn2PDFExporter:
         self.pdf.multi_cell(
             0,
             0,
-            f"**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
+            "**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -547,7 +552,7 @@ class PassOn2PDFExporter:
             self.pdf.get_x(), self.pdf.get_y(), self.pdf.get_x() + 190, self.pdf.get_y()
         )
         self.pdf.ln(3)
-        self.__set_helvetica_font(font_size=7, bold=False)
+        self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
             0,
             0,

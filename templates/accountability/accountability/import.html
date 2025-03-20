@@ -56,7 +56,7 @@
     </ol>
 </nav>
   
-<form method="post" class="max-w-lg mx-auto">
+<form method="post" target="download_iframe" class="max-w-lg mx-auto">
   {% csrf_token %}
 
   <h2 class="py-1 mt-4 mb-2 font-semibold text-2xl text-center bg-gray-300 rounded-lg">Baixar Modelo<h2>
@@ -104,7 +104,7 @@
 
 <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
 
-<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto">
+<form method="post" enctype="multipart/form-data" target="download_iframe" class="max-w-lg mx-auto">
   {% csrf_token %}
 
   <h2 class="py-1 mt-4 mb-2 font-semibold text-2xl text-center bg-gray-300 rounded-lg">Carregar Dados<h2>

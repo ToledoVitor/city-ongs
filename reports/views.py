@@ -60,6 +60,7 @@ class ReportsView(TemplateView):
             response["Content-Disposition"] = (
                 f'attachment; filename="{report_model}-{str(datetime.now().date())}.pdf"'
             )
+            response.set_cookie("fileDownload", "true", max_age=60)
             return response
 
         else:

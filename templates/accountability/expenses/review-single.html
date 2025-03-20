@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Receitas - Portal SITTS{% endblock %}
+{% block title %}Despesas - Portal SITTS{% endblock %}
 
 {% block content %}
 
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-    Revisar Receitas
+    Revisar Despesas
 </p>
   
 <!-- Breadcrumb -->
@@ -34,7 +34,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">{{ accountability.contract.trailing_code }}</a>
+          <a href="{% url 'contracts:contracts-detail' expense.accountability.contract.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">{{ expense.accountability.contract.trailing_code }}</a>
         </div>
       </li>
       <li aria-current="page">
@@ -42,7 +42,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
+          <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}</a>
         </div>
       </li>
       <li aria-current="page">
@@ -50,7 +50,7 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium md:ms-2 text-black">Revisar Receitas</span>
+          <span class="ms-1 text-sm font-medium md:ms-2 text-black">Revisar Despesas</span>
         </div>
       </li>
     </ol>
@@ -60,7 +60,7 @@
     {% csrf_token %}
 
     <div class="flex justify-between mb-4">
-      <label class="block py-2 text-2xl font-bold text-black">Dados da Receita</label>
+      <label class="block py-2 text-2xl font-bold text-black">Dados da Despesa</label>
       <button
         type="button"
         data-modal-target="documents-modal"
@@ -92,51 +92,58 @@
     </div>
 
     <div class="mb-2 text-base flex justify-between">
-        <b>Identificação: </b> <span class="text-right">{{ revenue.identification }}</span>
+        <b>Identificação: </b> <span class="text-right">{{ expense.identification }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> <span class="text-right">{{ revenue.observations|default_if_none:"Sem Observações" }}</span>
+        <b>Observações: </b> <span class="text-right">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Favorecido: </b> <span class="text-right">{{ revenue.favored.name }}</span>
-    </div>
+      <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
+  </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Valor: </b> <span class="text-right">R${{ revenue.value|intcomma }}</span>
+        <b>Valor: </b> <span class="text-right">R${{ expense.value|intcomma }}</span>
     </div>
 
     <hr class="h-px my-3 border-0 bg-gray-500">
 
     <div class="mb-2 text-base flex justify-between">
-        {% if revenue.source %}
-            <b>Fonte: </b> <span class="text-right">{{ revenue.source.name }}</span>
+        {% if expense.source %}
+            <b>Fonte: </b> <span class="text-right">{{ expense.source.name }}</span>
         {% else %}
             <b>Fonte: </b> -
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Natureza da Receita: </b> <span class="text-right">{{ revenue.revenue_nature_label }}</span>
+        {% if expense.favored %}
+            <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
+        {% else %}
+            <b>Favorecido: </b> -
+        {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Conta Bancária: </b> <span class="text-right">{{ revenue.bank_account.bank_name }} - {{ revenue.bank_account.account }}</span>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        {% if revenue.item %}
-            <b>Item de Aquisição: </b> <span class="text-right">{{ revenue.item.name }}</span>
+        {% if expense.item %}
+            <b>Item de Aquisição: </b> <span class="text-right">{{ expense.item.name }}</span>
         {% else %}
             <b>Item de Aquisição: </b> -
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Natureza: </b> <span class="text-right">{{ revenue.revenue_nature_label }}</span>
+      <b>Natureza: </b> <span class="text-right">{{ expense.nature_label }}</span>
     </div>
     
     <hr class="h-px my-3 border-0 bg-gray-500">
 
     <div class="mb-2 text-base flex justify-between">
-      <b>Recebimento: </b> <span class="text-right">{{ revenue.receive_date|default_if_none:"-" }}</span>
+      <b>Vencimento: </b> <span class="text-right">{{ expense.due_date }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Competência: </b> <span class="text-right">{{ revenue.competency|default_if_none:"-" }}</span>
+      <b>Competência: </b> <span class="text-right">{{ expense.competency }}</span>
+    </div>
+    <div class="mb-2 text-base flex justify-between">
+      <b>Liquidação: </b> <span class="text-right">{{ expense.liquidation|default_if_none:"-" }}</span>
+    </div>
+    <div class="mb-2 text-base flex justify-between">
+      <b>Forma de Liquidação: </b> <span class="text-right">{{ expense.liquidation_form_label }}</span>
     </div>
 
     <hr class="h-px my-3 border-0 bg-gray-500">
@@ -162,9 +169,9 @@
         "
         required
       >
-        <option value="" {% if revenue.status == "IN_ANALISIS" %}selected{% endif %}>Status</option>
-        <option value="REJECTED" {% if revenue.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
-        <option value="APPROVED" {% if revenue.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
+        <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Status</option>
+        <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
+        <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
       </select>
     </div>
 
@@ -189,126 +196,31 @@
               focus:border-blue-500
           "
           placeholder="Escreva as pendências aqui..."
-        >{{ revenue.pendencies|default_if_none:"" }}</textarea>
+        >{{ expense.pendencies|default_if_none:"" }}</textarea>
     </div>
-
-    <div class="flex gap-10">
-      {% if current_revenue_index == 1 %}
-      <button
-        type="submit"
-        name="action"
-        value="previous"
-        disabled
-        class="
-            w-full
-            text-white
-            bg-gray-200
-            hover:bg-gray-300
-            focus:ring-4
-            focus:outline-none
-            focus:ring-gray-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Anterior
-      </button>
-      {% else %}
-      <button
-        type="submit"
-        name="action"
-        value="previous"
-        class="
-            w-full
-            text-white
-            bg-gray-500
-            hover:bg-gray-600
-            focus:ring-4
-            focus:outline-none
-            focus:ring-gray-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Anterior
-      </button>
-      {% endif %}
-
-      {% if current_revenue_index == total_revenues %}
-      <button
-        type="submit"
-        name="action"
-        value="next"
-        disabled
-        class="
-          w-full
-          text-white
-          bg-gray-200
-          hover:bg-gray-300
-          focus:ring-4
-          focus:outline-none
-          focus:ring-gray-300
-          font-medium rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-        "
-      >
-        Próximo
-      </button>
-      {% else %}
-      <button
-        type="submit"
-        name="action"
-        value="next"
-        class="
-          w-full
-          text-white
-          bg-gray-500
-          hover:bg-gray-600
-          focus:ring-4
-          focus:outline-none
-          focus:ring-gray-300
-          font-medium rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-        "
-      >
-        Próximo
-      </button>
-      {% endif %}
-
-      <button
-        type="submit"
-        name="action"
-        value="save_all"
-        class="
-            w-full
-            text-white
-            bg-blue-700
-            hover:bg-blue-800
-            focus:ring-4
-            focus:outline-none
-            focus:ring-blue-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Salvar Análise
+  
+    <button
+      type="submit"
+      class="
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-center
+        inline-flex
+        items-center
+        text-white
+        rounded-lg
+        focus:ring-4
+        focus:outline-none
+        bg-blue-600
+        hover:bg-blue-700
+        focus:ring-blue-800
+      "
+      style="display: flex; justify-self: center;"
+    >
+      Salvar Análise
     </button>
-  </div>
 </form>
 
 <div
@@ -370,8 +282,8 @@
         <div class="p-4 md:p-5">
             <div>
               <ul class="max-w-md divide-y divide-gray-700">
-                {% if revenue.files.count %}
-                  {% for file in revenue.files.all %}
+                {% if expense.files.count %}
+                  {% for file in expense.files.all %}
                   <li class="py-3 sm:pb-4">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                       <div class="
@@ -398,14 +310,14 @@
                       </div>
                       <div class="flex-1 min-w-0">
                           <a
-                          href="https://google.com.br"
+                            href="{{ file.file.url }}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="text-base font-medium text-blue-600 hover:underline"
                           >
                             {{ file.name }}
                           </a>
-                          <p class="text-xs text-gray-600 truncate">
+                          <p class="text-xs mt-2 text-gray-600 truncate">
                             Anexado em: {{ file.created_at }}
                           </p>
                       </div>

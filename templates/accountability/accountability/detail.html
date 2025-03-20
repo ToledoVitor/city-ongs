@@ -70,29 +70,69 @@
   </div>
 
   <input type="hidden" id="id-paid" name="paid" value="{{ request.GET.paid|default:'all' }}">
+  <input type="hidden" id="id-reviwed" name="reviwed" value="{{ request.GET.reviwed|default:'all' }}">
 
-  <div class="mt-2 inline-flex rounded-md shadow-xs" role="group">
-    <button
-      type="button"
-      data-flag="all"
-      class="status-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-xs font-medium border border-gray-400 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
-    >
-      Todos
-    </button>
-    <button
-      type="button"
-      data-flag="true"
-      class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border-t border-b border-gray-400 rounded-none focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
-    >
-      Conciliados
-    </button>
-    <button
-      type="button"
-      data-flag="false"
-      class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border border-gray-400 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
-    >
-      Pendentes
-    </button>
+  <div class="mt-2 flex gap-4">
+    <div data-filter="paid">
+      <p class="text-xs">Por Conciliação</p>
+      <div class="mt-0 inline-flex rounded-md shadow-xs" role="group">
+        <button
+          type="button"
+          data-flag="all"
+          class="status-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-xs font-medium border border-gray-400 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          data-flag="true"
+          class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border-t border-b border-gray-400 rounded-none focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Conciliados
+        </button>
+        <button
+          type="button"
+          data-flag="false"
+          class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border border-gray-400 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Pendentes
+        </button>
+      </div>
+    </div>
+    
+    <div data-filter="reviwed">
+      <p class="text-xs">Por Revisão</p>
+      <div class="mt-0 inline-flex rounded-md shadow-xs" role="group">
+        <button
+          type="button"
+          data-flag="all"
+          class="status-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-xs font-medium border border-gray-400 rounded-s-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          data-flag="pending"
+          class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border-t border-b border-gray-400 rounded-none focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Em análise
+        </button>
+        <button
+          type="button"
+          data-flag="rejected"
+          class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border-t border-b border-l border-gray-400 rounded-none focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Rejeitados
+        </button>
+        <button
+          type="button"
+          data-flag="approved"
+          class="status-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-4 py-2 text-xs font-medium border border-gray-400 rounded-e-lg focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-white"
+        >
+          Aprovados
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 
@@ -147,7 +187,7 @@
         </button>
       </a>
       {% elif object.is_sent and user.can_change_statuses %}
-      <a href="{% url 'accountability:review-expenses' object.id 0 %}">
+      <a href="{% url 'accountability:review-all-expenses' object.id 0 %}">
         <button
           type="button"
           class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
@@ -160,7 +200,7 @@
           </svg>
         </button>
       </a>
-      <a href="{% url 'accountability:review-revenues' object.id 0 %}">
+      <a href="{% url 'accountability:review-all-revenues' object.id 0 %}">
         <button
           type="button"
           class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
@@ -537,35 +577,38 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    const flagInput = document.getElementById("id-paid");
-    const flagButtons = document.querySelectorAll(".status-btn");
+    document.querySelectorAll("[data-filter]").forEach(function(filterGroup) {
+      const filterType = filterGroup.getAttribute("data-filter");
+      const hiddenInput = document.getElementById("id-" + filterType);
+      const flagButtons = filterGroup.querySelectorAll(".status-btn");
   
-    // Atualiza a aparência dos botões de acordo com o valor atual do hidden
-    flagButtons.forEach(button => {
-      if (button.getAttribute("data-flag") === flagInput.value) {
-        button.classList.remove("bg-gray-200", "text-gray-700");
-        button.classList.add("bg-blue-600", "text-white");
-      } else {
-        button.classList.remove("bg-blue-600", "text-white");
-        button.classList.add("bg-gray-200", "text-gray-700");
-      }
-    });
+      // Atualiza a aparência dos botões conforme o valor atual do campo hidden
+      flagButtons.forEach(button => {
+        if (button.getAttribute("data-flag") === hiddenInput.value) {
+          button.classList.remove("bg-gray-200", "text-gray-700");
+          button.classList.add("bg-blue-600", "text-white");
+        } else {
+          button.classList.remove("bg-blue-600", "text-white");
+          button.classList.add("bg-gray-200", "text-gray-700");
+        }
+      });
   
-    flagButtons.forEach(button => {
-      button.addEventListener("click", function() {
-        flagInput.value = button.getAttribute("data-flag");
+      flagButtons.forEach(button => {
+        button.addEventListener("click", function() {
+          hiddenInput.value = button.getAttribute("data-flag");
   
-        flagButtons.forEach(btn => {
-          if (btn === button) {
-            btn.classList.remove("bg-gray-200", "text-gray-700");
-            btn.classList.add("bg-blue-600", "text-white");
-          } else {
-            btn.classList.remove("bg-blue-600", "text-white");
-            btn.classList.add("bg-gray-200", "text-gray-700");
-          }
+          flagButtons.forEach(btn => {
+            if (btn === button) {
+              btn.classList.remove("bg-gray-200", "text-gray-700");
+              btn.classList.add("bg-blue-600", "text-white");
+            } else {
+              btn.classList.remove("bg-blue-600", "text-white");
+              btn.classList.add("bg-gray-200", "text-gray-700");
+            }
+          });
+  
+          button.closest("form").submit();
         });
-  
-        button.closest("form").submit();
       });
     });
   });  

@@ -1,13 +1,13 @@
-import copy
+import os
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Q, Sum
+from django.conf import settings
+from django.db.models import Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from contracts.choices import NatureCategories
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.choices import MonthChoices
@@ -15,6 +15,9 @@ from utils.formats import (
     format_into_brazilian_currency,
     format_into_brazilian_date,
 )
+
+font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -26,18 +29,20 @@ class PassOn1PDFExporter:
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
-        pdf.set_font("Helvetica", "", 8)
+        pdf.add_font("FreeSans", "", font_path, uni=True)
+        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
+        pdf.set_font("FreeSans", size=8)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_helvetica_font(self, font_size=7, bold=False):
+    def __set_font(self, font_size=7, bold=False):
         if bold:
-            self.pdf.set_font("Helvetica", "B", font_size)
+            self.pdf.set_font("FreeSans", "B", font_size)
         else:
-            self.pdf.set_font("Helvetica", "", font_size)
+            self.pdf.set_font("FreeSans", "", font_size)
 
     def __database_queries(self):
         self.contracts_queryset = Contract.objects.filter(
@@ -58,7 +63,7 @@ class PassOn1PDFExporter:
         return self.pdf
 
     def _draw_header(self):
-        self.__set_helvetica_font(font_size=9, bold=True)
+        self.__set_font(font_size=9, bold=True)
         self.pdf.multi_cell(
             0,
             4,
@@ -72,7 +77,7 @@ class PassOn1PDFExporter:
 
     def _draw_up_informations(self):
         # Cabeçalho e títulos
-        self.__set_helvetica_font(font_size=8, bold=False)
+        self.__set_font(font_size=8, bold=False)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         self.pdf.cell(
@@ -138,7 +143,7 @@ class PassOn1PDFExporter:
 
         self.pdf.ln(10)
         sub_col_widths = [61, 29, 29, 73]  # Total: 190
-        font = FontFace("Helvetica", "", size_pt=6)
+        font = FontFace("FreeSans", "", size_pt=6)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -153,7 +158,7 @@ class PassOn1PDFExporter:
 
         self.default_cell_height
         col_widths = [15, 20, 26, 14, 15, 14, 15, 19, 17, 17, 20]  # Total: 190
-        font = FontFace("Helvetica", "", size_pt=6)
+        font = FontFace("FreeSans", "", size_pt=6)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -167,7 +172,7 @@ class PassOn1PDFExporter:
                 header.cell(text=text, align="C")
 
             if data_body != []:
-                self.pdf.set_font("Helvetica", "", 6)
+                self.pdf.set_font("FreeSans", "", 6)
                 for item in data_body:
                     body = table.row()
                     for text in item:
@@ -175,7 +180,7 @@ class PassOn1PDFExporter:
 
         self.default_cell_height
         footer_col_widths = [154, 36]  # Total: 190
-        font = FontFace("Helvetica", "B", size_pt=7)
+        font = FontFace("FreeSans", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
             headings_style=font,
@@ -190,7 +195,7 @@ class PassOn1PDFExporter:
         self.pdf.ln(10)
 
     def _draw_down_informations(self):
-        self.__set_helvetica_font(font_size=8, bold=True)
+        self.__set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
         self.pdf.cell(
             0,
@@ -216,7 +221,7 @@ class PassOn1PDFExporter:
         self.pdf.multi_cell(
             0,
             0,
-            f"**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
+            "**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -230,7 +235,7 @@ class PassOn1PDFExporter:
         self.pdf.ln(10)
 
     def _draw_observations(self):
-        self.__set_helvetica_font(font_size=7)
+        self.__set_font(font_size=7)
         self.pdf.cell(
             0,
             0,
@@ -243,7 +248,7 @@ class PassOn1PDFExporter:
         self.pdf.cell(
             0,
             0,
-            f"(**) Fonte de recursos: federal ou estadual.",
+            "(**) Fonte de recursos: federal ou estadual.",
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,

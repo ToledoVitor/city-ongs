@@ -59,7 +59,7 @@
 
       <div class="relative">
         <label class="block mb-2 text-base font-medium text-black">Natureza</label>
-        {% include 'commons/nature-select.html' with id='id_nature' name='nature' %}
+        {% include 'commons/nature-select.html' with id='id_nature' name='nature' selected_value=expense.nature %}
       </div>
     </div>
   </div>
@@ -112,6 +112,7 @@
         name="value"
         placeholder="000,00"
         oninput="formatMoney(this)"
+        value="{{ expense.value }}"
         class="
           block
           p-2.5
@@ -173,6 +174,7 @@
                 id="id_competency"
                 name="competency"
                 type="text"
+                value="{{ expense.competency|date:'d/m/Y' }}"
                 class="
                   border
                   text-sm
@@ -207,6 +209,7 @@
                 id="id_due_date"
                 name="due_date"
                 type="text"
+                value="{{ expense.due_date|date:'d/m/Y' }}"
                 class="
                   border
                   text-sm

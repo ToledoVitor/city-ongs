@@ -92,58 +92,58 @@
     </div>
 
     <div class="mb-2 text-base flex justify-between">
-        <b>Identificação: </b> {{ expense.identification }}
+        <b>Identificação: </b> <span class="text-right">{{ expense.identification }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> {{ expense.observations|default_if_none:"Sem Observações" }}
+        <b>Observações: </b> <span class="text-right">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Favorecido: </b> {{ expense.favored.name }}
+      <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
   </div>
     <div class="mb-2 text-base flex justify-between">
-        <b>Valor: </b> R${{ expense.value|intcomma }}
+        <b>Valor: </b> <span class="text-right">R${{ expense.value|intcomma }}</span>
     </div>
 
     <hr class="h-px my-3 border-0 bg-gray-500">
 
     <div class="mb-2 text-base flex justify-between">
         {% if expense.source %}
-            <b>Fonte: </b> {{ expense.source.name }}
+            <b>Fonte: </b> <span class="text-right">{{ expense.source.name }}</span>
         {% else %}
             <b>Fonte: </b> -
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
         {% if expense.favored %}
-            <b>Favorecido: </b> {{ expense.favored.name }}
+            <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
         {% else %}
             <b>Favorecido: </b> -
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
         {% if expense.item %}
-            <b>Item de Aquisição: </b> {{ expense.item.name }}
+            <b>Item de Aquisição: </b> <span class="text-right">{{ expense.item.name }}</span>
         {% else %}
             <b>Item de Aquisição: </b> -
         {% endif %}
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Natureza: </b> {{ expense.nature_label }}
+      <b>Natureza: </b> <span class="text-right">{{ expense.nature_label }}</span>
     </div>
     
     <hr class="h-px my-3 border-0 bg-gray-500">
 
     <div class="mb-2 text-base flex justify-between">
-      <b>Vencimento: </b> {{ expense.due_date }}
+      <b>Vencimento: </b> <span class="text-right">{{ expense.due_date }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Competência: </b> {{ expense.competency }}
+      <b>Competência: </b> <span class="text-right">{{ expense.competency }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Liquidação: </b> {{ expense.liquidation|default_if_none:"-" }}
+      <b>Liquidação: </b> <span class="text-right">{{ expense.liquidation|default_if_none:"-" }}</span>
     </div>
     <div class="mb-2 text-base flex justify-between">
-      <b>Forma de Liquidação: </b> {{ expense.liquidation_form_label }}
+      <b>Forma de Liquidação: </b> <span class="text-right">{{ expense.liquidation_form_label }}</span>
     </div>
 
     <hr class="h-px my-3 border-0 bg-gray-500">
@@ -196,7 +196,7 @@
               focus:border-blue-500
           "
           placeholder="Escreva as pendências aqui..."
-        >{{ expense.pendencies }}</textarea>
+        >{{ expense.pendencies|default_if_none:"" }}</textarea>
     </div>
 
     <div class="flex gap-10">

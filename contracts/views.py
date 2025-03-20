@@ -1084,7 +1084,7 @@ def contract_status_change_view(request, pk):
                 return redirect("contracts:contracts-detail", pk=contract.id)
     else:
         form = ContractStatusUpdateForm()
-        return render(request, "contracts/status-update.html", {"form": form})
+        return render(request, "contracts/status-update.html", {"form": form, "contract": contract})
 
 
 @login_required

@@ -43,9 +43,13 @@
 <form method="post" class="max-w-lg mx-auto">
     {% csrf_token %}
 
-    <div class="mb-3">
-        <label for="id_status" class="block mb-2 text-base font-medium text-black">Status Atual</label>
-        {{ form.status }}
+    <span class="mb-6 text-lg"><b>Status Atual do Contrato:</b> {{ contract.status_label }}</span>
+
+    <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
+
+    <div class="my-3">
+      <label for="id_status" class="block mb-2 text-base font-medium text-black">Alterar Status para:</label>
+      {{ form.status }}
     </div>
 
     <button

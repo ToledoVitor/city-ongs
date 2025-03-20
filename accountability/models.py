@@ -410,6 +410,14 @@ class Expense(BaseModel):
         return "-"
 
     @property
+    def status_label(self) -> str:
+        return Expense.ReviewStatus(self.status).label
+
+    @property
+    def is_rejected(self) -> str:
+        return self.status == Expense.ReviewStatus.REJECTED
+
+    @property
     def document_type_label(self) -> str:
         if self.document_type:
             return Expense.DocumentChoices(self.document_type).label
@@ -566,6 +574,14 @@ class Revenue(BaseModel):
     @property
     def source_label(self) -> str:
         return Revenue.RevenueSource(self.source).label
+
+    @property
+    def status_label(self) -> str:
+        return Revenue.ReviewStatus(self.status).label
+
+    @property
+    def is_rejected(self) -> str:
+        return self.status == Revenue.ReviewStatus.REJECTED
 
     @property
     def revenue_nature_label(self) -> str:

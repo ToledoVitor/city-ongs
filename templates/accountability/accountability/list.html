@@ -88,7 +88,18 @@
                   <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
                     {% if accountability.status == "WIP" %}
                       <span
-                        class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100"
+                        class="
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                          border
+                          border-indigo-500
+                          bg-indigo-900
+                          text-indigo-100
+                        "
                       >
                         {{ accountability.status_label }}
                       </span>
@@ -101,6 +112,8 @@
                           px-2.5
                           py-0.5
                           rounded
+                          border
+                          border-indigo-500
                           bg-indigo-900
                           text-indigo-100
                         "
@@ -109,13 +122,35 @@
                       </span>
                     {% elif accountability.status == "CORRECTING" %}
                       <span
-                        class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="
+                          bg-indigo-100
+                          border
+                          border-indigo-500
+                          text-indigo-800
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                        "
                       >
                         {{ accountability.status_label }}
                       </span>
                     {% elif accountability.status == "FINISHED" %}
                       <span
-                        class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
+                        class="
+                          bg-gray-100
+                          border
+                          border-gray-500
+                          text-gray-800
+                          text-xs
+                          font-medium
+                          me-2
+                          px-2.5
+                          py-0.5
+                          rounded
+                        "
                       >
                         {{ accountability.status_label }}
                       </span>

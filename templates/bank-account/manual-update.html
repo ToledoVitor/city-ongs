@@ -541,11 +541,9 @@ addTransactionButton.addEventListener('click', () => {
     const formCount = parseInt(totalFormsInput.value, 10);
     const newForm = formsetDiv.querySelector('.transactions-form').cloneNode(true);
 
-    // Atualiza os índices nos campos do novo formulário
     newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
     newForm.innerHTML = newForm.innerHTML.replace(/_0_/g, `_${formCount}_`);
 
-    debugger
     const removeButton = newForm.querySelector('.remove-form');
     if (formCount === 0 && removeButton) {
         removeButton.style.display = 'none';
