@@ -791,6 +791,7 @@ def import_accountability_view(request, pk):
             response["Content-Disposition"] = (
                 f'attachment; filename="importacao-{accountability.month}-{accountability.year}.xlsx"'
             )
+            response.set_cookie("fileDownload", "true", max_age=60)
             return response
 
         elif step == "upload":
