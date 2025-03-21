@@ -1,7 +1,5 @@
-import calendar
 from datetime import date, datetime
 
-from accountability.models import Accountability
 from contracts.models import Contract
 from reports.exporters import (
     ConsolidatedPDFExporter,
@@ -22,7 +20,6 @@ from reports.exporters import (
     PeriodEpensesPDFExporter,
     PredictedVersusRealizedPDFExporter,
 )
-from reports.forms import TRANSACTION_OPTIONS, ReportForm
 
 
 def export_pass_on_1(contract: Contract, start_date: date, end_date: date):
@@ -33,105 +30,105 @@ def export_pass_on_1(contract: Contract, start_date: date, end_date: date):
     ).handle()
 
 
-def export_pass_on_2(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_2(contract: Contract, start_date: date, end_date: date):
     return PassOn2PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_3(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_3(contract: Contract, start_date: date, end_date: date):
     return PassOn3PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_4(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_4(contract: Contract, start_date: date, end_date: date):
     return PassOn4PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_5(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_5(contract: Contract, start_date: date, end_date: date):
     return PassOn5PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_6(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_6(contract: Contract, start_date: date, end_date: date):
     return PassOn6PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_7(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_7(contract: Contract, start_date: date, end_date: date):
     return PassOn7PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_8(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_8(contract: Contract, start_date: date, end_date: date):
     return PassOn8PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_9(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_9(contract: Contract, start_date: date, end_date: date):
     return PassOn9PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_10(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_10(contract: Contract, start_date: date, end_date: date):
     return PassOn10PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_11(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_11(contract: Contract, start_date: date, end_date: date):
     return PassOn11PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_12(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_12(contract: Contract, start_date: date, end_date: date):
     return PassOn12PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_13(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_13(contract: Contract, start_date: date, end_date: date):
     return PassOn13PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
 
 
-def export_pass_on_14(accountability: Accountability, start_date: date, end_date: date):
+def export_pass_on_14(contract: Contract, start_date: date, end_date: date):
     return PassOn14PDFExporter(
-        accountability=accountability,
+        contract=contract,
         start_date=start_date,
         end_date=end_date,
     ).handle()
@@ -163,121 +160,63 @@ def export_consolidated(contract: Contract, start_date: date, end_date: date):
     ).handle()
 
 
-def export_predicted_versus_realized(
-    accountability: Accountability, start_date: date, end_date: date
-):
-    return PredictedVersusRealizedPDFExporter(
-        accountability=accountability,
-        start_date=start_date,
-        end_date=end_date,
-    ).handle()
-
-
-def _get_start_end_date(month: int, year: int):
-    last_day = calendar.monthrange(year, month)[1]
-
-    start_date = datetime(year, month, 1)
-    end_date = datetime(year, month, last_day)
-    return start_date, end_date
-
-
-def get_model_for_report(form: ReportForm):
-    cleaned_data = form.cleaned_data
-    transaction_reports = {opt[0] for opt in TRANSACTION_OPTIONS}
-    if cleaned_data["report_model"] in transaction_reports:
-        return (
-            cleaned_data["contract"],
-            cleaned_data["start_date"],
-            cleaned_data["end_date"],
-        )
-
-    else:
-        start_date, end_date = _get_start_end_date(
-            month=int(cleaned_data["month"]),
-            year=int(cleaned_data["year"]),
-        )
-        return (
-            (
-                Accountability.objects.filter(
-                    month=cleaned_data["month"],
-                    year=cleaned_data["year"],
-                    contract=cleaned_data["contract"],
-                )
-                .select_related(
-                    "contract",
-                    "contract__organization",
-                    "contract__organization__city_hall",
-                    "contract__hired_company",
-                )
-                .first()
-            ),
-            start_date,
-            end_date,
-        )
-
-
 def export_report(
-    model: Accountability | Contract,
+    contract: Contract,
     start_date: datetime,
     end_date: datetime,
     report_model: str,
 ):
     match report_model:
-        case "pass_on_1":
-            return export_pass_on_1(model, start_date, end_date)
+        case "rp_1":
+            return export_pass_on_1(contract, start_date, end_date)
 
         case "rp_2":
-            return export_pass_on_2(model, start_date, end_date)
+            return export_pass_on_2(contract, start_date, end_date)
 
         case "rp_3":
-            return export_pass_on_3(model, start_date, end_date)
+            return export_pass_on_3(contract, start_date, end_date)
 
         case "rp_4":
-            return export_pass_on_4(model, start_date, end_date)
+            return export_pass_on_4(contract, start_date, end_date)
 
         case "rp_5":
-            return export_pass_on_5(model, start_date, end_date)
+            return export_pass_on_5(contract, start_date, end_date)
 
         case "rp_6":
-            return export_pass_on_6(model, start_date, end_date)
+            return export_pass_on_6(contract, start_date, end_date)
 
         case "rp_7":
-            return export_pass_on_7(model, start_date, end_date)
+            return export_pass_on_7(contract, start_date, end_date)
 
         case "rp_8":
-            return export_pass_on_8(model, start_date, end_date)
+            return export_pass_on_8(contract, start_date, end_date)
 
         case "rp_9":
-            return export_pass_on_9(model, start_date, end_date)
+            return export_pass_on_9(contract, start_date, end_date)
 
         case "rp_10":
-            return export_pass_on_10(model, start_date, end_date)
+            return export_pass_on_10(contract, start_date, end_date)
 
         case "rp_11":
-            return export_pass_on_11(model, start_date, end_date)
+            return export_pass_on_11(contract, start_date, end_date)
 
         case "rp_12":
-            return export_pass_on_12(model, start_date, end_date)
+            return export_pass_on_12(contract, start_date, end_date)
 
         case "rp_13":
-            return export_pass_on_13(model, start_date, end_date)
+            return export_pass_on_13(contract, start_date, end_date)
 
         case "rp_14":
-            return export_pass_on_14(model, start_date, end_date)
+            return export_pass_on_14(contract, start_date, end_date)
 
         case "period_expenses":
-            return export_period_expenses(model, start_date, end_date)
+            return export_period_expenses(contract, start_date, end_date)
 
         case "predicted_versus_realized":
-            return export_predicted_versus_realized(model, start_date, end_date)
+            return export_predicted_versus_realized(contract, start_date, end_date)
 
         case "consolidated":
-            return export_consolidated(model, start_date, end_date)
-
-        case "predicted_versus_realized":
-            return export_predicted_versus_realized(
-                accountability, start_date, end_date
-            )
+            return export_consolidated(contract, start_date, end_date)
 
         case _:
             raise ValueError(f"Report model {report_model} is not a valid option")

@@ -27,7 +27,7 @@ class PassOn14PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract, start_date, end_date):
         pdf = BasePdf(
             orientation="portrait", unit="mm", format="A4"
         )  # Querie para Aditivos
@@ -37,7 +37,7 @@ class PassOn14PDFExporter:
         pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
         pdf.set_font("FreeSans", "", 8)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
@@ -48,8 +48,8 @@ class PassOn14PDFExporter:
             self.pdf.set_font("FreeSans", "", font_size)
 
     def __database_queries(self):
-        self.checking_account = self.accountability.contract.checking_account
-        self.investing_account = self.accountability.contract.investing_account
+        self.checking_account = self.contract.checking_account
+        self.investing_account = self.contract.investing_account
 
         # Queries para Receitas
         self.revenue_queryset = Revenue.objects.filter(
@@ -77,7 +77,7 @@ class PassOn14PDFExporter:
 
         # Queries para Despesas
         self.expense_queryset = Expense.objects.filter(
-            accountability__contract=self.accountability.contract,
+            accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
@@ -88,7 +88,7 @@ class PassOn14PDFExporter:
 
         # Querie para Aditivos
         self.addendum_queryset = ContractAddendum.objects.filter(
-            contract=self.accountability.contract,
+            contract=self.contract,
         )
 
     def handle(self):
@@ -125,24 +125,24 @@ class PassOn14PDFExporter:
     def _draw_informations(self):
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"**Órgão Concessor:** {self.accountability.contract.organization.city_hall.name}",
+            text=f"**Órgão Concessor:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**Entidade Beneficiária:** {self.accountability.contract.organization.name}",
+            text=f"**Entidade Beneficiária:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
-            text=f"**CNPJ**: {self.accountability.contract.hired_company.cnpj}",
+            text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(self.default_cell_height)
-        hired_company = self.accountability.contract.hired_company
+        hired_company = self.contract.hired_company
         self.pdf.cell(
             # TODO averiguar se dados pertence a entidade "Contratada"
             text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
@@ -165,7 +165,7 @@ class PassOn14PDFExporter:
                 "",
                 "",
                 " ",
-                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
+                f"Nome: {self.contract.accountability_autority.get_full_name()}",
             ]
         )
         (
@@ -174,7 +174,7 @@ class PassOn14PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
                 ]
             ),
         )
@@ -183,7 +183,7 @@ class PassOn14PDFExporter:
                 "",
                 "",
                 " ",
-                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
+                f"{document_mask(str(self.contract.supervision_autority.cpf))}",
             ]
         )
 
@@ -209,7 +209,7 @@ class PassOn14PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.multi_cell(
-            text=f"**Objeto do Contrato de Gestão:** {self.accountability.contract.objective}",
+            text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -217,8 +217,8 @@ class PassOn14PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        start = self.accountability.contract.start_of_vigency
-        end = self.accountability.contract.end_of_vigency
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
             text=f"**Exercício:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
@@ -239,14 +239,10 @@ class PassOn14PDFExporter:
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
-                self.accountability.contract.name_with_code,
-                format_into_brazilian_date(
-                    self.accountability.contract.start_of_vigency
-                ),
-                format_into_brazilian_date(self.accountability.contract.end_of_vigency),
-                format_into_brazilian_currency(
-                    self.accountability.contract.total_value
-                ),
+                self.contract.name_with_code,
+                format_into_brazilian_date(self.contract.start_of_vigency),
+                format_into_brazilian_date(self.contract.end_of_vigency),
+                format_into_brazilian_currency(self.contract.total_value),
             ],
         ]
 
@@ -299,8 +295,8 @@ class PassOn14PDFExporter:
                 "**VALORES REPASSADOS (R$)**",
             ],
             [
-                f"{format_into_brazilian_date(self.accountability.contract.end_of_vigency)}",
-                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
+                f"{format_into_brazilian_date(self.contract.end_of_vigency)}",
+                f"{format_into_brazilian_currency(self.contract.total_value)}",
                 "dd/mm/aa",  # TODO seria o mesmoque end_of_vigency?
                 "Nao sei o que é",
                 f"{format_into_brazilian_currency(self.all_pass_on_values)}",
@@ -709,7 +705,7 @@ class PassOn14PDFExporter:
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
-                f"{format_into_brazilian_currency(self.accountability.contract.total_value)}",
+                f"{format_into_brazilian_currency(self.contract.total_value)}",
             ],
             [
                 "(J) DESPESAS PAGAS NO EXERCÍCIO (H+I)",
@@ -796,7 +792,7 @@ class PassOn14PDFExporter:
                 "",
                 "",
                 " ",
-                f"Nome: {self.accountability.contract.supervision_autority.get_full_name()} - Confirmar campo",
+                f"Nome: {self.contract.supervision_autority.get_full_name()} - Confirmar campo",
             ]
         )
         (
@@ -805,7 +801,7 @@ class PassOn14PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
                 ]
             ),
         )
@@ -814,7 +810,7 @@ class PassOn14PDFExporter:
                 "",
                 "",
                 " ",
-                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
+                f"{document_mask(str(self.contract.supervision_autority.cpf))}",
             ]
         )
 
@@ -837,9 +833,8 @@ class PassOn14PDFExporter:
                     data.cell(text=text, align="L", border=0)
 
     def __categorize_expenses(self) -> dict:
-        expenses = Expense.objects.filter(
-            Q(accountability=self.accountability)
-            | Q(item__contract=self.accountability.contract)
+        expenses = Expense.objects.filter(item__contract=self.contract).filter(
+            due_date__gte=self.start_date, due_date__lte=self.end_date
         )
 
         base_empty_dict = {
