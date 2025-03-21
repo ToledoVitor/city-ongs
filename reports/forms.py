@@ -72,7 +72,7 @@ class ReportForm(forms.Form):
 
         self.fields[
             "contract"
-        ].queryset = self.request.user.organization.contracts.all()
+        ].queryset = Contract.objects.filter(area__in=self.request.user.areas.all())
 
     def clean(self):
         cleaned_data = super().clean()
