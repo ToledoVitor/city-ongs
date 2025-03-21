@@ -123,7 +123,7 @@ class PassOn1PDFExporter:
         for contract in self.contracts_queryset:
             data_body.append(
                 [
-                    f"{contract.concession_type}",  # Tipo de Concessão
+                    f"{contract.get_concession_type_display()}",  # Tipo de Concessão
                     f"{contract.organization.name}",  # BENEFICIARIO
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",  # ENDEREÇO
                     f"Lei nº {contract.law_num}",  # N° da Lei
