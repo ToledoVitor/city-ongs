@@ -2,11 +2,10 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from accounts.models import User
-from utils.models import BaseModel
+from accounts.models import BaseOrganizationTenantModel, User
 
 
-class ActivityLog(models.Model):
+class ActivityLog(BaseOrganizationTenantModel):
     class ActivityLogChoices(models.TextChoices):
         # accounts
         CREATED_CIVIL_SERVANT = "CREATED_CIVIL_SERVANT", "Criou funcionário público"
@@ -145,6 +144,7 @@ class ActivityLog(models.Model):
         DUPLICATED_REVENUE = "DUPLICATED_REVENUE", "Duplicou receita"
         DELETED_REVENUE = "DELETED_REVENUE", "Deletou receita"
 
+    id = models.BigAutoField(primary_key=True)
     created_at = models.DateTimeField(
         verbose_name="Hora do registro",
         auto_now_add=True,
@@ -201,7 +201,7 @@ class ActivityLog(models.Model):
         ]
 
 
-class Notification(BaseModel):
+class Notification(BaseOrganizationTenantModel):
     class Category(models.TextChoices):
         ACCOUNTABILITY_CREATED = (
             "ACCOUNTABILITY_CREATED",

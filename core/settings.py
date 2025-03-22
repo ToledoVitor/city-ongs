@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "contracts",
     "reports",
     # Third parties
+    "easy_tenants",
     "django_cpf_cnpj",
     "health_check",
     "health_check.db",
@@ -92,6 +93,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Internal Middlewares
     "core.middlewares.ForcePasswordChangeMiddleware",
+    "accounts.middlewares.TenantMiddleware",
     # Third parties
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
@@ -186,3 +188,7 @@ DATE_INPUT_FORMATS = [
 WEBSITE_URL = env("WEBSITE_URL", default="localhost")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY", default="")
 SENDGRID_ACCOUNT_SENDER = env("SENDGRID_ACCOUNT_SENDER", default="")
+
+# Easy tenants configuration
+EASY_TENANTS_TENANT_MODEL = "accounts.Organization"
+EASY_TENANTS_TENANT_FIELD = "organization"

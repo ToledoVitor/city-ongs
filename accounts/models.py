@@ -1,9 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from easy_tenants import get_current_tenant, tenant_context
+from easy_tenants.models import TenantAwareAbstract, TenantManager
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
 from utils.fields import LowerCaseEmailField
+from utils.managers import TenantManagerAllObjects
 from utils.models import BaseModel
 
 
@@ -67,11 +70,43 @@ class Organization(BaseModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Organização - {self.name}"
+        return f"{self.name} | {self.city_hall.name}"
 
     class Meta:
         verbose_name = "Organização"
         verbose_name_plural = "Organizações"
+
+
+class OrganizationTenantBaseClass(BaseModel, TenantAwareAbstract):
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        help_text="The organization associated with this tenant.",
+        related_name="%(app_label)s_%(class)s_related",
+        null=True,
+        blank=True,
+    )
+
+    objects = TenantManager()
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        """Set tenant field on save"""
+        if get_current_tenant():
+            return super().save(*args, **kwargs)
+
+        with tenant_context(self.organization):
+            super().save(*args, **kwargs)
+
+
+class BaseOrganizationTenantModel(OrganizationTenantBaseClass, BaseModel):
+    objects = TenantManager()
+    all_objects = TenantManagerAllObjects()
+
+    class Meta:
+        abstract = True
 
 
 class Area(BaseModel):

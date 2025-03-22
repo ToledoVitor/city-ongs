@@ -225,6 +225,7 @@ class ContractStepForm(forms.ModelForm):
 ContractExtraStepFormSet = forms.inlineformset_factory(
     ContractGoal,
     ContractStep,
+    fk_name="goal",
     form=ContractStepForm,
     extra=1,
     can_delete=True,
@@ -234,6 +235,7 @@ ContractExtraStepFormSet = forms.inlineformset_factory(
 ContractStepFormSet = forms.inlineformset_factory(
     ContractGoal,
     ContractStep,
+    fk_name="goal",
     form=ContractStepForm,
     extra=0,
     can_delete=True,

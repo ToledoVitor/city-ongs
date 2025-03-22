@@ -65,9 +65,9 @@ class ContractsListView(LoginRequiredMixin, ListView):
         queryset = (
             super()
             .get_queryset()
-            .filter(
-                area__in=self.request.user.areas.all(),
-            )
+            # .filter(
+            #     area__in=self.request.user.areas.all(),
+            # )
             .select_related(
                 "contractor_manager",
                 "hired_manager",

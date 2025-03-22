@@ -5,7 +5,7 @@ pre-commit:
 	@poetry run pre-commit install
 
 shell:
-	@poetry run python manage.py shell
+	@poetry run python manage.py shell_tenant --disable
 
 makemigrations:
 	@poetry run python manage.py makemigrations
