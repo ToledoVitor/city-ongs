@@ -1,11 +1,12 @@
 import os
 from dataclasses import dataclass
+from datetime import date
 
 from django.conf import settings
 from fpdf import XPos, YPos
 
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import document_mask, format_into_brazilian_currency
+from utils.formats import document_mask, format_into_brazilian_currency, format_into_brazilian_date
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
@@ -97,7 +98,7 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ENTIDADE BENEFICIÁRIA:** {self.contract.organization.name}",
+            text=f"**ENTIDADE BENEFICIÁRIA:** {self.contract.hired_company} ({self.contract.area.name})",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -229,10 +230,9 @@ class PassOn13PDFExporter:
         self.pdf.ln(1)
         self.__set_font(font_size=8)
         self.pdf.multi_cell(
-            text="d) A notificação pessoal só ocorrerá caso a defesa apresentada seja rejeitada, mantida a determinação de recolhimento, conforme §1º do artigo 30 da citada Lei.",
+            text=f"d) A notificação pessoal só ocorrerá caso a defesa apresentada seja rejeitad{self.contract.organization.name}",
             w=190,
             h=4,
-            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -249,7 +249,7 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(3)
         self.pdf.multi_cell(
-            text="**DATA:**",  # É preenchido pelo Usuário
+            text=f"**DATA:** {format_into_brazilian_date(date.today())}",
             w=190,
             h=4,
             markdown=True,
@@ -356,13 +356,13 @@ class PassOn13PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.supervision_autority.get_full_name()}",
+            text=f"Nome: Comitê",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.supervision_autority.position}",
+            text=f"Cargo: Comitê",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
