@@ -64,6 +64,7 @@
                       {{ favored.updated_at.date }}
                     </td>
                     <td class="px-6 py-4 text-sm flex justify-end">
+                      {% if not user.is_committee_member %}
                       <a
                         href="{% url 'accountability:favoreds-update' favored.id %}"
                       >
@@ -88,6 +89,7 @@
                         Editar
                         </button>
                       </a>
+                      {% endif %}
                     </td>
                   </tr>
               {% endfor %}
@@ -110,7 +112,7 @@
         </tbody>
     </table>
   
-    {% if user.has_admin_access %}
+    {% if not user.is_committee_member %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
         <a
           href="{% url 'accountability:favoreds-create' %}"

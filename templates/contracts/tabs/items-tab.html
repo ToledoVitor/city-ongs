@@ -93,7 +93,7 @@
                           </button>
                         </a>
                         
-                        {% if contract.is_on_planning %}
+                        {% if contract.is_on_planning and not user.is_committee_member %}
                         <br>
                         <a
                           href="{% url 'contracts:contracts-item-update' contract.id item.id %}"

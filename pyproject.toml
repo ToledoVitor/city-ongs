@@ -29,6 +29,7 @@ google-cloud-storage = "^3.0.0"
 django-storages = {extras = ["google"], version = "^1.14.5"}
 sendgrid = "^6.11.0"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^8.0.0"}
+ipython = "^9.0.2"
 
 
 [build-system]

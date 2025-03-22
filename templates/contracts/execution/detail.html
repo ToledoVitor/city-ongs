@@ -200,7 +200,7 @@
                         </div>                    
                       </td>
                       <td scope="row" class="max-w-48 px-6 py-4 text-base text-sm flex justify-end">
-                        {% if execution.is_on_execution %}
+                        {% if execution.is_on_execution and not user.is_committee_member %}
                           <a
                             href="{% url 'contracts:activities-detail' activity.id %}"
                             class="

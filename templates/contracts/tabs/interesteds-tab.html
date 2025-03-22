@@ -45,28 +45,30 @@
                       </svg>
                     </button>
 
-                    <a
-                      href="{% url 'contracts:contracts-interesteds-update' contract.id interested.id %}"
-                      class="
-                        ml-4
-                        px-3
-                        py-2
-                        text-sm
-                        font-medium
-                        text-center
-                        inline-flex
-                        items-center
-                        text-white
-                        rounded-lg
-                        focus:ring-4
-                        focus:outline-none
-                        bg-blue-600
-                        hover:bg-blue-700
-                        focus:ring-blue-800
-                      "
-                    >
-                      Editar
-                    </a>
+                    {% if not user.is_committee_member %}
+                      <a
+                        href="{% url 'contracts:contracts-interesteds-update' contract.id interested.id %}"
+                        class="
+                          ml-4
+                          px-3
+                          py-2
+                          text-sm
+                          font-medium
+                          text-center
+                          inline-flex
+                          items-center
+                          text-white
+                          rounded-lg
+                          focus:ring-4
+                          focus:outline-none
+                          bg-blue-600
+                          hover:bg-blue-700
+                          focus:ring-blue-800
+                        "
+                      >
+                        Editar
+                      </a>
+                    {% endif %}
                   </td>
 
                   <td class="px-6 py-4 text-sm text-black text-left">

@@ -502,6 +502,8 @@ class ContractAddendum(BaseOrganizationTenantModel):
 
 
 class ContractGoal(BaseOrganizationTenantModel):
+    """Model representing a goal within a contract with its specifications."""
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -555,6 +557,8 @@ class ContractGoal(BaseOrganizationTenantModel):
 
 
 class ContractGoalReview(BaseOrganizationTenantModel):
+    """Model representing a review/comment on a contract goal."""
+
     goal = models.ForeignKey(
         ContractGoal,
         verbose_name="Meta",
@@ -578,6 +582,8 @@ class ContractGoalReview(BaseOrganizationTenantModel):
 
 
 class ContractStep(BaseOrganizationTenantModel):
+    """Model representing a step within a contract goal."""
+
     goal = models.ForeignKey(
         ContractGoal, related_name="steps", on_delete=models.CASCADE
     )
@@ -602,7 +608,7 @@ class ContractStep(BaseOrganizationTenantModel):
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return f"Etapa: {self.name} | Meta: {self.goal.name}"
+        return str(f"Etapa: {self.name} | Meta: {self.goal.name}")
 
     class Meta:
         verbose_name = "Etapa"

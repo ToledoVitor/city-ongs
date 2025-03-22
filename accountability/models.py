@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -7,6 +8,7 @@ from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from contracts.models import Contract, ContractItem
 from utils.choices import MonthChoices, StatusChoices
+from utils.validators import validate_cpf_cnpj
 
 
 class Accountability(BaseOrganizationTenantModel):
@@ -142,6 +144,8 @@ class AccountabilityFile(BaseOrganizationTenantModel):
 
 
 class Favored(BaseOrganizationTenantModel):
+    """Model representing a person or entity that receives payments or benefits."""
+
     name = models.CharField(
         verbose_name="Nome",
         max_length=128,
@@ -150,21 +154,37 @@ class Favored(BaseOrganizationTenantModel):
         verbose_name="CPF/CNPJ",
         null=True,
         blank=True,
+        validators=[validate_cpf_cnpj],
+        help_text="CPF ou CNPJ do favorecido",
     )
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return str(self.name)
+
+    def clean(self):
+        """Validate the favored data."""
+        if self.document:
+            # Check if document is unique within the organization
+            existing = Favored.objects.filter(
+                document=self.document, organization=self.organization
+            ).exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(
+                    "Já existe um favorecido com este documento nesta organização"
+                )
 
     def save(self, *args, **kwargs):
+        """Save the favored after validation."""
+        self.clean()
         if self.document is not None:
             string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
-
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Favorecido"
         verbose_name_plural = "Favorecidos"
+        unique_together = [("organization", "document")]
 
 
 class ResourceSource(BaseOrganizationTenantModel):
@@ -187,11 +207,16 @@ class ResourceSource(BaseOrganizationTenantModel):
         TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
         PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
 
-    name = models.CharField(verbose_name="Nome da fonte", max_length=64)
-    document = models.IntegerField(
-        verbose_name="CPF/CNPJ da fonte",
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=128,
+    )
+    document = models.CharField(
+        verbose_name="CPF/CNPJ",
         null=True,
         blank=True,
+        validators=[validate_cpf_cnpj],
+        help_text="CPF ou CNPJ da fonte de recursos",
     )
     contract_number = models.CharField(
         verbose_name="Número do contrato",
@@ -201,9 +226,9 @@ class ResourceSource(BaseOrganizationTenantModel):
     )
 
     origin = models.CharField(
-        verbose_name="Origem da Fonte",
+        verbose_name="Origem",
         choices=OriginChoices,
-        default=OriginChoices.FEDERAL,
+        default=OriginChoices.MUNICIPAL,
         max_length=19,
     )
     category = models.CharField(
@@ -213,13 +238,33 @@ class ResourceSource(BaseOrganizationTenantModel):
         max_length=23,
     )
 
-    class Meta:
-        verbose_name = "Fonte de Recurso"
-        verbose_name_plural = "Fonte de Recursos"
-        unique_together = ("organization", "name")
-
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
+
+    def clean(self):
+        """Validate the resource source data."""
+        if self.document:
+            # Check if document is unique within the organization
+            existing = ResourceSource.objects.filter(
+                document=self.document, organization=self.organization
+            ).exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(
+                    "Já existe uma fonte com este documento nesta organização"
+                )
+
+    def save(self, *args, **kwargs):
+        """Save the resource source after validation."""
+        self.clean()
+        if self.document is not None:
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
+            self.document = str(string_doc)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Fonte de Recursos"
+        verbose_name_plural = "Fontes de Recursos"
+        unique_together = [("organization", "document")]
 
     @property
     def origin_label(self) -> str:
@@ -228,13 +273,6 @@ class ResourceSource(BaseOrganizationTenantModel):
     @property
     def category_label(self) -> str:
         return ResourceSource.CategoryChoices(self.category).label
-
-    def save(self, *args, **kwargs):
-        if self.document is not None:
-            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
-            self.document = int(string_doc)
-
-        super().save(*args, **kwargs)
 
 
 class Expense(BaseOrganizationTenantModel):
@@ -454,6 +492,8 @@ class ExpenseAnalysis(BaseOrganizationTenantModel):
 
 
 class Revenue(BaseOrganizationTenantModel):
+    """Model representing revenue entries in the system."""
+
     class RevenueSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida"

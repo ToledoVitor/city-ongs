@@ -6,7 +6,11 @@ from django.conf import settings
 from fpdf import XPos, YPos
 
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import document_mask, format_into_brazilian_currency, format_into_brazilian_date
+from utils.formats import (
+    document_mask,
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
@@ -341,13 +345,13 @@ class PassOn11PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: Comitê",
+            text="Nome: Comitê",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: Comitê",
+            text="Cargo: Comitê",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)

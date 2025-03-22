@@ -47,7 +47,11 @@ from contracts.models import (
     ContractMonthTransfer,
 )
 from utils.choices import StatusChoices
-from utils.mixins import AdminRequiredMixin
+from utils.mixins import (
+    AdminRequiredMixin,
+    CommitteeMemberCreateMixin,
+    CommitteeMemberUpdateMixin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +90,7 @@ class ContractsListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ContractCreateView(AdminRequiredMixin, TemplateView):
+class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, TemplateView):
     template_name = "contracts/create.html"
     login_url = "/auth/login"
 
@@ -703,7 +707,9 @@ def create_execution_activity_view(request, pk):
         )
 
 
-class ContractExecutionActivityUpdateView(LoginRequiredMixin, UpdateView):
+class ContractExecutionActivityUpdateView(
+    CommitteeMemberUpdateMixin, LoginRequiredMixin, UpdateView
+):
     model = ContractExecutionActivity
     form_class = ContractExecutionActivityForm
     template_name = "contracts/execution/activity-detail.html"

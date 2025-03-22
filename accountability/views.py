@@ -38,6 +38,7 @@ from accountability.models import (
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
 from contracts.models import Contract
+from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,9 @@ class ResourceSourceListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
+class ResourceSourceCreateView(
+    CommitteeMemberCreateMixin, LoginRequiredMixin, TemplateView
+):
     template_name = "accountability/sources/create.html"
     login_url = "/auth/login"
 
@@ -115,7 +118,6 @@ class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO: should check any user access?
         form = ResourceSourceForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
@@ -136,7 +138,9 @@ class ResourceSourceCreateView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class ResourceSourceUpdateView(LoginRequiredMixin, UpdateView):
+class ResourceSourceUpdateView(
+    CommitteeMemberUpdateMixin, LoginRequiredMixin, UpdateView
+):
     model = ResourceSource
     form_class = ResourceSourceForm
     template_name = "accountability/sources/create.html"
@@ -699,7 +703,7 @@ class FavoredListView(LoginRequiredMixin, ListView):
         return context
 
 
-class FavoredCreateView(LoginRequiredMixin, TemplateView):
+class FavoredCreateView(CommitteeMemberCreateMixin, LoginRequiredMixin, TemplateView):
     template_name = "accountability/favoreds/create.html"
     login_url = "/auth/login"
 
@@ -711,7 +715,6 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO: should check any user access?
         form = FavoredForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
@@ -732,7 +735,7 @@ class FavoredCreateView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class FavoredUpdateView(LoginRequiredMixin, UpdateView):
+class FavoredUpdateView(CommitteeMemberUpdateMixin, LoginRequiredMixin, UpdateView):
     model = Favored
     form_class = FavoredForm
     template_name = "accountability/favoreds/create.html"
