@@ -73,7 +73,13 @@ class BankAccount(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Conta Bancária"
         verbose_name_plural = "Contas Bancárias"
-        unique_together = ("organization", "bank_name", "account", "account_type")
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("organization", "bank_name", "account", "account_type"),
+                name="unique_bank_account_per_organization",
+            ),
+        ]
         indexes = [
             models.Index(fields=["bank_name", "account"]),
             models.Index(fields=["account_type"]),

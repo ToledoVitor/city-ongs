@@ -61,7 +61,13 @@ class CityHall(BaseModel):
     class Meta:
         verbose_name = "Prefeitura"
         verbose_name_plural = "Prefeituras"
-        unique_together = [("document")]
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("document",),
+                name="unique_cityhall_document",
+            ),
+        ]
 
 
 class Organization(BaseModel):
@@ -125,7 +131,13 @@ class Organization(BaseModel):
     class Meta:
         verbose_name = "Organização"
         verbose_name_plural = "Organizações"
-        unique_together = [("city_hall", "document")]
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("city_hall", "document"),
+                name="unique_organization_document_per_cityhall",
+            ),
+        ]
 
 
 class OrganizationTenantBaseClass(BaseModel, TenantAwareAbstract):
@@ -196,19 +208,18 @@ class Area(BaseModel):
 class User(AbstractUser):
     class AccessChoices(models.TextChoices):
         MASTER = "MASTER", "master"
-        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"  # administrador
-        FOLDER_MANAGER = (
-            "FOLDER_MANAGER",
-            "Gestor da pasta",
-        )  # Gestor da pasta / Proprietáio da Pasta
+        CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"
+        FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta"
         ORGANIZATION_ACCOUNTANT = (
             "ORGANIZATION_ACCOUNTANT",
             "Contador / funcionário da organização",
-        )  # usuário final
-        COMMITTEE_MEMBER = (
-            "COMMITTEE_MEMBER",
-            "Membro do comitê",
-        )  # membro do comitê
+        )
+        COMMITTEE_MEMBER = "COMMITTEE_MEMBER", "Membro do comitê"
+
+    class ReviewStatus(models.TextChoices):
+        PENDING = "PENDING", "Pendente"
+        APPROVED = "APPROVED", "Aprovado"
+        REJECTED = "REJECTED", "Rejeitado"
 
     username = models.CharField(
         max_length=150,
@@ -235,10 +246,10 @@ class User(AbstractUser):
     )  # type: PhoneNumberField
 
     password_expires_at = models.DateTimeField(
+        verbose_name="Data de Expiração da Senha",
         null=True,
-        default=None,
         blank=True,
-        help_text="Data em que a senha do usuário irá expirar. Se None, a senha nunca expira.",
+        help_text="Data em que a senha do usuário expira",
     )
     password_redefined = models.BooleanField(
         verbose_name="Senha Redefinida",

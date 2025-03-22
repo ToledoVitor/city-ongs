@@ -184,7 +184,13 @@ class Favored(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Favorecido"
         verbose_name_plural = "Favorecidos"
-        unique_together = [("organization", "document")]
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("organization", "document"),
+                name="unique_favored_document_per_organization",
+            ),
+        ]
 
 
 class ResourceSource(BaseOrganizationTenantModel):
@@ -264,7 +270,13 @@ class ResourceSource(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Fonte de Recursos"
         verbose_name_plural = "Fontes de Recursos"
-        unique_together = [("organization", "document")]
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("organization", "document"),
+                name="unique_resource_source_document_per_organization",
+            ),
+        ]
 
     @property
     def origin_label(self) -> str:

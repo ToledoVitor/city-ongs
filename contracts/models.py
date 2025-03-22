@@ -896,7 +896,13 @@ class ContractExecutionActivity(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Atividade Executada"
         verbose_name_plural = "Atividades Executadas"
-        unique_together = ("execution", "step", "name")
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("execution", "step", "name"),
+                name="unique_activity_per_execution_step",
+            ),
+        ]
 
 
 class ContractExecutionFile(BaseOrganizationTenantModel):
