@@ -293,19 +293,19 @@ class PassOn13PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.supervision_autority.get_full_name()}",
+            text=f"Nome: {self.contract.contractor_manager.name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.supervision_autority.position}",
+            text=f"Cargo: {self.contract.contractor_manager.name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.supervision_autority.cpf)),
+            text=document_mask(str(self.contract.contractor_manager.cnpj)),
             h=self.default_cell_height,
         )
         self.pdf.ln(5)
