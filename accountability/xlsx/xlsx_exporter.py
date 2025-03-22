@@ -4,8 +4,9 @@ from io import BytesIO
 import xlsxwriter
 
 from accountability.models import Accountability, Expense, Revenue
+from accounts.models import Organization
 from contracts.choices import NatureChoices
-from contracts.models import Contract, Organization
+from contracts.models import Contract
 
 
 class AccountabilityXLSXExporter:

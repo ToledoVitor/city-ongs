@@ -1,16 +1,15 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Organization, User
+from accounts.models import BaseOrganizationTenantModel, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from contracts.models import Contract, ContractItem
 from utils.choices import MonthChoices, StatusChoices
-from utils.models import BaseModel
 
 
-class Accountability(BaseModel):
+class Accountability(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em Andamento"
         SENT = "SENT", "Enviada para análise"
@@ -104,7 +103,7 @@ class Accountability(BaseModel):
         unique_together = ("contract", "month", "year")
 
 
-class AccountabilityFile(BaseModel):
+class AccountabilityFile(BaseOrganizationTenantModel):
     accountability = models.ForeignKey(
         Accountability,
         verbose_name="Prestação",
@@ -142,13 +141,7 @@ class AccountabilityFile(BaseModel):
         verbose_name_plural = "Arquivo de Prestações"
 
 
-class Favored(BaseModel):
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="Organização",
-        related_name="favoreds",
-        on_delete=models.CASCADE,
-    )
+class Favored(BaseOrganizationTenantModel):
     name = models.CharField(
         verbose_name="Nome",
         max_length=128,
@@ -174,7 +167,7 @@ class Favored(BaseModel):
         verbose_name_plural = "Favorecidos"
 
 
-class ResourceSource(BaseModel):
+class ResourceSource(BaseOrganizationTenantModel):
     class OriginChoices(models.TextChoices):
         FEDERAL = "FEDERAL", "Federal"
         STATE = "STATE", "Estadual"
@@ -193,13 +186,6 @@ class ResourceSource(BaseModel):
         MANAGEMENT_AGREEMENT = "MANAGEMENT_AGREEMENT", "Contrato de Gestão"
         TRANSFER_AGREEMENT = "TRANSFER_AGREEMENT", "Contrato de Repasse"
         PARTNERSHIP_AGREEMENT = "PARTNERSHIP_AGREEMENT", "Termo de Parceria"
-
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="Organização",
-        related_name="resource_sources",
-        on_delete=models.CASCADE,
-    )
 
     name = models.CharField(verbose_name="Nome da fonte", max_length=64)
     document = models.IntegerField(
@@ -251,7 +237,7 @@ class ResourceSource(BaseModel):
         super().save(*args, **kwargs)
 
 
-class Expense(BaseModel):
+class Expense(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         IN_ANALISIS = "IN_ANALISIS", "Em Análise"
         REJECTED = "REJECTED", "Rejeitada"
@@ -434,7 +420,7 @@ class Expense(BaseModel):
 
 
 # TODO: drop model??
-class ExpenseAnalysis(BaseModel):
+class ExpenseAnalysis(BaseOrganizationTenantModel):
     status = models.CharField(
         verbose_name="Status",
         choices=StatusChoices,
@@ -467,7 +453,7 @@ class ExpenseAnalysis(BaseModel):
         verbose_name_plural = "Análise de Despesas"
 
 
-class Revenue(BaseModel):
+class Revenue(BaseOrganizationTenantModel):
     class RevenueSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida"
@@ -594,7 +580,7 @@ class Revenue(BaseModel):
         verbose_name_plural = "Receitas"
 
 
-class ExpenseFile(BaseModel):
+class ExpenseFile(BaseOrganizationTenantModel):
     expense = models.ForeignKey(
         Expense,
         verbose_name="Despesa",
@@ -634,7 +620,7 @@ class ExpenseFile(BaseModel):
         verbose_name_plural = "Arquivo de Despesas"
 
 
-class RevenueFile(BaseModel):
+class RevenueFile(BaseOrganizationTenantModel):
     revenue = models.ForeignKey(
         Revenue,
         verbose_name="Recurso",

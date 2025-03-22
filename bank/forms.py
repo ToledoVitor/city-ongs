@@ -142,6 +142,7 @@ class UpdateBankStatementForm(forms.ModelForm):
 TransactionFormSet = forms.inlineformset_factory(
     BankAccount,
     Transaction,
+    fk_name="bank_account",
     form=TransactionForm,
     extra=1,
     can_delete=True,

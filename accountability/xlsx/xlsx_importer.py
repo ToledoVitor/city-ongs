@@ -14,8 +14,8 @@ from django.db.models import Sum
 
 from accountability.models import Accountability, Expense, Favored, Revenue
 from bank.models import Transaction
-from contracts.models import ContractItem
 from contracts.choices import NatureChoices
+from contracts.models import ContractItem
 
 
 class AccountabilityXLSXImporter:
@@ -28,9 +28,7 @@ class AccountabilityXLSXImporter:
             xls = pd.ExcelFile(self.file)
             revenues_df = pd.read_excel(xls, sheet_name="1. RECEITAS")
             expenses_df = pd.read_excel(xls, sheet_name="2. DESPESAS")
-            applications_df = pd.read_excel(
-                xls, sheet_name="3. APLICACOES E RESGATES"
-            )
+            applications_df = pd.read_excel(xls, sheet_name="3. APLICACOES E RESGATES")
         except ValueError:
             raise ValueError("Excel sheets are not in the right format")
 
@@ -194,7 +192,9 @@ class AccountabilityXLSXImporter:
             item_id = self.mapped_ias.get(line[9], None)
 
             if planned and not item_id:
-                errors.append(f"Despesa {line[0]}: Despesa planejada precisa ter um item associado.")
+                errors.append(
+                    f"Despesa {line[0]}: Despesa planejada precisa ter um item associado."
+                )
                 continue
 
             expense = Expense(
@@ -217,7 +217,7 @@ class AccountabilityXLSXImporter:
                 expense.full_clean()
                 expenses.append(expense)
                 if planned:
-                    new_expense_per_item.setdefault(item_id, Decimal('0.00'))
+                    new_expense_per_item.setdefault(item_id, Decimal("0.00"))
                     new_expense_per_item[item_id] += expense.value
             except ValidationError as e:
                 errors.append(f"Despesa {line[0]}: {" ".join(e.messages)}")

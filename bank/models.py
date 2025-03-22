@@ -3,12 +3,12 @@ from decimal import Decimal
 from django.db import models
 from simple_history.models import HistoricalRecords
 
+from accounts.models import BaseOrganizationTenantModel
 from activity.models import ActivityLog
 from utils.choices import MonthChoices
-from utils.models import BaseModel
 
 
-class BankAccount(BaseModel):
+class BankAccount(BaseOrganizationTenantModel):
     class OriginChoices(models.TextChoices):
         MUNICIPAL = "MUNICIPAL", "Municipal"
         FEDERAL = "FEDERAL", "Federal"
@@ -101,7 +101,7 @@ class BankAccount(BaseModel):
         return None
 
 
-class BankStatement(BaseModel):
+class BankStatement(BaseOrganizationTenantModel):
     bank_account = models.ForeignKey(
         BankAccount,
         verbose_name="Conta Bancária",
@@ -146,7 +146,7 @@ class BankStatement(BaseModel):
         return MonthChoices(self.reference_month).label.capitalize()
 
 
-class Transaction(BaseModel):
+class Transaction(BaseOrganizationTenantModel):
     class TransactionTypeChoices(models.TextChoices):
         DEBIT = "DEBIT", "débito"
         CREDIT = "CREDIT", "crédito"

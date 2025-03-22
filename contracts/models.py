@@ -8,15 +8,14 @@ from django_cpf_cnpj.fields import CNPJField
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Area, Organization, User
+from accounts.models import Area, BaseOrganizationTenantModel, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from utils.choices import MonthChoices, StatesChoices, StatusChoices
-from utils.models import BaseModel
 
 
-class Company(BaseModel):
+class Company(BaseOrganizationTenantModel):
     # Info
     name = models.CharField(verbose_name="Nome", max_length=128)
     cnpj = CNPJField(masked=True)
@@ -68,12 +67,6 @@ class Company(BaseModel):
         blank=True,
     )
 
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="Organização",
-        related_name="companies",
-        on_delete=models.CASCADE,
-    )
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -110,7 +103,7 @@ class Company(BaseModel):
         verbose_name_plural = "Empresas"
 
 
-class Contract(BaseModel):
+class Contract(BaseOrganizationTenantModel):
     class ContractStatusChoices(models.TextChoices):
         PLANNING = "PLANNING", "planejamento"
         EXECUTION = "EXECUTION", "em execução"
@@ -243,13 +236,6 @@ class Contract(BaseModel):
         related_name="hired_manager_contracts",
         on_delete=models.CASCADE,
         null=True,
-    )
-
-    organization = models.ForeignKey(
-        Organization,
-        verbose_name="Organização",
-        related_name="contracts",
-        on_delete=models.CASCADE,
     )
 
     # Link with city hall area
@@ -393,7 +379,7 @@ class Contract(BaseModel):
         super().save(*args, **kwargs)
 
 
-class ContractInterestedPart(BaseModel):
+class ContractInterestedPart(BaseOrganizationTenantModel):
     class InterestLevel(models.TextChoices):
         PROJECT_MANAGER = "PROJECT_MANAGER", "Gestor de Projeto"
         FINANCIAL_MANAGER = "FINANCIAL_MANAGER", "Gestor Financeiro"
@@ -433,7 +419,7 @@ class ContractInterestedPart(BaseModel):
         verbose_name = "Partes Interessadas"
 
 
-class ContractMonthTransfer(BaseModel):
+class ContractMonthTransfer(BaseOrganizationTenantModel):
     class TransferSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida"
@@ -469,7 +455,7 @@ class ContractMonthTransfer(BaseModel):
         verbose_name_plural = "Repasses Mensais"
 
 
-class ContractAddendum(BaseModel):
+class ContractAddendum(BaseOrganizationTenantModel):
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -500,7 +486,6 @@ class ContractAddendum(BaseModel):
         max_digits=12,
         default=Decimal("0.00"),
     )
-
     history = HistoricalRecords()
 
     class Meta:
@@ -508,7 +493,7 @@ class ContractAddendum(BaseModel):
         verbose_name_plural = "Aditivos de Contrato"
 
 
-class ContractGoal(BaseModel):
+class ContractGoal(BaseOrganizationTenantModel):
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -561,7 +546,7 @@ class ContractGoal(BaseModel):
         verbose_name_plural = "Metas"
 
 
-class ContractGoalReview(BaseModel):
+class ContractGoalReview(BaseOrganizationTenantModel):
     goal = models.ForeignKey(
         ContractGoal,
         verbose_name="Meta",
@@ -584,7 +569,7 @@ class ContractGoalReview(BaseModel):
         verbose_name_plural = "Revisões de Metas"
 
 
-class ContractStep(BaseModel):
+class ContractStep(BaseOrganizationTenantModel):
     goal = models.ForeignKey(
         ContractGoal, related_name="steps", on_delete=models.CASCADE
     )
@@ -616,7 +601,7 @@ class ContractStep(BaseModel):
         verbose_name_plural = "Etapas"
 
 
-class ContractItem(BaseModel):
+class ContractItem(BaseOrganizationTenantModel):
     class ResourceSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
@@ -753,7 +738,7 @@ class ContractItem(BaseModel):
         ordering = ("-month_expense",)
 
 
-class ContractItemReview(BaseModel):
+class ContractItemReview(BaseOrganizationTenantModel):
     item = models.ForeignKey(
         ContractItem,
         verbose_name="Item",
@@ -776,7 +761,7 @@ class ContractItemReview(BaseModel):
         verbose_name_plural = "Revisões de Itens"
 
 
-class ContractExecution(BaseModel):
+class ContractExecution(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em Andamento"
         SENT = "SENT", "Enviada para análise"
@@ -856,7 +841,7 @@ class ContractExecution(BaseModel):
         return combined_querset.order_by("-created_at")[:10]
 
 
-class ContractExecutionActivity(BaseModel):
+class ContractExecutionActivity(BaseOrganizationTenantModel):
     execution = models.ForeignKey(
         ContractExecution,
         verbose_name="Relatório de Execução",
@@ -900,7 +885,7 @@ class ContractExecutionActivity(BaseModel):
         unique_together = ("execution", "step", "name")
 
 
-class ContractExecutionFile(BaseModel):
+class ContractExecutionFile(BaseOrganizationTenantModel):
     execution = models.ForeignKey(
         # TODO: remove null
         ContractExecution,
@@ -935,7 +920,7 @@ class ContractExecutionFile(BaseModel):
         return os.path.splitext(self.file.name)[1]
 
 
-class ContractItemNewValueRequest(BaseModel):
+class ContractItemNewValueRequest(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         IN_REVIEW = "IN_REVIEW", "Em revisão"
         REJECTED = "REJECTED", "Rejeitado"

@@ -54,7 +54,7 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.select_related(
             "contract",
-        ).filter(contract__organization=self.request.user.organization)
+        ).filter(contract__organization__area__in=self.request.user.areas.all())
 
         query = self.request.GET.get("q")
         if query:
@@ -416,7 +416,9 @@ def update_accountability_revenue_view(request, pk):
         )
 
     if request.method == "POST":
-        form = RevenueForm(request.POST, instance=revenue, accountability=revenue.accountability)
+        form = RevenueForm(
+            request.POST, instance=revenue, accountability=revenue.accountability
+        )
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save()
@@ -1360,12 +1362,16 @@ def reconcile_revenue_view(request, pk):
 @login_required
 def accountability_pendencies_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
-    expenses = Expense.objects.filter(
-        accountability=accountability,
-        pendencies__isnull=False,
-    ).exclude(
-        pendencies="",
-    ).select_related("favored")
+    expenses = (
+        Expense.objects.filter(
+            accountability=accountability,
+            pendencies__isnull=False,
+        )
+        .exclude(
+            pendencies="",
+        )
+        .select_related("favored")
+    )
     revenues = Revenue.objects.filter(
         accountability=accountability,
         pendencies__isnull=False,

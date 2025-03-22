@@ -21,7 +21,7 @@ class PassOn4PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
@@ -29,7 +29,7 @@ class PassOn4PDFExporter:
         pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
         pdf.set_font("FreeSans", "", 8)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
@@ -46,8 +46,8 @@ class PassOn4PDFExporter:
             self.pdf.set_fill_color(255, 255, 255)
 
     def __database_queries(self):
-        self.checking_account = self.accountability.contract.checking_account
-        self.investing_account = self.accountability.contract.investing_account
+        self.checking_account = self.contract.checking_account
+        self.investing_account = self.contract.investing_account
 
         self.revenue_queryset = Revenue.objects.filter(
             Q(bank_account=self.checking_account)
@@ -91,8 +91,8 @@ class PassOn4PDFExporter:
 
     def _draw_informations(self):
         self.__set_font(font_size=8, bold=False)
-        start = self.accountability.contract.start_of_vigency
-        end = self.accountability.contract.end_of_vigency
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
             text=f"**VALORES REPASSADOS DURANTE O EXERCÍCIO DE:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
             markdown=True,
@@ -100,7 +100,7 @@ class PassOn4PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ÓRGÃO CONCESSOR:** {self.accountability.contract.organization.name}",
+            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -114,7 +114,7 @@ class PassOn4PDFExporter:
 
     def _draw_manager_table(self):
         manager_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.MANAGEMENT  # Não é Revenue
         )
@@ -132,8 +132,8 @@ class PassOn4PDFExporter:
             "**Fonte:**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in manager_queryset:
@@ -198,7 +198,7 @@ class PassOn4PDFExporter:
 
     def _draw_partner_table(self):
         partner_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.PARTNERSHIP
         )
@@ -216,8 +216,8 @@ class PassOn4PDFExporter:
             "**Fonte**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in partner_queryset:
@@ -282,7 +282,7 @@ class PassOn4PDFExporter:
 
     def _draw_collaborator_table(self):
         collaborator_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.COLLABORATION
         )
@@ -300,8 +300,8 @@ class PassOn4PDFExporter:
             "**Fonte**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in collaborator_queryset:
@@ -366,7 +366,7 @@ class PassOn4PDFExporter:
 
     def _draw_promotion_table(self):
         promotion_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.DEVELOPMENTO
         )
@@ -384,8 +384,8 @@ class PassOn4PDFExporter:
             "**Fonte**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in promotion_queryset:
@@ -450,7 +450,7 @@ class PassOn4PDFExporter:
 
     def _draw_agreement_table(self):
         agreement_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.AGREEMENT
         )
@@ -468,8 +468,8 @@ class PassOn4PDFExporter:
             "**Fonte**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in agreement_queryset:
@@ -534,7 +534,7 @@ class PassOn4PDFExporter:
 
     def _draw_concession_table(self):
         concession_queryset = self.revenue_queryset.filter(
-            Q(receive_date__gte=self.start_date) | Q(receive_date__lte=self.end_date)
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.GRANT
         )
@@ -559,8 +559,8 @@ class PassOn4PDFExporter:
             "**Fonte**",
             "**Valor Repassado no Exercício**",
         ]
-        hired_company = self.accountability.contract.hired_company
-        contract = self.accountability.contract
+        hired_company = self.contract.hired_company
+        contract = self.contract
         table_data = []
         total_revenue_value = Decimal("0.00")
         for revenue in concession_queryset:

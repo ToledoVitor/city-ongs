@@ -19,6 +19,7 @@ from utils.formats import (
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf")
 
 
 @dataclass
@@ -26,15 +27,16 @@ class PassOn2PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, accountability, start_date, end_date):
+    def __init__(self, contract, start_date, end_date):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
         pdf.add_font("FreeSans", "", font_path, uni=True)
         pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
+        # pdf.add_font("FreeSans", "I", font_italic_path, uni=True)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
-        self.accountability = accountability
+        self.contract = contract
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
 
@@ -45,8 +47,8 @@ class PassOn2PDFExporter:
             self.pdf.set_font("FreeSans", "", font_size)
 
     def __database_queries(self):
-        self.checking_account = self.accountability.contract.checking_account
-        self.investing_account = self.accountability.contract.investing_account
+        self.checking_account = self.contract.checking_account
+        self.investing_account = self.contract.investing_account
 
         self.statement_queryset = (
             BankStatement.objects.filter(
@@ -75,7 +77,7 @@ class PassOn2PDFExporter:
         )
 
         self.expense_queryset = Expense.objects.filter(
-            accountability__contract=self.accountability.contract,
+            contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
@@ -114,7 +116,7 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             self.default_cell_height,
-            text=f"**ÓRGÃO CONCESSOR:** {self.accountability.contract.organization.city_hall.name}",
+            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
@@ -123,16 +125,16 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             self.default_cell_height,
-            f"**TIPO DE CONCESSÃO (1):** {self.accountability.contract.get_concession_type_display()}",
+            f"**TIPO DE CONCESSÃO (1):** {self.contract.get_concession_type_display()}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        if self.accountability.contract.law_num:
-            law_or_agreement = str(self.accountability.contract.law_num)
+        if self.contract.law_num:
+            law_or_agreement = str(self.contract.law_num)
         else:
-            law_or_agreement = str(self.accountability.contract.agreement_num)
+            law_or_agreement = str(self.contract.agreement_num)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -145,14 +147,14 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             self.default_cell_height,
-            text=f"**OBJETO DA PARCERIA:** {self.accountability.contract.objective}",
+            text=f"**OBJETO DA PARCERIA:** {self.contract.objective}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        start = self.accountability.contract.start_of_vigency
-        end = self.accountability.contract.end_of_vigency
+        start = self.contract.start_of_vigency
+        end = self.contract.end_of_vigency
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -165,13 +167,13 @@ class PassOn2PDFExporter:
         self.pdf.cell(
             0,
             self.default_cell_height,
-            text=f"**ÓRGÃO BENEFICIÁRIO:** {self.accountability.contract.organization.name}",
+            text=f"**ÓRGÃO BENEFICIÁRIO:** {self.contract.organization.name}",
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        hired_company = self.accountability.contract.hired_company
+        hired_company = self.contract.hired_company
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -206,7 +208,7 @@ class PassOn2PDFExporter:
                 "",
                 "",
                 " ",
-                f"Nome: {self.accountability.contract.accountability_autority.get_full_name()}",
+                f"Nome: {self.contract.accountability_autority.get_full_name()}",
             ]
         )
         (
@@ -215,7 +217,7 @@ class PassOn2PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.accountability.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
                 ]
             ),
         )
@@ -224,7 +226,7 @@ class PassOn2PDFExporter:
                 "",
                 "",
                 " ",
-                f"{document_mask(str(self.accountability.contract.supervision_autority.cpf))}",
+                f"{document_mask(str(self.contract.supervision_autority.cpf))}",
             ]
         )
 
@@ -283,7 +285,7 @@ class PassOn2PDFExporter:
         )
         self.revenue_total = Decimal("0.00")
 
-        contract = self.accountability.contract
+        contract = self.contract
         table_data = [
             ["", format_into_brazilian_currency(contract.total_value)],
             [
@@ -515,7 +517,7 @@ class PassOn2PDFExporter:
 
     def _draw_observation(self):
         self.__set_font(font_size=8, bold=True)
-        contractor_company = self.accountability.contract.contractor_company
+        contractor_company = self.contract.contractor_company
         self.pdf.cell(
             0,
             0,
