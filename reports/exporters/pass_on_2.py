@@ -20,6 +20,7 @@ from utils.formats import (
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 font_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf")
+font_bold_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBoldOblique.ttf")
 
 
 @dataclass
@@ -33,7 +34,8 @@ class PassOn2PDFExporter:
         pdf.set_margins(10, 15, 10)
         pdf.add_font("FreeSans", "", font_path, uni=True)
         pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        # pdf.add_font("FreeSans", "I", font_italic_path, uni=True)
+        pdf.add_font("FreeSans", "I", font_italic_path, uni=True)
+        pdf.add_font("FreeSans", "BI", font_bold_italic_path, uni=True)
         pdf.set_fill_color(233, 234, 236)
         self.pdf = pdf
         self.contract = contract
@@ -77,7 +79,7 @@ class PassOn2PDFExporter:
         )
 
         self.expense_queryset = Expense.objects.filter(
-            contract=self.contract,
+            accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
