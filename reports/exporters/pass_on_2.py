@@ -20,7 +20,9 @@ from utils.formats import (
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 font_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf")
-font_bold_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBoldOblique.ttf")
+font_bold_italic_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBoldOblique.ttf"
+)
 
 
 @dataclass

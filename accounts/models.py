@@ -262,3 +262,17 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{self.get_full_name()} -  {self.email}"
+
+
+class Committee(OrganizationTenantBaseClass):
+    name = models.CharField(verbose_name="Nome do Comitê", max_length=128)
+    city_hall = models.ForeignKey(
+        CityHall,
+        verbose_name="Prefeitura",
+        related_name="committees",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = "Comitê"
+        verbose_name_plural = "Comitês"

@@ -8,7 +8,7 @@ from django_cpf_cnpj.fields import CNPJField
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
-from accounts.models import Area, BaseOrganizationTenantModel, User
+from accounts.models import Area, BaseOrganizationTenantModel, Committee, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
@@ -244,6 +244,14 @@ class Contract(BaseOrganizationTenantModel):
         verbose_name="Area",
         related_name="contracts",
         on_delete=models.CASCADE,
+    )
+    committee = models.ForeignKey(
+        Committee,
+        verbose_name="Comitê",
+        related_name="contracts",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     # bank accounts
