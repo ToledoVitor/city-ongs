@@ -88,11 +88,17 @@ class Area(BaseModel):
         related_name="areas",
         on_delete=models.CASCADE,
     )
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name="Organização",
+        related_name="areas",
+        on_delete=models.CASCADE,
+    )
 
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} | {self.organization.name}"
 
     class Meta:
         verbose_name = "Area"

@@ -217,6 +217,5 @@ def export_report(
 
         case "consolidated":
             return export_consolidated(contract, start_date, end_date)
-
         case _:
             raise ValueError(f"Report model {report_model} is not a valid option")
