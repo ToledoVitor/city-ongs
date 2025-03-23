@@ -33,6 +33,7 @@ ipython = "^9.0.2"
 phonenumbers = "^8.13.30"
 django-redis = "^5.4.0"
 redis = "^5.0.1"
+hiredis = "^3.1.0"
 
 
 [build-system]

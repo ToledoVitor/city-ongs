@@ -65,21 +65,43 @@ else:
             "LOCATION": f'redis://{os.environ.get("REDIS_HOST", "localhost")}:{os.environ.get("REDIS_PORT", "6379")}/1',
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "SOCKET_CONNECT_TIMEOUT": 5,
-                "SOCKET_TIMEOUT": 5,
+                "SOCKET_CONNECT_TIMEOUT": 2,
+                "SOCKET_TIMEOUT": 2,
                 "RETRY_ON_TIMEOUT": True,
                 "MAX_CONNECTIONS": 1000,
                 "CONNECTION_POOL_CLASS": "redis.BlockingConnectionPool",
                 "CONNECTION_POOL_CLASS_KWARGS": {
                     "max_connections": 50,
-                    "timeout": 20,
+                    "timeout": 10,
+                    "retry_on_timeout": True,
+                    "socket_keepalive": True,
+                },
+                "PARSER_CLASS": "redis.connection._HiredisParser",
+                "COMPRESSOR_CLASS": "django_redis.compressors.lzma.LzmaCompressor",
+                "COMPRESS_MIN_LEN": 100,  # Only compress values larger than 100 bytes
+                "IGNORE_EXCEPTIONS": True,
+                "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
+                "USE_REDIS_CLIENT": True,
+                "REDIS_CLIENT_KWARGS": {
+                    "decode_responses": True,
+                    "health_check_interval": 30,
                 },
             },
+            "KEY_PREFIX": "sitts",
+            "VERSION": "1",  # Cache version for bulk invalidation
+            "TIMEOUT": 300,  # 5 minutes default timeout
         }
     }
 
-    # Cache time for different types of content
-    CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutos
+    # Cache timeouts for different types of content
+    CACHE_TIMEOUTS = {
+        "STATIC": 3600,  # 1 hour for static data
+        "DYNAMIC": 300,  # 5 minutes for dynamic data
+        "VOLATILE": 60,  # 1 minute for frequently changing data
+    }
+
+    # Cache middleware settings
+    CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
     CACHE_MIDDLEWARE_KEY_PREFIX = "sitts"
 
 SECRET_KEY = env("SECRET_KEY")

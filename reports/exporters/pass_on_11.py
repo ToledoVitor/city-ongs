@@ -21,7 +21,7 @@ class PassOn11PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract, start_date, end_date):
+    def __init__(self, contract, start_date, end_date, responsibles=None):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
@@ -33,6 +33,7 @@ class PassOn11PDFExporter:
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
+        self.responsibles = responsibles
         self.government_link = (
             "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
         )
@@ -406,36 +407,72 @@ class PassOn11PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(6)
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            text="Tipo de ato sob sua responsabilidade:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            text="Nome:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.cell(
-            text="Cargo:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.cell(
-            text="CPF:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.multi_cell(
-            text="Assinatura:______________________________________",
-            w=190,
-            h=self.default_cell_height,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(10)
+
+        responsibles = getattr(self, "responsibles", [])
+        if responsibles:
+            for responsible in responsibles:
+                self.__set_font(font_size=8, bold=False)
+                self.pdf.cell(
+                    text=(
+                        "Tipo de ato sob sua responsabilidade: "
+                        f"{responsible["interest_label"]}"
+                    ),
+                    h=self.default_cell_height,
+                )
+                self.pdf.ln(6)
+                self.pdf.cell(
+                    text=f"Nome: {responsible["user"].get_full_name()}",
+                    h=self.default_cell_height,
+                )
+                self.pdf.ln(6)
+                self.pdf.cell(
+                    text=f"Cargo: {responsible["user"].position}",
+                    h=self.default_cell_height,
+                )
+                self.pdf.ln(6)
+                self.pdf.cell(
+                    text=f"Documento: {document_mask(str(responsible["user"].cpf))}",
+                    h=self.default_cell_height,
+                )
+                self.pdf.ln(6)
+                self.pdf.multi_cell(
+                    text=("Assinatura: " "______________________________________"),
+                    w=190,
+                    h=self.default_cell_height,
+                    new_x=XPos.LMARGIN,
+                    new_y=YPos.NEXT,
+                )
+                self.pdf.ln(10)
+        else:
+            self.__set_font(font_size=8, bold=False)
+            self.pdf.cell(
+                text="Tipo de ato sob sua responsabilidade:",
+                h=self.default_cell_height,
+            )
+            self.pdf.ln(6)
+            self.pdf.cell(
+                text="Nome:",
+                h=self.default_cell_height,
+            )
+            self.pdf.ln(6)
+            self.pdf.cell(
+                text="Cargo:",
+                h=self.default_cell_height,
+            )
+            self.pdf.ln(6)
+            self.pdf.cell(
+                text="CPF:",
+                h=self.default_cell_height,
+            )
+            self.pdf.ln(6)
+            self.pdf.multi_cell(
+                text=("Assinatura:" "______________________________________"),
+                w=190,
+                h=self.default_cell_height,
+                new_x=XPos.LMARGIN,
+                new_y=YPos.NEXT,
+            )
+            self.pdf.ln(10)
 
     def _draw_line(self):
         self.pdf.set_draw_color(100, 100, 100)
