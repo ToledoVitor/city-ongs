@@ -132,12 +132,8 @@ class Accountability(
                 "month_label": self.month_label,
                 "status": self.status,
                 "status_label": self.status_label,
-                "count_revenues": self.revenues.filter(
-                    deleted_at__isnull=True
-                ).count(),
-                "count_expenses": self.expenses.filter(
-                    deleted_at__isnull=True
-                ).count(),
+                "count_revenues": self.revenues.filter(deleted_at__isnull=True).count(),
+                "count_expenses": self.expenses.filter(deleted_at__isnull=True).count(),
             }
 
         # Full version for detail page
@@ -158,17 +154,13 @@ class Accountability(
         if hasattr(self, "revenues"):
             data["revenues"] = [
                 revenue.to_cacheable_dict()
-                for revenue in self.revenues.filter(deleted_at__isnull=True)[
-                    :10
-                ]
+                for revenue in self.revenues.filter(deleted_at__isnull=True)[:10]
             ]
 
         if hasattr(self, "expenses"):
             data["expenses"] = [
                 expense.to_cacheable_dict()
-                for expense in self.expenses.filter(deleted_at__isnull=True)[
-                    :10
-                ]
+                for expense in self.expenses.filter(deleted_at__isnull=True)[:10]
             ]
 
         if hasattr(self, "files"):
@@ -240,9 +232,7 @@ class AccountabilityFile(
                 "id": self.id,
                 "name": self.name,
                 "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat()
-                if self.created_at
-                else None,
+                "created_at": self.created_at.isoformat() if self.created_at else None,
                 "created_by": {
                     "id": self.created_by.id,
                     "name": self.created_by.get_full_name()
@@ -294,9 +284,7 @@ class Favored(BaseOrganizationTenantModel):
         """Save the favored after validation."""
         self.clean()
         if self.document is not None:
-            string_doc = "".join(
-                [i for i in str(self.document) if i.isdigit()]
-            )
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
         super().save(*args, **kwargs)
 
@@ -388,9 +376,7 @@ class ResourceSource(BaseOrganizationTenantModel):
         """Save the resource source after validation."""
         self.clean()
         if self.document is not None:
-            string_doc = "".join(
-                [i for i in str(self.document) if i.isdigit()]
-            )
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
         super().save(*args, **kwargs)
 
@@ -893,9 +879,7 @@ class ExpenseFile(
                 "id": self.id,
                 "name": self.name,
                 "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat()
-                if self.created_at
-                else None,
+                "created_at": self.created_at.isoformat() if self.created_at else None,
                 "created_by": {
                     "id": self.created_by.id,
                     "name": self.created_by.get_full_name()
@@ -972,9 +956,7 @@ class RevenueFile(
                 "id": self.id,
                 "name": self.name,
                 "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat()
-                if self.created_at
-                else None,
+                "created_at": self.created_at.isoformat() if self.created_at else None,
                 "created_by": {
                     "id": self.created_by.id,
                     "name": self.created_by.get_full_name()

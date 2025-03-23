@@ -45,17 +45,13 @@ class CityHall(BaseModel):
                 pk=self.pk
             )
             if existing.exists():
-                raise ValidationError(
-                    "Já existe uma prefeitura com este documento"
-                )
+                raise ValidationError("Já existe uma prefeitura com este documento")
 
     def save(self, *args, **kwargs):
         """Save the city hall after validation."""
         self.clean()
         if self.document is not None:
-            string_doc = "".join(
-                [i for i in str(self.document) if i.isdigit()]
-            )
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
         super().save(*args, **kwargs)
 
@@ -125,9 +121,7 @@ class Organization(BaseModel):
         """Save the organization after validation."""
         self.clean()
         if self.document is not None:
-            string_doc = "".join(
-                [i for i in str(self.document) if i.isdigit()]
-            )
+            string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
         super().save(*args, **kwargs)
 
@@ -330,10 +324,7 @@ class User(AbstractUser):
                 )
 
         # Validate password expiration
-        if (
-            self.password_expires_at
-            and self.password_expires_at < timezone.now()
-        ):
+        if self.password_expires_at and self.password_expires_at < timezone.now():
             raise ValidationError(
                 "A data de expiração da senha não pode estar no passado"
             )

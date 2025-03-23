@@ -147,9 +147,7 @@ def export_pass_on_14(contract: Contract, start_date: date, end_date: date):
     ).handle()
 
 
-def export_period_expenses(
-    contract: Contract, start_date: date, end_date: date
-):
+def export_period_expenses(contract: Contract, start_date: date, end_date: date):
     return PeriodEpensesPDFExporter(
         contract=contract,
         start_date=start_date,
@@ -228,16 +226,12 @@ def export_report(
             return export_period_expenses(contract, start_date, end_date)
 
         case "predicted_versus_realized":
-            return export_predicted_versus_realized(
-                contract, start_date, end_date
-            )
+            return export_predicted_versus_realized(contract, start_date, end_date)
 
         case "consolidated":
             return export_consolidated(contract, start_date, end_date)
         case _:
-            raise ValueError(
-                f"Report model {report_model} is not a valid option"
-            )
+            raise ValueError(f"Report model {report_model} is not a valid option")
 
 
 class ReportCacheService:
@@ -261,9 +255,7 @@ class ReportCacheService:
 
             stats = {
                 "total_value": contract.items.aggregate(
-                    total=Coalesce(
-                        Sum("anual_expense"), Value(Decimal("0.00"))
-                    )
+                    total=Coalesce(Sum("anual_expense"), Value(Decimal("0.00")))
                 )["total"],
                 "total_expenses": contract.accountabilities.aggregate(
                     total=Coalesce(
@@ -283,9 +275,7 @@ class ReportCacheService:
                         Value(Decimal("0.00")),
                     )
                 )["total"],
-                "pending_items": contract.items.filter(
-                    status="pending"
-                ).count(),
+                "pending_items": contract.items.filter(status="pending").count(),
             }
 
             cache.set(cache_key, stats, CACHE_TIMES["STATS"])

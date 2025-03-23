@@ -79,9 +79,7 @@ def update_bank_account_ofx_view(request, pk):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                return redirect(
-                    "bank:bank-accounts-detail", pk=bank_account.id
-                )
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
             except ValidationError:
                 return render(
                     request,
@@ -137,9 +135,7 @@ def create_bank_account_view(request, pk):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                return redirect(
-                    "bank:bank-accounts-detail", pk=bank_account.id
-                )
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
     else:
         form = BankAccountForm()
 
@@ -198,9 +194,7 @@ def update_bank_account_manual_view(request, pk):
                     target_object_id=bank_account.id,
                     target_content_object=bank_account,
                 )
-                return redirect(
-                    "bank:bank-accounts-detail", pk=bank_account.id
-                )
+                return redirect("bank:bank-accounts-detail", pk=bank_account.id)
 
     else:
         form = UpdateBankStatementForm()
@@ -216,9 +210,7 @@ def update_bank_account_manual_view(request, pk):
         )
 
 
-def _statement_already_uploaded(
-    bank_account: BankAccount, month: int, year: int
-):
+def _statement_already_uploaded(bank_account: BankAccount, month: int, year: int):
     return BankStatement.objects.filter(
         bank_account=bank_account, reference_month=month, reference_year=year
     ).exists()
@@ -238,9 +230,7 @@ def _account_type_already_created(contract: Contract, account_type: str):
 def bank_statement_view(request, pk):
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
-    status_filter = request.GET.get(
-        "status", "all"
-    )  # "all", "reconciled" ou "pending"
+    status_filter = request.GET.get("status", "all")  # "all", "reconciled" ou "pending"
 
     account = get_object_or_404(BankAccount, id=pk)
 
@@ -271,9 +261,7 @@ def bank_statement_view(request, pk):
         .annotate(total_day=Sum("amount"))
         .order_by("-date")
     )
-    daily_totals_dict = {
-        item["date"]: item["total_day"] for item in daily_totals
-    }
+    daily_totals_dict = {item["date"]: item["total_day"] for item in daily_totals}
 
     statement_days = []
     current_balance = account.balance

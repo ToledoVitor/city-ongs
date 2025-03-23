@@ -78,9 +78,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=128, verbose_name="Prefeitura"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Prefeitura"),
                 ),
                 (
                     "mayor",
@@ -176,9 +174,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "email",
-                    utils.fields.LowerCaseEmailField(
-                        max_length=254, unique=True
-                    ),
+                    utils.fields.LowerCaseEmailField(max_length=254, unique=True),
                 ),
                 ("cpf", models.CharField(max_length=16, verbose_name="Cpf")),
                 (
@@ -235,9 +231,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "areas",
-                    models.ManyToManyField(
-                        related_name="users", to="accounts.area"
-                    ),
+                    models.ManyToManyField(related_name="users", to="accounts.area"),
                 ),
             ],
             options={
@@ -370,9 +364,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=128, verbose_name="Prefeitura"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Prefeitura"),
                 ),
                 (
                     "mayor",

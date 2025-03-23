@@ -190,15 +190,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="user",
-            index=models.Index(
-                fields=["email"], name="accounts_us_email_74c8d6_idx"
-            ),
+            index=models.Index(fields=["email"], name="accounts_us_email_74c8d6_idx"),
         ),
         migrations.AddIndex(
             model_name="user",
-            index=models.Index(
-                fields=["cpf"], name="accounts_us_cpf_c8d8a5_idx"
-            ),
+            index=models.Index(fields=["cpf"], name="accounts_us_cpf_c8d8a5_idx"),
         ),
         migrations.AddIndex(
             model_name="user",

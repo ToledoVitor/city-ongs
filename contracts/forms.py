@@ -77,12 +77,8 @@ class ContractCreateForm(forms.ModelForm):
             "supervision_autority": BaseSelectFormWidget(
                 placeholder="Fiscal Responsável",
             ),
-            "hired_company": BaseSelectFormWidget(
-                placeholder="Empresa Contratada"
-            ),
-            "hired_manager": BaseSelectFormWidget(
-                placeholder="Gestor da Contratada"
-            ),
+            "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
+            "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
             "file": BaseFileFormWidget(),
         }
@@ -127,9 +123,7 @@ class ContractCreateForm(forms.ModelForm):
         counterpart_value = cleaned_data.get("counterpart_value")
 
         if not all([bool(total_value), bool(total_value), bool(total_value)]):
-            self.add_error(
-                "total_value", "Valores repassados não podem ser nulos."
-            )
+            self.add_error("total_value", "Valores repassados não podem ser nulos.")
 
         if total_value != (municipal_value + counterpart_value):
             self.add_error(
@@ -370,9 +364,9 @@ class ContractItemValueRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.contract:
-            self.fields[
-                "downgrade_item"
-            ].queryset = ContractItem.objects.filter(contract=self.contract)
+            self.fields["downgrade_item"].queryset = ContractItem.objects.filter(
+                contract=self.contract
+            )
             self.fields["raise_item"].queryset = ContractItem.objects.filter(
                 contract=self.contract
             )
@@ -419,9 +413,9 @@ class ContractItemValueRequestForm(forms.ModelForm):
             deleted_at__isnull=True
         ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
-        if (
-            downgrade_item.anual_expense - cleaned_data["anual_raise"]
-        ) <= Decimal("0.00"):
+        if (downgrade_item.anual_expense - cleaned_data["anual_raise"]) <= Decimal(
+            "0.00"
+        ):
             raise forms.ValidationError(
                 "Não é possível criar a solicitação. O item à ser remanejado"
                 "ficará com valor negativo."
@@ -451,9 +445,7 @@ class ItemValueReviewForm(forms.ModelForm):
 
         rejected = cleaned_data["status"] == "REJECTED"
         if rejected and not cleaned_data["rejection_reason"]:
-            raise forms.ValidationError(
-                "É necessário informar um motivo para rejeição"
-            )
+            raise forms.ValidationError("É necessário informar um motivo para rejeição")
 
         return cleaned_data
 

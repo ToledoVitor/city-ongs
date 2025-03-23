@@ -38,16 +38,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "bank_name",
-                    models.CharField(
-                        max_length=128, verbose_name="Nome do Banco"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Nome do Banco"),
                 ),
                 ("bank_id", models.IntegerField(verbose_name="Id do Banco")),
                 (
                     "account",
-                    models.CharField(
-                        max_length=16, verbose_name="Número da Conta"
-                    ),
+                    models.CharField(max_length=16, verbose_name="Número da Conta"),
                 ),
                 (
                     "account_type",
@@ -205,16 +201,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "bank_name",
-                    models.CharField(
-                        max_length=128, verbose_name="Nome do Banco"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Nome do Banco"),
                 ),
                 ("bank_id", models.IntegerField(verbose_name="Id do Banco")),
                 (
                     "account",
-                    models.CharField(
-                        max_length=16, verbose_name="Número da Conta"
-                    ),
+                    models.CharField(max_length=16, verbose_name="Número da Conta"),
                 ),
                 (
                     "account_type",

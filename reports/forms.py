@@ -48,9 +48,7 @@ class ReportForm(forms.Form):
         (11, "Novembro"),
         (12, "Dezembro"),
     ]
-    YEAR_CHOICES = [
-        (year, year) for year in range(2020, datetime.now().year + 1)
-    ]
+    YEAR_CHOICES = [(year, year) for year in range(2020, datetime.now().year + 1)]
 
     start_month = forms.ChoiceField(
         choices=MONTH_CHOICES,

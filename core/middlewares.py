@@ -87,9 +87,7 @@ class ErrorHandlingMiddleware:
         self, request: HttpRequest, exception: Exception
     ) -> HttpResponse | None:
         # Skip admin and auth requests
-        if request.path.startswith("/admin/") or request.path.startswith(
-            "/auth/"
-        ):
+        if request.path.startswith("/admin/") or request.path.startswith("/auth/"):
             return None
 
         # Handle Http404 exceptions

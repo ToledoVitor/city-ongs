@@ -9,6 +9,4 @@ class ActivityConfig(AppConfig):
     def ready(self) -> None:
         from activity.signals import on_activity_log_post_save
 
-        post_save.connect(
-            on_activity_log_post_save, sender="activity.ActivityLog"
-        )
+        post_save.connect(on_activity_log_post_save, sender="activity.ActivityLog")

@@ -21,9 +21,7 @@ class ConsolidatedPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(
-        self, contract: Contract, start_date: datetime, end_date: datetime
-    ):
+    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
@@ -165,25 +163,19 @@ class ConsolidatedPDFExporter:
         self.opening_balance = self.statement_queryset.filter(
             reference_month=self.start_date.month,
             reference_year=self.start_date.year,
-        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
 
         self.closing_checking_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.checking_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
         self.closing_investing_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.investing_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
         self.closing_balance = (
             self.closing_checking_account + self.closing_investing_account
@@ -345,16 +337,12 @@ class ConsolidatedPDFExporter:
         self.planned_expenses = self.all_expense.filter(planned=True)
         self.unplanned_expenses = self.all_expense.filter(planned=False)
         if self.planned_expenses.count():
-            planned = self.planned_expenses.aggregate(Sum("value"))[
-                "value__sum"
-            ]
+            planned = self.planned_expenses.aggregate(Sum("value"))["value__sum"]
         else:
             planned = Decimal("0.00")
 
         if self.unplanned_expenses.count():
-            unplanned = self.unplanned_expenses.aggregate(Sum("value"))[
-                "value__sum"
-            ]
+            unplanned = self.unplanned_expenses.aggregate(Sum("value"))["value__sum"]
         else:
             unplanned = Decimal("0.00")
 
@@ -451,9 +439,7 @@ class ConsolidatedPDFExporter:
             income = Decimal("0.00")
 
         if outgoing_transaction.count():
-            outgoing = outgoing_transaction.aggregate(Sum("amount"))[
-                "amount__sum"
-            ]
+            outgoing = outgoing_transaction.aggregate(Sum("amount"))["amount__sum"]
         else:
             outgoing = Decimal("0.00")
 
@@ -695,9 +681,7 @@ class ConsolidatedPDFExporter:
             body_data.append(
                 [
                     format_into_brazilian_date(public_transfer.receive_date),
-                    str(
-                        public_transfer.history
-                    ),  # TODO, receio de criar a label
+                    str(public_transfer.history),  # TODO, receio de criar a label
                     format_into_brazilian_currency(public_transfer.value),
                 ]
             )
@@ -748,9 +732,7 @@ class ConsolidatedPDFExporter:
 
     def _draw_expenses_analysis_table(self):
         if self.planned_expenses.count():
-            total_planned = self.planned_expenses.aggregate(Sum("value"))[
-                "value__sum"
-            ]
+            total_planned = self.planned_expenses.aggregate(Sum("value"))["value__sum"]
         else:
             total_planned = Decimal("0.00")
 

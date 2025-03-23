@@ -194,18 +194,13 @@ class BankStatement(BaseOrganizationTenantModel):
             ),
         ]
         indexes = [
-            models.Index(
-                fields=["bank_account", "reference_month", "reference_year"]
-            ),
+            models.Index(fields=["bank_account", "reference_month", "reference_year"]),
             models.Index(fields=["reference_month", "reference_year"]),
         ]
 
     def clean(self):
         """Validate the statement data."""
-        if (
-            self.closing_balance is not None
-            and self.opening_balance is not None
-        ):
+        if self.closing_balance is not None and self.opening_balance is not None:
             if self.closing_balance < 0:
                 raise ValidationError("Closing balance cannot be negative")
             if self.opening_balance < 0:

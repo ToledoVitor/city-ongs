@@ -238,9 +238,7 @@ class ActivityLog(BaseOrganizationTenantModel):
         null=True,
         blank=True,
     )
-    target_content_object = GenericForeignKey(
-        "target_content_type", "target_object_id"
-    )
+    target_content_object = GenericForeignKey("target_content_type", "target_object_id")
 
     def __str__(self) -> str:
         return f"{self.user_email} - {"self.action"}"

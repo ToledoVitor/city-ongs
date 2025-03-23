@@ -579,9 +579,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="bankaccount",
-            unique_together={
-                ("organization", "bank_name", "account", "account_type")
-            },
+            unique_together={("organization", "bank_name", "account", "account_type")},
         ),
         migrations.AddIndex(
             model_name="bankaccount",
@@ -598,9 +596,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="bankaccount",
-            index=models.Index(
-                fields=["origin"], name="bank_bankac_origin_06e584_idx"
-            ),
+            index=models.Index(fields=["origin"], name="bank_bankac_origin_06e584_idx"),
         ),
         migrations.AddIndex(
             model_name="bankstatement",

@@ -36,9 +36,7 @@ class Command(BaseCommand):
     help = "Updates a duplicate CPF to a new valid one"
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "organization_id", type=str, help="Organization ID"
-        )
+        parser.add_argument("organization_id", type=str, help="Organization ID")
         parser.add_argument("cpf", type=str, help="CPF to update")
 
     def handle(self, *args, **options):
@@ -49,10 +47,7 @@ class Command(BaseCommand):
         users = User.objects.filter(organization_id=organization_id, cpf=cpf)
 
         if not users.exists():
-            msg = (
-                f"No users found with CPF {cpf} "
-                f"in organization {organization_id}"
-            )
+            msg = f"No users found with CPF {cpf} " f"in organization {organization_id}"
             self.stdout.write(self.style.ERROR(msg))
             return
 
@@ -70,8 +65,5 @@ class Command(BaseCommand):
                 new_cpf = generate_valid_cpf()
                 user.cpf = new_cpf
                 user.save()
-                msg = (
-                    f"Updated CPF for user {user.email} "
-                    f"from {cpf} to {new_cpf}"
-                )
+                msg = f"Updated CPF for user {user.email} " f"from {cpf} to {new_cpf}"
                 self.stdout.write(self.style.SUCCESS(msg))

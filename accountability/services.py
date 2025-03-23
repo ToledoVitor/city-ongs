@@ -11,7 +11,5 @@ def export_xlsx_model(accountability: Accountability):
     return AccountabilityXLSXExporter(accountability).handle()
 
 
-def import_xlsx_model(
-    file: InMemoryUploadedFile, accountability: Accountability
-):
+def import_xlsx_model(file: InMemoryUploadedFile, accountability: Accountability):
     return AccountabilityXLSXImporter(file, accountability).handle()

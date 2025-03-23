@@ -56,9 +56,7 @@ urlpatterns = [
         "contracts/",
         include(("contracts.urls", "contracts"), namespace="contracts"),
     ),
-    path(
-        "reports/", include(("reports.urls", "reports"), namespace="reports")
-    ),
+    path("reports/", include(("reports.urls", "reports"), namespace="reports")),
     # Health Check
     re_path(r"^api/health_check/", include("health_check.urls")),
 ]

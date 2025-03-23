@@ -20,9 +20,7 @@ class SendGridClient:
             return
 
         if not (subject and html_content):
-            logger.error(
-                "Missing subject or html content", subject, html_content
-            )
+            logger.error("Missing subject or html content", subject, html_content)
             return
 
         to_emails = [recipient.email for recipient in recipients]
@@ -33,9 +31,7 @@ class SendGridClient:
             html_content=html_content,
         )
         try:
-            logger.error(
-                f"Sending email with subject: {subject} for {to_emails}"
-            )
+            logger.error(f"Sending email with subject: {subject} for {to_emails}")
             sendgrid_client = SendGridAPIClient(self.sendgrid_api_key)
             sendgrid_client.send(message)
 

@@ -61,9 +61,7 @@ class ActivityLogEmailNotificationHandler:
                         f"recipients: {recipients} \n"
                     )
 
-                logger.info(
-                    f"Notifying users for action {activity_log.action}"
-                )
+                logger.info(f"Notifying users for action {activity_log.action}")
 
             try:
                 sendgrid_client = SendGridClient()
@@ -88,9 +86,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/accountability/detail/{accountability.id}/",
         }
-        html_content = render_to_string(
-            "email/new_accountability_email.html", context
-        )
+        html_content = render_to_string("email/new_accountability_email.html", context)
 
         recipient = accountability.contract.supervision_autority
         Notification.objects.create(
@@ -256,9 +252,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/execution/detail/{execution.id}/",
         }
-        html_content = render_to_string(
-            "email/execution_finished_email.html", context
-        )
+        html_content = render_to_string("email/execution_finished_email.html", context)
 
         recipient = execution.contract.accountability_autority
         Notification.objects.create(
@@ -282,9 +276,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/new_contract_email.html", context
-        )
+        html_content = render_to_string("email/new_contract_email.html", context)
 
         recipients = [
             contract.accountability_autority,
@@ -315,9 +307,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/new_contract_status_email.html", context
-        )
+        html_content = render_to_string("email/new_contract_status_email.html", context)
 
         recipients = [
             contract.accountability_autority,
@@ -349,9 +339,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/contract_goal_commented.html", context
-        )
+        html_content = render_to_string("email/contract_goal_commented.html", context)
 
         recipient = contract.accountability_autority
         Notification.objects.create(
@@ -377,9 +365,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/contract_item_commented.html", context
-        )
+        html_content = render_to_string("email/contract_item_commented.html", context)
 
         recipient = contract.accountability_autority
         Notification.objects.create(
@@ -395,28 +381,20 @@ class ActivityLogEmailNotificationHandler:
     def build_item_value_request_log(
         self, activity_log: ActivityLog
     ) -> Tuple[str, str, list[str]]:
-        value_request: ContractItemNewValueRequest = (
-            activity_log.target_content_object
-        )
+        value_request: ContractItemNewValueRequest = activity_log.target_content_object
         contract: Contract = value_request.raise_item.contract
 
         subject = "Novo Pedido de Remanejamento de Gastos"
         context = {
             "raise_item": value_request.raise_item.name,
             "downgrade_item": value_request.downgrade_item.name,
-            "month_raise": format_into_brazilian_currency(
-                value_request.month_raise
-            ),
-            "anual_raise": format_into_brazilian_currency(
-                value_request.anual_raise
-            ),
+            "month_raise": format_into_brazilian_currency(value_request.month_raise),
+            "anual_raise": format_into_brazilian_currency(value_request.anual_raise),
             "contract_name": contract.name,
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/new_value_requested.html", context
-        )
+        html_content = render_to_string("email/new_value_requested.html", context)
 
         recipient = contract.supervision_autority
         Notification.objects.create(
@@ -432,9 +410,7 @@ class ActivityLogEmailNotificationHandler:
     def build_item_value_analised_log(
         self, activity_log: ActivityLog
     ) -> Tuple[str, str, list[str]]:
-        value_request: ContractItemNewValueRequest = (
-            activity_log.target_content_object
-        )
+        value_request: ContractItemNewValueRequest = activity_log.target_content_object
         contract: Contract = value_request.raise_item.contract
 
         subject = "Pedido de Remanejamento de Gastos Revisado"
@@ -446,9 +422,7 @@ class ActivityLogEmailNotificationHandler:
             "created_by": activity_log.user_email,
             "link": f"{self.website_url}/contracts/detail/{contract.id}/",
         }
-        html_content = render_to_string(
-            "email/new_value_reviewed.html", context
-        )
+        html_content = render_to_string("email/new_value_reviewed.html", context)
 
         recipient = contract.accountability_autority
         Notification.objects.create(

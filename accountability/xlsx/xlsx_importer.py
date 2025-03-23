@@ -23,9 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class AccountabilityXLSXImporter:
-    def __init__(
-        self, file: InMemoryUploadedFile, accountability: Accountability
-    ):
+    def __init__(self, file: InMemoryUploadedFile, accountability: Accountability):
         self.file = file
         self.accountability = accountability
         self.mapped_fds: dict = {}
@@ -46,9 +44,7 @@ class AccountabilityXLSXImporter:
             xls = pd.ExcelFile(self.file)
             revenues_df = pd.read_excel(xls, sheet_name="1. RECEITAS")
             expenses_df = pd.read_excel(xls, sheet_name="2. DESPESAS")
-            applications_df = pd.read_excel(
-                xls, sheet_name="3. APLICACOES E RESGATES"
-            )
+            applications_df = pd.read_excel(xls, sheet_name="3. APLICACOES E RESGATES")
         except ValueError:
             raise ValueError("Excel sheets are not in the right format")
 
@@ -67,9 +63,7 @@ class AccountabilityXLSXImporter:
         expenses_error = self._create_expenses(expenses_df)
         applications_error = self._create_applications(applications_df)
 
-        imported = not any(
-            [revenues_error, expenses_error, applications_error]
-        )
+        imported = not any([revenues_error, expenses_error, applications_error])
         return imported, revenues_error, expenses_error, applications_error
 
     def _store_fd_ids(self, xls: pd.ExcelFile) -> None:
@@ -92,9 +86,7 @@ class AccountabilityXLSXImporter:
             for row in df.values.tolist()
             if row[0]
         ]
-        documents = [
-            record["document"] for record in records if record["document"]
-        ]
+        documents = [record["document"] for record in records if record["document"]]
         existing_favored = Favored.objects.filter(
             organization=organization,
             document__in=documents,
@@ -137,14 +129,10 @@ class AccountabilityXLSXImporter:
         }
 
     def _store_nr_choices(self) -> None:
-        self.mapped_nrs = {
-            label: value for value, label in Revenue.Nature.choices
-        }
+        self.mapped_nrs = {label: value for value, label in Revenue.Nature.choices}
 
     def _store_nd_choices(self) -> None:
-        self.mapped_nds = {
-            label: value for value, label in NatureChoices.choices
-        }
+        self.mapped_nds = {label: value for value, label in NatureChoices.choices}
 
     def _store_td_choices(self) -> None:
         self.mapped_tds = {
@@ -169,9 +157,7 @@ class AccountabilityXLSXImporter:
                 receive_date=datetime(
                     receive_date.year, receive_date.month, receive_date.day
                 ),
-                competency=datetime(
-                    competency.year, competency.month, competency.day
-                ),
+                competency=datetime(competency.year, competency.month, competency.day),
                 source=self.mapped_frs.get(line[6]),
                 bank_account_id=self.mapped_cbs.get(line[7]),
                 revenue_nature=self.mapped_nrs.get(line[8]),
@@ -224,9 +210,7 @@ class AccountabilityXLSXImporter:
                 identification=line[2],
                 value=Decimal(line[3]).quantize(Decimal("0.01")),
                 due_date=datetime(due_date.year, due_date.month, due_date.day),
-                competency=datetime(
-                    competency.year, competency.month, competency.day
-                ),
+                competency=datetime(competency.year, competency.month, competency.day),
                 source_id=self.mapped_fds.get(line[6], None),
                 nature=self.mapped_nds.get(line[7], None),
                 favored_id=self.mapped_fvs.get(line[8], None),
@@ -277,9 +261,7 @@ class AccountabilityXLSXImporter:
 
         transactions = []
         errors = []
-        for index, line in enumerate(
-            applications_df.values.tolist()[1:], start=2
-        ):
+        for index, line in enumerate(applications_df.values.tolist()[1:], start=2):
             if not line[2]:
                 break
 
@@ -294,9 +276,7 @@ class AccountabilityXLSXImporter:
                         transaction_date.month,
                         transaction_date.day,
                     ),
-                    amount=Decimal(abs(line[2]) * -1).quantize(
-                        Decimal("0.01")
-                    ),
+                    amount=Decimal(abs(line[2]) * -1).quantize(Decimal("0.01")),
                     transaction_number=line[4],
                     bank_account_id=self.mapped_cbs.get(line[5]),
                 )

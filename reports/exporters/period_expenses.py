@@ -15,9 +15,7 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
-)
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -25,9 +23,7 @@ class PeriodEpensesPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(
-        self, contract: Contract, start_date: datetime, end_date: datetime
-    ):
+    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)

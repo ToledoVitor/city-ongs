@@ -33,9 +33,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=128, verbose_name="Nome do Comitê"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Nome do Comitê"),
                 ),
                 (
                     "city_hall",

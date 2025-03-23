@@ -11,9 +11,7 @@ class BasePDFExporter:
     Classe base para todos os exportadores PDF com gerenciamento adequado de recursos.
     """
 
-    _pdf_instances = (
-        weakref.WeakSet()
-    )  # Rastreia todas as instâncias PDF ativas
+    _pdf_instances = weakref.WeakSet()  # Rastreia todas as instâncias PDF ativas
 
     def __init__(self):
         self.pdf = None

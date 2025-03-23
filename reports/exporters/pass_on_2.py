@@ -18,12 +18,8 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
-)
-font_italic_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf"
-)
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf")
 font_bold_italic_path = os.path.join(
     settings.BASE_DIR, "static/fonts/FreeSansBoldOblique.ttf"
 )
@@ -272,25 +268,19 @@ class PassOn2PDFExporter:
         opening_balance = self.statement_queryset.filter(
             reference_month=self.start_date.month,
             reference_year=self.start_date.year,
-        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
 
         closing_checking_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.checking_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
         closing_investing_account = self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.investing_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal(
-            "0.00"
-        )
+        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
 
         closing_balance = closing_checking_account + closing_investing_account
 

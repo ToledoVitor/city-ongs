@@ -65,9 +65,7 @@ class ExpenseForm(forms.ModelForm):
         max_digits=12,
         decimal_places=2,
         validators=[
-            MinValueValidator(
-                Decimal("0.01"), "O valor deve ser maior que zero"
-            ),
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
             MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
         ],
     )
@@ -190,9 +188,7 @@ class ExpenseForm(forms.ModelForm):
             self.fields["favored"].queryset = Favored.objects.none()
 
         if self.accountability:
-            self.fields[
-                "item"
-            ].queryset = self.accountability.contract.items.all()
+            self.fields["item"].queryset = self.accountability.contract.items.all()
         else:
             self.fields["item"].queryset = ContractItem.objects.none()
 
@@ -223,9 +219,7 @@ class RevenueForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.accountability: Accountability = kwargs.pop(
-            "accountability", None
-        )
+        self.accountability: Accountability = kwargs.pop("accountability", None)
         super().__init__(*args, **kwargs)
 
         checking_account_id = getattr(
@@ -359,13 +353,9 @@ class ReconcileExpenseForm(forms.Form):
         transactions = self.cleaned_data.get("transactions")
 
         if not transactions:
-            raise forms.ValidationError(
-                "Informe as transações correspondentes"
-            )
+            raise forms.ValidationError("Informe as transações correspondentes")
 
-        transaction_amount = sum(
-            [transaction.amount for transaction in transactions]
-        )
+        transaction_amount = sum([transaction.amount for transaction in transactions])
         expenses_amount = self.expense.value
         for related_expense in self.relateds:
             expenses_amount += related_expense.value
@@ -418,9 +408,7 @@ class ReconcileRevenueForm(forms.Form):
         transactions = self.cleaned_data.get("transactions")
 
         if not transactions:
-            raise forms.ValidationError(
-                "Informe as transações correspondentes"
-            )
+            raise forms.ValidationError("Informe as transações correspondentes")
 
         amount = sum([transaction.amount for transaction in transactions])
         if amount != self.revenue.value:

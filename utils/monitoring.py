@@ -33,9 +33,7 @@ class PerformanceMetrics:
 
     def get_summary(self) -> dict[str, float]:
         """Retorna um resumo com médias de todas as métricas."""
-        return {
-            category: self.get_average(category) for category in self.metrics
-        }
+        return {category: self.get_average(category) for category in self.metrics}
 
 
 class PerformanceMonitor:
@@ -67,9 +65,7 @@ class PerformanceMonitor:
                 end_time = time.time()
                 final_queries = len(connection.queries)
 
-                self.metrics.add_metric(
-                    "response_times", end_time - start_time
-                )
+                self.metrics.add_metric("response_times", end_time - start_time)
                 self.metrics.add_metric(
                     "db_query_counts", final_queries - initial_queries
                 )
@@ -84,21 +80,15 @@ class PerformanceMonitor:
                 # Atualiza métricas de cache
                 final_hits = cache.get("cache_hits", 0)
                 final_misses = cache.get("cache_misses", 0)
-                self.metrics.add_metric(
-                    "cache_hits", final_hits - initial_hits
-                )
-                self.metrics.add_metric(
-                    "cache_misses", final_misses - initial_misses
-                )
+                self.metrics.add_metric("cache_hits", final_hits - initial_hits)
+                self.metrics.add_metric("cache_misses", final_misses - initial_misses)
 
                 return response
 
             except Exception:
                 # Em caso de erro, ainda registra as métricas coletadas
                 end_time = time.time()
-                self.metrics.add_metric(
-                    "response_times", end_time - start_time
-                )
+                self.metrics.add_metric("response_times", end_time - start_time)
                 raise
 
         return wrapper

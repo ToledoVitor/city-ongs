@@ -137,9 +137,7 @@ class AccountabilityXLSXExporter:
 
         col = 0
         for column_name, column_format in header_content:
-            receipt_worksheet.merge_range(
-                0, col, 1, col, column_name, column_format
-            )
+            receipt_worksheet.merge_range(0, col, 1, col, column_name, column_format)
             col += 1
 
         for line in range(2, 1002):
@@ -435,9 +433,7 @@ class AccountabilityXLSXExporter:
             col += 1
 
         for line in range(2, 1002):
-            application_worksheet.write(
-                line, 0, line - 1, self.locked_cell_format
-            )
+            application_worksheet.write(line, 0, line - 1, self.locked_cell_format)
             application_worksheet.write(
                 line, 1, self.contract_code, self.locked_cell_format
             )

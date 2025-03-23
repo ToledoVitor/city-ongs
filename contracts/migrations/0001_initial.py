@@ -56,9 +56,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "number",
-                    models.IntegerField(
-                        blank=True, null=True, verbose_name="Número"
-                    ),
+                    models.IntegerField(blank=True, null=True, verbose_name="Número"),
                 ),
                 (
                     "complement",
@@ -166,9 +164,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=128, verbose_name="Nome do contrato"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Nome do contrato"),
                 ),
                 (
                     "concession_type",
@@ -545,9 +541,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "observations",
@@ -611,9 +605,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comment",
-                    models.CharField(
-                        max_length=255, verbose_name="Comentário"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Comentário"),
                 ),
                 (
                     "goal",
@@ -667,9 +659,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "observations",
@@ -682,9 +672,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "month_quantity",
-                    models.PositiveIntegerField(
-                        verbose_name="Quantidade de Meses"
-                    ),
+                    models.PositiveIntegerField(verbose_name="Quantidade de Meses"),
                 ),
                 (
                     "month_expense",
@@ -706,15 +694,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "quantity",
-                    models.PositiveIntegerField(
-                        default=1, verbose_name="Quantidade"
-                    ),
+                    models.PositiveIntegerField(default=1, verbose_name="Quantidade"),
                 ),
                 (
                     "unit_type",
-                    models.CharField(
-                        max_length=32, verbose_name="Tipo da Unidade"
-                    ),
+                    models.CharField(max_length=32, verbose_name="Tipo da Unidade"),
                 ),
                 (
                     "nature",
@@ -940,15 +924,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "end_date",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Data Final"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Data Final"),
                 ),
                 (
                     "is_additive",
-                    models.BooleanField(
-                        default=False, verbose_name="É aditivo?"
-                    ),
+                    models.BooleanField(default=False, verbose_name="É aditivo?"),
                 ),
                 (
                     "status",
@@ -1102,9 +1082,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comment",
-                    models.CharField(
-                        max_length=255, verbose_name="Comentário"
-                    ),
+                    models.CharField(max_length=255, verbose_name="Comentário"),
                 ),
                 (
                     "item",
@@ -1158,9 +1136,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "resources",
@@ -1219,9 +1195,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "number",
-                    models.IntegerField(
-                        blank=True, null=True, verbose_name="Número"
-                    ),
+                    models.IntegerField(blank=True, null=True, verbose_name="Número"),
                 ),
                 (
                     "complement",
@@ -1369,9 +1343,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=128, verbose_name="Nome do contrato"
-                    ),
+                    models.CharField(max_length=128, verbose_name="Nome do contrato"),
                 ),
                 (
                     "concession_type",
@@ -1720,9 +1692,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "observations",
@@ -1834,9 +1804,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "observations",
@@ -1849,9 +1817,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "month_quantity",
-                    models.PositiveIntegerField(
-                        verbose_name="Quantidade de Meses"
-                    ),
+                    models.PositiveIntegerField(verbose_name="Quantidade de Meses"),
                 ),
                 (
                     "month_expense",
@@ -1873,15 +1839,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "quantity",
-                    models.PositiveIntegerField(
-                        default=1, verbose_name="Quantidade"
-                    ),
+                    models.PositiveIntegerField(default=1, verbose_name="Quantidade"),
                 ),
                 (
                     "unit_type",
-                    models.CharField(
-                        max_length=32, verbose_name="Tipo da Unidade"
-                    ),
+                    models.CharField(max_length=32, verbose_name="Tipo da Unidade"),
                 ),
                 (
                     "nature",
@@ -2107,15 +2069,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "end_date",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Data Final"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Data Final"),
                 ),
                 (
                     "is_additive",
-                    models.BooleanField(
-                        default=False, verbose_name="É aditivo?"
-                    ),
+                    models.BooleanField(default=False, verbose_name="É aditivo?"),
                 ),
                 (
                     "status",
@@ -2227,9 +2185,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "methodology",
-                    models.CharField(
-                        max_length=256, verbose_name="Metodologia"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Metodologia"),
                 ),
                 (
                     "resources",

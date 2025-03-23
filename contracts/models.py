@@ -350,9 +350,7 @@ class Contract(
             "accountabilities": list(
                 self.accountabilities.values_list("id", flat=True)[:10]
             ),
-            "interested": list(
-                self.interested_parts.values_list("id", flat=True)[:10]
-            ),
+            "interested": list(self.interested_parts.values_list("id", flat=True)[:10]),
         }
         return (
             ActivityLog.objects.filter(
@@ -370,13 +368,9 @@ class Contract(
 
     @property
     def month_income_value(self):
-        months_amount = (
-            self.end_of_vigency - self.start_of_vigency
-        ).days // 30
+        months_amount = (self.end_of_vigency - self.start_of_vigency).days // 30
         value_per_month = self.total_value / months_amount
-        return value_per_month.quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+        return value_per_month.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def save(self, *args, **kwargs):
         if self.internal_code is None:
@@ -911,16 +905,12 @@ class ContractExecution(
             target_object_id__in=activities_ids,
         )
 
-        files_ids = [
-            str(id) for id in self.files.values_list("id", flat=True)[:10]
-        ]
+        files_ids = [str(id) for id in self.files.values_list("id", flat=True)[:10]]
         files_logs = ActivityLog.objects.filter(
             target_object_id__in=files_ids,
         )
 
-        combined_querset = (
-            execution_logs | activities_logs | files_logs
-        ).distinct()
+        combined_querset = (execution_logs | activities_logs | files_logs).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
     def invalidate_cache(self):

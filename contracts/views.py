@@ -98,9 +98,7 @@ class ContractsListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ContractCreateView(
-    CommitteeMemberCreateMixin, AdminRequiredMixin, TemplateView
-):
+class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, TemplateView):
     template_name = "contracts/create.html"
     login_url = "/auth/login"
 
@@ -265,12 +263,8 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
 
             # Items totals
             context["items_totals"] = self.object.items.aggregate(
-                total_month=Coalesce(
-                    Sum("month_expense"), Value(Decimal("0.00"))
-                ),
-                total_year=Coalesce(
-                    Sum("anual_expense"), Value(Decimal("0.00"))
-                ),
+                total_month=Coalesce(Sum("month_expense"), Value(Decimal("0.00"))),
+                total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
             )
 
             # Store in cache
@@ -362,9 +356,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                         )
 
                 case _:
-                    logger.warning(
-                        f"form_type: {form_type} is not a valid form"
-                    )
+                    logger.warning(f"form_type: {form_type} is not a valid form")
                     return redirect("contracts:contracts-list")
 
         return redirect("contracts:contracts-detail", pk=contract.id)
@@ -940,14 +932,10 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
                 continue
 
             if item.nature_label in groupped_expenses[group]:
-                groupped_expenses[group][item.nature_label] += (
-                    item.anual_expense
-                )
+                groupped_expenses[group][item.nature_label] += item.anual_expense
                 groupped_expenses[group]["total"] += item.anual_expense
             else:
-                groupped_expenses[group][item.nature_label] = (
-                    item.anual_expense
-                )
+                groupped_expenses[group][item.nature_label] = item.anual_expense
                 groupped_expenses[group]["total"] += item.anual_expense
 
         return groupped_expenses
@@ -979,15 +967,9 @@ def get_monthly_transfers(contract):
                 "total": Decimal(0),
             }
 
-        if (
-            transfer["source"]
-            == ContractMonthTransfer.TransferSource.CITY_HALL
-        ):
+        if transfer["source"] == ContractMonthTransfer.TransferSource.CITY_HALL:
             monthly_data[month_year]["city_hall"] = transfer["total_value"]
-        elif (
-            transfer["source"]
-            == ContractMonthTransfer.TransferSource.COUNTERPART
-        ):
+        elif transfer["source"] == ContractMonthTransfer.TransferSource.COUNTERPART:
             monthly_data[month_year]["counterpart"] = transfer["total_value"]
 
         monthly_data[month_year]["total"] = (
@@ -1091,10 +1073,7 @@ def contract_timeline_update_view(request, pk):
             wrong_values = True
         if sum(counterpart_values) != contract.counterpart_value:
             wrong_values = True
-        if (
-            sum([*city_hall_values, *counterpart_values])
-            != contract.total_value
-        ):
+        if sum([*city_hall_values, *counterpart_values]) != contract.total_value:
             wrong_values = True
 
         if wrong_values:
@@ -1325,9 +1304,7 @@ def send_accountability_review_analisys(request, pk):
         if review_status == ContractExecution.ReviewStatus.CORRECTING:
             action = ActivityLog.ActivityLogChoices.EXECUTION_SENT_TO_CORRECT
         elif review_status == ContractExecution.ReviewStatus.FINISHED:
-            action = (
-                ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED
-            )
+            action = ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED
         else:
             raise ValueError(f"{review_status} - Is an unnknow status review")
 

@@ -119,15 +119,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "conciled",
-                    models.BooleanField(
-                        default=False, verbose_name="Conciliado?"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Conciliado?"),
                 ),
                 (
                     "planned",
-                    models.BooleanField(
-                        default=True, verbose_name="Planejado?"
-                    ),
+                    models.BooleanField(default=True, verbose_name="Planejado?"),
                 ),
                 (
                     "identification",
@@ -372,16 +368,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "due_date",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Vencimento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Vencimento"),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "liquidation",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Liquidação"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Liquidação"),
                 ),
                 (
                     "liquidation_form",
@@ -488,15 +480,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comments",
-                    models.CharField(
-                        max_length=256, verbose_name="Comentários"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Comentários"),
                 ),
                 (
                     "pending",
-                    models.CharField(
-                        max_length=256, verbose_name="Pendências"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Pendências"),
                 ),
             ],
             options={
@@ -567,9 +555,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=64, verbose_name="Nome")),
                 (
                     "document",
-                    models.IntegerField(
-                        blank=True, null=True, verbose_name="CPF/CNPJ"
-                    ),
+                    models.IntegerField(blank=True, null=True, verbose_name="CPF/CNPJ"),
                 ),
             ],
             options={
@@ -716,15 +702,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "conciled",
-                    models.BooleanField(
-                        default=False, verbose_name="Conciliado?"
-                    ),
+                    models.BooleanField(default=False, verbose_name="Conciliado?"),
                 ),
                 (
                     "planned",
-                    models.BooleanField(
-                        default=True, verbose_name="Planejado?"
-                    ),
+                    models.BooleanField(default=True, verbose_name="Planejado?"),
                 ),
                 (
                     "identification",
@@ -969,16 +951,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "due_date",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Vencimento"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Vencimento"),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "liquidation",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="Liquidação"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="Liquidação"),
                 ),
                 (
                     "liquidation_form",
@@ -1113,15 +1091,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comments",
-                    models.CharField(
-                        max_length=256, verbose_name="Comentários"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Comentários"),
                 ),
                 (
                     "pending",
-                    models.CharField(
-                        max_length=256, verbose_name="Pendências"
-                    ),
+                    models.CharField(max_length=256, verbose_name="Pendências"),
                 ),
                 (
                     "history_id",
@@ -1453,9 +1427,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(
-                        max_length=64, verbose_name="Nome da fonte"
-                    ),
+                    models.CharField(max_length=64, verbose_name="Nome da fonte"),
                 ),
                 (
                     "document",

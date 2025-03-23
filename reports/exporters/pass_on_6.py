@@ -19,9 +19,7 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
-)
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -64,9 +62,9 @@ class PassOn6PDFExporter:
             .exclude(bank_account__isnull=True)
         )
 
-        self.all_pass_on_values = self.revenue_queryset.aggregate(
-            Sum("value")
-        )["value__sum"] or Decimal("0.00")
+        self.all_pass_on_values = self.revenue_queryset.aggregate(Sum("value"))[
+            "value__sum"
+        ] or Decimal("0.00")
 
         self.previous_balance = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.PREVIOUS_BALANCE
@@ -87,9 +85,9 @@ class PassOn6PDFExporter:
             liquidation__lte=self.end_date,
         )
 
-        self.all_expenses_value = self.expense_queryset.aggregate(
-            Sum("value")
-        )["value__sum"] or Decimal("0.00")
+        self.all_expenses_value = self.expense_queryset.aggregate(Sum("value"))[
+            "value__sum"
+        ] or Decimal("0.00")
 
         # Querie para Aditivos
         self.addendum_queryset = ContractAddendum.objects.filter(
@@ -366,9 +364,7 @@ class PassOn6PDFExporter:
         ]
 
         self.sum_items_a_to_d = (
-            self.previous_balance
-            + self.all_pass_on_values
-            + self.investment_income
+            self.previous_balance + self.all_pass_on_values + self.investment_income
         )  # TODO inserir valor de D
 
         extern_revenue_data.append(
@@ -889,60 +885,40 @@ class PassOn6PDFExporter:
         }
 
         for expense in expenses:
-            expense_category = self.__get_expense_nature_category(
-                expense=expense
-            )
+            expense_category = self.__get_expense_nature_category(expense=expense)
             if not expense_category:
                 continue
 
             accounted_on_period = (
                 expense.competency
-                and self.start_date.date()
-                < expense.competency
-                < self.end_date.date()
+                and self.start_date.date() < expense.competency < self.end_date.date()
             )
             paid_on_period = (
                 expense.due_date
-                and self.start_date.date()
-                < expense.due_date
-                < self.end_date.date()
+                and self.start_date.date() < expense.due_date < self.end_date.date()
             )
 
             if paid_on_period and accounted_on_period:
-                categorized_expenses[expense_category][
-                    "accounted_and_paid"
-                ] += expense.value
-                categorized_expenses[expense_category]["accounted_on"] += (
+                categorized_expenses[expense_category]["accounted_and_paid"] += (
                     expense.value
                 )
-                categorized_expenses[expense_category]["paid_on"] += (
-                    expense.value
-                )
+                categorized_expenses[expense_category]["accounted_on"] += expense.value
+                categorized_expenses[expense_category]["paid_on"] += expense.value
 
-                categorized_expenses["TOTAL"]["accounted_and_paid"] += (
-                    expense.value
-                )
+                categorized_expenses["TOTAL"]["accounted_and_paid"] += expense.value
                 categorized_expenses["TOTAL"]["paid_on"] += expense.value
                 categorized_expenses["TOTAL"]["accounted_on"] += expense.value
 
             elif paid_on_period and not accounted_on_period:
-                categorized_expenses[expense_category]["not_accounted"] += (
-                    expense.value
-                )
-                categorized_expenses[expense_category]["paid_on"] += (
-                    expense.value
-                )
+                categorized_expenses[expense_category]["not_accounted"] += expense.value
+                categorized_expenses[expense_category]["paid_on"] += expense.value
 
                 categorized_expenses["TOTAL"]["not_accounted"] += expense.value
                 categorized_expenses["TOTAL"]["paid_on"] += expense.value
 
             elif not paid_on_period and accounted_on_period:
-                categorized_expenses[expense_category]["not_paid"] += (
-                    expense.value
-                )
-                categorized_expenses[expense_category]["accounted_on"] += (
-                    expense.value
-                )
+                categorized_expenses[expense_category]["not_paid"] += expense.value
+                categorized_expenses[expense_category]["accounted_on"] += expense.value
 
                 categorized_expenses["TOTAL"]["accounted_on"] += expense.value
                 categorized_expenses["TOTAL"]["not_paid"] += expense.value
