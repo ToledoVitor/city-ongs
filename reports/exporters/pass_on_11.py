@@ -21,7 +21,7 @@ class PassOn11PDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract, start_date, end_date):
+    def __init__(self, contract, start_date, end_date, responsibles=None):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
@@ -33,6 +33,7 @@ class PassOn11PDFExporter:
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
+        self.responsibles = responsibles
         self.government_link = (
             "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
         )
@@ -435,7 +436,7 @@ class PassOn11PDFExporter:
                 )
                 self.pdf.ln(6)
                 self.pdf.multi_cell(
-                    text=("Assinatura:" "______________________________________"),
+                    text=("Assinatura: " "______________________________________"),
                     w=190,
                     h=self.default_cell_height,
                     new_x=XPos.LMARGIN,
