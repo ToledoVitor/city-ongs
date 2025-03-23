@@ -48,6 +48,7 @@ else:
     }
 
 SECRET_KEY = env("SECRET_KEY")
+# DEBUG = False
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
@@ -92,6 +93,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Internal Middlewares
+    "core.middlewares.ErrorHandlingMiddleware",
     "core.middlewares.ForcePasswordChangeMiddleware",
     "accounts.middlewares.TenantMiddleware",
     # Third parties
