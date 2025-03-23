@@ -5,7 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("accounts", "0011_alter_user_options_alter_cityhall_document_and_more"),
+        (
+            "accounts",
+            "0011_alter_user_options_alter_cityhall_document_and_more",
+        ),
     ]
 
     operations = [

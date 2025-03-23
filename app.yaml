@@ -10,4 +10,11 @@ runtime_config:
 beta_settings:
     cloud_sql_instances: sitts-project:REGION:postgres
 
+vpc_access_connector:
+    name: projects/sitts-project/locations/REGION/connectors/redis-connector
+
+env_variables:
+    REDIS_HOST: '10.232.60.11'
+    REDIS_PORT: '6379'
+
 # [END gaeflex_py_django_app_yaml]

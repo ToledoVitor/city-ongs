@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Q
 from django_cpf_cnpj.fields import CNPJField
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
@@ -12,7 +12,12 @@ from accounts.models import Area, BaseOrganizationTenantModel, Committee, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
+from utils.cache_invalidation import (
+    CacheInvalidationMixin,
+    invalidate_contract_cache,
+)
 from utils.choices import MonthChoices, StatesChoices, StatusChoices
+from utils.mixins import CacheableModelMixin
 
 
 class Company(BaseOrganizationTenantModel):
@@ -103,7 +108,15 @@ class Company(BaseOrganizationTenantModel):
         verbose_name_plural = "Empresas"
 
 
-class Contract(BaseOrganizationTenantModel):
+class Contract(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
+    """
+    Contract model representing agreements between organizations.
+    """
+
     class ContractStatusChoices(models.TextChoices):
         PLANNING = "PLANNING", "planejamento"
         EXECUTION = "EXECUTION", "em execução"
@@ -329,54 +342,41 @@ class Contract(BaseOrganizationTenantModel):
 
     @property
     def recent_logs(self):
-        contract_logs = ActivityLog.objects.filter(target_object_id=self.id)
-
-        addendum_ids = [
-            str(id) for id in self.addendums.values_list("id", flat=True)[:10]
-        ]
-        addendum_logs = ActivityLog.objects.filter(
-            target_object_id__in=addendum_ids,
+        # Coletando IDs necessários em uma única query para cada tipo
+        related_ids = {
+            "addendum": list(self.addendums.values_list("id", flat=True)[:10]),
+            "goals": list(self.goals.values_list("id", flat=True)[:10]),
+            "items": list(self.items.values_list("id", flat=True)[:10]),
+            "accountabilities": list(
+                self.accountabilities.values_list("id", flat=True)[:10]
+            ),
+            "interested": list(
+                self.interested_parts.values_list("id", flat=True)[:10]
+            ),
+        }
+        return (
+            ActivityLog.objects.filter(
+                Q(target_object_id=str(self.id))
+                | Q(target_object_id__in=related_ids["addendum"])
+                | Q(target_object_id__in=related_ids["goals"])
+                | Q(target_object_id__in=related_ids["items"])
+                | Q(target_object_id__in=related_ids["accountabilities"])
+                | Q(target_object_id__in=related_ids["interested"])
+            )
+            .select_related("user")
+            .distinct()
+            .order_by("-created_at")[:10]
         )
-
-        goals_ids = [str(id) for id in self.goals.values_list("id", flat=True)[:10]]
-        goals_logs = ActivityLog.objects.filter(
-            target_object_id__in=goals_ids,
-        )
-
-        items_ids = [str(id) for id in self.items.values_list("id", flat=True)[:10]]
-        items_logs = ActivityLog.objects.filter(
-            target_object_id__in=items_ids,
-        )
-
-        accountability_ids = [
-            str(id) for id in self.accountabilities.values_list("id", flat=True)[:10]
-        ]
-        accountability_logs = ActivityLog.objects.filter(
-            target_object_id__in=accountability_ids,
-        )
-
-        interested_ids = [
-            str(id) for id in self.interested_parts.values_list("id", flat=True)[:10]
-        ]
-        interested_logs = ActivityLog.objects.filter(
-            target_object_id__in=interested_ids,
-        )
-
-        combined_querset = (
-            contract_logs
-            | addendum_logs
-            | goals_logs
-            | items_logs
-            | accountability_logs
-            | interested_logs
-        ).distinct()
-        return combined_querset.order_by("-created_at")[:10]
 
     @property
     def month_income_value(self):
-        months_amount = (self.end_of_vigency - self.start_of_vigency).days // 30
+        months_amount = (
+            self.end_of_vigency - self.start_of_vigency
+        ).days // 30
         value_per_month = self.total_value / months_amount
-        return value_per_month.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return value_per_month.quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
 
     def save(self, *args, **kwargs):
         if self.internal_code is None:
@@ -385,6 +385,12 @@ class Contract(BaseOrganizationTenantModel):
             ]
             self.internal_code = 1 if max_code is None else max_code + 1
         super().save(*args, **kwargs)
+
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this contract.
+        """
+        invalidate_contract_cache(self.id)
 
 
 class ContractInterestedPart(BaseOrganizationTenantModel):
@@ -427,7 +433,11 @@ class ContractInterestedPart(BaseOrganizationTenantModel):
         verbose_name = "Partes Interessadas"
 
 
-class ContractMonthTransfer(BaseOrganizationTenantModel):
+class ContractMonthTransfer(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     class TransferSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida"
@@ -462,8 +472,19 @@ class ContractMonthTransfer(BaseOrganizationTenantModel):
         verbose_name = "Repasse Mensal"
         verbose_name_plural = "Repasses Mensais"
 
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this transfer.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
 
-class ContractAddendum(BaseOrganizationTenantModel):
+
+class ContractAddendum(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -500,8 +521,19 @@ class ContractAddendum(BaseOrganizationTenantModel):
         verbose_name = "Aditivo de Contrato"
         verbose_name_plural = "Aditivos de Contrato"
 
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this addendum.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
 
-class ContractGoal(BaseOrganizationTenantModel):
+
+class ContractGoal(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     """Model representing a goal within a contract with its specifications."""
 
     contract = models.ForeignKey(
@@ -551,6 +583,13 @@ class ContractGoal(BaseOrganizationTenantModel):
     def last_reviews(self) -> str:
         return self.goal_reviews.order_by("-created_at")[:10]
 
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this goal.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
+
     class Meta:
         verbose_name = "Meta"
         verbose_name_plural = "Metas"
@@ -581,7 +620,11 @@ class ContractGoalReview(BaseOrganizationTenantModel):
         verbose_name_plural = "Revisões de Metas"
 
 
-class ContractStep(BaseOrganizationTenantModel):
+class ContractStep(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     """Model representing a step within a contract goal."""
 
     goal = models.ForeignKey(
@@ -610,12 +653,23 @@ class ContractStep(BaseOrganizationTenantModel):
     def __str__(self) -> str:
         return str(f"Etapa: {self.name} | Meta: {self.goal.name}")
 
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this step.
+        """
+        if self.goal and self.goal.contract:
+            invalidate_contract_cache(self.goal.contract.id)
+
     class Meta:
         verbose_name = "Etapa"
         verbose_name_plural = "Etapas"
 
 
-class ContractItem(BaseOrganizationTenantModel):
+class ContractItem(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     class ResourceSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
@@ -746,6 +800,13 @@ class ContractItem(BaseOrganizationTenantModel):
     def last_reviews(self) -> str:
         return self.item_reviews.order_by("-created_at")[:10]
 
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this contract item.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
+
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
@@ -775,7 +836,11 @@ class ContractItemReview(BaseOrganizationTenantModel):
         verbose_name_plural = "Revisões de Itens"
 
 
-class ContractExecution(BaseOrganizationTenantModel):
+class ContractExecution(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em Andamento"
         SENT = "SENT", "Enviada para análise"
@@ -846,13 +911,24 @@ class ContractExecution(BaseOrganizationTenantModel):
             target_object_id__in=activities_ids,
         )
 
-        files_ids = [str(id) for id in self.files.values_list("id", flat=True)[:10]]
+        files_ids = [
+            str(id) for id in self.files.values_list("id", flat=True)[:10]
+        ]
         files_logs = ActivityLog.objects.filter(
             target_object_id__in=files_ids,
         )
 
-        combined_querset = (execution_logs | activities_logs | files_logs).distinct()
+        combined_querset = (
+            execution_logs | activities_logs | files_logs
+        ).distinct()
         return combined_querset.order_by("-created_at")[:10]
+
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this execution.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
 
 
 class ContractExecutionActivity(BaseOrganizationTenantModel):
@@ -905,7 +981,11 @@ class ContractExecutionActivity(BaseOrganizationTenantModel):
         ]
 
 
-class ContractExecutionFile(BaseOrganizationTenantModel):
+class ContractExecutionFile(
+    BaseOrganizationTenantModel,
+    CacheableModelMixin,
+    CacheInvalidationMixin,
+):
     execution = models.ForeignKey(
         # TODO: remove null
         ContractExecution,
@@ -938,6 +1018,13 @@ class ContractExecutionFile(BaseOrganizationTenantModel):
     @property
     def file_type(self) -> str:
         return os.path.splitext(self.file.name)[1]
+
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this execution file.
+        """
+        if self.execution and self.execution.contract:
+            invalidate_contract_cache(self.execution.contract.id)
 
 
 class ContractItemNewValueRequest(BaseOrganizationTenantModel):

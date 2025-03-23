@@ -26,12 +26,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="contract",
             name="law_date",
-            field=models.DateField(blank=True, null=True, verbose_name="Data da Lei"),
+            field=models.DateField(
+                blank=True, null=True, verbose_name="Data da Lei"
+            ),
         ),
         migrations.AddField(
             model_name="contract",
             name="law_num",
-            field=models.IntegerField(blank=True, null=True, verbose_name="Lei nº"),
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Lei nº"
+            ),
         ),
         migrations.AddField(
             model_name="historicalcontract",
@@ -50,11 +54,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="historicalcontract",
             name="law_date",
-            field=models.DateField(blank=True, null=True, verbose_name="Data da Lei"),
+            field=models.DateField(
+                blank=True, null=True, verbose_name="Data da Lei"
+            ),
         ),
         migrations.AddField(
             model_name="historicalcontract",
             name="law_num",
-            field=models.IntegerField(blank=True, null=True, verbose_name="Lei nº"),
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Lei nº"
+            ),
         ),
     ]

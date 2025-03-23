@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 from django import forms
-from django.db.models import Q, Sum
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import Q
 
 from accountability.models import (
     Accountability,
@@ -58,7 +61,85 @@ class ResourceSourceForm(forms.ModelForm):
 
 
 class ExpenseForm(forms.ModelForm):
-    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+    value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(
+                Decimal("0.01"), "O valor deve ser maior que zero"
+            ),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+
+    def clean_identification(self):
+        identification = self.cleaned_data.get("identification")
+        if identification:
+            # Remove caracteres especiais e espaços extras
+            identification = " ".join(identification.split())
+
+            # Verifica comprimento mínimo
+            if len(identification) < 5:
+                raise forms.ValidationError(
+                    "A identificação deve ter pelo menos 5 caracteres"
+                )
+
+            # Verifica se já existe uma despesa com essa identificação no mesmo mês
+            if self.instance and self.instance.accountability:
+                exists = (
+                    Expense.objects.filter(
+                        accountability=self.instance.accountability,
+                        identification=identification,
+                    )
+                    .exclude(id=self.instance.id)
+                    .exists()
+                )
+
+                if exists:
+                    raise forms.ValidationError(
+                        "Já existe uma despesa com essa identificação neste mês"
+                    )
+
+        return identification
+
+    def clean_document_number(self):
+        document_number = self.cleaned_data.get("document_number")
+        document_type = self.cleaned_data.get("document_type")
+
+        if document_type and not document_number:
+            raise forms.ValidationError(
+                "O número do documento é obrigatório quando o tipo é informado"
+            )
+
+        if document_number and not document_type:
+            raise forms.ValidationError(
+                "O tipo do documento é obrigatório quando o número é informado"
+            )
+
+        return document_number
+
+    def clean(self):
+        cleaned_data = super().clean()
+        value = cleaned_data.get("value")
+        item = cleaned_data.get("item")
+
+        if value and item:
+            # Verifica se o valor excede o orçamento do item
+            if item.remaining_budget < value:
+                raise forms.ValidationError(
+                    f"O valor excede o orçamento disponível do item "
+                    f"({format_into_brazilian_currency(item.remaining_budget)})"
+                )
+
+        # Verifica se a data de vencimento é anterior à data de competência
+        due_date = cleaned_data.get("due_date")
+        competency = cleaned_data.get("competency")
+        if due_date and competency and due_date < competency:
+            raise forms.ValidationError(
+                "A data de vencimento não pode ser anterior à data de competência"
+            )
+
+        return cleaned_data
 
     class Meta:
         model = Expense
@@ -109,41 +190,11 @@ class ExpenseForm(forms.ModelForm):
             self.fields["favored"].queryset = Favored.objects.none()
 
         if self.accountability:
-            self.fields["item"].queryset = self.accountability.contract.items.all()
+            self.fields[
+                "item"
+            ].queryset = self.accountability.contract.items.all()
         else:
             self.fields["item"].queryset = ContractItem.objects.none()
-
-    def clean(self):
-        cleaned_data = super().clean()
-        planned = cleaned_data["planned"]
-        item = cleaned_data["item"]
-
-        if planned and not item:
-            raise forms.ValidationError(
-                "As despesas planejadas devem estar relacionadas com um item de"
-                " aquisição do contrato."
-            )
-        elif not planned and item:
-            raise forms.ValidationError(
-                "As despesas não planejadas não podem estar relacionadas com um item de"
-                " aquisição do contrato."
-            )
-        elif not planned and not cleaned_data["nature"]:
-            raise forms.ValidationError(
-                "As despesas não planejadas precisam ter uma natureza da despesa."
-            )
-
-        if planned:
-            expended_value = item.expenses.filter(deleted_at__isnull=True).aggregate(
-                Sum("value")
-            )["value__sum"]
-            if (expended_value + cleaned_data["value"]) > item.anual_expense:
-                raise forms.ValidationError(
-                    "A despesa ultrapassará o custo anual planejado."
-                    "Solicite um remanejamento na página de items."
-                )
-
-        return cleaned_data
 
 
 class RevenueForm(forms.ModelForm):
@@ -172,7 +223,9 @@ class RevenueForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.accountability: Accountability = kwargs.pop("accountability", None)
+        self.accountability: Accountability = kwargs.pop(
+            "accountability", None
+        )
         super().__init__(*args, **kwargs)
 
         checking_account_id = getattr(
@@ -306,9 +359,13 @@ class ReconcileExpenseForm(forms.Form):
         transactions = self.cleaned_data.get("transactions")
 
         if not transactions:
-            raise forms.ValidationError("Informe as transações correspondentes")
+            raise forms.ValidationError(
+                "Informe as transações correspondentes"
+            )
 
-        transaction_amount = sum([transaction.amount for transaction in transactions])
+        transaction_amount = sum(
+            [transaction.amount for transaction in transactions]
+        )
         expenses_amount = self.expense.value
         for related_expense in self.relateds:
             expenses_amount += related_expense.value
@@ -361,7 +418,9 @@ class ReconcileRevenueForm(forms.Form):
         transactions = self.cleaned_data.get("transactions")
 
         if not transactions:
-            raise forms.ValidationError("Informe as transações correspondentes")
+            raise forms.ValidationError(
+                "Informe as transações correspondentes"
+            )
 
         amount = sum([transaction.amount for transaction in transactions])
         if amount != self.revenue.value:

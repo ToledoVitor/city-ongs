@@ -9,10 +9,15 @@ from fpdf.fonts import FontFace
 from accountability.models import Expense, Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
+from utils.formats import (
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass
@@ -20,7 +25,9 @@ class PeriodEpensesPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
+    def __init__(
+        self, contract: Contract, start_date: datetime, end_date: datetime
+    ):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)

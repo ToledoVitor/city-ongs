@@ -9,7 +9,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("accountability", "0015_alter_resourcesource_options_and_more"),
-        ("accounts", "0011_alter_user_options_alter_cityhall_document_and_more"),
+        (
+            "accounts",
+            "0011_alter_user_options_alter_cityhall_document_and_more",
+        ),
         ("bank", "0008_alter_bankaccount_organization_and_more"),
     ]
 
@@ -35,7 +38,10 @@ class Migration(migrations.Migration):
             model_name="bankaccount",
             name="account_type",
             field=models.CharField(
-                choices=[("CHECKING", "conta corrente"), ("INVESTING", "investimento")],
+                choices=[
+                    ("CHECKING", "conta corrente"),
+                    ("INVESTING", "investimento"),
+                ],
                 default="CHECKING",
                 help_text="Type of bank account (checking or investment)",
                 max_length=9,
@@ -68,7 +74,8 @@ class Migration(migrations.Migration):
             model_name="bankaccount",
             name="bank_id",
             field=models.IntegerField(
-                help_text="Bank identification number", verbose_name="Id do Banco"
+                help_text="Bank identification number",
+                verbose_name="Id do Banco",
             ),
         ),
         migrations.AlterField(
@@ -175,7 +182,10 @@ class Migration(migrations.Migration):
             model_name="historicalbankaccount",
             name="account_type",
             field=models.CharField(
-                choices=[("CHECKING", "conta corrente"), ("INVESTING", "investimento")],
+                choices=[
+                    ("CHECKING", "conta corrente"),
+                    ("INVESTING", "investimento"),
+                ],
                 default="CHECKING",
                 help_text="Type of bank account (checking or investment)",
                 max_length=9,
@@ -208,7 +218,8 @@ class Migration(migrations.Migration):
             model_name="historicalbankaccount",
             name="bank_id",
             field=models.IntegerField(
-                help_text="Bank identification number", verbose_name="Id do Banco"
+                help_text="Bank identification number",
+                verbose_name="Id do Banco",
             ),
         ),
         migrations.AlterField(
@@ -568,12 +579,15 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="bankaccount",
-            unique_together={("organization", "bank_name", "account", "account_type")},
+            unique_together={
+                ("organization", "bank_name", "account", "account_type")
+            },
         ),
         migrations.AddIndex(
             model_name="bankaccount",
             index=models.Index(
-                fields=["bank_name", "account"], name="bank_bankac_bank_na_12c426_idx"
+                fields=["bank_name", "account"],
+                name="bank_bankac_bank_na_12c426_idx",
             ),
         ),
         migrations.AddIndex(
@@ -584,7 +598,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="bankaccount",
-            index=models.Index(fields=["origin"], name="bank_bankac_origin_06e584_idx"),
+            index=models.Index(
+                fields=["origin"], name="bank_bankac_origin_06e584_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="bankstatement",
@@ -603,7 +619,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="transaction",
             index=models.Index(
-                fields=["bank_account", "date"], name="bank_transa_bank_ac_34371a_idx"
+                fields=["bank_account", "date"],
+                name="bank_transa_bank_ac_34371a_idx",
             ),
         ),
         migrations.AddIndex(
@@ -616,7 +633,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="transaction",
             index=models.Index(
-                fields=["transaction_number"], name="bank_transa_transac_365a0b_idx"
+                fields=["transaction_number"],
+                name="bank_transa_transac_365a0b_idx",
             ),
         ),
         migrations.AddConstraint(

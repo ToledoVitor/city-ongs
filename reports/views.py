@@ -30,7 +30,10 @@ class ReportsView(TemplateView):
             start_date = make_aware(start_date)
             end_date = make_aware(end_date)
 
-            if not contract.checking_account and not contract.investing_account:
+            if (
+                not contract.checking_account
+                and not contract.investing_account
+            ):
                 return self.render_to_response(
                     self.get_context_data(
                         form=form,

@@ -28,7 +28,8 @@ class Migration(migrations.Migration):
             model_name="transaction",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    ("deleted_at__isnull", True), ("transaction_number__isnull", False)
+                    ("deleted_at__isnull", True),
+                    ("transaction_number__isnull", False),
                 ),
                 fields=("transaction_number",),
                 name="unique__transaction_number",

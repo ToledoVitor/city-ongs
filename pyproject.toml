@@ -30,6 +30,9 @@ django-storages = {extras = ["google"], version = "^1.14.5"}
 sendgrid = "^6.11.0"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^8.0.0"}
 ipython = "^9.0.2"
+phonenumbers = "^8.13.30"
+django-redis = "^5.4.0"
+redis = "^5.0.1"
 
 
 [build-system]

@@ -60,8 +60,14 @@ class NatureChoices(TextChoices):
         "OTHER_ADMINISTRATIVE_EXPENSES",
         "Despesas Administrativas",
     )
-    RETURN_OF_FUNDS = "RETURN_OF_FUNDS", "Devolução de Recurso ao Órgão Concedente"
-    PARKING_DRIVING_TAXI = "PARKING_DRIVING_TAXI", "Estacionamento/condução/táxi"
+    RETURN_OF_FUNDS = (
+        "RETURN_OF_FUNDS",
+        "Devolução de Recurso ao Órgão Concedente",
+    )
+    PARKING_DRIVING_TAXI = (
+        "PARKING_DRIVING_TAXI",
+        "Estacionamento/condução/táxi",
+    )
     IPTU = "IPTU", "IPTU"
     TAXES_FEES_CONTRIBUTIONS = (
         "TAXES_FEES_CONTRIBUTIONS",
@@ -87,12 +93,18 @@ class NatureChoices(TextChoices):
     UTENSILS = "UTENSILS", "Utensílios"
     OFFICE_SUPPLIES_1 = "OFFICE_SUPPLIES_1", "Materiais de Expediente"
     OFFICE_SUPPLIES_2 = "OFFICE_SUPPLIES_2", "Material de Escritório"
-    OFFICE_SUPPLIES_3 = "OFFICE_SUPPLIES_3", "Material de expediente/correio/fotocópias"
+    OFFICE_SUPPLIES_3 = (
+        "OFFICE_SUPPLIES_3",
+        "Material de expediente/correio/fotocópias",
+    )
     OTHER_CONSUMABLES = "OTHER_CONSUMABLES", "Outros Materiais de Consumo"
 
     # Other Third-Party Services
     COMMON_WASTE_COLLECT = "COMMON_WASTE_COLLECT", "Coleta de lixo comum"
-    HOSPITAL_WASTE_COLLECT = "HOSPITAL_WASTE_COLLECT", "Coleta de lixo hospitalar"
+    HOSPITAL_WASTE_COLLECT = (
+        "HOSPITAL_WASTE_COLLECT",
+        "Coleta de lixo hospitalar",
+    )
     CONSULTING_LEGAL_ADVICE = (
         "CONSULTING_LEGAL_ADVICE",
         "Consultoria/assessoria jurídica",
@@ -106,7 +118,10 @@ class NatureChoices(TextChoices):
         "MAINTENANCE_COMPUTER_EQUIPMENT",
         "Manutenção - Equipamento de Informática",
     )
-    MAINTENANCE_BUILDING = "MAINTENANCE_BUILDING", "Manutenção - predial e Imobiliário"
+    MAINTENANCE_BUILDING = (
+        "MAINTENANCE_BUILDING",
+        "Manutenção - predial e Imobiliário",
+    )
     MAINTENANCE_VEHICLE = "MAINTENANCE_VEHICLE", "Manutenção de veículos"
     CONSTRUCTION = "CONSTRUCTION", "Obras"
     MAINTENANCE_OTHERS = "MAINTENANCE_OTHERS", "Outras Manutenções"
@@ -114,7 +129,10 @@ class NatureChoices(TextChoices):
         "LEGAL_THIRD_PARTY_SERVICES",
         "Outros serviços de terceiros pessoa jurídica",
     )
-    ADVERTISING_PUBILICITY = "ADVERTISING_PUBILICITY", "Publicidade e propaganda"
+    ADVERTISING_PUBILICITY = (
+        "ADVERTISING_PUBILICITY",
+        "Publicidade e propaganda",
+    )
     THERAPEUTIC_SUPPORT_SERVICE = (
         "THERAPEUTIC_SUPPORT_SERVICE",
         "Serviço de apoio diagnóstico terapêutico (sadt)",
@@ -130,7 +148,10 @@ class NatureChoices(TextChoices):
     MEDICAL_ASSISTENCE = "MEDICAL_ASSISTENCE", "Assistência médica"
     ADVANCE_NOTICE = "ADVANCE_NOTICE", "Aviso prévio"
     BENEFITS = "BENEFITS", "Benefícios"
-    INTERNSHIP_ALLOWANCE = "INTERNSHIP_ALLOWANCE", "Bolsa Auxílio - estagiários"
+    INTERNSHIP_ALLOWANCE = (
+        "INTERNSHIP_ALLOWANCE",
+        "Bolsa Auxílio - estagiários",
+    )
     INSS_CONTRIBUTION_SHARE = (
         "INSS_CONTRIBUTION_SHARE",
         "Contribuição ao INSS - Cota Patronal",
@@ -155,12 +176,18 @@ class NatureChoices(TextChoices):
         "TERMINATION_EMPLOYMENT_CONTRACT",
         "Rescisão de Contrato de Trabalho - TRCT",
     )
-    MISCELLANOUS_WITHHOLDINGS = "MISCELLANOUS_WITHHOLDINGS", "Retenções Diversas"
+    MISCELLANOUS_WITHHOLDINGS = (
+        "MISCELLANOUS_WITHHOLDINGS",
+        "Retenções Diversas",
+    )
     MANAGEMENT_SALARY = (
         "MANAGEMENT_SALARY",
         "Salário diretoria (salários e ordenados)",
     )
-    SALARIES_AND_WAGES = "SALARIES_AND_WAGES", "Salários e ordenados (exceto diretoria)"
+    SALARIES_AND_WAGES = (
+        "SALARIES_AND_WAGES",
+        "Salários e ordenados (exceto diretoria)",
+    )
     UNIFORMS = "UNIFORMS", "Uniformes"
     FOOD_VOUCHERS = "FOOD_VOUCHERS", "Vale Alimentação"
     MEAL_VOUCHERS = "MEAL_VOUCHERS", "Vale Refeição"

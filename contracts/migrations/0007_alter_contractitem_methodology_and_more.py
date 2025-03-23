@@ -13,28 +13,40 @@ class Migration(migrations.Migration):
             model_name="contractitem",
             name="methodology",
             field=models.CharField(
-                blank=True, max_length=256, null=True, verbose_name="Metodologia"
+                blank=True,
+                max_length=256,
+                null=True,
+                verbose_name="Metodologia",
             ),
         ),
         migrations.AlterField(
             model_name="contractitem",
             name="unit_type",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="Tipo da Unidade"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="Tipo da Unidade",
             ),
         ),
         migrations.AlterField(
             model_name="historicalcontractitem",
             name="methodology",
             field=models.CharField(
-                blank=True, max_length=256, null=True, verbose_name="Metodologia"
+                blank=True,
+                max_length=256,
+                null=True,
+                verbose_name="Metodologia",
             ),
         ),
         migrations.AlterField(
             model_name="historicalcontractitem",
             name="unit_type",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="Tipo da Unidade"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="Tipo da Unidade",
             ),
         ),
     ]

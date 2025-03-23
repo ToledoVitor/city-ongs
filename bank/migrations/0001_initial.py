@@ -38,12 +38,16 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "bank_name",
-                    models.CharField(max_length=128, verbose_name="Nome do Banco"),
+                    models.CharField(
+                        max_length=128, verbose_name="Nome do Banco"
+                    ),
                 ),
                 ("bank_id", models.IntegerField(verbose_name="Id do Banco")),
                 (
                     "account",
-                    models.CharField(max_length=16, verbose_name="Número da Conta"),
+                    models.CharField(
+                        max_length=16, verbose_name="Número da Conta"
+                    ),
                 ),
                 (
                     "account_type",
@@ -60,13 +64,18 @@ class Migration(migrations.Migration):
                 (
                     "agency",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Agência"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Agência",
                     ),
                 ),
                 (
                     "balance",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Saldo Atual"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Saldo Atual",
                     ),
                 ),
                 (
@@ -76,7 +85,10 @@ class Migration(migrations.Migration):
                             ("MUNICIPAL", "Municipal"),
                             ("FEDERAL", "Federal"),
                             ("STATE", "Estadual"),
-                            ("COUNTERPART_PARTNER", "Contrapartida de parceiro"),
+                            (
+                                "COUNTERPART_PARTNER",
+                                "Contrapartida de parceiro",
+                            ),
                             ("PRIVATE_SPONSOR", "Patrocinador privado"),
                         ],
                         default="MUNICIPAL",
@@ -149,7 +161,10 @@ class Migration(migrations.Migration):
                         verbose_name="Mês",
                     ),
                 ),
-                ("reference_year", models.IntegerField(default=0, verbose_name="Ano")),
+                (
+                    "reference_year",
+                    models.IntegerField(default=0, verbose_name="Ano"),
+                ),
                 (
                     "bank_account",
                     models.ForeignKey(
@@ -176,20 +191,30 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
                 (
                     "bank_name",
-                    models.CharField(max_length=128, verbose_name="Nome do Banco"),
+                    models.CharField(
+                        max_length=128, verbose_name="Nome do Banco"
+                    ),
                 ),
                 ("bank_id", models.IntegerField(verbose_name="Id do Banco")),
                 (
                     "account",
-                    models.CharField(max_length=16, verbose_name="Número da Conta"),
+                    models.CharField(
+                        max_length=16, verbose_name="Número da Conta"
+                    ),
                 ),
                 (
                     "account_type",
@@ -206,13 +231,18 @@ class Migration(migrations.Migration):
                 (
                     "agency",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Agência"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Agência",
                     ),
                 ),
                 (
                     "balance",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Saldo Atual"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Saldo Atual",
                     ),
                 ),
                 (
@@ -222,7 +252,10 @@ class Migration(migrations.Migration):
                             ("MUNICIPAL", "Municipal"),
                             ("FEDERAL", "Federal"),
                             ("STATE", "Estadual"),
-                            ("COUNTERPART_PARTNER", "Contrapartida de parceiro"),
+                            (
+                                "COUNTERPART_PARTNER",
+                                "Contrapartida de parceiro",
+                            ),
                             ("PRIVATE_SPONSOR", "Patrocinador privado"),
                         ],
                         default="MUNICIPAL",
@@ -230,13 +263,23 @@ class Migration(migrations.Migration):
                         verbose_name="Origem da Fonte",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -269,8 +312,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -316,14 +365,27 @@ class Migration(migrations.Migration):
                         verbose_name="Mês",
                     ),
                 ),
-                ("reference_year", models.IntegerField(default=0, verbose_name="Ano")),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "reference_year",
+                    models.IntegerField(default=0, verbose_name="Ano"),
+                ),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -368,8 +430,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -423,7 +491,10 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Nome"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Nome",
                     ),
                 ),
                 (
@@ -435,13 +506,23 @@ class Migration(migrations.Migration):
                         verbose_name="Notas Adicionais (opcional)",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -578,7 +659,10 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Nome"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Nome",
                     ),
                 ),
                 (

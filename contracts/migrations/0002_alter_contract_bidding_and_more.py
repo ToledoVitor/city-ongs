@@ -20,7 +20,10 @@ class Migration(migrations.Migration):
             model_name="contract",
             name="concession_type",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="Tipo de Concessão"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="Tipo de Concessão",
             ),
         ),
         migrations.AlterField(
@@ -38,7 +41,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="contractitem",
             name="unit_type",
-            field=models.CharField(max_length=128, verbose_name="Tipo da Unidade"),
+            field=models.CharField(
+                max_length=128, verbose_name="Tipo da Unidade"
+            ),
         ),
         migrations.AlterField(
             model_name="historicalcontract",
@@ -51,12 +56,17 @@ class Migration(migrations.Migration):
             model_name="historicalcontract",
             name="concession_type",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="Tipo de Concessão"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="Tipo de Concessão",
             ),
         ),
         migrations.AlterField(
             model_name="historicalcontractitem",
             name="unit_type",
-            field=models.CharField(max_length=128, verbose_name="Tipo da Unidade"),
+            field=models.CharField(
+                max_length=128, verbose_name="Tipo da Unidade"
+            ),
         ),
     ]

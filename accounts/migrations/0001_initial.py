@@ -39,11 +39,17 @@ class Migration(migrations.Migration):
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Nome")),
+                (
+                    "name",
+                    models.CharField(max_length=128, verbose_name="Nome"),
+                ),
                 (
                     "description",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Descrição"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Descrição",
                     ),
                 ),
             ],
@@ -70,13 +76,27 @@ class Migration(migrations.Migration):
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Prefeitura")),
-                ("mayor", models.CharField(max_length=256, verbose_name="Prefeito")),
-                ("document", models.CharField(max_length=32, verbose_name="Documento")),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=128, verbose_name="Prefeitura"
+                    ),
+                ),
+                (
+                    "mayor",
+                    models.CharField(max_length=256, verbose_name="Prefeito"),
+                ),
+                (
+                    "document",
+                    models.CharField(max_length=32, verbose_name="Documento"),
+                ),
                 (
                     "position",
                     models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="cargo"
+                        blank=True,
+                        max_length=150,
+                        null=True,
+                        verbose_name="cargo",
                     ),
                 ),
             ],
@@ -97,7 +117,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "password",
+                    models.CharField(max_length=128, verbose_name="password"),
+                ),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -143,13 +166,19 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now,
+                        verbose_name="date joined",
                     ),
                 ),
-                ("username", models.CharField(blank=True, max_length=150, null=True)),
+                (
+                    "username",
+                    models.CharField(blank=True, max_length=150, null=True),
+                ),
                 (
                     "email",
-                    utils.fields.LowerCaseEmailField(max_length=254, unique=True),
+                    utils.fields.LowerCaseEmailField(
+                        max_length=254, unique=True
+                    ),
                 ),
                 ("cpf", models.CharField(max_length=16, verbose_name="Cpf")),
                 (
@@ -176,7 +205,10 @@ class Migration(migrations.Migration):
                 (
                     "position",
                     models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="cargo"
+                        blank=True,
+                        max_length=150,
+                        null=True,
+                        verbose_name="cargo",
                     ),
                 ),
                 (
@@ -203,7 +235,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "areas",
-                    models.ManyToManyField(related_name="users", to="accounts.area"),
+                    models.ManyToManyField(
+                        related_name="users", to="accounts.area"
+                    ),
                 ),
             ],
             options={
@@ -236,26 +270,48 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Nome")),
+                (
+                    "name",
+                    models.CharField(max_length=128, verbose_name="Nome"),
+                ),
                 (
                     "description",
                     models.CharField(
-                        blank=True, max_length=128, null=True, verbose_name="Descrição"
+                        blank=True,
+                        max_length=128,
+                        null=True,
+                        verbose_name="Descrição",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -300,28 +356,58 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Prefeitura")),
-                ("mayor", models.CharField(max_length=256, verbose_name="Prefeito")),
-                ("document", models.CharField(max_length=32, verbose_name="Documento")),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=128, verbose_name="Prefeitura"
+                    ),
+                ),
+                (
+                    "mayor",
+                    models.CharField(max_length=256, verbose_name="Prefeito"),
+                ),
+                (
+                    "document",
+                    models.CharField(max_length=32, verbose_name="Documento"),
+                ),
                 (
                     "position",
                     models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="cargo"
+                        blank=True,
+                        max_length=150,
+                        null=True,
+                        verbose_name="cargo",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -354,38 +440,66 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Nome")),
+                (
+                    "name",
+                    models.CharField(max_length=128, verbose_name="Nome"),
+                ),
                 (
                     "owner",
                     models.CharField(
-                        blank=True, max_length=256, null=True, verbose_name="Presidente"
+                        blank=True,
+                        max_length=256,
+                        null=True,
+                        verbose_name="Presidente",
                     ),
                 ),
                 (
                     "document",
                     models.CharField(
-                        blank=True, max_length=32, null=True, verbose_name="Documento"
+                        blank=True,
+                        max_length=32,
+                        null=True,
+                        verbose_name="Documento",
                     ),
                 ),
                 (
                     "position",
                     models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="cargo"
+                        blank=True,
+                        max_length=150,
+                        null=True,
+                        verbose_name="cargo",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -437,23 +551,35 @@ class Migration(migrations.Migration):
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Nome")),
+                (
+                    "name",
+                    models.CharField(max_length=128, verbose_name="Nome"),
+                ),
                 (
                     "owner",
                     models.CharField(
-                        blank=True, max_length=256, null=True, verbose_name="Presidente"
+                        blank=True,
+                        max_length=256,
+                        null=True,
+                        verbose_name="Presidente",
                     ),
                 ),
                 (
                     "document",
                     models.CharField(
-                        blank=True, max_length=32, null=True, verbose_name="Documento"
+                        blank=True,
+                        max_length=32,
+                        null=True,
+                        verbose_name="Documento",
                     ),
                 ),
                 (
                     "position",
                     models.CharField(
-                        blank=True, max_length=150, null=True, verbose_name="cargo"
+                        blank=True,
+                        max_length=150,
+                        null=True,
+                        verbose_name="cargo",
                     ),
                 ),
                 (

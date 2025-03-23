@@ -256,7 +256,7 @@
                       >
                         {{ revenue.bank_account.account }} ({{revenue.bank_account.account_type_label}}) <br>
                         <span class="text-sm">{{ revenue.bank_account.bank_name }}</span>
-                    </a>
+                      </a>
                     </td>
                     <td class="px-6 py-4 text-sm text-black">
                       {{ revenue.source_label }} <br>
@@ -264,7 +264,7 @@
                     <td class="px-6 py-4 text-sm flex justify-end">
                       {% if accountability.is_on_execution %}
                       <a
-                        href="{% url 'accountability:revenue-update' revenue.id %}"
+                        href="{% url 'accountability:revenues-update' revenue.id %}"
                         class="
                           px-3
                           py-2
@@ -536,7 +536,7 @@
                             </div>
                 
                             <div id="uploadRevenueFormContainer-{{ revenue.id }}" class="hidden mb-6">
-                              <form method="post" action="{% url 'accountability:revenue-file' revenue.pk %}" enctype="multipart/form-data">
+                              <form method="post" action="{% url 'accountability:revenue-file' revenue.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                 <div class="my-3">
@@ -679,7 +679,7 @@
                           <!-- Modal body -->
                           <div class="p-4 md:p-5">
 
-                              <form class="space-y-4"  method="post" action="{% url 'accountability:revenue-duplicate' revenue.id %}">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:revenues-duplicate' revenue.id %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="form_type" value="revenues_delete">
                                   <input type="hidden" name="revenue_id" value="{{ revenue.id }}">

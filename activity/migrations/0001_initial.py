@@ -39,7 +39,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("object_id", models.UUIDField(verbose_name="ID do objeto")),
-                ("text", models.CharField(max_length=255, verbose_name="Texto")),
+                (
+                    "text",
+                    models.CharField(max_length=255, verbose_name="Texto"),
+                ),
                 (
                     "recipient",
                     models.ForeignKey(
@@ -86,31 +89,73 @@ class Migration(migrations.Migration):
                     "action",
                     models.CharField(
                         choices=[
-                            ("CREATED_CIVIL_SERVANT", "Criou funcionário público"),
-                            ("CREATED_FOLDER_MANAGER", "Criou gestor de pasta"),
+                            (
+                                "CREATED_CIVIL_SERVANT",
+                                "Criou funcionário público",
+                            ),
+                            (
+                                "CREATED_FOLDER_MANAGER",
+                                "Criou gestor de pasta",
+                            ),
                             (
                                 "CREATED_ORGANIZATION_ACCOUNTANT",
                                 "Criou contador / funcionário organização",
                             ),
-                            ("CREATED_ACCOUNTABILITY", "Criou prestação mensal"),
+                            (
+                                "CREATED_ACCOUNTABILITY",
+                                "Criou prestação mensal",
+                            ),
                             ("SENT_TO_ANALISYS", "Enviou para análise"),
                             ("SENT_TO_CORRECT", "Enviou para correção"),
                             ("MARKED_AS_FINISHED", "Marcou como finalizada"),
                             ("CREATED_BANK_ACCOUNT", "Criou conta bancária"),
-                            ("UPDATED_BANK_ACCOUNT", "Atualizou conta bancária"),
-                            ("UPLOADED_BALANCE_FILE", "subiu extrato bancário"),
+                            (
+                                "UPDATED_BANK_ACCOUNT",
+                                "Atualizou conta bancária",
+                            ),
+                            (
+                                "UPLOADED_BALANCE_FILE",
+                                "subiu extrato bancário",
+                            ),
                             ("CREATED_COMPANY", "Criou empresa"),
                             ("UPDATED_COMPANY", "Atualizou empresa"),
                             ("CREATED_CONTRACT", "Criou contrato"),
-                            ("CREATED_CONTRACT_ADDENDUM", "Criou aditivo de contrato"),
-                            ("UPDATED_CONTRACT_STATUS", "Atualizou status do contrato"),
-                            ("CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"),
-                            ("COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"),
-                            ("UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"),
-                            ("CREATED_CONTRACT_ITEM", "Cadastrou item do contrato"),
-                            ("COMMENTED_CONTRACT_ITEM", "Comentou item do contrato"),
-                            ("UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"),
-                            ("REQUEST_NEW_VALUE_ITEM", "Solicitou nova valor do item"),
+                            (
+                                "CREATED_CONTRACT_ADDENDUM",
+                                "Criou aditivo de contrato",
+                            ),
+                            (
+                                "UPDATED_CONTRACT_STATUS",
+                                "Atualizou status do contrato",
+                            ),
+                            (
+                                "CREATED_CONTRACT_GOAL",
+                                "Cadastrou meta do contrato",
+                            ),
+                            (
+                                "COMMENTED_CONTRACT_GOAL",
+                                "Comentou meta do contrato",
+                            ),
+                            (
+                                "UPDATED_CONTRACT_GOAL",
+                                "Atualizou meta do contrato",
+                            ),
+                            (
+                                "CREATED_CONTRACT_ITEM",
+                                "Cadastrou item do contrato",
+                            ),
+                            (
+                                "COMMENTED_CONTRACT_ITEM",
+                                "Comentou item do contrato",
+                            ),
+                            (
+                                "UPDATED_CONTRACT_ITEM",
+                                "Atualizou item do contrato",
+                            ),
+                            (
+                                "REQUEST_NEW_VALUE_ITEM",
+                                "Solicitou nova valor do item",
+                            ),
                             (
                                 "ANALISED_NEW_VALUE_ITEM",
                                 "Analisou pedido de novo valor do item",
@@ -119,12 +164,18 @@ class Migration(migrations.Migration):
                                 "CREATED_CONTRACT_EXECUTION",
                                 "Criou Relatório de Execução",
                             ),
-                            ("CREATED_EXECUTION_ACTIVITY", "Criou Atividade Executada"),
+                            (
+                                "CREATED_EXECUTION_ACTIVITY",
+                                "Criou Atividade Executada",
+                            ),
                             (
                                 "UPDATED_EXECUTION_ACTIVITY",
                                 "Atualizou Atividade Executada",
                             ),
-                            ("CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"),
+                            (
+                                "CREATED_EXECUTION_FILE",
+                                "Anexou Arquivo de Atividade",
+                            ),
                             (
                                 "UPDATED_EXECUTION_FILE",
                                 "Atualizou Arquivo de Atividade",
@@ -139,8 +190,14 @@ class Migration(migrations.Migration):
                             ("CREATED_FAVORED", "Cadastrou favorecido"),
                             ("UPDATED_FAVORED", "Atualizou favorecido"),
                             ("DELETED_FAVORED", "Apagou favorecido"),
-                            ("CREATED_RESOURCES_SOURCE", "Cadastrou fonte de recurso"),
-                            ("DELETED_RESOURCES_SOURCE", "Apagou fonte de recurso"),
+                            (
+                                "CREATED_RESOURCES_SOURCE",
+                                "Cadastrou fonte de recurso",
+                            ),
+                            (
+                                "DELETED_RESOURCES_SOURCE",
+                                "Apagou fonte de recurso",
+                            ),
                             ("CREATED_REVENUE", "Cadastrou receita"),
                             ("UPDATED_REVENUE", "Atualizou receita"),
                             ("RECONCILED_REVENUE", "Conciliou receita"),
@@ -155,7 +212,10 @@ class Migration(migrations.Migration):
                 (
                     "target_object_id",
                     models.CharField(
-                        blank=True, max_length=32, null=True, verbose_name="ID do alvo"
+                        blank=True,
+                        max_length=32,
+                        null=True,
+                        verbose_name="ID do alvo",
                     ),
                 ),
                 (

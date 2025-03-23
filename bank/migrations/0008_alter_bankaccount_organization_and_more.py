@@ -7,7 +7,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("accounts", "0008_delete_organizationtenantbaseclass"),
-        ("bank", "0007_bankaccount_organization_bankstatement_organization_and_more"),
+        (
+            "bank",
+            "0007_bankaccount_organization_bankstatement_organization_and_more",
+        ),
     ]
 
     operations = [

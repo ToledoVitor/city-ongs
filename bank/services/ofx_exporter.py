@@ -11,7 +11,9 @@ class OFXStatementExporter:
         end_date: datetime.date,
     ):
         def format_dt(dt):
-            if isinstance(dt, datetime.date) and not isinstance(dt, datetime.datetime):
+            if isinstance(dt, datetime.date) and not isinstance(
+                dt, datetime.datetime
+            ):
                 dt = datetime.datetime.combine(dt, datetime.time.min)
             return dt.strftime("%Y%m%d%H%M%S")
 

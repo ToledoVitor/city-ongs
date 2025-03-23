@@ -31,7 +31,10 @@ class Migration(migrations.Migration):
                     ("UPDATED_COMPANY", "Atualizou empresa"),
                     ("CREATED_CONTRACT", "Criou contrato"),
                     ("CREATED_CONTRACT_ADDENDUM", "Criou aditivo de contrato"),
-                    ("UPDATED_CONTRACT_STATUS", "Atualizou status do contrato"),
+                    (
+                        "UPDATED_CONTRACT_STATUS",
+                        "Atualizou status do contrato",
+                    ),
                     ("CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"),
                     ("COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"),
                     ("UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"),
@@ -43,17 +46,32 @@ class Migration(migrations.Migration):
                         "ANALISED_NEW_VALUE_ITEM",
                         "Analisou pedido de novo valor do item",
                     ),
-                    ("CREATED_CONTRACT_EXECUTION", "Criou relatório de execução"),
+                    (
+                        "CREATED_CONTRACT_EXECUTION",
+                        "Criou relatório de execução",
+                    ),
                     ("EXECUTION_TO_ANALISYS", "Enviou relatório para análise"),
-                    ("EXECUTION_SENT_TO_CORRECT", "Enviou relatório para correção"),
+                    (
+                        "EXECUTION_SENT_TO_CORRECT",
+                        "Enviou relatório para correção",
+                    ),
                     (
                         "EXECUTION_MARKED_AS_FINISHED",
                         "Marcou relatório como finalizada",
                     ),
-                    ("CREATED_EXECUTION_ACTIVITY", "Criou Atividade Executada"),
-                    ("UPDATED_EXECUTION_ACTIVITY", "Atualizou Atividade Executada"),
+                    (
+                        "CREATED_EXECUTION_ACTIVITY",
+                        "Criou Atividade Executada",
+                    ),
+                    (
+                        "UPDATED_EXECUTION_ACTIVITY",
+                        "Atualizou Atividade Executada",
+                    ),
                     ("CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"),
-                    ("UPDATED_EXECUTION_FILE", "Atualizou Arquivo de Atividade"),
+                    (
+                        "UPDATED_EXECUTION_FILE",
+                        "Atualizou Arquivo de Atividade",
+                    ),
                     ("CREATED_EXPENSE", "Cadastrou despesa"),
                     ("UPDATED_EXPENSE", "Atualizou despesa"),
                     ("GLOSSED_EXPENSE", "Glosou despesa"),
@@ -82,10 +100,22 @@ class Migration(migrations.Migration):
             name="category",
             field=models.CharField(
                 choices=[
-                    ("ACCOUNTABILITY_CREATED", "Uma nova prestação foi criada"),
-                    ("ACCOUNTABILITY_ANALISYS", "Prestação enviada para análise"),
-                    ("ACCOUNTABILITY_CORRECTING", "Prestação enviada para correção"),
-                    ("ACCOUNTABILITY_FINISHED", "Prestação marcada como finalizada"),
+                    (
+                        "ACCOUNTABILITY_CREATED",
+                        "Uma nova prestação foi criada",
+                    ),
+                    (
+                        "ACCOUNTABILITY_ANALISYS",
+                        "Prestação enviada para análise",
+                    ),
+                    (
+                        "ACCOUNTABILITY_CORRECTING",
+                        "Prestação enviada para correção",
+                    ),
+                    (
+                        "ACCOUNTABILITY_FINISHED",
+                        "Prestação marcada como finalizada",
+                    ),
                     ("CONTRACT_CREATED", "Um novo contrato foi criado"),
                     ("CONTRACT_STATUS", "O Status do contrato foi atualizado"),
                     ("CONTRACT_GOAL_COMMENTED", "Meta do contrato comentada"),

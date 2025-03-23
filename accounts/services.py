@@ -18,7 +18,9 @@ def notify_user_account_created(user: User, password: str):
             "password": password,
             "website_url": settings.WEBSITE_URL,
         }
-        html_content = render_to_string("email/account_created_email.html", context)
+        html_content = render_to_string(
+            "email/account_created_email.html", context
+        )
 
         sendgrid_client = SendGridClient()
         sendgrid_client.notify(

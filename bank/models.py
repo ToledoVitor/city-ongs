@@ -14,7 +14,10 @@ class BankAccount(BaseOrganizationTenantModel):
         MUNICIPAL = "MUNICIPAL", "Municipal"
         FEDERAL = "FEDERAL", "Federal"
         STATE = "STATE", "Estadual"
-        COUNTERPART_PARTNER = "COUNTERPART_PARTNER", "Contrapartida de parceiro"
+        COUNTERPART_PARTNER = (
+            "COUNTERPART_PARTNER",
+            "Contrapartida de parceiro",
+        )
         PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
 
     class AccountTypeChoices(models.TextChoices):
@@ -76,7 +79,12 @@ class BankAccount(BaseOrganizationTenantModel):
         constraints = [
             models.UniqueConstraint(
                 condition=models.Q(deleted_at__isnull=True),
-                fields=("organization", "bank_name", "account", "account_type"),
+                fields=(
+                    "organization",
+                    "bank_name",
+                    "account",
+                    "account_type",
+                ),
                 name="unique_bank_account_per_organization",
             ),
         ]
@@ -186,13 +194,18 @@ class BankStatement(BaseOrganizationTenantModel):
             ),
         ]
         indexes = [
-            models.Index(fields=["bank_account", "reference_month", "reference_year"]),
+            models.Index(
+                fields=["bank_account", "reference_month", "reference_year"]
+            ),
             models.Index(fields=["reference_month", "reference_year"]),
         ]
 
     def clean(self):
         """Validate the statement data."""
-        if self.closing_balance is not None and self.opening_balance is not None:
+        if (
+            self.closing_balance is not None
+            and self.opening_balance is not None
+        ):
             if self.closing_balance < 0:
                 raise ValidationError("Closing balance cannot be negative")
             if self.opening_balance < 0:

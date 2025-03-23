@@ -6,7 +6,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("contracts", "0009_company_phone_number_historicalcompany_phone_number"),
+        (
+            "contracts",
+            "0009_company_phone_number_historicalcompany_phone_number",
+        ),
     ]
 
     operations = [

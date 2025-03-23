@@ -7,7 +7,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("bank", "0003_remove_historicaltransaction_destination_source_and_more"),
+        (
+            "bank",
+            "0003_remove_historicaltransaction_destination_source_and_more",
+        ),
     ]
 
     operations = [

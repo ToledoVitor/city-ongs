@@ -183,15 +183,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="user",
-            unique_together={("organization", "cpf"), ("organization", "email")},
+            unique_together={
+                ("organization", "cpf"),
+                ("organization", "email"),
+            },
         ),
         migrations.AddIndex(
             model_name="user",
-            index=models.Index(fields=["email"], name="accounts_us_email_74c8d6_idx"),
+            index=models.Index(
+                fields=["email"], name="accounts_us_email_74c8d6_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="user",
-            index=models.Index(fields=["cpf"], name="accounts_us_cpf_c8d8a5_idx"),
+            index=models.Index(
+                fields=["cpf"], name="accounts_us_cpf_c8d8a5_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="user",
@@ -209,7 +216,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="user",
             index=models.Index(
-                fields=["password_expires_at"], name="accounts_us_passwor_978854_idx"
+                fields=["password_expires_at"],
+                name="accounts_us_passwor_978854_idx",
             ),
         ),
     ]

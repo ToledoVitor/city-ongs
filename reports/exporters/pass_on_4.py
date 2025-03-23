@@ -10,10 +10,15 @@ from fpdf.fonts import FontFace
 from accountability.models import Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
-from utils.formats import format_into_brazilian_currency, format_into_brazilian_date
+from utils.formats import (
+    format_into_brazilian_currency,
+    format_into_brazilian_date,
+)
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass

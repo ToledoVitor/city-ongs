@@ -43,7 +43,10 @@ class Migration(migrations.Migration):
                     "category",
                     models.CharField(
                         choices=[
-                            ("ACCOUNTABILITY_CREATED", "Uma nova prestação foi criada"),
+                            (
+                                "ACCOUNTABILITY_CREATED",
+                                "Uma nova prestação foi criada",
+                            ),
                             (
                                 "ACCOUNTABILITY_ANALISYS",
                                 "Prestação enviada para análise",
@@ -56,10 +59,22 @@ class Migration(migrations.Migration):
                                 "ACCOUNTABILITY_FINISHED",
                                 "Prestação marcada como finalizada",
                             ),
-                            ("CONTRACT_CREATED", "Um novo contrato foi criado"),
-                            ("CONTRACT_STATUS", "O Status do contrato foi atualizado"),
-                            ("CONTRACT_GOAL_COMMENTED", "Meta do contrato comentada"),
-                            ("CONTRACT_ITEM_COMMENTED", "Item do contrato comentada"),
+                            (
+                                "CONTRACT_CREATED",
+                                "Um novo contrato foi criado",
+                            ),
+                            (
+                                "CONTRACT_STATUS",
+                                "O Status do contrato foi atualizado",
+                            ),
+                            (
+                                "CONTRACT_GOAL_COMMENTED",
+                                "Meta do contrato comentada",
+                            ),
+                            (
+                                "CONTRACT_ITEM_COMMENTED",
+                                "Item do contrato comentada",
+                            ),
                             (
                                 "CONTRACT_ITEM_VALUE_REQUESTED",
                                 "Pedido de remanejamento de gastos feito",
@@ -74,7 +89,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("object_id", models.UUIDField(verbose_name="ID do objeto")),
-                ("text", models.CharField(max_length=255, verbose_name="Texto")),
+                (
+                    "text",
+                    models.CharField(max_length=255, verbose_name="Texto"),
+                ),
                 (
                     "recipient",
                     models.ForeignKey(

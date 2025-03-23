@@ -31,14 +31,20 @@ class Migration(migrations.Migration):
             model_name="contract",
             name="agreement_num",
             field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Número do Convênio"
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Número do Convênio",
             ),
         ),
         migrations.AlterField(
             model_name="contract",
             name="law_num",
             field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Número da Lei"
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Número da Lei",
             ),
         ),
         migrations.AlterField(
@@ -70,14 +76,20 @@ class Migration(migrations.Migration):
             model_name="historicalcontract",
             name="agreement_num",
             field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Número do Convênio"
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Número do Convênio",
             ),
         ),
         migrations.AlterField(
             model_name="historicalcontract",
             name="law_num",
             field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Número da Lei"
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Número da Lei",
             ),
         ),
         migrations.AlterField(

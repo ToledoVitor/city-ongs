@@ -12,7 +12,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DetailView, ListView, TemplateView
 
-from accounts.forms import FolderManagerCreateForm, OrganizationAccountantCreateForm
+from accounts.forms import (
+    FolderManagerCreateForm,
+    OrganizationAccountantCreateForm,
+)
 from accounts.models import User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
@@ -91,7 +94,9 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
-                    phone_number=str(form.cleaned_data["phone_number"].national_number),
+                    phone_number=str(
+                        form.cleaned_data["phone_number"].national_number
+                    ),
                     cpf=form.cleaned_data.get("cpf"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
@@ -170,7 +175,9 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = OrganizationAccountantCreateForm(request=self.request)
+            context["form"] = OrganizationAccountantCreateForm(
+                request=self.request
+            )
 
         return context
 
@@ -188,7 +195,9 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
-                    phone_number=str(form.cleaned_data["phone_number"].national_number),
+                    phone_number=str(
+                        form.cleaned_data["phone_number"].national_number
+                    ),
                     cpf=form.cleaned_data.get("cpf"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
@@ -200,7 +209,9 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                 new_user.save()
                 new_user.areas.set(form.cleaned_data["areas"])
 
-                logger.info(f"{request.user.id} - Created new organization accountant")
+                logger.info(
+                    f"{request.user.id} - Created new organization accountant"
+                )
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -240,7 +251,9 @@ def user_unread_notifications(request):
 
 @login_required
 def read_notification_view(request, pk):
-    notification = get_object_or_404(Notification, id=pk, recipient=request.user)
+    notification = get_object_or_404(
+        Notification, id=pk, recipient=request.user
+    )
 
     notification.read_at = timezone.now()
     notification.save()

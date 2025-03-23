@@ -1,5 +1,6 @@
 import io
 import os
+from typing import Any, Dict, List
 
 import environ
 from google.cloud import secretmanager
@@ -14,7 +15,7 @@ DEVELOPMENT = env("DEVELOPMENT")
 if DEVELOPMENT:
     env.read_env(env_file)
     # Database
-    DATABASES = {
+    DATABASES: Dict[str, Dict[str, Any]] = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": env("DB_NAME"),
@@ -22,6 +23,16 @@ if DEVELOPMENT:
             "PASSWORD": env("DB_PASSWORD"),
             "HOST": env("DB_HOST"),
             "PORT": env("DB_PORT", default=None),
+        }
+    }
+    # Cache para desenvolvimento
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://localhost:6379/1",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
         }
     }
 else:
@@ -32,11 +43,13 @@ else:
     # Pull secrets from Secret Manager
     client = secretmanager.SecretManagerServiceClient()
     name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
-    payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
+    payload = client.access_secret_version(name=name).payload.data.decode(
+        "UTF-8"
+    )
     env.read_env(io.StringIO(payload))
 
     # Database
-    DATABASES = {
+    DATABASES: Dict[str, Dict[str, Any]] = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": env("DB_NAME"),
@@ -47,11 +60,83 @@ else:
         }
     }
 
+    # Cache configuration for production
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f'redis://{os.environ.get("REDIS_HOST", "localhost")}:{os.environ.get("REDIS_PORT", "6379")}/1',
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "RETRY_ON_TIMEOUT": True,
+                "MAX_CONNECTIONS": 1000,
+                "CONNECTION_POOL_CLASS": "redis.BlockingConnectionPool",
+                "CONNECTION_POOL_CLASS_KWARGS": {
+                    "max_connections": 50,
+                    "timeout": 20,
+                },
+            },
+        }
+    }
+
+    # Cache time for different types of content
+    CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutos
+    CACHE_MIDDLEWARE_KEY_PREFIX = "sitts"
+
 SECRET_KEY = env("SECRET_KEY")
-# DEBUG = False
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+# Logging configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/django.log"),
+            "formatter": "verbose",
+        },
+        "cache_file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/cache.log"),
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.core.cache": {
+            "handlers": ["cache_file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "utils.logging": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
+
+# Ensure logs directory exists
+if not os.path.exists(os.path.join(BASE_DIR, "logs")):
+    os.makedirs(os.path.join(BASE_DIR, "logs"))
+
+ALLOWED_HOSTS: List[str] = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sitts-455340212401.southamerica-east1.run.app",
@@ -129,16 +214,27 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation." "MinimumLengthValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
     },
 ]
 

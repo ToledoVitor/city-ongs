@@ -25,123 +25,119 @@
             </tr>
         </thead>
         <tbody>
-            {% if accountabilities.count %}
-              {% for accountability in accountabilities.all %}
-                <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                  <th class="pl-10 pr-6 py-4 text-sm whitespace-nowrap text-black">
-                    {{ accountability.month_label }} {{ accountability.year }}
-                  </th>
+            {% for accountability in accountabilities %}
+              <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
+                <th class="pl-10 pr-6 py-4 text-sm whitespace-nowrap text-black">
+                  {{ accountability.month_label }} {{ accountability.year }}
+                </th>
 
-                  <td class="px-6 py-4 text-sm text-left text-black max-w-48">
-                    Cadastradas: {{ accountability.count_revenues }} <br>
-                    {% comment %} Valor: R${{ accountability.sum_revenues|intcomma }} {% endcomment %}
-                  </td>
-
-                  <td class="px-6 py-4 text-sm text-left text-black max-w-48">
-                    Cadastradas: {{ accountability.count_expenses }} <br>
-                    {% comment %} Valor: R${{ accountability.sum_expenses|intcomma }} {% endcomment %}
-                  </td>
-
-                  <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
-                    {% if accountability.status == "WIP" %}
-                      <span
-                        class="
-                          text-xs
-                          font-medium
-                          me-2
-                          px-2.5
-                          py-0.5
-                          rounded
-                          border
-                          border-indigo-500
-                          bg-indigo-900
-                          text-indigo-100
-                        "
-                      >
-                        {{ accountability.status_label }}
-                      </span>
-                    {% elif accountability.status == "SENT" %}
-                      <span
-                        class="
-                          text-xs
-                          font-medium
-                          me-2
-                          px-2.5
-                          py-0.5
-                          rounded
-                          border
-                          border-indigo-500
-                          bg-indigo-900
-                          text-indigo-100
-                        "
-                      >
-                        {{ accountability.status_label }}
-                      </span>
-                    {% elif accountability.status == "CORRECTING" %}
-                      <span
-                        class="
-                          bg-indigo-100
-                          border
-                          border-indigo-500
-                          text-indigo-800
-                          text-xs
-                          font-medium
-                          me-2
-                          px-2.5
-                          py-0.5
-                          rounded
-                        "
-                      >
-                        {{ accountability.status_label }}
-                      </span>
-                    {% elif accountability.status == "FINISHED" %}
-                      <span
-                        class="
-                          bg-gray-100
-                          border
-                          border-gray-500
-                          text-gray-800
-                          text-xs
-                          font-medium
-                          me-2
-                          px-2.5
-                          py-0.5
-                          rounded
-                        "
-                      >
-                        {{ accountability.status_label }}
-                      </span>
-                    {% endif %}
-                  </td>
-
-                  <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-                    <a
-                      href="{% url 'accountability:accountability-detail' accountability.id %}"
-                      class="
-                        ml-4
-                        px-3
-                        py-2
-                        text-sm
-                        font-medium
-                        text-center
-                        inline-flex
-                        items-center
-                        text-white
-                        rounded-lg
-                        focus:ring-4
-                        focus:outline-none
-                        bg-blue-600
-                        hover:bg-blue-700
-                        focus:ring-blue-800
-                      "
-                    >
-                      Conferir
-                    </a>
+                <td class="px-6 py-4 text-sm text-left text-black max-w-48">
+                  Cadastradas: {{ accountability.count_revenues }} <br>
                 </td>
 
-                </tr>
-              {% endfor %}
-            {% else %}
+                <td class="px-6 py-4 text-sm text-left text-black max-w-48">
+                  Cadastradas: {{ accountability.count_expenses }} <br>
+                </td>
+
+                <td class="px-6 py-4 text-sm text-black whitespace-nowrap max-w-48">
+                  {% if accountability.status == "WIP" %}
+                    <span
+                      class="
+                        text-xs
+                        font-medium
+                        me-2
+                        px-2.5
+                        py-0.5
+                        rounded
+                        border
+                        border-indigo-500
+                        bg-indigo-900
+                        text-indigo-100
+                      "
+                    >
+                      Em Andamento
+                    </span>
+                  {% elif accountability.status == "SENT" %}
+                    <span
+                      class="
+                        text-xs
+                        font-medium
+                        me-2
+                        px-2.5
+                        py-0.5
+                        rounded
+                        border
+                        border-indigo-500
+                        bg-indigo-900
+                        text-indigo-100
+                      "
+                    >
+                      Enviada para análise
+                    </span>
+                  {% elif accountability.status == "CORRECTING" %}
+                    <span
+                      class="
+                        bg-indigo-100
+                        border
+                        border-indigo-500
+                        text-indigo-800
+                        text-xs
+                        font-medium
+                        me-2
+                        px-2.5
+                        py-0.5
+                        rounded
+                      "
+                    >
+                      Corrigindo
+                    </span>
+                  {% elif accountability.status == "FINISHED" %}
+                    <span
+                      class="
+                        bg-gray-100
+                        border
+                        border-gray-500
+                        text-gray-800
+                        text-xs
+                        font-medium
+                        me-2
+                        px-2.5
+                        py-0.5
+                        rounded
+                      "
+                    >
+                      Finalizada
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+                  <a
+                    href="{% url 'accountability:accountability-detail' accountability.id %}"
+                    class="
+                      ml-4
+                      px-3
+                      py-2
+                      text-sm
+                      font-medium
+                      text-center
+                      inline-flex
+                      items-center
+                      text-white
+                      rounded-lg
+                      focus:ring-4
+                      focus:outline-none
+                      bg-blue-600
+                      hover:bg-blue-700
+                      focus:ring-blue-800
+                    "
+                  >
+                    Conferir
+                  </a>
+                </td>
+
+              </tr>
+            {% empty %}
               <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
                 <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
                     Nenhuma prestação cadastrada
@@ -159,7 +155,7 @@
                   -
                 </td>
               </tr>
-            {% endif %}     
+            {% endfor %}     
         </tbody>
     </table>
   </div>

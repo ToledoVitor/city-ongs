@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="historicalrevenue",
             name="conciled",
-            field=models.BooleanField(default=False, verbose_name="Conciliado?"),
+            field=models.BooleanField(
+                default=False, verbose_name="Conciliado?"
+            ),
         ),
         migrations.AddField(
             model_name="historicalrevenue",
@@ -22,7 +24,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="revenue",
             name="conciled",
-            field=models.BooleanField(default=False, verbose_name="Conciliado?"),
+            field=models.BooleanField(
+                default=False, verbose_name="Conciliado?"
+            ),
         ),
         migrations.AddField(
             model_name="revenue",

@@ -1,9 +1,4 @@
-from accounts.models import (
-    Area,
-    CityHall,
-    Organization,
-    User,
-)
+from accounts.models import Area, CityHall, Organization, User
 from contracts.models import Company
 from utils.choices import StatesChoices
 

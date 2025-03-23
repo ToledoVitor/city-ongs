@@ -107,17 +107,27 @@ class Migration(migrations.Migration):
                 (
                     "pendencies",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="Pendências"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Pendências",
                     ),
                 ),
-                ("paid", models.BooleanField(default=False, verbose_name="Pago?")),
+                (
+                    "paid",
+                    models.BooleanField(default=False, verbose_name="Pago?"),
+                ),
                 (
                     "conciled",
-                    models.BooleanField(default=False, verbose_name="Conciliado?"),
+                    models.BooleanField(
+                        default=False, verbose_name="Conciliado?"
+                    ),
                 ),
                 (
                     "planned",
-                    models.BooleanField(default=True, verbose_name="Planejado?"),
+                    models.BooleanField(
+                        default=True, verbose_name="Planejado?"
+                    ),
                 ),
                 (
                     "identification",
@@ -137,7 +147,9 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Valor da Despesa"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Valor da Despesa",
                     ),
                 ),
                 (
@@ -165,7 +177,10 @@ class Migration(migrations.Migration):
                             ("FOODSTUFFS", "Gêneros Alimentícios"),
                             ("REAL_ESTATE_LEASE", "Locação de Imóveis"),
                             ("AMBULANCES", "Ambulâncias"),
-                            ("COMPUTER_EQUIPMENT", "Equipamento de informática"),
+                            (
+                                "COMPUTER_EQUIPMENT",
+                                "Equipamento de informática",
+                            ),
                             (
                                 "HOSPITCAL_MEDICAL_EQUIPMENT",
                                 "Equipamento médico hospitalar",
@@ -188,7 +203,10 @@ class Migration(migrations.Migration):
                                 "RETURN_OF_FUNDS",
                                 "Devolução de Recurso ao Órgão Concedente",
                             ),
-                            ("PARKING_DRIVING_TAXI", "Estacionamento/condução/táxi"),
+                            (
+                                "PARKING_DRIVING_TAXI",
+                                "Estacionamento/condução/táxi",
+                            ),
                             ("IPTU", "IPTU"),
                             (
                                 "TAXES_FEES_CONTRIBUTIONS",
@@ -196,7 +214,10 @@ class Migration(migrations.Migration):
                             ),
                             ("OTHER_EXPENSES", "Outras despesas - Diversos"),
                             ("INSURANCE", "Seguros"),
-                            ("TRAVEL_TICKET_STAY", "Viagens (passagem, hospedagem)"),
+                            (
+                                "TRAVEL_TICKET_STAY",
+                                "Viagens (passagem, hospedagem)",
+                            ),
                             ("COOKING_GAS", "Gás de Cozinha"),
                             ("COMPUTER_SUPPLIES", "Materiais de Informática"),
                             (
@@ -216,9 +237,15 @@ class Migration(migrations.Migration):
                                 "OFFICE_SUPPLIES_3",
                                 "Material de expediente/correio/fotocópias",
                             ),
-                            ("OTHER_CONSUMABLES", "Outros Materiais de Consumo"),
+                            (
+                                "OTHER_CONSUMABLES",
+                                "Outros Materiais de Consumo",
+                            ),
                             ("COMMON_WASTE_COLLECT", "Coleta de lixo comum"),
-                            ("HOSPITAL_WASTE_COLLECT", "Coleta de lixo hospitalar"),
+                            (
+                                "HOSPITAL_WASTE_COLLECT",
+                                "Coleta de lixo hospitalar",
+                            ),
                             (
                                 "CONSULTING_LEGAL_ADVICE",
                                 "Consultoria/assessoria jurídica",
@@ -243,7 +270,10 @@ class Migration(migrations.Migration):
                                 "LEGAL_THIRD_PARTY_SERVICES",
                                 "Outros serviços de terceiros pessoa jurídica",
                             ),
-                            ("ADVERTISING_PUBILICITY", "Publicidade e propaganda"),
+                            (
+                                "ADVERTISING_PUBILICITY",
+                                "Publicidade e propaganda",
+                            ),
                             (
                                 "THERAPEUTIC_SUPPORT_SERVICE",
                                 "Serviço de apoio diagnóstico terapêutico (sadt)",
@@ -260,7 +290,10 @@ class Migration(migrations.Migration):
                             ("MEDICAL_ASSISTENCE", "Assistência médica"),
                             ("ADVANCE_NOTICE", "Aviso prévio"),
                             ("BENEFITS", "Benefícios"),
-                            ("INTERNSHIP_ALLOWANCE", "Bolsa Auxílio - estagiários"),
+                            (
+                                "INTERNSHIP_ALLOWANCE",
+                                "Bolsa Auxílio - estagiários",
+                            ),
                             (
                                 "INSS_CONTRIBUTION_SHARE",
                                 "Contribuição ao INSS - Cota Patronal",
@@ -285,7 +318,10 @@ class Migration(migrations.Migration):
                                 "TERMINATION_EMPLOYMENT_CONTRACT",
                                 "Rescisão de Contrato de Trabalho - TRCT",
                             ),
-                            ("MISCELLANOUS_WITHHOLDINGS", "Retenções Diversas"),
+                            (
+                                "MISCELLANOUS_WITHHOLDINGS",
+                                "Retenções Diversas",
+                            ),
                             (
                                 "MANAGEMENT_SALARY",
                                 "Salário diretoria (salários e ordenados)",
@@ -298,7 +334,10 @@ class Migration(migrations.Migration):
                             ("FOOD_VOUCHERS", "Vale Alimentação"),
                             ("MEAL_VOUCHERS", "Vale Refeição"),
                             ("TRANSPORTATION_VOUCHERS", "Vale Transporte"),
-                            ("INTERN_REMUNERATION", "Remuneração de Estagiários"),
+                            (
+                                "INTERN_REMUNERATION",
+                                "Remuneração de Estagiários",
+                            ),
                             (
                                 "SERVICES_PF_THIRD_PARTIES",
                                 "Serviços Prestados por Terceiro - PF",
@@ -333,12 +372,16 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "due_date",
-                    models.DateField(blank=True, null=True, verbose_name="Vencimento"),
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Vencimento"
+                    ),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "liquidation",
-                    models.DateField(blank=True, null=True, verbose_name="Liquidação"),
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Liquidação"
+                    ),
                 ),
                 (
                     "liquidation_form",
@@ -432,7 +475,10 @@ class Migration(migrations.Migration):
                             ("ANALYZING", "em análise"),
                             ("CORRECTING", "correção"),
                             ("APPROVED", "aprovado"),
-                            ("APPROVED_WITH_PENDENCE", "aprovado com ressalva"),
+                            (
+                                "APPROVED_WITH_PENDENCE",
+                                "aprovado com ressalva",
+                            ),
                             ("REJECTED", "rejeitado"),
                         ],
                         default="ANALYZING",
@@ -442,11 +488,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comments",
-                    models.CharField(max_length=256, verbose_name="Comentários"),
+                    models.CharField(
+                        max_length=256, verbose_name="Comentários"
+                    ),
                 ),
                 (
                     "pending",
-                    models.CharField(max_length=256, verbose_name="Pendências"),
+                    models.CharField(
+                        max_length=256, verbose_name="Pendências"
+                    ),
                 ),
             ],
             options={
@@ -517,7 +567,9 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=64, verbose_name="Nome")),
                 (
                     "document",
-                    models.IntegerField(blank=True, null=True, verbose_name="CPF/CNPJ"),
+                    models.IntegerField(
+                        blank=True, null=True, verbose_name="CPF/CNPJ"
+                    ),
                 ),
             ],
             options={
@@ -536,8 +588,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -578,13 +636,23 @@ class Migration(migrations.Migration):
                         verbose_name="Status",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -608,8 +676,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -630,17 +704,27 @@ class Migration(migrations.Migration):
                 (
                     "pendencies",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="Pendências"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Pendências",
                     ),
                 ),
-                ("paid", models.BooleanField(default=False, verbose_name="Pago?")),
+                (
+                    "paid",
+                    models.BooleanField(default=False, verbose_name="Pago?"),
+                ),
                 (
                     "conciled",
-                    models.BooleanField(default=False, verbose_name="Conciliado?"),
+                    models.BooleanField(
+                        default=False, verbose_name="Conciliado?"
+                    ),
                 ),
                 (
                     "planned",
-                    models.BooleanField(default=True, verbose_name="Planejado?"),
+                    models.BooleanField(
+                        default=True, verbose_name="Planejado?"
+                    ),
                 ),
                 (
                     "identification",
@@ -660,7 +744,9 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Valor da Despesa"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Valor da Despesa",
                     ),
                 ),
                 (
@@ -688,7 +774,10 @@ class Migration(migrations.Migration):
                             ("FOODSTUFFS", "Gêneros Alimentícios"),
                             ("REAL_ESTATE_LEASE", "Locação de Imóveis"),
                             ("AMBULANCES", "Ambulâncias"),
-                            ("COMPUTER_EQUIPMENT", "Equipamento de informática"),
+                            (
+                                "COMPUTER_EQUIPMENT",
+                                "Equipamento de informática",
+                            ),
                             (
                                 "HOSPITCAL_MEDICAL_EQUIPMENT",
                                 "Equipamento médico hospitalar",
@@ -711,7 +800,10 @@ class Migration(migrations.Migration):
                                 "RETURN_OF_FUNDS",
                                 "Devolução de Recurso ao Órgão Concedente",
                             ),
-                            ("PARKING_DRIVING_TAXI", "Estacionamento/condução/táxi"),
+                            (
+                                "PARKING_DRIVING_TAXI",
+                                "Estacionamento/condução/táxi",
+                            ),
                             ("IPTU", "IPTU"),
                             (
                                 "TAXES_FEES_CONTRIBUTIONS",
@@ -719,7 +811,10 @@ class Migration(migrations.Migration):
                             ),
                             ("OTHER_EXPENSES", "Outras despesas - Diversos"),
                             ("INSURANCE", "Seguros"),
-                            ("TRAVEL_TICKET_STAY", "Viagens (passagem, hospedagem)"),
+                            (
+                                "TRAVEL_TICKET_STAY",
+                                "Viagens (passagem, hospedagem)",
+                            ),
                             ("COOKING_GAS", "Gás de Cozinha"),
                             ("COMPUTER_SUPPLIES", "Materiais de Informática"),
                             (
@@ -739,9 +834,15 @@ class Migration(migrations.Migration):
                                 "OFFICE_SUPPLIES_3",
                                 "Material de expediente/correio/fotocópias",
                             ),
-                            ("OTHER_CONSUMABLES", "Outros Materiais de Consumo"),
+                            (
+                                "OTHER_CONSUMABLES",
+                                "Outros Materiais de Consumo",
+                            ),
                             ("COMMON_WASTE_COLLECT", "Coleta de lixo comum"),
-                            ("HOSPITAL_WASTE_COLLECT", "Coleta de lixo hospitalar"),
+                            (
+                                "HOSPITAL_WASTE_COLLECT",
+                                "Coleta de lixo hospitalar",
+                            ),
                             (
                                 "CONSULTING_LEGAL_ADVICE",
                                 "Consultoria/assessoria jurídica",
@@ -766,7 +867,10 @@ class Migration(migrations.Migration):
                                 "LEGAL_THIRD_PARTY_SERVICES",
                                 "Outros serviços de terceiros pessoa jurídica",
                             ),
-                            ("ADVERTISING_PUBILICITY", "Publicidade e propaganda"),
+                            (
+                                "ADVERTISING_PUBILICITY",
+                                "Publicidade e propaganda",
+                            ),
                             (
                                 "THERAPEUTIC_SUPPORT_SERVICE",
                                 "Serviço de apoio diagnóstico terapêutico (sadt)",
@@ -783,7 +887,10 @@ class Migration(migrations.Migration):
                             ("MEDICAL_ASSISTENCE", "Assistência médica"),
                             ("ADVANCE_NOTICE", "Aviso prévio"),
                             ("BENEFITS", "Benefícios"),
-                            ("INTERNSHIP_ALLOWANCE", "Bolsa Auxílio - estagiários"),
+                            (
+                                "INTERNSHIP_ALLOWANCE",
+                                "Bolsa Auxílio - estagiários",
+                            ),
                             (
                                 "INSS_CONTRIBUTION_SHARE",
                                 "Contribuição ao INSS - Cota Patronal",
@@ -808,7 +915,10 @@ class Migration(migrations.Migration):
                                 "TERMINATION_EMPLOYMENT_CONTRACT",
                                 "Rescisão de Contrato de Trabalho - TRCT",
                             ),
-                            ("MISCELLANOUS_WITHHOLDINGS", "Retenções Diversas"),
+                            (
+                                "MISCELLANOUS_WITHHOLDINGS",
+                                "Retenções Diversas",
+                            ),
                             (
                                 "MANAGEMENT_SALARY",
                                 "Salário diretoria (salários e ordenados)",
@@ -821,7 +931,10 @@ class Migration(migrations.Migration):
                             ("FOOD_VOUCHERS", "Vale Alimentação"),
                             ("MEAL_VOUCHERS", "Vale Refeição"),
                             ("TRANSPORTATION_VOUCHERS", "Vale Transporte"),
-                            ("INTERN_REMUNERATION", "Remuneração de Estagiários"),
+                            (
+                                "INTERN_REMUNERATION",
+                                "Remuneração de Estagiários",
+                            ),
                             (
                                 "SERVICES_PF_THIRD_PARTIES",
                                 "Serviços Prestados por Terceiro - PF",
@@ -856,12 +969,16 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "due_date",
-                    models.DateField(blank=True, null=True, verbose_name="Vencimento"),
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Vencimento"
+                    ),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "liquidation",
-                    models.DateField(blank=True, null=True, verbose_name="Liquidação"),
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Liquidação"
+                    ),
                 ),
                 (
                     "liquidation_form",
@@ -924,13 +1041,23 @@ class Migration(migrations.Migration):
                         verbose_name="Número do documento",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -954,8 +1081,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -967,7 +1100,10 @@ class Migration(migrations.Migration):
                             ("ANALYZING", "em análise"),
                             ("CORRECTING", "correção"),
                             ("APPROVED", "aprovado"),
-                            ("APPROVED_WITH_PENDENCE", "aprovado com ressalva"),
+                            (
+                                "APPROVED_WITH_PENDENCE",
+                                "aprovado com ressalva",
+                            ),
                             ("REJECTED", "rejeitado"),
                         ],
                         default="ANALYZING",
@@ -977,19 +1113,33 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "comments",
-                    models.CharField(max_length=256, verbose_name="Comentários"),
+                    models.CharField(
+                        max_length=256, verbose_name="Comentários"
+                    ),
                 ),
                 (
                     "pending",
-                    models.CharField(max_length=256, verbose_name="Pendências"),
+                    models.CharField(
+                        max_length=256, verbose_name="Pendências"
+                    ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -1013,8 +1163,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -1022,7 +1178,10 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.TextField(
-                        blank=True, max_length=100, null=True, verbose_name="Arquivo"
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Arquivo",
                     ),
                 ),
                 (
@@ -1034,13 +1193,23 @@ class Migration(migrations.Migration):
                         verbose_name="Nome do Arquivo",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -1064,8 +1233,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -1086,7 +1261,10 @@ class Migration(migrations.Migration):
                 (
                     "pendencies",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="Pendências"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Pendências",
                     ),
                 ),
                 (
@@ -1107,14 +1285,18 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Valor da Despesa"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Valor da Despesa",
                     ),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "receive_date",
                     models.DateField(
-                        blank=True, null=True, verbose_name="Data de Recebimento"
+                        blank=True,
+                        null=True,
+                        verbose_name="Data de Recebimento",
                     ),
                 ),
                 (
@@ -1133,7 +1315,10 @@ class Migration(migrations.Migration):
                                 "OTHER_REVENUES",
                                 "Outras Receitas decorrentes da execução do ajuste",
                             ),
-                            ("OWN_RESOURCES", "Recurso próprio da entidade parceira"),
+                            (
+                                "OWN_RESOURCES",
+                                "Recurso próprio da entidade parceira",
+                            ),
                             (
                                 "REIMBURSEMENT_INTEREST",
                                 "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",
@@ -1149,13 +1334,23 @@ class Migration(migrations.Migration):
                         verbose_name="Natureza da Receita",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -1179,8 +1374,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -1197,16 +1398,29 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.TextField(
-                        blank=True, max_length=100, null=True, verbose_name="Arquivo"
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Arquivo",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),
@@ -1237,7 +1451,12 @@ class Migration(migrations.Migration):
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
                 ),
-                ("name", models.CharField(max_length=64, verbose_name="Nome da fonte")),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=64, verbose_name="Nome da fonte"
+                    ),
+                ),
                 (
                     "document",
                     models.IntegerField(
@@ -1260,7 +1479,10 @@ class Migration(migrations.Migration):
                             ("FEDERAL", "Federal"),
                             ("STATE", "Estadual"),
                             ("MUNICIPAL", "Municipal"),
-                            ("COUNTERPART_PARTNER", "Contrapartida de parceiro"),
+                            (
+                                "COUNTERPART_PARTNER",
+                                "Contrapartida de parceiro",
+                            ),
                             ("PRIVATE_SPONSOR", "Patrocinador privado"),
                         ],
                         default="FEDERAL",
@@ -1275,7 +1497,10 @@ class Migration(migrations.Migration):
                             ("NOT_APPLIABLE", "Não Aplicavél"),
                             ("COOPERATION_AGREEMENT", "Acordo de Cooperação"),
                             ("AGREEMENT", "Convênio"),
-                            ("COLLABORATION_AGREEMENT", "Termo de Colaboração"),
+                            (
+                                "COLLABORATION_AGREEMENT",
+                                "Termo de Colaboração",
+                            ),
                             ("PROMOTION_AGREEMENT", "Termo de Fomento"),
                             ("DONATION_AGREEMENT", "Contrato de Doação"),
                             ("MANAGEMENT_AGREEMENT", "Contrato de Gestão"),
@@ -1327,7 +1552,10 @@ class Migration(migrations.Migration):
                 (
                     "pendencies",
                     models.CharField(
-                        blank=True, max_length=255, null=True, verbose_name="Pendências"
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Pendências",
                     ),
                 ),
                 (
@@ -1348,14 +1576,18 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Valor da Despesa"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Valor da Despesa",
                     ),
                 ),
                 ("competency", models.DateField(verbose_name="Competência")),
                 (
                     "receive_date",
                     models.DateField(
-                        blank=True, null=True, verbose_name="Data de Recebimento"
+                        blank=True,
+                        null=True,
+                        verbose_name="Data de Recebimento",
                     ),
                 ),
                 (
@@ -1374,7 +1606,10 @@ class Migration(migrations.Migration):
                                 "OTHER_REVENUES",
                                 "Outras Receitas decorrentes da execução do ajuste",
                             ),
-                            ("OWN_RESOURCES", "Recurso próprio da entidade parceira"),
+                            (
+                                "OWN_RESOURCES",
+                                "Recurso próprio da entidade parceira",
+                            ),
                             (
                                 "REIMBURSEMENT_INTEREST",
                                 "Reembolso de Juros, multas, glosas, pagto. Indevido, duplicidade etc",

@@ -14,7 +14,10 @@ class Migration(migrations.Migration):
             name="category",
             field=models.CharField(
                 choices=[
-                    ("ACCOUNTABILITY_CREATED", "Uma nova prestação foi criada"),
+                    (
+                        "ACCOUNTABILITY_CREATED",
+                        "Uma nova prestação foi criada",
+                    ),
                     ("CONTRACT_CREATED", "Um novo contrato foi criado"),
                 ],
                 max_length=32,

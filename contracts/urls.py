@@ -32,7 +32,11 @@ from contracts.views import (
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
     path("create/", ContractCreateView.as_view(), name="contracts-create"),
-    path("detail/<uuid:pk>/", ContractsDetailView.as_view(), name="contracts-detail"),
+    path(
+        "detail/<uuid:pk>/",
+        ContractsDetailView.as_view(),
+        name="contracts-detail",
+    ),
     path(
         "detail/<uuid:pk>/workplan/",
         ContractWorkPlanView.as_view(),

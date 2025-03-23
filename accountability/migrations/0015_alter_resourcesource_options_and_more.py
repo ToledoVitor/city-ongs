@@ -8,7 +8,10 @@ import utils.validators
 class Migration(migrations.Migration):
     dependencies = [
         ("accountability", "0014_handle_duplicate_favoreds"),
-        ("accounts", "0011_alter_user_options_alter_cityhall_document_and_more"),
+        (
+            "accounts",
+            "0011_alter_user_options_alter_cityhall_document_and_more",
+        ),
     ]
 
     operations = [

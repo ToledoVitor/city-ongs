@@ -12,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="favored",
             name="document",
-            field=models.CharField(blank=True, null=True, verbose_name="CPF/CNPJ"),
+            field=models.CharField(
+                blank=True, null=True, verbose_name="CPF/CNPJ"
+            ),
         ),
     ]

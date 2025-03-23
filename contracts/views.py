@@ -7,12 +7,15 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
+from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from activity.models import ActivityLog
@@ -46,7 +49,12 @@ from contracts.models import (
     ContractItemReview,
     ContractMonthTransfer,
 )
+from utils.cache_keys import (
+    CACHE_TIMES,
+    get_contract_detail_key,
+)
 from utils.choices import StatusChoices
+from utils.logging import log_database_operation, log_view_access
 from utils.mixins import (
     AdminRequiredMixin,
     CommitteeMemberCreateMixin,
@@ -56,11 +64,11 @@ from utils.mixins import (
 logger = logging.getLogger(__name__)
 
 
+@method_decorator(log_view_access, name="dispatch")
 class ContractsListView(LoginRequiredMixin, ListView):
     model = Contract
     context_object_name = "contracts_list"
     paginate_by = 10
-    ordering = "-created_at"
 
     template_name = "contracts/list.html"
     login_url = "/auth/login"
@@ -82,7 +90,7 @@ class ContractsListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(
                 Q(name__icontains=query) | Q(code__icontains=query)
             )
-        return queryset
+        return queryset.order_by("code")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -90,7 +98,9 @@ class ContractsListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, TemplateView):
+class ContractCreateView(
+    CommitteeMemberCreateMixin, AdminRequiredMixin, TemplateView
+):
     template_name = "contracts/create.html"
     login_url = "/auth/login"
 
@@ -123,12 +133,11 @@ class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, Templat
         return self.render_to_response(self.get_context_data(form=form))
 
 
+@method_decorator(log_view_access, name="dispatch")
 class ContractsDetailView(LoginRequiredMixin, DetailView):
     model = Contract
-
     template_name = "contracts/detail.html"
     context_object_name = "contract"
-
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
@@ -166,52 +175,116 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         ).get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context["executions"] = (
-            self.object.executions.filter(deleted_at__isnull=True)
-            .annotate(
-                count_activities=Count(
-                    "activities",
-                    filter=Q(activities__deleted_at__isnull=True),
-                    distinct=True,
-                ),
-                count_files=Count(
-                    "files", filter=Q(files__deleted_at__isnull=True), distinct=True
-                ),
+        # try to get from cache
+        cache_key = get_contract_detail_key(self.object.id)
+        cached_data = cache.get(cache_key)
+
+        if cached_data is None:
+            # Create a fresh context instead of using super()
+            context = {}
+
+            # Convert contract to cacheable format, excluding the file field
+            contract_dict = model_to_dict(self.object, exclude=["file"])
+            if self.object.file:
+                contract_dict["file_url"] = self.object.file.url
+            context["contract"] = contract_dict
+
+            # Convert executions to cacheable format
+            executions = (
+                self.object.executions.filter(deleted_at__isnull=True)
+                .annotate(
+                    count_activities=Count(
+                        "activities",
+                        filter=Q(activities__deleted_at__isnull=True),
+                        distinct=True,
+                    ),
+                    count_files=Count(
+                        "files",
+                        filter=Q(files__deleted_at__isnull=True),
+                        distinct=True,
+                    ),
+                )
+                .prefetch_related("activities", "files")
+                .order_by("-year", "-month")[:12]
             )
-            .prefetch_related("activities", "files")
-            .order_by("-year", "-month")[:12]
-        )
-        context["accountabilities"] = (
-            self.object.accountabilities.filter(deleted_at__isnull=True)
-            .prefetch_related(
-                "revenues",
-                "expenses",
-            )
-            .annotate(
-                count_revenues=Count(
+
+            # Convert executions to cacheable format
+            context["executions"] = [
+                {
+                    **model_to_dict(execution, exclude=["file"]),
+                    "count_activities": execution.count_activities,
+                    "count_files": execution.count_files,
+                    "file_url": execution.file.url if execution.file else None,
+                }
+                for execution in executions
+            ]
+
+            # Accountabilities with light caching for list view
+            accountabilities = (
+                self.object.accountabilities.filter(deleted_at__isnull=True)
+                .prefetch_related(
                     "revenues",
-                    filter=Q(revenues__deleted_at__isnull=True)
-                    & Q(deleted_at__isnull=True),
-                    distinct=True,
-                ),
-                count_expenses=Count(
                     "expenses",
-                    filter=Q(expenses__deleted_at__isnull=True)
-                    & Q(deleted_at__isnull=True),
-                    distinct=True,
+                )
+                .annotate(
+                    count_revenues=Count(
+                        "revenues",
+                        filter=Q(revenues__deleted_at__isnull=True)
+                        & Q(deleted_at__isnull=True),
+                        distinct=True,
+                    ),
+                    count_expenses=Count(
+                        "expenses",
+                        filter=Q(expenses__deleted_at__isnull=True)
+                        & Q(deleted_at__isnull=True),
+                        distinct=True,
+                    ),
+                )[:12]
+            )
+
+            # Convert accountabilities to cacheable format
+            context["accountabilities"] = [
+                {
+                    **model_to_dict(accountability),
+                    "count_revenues": accountability.count_revenues,
+                    "count_expenses": accountability.count_expenses,
+                }
+                for accountability in accountabilities
+            ]
+
+            # Value requests with cacheable conversion
+            value_requests = ContractItemNewValueRequest.objects.filter(
+                raise_item__contract=self.object,
+                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+            ).select_related("raise_item")[:12]
+
+            # Convert value requests to cacheable format
+            context["value_requests"] = [
+                model_to_dict(request) for request in value_requests
+            ]
+
+            # Items totals
+            context["items_totals"] = self.object.items.aggregate(
+                total_month=Coalesce(
+                    Sum("month_expense"), Value(Decimal("0.00"))
                 ),
-            )[:12]
-        )
-        context["value_requests"] = ContractItemNewValueRequest.objects.filter(
-            raise_item__contract=self.object,
-            status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
-        ).select_related("raise_item")[:12]
-        context["items_totals"] = self.object.items.aggregate(
-            total_month=Coalesce(Sum("month_expense"), Value(Decimal("0.00"))),
-            total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
-        )
-        return context
+                total_year=Coalesce(
+                    Sum("anual_expense"), Value(Decimal("0.00"))
+                ),
+            )
+
+            # Store in cache
+            cache.set(cache_key, context, CACHE_TIMES["DETAIL"])
+
+            # Now merge with the standard context data
+            standard_context = super().get_context_data(**kwargs)
+            context.update(standard_context)
+            return context
+
+        # Merge cached data with standard context
+        standard_context = super().get_context_data(**kwargs)
+        cached_data.update(standard_context)
+        return cached_data
 
     def post(self, request, pk, *args, **kwargs):
         if not self.request.POST.get("csrfmiddlewaretoken"):
@@ -289,7 +362,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                         )
 
                 case _:
-                    logger.warning(f"form_type: {form_type} is not a valid form")
+                    logger.warning(
+                        f"form_type: {form_type} is not a valid form"
+                    )
                     return redirect("contracts:contracts-list")
 
         return redirect("contracts:contracts-detail", pk=contract.id)
@@ -336,7 +411,9 @@ def create_contract_item_view(request, pk):
     else:
         form = ContractItemForm()
         return render(
-            request, "contracts/items-create.html", {"contract": contract, "form": form}
+            request,
+            "contracts/items-create.html",
+            {"contract": contract, "form": form},
         )
 
 
@@ -617,7 +694,11 @@ def create_contract_execution_view(request, pk):
                 return render(
                     request,
                     "contracts/execution/create.html",
-                    {"contract": contract, "form": form, "execution_exists": True},
+                    {
+                        "contract": contract,
+                        "form": form,
+                        "execution_exists": True,
+                    },
                 )
 
             with transaction.atomic():
@@ -746,7 +827,8 @@ class ContractExecutionActivityUpdateView(
 
     def get_success_url(self) -> str:
         return reverse_lazy(
-            "contracts:executions-detail", kwargs={"pk": self.object.execution.id}
+            "contracts:executions-detail",
+            kwargs={"pk": self.object.execution.id},
         )
 
     def get_object(self, queryset=None):
@@ -792,6 +874,7 @@ def create_execution_file_view(request, pk):
         )
 
 
+@method_decorator(log_view_access, name="dispatch")
 class ContractWorkPlanView(LoginRequiredMixin, DetailView):
     model = Contract
 
@@ -857,10 +940,14 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
                 continue
 
             if item.nature_label in groupped_expenses[group]:
-                groupped_expenses[group][item.nature_label] += item.anual_expense
+                groupped_expenses[group][item.nature_label] += (
+                    item.anual_expense
+                )
                 groupped_expenses[group]["total"] += item.anual_expense
             else:
-                groupped_expenses[group][item.nature_label] = item.anual_expense
+                groupped_expenses[group][item.nature_label] = (
+                    item.anual_expense
+                )
                 groupped_expenses[group]["total"] += item.anual_expense
 
         return groupped_expenses
@@ -883,7 +970,7 @@ def get_monthly_transfers(contract):
 
     monthly_data = {}
     for transfer in transfers:
-        month_year = f"{month_abbr[transfer["month"]]}/{transfer["year"]}"
+        month_year = f"{month_abbr[transfer['month']]}/{transfer['year']}"
         if month_year not in monthly_data:
             monthly_data[month_year] = {
                 "month": month_year,
@@ -892,9 +979,15 @@ def get_monthly_transfers(contract):
                 "total": Decimal(0),
             }
 
-        if transfer["source"] == ContractMonthTransfer.TransferSource.CITY_HALL:
+        if (
+            transfer["source"]
+            == ContractMonthTransfer.TransferSource.CITY_HALL
+        ):
             monthly_data[month_year]["city_hall"] = transfer["total_value"]
-        elif transfer["source"] == ContractMonthTransfer.TransferSource.COUNTERPART:
+        elif (
+            transfer["source"]
+            == ContractMonthTransfer.TransferSource.COUNTERPART
+        ):
             monthly_data[month_year]["counterpart"] = transfer["total_value"]
 
         monthly_data[month_year]["total"] = (
@@ -905,6 +998,7 @@ def get_monthly_transfers(contract):
     return list(monthly_data.values())
 
 
+@method_decorator(log_view_access, name="dispatch")
 class ContractTimelineView(LoginRequiredMixin, DetailView):
     model = Contract
 
@@ -980,6 +1074,8 @@ def _groupped_list_values(request):
     return city_hall_values, counterpart_values
 
 
+@log_database_operation("update_timeline")
+@log_view_access
 @login_required
 def contract_timeline_update_view(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
@@ -995,7 +1091,10 @@ def contract_timeline_update_view(request, pk):
             wrong_values = True
         if sum(counterpart_values) != contract.counterpart_value:
             wrong_values = True
-        if sum([*city_hall_values, *counterpart_values]) != contract.total_value:
+        if (
+            sum([*city_hall_values, *counterpart_values])
+            != contract.total_value
+        ):
             wrong_values = True
 
         if wrong_values:
@@ -1064,6 +1163,8 @@ def contract_timeline_update_view(request, pk):
         return render(request, "contracts/timeline-update.html", context)
 
 
+@log_database_operation("change_contract_status")
+@log_view_access
 @login_required
 def contract_status_change_view(request, pk):
     if not request.user:
@@ -1097,6 +1198,7 @@ def contract_status_change_view(request, pk):
         )
 
 
+@log_view_access
 @login_required
 def item_new_value_request_view(request, pk):
     contract = get_object_or_404(Contract, id=pk)
@@ -1223,7 +1325,9 @@ def send_accountability_review_analisys(request, pk):
         if review_status == ContractExecution.ReviewStatus.CORRECTING:
             action = ActivityLog.ActivityLogChoices.EXECUTION_SENT_TO_CORRECT
         elif review_status == ContractExecution.ReviewStatus.FINISHED:
-            action = ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED
+            action = (
+                ActivityLog.ActivityLogChoices.EXECUTION_MARKED_AS_FINISHED
+            )
         else:
             raise ValueError(f"{review_status} - Is an unnknow status review")
 

@@ -288,7 +288,7 @@
                     <td class="px-6 py-4 text-sm flex justify-end max-w-48">
                       {% if accountability.is_on_execution %}
                       <a
-                        href="{% url 'accountability:expense-update' expense.id %}"
+                        href="{% url 'accountability:expenses-update' expense.id %}"
                         class="
                           px-3
                           py-2
@@ -560,7 +560,7 @@
                             </div>
 
                             <div id="uploadExpenseFormContainer-{{ expense.id }}" class="hidden mb-4">
-                              <form method="post" action="{% url 'accountability:expense-file' expense.pk %}" enctype="multipart/form-data">
+                              <form method="post" action="{% url 'accountability:expense-file' expense.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                 <div class="my-3">
@@ -701,7 +701,7 @@
                           </div>
                           <!-- Modal body -->
                           <div class="p-4 md:p-5">
-                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.pk %}">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-gloss' expense.id %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
                                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -816,7 +816,7 @@
                           </div>
                           <!-- Modal body -->
                           <div class="p-4 md:p-5">
-                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-duplicate' expense.pk %}">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expenses-duplicate' expense.id %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
                                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -927,7 +927,7 @@
                           </div>
                           <!-- Modal body -->
                           <div class="p-4 md:p-5">
-                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-delete' expense.pk %}">
+                              <form class="space-y-4"  method="post" action="{% url 'accountability:expense-delete' expense.id %}">
                                   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                   <input type="hidden" name="expense_id" value="{{ expense.id }}">
                                   <input type="hidden" name="next" value="{{ request.get_full_path }}">

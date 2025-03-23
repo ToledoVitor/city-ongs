@@ -31,7 +31,10 @@ class Migration(migrations.Migration):
                     ("UPDATED_COMPANY", "Atualizou empresa"),
                     ("CREATED_CONTRACT", "Criou contrato"),
                     ("CREATED_CONTRACT_ADDENDUM", "Criou aditivo de contrato"),
-                    ("UPDATED_CONTRACT_STATUS", "Atualizou status do contrato"),
+                    (
+                        "UPDATED_CONTRACT_STATUS",
+                        "Atualizou status do contrato",
+                    ),
                     ("CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"),
                     ("COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"),
                     ("UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"),
@@ -43,11 +46,23 @@ class Migration(migrations.Migration):
                         "ANALISED_NEW_VALUE_ITEM",
                         "Analisou pedido de novo valor do item",
                     ),
-                    ("CREATED_CONTRACT_EXECUTION", "Criou Relatório de Execução"),
-                    ("CREATED_EXECUTION_ACTIVITY", "Criou Atividade Executada"),
-                    ("UPDATED_EXECUTION_ACTIVITY", "Atualizou Atividade Executada"),
+                    (
+                        "CREATED_CONTRACT_EXECUTION",
+                        "Criou Relatório de Execução",
+                    ),
+                    (
+                        "CREATED_EXECUTION_ACTIVITY",
+                        "Criou Atividade Executada",
+                    ),
+                    (
+                        "UPDATED_EXECUTION_ACTIVITY",
+                        "Atualizou Atividade Executada",
+                    ),
                     ("CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"),
-                    ("UPDATED_EXECUTION_FILE", "Atualizou Arquivo de Atividade"),
+                    (
+                        "UPDATED_EXECUTION_FILE",
+                        "Atualizou Arquivo de Atividade",
+                    ),
                     ("CREATED_EXPENSE", "Cadastrou despesa"),
                     ("UPDATED_EXPENSE", "Atualizou despesa"),
                     ("GLOSSED_EXPENSE", "Glosou despesa"),
@@ -75,14 +90,20 @@ class Migration(migrations.Migration):
             model_name="activitylog",
             name="target_object_id",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="ID do alvo"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="ID do alvo",
             ),
         ),
         migrations.AlterField(
             model_name="activitylog",
             name="user_email",
             field=models.CharField(
-                blank=True, max_length=128, null=True, verbose_name="Email do Usuário"
+                blank=True,
+                max_length=128,
+                null=True,
+                verbose_name="Email do Usuário",
             ),
         ),
     ]

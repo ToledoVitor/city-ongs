@@ -17,7 +17,9 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass
@@ -46,11 +48,15 @@ class PassOn1PDFExporter:
 
     def __database_queries(self):
         self.contracts_queryset = Contract.objects.filter(
-            area__city_hall=self.contract.area.city_hall, checking_account__isnull=False
+            area__city_hall=self.contract.area.city_hall,
+            checking_account__isnull=False,
         ).order_by("start_of_vigency")
-        self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
-            Sum("total_value")
-        )["total_value__sum"] or Decimal("0.00")
+        self.all_values_in_contracts = (
+            self.contracts_queryset.filter().aggregate(Sum("total_value"))[
+                "total_value__sum"
+            ]
+            or Decimal("0.00")
+        )
 
     def handle(self):
         self.__database_queries()
@@ -230,7 +236,10 @@ class PassOn1PDFExporter:
         self.pdf.ln(8)
         self.pdf.cell(190, 10, "", ln=True, align="C")
         self.pdf.line(
-            self.pdf.get_x(), self.pdf.get_y(), self.pdf.get_x() + 190, self.pdf.get_y()
+            self.pdf.get_x(),
+            self.pdf.get_y(),
+            self.pdf.get_x() + 190,
+            self.pdf.get_y(),
         )
         self.pdf.ln(10)
 

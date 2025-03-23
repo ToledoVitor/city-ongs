@@ -9,7 +9,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("contracts", "0014_contractitem_source_historicalcontractitem_source"),
+        (
+            "contracts",
+            "0014_contractitem_source_historicalcontractitem_source",
+        ),
     ]
 
     operations = [
@@ -45,7 +48,9 @@ class Migration(migrations.Migration):
                 (
                     "value",
                     models.DecimalField(
-                        decimal_places=2, max_digits=12, verbose_name="Valor do Repasse"
+                        decimal_places=2,
+                        max_digits=12,
+                        verbose_name="Valor do Repasse",
                     ),
                 ),
                 (

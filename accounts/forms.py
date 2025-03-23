@@ -53,7 +53,9 @@ class FolderManagerCreateForm(forms.ModelForm):
         areas = cleaned_data.get("areas", [])
 
         if email_exists(email):
-            self.add_error("email", "Já existe uma conta cadastrada com esse email.")
+            self.add_error(
+                "email", "Já existe uma conta cadastrada com esse email."
+            )
 
         if len(areas) < 1:
             self.add_error("areas", "Você deve escolher pelo menos uma área.")
@@ -102,7 +104,9 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         areas = cleaned_data.get("areas", [])
 
         if email_exists(email):
-            self.add_error("email", "Já existe uma conta cadastrada com esse email.")
+            self.add_error(
+                "email", "Já existe uma conta cadastrada com esse email."
+            )
 
         if len(areas) < 1:
             self.add_error("areas", "Você deve escolher pelo menos uma área.")

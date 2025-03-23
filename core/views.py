@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -25,7 +26,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
     login_url = "/auth/login"
 
 
-def send_reset_email(user: User, reset_url: str):
+def send_reset_email(user: User, reset_url: str) -> None:
     context = {
         "reset_url": reset_url,
         "user": user,
@@ -40,17 +41,15 @@ def send_reset_email(user: User, reset_url: str):
         html_content=html_content,
         recipients=[user],
     )
-    logger.info(f"Sending recovery password email for {user.email}")
+    logger.info("Sending recovery password email for %s", user.email)
 
 
 class CustomPasswordResetView(PasswordResetView):
     email_template_name = "registration/password_reset_email.html"
-    html_email_template_name = (
-        "registration/password_reset_email.html"  # Template de email em HTML
-    )
+    html_email_template_name = "registration/password_reset_email.html"
     success_url = reverse_lazy("password_reset_done")
 
-    def form_valid(self, form):
+    def form_valid(self, form: Any) -> HttpResponseRedirect:
         email = form.cleaned_data["email"]
         try:
             user = User.objects.get(email=email)
@@ -58,19 +57,20 @@ class CustomPasswordResetView(PasswordResetView):
             token = default_token_generator.make_token(user)
             reset_url = self.request.build_absolute_uri(
                 reverse_lazy(
-                    "password_reset_confirm", kwargs={"uidb64": uid, "token": token}
+                    "password_reset_confirm",
+                    kwargs={"uidb64": uid, "token": token},
                 )
             )
             send_reset_email(user, reset_url)
         except User.DoesNotExist:
-            logger.info(f"Requested email {email} does not exists")
+            logger.info("Requested email %s does not exist", email)
             pass  # Dont reveal user does not exist
 
         return HttpResponseRedirect(self.get_success_url())
 
 
 @login_required
-def force_password_change_view(request):
+def force_password_change_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
@@ -79,7 +79,7 @@ def force_password_change_view(request):
             user.save()
             update_session_auth_hash(request, user)
 
-            logger.info(f"{request.user.get_full_name()} redefined password")
+            logger.info("%s redefined password", request.user.get_full_name())
             return redirect("home")
     else:
         form = PasswordChangeForm(user=request.user)

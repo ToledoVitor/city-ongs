@@ -11,13 +11,12 @@ from accountability.models import Revenue
 from contracts.models import Contract
 from reports.exporters.commons.exporters import BasePdf
 from utils.choices import MonthChoices
-from utils.formats import (
-    format_into_brazilian_currency,
-    get_month_range,
-)
+from utils.formats import format_into_brazilian_currency, get_month_range
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass
@@ -25,7 +24,9 @@ class PredictedVersusRealizedPDFExporter:
     pdf = None
     default_cell_height = 5
 
-    def __init__(self, contract: Contract, start_date: datetime, end_date: datetime):
+    def __init__(
+        self, contract: Contract, start_date: datetime, end_date: datetime
+    ):
         pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
         pdf.add_page()
         pdf.set_margins(10, 15, 10)
@@ -108,7 +109,9 @@ class PredictedVersusRealizedPDFExporter:
             accountability_id__in=self.contract.accountabilities.values_list(
                 "id", flat=True
             )
-        ).filter(receive_date__gte=self.start_date, receive_date__lte=self.end_date)
+        ).filter(
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
+        )
         month_income_value = self.contract.month_income_value
 
         head_data = [
@@ -119,7 +122,9 @@ class PredictedVersusRealizedPDFExporter:
         body_data = []
         footer_data = [
             "**TOTAL**",
-            format_into_brazilian_currency(month_income_value * len(months_range)),
+            format_into_brazilian_currency(
+                month_income_value * len(months_range)
+            ),
             format_into_brazilian_currency(
                 all_revenue.aggregate(Sum("value"))["value__sum"]
             ),

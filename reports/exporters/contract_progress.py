@@ -22,7 +22,9 @@ class ContractProgressPDFExporter:
         self._build_content()
         self._build_footer()
 
-        self.pdf.output(f"progress-report-{str(datetime.now().time())[0:8]}.pdf")
+        self.pdf.output(
+            f"progress-report-{str(datetime.now().time())[0:8]}.pdf"
+        )
         return self.pdf
 
     def _set_pdf_base(self):

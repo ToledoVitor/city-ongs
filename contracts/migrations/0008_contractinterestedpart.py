@@ -41,7 +41,10 @@ class Migration(migrations.Migration):
                             ("FINANCIAL_MANAGER", "Gestor Financeiro"),
                             ("TECHNICAL_MANAGER", "Responsável Técnico"),
                             ("PROJECT_COORDINATOR", "Coordenador do Projeto"),
-                            ("ENTITY_RESPONSIBLE", "Responsável pela Entidade"),
+                            (
+                                "ENTITY_RESPONSIBLE",
+                                "Responsável pela Entidade",
+                            ),
                             ("FISCAL_COUNCIL", "Conselho Fiscal"),
                             ("VICE_PRESIDENT", "Vice Presidente"),
                             ("TREASURER", "Tesoureiro"),

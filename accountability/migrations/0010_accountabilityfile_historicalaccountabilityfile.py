@@ -89,8 +89,14 @@ class Migration(migrations.Migration):
                         verbose_name=django.db.models.fields.UUIDField,
                     ),
                 ),
-                ("created_at", models.DateTimeField(blank=True, editable=False)),
-                ("updated_at", models.DateTimeField(blank=True, editable=False)),
+                (
+                    "created_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(blank=True, editable=False),
+                ),
                 (
                     "deleted_at",
                     models.DateTimeField(blank=True, db_index=True, null=True),
@@ -98,7 +104,10 @@ class Migration(migrations.Migration):
                 (
                     "file",
                     models.TextField(
-                        blank=True, max_length=100, null=True, verbose_name="Arquivo"
+                        blank=True,
+                        max_length=100,
+                        null=True,
+                        verbose_name="Arquivo",
                     ),
                 ),
                 (
@@ -110,13 +119,23 @@ class Migration(migrations.Migration):
                         verbose_name="Nome do Arquivo",
                     ),
                 ),
-                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "history_id",
+                    models.AutoField(primary_key=True, serialize=False),
+                ),
                 ("history_date", models.DateTimeField(db_index=True)),
-                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_change_reason",
+                    models.CharField(max_length=100, null=True),
+                ),
                 (
                     "history_type",
                     models.CharField(
-                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        choices=[
+                            ("+", "Created"),
+                            ("~", "Changed"),
+                            ("-", "Deleted"),
+                        ],
                         max_length=1,
                     ),
                 ),

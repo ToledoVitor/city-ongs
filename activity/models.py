@@ -8,14 +8,23 @@ from accounts.models import BaseOrganizationTenantModel, User
 class ActivityLog(BaseOrganizationTenantModel):
     class ActivityLogChoices(models.TextChoices):
         # accounts
-        CREATED_CIVIL_SERVANT = "CREATED_CIVIL_SERVANT", "Criou funcionário público"
-        CREATED_FOLDER_MANAGER = "CREATED_FOLDER_MANAGER", "Criou gestor de pasta"
+        CREATED_CIVIL_SERVANT = (
+            "CREATED_CIVIL_SERVANT",
+            "Criou funcionário público",
+        )
+        CREATED_FOLDER_MANAGER = (
+            "CREATED_FOLDER_MANAGER",
+            "Criou gestor de pasta",
+        )
         CREATED_ORGANIZATION_ACCOUNTANT = (
             "CREATED_ORGANIZATION_ACCOUNTANT",
             "Criou contador / funcionário organização",
         )
         # accountability
-        CREATED_ACCOUNTABILITY = "CREATED_ACCOUNTABILITY", "Criou prestação mensal"
+        CREATED_ACCOUNTABILITY = (
+            "CREATED_ACCOUNTABILITY",
+            "Criou prestação mensal",
+        )
         CREATED_ACCOUNTABILITY_FILE = (
             "CREATED_ACCOUNTABILITY_FILE",
             "Subiu documento de prestação",
@@ -31,10 +40,33 @@ class ActivityLog(BaseOrganizationTenantModel):
             "IMPORTED_ACCOUNTABILITY_FILE",
             "Importou arquivo de prestação",
         )
+        # Accountability files
+        UPLOADED_EXPENSE_FILE = (
+            "UPLOADED_EXPENSE_FILE",
+            "Subiu arquivo de despesa",
+        )
+        UPLOADED_REVENUE_FILE = (
+            "UPLOADED_REVENUE_FILE",
+            "Subiu arquivo de receita",
+        )
+        DELETED_EXPENSE_FILE = (
+            "DELETED_EXPENSE_FILE",
+            "Deletou arquivo de despesa",
+        )
+        DELETED_REVENUE_FILE = (
+            "DELETED_REVENUE_FILE",
+            "Deletou arquivo de receita",
+        )
         # bank
         CREATED_BANK_ACCOUNT = "CREATED_BANK_ACCOUNT", "Criou conta bancária"
-        UPDATED_BANK_ACCOUNT = "UPDATED_BANK_ACCOUNT", "Atualizou conta bancária"
-        UPLOADED_BALANCE_FILE = "UPLOADED_BALANCE_FILE", "subiu extrato bancário"
+        UPDATED_BANK_ACCOUNT = (
+            "UPDATED_BANK_ACCOUNT",
+            "Atualizou conta bancária",
+        )
+        UPLOADED_BALANCE_FILE = (
+            "UPLOADED_BALANCE_FILE",
+            "subiu extrato bancário",
+        )
         # company
         CREATED_COMPANY = "CREATED_COMPANY", "Criou empresa"
         UPDATED_COMPANY = "UPDATED_COMPANY", "Atualizou empresa"
@@ -67,13 +99,31 @@ class ActivityLog(BaseOrganizationTenantModel):
             "Atualizou repasse mensal",
         )
         # contract goals
-        CREATED_CONTRACT_GOAL = "CREATED_CONTRACT_GOAL", "Cadastrou meta do contrato"
-        COMMENTED_CONTRACT_GOAL = "COMMENTED_CONTRACT_GOAL", "Comentou meta do contrato"
-        UPDATED_CONTRACT_GOAL = "UPDATED_CONTRACT_GOAL", "Atualizou meta do contrato"
+        CREATED_CONTRACT_GOAL = (
+            "CREATED_CONTRACT_GOAL",
+            "Cadastrou meta do contrato",
+        )
+        COMMENTED_CONTRACT_GOAL = (
+            "COMMENTED_CONTRACT_GOAL",
+            "Comentou meta do contrato",
+        )
+        UPDATED_CONTRACT_GOAL = (
+            "UPDATED_CONTRACT_GOAL",
+            "Atualizou meta do contrato",
+        )
         # contract items
-        CREATED_CONTRACT_ITEM = "CREATED_CONTRACT_ITEM", "Cadastrou item do contrato"
-        COMMENTED_CONTRACT_ITEM = "COMMENTED_CONTRACT_ITEM", "Comentou item do contrato"
-        UPDATED_CONTRACT_ITEM = "UPDATED_CONTRACT_ITEM", "Atualizou item do contrato"
+        CREATED_CONTRACT_ITEM = (
+            "CREATED_CONTRACT_ITEM",
+            "Cadastrou item do contrato",
+        )
+        COMMENTED_CONTRACT_ITEM = (
+            "COMMENTED_CONTRACT_ITEM",
+            "Comentou item do contrato",
+        )
+        UPDATED_CONTRACT_ITEM = (
+            "UPDATED_CONTRACT_ITEM",
+            "Atualizou item do contrato",
+        )
         REQUEST_NEW_VALUE_ITEM = (
             "REQUEST_NEW_VALUE_ITEM",
             "Solicitou nova valor do item",
@@ -109,7 +159,10 @@ class ActivityLog(BaseOrganizationTenantModel):
             "Atualizou Atividade Executada",
         )
         # contract executions files
-        CREATED_EXECUTION_FILE = "CREATED_EXECUTION_FILE", "Anexou Arquivo de Atividade"
+        CREATED_EXECUTION_FILE = (
+            "CREATED_EXECUTION_FILE",
+            "Anexou Arquivo de Atividade",
+        )
         UPDATED_EXECUTION_FILE = (
             "UPDATED_EXECUTION_FILE",
             "Atualizou Arquivo de Atividade",
@@ -135,7 +188,10 @@ class ActivityLog(BaseOrganizationTenantModel):
             "UPDATED_RESOURCES_SOURCE",
             "Atualizou fonte de recurso",
         )
-        DELETED_RESOURCES_SOURCE = "DELETED_RESOURCES_SOURCE", "Apagou fonte de recurso"
+        DELETED_RESOURCES_SOURCE = (
+            "DELETED_RESOURCES_SOURCE",
+            "Apagou fonte de recurso",
+        )
         # revenues
         CREATED_REVENUE = "CREATED_REVENUE", "Cadastrou receita"
         UPDATED_REVENUE = "UPDATED_REVENUE", "Atualizou receita"
@@ -182,7 +238,9 @@ class ActivityLog(BaseOrganizationTenantModel):
         null=True,
         blank=True,
     )
-    target_content_object = GenericForeignKey("target_content_type", "target_object_id")
+    target_content_object = GenericForeignKey(
+        "target_content_type", "target_object_id"
+    )
 
     def __str__(self) -> str:
         return f"{self.user_email} - {"self.action"}"
@@ -220,7 +278,10 @@ class Notification(BaseOrganizationTenantModel):
             "Prestação marcada como finalizada",
         )
         CONTRACT_CREATED = "CONTRACT_CREATED", "Um novo contrato foi criado"
-        CONTRACT_STATUS = "CONTRACT_STATUS", "O Status do contrato foi atualizado"
+        CONTRACT_STATUS = (
+            "CONTRACT_STATUS",
+            "O Status do contrato foi atualizado",
+        )
         CONTRACT_GOAL_COMMENTED = (
             "CONTRACT_GOAL_COMMENTED",
             "Meta do contrato comentada",

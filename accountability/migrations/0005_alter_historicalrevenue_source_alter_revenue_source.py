@@ -16,7 +16,10 @@ class Migration(migrations.Migration):
             model_name="historicalrevenue",
             name="source",
             field=models.CharField(
-                choices=[("CITY_HALL", "Prefeitura"), ("COUNTERPART", "Contrapartida")],
+                choices=[
+                    ("CITY_HALL", "Prefeitura"),
+                    ("COUNTERPART", "Contrapartida"),
+                ],
                 default="CITY_HALL",
                 verbose_name="Fonte de Recurso",
             ),
@@ -25,7 +28,10 @@ class Migration(migrations.Migration):
             model_name="revenue",
             name="source",
             field=models.CharField(
-                choices=[("CITY_HALL", "Prefeitura"), ("COUNTERPART", "Contrapartida")],
+                choices=[
+                    ("CITY_HALL", "Prefeitura"),
+                    ("COUNTERPART", "Contrapartida"),
+                ],
                 default="CITY_HALL",
                 verbose_name="Fonte de Recurso",
             ),

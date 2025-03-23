@@ -13,7 +13,9 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass
@@ -33,9 +35,7 @@ class PassOn11PDFExporter:
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
-        self.government_link = (
-            "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
-        )
+        self.government_link = "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
 
     def __set_font(self, font_size=7, bold=False):
         if bold:
@@ -268,7 +268,9 @@ class PassOn11PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.city_hall.document)),
+            text=document_mask(
+                str(self.contract.organization.city_hall.document)
+            ),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -326,7 +328,9 @@ class PassOn11PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document)),  # TODO
+            text=document_mask(
+                str(self.contract.organization.document)
+            ),  # TODO
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
