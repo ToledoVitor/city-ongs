@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from utils.admin import BaseModelAdmin
 from accounts.models import Area, CityHall, Committee, Organization, User
+from utils.admin import BaseModelAdmin
 
 
 @admin.register(Organization)
@@ -31,18 +31,24 @@ class CommitteeAdmin(BaseModelAdmin):
     search_fields = ("name",)
     filter_horizontal = ("members",)
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "name",
-                "city_hall",
-                "created_at",
-                "updated_at",
-            )
-        }),
-        (_("Membros"), {
-            "fields": ("members",),
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "name",
+                    "city_hall",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+        (
+            _("Membros"),
+            {
+                "fields": ("members",),
+            },
+        ),
     )
 
 
@@ -59,25 +65,34 @@ class UserAdmin(BaseModelAdmin):
     search_fields = ("email", "first_name", "last_name")
     readonly_fields = ("last_login",)
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "email",
-                "first_name",
-                "last_name",
-                "is_active",
-            )
-        }),
-        (_("Permissões"), {
-            "fields": (
-                "is_staff",
-                "is_superuser",
-                "groups",
-                "user_permissions",
-            ),
-        }),
-        (_("Datas Importantes"), {
-            "fields": ("last_login",),
-            "classes": ("collapse",),
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "is_active",
+                )
+            },
+        ),
+        (
+            _("Permissões"),
+            {
+                "fields": (
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (
+            _("Datas Importantes"),
+            {
+                "fields": ("last_login",),
+                "classes": ("collapse",),
+            },
+        ),
     )

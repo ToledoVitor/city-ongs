@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from utils.admin import BaseModelAdmin
 from accountability.models import (
     Accountability,
     AccountabilityFile,
@@ -13,6 +12,7 @@ from accountability.models import (
     Revenue,
     RevenueFile,
 )
+from utils.admin import BaseModelAdmin
 
 
 class AccountabilityFileInline(admin.TabularInline):
@@ -41,17 +41,21 @@ class AccountabilityAdmin(BaseModelAdmin):
     search_fields = ("contract__name", "month", "year")
     inlines = [AccountabilityFileInline]
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "contract",
-                "status",
-                "description",
-            )
-        }),
-        (_("Datas"), {
-            "fields": ("start_date", "end_date", "created_at", "updated_at")
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "contract",
+                    "status",
+                    "description",
+                )
+            },
+        ),
+        (
+            _("Datas"),
+            {"fields": ("start_date", "end_date", "created_at", "updated_at")},
+        ),
     )
 
 
@@ -86,21 +90,26 @@ class ExpenseAdmin(BaseModelAdmin):
         "paid",
         "conciled",
     )
-    search_fields = ("identification", "favored__name", "accountability__contract__name")
+    search_fields = (
+        "identification",
+        "favored__name",
+        "accountability__contract__name",
+    )
     inlines = [ExpenseFileInline]
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "accountability",
-                "favored",
-                "value",
-                "date",
-            )
-        }),
-        (_("Detalhes"), {
-            "fields": ("description", "created_at", "updated_at")
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "accountability",
+                    "favored",
+                    "value",
+                    "date",
+                )
+            },
+        ),
+        (_("Detalhes"), {"fields": ("description", "created_at", "updated_at")}),
     )
 
 
@@ -128,24 +137,22 @@ class RevenueAdmin(BaseModelAdmin):
         "competency",
         "receive_date",
     )
-    search_fields = (
-        "description", "accountability__contract__number",
-        "source__name"
-    )
+    search_fields = ("description", "accountability__contract__number", "source__name")
     inlines = [RevenueFileInline]
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "accountability",
-                "source",
-                "value",
-                "date",
-            )
-        }),
-        (_("Detalhes"), {
-            "fields": ("description", "created_at", "updated_at")
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "accountability",
+                    "source",
+                    "value",
+                    "date",
+                )
+            },
+        ),
+        (_("Detalhes"), {"fields": ("description", "created_at", "updated_at")}),
     )
 
 

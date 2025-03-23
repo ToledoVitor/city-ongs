@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from utils.admin import BaseModelAdmin
 from bank.models import BankAccount, BankStatement, Transaction
+from utils.admin import BaseModelAdmin
 
 
 class BankStatementInline(admin.TabularInline):
@@ -40,19 +40,20 @@ class BankAccountAdmin(BaseModelAdmin):
     readonly_fields = ("balance",)
     inlines = [BankStatementInline, TransactionInline]
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "bank_name",
-                "bank_id",
-                "account",
-                "account_type",
-                "agency",
-            )
-        }),
-        (_("Informações Financeiras"), {
-            "fields": ("balance", "origin")
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "bank_name",
+                    "bank_id",
+                    "account",
+                    "account_type",
+                    "agency",
+                )
+            },
+        ),
+        (_("Informações Financeiras"), {"fields": ("balance", "origin")}),
     )
 
 
@@ -75,15 +76,9 @@ class BankStatementAdmin(BaseModelAdmin):
     search_fields = ("bank_account__bank_name", "bank_account__account")
     readonly_fields = ("opening_balance", "closing_balance")
     fieldsets = (
-        (_("Conta Bancária"), {
-            "fields": ("organization", "bank_account")
-        }),
-        (_("Período"), {
-            "fields": ("reference_month", "reference_year")
-        }),
-        (_("Saldos"), {
-            "fields": ("opening_balance", "closing_balance")
-        }),
+        (_("Conta Bancária"), {"fields": ("organization", "bank_account")}),
+        (_("Período"), {"fields": ("reference_month", "reference_year")}),
+        (_("Saldos"), {"fields": ("opening_balance", "closing_balance")}),
     )
 
 
@@ -108,28 +103,32 @@ class TransactionAdmin(BaseModelAdmin):
         "memo",
         "bank_account__bank_name",
         "bank_account__account",
-    )   
+    )
     readonly_fields = ("amount", "date", "transaction_number")
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "bank_account",
-                "date",
-                "transaction_type",
-                "transaction_number",
-            )
-        }),
-        (_("Detalhes da Transação"), {
-            "fields": ("amount", "name", "memo")
-        }),
-        (_("Associações"), {
-            "fields": (
-                "expense",
-                "revenue",
-                "expenses",
-                "revenues",
-            ),
-            "classes": ("collapse",),
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "bank_account",
+                    "date",
+                    "transaction_type",
+                    "transaction_number",
+                )
+            },
+        ),
+        (_("Detalhes da Transação"), {"fields": ("amount", "name", "memo")}),
+        (
+            _("Associações"),
+            {
+                "fields": (
+                    "expense",
+                    "revenue",
+                    "expenses",
+                    "revenues",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
     )

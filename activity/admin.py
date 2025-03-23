@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from utils.admin import BaseModelAdmin
 from activity.models import ActivityLog, Notification
+from utils.admin import BaseModelAdmin
 
 
 @admin.register(ActivityLog)
@@ -17,25 +17,34 @@ class ActivityLogAdmin(BaseModelAdmin):
     search_fields = ("user__email", "user__first_name", "user__last_name")
     readonly_fields = ("created_at",)
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "user",
-                "action",
-                "created_at",
-            )
-        }),
-        (_("Objeto Alvo"), {
-            "fields": (
-                "target_model",
-                "target_object_id",
-                "target_object_str",
-            )
-        }),
-        (_("Detalhes"), {
-            "fields": ("changes", "ip_address", "user_agent"),
-            "classes": ("collapse",),
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "user",
+                    "action",
+                    "created_at",
+                )
+            },
+        ),
+        (
+            _("Objeto Alvo"),
+            {
+                "fields": (
+                    "target_model",
+                    "target_object_id",
+                    "target_object_str",
+                )
+            },
+        ),
+        (
+            _("Detalhes"),
+            {
+                "fields": ("changes", "ip_address", "user_agent"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
 
@@ -58,17 +67,23 @@ class NotificationAdmin(BaseModelAdmin):
     )
     readonly_fields = ("created_at",)
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "recipient",
-                "category",
-                "text",
-                "object_id",
-            )
-        }),
-        (_("Datas"), {
-            "fields": ("created_at", "read_at"),
-            "classes": ("collapse",),
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "recipient",
+                    "category",
+                    "text",
+                    "object_id",
+                )
+            },
+        ),
+        (
+            _("Datas"),
+            {
+                "fields": ("created_at", "read_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )

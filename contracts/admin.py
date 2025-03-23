@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from utils.admin import BaseModelAdmin
 from contracts.models import (
     Company,
     Contract,
@@ -16,6 +15,7 @@ from contracts.models import (
     ContractItemReview,
     ContractStep,
 )
+from utils.admin import BaseModelAdmin
 
 
 class ContractAddendumInline(admin.TabularInline):
@@ -94,23 +94,27 @@ class ContractAdmin(BaseModelAdmin):
         ContractItemInline,
     ]
     fieldsets = (
-        (_("Informações Básicas"), {
-            "fields": (
-                "organization",
-                "name",
-                "status",
-                "description",
-            )
-        }),
-        (_("Datas"), {
-            "fields": (
-                "created_at",
-                "updated_at",
-            )
-        }),
-        (_("Valores"), {
-            "fields": ("total_value", "monthly_value")
-        }),
+        (
+            _("Informações Básicas"),
+            {
+                "fields": (
+                    "organization",
+                    "name",
+                    "status",
+                    "description",
+                )
+            },
+        ),
+        (
+            _("Datas"),
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+        (_("Valores"), {"fields": ("total_value", "monthly_value")}),
     )
 
 

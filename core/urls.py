@@ -10,8 +10,12 @@ from core.views import (
 )
 
 urlpatterns = [
-    # Internal
-    path("admin/", admin.site.urls),
+    # Dev Internal
+    re_path(r"^__dev__/api/health_check/", include("health_check.urls")),
+    path("__dev__/api/redis/", test_redis, name="test_redis"),
+    # Admin
+    path("__staff__/admin/", admin.site.urls),
+    # Auth
     path("auth/login/", auth_views.LoginView.as_view(), name="login"),
     path("auth/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path(
@@ -58,7 +62,4 @@ urlpatterns = [
         include(("contracts.urls", "contracts"), namespace="contracts"),
     ),
     path("reports/", include(("reports.urls", "reports"), namespace="reports")),
-    # Health Check
-    re_path(r"^api/health_check/", include("health_check.urls")),
-    path("api/redis/", test_redis, name="test_redis"),
 ]

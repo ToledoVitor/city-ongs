@@ -74,7 +74,7 @@ else:
                     "max_connections": 50,
                     "timeout": 20,
                 },
-                "PARSER_CLASS": "redis.connection.HiredisParser",
+                "PARSER_CLASS": "redis.connection._HiredisParser",
                 "COMPRESSOR_CLASS": "django_redis.compressors.zlib.ZlibCompressor",
                 "IGNORE_EXCEPTIONS": True,
                 "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
