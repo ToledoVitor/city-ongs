@@ -59,7 +59,7 @@ class AccountabilityListView(LoginRequiredMixin, ListView):
     def get_queryset(self) -> QuerySet[Any]:
         query = self.request.GET.get("q", "")
         queryset = self.model.objects.select_related("contract").filter(
-            contract__organization__area__in=self.request.user.areas.all()
+            contract__area__in=self.request.user.areas.all()
         )
 
         if query:

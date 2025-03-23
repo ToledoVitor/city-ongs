@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from typing import Any
 
 from django.contrib.auth import update_session_auth_hash
@@ -90,11 +91,19 @@ def force_password_change_view(request: HttpRequest) -> HttpResponse:
 
 def test_redis(request):
     try:
-        # Test setting a value
-        cache.set("test_key", "test_value", timeout=60)
+        start_time = time.time()
 
-        # Test getting the value
-        value = cache.get("test_key")
+        # Use pipeline for better performance
+        with cache.get_client().pipeline() as pipe:
+            # Test setting a value
+            pipe.set("test_key", "test_value", timeout=60)
+            # Test getting the value
+            pipe.get("test_key")
+            # Execute all commands at once
+            _, value = pipe.execute()
+
+        end_time = time.time()
+        operation_time = (end_time - start_time) * 1000  # Convert to milliseconds
 
         return JsonResponse(
             {
@@ -103,6 +112,7 @@ def test_redis(request):
                 "value": value,
                 "host": os.environ.get("REDIS_HOST"),
                 "port": os.environ.get("REDIS_PORT"),
+                "operation_time_ms": round(operation_time, 2),
             }
         )
     except Exception as e:

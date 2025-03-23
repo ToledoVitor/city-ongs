@@ -295,7 +295,7 @@ class User(AbstractUser):
             models.Index(fields=["organization", "access_level"]),
             models.Index(fields=["password_expires_at"]),
         ]
-        ordering = ["-date_joined"]
+        ordering = ["first_name", "last_name"]
         unique_together = [
             ("organization", "email"),
             ("organization", "cpf"),

@@ -2,8 +2,9 @@ import calendar
 from datetime import datetime
 
 from django import forms
+from django.forms import inlineformset_factory
 
-from contracts.models import Contract
+from contracts.models import Contract, ContractInterestedPart
 from utils.widgets import BaseSelectFormWidget
 
 REPORTS_OPTIONS = [
@@ -31,6 +32,52 @@ REPORTS_OPTIONS = [
         "Consolidado das Conciliações Bancárias",
     ),
 ]
+
+
+class AdditionalResponsibleForm(forms.ModelForm):
+    class Meta:
+        model = ContractInterestedPart
+        fields = ["user", "interest"]
+        widgets = {
+            "user": BaseSelectFormWidget(),
+            "interest": BaseSelectFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+        if self.request:
+            self.fields["user"].queryset = (
+                self.request.user.organization.users.filter(
+                    areas__in=self.request.user.areas.all()
+                )
+                .order_by("first_name", "last_name")
+                .distinct()
+            )
+            self.fields["interest"].choices = [
+                ("", "Selecione o tipo de responsabilidade"),
+            ] + list(ContractInterestedPart.InterestLevel.choices)
+
+
+class AdditionalResponsibleFormSet(
+    inlineformset_factory(
+        Contract,
+        ContractInterestedPart,
+        form=AdditionalResponsibleForm,
+        extra=1,
+        can_delete=False,
+        min_num=0,
+        validate_min=True,
+    )
+):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self, index):
+        kwargs = super().get_form_kwargs(index)
+        kwargs["request"] = self.request
+        return kwargs
 
 
 class ReportForm(forms.Form):
@@ -95,6 +142,18 @@ class ReportForm(forms.Form):
             area__in=self.request.user.areas.all()
         ).order_by("code")
 
+        self.responsible_formset = None
+
+    def get_responsible_formset(self, contract=None):
+        if contract and not self.responsible_formset:
+            self.responsible_formset = AdditionalResponsibleFormSet(
+                instance=contract,
+                data=self.data if self.is_bound else None,
+                prefix="responsibles",
+                request=self.request,
+            )
+        return self.responsible_formset
+
     def clean(self):
         cleaned_data = super().clean()
         try:
@@ -117,5 +176,11 @@ class ReportForm(forms.Form):
 
         cleaned_data["start_date"] = start_date
         cleaned_data["end_date"] = end_date
+
+        if "contract" in cleaned_data:
+            contract = cleaned_data["contract"]
+            formset = self.get_responsible_formset(contract)
+            if formset and not formset.is_valid():
+                self.add_error(None, "Erro nos dados dos responsáveis")
 
         return cleaned_data

@@ -75,6 +75,61 @@
       </div>
     </div>
 
+    <hr class="h-px my-4 border-0 bg-gray-500">
+    <div class="mb-4">
+      <button type="button" id="toggle-responsibles" class="flex items-center w-full text-left mb-2" onclick="toggleResponsibles()">
+        <span class="text-base font-medium text-black">Demais Responsáveis</span>
+        <svg class="w-4 h-4 ml-2 transition-transform" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      
+      <div id="responsibles-container" class="hidden bg-gray-200 border border-gray-300 p-4 rounded-lg">
+        {% if form.responsible_formset %}
+          {{ form.responsible_formset.management_form }}
+          {% for responsible_form in form.responsible_formset %}
+            <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
+              <div class="grid gap-4">
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
+                  {{ responsible_form.user }}
+                </div>
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
+                  {{ responsible_form.interest }}
+                </div>
+              </div>
+              {% if forloop.counter > 1 %}
+                <button type="button" class="remove-responsible mt-2 text-red-600 hover:text-red-800">
+                  Remover Responsável
+                </button>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
+            <div class="grid gap-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
+                <select name="responsibles-0-user" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                  <option value="">Selecione um usuário</option>
+                </select>
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
+                <select name="responsibles-0-interest" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                  <option value="">Selecione o tipo de responsabilidade</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        <button type="button" id="add-responsible" class="mb-2 text-blue-600 hover:text-blue-800">
+          + Adicionar Responsável
+        </button>
+      </div>
+    </div>
+
     <button
       type="submit"
       class="
@@ -146,5 +201,64 @@
       </div>
     {% endif %}
 </form>
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const container = document.getElementById("responsibles-container");
+    const addButton = document.getElementById("add-responsible");
+    const totalFormsInput = document.querySelector('#id_responsibles-TOTAL_FORMS');
+    let formCount = parseInt(totalFormsInput.value, 10);
+
+    addButton.addEventListener("click", function () {
+        const newForm = container.querySelector('.responsible-form').cloneNode(true);
+        const formRegex = RegExp(`responsibles-(\\d+)-`, "g");
+
+        formCount++;
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `responsibles-${formCount-1}-`);
+        
+        newForm.querySelectorAll("input, select").forEach(input => {
+            if (input.type !== "hidden") {
+                input.value = "";
+            }
+        });
+
+        if (!newForm.querySelector(".remove-responsible")) {
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "remove-responsible mt-2 text-red-600 hover:text-red-800";
+            removeButton.textContent = "Remover Responsável";
+            newForm.appendChild(removeButton);
+        }
+
+        container.appendChild(newForm);
+        totalFormsInput.value = formCount;
+    });
+
+    container.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-responsible")) {
+            e.target.closest(".responsible-form").remove();
+            formCount--;
+            totalFormsInput.value = formCount;
+            
+            // Update indices of remaining forms
+            container.querySelectorAll('.responsible-form').forEach((form, index) => {
+                form.innerHTML = form.innerHTML.replace(
+                    /responsibles-\d+-/g,
+                    `responsibles-${index}-`
+                );
+            });
+        }
+    });
+});
+
+function toggleResponsibles() {
+  const container = document.getElementById("responsibles-container");
+  const icon = document.getElementById("toggle-icon");
+  container.classList.toggle("hidden");
+  icon.style.transform = container.classList.contains("hidden") ? "" : "rotate(180deg)";
+}
+</script>
+{% endblock %}
 
 {% endblock %}
