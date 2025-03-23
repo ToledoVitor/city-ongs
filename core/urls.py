@@ -6,6 +6,7 @@ from core.views import (
     CustomPasswordResetView,
     HomeView,
     force_password_change_view,
+    test_redis,
 )
 
 urlpatterns = [
@@ -59,4 +60,5 @@ urlpatterns = [
     path("reports/", include(("reports.urls", "reports"), namespace="reports")),
     # Health Check
     re_path(r"^api/health_check/", include("health_check.urls")),
+    path("api/redis/", test_redis, name="test_redis"),
 ]

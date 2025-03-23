@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+import os
 
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -7,13 +8,14 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.views.generic import TemplateView
+from django.core.cache import cache
 
 from accounts.models import User
 from sendgrid_client.client import SendGridClient
@@ -84,3 +86,25 @@ def force_password_change_view(request: HttpRequest) -> HttpResponse:
     else:
         form = PasswordChangeForm(user=request.user)
     return render(request, "force_password_change.html", {"form": form})
+
+
+def test_redis(request):
+    try:
+        # Test setting a value
+        cache.set("test_key", "test_value", timeout=60)
+
+        # Test getting the value
+        value = cache.get("test_key")
+
+        return JsonResponse({
+            "status": "success",
+            "message": "Redis connection is working",
+            "value": value,
+            "host": os.environ.get("REDIS_HOST"),
+            "port": os.environ.get("REDIS_PORT")
+        })
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        }, status=500)

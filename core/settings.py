@@ -74,7 +74,13 @@ else:
                     "max_connections": 50,
                     "timeout": 20,
                 },
+                "PARSER_CLASS": "redis.connection.HiredisParser",
+                "COMPRESSOR_CLASS": "django_redis.compressors.zlib.ZlibCompressor",
+                "IGNORE_EXCEPTIONS": True,
+                "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
             },
+            "KEY_PREFIX": "sitts",
+            "TIMEOUT": 300,  # 5 minutes
         }
     }
 
