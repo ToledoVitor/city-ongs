@@ -25,7 +25,8 @@ class ErrorHandlingMiddleware:
     ) -> HttpResponse:
         # Skip admin, auth, and error template responses
         if (
-            request.path.startswith("/admin/")
+            request.path.startswith("/__dev__/")
+            or request.path.startswith("/__staff__/")
             or request.path.startswith("/auth/")
             or (
                 hasattr(response, "template_name")
@@ -88,7 +89,8 @@ class ErrorHandlingMiddleware:
     ) -> HttpResponse | None:
         # Skip admin and auth requests
         if (
-            request.path.startswith("/admin/")
+            request.path.startswith("/__dev__/")
+            or request.path.startswith("/__staff__/")
             or request.path.startswith("/auth/")
             or request.path.startswith("/reports/")
         ):
