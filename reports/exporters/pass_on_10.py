@@ -325,7 +325,6 @@ class PassOn10PDFExporter(CommonPDFExporter):
             width=190,
             border=1,
             align="C",
-            fill=True,
         )
         self.pdf.set_fill_color(255, 255, 255)
         self.ln(4)

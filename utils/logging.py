@@ -54,8 +54,8 @@ def log_database_operation(operation: str) -> Callable:
                         operation,
                         extra={
                             "operation": operation,
-                            "args": args,
-                            "kwargs": kwargs,
+                            "function_args": str(args),
+                            "function_kwargs": str(kwargs),
                             "result": str(result),
                         },
                     )
@@ -69,8 +69,8 @@ def log_database_operation(operation: str) -> Callable:
                     exc_info=True,
                     extra={
                         "operation": operation,
-                        "args": args,
-                        "kwargs": kwargs,
+                        "function_args": str(args),
+                        "function_kwargs": str(kwargs),
                         "error": str(e),
                     },
                 )

@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -60,6 +61,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
+        self.initialize_pdf()
         self.default_cell_height = 5
 
     def handle(self) -> Any:
@@ -135,7 +137,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text=self.TITLE,
             align="C",
-            max_line_height=self.default_cell_height,
         )
         self.pdf.set_y(self.pdf.get_y() + 5)
 
@@ -145,19 +146,16 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_cell(
             text=f"**Órgão Concessor:** {self.contract.organization.city_hall.name}",
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln()
         self.draw_cell(
             text=f"**Entidade Beneficiária:** {self.contract.organization.name}",
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln()
         self.draw_cell(
             text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln()
         hired_company = self.contract.hired_company
@@ -168,13 +166,11 @@ class PassOn14PDFExporter(CommonPDFExporter):
                 f"{hired_company.district}"
             ),
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln()
         self.draw_cell(
             text="**Responsáveis pela OSC:**",
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln()
 
@@ -207,8 +203,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
-            font_size=6,
             align="L",
             line_height=4,
             repeat_headings=0,
@@ -229,9 +223,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -243,14 +235,12 @@ class PassOn14PDFExporter(CommonPDFExporter):
                 f"{format_into_brazilian_date(end)}"
             ),
             markdown=True,
-            h=self.default_cell_height,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
         self.draw_cell(
             text=f"**Origem dos Recursos (1):** {self.RESOURCE_SOURCE}",
             markdown=True,
-            h=self.default_cell_height,
         )
         self.ln(4)
 
@@ -279,11 +269,10 @@ class PassOn14PDFExporter(CommonPDFExporter):
             )
 
         col_widths = [75, 19, 65, 31]
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
-            font_size=6,
             line_height=4,
             align="C",
             repeat_headings=0,
@@ -303,8 +292,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.set_font(font_size=8)
         self.draw_cell(
             text=self.RESOURCES_TITLE,
-            w=190,
-            h=self.default_cell_height,
+            width=190,
             border=1,
             markdown=True,
             align="C",
@@ -333,8 +321,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
-            font_size=6,
             line_height=4,
             align="C",
             repeat_headings=0,
@@ -349,11 +335,9 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.set_fill_color(gray=True)
         self.draw_cell(
             text="",
-            w=190,
-            h=self.default_cell_height,
+            width=190,
             border=1,
             align="C",
-            fill=True,
         )
         self.set_fill_color(gray=False)
         self.ln()
@@ -419,7 +403,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=extern_revenue_data,
             line_height=4,
             align="C",
             repeat_headings=0,
@@ -452,7 +435,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
                 "(1) Verba: Federal, Estadual, Municipal, devendo ser elaborado "
                 "um anexo para cada fonte de recurso."
             ),
-            h=self.default_cell_height,
         )
         self.ln(4)
         self.draw_cell(
@@ -460,12 +442,10 @@ class PassOn14PDFExporter(CommonPDFExporter):
                 "(2) Incluir valores previstos no exercício anterior e repassados "
                 "neste exercício."
             ),
-            h=self.default_cell_height,
         )
         self.ln(4)
         self.draw_cell(
             text="(3) Receitas com estacionamento, aluguéis, entre outras.",
-            h=self.default_cell_height,
         )
         self.ln(10)
 
@@ -480,9 +460,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
                 "a pagar no exercício seguinte."
             ),
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -491,8 +469,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.set_font(font_size=8, bold=True)
         self.draw_cell(
             text=self.EXPENSES_TITLE,
-            w=190,
-            h=self.default_cell_height,
+            width=190,
             border=1,
             align="C",
             new_x=XPos.LMARGIN,
@@ -500,8 +477,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         )
         self.draw_cell(
             text=f"ORIGEM DOS RECURSOS (4): **{self.RESOURCE_SOURCE}**",
-            w=190,
-            h=self.default_cell_height,
+            width=190,
             border=1,
             align="L",
             markdown=True,
@@ -666,7 +642,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
             line_height=4,
             align="C",
             repeat_headings=0,
@@ -731,7 +706,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.ln(7)
         self.draw_multi_cell(
             text="(*) Apenas para entidades da área da Saúde.",
-            height=self.default_cell_height,
         )
         self.ln(4)
 
@@ -741,7 +715,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text=self.FINANCIAL_TITLE,
             width=190,
-            height=self.default_cell_height,
             border=1,
             align="C",
             new_x=XPos.LMARGIN,
@@ -776,7 +749,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
             align="C",
             repeat_headings=0,
         ) as table:
@@ -795,9 +767,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text=self.DECLARATION_TEXT,
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -805,9 +775,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text="**LOCAL:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -815,9 +783,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text="**DATA:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -825,9 +791,7 @@ class PassOn14PDFExporter(CommonPDFExporter):
         self.draw_multi_cell(
             text="**Responsáveis pela Contratada:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -864,7 +828,6 @@ class PassOn14PDFExporter(CommonPDFExporter):
         with self.pdf.table(
             headings_style=font,
             col_widths=col_widths,
-            data=table_data,
             align="L",
             line_height=4,
             repeat_headings=0,

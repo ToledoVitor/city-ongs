@@ -350,7 +350,7 @@ class PassOn3PDFExporter(CommonPDFExporter):
         )
         self.ln(4)
         self.draw_cell(
-            text=f"Cargo: {manager.position}",
+            text=f"Cargo: {manager.name}",
             width=190,
             align="L",
         )

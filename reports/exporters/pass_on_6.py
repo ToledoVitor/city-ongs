@@ -70,7 +70,7 @@ class PassOn6PDFExporter(CommonPDFExporter):
         ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
         self.expense_queryset = Expense.objects.filter(
-            contract=self.contract,
+            accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
@@ -107,11 +107,11 @@ class PassOn6PDFExporter(CommonPDFExporter):
     def _draw_header(self) -> None:
         """Draw the header section of the PDF."""
         self.set_font(font_size=11, bold=True)
-        self.pdf.multi_cell(
+        self.draw_multi_cell(
             text=(
                 "ANEXO RP-06 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO "
                 "INTEGRAL DAS RECEITAS E DESPESAS \n CONTRATO DE GESTÃO"
-            )
+            ),
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -126,25 +126,25 @@ class PassOn6PDFExporter(CommonPDFExporter):
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.pdf.cell(
             text=f"**Contratada:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.pdf.cell(
             text="**Entidade Gerenciada (*):**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.pdf.cell(
             text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         hired_company = self.contract.hired_company
         self.pdf.cell(
             text=(
@@ -155,13 +155,13 @@ class PassOn6PDFExporter(CommonPDFExporter):
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.pdf.cell(
             text="**Responsável(is) pela Organização Social:**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
     def _draw_table(
         self,
@@ -221,40 +221,37 @@ class PassOn6PDFExporter(CommonPDFExporter):
 
     def _draw_partners_data(self) -> None:
         """Draw the partners data section."""
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.set_font(font_size=8)
-        self.pdf.multi_cell(
+        self.draw_multi_cell(
             text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=self.default_cell_height,
+            height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
-        self.pdf.cell(
+        self.draw_cell(
             text=(
                 f"**EXERCÍCIO:** {format_into_brazilian_date(start)} a "
                 f"{format_into_brazilian_date(end)}"
             ),
             markdown=True,
-            h=self.default_cell_height,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.cell(
+        self.draw_cell(
             text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
             markdown=True,
-            h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
     def _draw_documents_table(self) -> None:
         """Draw the documents table."""
         self.set_font(font_size=7, bold=False)
-        self.pdf.ln()
+        self.ln()
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
@@ -283,11 +280,11 @@ class PassOn6PDFExporter(CommonPDFExporter):
             align="C",
             markdown=True,
         )
-        self.pdf.ln()
+        self.ln()
 
     def _draw_header_resources_table(self) -> None:
         """Draw the header of the resources table."""
-        self.pdf.ln(7)
+        self.ln(7)
         self.set_font(font_size=8, bold=False)
         self.pdf.cell(
             190,
@@ -297,7 +294,7 @@ class PassOn6PDFExporter(CommonPDFExporter):
             markdown=True,
             align="C",
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
         table_data = [
             [
@@ -337,7 +334,7 @@ class PassOn6PDFExporter(CommonPDFExporter):
             fill=True,
         )
         self.pdf.set_fill_color(255, 255, 255)
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
     def _draw_resources_table(self) -> None:
         """Draw the resources table."""
@@ -403,7 +400,7 @@ class PassOn6PDFExporter(CommonPDFExporter):
 
     def _draw_resources_footer(self) -> None:
         """Draw the resources footer section."""
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         self.set_font(font_size=7)
         self.pdf.cell(
             text=(
@@ -412,7 +409,7 @@ class PassOn6PDFExporter(CommonPDFExporter):
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
         self.pdf.cell(
             text=(
                 "(2) Incluir valores previstos no exercício anterior e repassados "
@@ -420,16 +417,16 @@ class PassOn6PDFExporter(CommonPDFExporter):
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
         self.pdf.cell(
             text="(3) Receitas com estacionamento, aluguéis, entre outras.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(10)
+        self.ln(10)
 
     def _draw_expenses_table(self) -> None:
         """Draw the expenses table."""
-        self.pdf.multi_cell(
+        self.draw_multi_cell(
             text=(
                 f"O(s) signatário(s), na qualidade de representante(s) do(a) "
                 f"{self.contract.name} vem indicar, na forma abaixo detalhada, as "
@@ -439,14 +436,12 @@ class PassOn6PDFExporter(CommonPDFExporter):
                 f"pagar no exercício seguinte."
             ),
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
 
-        self.pdf.ln(7)
+        self.ln(7)
         self.set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
@@ -639,37 +634,37 @@ class PassOn6PDFExporter(CommonPDFExporter):
             ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
         self.pdf.cell(
             text="(5) Salários, encargos e benefícios.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
         self.pdf.cell(
             text="(6) Autônomos e pessoa jurídica.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
         self.pdf.cell(
             text="(7) Energia elétrica, água e esgoto, gás, telefone e internet.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(5)
-        self.pdf.multi_cell(
-            190,
+        self.ln(5)
+        self.draw_multi_cell(
+            width=190,
             text=(
                 "(8) No rol exemplificativo incluir também as aquisições e os "
                 "compromissos assumidos que não são classificados contabilmente como "
                 "DESPESAS, como, por exemplo, aquisição de bens permanentes."
             ),
-            h=3,
+            height=3,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.cell(w=190, text="", h=1)  # It works, please do not erase
-        self.pdf.ln()
-        self.pdf.multi_cell(
-            190,
+        self.draw_cell(width=190, text="", height=1)  # It works, please do not erase
+        self.ln()
+        self.draw_multi_cell(
+            width=190,
             text=(
                 "(9) Quando a diferença entre a Coluna DESPESAS CONTABILIZADAS "
                 "NESTE EXERCÍCIO e a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO "
@@ -679,19 +674,19 @@ class PassOn6PDFExporter(CommonPDFExporter):
                 "SEGUINTES, uma vez que tais descontos ou multas são contabilizados "
                 "em contas de receitas ou despesas."
             ),
-            h=4,
+            height=4,
             new_x=XPos.LMARGIN,
         )
-        self.pdf.ln(7)
+        self.ln(7)
         self.pdf.cell(
             text="(*) Apenas para entidades da área da Saúde.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
 
     def _draw_financial_table(self) -> None:
         """Draw the financial table."""
-        self.pdf.ln(7)
+        self.ln(7)
         self.set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
@@ -745,9 +740,9 @@ class PassOn6PDFExporter(CommonPDFExporter):
 
     def _draw_last_informations(self) -> None:
         """Draw the last information section."""
-        self.pdf.ln(7)
+        self.ln(7)
         self.set_font(font_size=7)
-        self.pdf.multi_cell(
+        self.draw_multi_cell(
             text=(
                 "Declaro(amos), na qualidade de responsável(is) pela entidade "
                 "supra epigrafada, sob as penas da Lei, que a despesa relacionada "
@@ -756,39 +751,35 @@ class PassOn6PDFExporter(CommonPDFExporter):
                 "Órgão Público Contratante."
             ),
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(9)
-        self.pdf.multi_cell(
+        self.ln(9)
+        self.draw_multi_cell(
             text="**LOCAL:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(4)
-        self.pdf.multi_cell(
+        self.ln(4)
+        self.draw_multi_cell(
             text="**DATA:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(8)
-        self.pdf.multi_cell(
+        self.ln(8)
+        self.draw_multi_cell(
             text="**Responsáveis pela Contratada:**",
             markdown=True,
-            h=self.default_cell_height,
-            w=190,
-            max_line_height=4,
+            height=self.default_cell_height,
+            width=190,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )

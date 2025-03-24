@@ -115,13 +115,12 @@ def export_pass_on_10(contract: Contract, start_date: date, end_date: date):
 
 
 def export_pass_on_11(
-    contract: Contract, start_date: date, end_date: date, responsibles: list = None
+    contract: Contract, start_date: date, end_date: date
 ):
     return PassOn11PDFExporter(
         contract=contract,
         start_date=start_date,
         end_date=end_date,
-        responsibles=responsibles,
     ).handle()
 
 
@@ -265,7 +264,6 @@ def export_report(
                 contract=contract,
                 start_date=start_date,
                 end_date=end_date,
-                responsibles=responsibles,
             )
 
         case "rp_12":

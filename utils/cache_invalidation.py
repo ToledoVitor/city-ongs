@@ -42,22 +42,18 @@ def invalidate_contract_cache(contract_id):
     """
     Invalidate all cache related to a contract.
     """
-    with cache.get_client().pipeline() as pipe:
-        pipe.delete(get_contract_stats_key(contract_id))
-        pipe.delete(get_contract_detail_key(contract_id))
-        pipe.execute()
+    cache.delete(get_contract_stats_key(contract_id))
+    cache.delete(get_contract_detail_key(contract_id))
 
 
 def invalidate_accountability_cache(accountability_id, organization_id=None):
     """
     Invalidate all cache related to an accountability.
     """
-    with cache.get_client().pipeline() as pipe:
-        pipe.delete(get_accountability_stats_key(accountability_id))
-        pipe.delete(get_accountability_detail_key(accountability_id))
-        if organization_id:
-            pipe.delete(get_accountability_list_key(organization_id))
-        pipe.execute()
+    cache.delete(get_accountability_stats_key(accountability_id))
+    cache.delete(get_accountability_detail_key(accountability_id))
+    if organization_id:
+        cache.delete(get_accountability_list_key(organization_id))
 
 
 def invalidate_cache_on_update(view_func):

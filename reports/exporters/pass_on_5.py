@@ -309,26 +309,20 @@ class PassOn5PDFExporter(CommonPDFExporter):
             document: Person's document number
         """
         self.set_font(font_size=8, bold=True)
-        self.pdf.cell(text=title, h=self.default_cell_height)
+        self.draw_cell(text=title)
         self.pdf.ln(4)
         self.set_font(font_size=8, bold=False)
-        self.pdf.cell(text=f"Nome: {name}", h=self.default_cell_height)
+        self.draw_cell(text=f"Nome: {name}")
         self.pdf.ln(4)
         self.set_font(font_size=8)
-        self.pdf.cell(text=f"Cargo: {position}", h=self.default_cell_height)
+        self.draw_cell(text=f"Cargo: {position}")
         self.pdf.ln(4)
         self.set_font(font_size=8)
-        self.pdf.cell(
-            text=document_mask(str(document)),
-            h=self.default_cell_height,
-        )
+        self.draw_cell(text=document_mask(str(document)))
 
         self.pdf.ln(4)
         self.set_font(font_size=8)
-        self.pdf.cell(
-            text="Assinatura: ___________________________",
-            h=self.default_cell_height,
-        )
+        self.draw_cell(text="Assinatura: ___________________________")
         self.pdf.ln(10)
 
     def _draw_grantor_authority(self) -> None:
