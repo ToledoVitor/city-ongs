@@ -90,6 +90,16 @@
   <label class="block mb-2 text-2xl font-bold text-black">Detalhamento da Despesa</label>
 
   <div class="my-3">
+    <label
+        for="id_source"
+        class="block mb-2 text-base font-medium text-black"
+    >
+        Fonte de recursos <span class="text-gray-400">(federal ou contrapartida)</span>
+    </label>
+    {{ form.source }}
+  </div>
+
+  <div class="my-3">
     <div class="grid gap-6 mb-6 md:grid-cols-2">
       <div class="relative">
         <label
