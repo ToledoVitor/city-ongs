@@ -730,8 +730,16 @@ class ContractItem(
     )
 
     # DATES
-    start_date = models.DateField(verbose_name="Data Inicial")
-    end_date = models.DateField(verbose_name="Data Final")
+    start_date = models.DateField(
+        verbose_name="Data Inicial",
+        null=True,
+        blank=True,
+    )
+    end_date = models.DateField(
+        verbose_name="Data Final",
+        null=True,
+        blank=True,
+    )
 
     is_additive = models.BooleanField(verbose_name="É aditivo?", default=False)
 
@@ -789,6 +797,120 @@ class ContractItem(
         verbose_name = "Item"
         verbose_name_plural = "Itens"
         ordering = ("-month_expense",)
+
+
+class ContractItemPurchaseProcess(BaseOrganizationTenantModel):
+    class PurchaseStatus(models.TextChoices):
+        ANALYZING = "ANALYZING", "Analisando Opções"
+        IN_PROGRESS = "IN_PROGRESS", "Em Andamento"
+        FINISHED = "FINISHED", "Finalizado"
+
+    item = models.OneToOneField(
+        ContractItem,
+        verbose_name="Item",
+        related_name="purchase_processes",
+        on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        verbose_name="Status de Compra",
+        choices=PurchaseStatus.choices,
+        default=PurchaseStatus.ANALYZING,
+        max_length=22,
+    )
+    observations = models.CharField(
+        verbose_name="Observações",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+
+    # Aquisition
+    aquisition_date = models.DateField(
+        verbose_name="Data da Aquisição",
+        null=True,
+        blank=True,
+    )
+    parcel_due_date = models.DateField(
+        verbose_name="Data de Vencimento das Parcelas",
+        null=True,
+        blank=True,
+    )
+    aquisition_value = models.DecimalField(
+        verbose_name="Valor da Aquisição",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
+    aquisition_parcel_quantity = models.PositiveIntegerField(
+        verbose_name="Quantidade de Parcelas",
+        null=True,
+        blank=True,
+    )    
+
+    # Supplier
+    supplier = models.CharField(
+        verbose_name="Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_document = models.CharField(
+        verbose_name="Documento do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_phone = models.CharField(
+        verbose_name="Telefone do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_email = models.EmailField(
+        verbose_name="Email do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_address = models.CharField(
+        verbose_name="Endereço do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self) -> str:
+        return f"Processo de Compra {self.item.name}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["item"]),
+        ]
+        verbose_name = "Processo de Compra"
+        verbose_name_plural = "Processos de Compra"
+
+
+class ContractItemPurchaseProcessDocument(BaseOrganizationTenantModel):
+    purchase_process = models.ForeignKey(
+        ContractItemPurchaseProcess,
+        verbose_name="Processo de Compra",
+        related_name="documents",
+        on_delete=models.CASCADE,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contract-item-purchase-process-documents/",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self) -> str:
+        return f"Documento de Compra - {self.file.name}"
+
+    class Meta:
+        verbose_name = "Documento do Processo de Compra"
+        verbose_name_plural = "Documentos do Processo de Compra"
 
 
 class ContractItemReview(BaseOrganizationTenantModel):

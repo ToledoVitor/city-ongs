@@ -801,7 +801,7 @@ class ExpenseFile(
         User,
         verbose_name="Criado por",
         related_name="expense_files",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
 
     file = models.FileField(
@@ -871,7 +871,7 @@ class RevenueFile(
         User,
         verbose_name="Criado por",
         related_name="revenue_files",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
 
     name = models.CharField(
