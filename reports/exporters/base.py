@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BasePDFExporter:
     """
-    Base class for all PDF exporters with proper resource management.
+    Classe base para todos os exportadores PDF com gerenciamento adequado de recursos.
     """
 
-    _pdf_instances = weakref.WeakSet()  # Tracks all active PDF instances
+    _pdf_instances = weakref.WeakSet()  # Rastreia todas as instâncias PDF ativas
 
     def __init__(self):
         self.pdf = None
@@ -19,54 +19,51 @@ class BasePDFExporter:
 
     def __del__(self):
         """
-        Ensure that the PDF resources are released when the object
-        is destroyed.
+        Garante que os recursos do PDF sejam liberados quando o objeto for destruído.
         """
         self.cleanup()
 
     def cleanup(self):
         """
-        Clean up PDF resources safely.
+        Limpa recursos do PDF de forma segura.
         """
         try:
             if self.pdf:
                 self.pdf.close()
                 self.pdf = None
-        except Exception as exception:
-            logger.error(
-                "Error cleaning up PDF resources: %s", exception
-            )
+        except Exception as e:
+            logger.error(f"Erro ao limpar recursos do PDF: {e}")
 
     @classmethod
     def cleanup_all(cls):
         """
-        Clean up resources from all active PDF instances.
+        Limpa recursos de todas as instâncias PDF ativas.
         """
         for instance in list(cls._pdf_instances):
             instance.cleanup()
 
     def initialize_pdf(self):
         """
-        Initialize the PDF with basic configurations.
-        Must be implemented by subclasses.
+        Inicializa o PDF com configurações básicas.
+        Deve ser implementado pelas classes filhas.
         """
         raise NotImplementedError
 
     def handle(self):
         """
-        Main method to generate the PDF.
-        Must be implemented by subclasses.
+        Método principal para gerar o PDF.
+        Deve ser implementado pelas classes filhas.
         """
         raise NotImplementedError
 
     def __enter__(self):
         """
-        Support for use with context manager.
+        Suporte para uso com context manager.
         """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
-        Ensure cleanup of resources when exiting the context manager.
+        Garante limpeza de recursos ao sair do context manager.
         """
         self.cleanup()
