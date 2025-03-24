@@ -598,7 +598,6 @@ class ConsolidatedPDFExporter:
     def _draw_reimbursement_interest_table(self):
         reimbursement_interest_queryset = self.revenue_queryset.filter(
             revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
-            # bank_account__revenues__revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST
         )
         total_reimbursement = Decimal("0.00")
         body_data = [

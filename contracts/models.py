@@ -138,7 +138,6 @@ class Contract(
         default=ConcessionChoices.MANAGEMENT,
         max_length=128,
     )
-    # TODO: remove null
     code = models.CharField(
         verbose_name="Código do contrato",
         max_length=16,
@@ -147,16 +146,11 @@ class Contract(
     )
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
-        null=True,
-        blank=True,
     )
     objective = models.CharField(verbose_name="Objeto", max_length=128)
     bidding = models.CharField(
-        # TODO: remove null
         verbose_name="Licitação",
         max_length=128,
-        null=True,
-        blank=True,
     )
 
     # Law and Agreement
@@ -736,18 +730,8 @@ class ContractItem(
     )
 
     # DATES
-    start_date = models.DateField(
-        # TODO: remove null
-        verbose_name="Data Inicial",
-        null=True,
-        blank=True,
-    )
-    end_date = models.DateField(
-        # TODO: remove null
-        verbose_name="Data Final",
-        null=True,
-        blank=True,
-    )
+    start_date = models.DateField(verbose_name="Data Inicial")
+    end_date = models.DateField(verbose_name="Data Final")
 
     is_additive = models.BooleanField(verbose_name="É aditivo?", default=False)
 
@@ -939,11 +923,8 @@ class ContractExecutionActivity(BaseOrganizationTenantModel):
         max_length=128,
     )
     description = models.CharField(
-        # TODO: remove null
         verbose_name="Descrição",
         max_length=256,
-        null=True,
-        blank=True,
     )
     percentage = models.DecimalField(
         verbose_name="Porcentagem Completa",
@@ -977,25 +958,18 @@ class ContractExecutionFile(
     CacheInvalidationMixin,
 ):
     execution = models.ForeignKey(
-        # TODO: remove null
         ContractExecution,
         verbose_name="Relatório de Execução",
         related_name="files",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     name = models.CharField(
         verbose_name="Nome",
         max_length=128,
-        null=True,
-        blank=True,
     )
     file = models.FileField(
         verbose_name="Arquivo",
         upload_to="uploads/contracts/executions",
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -1003,7 +977,7 @@ class ContractExecutionFile(
         verbose_name_plural = "Arquivos de Atividades"
 
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
 
     @property
     def file_type(self) -> str:

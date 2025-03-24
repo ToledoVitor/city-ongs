@@ -88,9 +88,11 @@ class ContractsListView(LoginRequiredMixin, ListView):
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(name__icontains=query) | Q(code__icontains=query)
+                Q(name__icontains=query)
+                | Q(code__icontains=query)
+                | Q(internal_code__icontains=query)
             )
-        return queryset.order_by("code")
+        return queryset.order_by("-internal_code")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
