@@ -1,56 +1,33 @@
-import os
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.conf import settings
 from django.db.models import Q, Sum
-from fpdf import XPos, YPos
-from fpdf.fonts import FontFace
 
+from fpdf.fonts import FontFace
 from accountability.models import Expense, Revenue
 from bank.models import BankStatement
-from reports.exporters.commons.exporters import BasePdf
+from reports.exporters.commons.pdf_exporter import CommonPDFExporter
 from utils.formats import (
     document_mask,
     format_into_brazilian_currency,
     format_into_brazilian_date,
 )
 
-font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
-font_italic_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansOblique.ttf")
-font_bold_italic_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansBoldOblique.ttf"
-)
-
 
 @dataclass
-class PassOn2PDFExporter:
-    pdf = None
-    default_cell_height = 5
+class PassOn2PDFExporter(CommonPDFExporter):
+    """Exporter for Pass On 2 PDF report."""
 
-    def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.add_font("FreeSans", "I", font_italic_path, uni=True)
-        pdf.add_font("FreeSans", "BI", font_bold_italic_path, uni=True)
-        pdf.set_fill_color(233, 234, 236)
-        self.pdf = pdf
+    def __init__(self, contract, start_date: date, end_date: date):
+        super().__init__()
         self.contract = contract
         self.start_date = start_date - timedelta(days=365)
         self.end_date = end_date
+        self.initialize_pdf()
 
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
-
-    def __database_queries(self):
+    def _database_queries(self) -> None:
+        """Performs database queries to get required data."""
         self.checking_account = self.contract.checking_account
         self.investing_account = self.contract.investing_account
 
@@ -74,10 +51,16 @@ class PassOn2PDFExporter:
         )
 
         self.revenue_queryset = (
-            Revenue.objects.filter(  # TODO como filtrar por contrato
+            Revenue.objects.filter(
+                accountability__contract=self.contract,
+                receive_date__gte=self.start_date,
+                receive_date__lte=self.end_date,
+            )
+            .filter(
                 Q(bank_account=self.checking_account)
                 | Q(bank_account=self.investing_account)
-            ).exclude(bank_account__isnull=True)
+            )
+            .exclude(bank_account__isnull=True)
         )
 
         self.expense_queryset = Expense.objects.filter(
@@ -89,7 +72,8 @@ class PassOn2PDFExporter:
         self.paid_expenses = self.expense_queryset.filter(paid=True)
 
     def handle(self):
-        self.__database_queries()
+        """Main method to generate the PDF report."""
+        self._database_queries()
         self._draw_header()
         self._draw_form()
         self._draw_table_I()
@@ -101,194 +85,192 @@ class PassOn2PDFExporter:
 
         return self.pdf
 
-    def _draw_header(self):
-        # Cabeçalho e títulos
-        self.__set_font(font_size=9, bold=True)
-        self.pdf.multi_cell(
-            0,
-            4,
-            "ANEXO RP-02 - REPASSES A ÓRGÃOS PÚBLICOS \n DEMONSTRATIVO INTEGRAL DE RECEITAS E DESPESAS",
+    def _draw_header(self) -> None:
+        """Draws the header section of the PDF."""
+        self.set_font(font_size=9, bold=True)
+        self.draw_multi_cell(
+            text=(
+                "ANEXO RP-02 - REPASSES A ÓRGÃOS PÚBLICOS \n "
+                "DEMONSTRATIVO INTEGRAL DE RECEITAS E DESPESAS"
+            ),
+            height=4,
             align="C",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        # Espaçamento do título pro próximo dado
-        self.pdf.set_y(self.pdf.get_y() + 10)
+        self.ln(10)
 
-    def _draw_form(self):
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
+    def _draw_form(self) -> None:
+        """Draws the form section with contract details."""
+        self.set_font(font_size=8, bold=False)
+        
+        # Draw organization details
+        self._draw_organization_details()
+        
+        # Draw contract details
+        self._draw_contract_details()
+        
+        # Draw company details
+        self._draw_company_details()
+        
+        # Draw responsible details
+        self._draw_responsible_details()
+        
+        # Draw total value section
+        self._draw_total_value_section()
+
+    def _draw_organization_details(self) -> None:
+        """Draws organization related details."""
+        city_hall_name = self.contract.organization.city_hall.name
+        self.draw_cell(
+            text=f"**ÓRGÃO CONCESSOR:** {city_hall_name}",
             markdown=True,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            f"**TIPO DE CONCESSÃO (1):** {self.contract.get_concession_type_display()}",
-            align="L",
+        self.draw_cell(
+            text=(
+                f"**TIPO DE CONCESSÃO (1):** "
+                f"{self.contract.get_concession_type_display()}"
+            ),
             markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        if self.contract.law_num:
-            law_or_agreement = str(self.contract.law_num)
-        else:
-            law_or_agreement = str(self.contract.agreement_num)
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            f"**LEI AUTORIZADORA OU CONVÊNIO:** {law_or_agreement}",
             align="L",
-            markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
+
+    def _draw_contract_details(self) -> None:
+        """Draws contract related details."""
+        law_or_agreement = (
+            str(self.contract.law_num) if self.contract.law_num
+            else str(self.contract.agreement_num)
+        )
+        self.draw_cell(
+            text=f"**LEI AUTORIZADORA OU CONVÊNIO:** {law_or_agreement}",
+            markdown=True,
+            align="L",
+        )
+        self.draw_cell(
             text=f"**OBJETO DA PARCERIA:** {self.contract.objective}",
             markdown=True,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            text=f"**EXERCÍCIO:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
+        self.draw_cell(
+            text=(
+                f"**EXERCÍCIO:** {format_into_brazilian_date(start)} a "
+                f"{format_into_brazilian_date(end)}"
+            ),
             markdown=True,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
+
+    def _draw_company_details(self) -> None:
+        """Draws company related details."""
+        self.draw_cell(
             text=f"**ÓRGÃO BENEFICIÁRIO:** {self.contract.organization.name}",
             markdown=True,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
         hired_company = self.contract.hired_company
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            f"**CNPJ:** {hired_company.cnpj}",
-            align="L",
+        self.draw_cell(
+            text=f"**CNPJ:** {hired_company.cnpj}",
             markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
             align="L",
-            markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            "**RESPONSÁVEL(IS) PELO ÓRGÃO:**",
-            align="L",
-            markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.__set_font(font_size=7, bold=False)
-        table_data = []
-        table_data.append(
-            [
-                "",
-                "",
-                " ",
-                f"Nome: {self.contract.accountability_autority.get_full_name()}",
-            ]
-        )
-        (
-            table_data.append(
-                [
-                    "",
-                    "",
-                    " ",
-                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
-                ]
+        self.draw_cell(
+            text=(
+                f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | "
+                f"{hired_company.street}, nº {hired_company.number} - "
+                f"{hired_company.district}"
             ),
-        )
-        table_data.append(
-            [
-                "",
-                "",
-                " ",
-                f"{document_mask(str(self.contract.supervision_autority.cpf))}",
-            ]
+            markdown=True,
+            align="L",
         )
 
-        col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("FreeSans", "", size_pt=8)
+    def _draw_responsible_details(self) -> None:
+        """Draws responsible person details."""
+        self.draw_cell(
+            text="**RESPONSÁVEL(IS) PELO ÓRGÃO:**",
+            markdown=True,
+            align="L",
+        )
+        self.set_font(font_size=7, bold=False)
+        
+        accountability_autority = self.contract.accountability_autority
+        supervision_autority = self.contract.supervision_autority
+        
+        table_data = [
+            ["", "", " ", f"Nome: {accountability_autority.get_full_name()}"],
+            ["", "", " ", f"Papel: {supervision_autority.position}"],
+            ["", "", " ", f"{document_mask(str(supervision_autority.cpf))}"],
+        ]
+
+        font = FontFace("FreeSans", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="L",
-            markdown=True,
-            col_widths=col_widths,
+            col_widths=[1, 2, 2, 185],  # Total: 190
+            repeat_headings=0,
         ) as table:
-            for item in table_data:
-                data = table.row()
-                for id, text in enumerate(item):
-                    if id == 1:
-                        self.pdf.set_fill_color(220, 220, 220)
-                    else:
-                        self.pdf.set_fill_color(255, 255, 255)
-                    data.cell(text=text, align="L", border=0)
+            for row_data in table_data:
+                row = table.row()
+                for text in row_data:
+                    row.cell(text=text, align="L")
 
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            0,
-            self.default_cell_height,
-            "**VALOR TOTAL RECEBIDO NO EXERCÍCIO.** __(DEMONSTRAR POR FONTE DE RECURSO)__",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
+    def _draw_total_value_section(self) -> None:
+        """Draws the total value section."""
+        self.set_font(font_size=8, bold=False)
+        self.draw_cell(
+            text=(
+                "**VALOR TOTAL RECEBIDO NO EXERCÍCIO.** "
+                "__(DEMONSTRAR POR FONTE DE RECURSO)__"
+            ),
             markdown=True,
+            align="L",
         )
-        self.pdf.ln(2)
+        self.ln(2)
 
-    def _draw_table_I(self):
-        opening_balance = self.statement_queryset.filter(
+    def _draw_table_I(self) -> None:
+        """Draws table I with financial data."""
+        # Get opening balance
+        opening_balance = (
+            self.statement_queryset.filter(
             reference_month=self.start_date.month,
             reference_year=self.start_date.year,
-        ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
+            )
+            .aggregate(Sum("opening_balance"))["opening_balance__sum"] 
+            or Decimal("0.00")
+        )
 
-        closing_checking_account = self.statement_queryset.filter(
+        # Get closing balances
+        closing_checking = (
+            self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.checking_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
+            )
+            .aggregate(Sum("closing_balance"))["closing_balance__sum"] 
+            or Decimal("0.00")
+        )
 
-        closing_investing_account = self.statement_queryset.filter(
+        closing_investing = (
+            self.statement_queryset.filter(
             reference_month=self.end_date.month,
             reference_year=self.end_date.year,
             bank_account=self.investing_account,
-        ).aggregate(Sum("closing_balance"))["closing_balance__sum"] or Decimal("0.00")
+            )
+            .aggregate(Sum("closing_balance"))["closing_balance__sum"] 
+            or Decimal("0.00")
+        )
 
-        closing_balance = closing_checking_account + closing_investing_account
+        closing_balance = closing_checking + closing_investing
 
+        # Get revenue data
         revenue_in_time = self.revenue_queryset.filter(
-            receive_date__gte=self.start_date, receive_date__lte=self.end_date
+            receive_date__gte=self.start_date,
+            receive_date__lte=self.end_date
         )
         self.revenue_total = Decimal("0.00")
 
+        # Prepare table data
         contract = self.contract
         table_data = [
             ["", format_into_brazilian_currency(contract.total_value)],
@@ -296,10 +278,7 @@ class PassOn2PDFExporter:
                 "SALDO DO EXERCÍCIO ANTERIOR",
                 format_into_brazilian_currency(opening_balance),
             ],
-            [
-                "REPASSADOS NO EXERCÍCIO (DATA)",
-                "",
-            ],  # TODO perguntar ao Felipe/Ronaldo como receberia sem ser no exercício?
+            ["REPASSADOS NO EXERCÍCIO (DATA)", ""],
             ["__(INDICAR AS FONTES DO RECURSO)__", "R$"],
         ]
 
@@ -312,65 +291,61 @@ class PassOn2PDFExporter:
             )
             self.revenue_total += revenue.value
 
-        table_data.append(
+        table_data.extend([
             [
                 "RECEITA COM APLICAÇÕES FINANCEIRAS DOS REPASSES PÚBLICOS",
-                format_into_brazilian_currency(closing_investing_account),
-            ]
-        )
-        table_data.append(
-            ["TOTAL", format_into_brazilian_currency(closing_balance)]
-        )  # adicionar tupla a cima
-        table_data.append(
+                format_into_brazilian_currency(closing_investing),
+            ],
+            ["TOTAL", format_into_brazilian_currency(closing_balance)],
             [
                 "RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO",
-                format_into_brazilian_currency(closing_checking_account),
-            ]
-        )
+                format_into_brazilian_currency(closing_checking),
+            ],
+        ])
 
-        self.__set_font(font_size=7, bold=True)
-        self.pdf.cell(
-            190,
-            self.default_cell_height,
-            "I - DEMONSTRATIVO DOS REPASSES PÚBLICOS RECEBIDOS",
+        self.set_font(font_size=7, bold=True)
+        self.draw_cell(
+            text="I - DEMONSTRATIVO DOS REPASSES PÚBLICOS RECEBIDOS",
+            width=190,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
             border=1,
         )
 
-        self.default_cell_height
-        col_widths = [150, 40]  # Total: 190
-        font = FontFace("FreeSans", "B", size_pt=8)
-        self.pdf.set_fill_color(255, 255, 255)
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
-            col_widths=col_widths,
+            col_widths=[150, 40],  # Total: 190
             repeat_headings=0,
-            markdown=True,
         ) as table:
-            for item in table_data:
-                body = table.row()
-                for text in item:
-                    body.cell(text)
+            for row_data in table_data:
+                row = table.row()
+                for text in row_data:
+                    row.cell(text=text, align="C")
 
-        self.pdf.ln(15)
+        self.ln(15)
 
-    def _draw_signatories_notification(self):
-        self.__set_font(font_size=8, bold=True)
-        self.pdf.multi_cell(
-            190,
-            5,
-            "O(S) SIGNATÁRIO(S), NA QUALIDADE DE REPRESENTANTE(S) DO ÓRGÃO PÚBLICO BENEFICIÁRIO VEM INDICAR, NA FORMA ABAIXO DETALHADA, A APLICAÇÃO DOS RECURSOS RECEBIDOS NO EXERCÍCIO SUPRAMENCIONADO, NA IMPORTÂNCIA TOTAL DE \n R$ ______________ (POR EXTENSO).",
+    def _draw_signatories_notification(self) -> None:
+        """Draws the signatories notification section."""
+        self.set_font(font_size=8, bold=True)
+        self.draw_multi_cell(
+            text=(
+                "O(S) SIGNATÁRIO(S), NA QUALIDADE DE REPRESENTANTE(S) DO "
+                "ÓRGÃO PÚBLICO BENEFICIÁRIO VEM INDICAR, NA FORMA ABAIXO "
+                "DETALHADA, A APLICAÇÃO DOS RECURSOS RECEBIDOS NO EXERCÍCIO "
+                "SUPRAMENCIONADO, NA IMPORTÂNCIA TOTAL DE \n R$ ______________ "
+                "(POR EXTENSO)."
+            ),
+            width=190,
+            height=5,
             align="J",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.ln(10)
+        self.ln(10)
 
-    def _draw_table_II(self):
+    def _draw_table_II(self) -> None:
+        """Draws table II with expense data."""
+        # Prepare table data
         up_table_data = [
             [
                 "DATA DO DOCUMENTO",
@@ -386,7 +361,7 @@ class PassOn2PDFExporter:
             up_table_data.append(
                 [
                     format_into_brazilian_date(expense.liquidation),
-                    "Tipo do documento (Holerite, Nota Fiscal, etc...)",  # TODO <-
+                    "Tipo do documento (Holerite, Nota Fiscal, etc...)",  # TODO
                     expense.favored.name,
                     expense.nature_label,
                     format_into_brazilian_currency(expense.value),
@@ -397,78 +372,83 @@ class PassOn2PDFExporter:
         down_table_data = [
             [
                 "TOTAL DAS DESPESAS",
-                f"{format_into_brazilian_currency(total_expense_value)}",
+                format_into_brazilian_currency(total_expense_value),
             ],
             [
                 "RECURSO DO REPASSE NÃO APLICADO",
-                "O que sobrou do contrato",
-            ],  # TODO
-            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", "Valor glosado"],  # TODO
+                "O que sobrou do contrato",  # TODO
+            ],
+            [
+                "VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR",
+                "Valor glosado",  # TODO
+            ],
             [
                 "VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE",
-                "Recurso - Devolvido",
-            ],  # TODO
+                "Recurso - Devolvido",  # TODO
+            ],
         ]
 
-        self.__set_font(font_size=7, bold=True)
-        self.pdf.cell(
-            190,
-            self.default_cell_height,
-            "II - DEMONSTRATIVO DAS DESPESAS REALIZADAS COM RECURSOS DO REPASSE",
+        # Draw table header
+        self.set_font(font_size=7, bold=True)
+        self.draw_cell(
+            text=(
+                "II - DEMONSTRATIVO DAS DESPESAS REALIZADAS COM "
+                "RECURSOS DO REPASSE"
+            ),
+            width=190,
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-            border=1,
         )
 
-        self.default_cell_height
-        col_widths = [38, 38, 38, 38, 38]  # Total: 190
-        font = FontFace("FreeSans", "B", size_pt=7)
-        self.pdf.set_fill_color(255, 255, 255)
+        # Draw main table
+        font = FontFace("FreeSans", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
-            col_widths=col_widths,
+            col_widths=[38, 38, 38, 38, 38],
             repeat_headings=0,
-            markdown=True,
         ) as table:
-            for item in up_table_data:
-                up_data = table.row()
-                for text in item:
-                    up_data.cell(text=text, align="C")
+            for row_data in up_table_data:
+                row = table.row()
+                for text in row_data:
+                    row.cell(text=text, align="C")
 
-        col_widths = [152, 38]  # Total: 190
-        font = FontFace("FreeSans", "B", size_pt=8)
-        self.pdf.set_fill_color(255, 255, 255)
+        # Draw summary table
+        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
-            col_widths=col_widths,
+            col_widths=[152, 38],  # Total: 190,
             repeat_headings=0,
-            markdown=True,
         ) as table:
-            for item in down_table_data:
-                down_data = table.row()
-                for text in item:
-                    down_data.cell(text=text, align="C")
+            for row_data in down_table_data:
+                row = table.row()
+                for text in row_data:
+                    row.cell(text=text, align="C")
 
-        self.pdf.ln(10)
+        self.ln(10)
 
-    def _draw_org_notification(self):
-        self.__set_font(font_size=8, bold=True)
-        self.pdf.multi_cell(
-            190,
-            5,
-            "DECLARAMOS, NA QUALIDADE DE RESPONSÁVEIS PELO ÓRGÃO BENEFICIÁRIO SUPRA EPIGRAFADO, SOB AS PENAS DA LEI, QUE A DESPESA RELACIONADA, EXAMINADA PELO CONTROLE INTERNO, COMPROVA A EXATA APLICAÇÃO DOS RECURSOS RECEBIDOS PARA OS FINS INDICADOS, CONFORME PROGRAMA DE TRABALHO APROVADO, PROPOSTO AO ÓRGÃO CONCESSOR.",
+    def _draw_org_notification(self) -> None:
+        """Draws the organization notification section."""
+        self.set_font(font_size=8, bold=True)
+        self.draw_multi_cell(
+            text=(
+                "DECLARAMOS, NA QUALIDADE DE RESPONSÁVEIS PELO ÓRGÃO "
+                "BENEFICIÁRIO SUPRA EPIGRAFADO, SOB AS PENAS DA LEI, QUE A "
+                "DESPESA RELACIONADA, EXAMINADA PELO CONTROLE INTERNO, "
+                "COMPROVA A EXATA APLICAÇÃO DOS RECURSOS RECEBIDOS PARA OS "
+                "FINS INDICADOS, CONFORME PROGRAMA DE TRABALHO APROVADO, "
+                "PROPOSTO AO ÓRGÃO CONCESSOR."
+            ),
+            width=190,
+            height=5,
             align="J",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.ln(15)
+        self.ln(15)
 
-    def _draw_table_III(self):
+    def _draw_table_III(self) -> None:
+        """Draws table III with adjustments data."""
         table_data = [
             [
                 "AJUSTE Nº",
@@ -480,132 +460,88 @@ class PassOn2PDFExporter:
                 "VALOR GLOBAL DO AJUSTE",
             ],
         ]
-        table_data.append(  # TODO Após adendo (Ajuste = Adendo), necessário criar tabela
-            [
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-            ]
-        )
+        # TODO: Após adendo (Ajuste = Adendo), necessário criar tabela
+        table_data.append(["..."] * 7)
 
-        self.__set_font(font_size=7, bold=True)
-        self.pdf.cell(
-            190,
-            self.default_cell_height,
-            "III - AJUSTES VINCULADOS ÀS DESPESAS CUSTEADAS COM RECURSOS DO REPASSE (3)",
+        self.set_font(font_size=7, bold=True)
+        self.draw_cell(
+            text=(
+                "III - AJUSTES VINCULADOS ÀS DESPESAS CUSTEADAS COM "
+                "RECURSOS DO REPASSE (3)"
+            ),
+            width=190,
             align="C",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-            border=1,
         )
 
-        self.default_cell_height
-        col_widths = [27, 25, 30, 27, 27, 27, 27]  # Total: 190
-        font = FontFace("FreeSans", "B", size_pt=7)
-        self.pdf.set_fill_color(255, 255, 255)
+        font = FontFace("FreeSans", "", size_pt=7)
         with self.pdf.table(
             headings_style=font,
             line_height=4,
             align="C",
-            col_widths=col_widths,
+            col_widths=[27, 25, 30, 27, 27, 27, 27],  # Total: 190
             repeat_headings=0,
-            markdown=True,
         ) as table:
-            for item in table_data:
-                data = table.row()
-                for text in item:
-                    data.cell(text=text, align="C")
+            for row_data in table_data:
+                row = table.row()
+                for text in row_data:
+                    row.cell(text=text, align="C")
 
-        self.pdf.ln(10)
+        self.ln(10)
 
-    def _draw_observation(self):
-        self.__set_font(font_size=8, bold=True)
+    def _draw_observation(self) -> None:
+        """Draws the observation section."""
+        self.set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
-        self.pdf.cell(
-            0,
-            0,
-            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | {contractor_company.street}, nº {contractor_company.number} - {contractor_company.district}",  # ENDEREÇO
-            align="L",
+        self.draw_cell(
+            text=(
+                f"LOCAL: {contractor_company.city}/{contractor_company.uf} | "
+                f"{contractor_company.street}, nº {contractor_company.number} - "
+                f"{contractor_company.district}"
+            ),
             markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
+            align="L",
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln(self.default_cell_height)
         today = date.today()
-        self.pdf.cell(
-            0,
-            0,
-            f"DATA: {format_into_brazilian_date(today)}",
-            align="L",
+        self.draw_cell(
+            text=f"DATA: {format_into_brazilian_date(today)}",
             markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(20)
-        self.pdf.multi_cell(
-            0,
-            0,
-            "**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-            markdown=True,
         )
-        self.pdf.ln(8)
-        self.pdf.cell(190, 10, "", ln=True, align="C")
-        self.pdf.line(
+        self.ln(20)
+        self.draw_multi_cell(
+            text="**RESPONSÁVEL: NOME, CARGO E ASSINATURA**",
+            markdown=True,
+            align="L",
+        )
+        self.ln(8)
+        self.draw_cell(text="", width=190, height=10, align="C")
+        self.draw_line(
             self.pdf.get_x(),
             self.pdf.get_y(),
             self.pdf.get_x() + 190,
             self.pdf.get_y(),
         )
-        self.pdf.ln(3)
-        self.__set_font(font_size=7, bold=False)
-        self.pdf.cell(
-            0,
-            0,
-            "(1) convênio ou auxílio/subvenção ou contribuição.",
+        self.ln(3)
+        self.set_font(font_size=7, bold=False)
+        self.draw_cell(text="(1) convênio ou auxílio/subvenção ou contribuição.")
+        self.ln(self.default_cell_height)
+        self.draw_cell(text="(2) notas fiscais e recibos")
+        self.ln(self.default_cell_height)
+        self.draw_cell(
+            text=(
+                "(3) contrato; contrato de gestão; termo de parceria; termo de "
+                "colaboração; termo de fomento; etc."
+            ),
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
-            0,
-            0,
-            "(2) notas fiscais e recibos",
+        self.ln(self.default_cell_height)
+        self.draw_cell(
+            text=(
+                "(4) modalidade, ou, no caso de dispensa e/ou inexigibilidade, "
+                "a base legal."
+            ),
             align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
         )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
-            0,
-            0,
-            "(3) contrato; contrato de gestão; termo de parceria; termo de colaboração; termo de fomento; etc.",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
-            0,
-            0,
-            "(4) modalidade, ou, no caso de dispensa e/ou inexigibilidade, a base legal.",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
-            0,
-            0,
-            "(5) fonte de recursos: federal ou estadual.",
-            align="L",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
+        self.ln(self.default_cell_height)
+        self.draw_cell(text="(5) fonte de recursos: federal ou estadual.", align="L")

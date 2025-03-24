@@ -1,5 +1,4 @@
 from .consolidated import ConsolidatedPDFExporter
-from .contract_progress import ContractProgressPDFExporter
 from .pass_on_1 import PassOn1PDFExporter
 from .pass_on_2 import PassOn2PDFExporter
 from .pass_on_3 import PassOn3PDFExporter
@@ -18,7 +17,6 @@ from .period_expenses import PeriodEpensesPDFExporter
 from .predicted_versus_realized import PredictedVersusRealizedPDFExporter
 
 __all__ = [
-    "ContractProgressPDFExporter",
     "PassOn1PDFExporter",
     "PassOn2PDFExporter",
     "PassOn3PDFExporter",

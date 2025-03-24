@@ -1,53 +1,91 @@
-import copy
-import os
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
+from typing import Any, Optional
 
-from django.conf import settings
 from django.db.models import Q, Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from contracts.choices import NatureCategories
-from contracts.models import ContractAddendum
-from reports.exporters.commons.exporters import BasePdf
+from contracts.models import Contract, ContractAddendum
+from reports.exporters.commons.pdf_exporter import CommonPDFExporter
 from utils.formats import (
     document_mask,
     format_into_brazilian_currency,
     format_into_brazilian_date,
 )
 
-font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
-
 
 @dataclass
-class PassOn14PDFExporter:
-    pdf = None
-    default_cell_height = 5
+class PassOn14PDFExporter(CommonPDFExporter):
+    """PDF exporter for Pass On 14 reports."""
 
-    def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(
-            orientation="portrait", unit="mm", format="A4"
-        )  # Querie para Aditivos
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.set_font("FreeSans", "", 8)
-        self.pdf = pdf
+    # Constants for text
+    TITLE = (
+        "ANEXO RP-14 - REPASSES AO TERCEIRO SETOR \n"
+        "DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS "
+        "AUXÍLIOS / SUBVENÇÕES / CONTRIBUIÇÕES"
+    )
+    RESOURCE_SOURCE = "Consolidado de todas as fontes"
+    EXPENSES_TITLE = (
+        "DEMONSTRATIVO DAS DESPESAS INCORRIDAS NO EXERCÍCIO"
+    )
+    FINANCIAL_TITLE = (
+        "DEMONSTRATIVO DO SALDO FINANCEIRO DO EXERCÍCIO"
+    )
+    RESOURCES_TITLE = (
+        "DEMONSTRATIVO DOS RECURSOS DISPONÍVEIS NO EXERCÍCIO"
+    )
+    DECLARATION_TEXT = (
+        "Declaro(amos), na qualidade de responsável(is) pela entidade supra "
+        "epigrafada, sob as penas da Lei, que a despesa relacionada comprova "
+        "a exata aplicação dos recursos recebidos para os fins indicados, "
+        "conforme programa de trabalho aprovado, proposto ao Órgão Público "
+        "Contratante."
+    )
+
+    def __init__(
+        self, contract: Contract, start_date: datetime, end_date: datetime
+    ):
+        """Initialize the exporter.
+
+        Args:
+            contract: The contract to generate the report for
+            start_date: Start date for the report period
+            end_date: End date for the report period
+        """
+        super().__init__()
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
+        self.default_cell_height = 5
 
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
+    def handle(self) -> Any:
+        """Generate the PDF report.
 
-    def __database_queries(self):
+        Returns:
+            The generated PDF document
+        """
+        self._database_queries()
+        self._draw_header()
+        self._draw_informations()
+        self._draw_first_table()
+        self._draw_partners_data()
+        self._draw_documents_table()
+        self._draw_header_resources_table()
+        self._draw_resources_table()
+        self._draw_resources_footer()
+        self._draw_expenses_table()
+        self._draw_expenses_footer()
+        self._draw_financial_table()
+        self._draw_last_informations()
+
+        return self.pdf
+
+    def _database_queries(self) -> None:
+        """Execute database queries to gather required data."""
         self.checking_account = self.contract.checking_account
         self.investing_account = self.contract.investing_account
 
@@ -91,124 +129,104 @@ class PassOn14PDFExporter:
             contract=self.contract,
         )
 
-    def handle(self):
-        self.__database_queries()
-        self._draw_header()
-        self._draw_informations()
-        self._draw_first_table()
-        self._draw_partners_data()
-        self._draw_documents_table()
-        self._draw_header_resources_table()
-        self._draw_resources_table()
-        self._draw_resources_footer()
-        self._draw_expenses_table()
-        self._draw_expenses_footer()
-        self._draw_financial_table()
-        self._draw_last_informations()
-
-        return self.pdf
-
-    def _draw_header(self):
-        self.__set_font(font_size=11, bold=True)
-        self.pdf.multi_cell(
-            0,
-            self.default_cell_height,
-            "ANEXO RP-14 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS AUXÍLIOS / SUBVENÇÕES / CONTRIBUIÇÕES",
+    def _draw_header(self) -> None:
+        """Draw the report header."""
+        self.set_font(font_size=11, bold=True)
+        self.draw_multi_cell(
+            text=self.TITLE,
             align="C",
-            markdown=False,
             max_line_height=self.default_cell_height,
         )
-
-        # Espaçamento do título pro próximo dado
         self.pdf.set_y(self.pdf.get_y() + 5)
 
-    def _draw_informations(self):
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
+    def _draw_informations(self) -> None:
+        """Draw contract information section."""
+        self.set_font(font_size=8)
+        self.draw_cell(
             text=f"**Órgão Concessor:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
+        self.ln()
+        self.draw_cell(
             text=f"**Entidade Beneficiária:** {self.contract.organization.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
+        self.ln()
+        self.draw_cell(
             text=f"**CNPJ**: {self.contract.hired_company.cnpj}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
         hired_company = self.contract.hired_company
-        self.pdf.cell(
-            # TODO averiguar se dados pertence a entidade "Contratada"
-            text=f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
+        self.draw_cell(
+            text=(
+                f"**Endereço e CEP:** {hired_company.city}/{hired_company.uf} | "
+                f"{hired_company.street}, nº {hired_company.number} - "
+                f"{hired_company.district}"
+            ),
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
-        self.pdf.cell(
+        self.ln()
+        self.draw_cell(
             text="**Responsáveis pela OSC:**",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
-    def _draw_first_table(self):
-        self.__set_font(font_size=7, bold=False)
-        table_data = []
-        table_data.append(
+    def _draw_first_table(self) -> None:
+        """Draw the first table with authority information."""
+        self.set_font(font_size=7)
+        table_data = [
             [
                 "",
                 "",
                 " ",
                 f"Nome: {self.contract.accountability_autority.get_full_name()}",
-            ]
-        )
-        (
-            table_data.append(
-                [
-                    "",
-                    "",
-                    " ",
-                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
-                ]
-            ),
-        )
-        table_data.append(
+            ],
+            [
+                "",
+                "",
+                " ",
+                f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
+            ],
             [
                 "",
                 "",
                 " ",
                 f"{document_mask(str(self.contract.supervision_autority.cpf))}",
-            ]
-        )
+            ],
+        ]
 
         col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("FreeSans", "", size_pt=8)
+        font = FontFace("Helvetica", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
-            line_height=4,
-            align="L",
-            markdown=True,
             col_widths=col_widths,
+            data=table_data,
+            font_size=6,
+            align="L",
+            line_height=4,
+            repeat_headings=0,
         ) as table:
             for item in table_data:
                 data = table.row()
-                for id, text in enumerate(item):
-                    if id == 1:
-                        self.pdf.set_fill_color(220, 220, 220)
+                for idx, text in enumerate(item):
+                    if idx == 1:
+                        self.set_fill_color(gray=True)
                     else:
-                        self.pdf.set_fill_color(255, 255, 255)
+                        self.set_fill_color(gray=False)
                     data.cell(text=text, align="L", border=0)
 
-    def _draw_partners_data(self):
-        self.pdf.ln(4)
-        self.__set_font(font_size=8)
-        self.pdf.multi_cell(
+    def _draw_partners_data(self) -> None:
+        """Draw partners data section."""
+        self.ln(4)
+        self.set_font(font_size=8)
+        self.draw_multi_cell(
             text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
@@ -219,23 +237,27 @@ class PassOn14PDFExporter:
         )
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
-        self.pdf.cell(
-            text=f"**Exercício:** {format_into_brazilian_date(start)} a {format_into_brazilian_date(end)}",
+        self.draw_cell(
+            text=(
+                f"**Exercício:** {format_into_brazilian_date(start)} a "
+                f"{format_into_brazilian_date(end)}"
+            ),
             markdown=True,
             h=self.default_cell_height,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            text="**Origem dos Recursos (1):** Consolidado de todas as fontes",
+        self.draw_cell(
+            text=f"**Origem dos Recursos (1):** {self.RESOURCE_SOURCE}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
+        self.ln(4)
 
-    def _draw_documents_table(self):
-        self.__set_font(font_size=7, bold=False)
-        self.pdf.ln()
+    def _draw_documents_table(self) -> None:
+        """Draw the documents table."""
+        self.set_font(font_size=7)
+        self.ln()
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
             [
@@ -257,34 +279,37 @@ class PassOn14PDFExporter:
             )
 
         col_widths = [75, 19, 65, 31]
-        font = FontFace("FreeSans", "", size_pt=8)
         with self.pdf.table(
             headings_style=font,
+            col_widths=col_widths,
+            data=table_data,
+            font_size=6,
             line_height=4,
             align="C",
+            repeat_headings=0,
             markdown=True,
-            col_widths=col_widths,
         ) as table:
             for item in table_data:
                 data = table.row()
                 for text in item:
                     data.cell(text=text, align="C")
 
-        self.pdf.ln()
+        self.ln()
 
-    def _draw_header_resources_table(self):
-        self.pdf.ln(7)
+    def _draw_header_resources_table(self) -> None:
+        """Draw the header of the resources table."""
+        self.ln(7)
 
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            190,
+        self.set_font(font_size=8)
+        self.draw_cell(
+            text=self.RESOURCES_TITLE,
+            w=190,
             h=self.default_cell_height,
-            text="**DEMONSTRATIVO DOS RECURSOS DISPONÍVEIS NO EXERCÍCIO**",
             border=1,
             markdown=True,
             align="C",
         )
-        self.pdf.ln(self.default_cell_height)
+        self.ln()
 
         table_data = [
             [
@@ -304,12 +329,14 @@ class PassOn14PDFExporter:
         ]
 
         col_widths = [40, 35, 25, 50, 40]
-        font = FontFace("FreeSans", "", size_pt=7)
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
+            col_widths=col_widths,
+            data=table_data,
+            font_size=6,
             line_height=4,
             align="C",
-            col_widths=col_widths,
             repeat_headings=0,
             markdown=True,
         ) as table:
@@ -319,19 +346,20 @@ class PassOn14PDFExporter:
                     data.cell(text=text, align="C")
 
         # Linha cinza
-        self.pdf.set_fill_color(233, 234, 236)
-        self.pdf.cell(
-            190,
-            h=self.default_cell_height,
+        self.set_fill_color(gray=True)
+        self.draw_cell(
             text="",
+            w=190,
+            h=self.default_cell_height,
             border=1,
             align="C",
             fill=True,
         )
-        self.pdf.set_fill_color(255, 255, 255)
-        self.pdf.ln(self.default_cell_height)
+        self.set_fill_color(gray=False)
+        self.ln()
 
-    def _draw_resources_table(self):
+    def _draw_resources_table(self) -> None:
+        """Draw the resources table."""
         extern_revenue_data = [
             [
                 "(A) SALDO DO EXERCÍCIO ANTERIOR",
@@ -385,21 +413,22 @@ class PassOn14PDFExporter:
         ]
 
         col_widths = [100, 50, 40]
-        self.__set_font(7)
-        font = FontFace("FreeSans", "", size_pt=7)
-        self.pdf.set_fill_color(255, 255, 255)
+        self.set_font(font_size=7)
+        self.set_fill_color(gray=False)
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
+            col_widths=col_widths,
+            data=extern_revenue_data,
             line_height=4,
             align="C",
-            col_widths=col_widths,
             repeat_headings=0,
             markdown=True,
         ) as table:
             for item in extern_revenue_data:
                 enxtern = table.row()
-                for id, text in enumerate(item):
-                    if id == 0:
+                for idx, text in enumerate(item):
+                    if idx == 0:
                         text_align = "L"
                     else:
                         text_align = "R"
@@ -407,35 +436,49 @@ class PassOn14PDFExporter:
 
             for item in intern_revenue_data:
                 intern = table.row()
-                for id, text in enumerate(item):
-                    if id == 0:
+                for idx, text in enumerate(item):
+                    if idx == 0:
                         text_align = "L"
                     else:
                         text_align = "R"
                     intern.cell(text=text, align=text_align)
 
-    def _draw_resources_footer(self):
-        self.pdf.ln(self.default_cell_height)
-        self.__set_font(7)
-        self.pdf.cell(
-            text="(1) Verba: Federal, Estadual ou Municipal, devendo ser elaborado um anexo para cada fonte de recurso.",
+    def _draw_resources_footer(self) -> None:
+        """Draw the resources table footer."""
+        self.ln()
+        self.set_font(font_size=7)
+        self.draw_cell(
+            text=(
+                "(1) Verba: Federal, Estadual, Municipal, devendo ser elaborado "
+                "um anexo para cada fonte de recurso."
+            ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text="(2) Incluir valores previstos no exercício anterior e repassados neste exercício.",
+        self.ln(4)
+        self.draw_cell(
+            text=(
+                "(2) Incluir valores previstos no exercício anterior e repassados "
+                "neste exercício."
+            ),
             h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.ln(4)
+        self.draw_cell(
             text="(3) Receitas com estacionamento, aluguéis, entre outras.",
             h=self.default_cell_height,
         )
-        self.pdf.ln(10)
+        self.ln(10)
 
-    def _draw_expenses_table(self):
-        self.pdf.multi_cell(
-            text="O(s) signatário(s), na qualidade de representante(s) da Associação Comunidade Varzina - Eco & Vida (Meio Ambiente) vem indicar, na forma abaixo detalhada, as despesas incorridas e pagas no exerício 01/01/2025 a 31/12/2025 bem como as despesas a pagar no exercício seguinte.",
+    def _draw_expenses_table(self) -> None:
+        """Draw the expenses table."""
+        self.draw_multi_cell(
+            text=(
+                "O(s) signatário(s), na qualidade de representante(s) da "
+                "Associação Comunidade Varzina - Eco & Vida (Meio Ambiente) vem "
+                "indicar, na forma abaixo detalhada, as despesas incorridas e "
+                "pagas no exerício 01/01/2025 a 31/12/2025 bem como as despesas "
+                "a pagar no exercício seguinte."
+            ),
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -444,21 +487,21 @@ class PassOn14PDFExporter:
             new_y=YPos.NEXT,
         )
 
-        self.pdf.ln(7)
-        self.__set_font(font_size=8, bold=True)
-        self.pdf.cell(
-            190,
+        self.ln(7)
+        self.set_font(font_size=8, bold=True)
+        self.draw_cell(
+            text=self.EXPENSES_TITLE,
+            w=190,
             h=self.default_cell_height,
-            text="DEMONSTRATIVO DAS DESPESAS INCORRIDAS NO EXERCÍCIO",
             border=1,
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.cell(
-            190,
+        self.draw_cell(
+            text=f"ORIGEM DOS RECURSOS (4): **{self.RESOURCE_SOURCE}**",
+            w=190,
             h=self.default_cell_height,
-            text="ORIGEM DOS RECURSOS (4): **Consolidado de todas as fontes**",
             border=1,
             align="L",
             markdown=True,
@@ -474,8 +517,8 @@ class PassOn14PDFExporter:
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
-        expenses_dict = self.__categorize_expenses()
-        expenses_dict = self.__convert_decimal_to_brl(expenses_dict)
+        expenses_dict = self._categorize_expenses()
+        expenses_dict = self._convert_decimal_to_brl(expenses_dict)
 
         table_data = [
             [
@@ -618,89 +661,87 @@ class PassOn14PDFExporter:
         ]
 
         col_widths = [40, 30, 30, 30, 30, 30]  # Total: 190
-        font = FontFace("FreeSans", "B", size_pt=7)
-        self.pdf.set_fill_color(255, 255, 255)
-
+        self.set_fill_color(gray=False)
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
+            col_widths=col_widths,
+            data=table_data,
             line_height=4,
             align="C",
-            col_widths=col_widths,
             repeat_headings=0,
         ) as table:
             header = table.row()
             for text in headers:
                 header.cell(text=text, align="C")
-            if table_data != []:
-                self.pdf.set_font("FreeSans", "", 7)
+
+            if table_data:
                 for item in table_data:
                     body = table.row()
-                    for id, text in enumerate(item):
-                        if id == 0:
+                    for idx, text in enumerate(item):
+                        if idx == 0:
                             text_align = "L"
                         else:
                             text_align = "R"
                         body.cell(text=text, align=text_align)
-            self.pdf.set_font("FreeSans", "B", 7)
             total = table.row()
-            for id, text in enumerate(line_total):
-                if id == 0:
+            for idx, text in enumerate(line_total):
+                if idx == 0:
                     text_align = "L"
                 else:
                     text_align = "R"
                 total.cell(text=text, align=text_align)
 
     def _draw_expenses_footer(self):
-        self.__set_font()
-        self.pdf.cell(
+        self.set_font(font_size=7)
+        self.draw_cell(
             text="(4) Verba: Federal, Estadual, Municipal e Recursos Próprios, devendo ser elaborado um anexo para cada fonte de recurso.",
-            h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.ln(4)
+        self.draw_cell(
             text="(5) Salários, encargos e benefícios.",
-            h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.ln(4)
+        self.draw_cell(
             text="(6) Autônomos e pessoa jurídica.",
-            h=self.default_cell_height,
         )
-        self.pdf.ln(4)
-        self.pdf.cell(
+        self.ln(4)
+        self.draw_cell(
             text="(7) Energia elétrica, água e esgoto, gás, telefone e internet.",
-            h=self.default_cell_height,
         )
-        self.pdf.ln(5)
-        self.pdf.multi_cell(
-            190,
+        self.ln(5)
+        self.draw_multi_cell(
             text="(8) No rol exemplificativo incluir também as aquisições e os compromissos assumidos que não são classificados contabilmente como DESPESAS, como, por exemplo, aquisição de bens permanentes.",
-            h=3,
+            height=3,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.cell(w=190, text="", h=1)  # It works, please do not erase
-        self.pdf.ln()
-        self.pdf.multi_cell(
-            190,
+        self.draw_multi_cell(
             text="(9) Quando a diferença entre a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO e a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO E PAGAS NESTE EXERCÍCIO for decorrente de descontos obtidos ou pagamento de multa por atraso, o resultado não deve aparecer na coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES, uma vez que tais descontos ou multas são contabilizados em contas de receitas ou despesas. Assim sendo deverá se indicado como nota de rodapé os valores e as respectivas contas de receitas e despesas.",
-            h=4,
+            width=190,
+            height=4,
             new_x=XPos.LMARGIN,
         )
-        self.pdf.ln(7)
-        self.pdf.cell(
-            text="(*) Apenas para entidades da área da Saúde.",
-            h=self.default_cell_height,
+        self.ln()
+        self.draw_multi_cell(
+            text="(9) Quando a diferença entre a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO e a Coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO E PAGAS NESTE EXERCÍCIO for decorrente de descontos obtidos ou pagamento de multa por atraso, o resultado não deve aparecer na coluna DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES, uma vez que tais descontos ou multas são contabilizados em contas de receitas ou despesas. Assim sendo deverá se indicado como nota de rodapé os valores e as respectivas contas de receitas e despesas.",
+            height=4,
+            new_x=XPos.LMARGIN,
         )
-        self.pdf.ln(4)
+        self.ln(7)
+        self.draw_multi_cell(
+            text="(*) Apenas para entidades da área da Saúde.",
+            height=self.default_cell_height,
+        )
+        self.ln(4)
 
     def _draw_financial_table(self):
-        self.pdf.ln(7)
-        self.__set_font(font_size=8, bold=True)
-        self.pdf.cell(
-            190,
-            h=self.default_cell_height,
-            text="DEMONSTRATIVO DO SALDO FINANCEIRO DO EXERCÍCIO",
+        self.ln(7)
+        self.set_font(font_size=8, bold=True)
+        self.draw_multi_cell(
+            text=self.FINANCIAL_TITLE,
+            width=190,
+            height=self.default_cell_height,
             border=1,
             align="C",
             new_x=XPos.LMARGIN,
@@ -731,29 +772,28 @@ class PassOn14PDFExporter:
         ]
 
         col_widths = [160, 30]  # Total: 190
-        font = FontFace("FreeSans", "", 7)
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
-            line_height=4,
-            align="C",
             col_widths=col_widths,
+            data=table_data,
+            align="C",
             repeat_headings=0,
         ) as table:
-            self.pdf.set_font("FreeSans", "", 7)
             for item in table_data:
                 body = table.row()
-                for id, text in enumerate(item):
-                    if id == 0:
+                for idx, text in enumerate(item):
+                    if idx == 0:
                         text_align = "L"
                     else:
                         text_align = "R"
                     body.cell(text=text, align=text_align)
 
     def _draw_last_informations(self):
-        self.pdf.ln(7)
-        self.__set_font()
-        self.pdf.multi_cell(
-            text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Contratante.",
+        self.ln(7)
+        self.set_font(font_size=8, bold=True)
+        self.draw_multi_cell(
+            text=self.DECLARATION_TEXT,
             markdown=True,
             h=self.default_cell_height,
             w=190,
@@ -761,8 +801,8 @@ class PassOn14PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(9)
-        self.pdf.multi_cell(
+        self.ln(9)
+        self.draw_multi_cell(
             text="**LOCAL:**",
             markdown=True,
             h=self.default_cell_height,
@@ -771,8 +811,8 @@ class PassOn14PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(4)
-        self.pdf.multi_cell(
+        self.ln(4)
+        self.draw_multi_cell(
             text="**DATA:**",
             markdown=True,
             h=self.default_cell_height,
@@ -781,8 +821,8 @@ class PassOn14PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.pdf.ln(8)
-        self.pdf.multi_cell(
+        self.ln(8)
+        self.draw_multi_cell(
             text="**Responsáveis pela Contratada:**",
             markdown=True,
             h=self.default_cell_height,
@@ -820,21 +860,22 @@ class PassOn14PDFExporter:
         )
 
         col_widths = [1, 2, 2, 185]  # Total de 190
-        font = FontFace("FreeSans", "")
+        font = FontFace("Helvetica", "", size_pt=6)
         with self.pdf.table(
             headings_style=font,
-            line_height=4,
-            align="L",
-            markdown=True,
             col_widths=col_widths,
+            data=table_data,
+            align="L",
+            line_height=4,
+            repeat_headings=0,
         ) as table:
             for item in table_data:
                 data = table.row()
-                for id, text in enumerate(item):
-                    if id == 1:
-                        self.pdf.set_fill_color(220, 220, 220)
+                for idx, text in enumerate(item):
+                    if idx == 1:
+                        self.set_fill_color(gray=True)
                     else:
-                        self.pdf.set_fill_color(255, 255, 255)
+                        self.set_fill_color(gray=False)
                     data.cell(text=text, align="L", border=0)
 
     def __categorize_expenses(self) -> dict:
@@ -910,56 +951,64 @@ class PassOn14PDFExporter:
 
         return categorized_expenses
 
-    def __get_expense_nature_category(self, expense: Expense):
+    def __get_expense_nature_category(self, expense: Expense) -> Optional[str]:
+        """Get the category for an expense based on its nature.
+
+        Args:
+            expense: The expense to categorize
+
+        Returns:
+            The category name or None if not found
+        """
         if not expense.nature:
             return None
 
         if expense.nature in NatureCategories.HUMAN_RESOURCES:
             return "HUMAN_RESOURCES"
 
-        if expense.nature in NatureCategories.OTHER_HUMAN_RESOURCES:
+        elif expense.nature in NatureCategories.OTHER_HUMAN_RESOURCES:
             return "OTHER_HUMAN_RESOURCES"
 
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
+        elif expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PERMANENT_GOODS"
 
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
+        elif expense.nature in NatureCategories.PERMANENT_GOODS:
             return "OTHER_THIRD_PARTY"
 
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
+        elif expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PUBLIC_UTILITIES"
 
-        if expense.nature in NatureCategories.FUEL:
+        elif expense.nature in NatureCategories.FUEL:
             return "FUEL"
 
-        if expense.nature in NatureCategories.FINANCIAL_AND_BANKING:
+        elif expense.nature in NatureCategories.FINANCIAL_AND_BANKING:
             return "FINANCIAL_AND_BANKING"
 
-        if expense.nature in NatureCategories.FOODSTUFFS:
+        elif expense.nature in NatureCategories.FOODSTUFFS:
             return "FOODSTUFFS"
 
-        if expense.nature in NatureCategories.REAL_STATE:
+        elif expense.nature in NatureCategories.REAL_STATE:
             return "REAL_STATE"
 
-        if expense.nature in NatureCategories.MISCELLANEOUS:
+        elif expense.nature in NatureCategories.MISCELLANEOUS:
             return "MISCELLANEOUS"
 
-        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
+        elif expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
             return "MEDICAL_AND_HOSPITAL"
 
-        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
+        elif expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
             return "MEDICAL_SERVICES"
 
-        if expense.nature in NatureCategories.MEDICINES:
+        elif expense.nature in NatureCategories.MEDICINES:
             return "MEDICINES"
 
-        if expense.nature in NatureCategories.WORKS:
+        elif expense.nature in NatureCategories.WORKS:
             return "WORKS"
 
-        if expense.nature in NatureCategories.OTHER_EXPENSES:
+        elif expense.nature in NatureCategories.OTHER_EXPENSES:
             return "OTHER_EXPENSES"
 
-        if expense.nature in NatureCategories.OTHER_CONSUMABLES:
+        elif expense.nature in NatureCategories.OTHER_CONSUMABLES:
             return "OTHER_CONSUMABLES"
 
         return None
