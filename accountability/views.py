@@ -1,13 +1,12 @@
 import logging
-from decimal import Decimal
 from typing import Any
 
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Q, Sum
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -309,26 +308,22 @@ def create_contract_accountability_view(request, pk):
 @log_view_access
 @login_required
 def accountability_detail_view(request, pk):
-    expenses_page_number = request.GET.get("expenses_page", 1)
-    revenues_page_number = request.GET.get("revenues_page", 1)
-    query = request.GET.get("q", "")
+    accountability = get_object_or_404(Accountability, id=pk)
 
-    accountability = get_object_or_404(
-        Accountability.objects.select_related(
-            "contract",
-            "contract__organization",
-            "contract__checking_account",
-            "contract__investing_account",
-        ),
-        id=pk,
-    )
+    # Get filter parameters
+    search_query = request.GET.get("q", "")
+    paid_filter = request.GET.get("paid", "all")
+    reviwed_filter = request.GET.get("reviwed", "all")
+    start_date = request.GET.get("start_date", "")
+    end_date = request.GET.get("end_date", "")
+    date_type = request.GET.get("date_type", "competence")  # competence, liquidation, due_date, conciliation
+    payment_status = request.GET.get("payment_status", "all")  # all, paid, unpaid
+    expense_type = request.GET.get("expense_type", "all")  # all, planned, unplanned
 
+    # Base querysets
     expenses_list = (
-        accountability.expenses.select_related(
-            "item",
-            "source",
-            "favored",
-        )
+        Expense.objects.filter(accountability=accountability)
+        .select_related("item", "favored")
         .prefetch_related(
             Prefetch(
                 "files",
@@ -348,7 +343,8 @@ def accountability_detail_view(request, pk):
     )
 
     revenues_list = (
-        accountability.revenues.select_related("bank_account")
+        Revenue.objects.filter(accountability=accountability)
+        .select_related("bank_account")
         .prefetch_related(
             Prefetch(
                 "files",
@@ -367,45 +363,107 @@ def accountability_detail_view(request, pk):
         .order_by("-value")
     )
 
-    documents_list = accountability.files.select_related("created_by")
+    documents_list = AccountabilityFile.objects.filter(
+        accountability=accountability,
+    ).select_related("created_by")
 
-    if query:
+    # Apply filters
+    if search_query:
         expenses_list = expenses_list.filter(
-            Q(favored__name__icontains=query)
-            | Q(source__name__icontains=query)
-            | Q(item__name__icontains=query)
+            Q(identification__icontains=search_query)
+            | Q(item__name__icontains=search_query)
+            | Q(favored__name__icontains=search_query)
         )
-        revenues_list = revenues_list.filter(Q(bank_account__name__icontains=query))
-        documents_list = documents_list.filter(Q(name__icontains=query))
+        revenues_list = revenues_list.filter(
+            Q(bank_account__name__icontains=search_query)
+        )
+        documents_list = documents_list.filter(Q(name__icontains=search_query))
+
+    # Apply payment status filter
+    if paid_filter != "all":
+        expenses_list = expenses_list.filter(paid=paid_filter == "true")
+        revenues_list = revenues_list.filter(paid=paid_filter == "true")
+
+    # Apply review status filter
+    if reviwed_filter != "all":
+        expenses_list = expenses_list.filter(status=reviwed_filter)
+        revenues_list = revenues_list.filter(status=reviwed_filter)
+
+    # Apply date range filter
+    if start_date and end_date:
+        match date_type:
+            case "competence":
+                expenses_list = expenses_list.filter(
+                    competency__range=[start_date, end_date]
+                )
+                revenues_list = revenues_list.filter(
+                    competency__range=[start_date, end_date]
+                )
+            case "liquidation":
+                expenses_list = expenses_list.filter(
+                    liquidation__range=[start_date, end_date]
+                )
+                revenues_list = revenues_list.filter(
+                    competency__range=[start_date, end_date]
+                )
+            case "due_date":
+                expenses_list = expenses_list.filter(
+                    due_date__range=[start_date, end_date]
+                )
+                revenues_list = revenues_list.filter(
+                    competency__range=[start_date, end_date]
+                )
+            case "conciliation":
+                expenses_list = expenses_list.filter(
+                    conciled_at__range=[start_date, end_date]
+                )
+                revenues_list = revenues_list.filter(
+                    conciled_at__range=[start_date, end_date]
+                )
+            case _:
+                pass
+
+    # Apply payment status filter
+    if payment_status != "all":
+        match payment_status:
+            case "paid":
+                expenses_list = expenses_list.filter(paid=True)
+                revenues_list = revenues_list.filter(paid=True)
+            case "unpaid":
+                expenses_list = expenses_list.filter(paid=False)
+                revenues_list = revenues_list.filter(paid=False)
+            case _:
+                pass
+
+    # Apply expense type filter
+    if expense_type != "all":
+        match expense_type:
+            case "planned":
+                expenses_list = expenses_list.filter(planned=True)
+            case "unplanned":
+                expenses_list = expenses_list.filter(planned=False)
+            case _:
+                pass
 
     expenses_paginator = Paginator(expenses_list, 10)
     revenues_paginator = Paginator(revenues_list, 10)
 
-    try:
-        expenses_page = expenses_paginator.page(expenses_page_number)
-    except (PageNotAnInteger, EmptyPage):
-        expenses_page = expenses_paginator.page(1)
-
-    try:
-        revenues_page = revenues_paginator.page(revenues_page_number)
-    except (PageNotAnInteger, EmptyPage):
-        revenues_page = revenues_paginator.page(1)
-
-    expenses_total = expenses_list.aggregate(
-        total=Coalesce(Sum("value"), Value(Decimal("0.00")))
-    )["total"]
-    revenues_total = revenues_list.aggregate(
-        total=Coalesce(Sum("value"), Value(Decimal("0.00")))
-    )["total"]
+    expenses_page = expenses_paginator.get_page(request.GET.get("expenses_page"))
+    revenues_page = revenues_paginator.get_page(request.GET.get("revenues_page"))
 
     context = {
         "accountability": accountability,
         "expenses_page": expenses_page,
         "revenues_page": revenues_page,
         "documents": documents_list,
-        "search_query": query,
-        "expenses_total": expenses_total,
-        "revenues_total": revenues_total,
+        "expenses_total": expenses_list.aggregate(Sum("value"))["value__sum"] or 0,
+        "revenues_total": revenues_list.aggregate(Sum("value"))["value__sum"] or 0,
+        "search_query": search_query,
+        "start_date": start_date,
+        "end_date": end_date,
+        "date_type": date_type,
+        "payment_status": payment_status,
+        "expense_type": expense_type,
     }
 
     return render(request, "accountability/accountability/detail.html", context)
@@ -1166,6 +1224,7 @@ def reconcile_expense_view(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 expense.conciled = True
+                expense.conciled_at = timezone.now()
                 expense.paid = True
                 expense.liquidation = form.cleaned_data["transactions"][0].date
                 expense.save()
@@ -1173,6 +1232,7 @@ def reconcile_expense_view(request, pk):
 
                 for related in relateds:
                     related.conciled = True
+                    related.conciled_at = timezone.now()
                     related.paid = True
                     related.liquidation = form.cleaned_data["transactions"][0].date
                     related.save()
@@ -1278,6 +1338,7 @@ def reconcile_revenue_view(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 revenue.conciled = True
+                revenue.conciled_at = timezone.now()
                 revenue.paid = True
                 revenue.liquidation = form.cleaned_data["transactions"][0].date
                 revenue.save()

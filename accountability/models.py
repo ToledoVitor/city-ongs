@@ -533,6 +533,11 @@ class Expense(BaseOrganizationTenantModel, CacheableModelMixin):
         default=LiquidationChoices.ELETRONIC_TRANSFER,
         max_length=18,
     )
+    conciled_at = models.DateTimeField(
+        verbose_name="Data de Liquidação",
+        null=True,
+        blank=True,
+    )
 
     # documents
     document_type = models.CharField(
@@ -685,6 +690,11 @@ class Revenue(BaseOrganizationTenantModel, CacheableModelMixin):
     # flags
     paid = models.BooleanField(verbose_name="Pago?", default=False)
     conciled = models.BooleanField(verbose_name="Conciliado?", default=False)
+    conciled_at = models.DateTimeField(
+        verbose_name="Data de Liquidação",
+        null=True,
+        blank=True,
+    )
 
     # specifications
     identification = models.CharField(
