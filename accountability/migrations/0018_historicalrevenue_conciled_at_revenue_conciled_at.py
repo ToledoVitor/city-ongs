@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0017_remove_historicalexpenseanalysis_expense_and_more'),
+        ("accountability", "0017_remove_historicalexpenseanalysis_expense_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='historicalrevenue',
-            name='conciled_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Data de Liquidação'),
+            model_name="historicalrevenue",
+            name="conciled_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Data de Liquidação"
+            ),
         ),
         migrations.AddField(
-            model_name='revenue',
-            name='conciled_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Data de Liquidação'),
+            model_name="revenue",
+            name="conciled_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Data de Liquidação"
+            ),
         ),
     ]

@@ -418,7 +418,7 @@ class ContractInterestedPart(BaseOrganizationTenantModel):
 
     class Meta:
         verbose_name = "Parte Interessada"
-        verbose_name = "Partes Interessadas"
+        verbose_name_plural = "Partes Interessadas"
 
 
 class ContractMonthTransfer(
@@ -870,11 +870,20 @@ class ContractItem(
 
 
 class ContractItemPurchaseProcessDocument(BaseOrganizationTenantModel):
-    purchase_process = models.ForeignKey(
+    item = models.ForeignKey(
+        # TODO: remove this null=True, blank=True
         ContractItem,
         verbose_name="Processo de Compra",
-        related_name="documents",
+        related_name="purchase_documents",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=256,
+        null=True,
+        blank=True,
     )
     file = models.FileField(
         verbose_name="Arquivo",

@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -11,6 +10,7 @@ from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, TemplateView, UpdateView
@@ -316,7 +316,9 @@ def accountability_detail_view(request, pk):
     reviwed_filter = request.GET.get("reviwed", "all")
     start_date = request.GET.get("start_date", "")
     end_date = request.GET.get("end_date", "")
-    date_type = request.GET.get("date_type", "competence")  # competence, liquidation, due_date, conciliation
+    date_type = request.GET.get(
+        "date_type", "competence"
+    )  # competence, liquidation, due_date, conciliation
     payment_status = request.GET.get("payment_status", "all")  # all, paid, unpaid
     expense_type = request.GET.get("expense_type", "all")  # all, planned, unplanned
 

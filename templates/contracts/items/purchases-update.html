@@ -72,6 +72,7 @@
                     datepicker-format="dd/mm/yyyy"
                     id="id_aquisition_date"
                     name="aquisition_date"
+                    value="{{ item.aquisition_date|date:'d/m/Y' }}"
                     type="text"
                     class="
                       border
@@ -147,6 +148,7 @@
                     datepicker-format="dd/mm/yyyy"
                     id="id_parcel_due_date"
                     name="parcel_due_date"
+                    value="{{ item.parcel_due_date|date:'d/m/Y' }}"
                     type="text"
                     class="
                       border

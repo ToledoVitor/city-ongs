@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0018_historicalrevenue_conciled_at_revenue_conciled_at'),
+        ("accountability", "0018_historicalrevenue_conciled_at_revenue_conciled_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='expense',
-            name='conciled_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Data de Liquidação'),
+            model_name="expense",
+            name="conciled_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Data de Liquidação"
+            ),
         ),
         migrations.AddField(
-            model_name='historicalexpense',
-            name='conciled_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Data de Liquidação'),
+            model_name="historicalexpense",
+            name="conciled_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Data de Liquidação"
+            ),
         ),
     ]

@@ -12,8 +12,13 @@ from contracts.views import (
     ContractTimelineView,
     ContractWorkPlanView,
     ItemValueRequestReviewView,
+    contract_item_purchase_file_delete_view,
+    contract_item_purchase_file_upload_view,
     contract_item_purchases_list_view,
     contract_item_purchases_update_view,
+    contract_item_supplementations_create_view,
+    contract_item_supplementations_list_view,
+    contract_item_supplementations_update_view,
     contract_status_change_view,
     contract_timeline_update_view,
     create_contract_execution_view,
@@ -29,9 +34,6 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_interested_view,
     update_contract_item_view,
-    contract_item_supplementations_list_view,
-    contract_item_supplementations_create_view,
-    contract_item_supplementations_update_view,
 )
 
 urlpatterns = [
@@ -182,5 +184,15 @@ urlpatterns = [
         "supplementations/update/<uuid:pk>",
         contract_item_supplementations_update_view,
         name="item-supplementations-update",
+    ),
+    path(
+        "items/<uuid:pk>/purchases/files/upload",
+        contract_item_purchase_file_upload_view,
+        name="item-purchase-file-upload",
+    ),
+    path(
+        "items/purchases/files/delete/<uuid:pk>",
+        contract_item_purchase_file_delete_view,
+        name="item-purchase-file-delete",
     ),
 ]

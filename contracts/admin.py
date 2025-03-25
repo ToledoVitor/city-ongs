@@ -10,12 +10,13 @@ from contracts.models import (
     ContractExecutionFile,
     ContractGoal,
     ContractGoalReview,
+    ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
     ContractItemPurchaseProcessDocument,
     ContractItemReview,
-    ContractStep,
     ContractItemSupplement,
+    ContractStep,
 )
 from utils.admin import BaseModelAdmin
 
@@ -64,7 +65,8 @@ class ContractItemNewValueRequestInline(admin.TabularInline):
     fields = (
         "raise_item",
         "downgrade_item",
-        "value",
+        "month_raise",
+        "anual_raise",
         "status",
         "created_at",
     )
@@ -153,7 +155,7 @@ class ContractExecutionAdmin(BaseModelAdmin):
 class ContractGoalReviewInline(admin.TabularInline):
     model = ContractGoalReview
     extra = 0
-    fields = ("status", "description")
+    fields = ("reviewer", "comment")
 
 
 @admin.register(ContractGoal)
@@ -172,7 +174,7 @@ class ContractGoalAdmin(BaseModelAdmin):
 class ContractItemReviewInline(admin.TabularInline):
     model = ContractItemReview
     extra = 0
-    fields = ("status", "description")
+    fields = ("reviewer", "comment")
 
 
 class ContractItemPurchaseProcessDocumentInline(admin.TabularInline):
@@ -217,3 +219,10 @@ class ContractItemSupplementAdmin(BaseModelAdmin):
     list_display = ("organization", "item", "suplement_value", "status")
     list_filter = ("organization", "item", "status")
     search_fields = ("item__name",)
+
+
+@admin.register(ContractInterestedPart)
+class ContractInterestedPartAdmin(BaseModelAdmin):
+    list_display = ("organization", "contract", "user", "interest")
+    list_filter = ("organization", "contract", "user", "interest")
+    search_fields = ("contract__name", "user__name")

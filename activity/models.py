@@ -145,6 +145,15 @@ class ActivityLog(BaseOrganizationTenantModel):
             "DELETED_CONTRACT_ITEM_SUPPLEMENT",
             "Deletou suplemento de item",
         )
+        # contract item purchase activities
+        UPLOADED_CONTRACT_ITEM_PURCHASE_FILE = (
+            "UPLOADED_CONTRACT_ITEM_PURCHASE_FILE",
+            "Subiu arquivo de compra de item",
+        )
+        DELETED_CONTRACT_ITEM_PURCHASE_FILE = (
+            "DELETED_CONTRACT_ITEM_PURCHASE_FILE",
+            "Deletou arquivo de compra de item",
+        )
         # contract executions
         CREATED_CONTRACT_EXECUTION = (
             "CREATED_CONTRACT_EXECUTION",

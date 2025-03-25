@@ -15,8 +15,8 @@ from contracts.models import (
     ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
-    ContractStep,
     ContractItemSupplement,
+    ContractStep,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -540,7 +540,9 @@ class ContractItemSupplementForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.contract:
-            self.fields["item"].queryset = ContractItem.objects.filter(contract=self.contract)
+            self.fields["item"].queryset = ContractItem.objects.filter(
+                contract=self.contract
+            )
 
 
 class ContractItemSupplementUpdateForm(forms.ModelForm):
