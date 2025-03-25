@@ -30,6 +30,7 @@ from contracts.forms import (
     ContractGoalForm,
     ContractInterestedForm,
     ContractItemForm,
+    ContractItemPurchaseProcessForm,
     ContractItemValueRequestForm,
     ContractStatusUpdateForm,
     ContractStepFormSet,
@@ -1417,3 +1418,42 @@ def interested_delete_view(request, pk):
         )
         interested.delete()
         return redirect("contracts:contracts-detail", pk=contract_id)
+
+
+@login_required
+def contract_item_purchases_list_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.items.count:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    items = ContractItem.objects.filter(contract=contract)
+    return render(
+        request,
+        "contracts/items/purchases.html",
+        {"contract": contract, "items": items},
+    )
+
+
+@login_required
+def contract_item_purchases_update_view(request, pk):
+    item = get_object_or_404(ContractItem, id=pk)
+
+    if request.method == "POST":
+        form = ContractItemPurchaseProcessForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect("contracts:item-purchases", pk=item.contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items/purchases-update.html",
+                {"item": item, "form": form},
+            )
+
+    else:
+        form = ContractItemPurchaseProcessForm(instance=item)
+        return render(
+            request,
+            "contracts/items/purchases-update.html",
+            {"item": item, "form": form},
+        )

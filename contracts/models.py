@@ -662,6 +662,11 @@ class ContractItem(
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
 
+    class PurchaseStatus(models.TextChoices):
+        ANALYZING = "ANALYZING", "Analisando Opções"
+        IN_PROGRESS = "IN_PROGRESS", "Em Andamento"
+        FINISHED = "FINISHED", "Finalizado"
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -757,74 +762,13 @@ class ContractItem(
         blank=True,
     )
 
-    history = HistoricalRecords()
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def source_label(self) -> str:
-        return ContractItem.ResourceSource(self.source).label
-
-    @property
-    def status_label(self) -> str:
-        return StatusChoices(self.status).label
-
-    @property
-    def nature_label(self) -> str:
-        return NatureChoices(self.nature).label
-
-    @property
-    def anual_expense_with_point(self) -> str:
-        return str(self.anual_expense).replace(",", ".")
-
-    @property
-    def month_expense_with_point(self) -> str:
-        return str(self.month_expense).replace(",", ".")
-
-    @property
-    def last_reviews(self) -> str:
-        return self.item_reviews.order_by("-created_at")[:10]
-
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this contract item.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
-
-    class Meta:
-        verbose_name = "Item"
-        verbose_name_plural = "Itens"
-        ordering = ("-month_expense",)
-
-
-class ContractItemPurchaseProcess(BaseOrganizationTenantModel):
-    class PurchaseStatus(models.TextChoices):
-        ANALYZING = "ANALYZING", "Analisando Opções"
-        IN_PROGRESS = "IN_PROGRESS", "Em Andamento"
-        FINISHED = "FINISHED", "Finalizado"
-
-    item = models.OneToOneField(
-        ContractItem,
-        verbose_name="Item",
-        related_name="purchase_processes",
-        on_delete=models.CASCADE,
-    )
-    status = models.CharField(
+    # AQUISITION STATUS
+    purchase_status = models.CharField(
         verbose_name="Status de Compra",
         choices=PurchaseStatus.choices,
         default=PurchaseStatus.ANALYZING,
         max_length=22,
     )
-    observations = models.CharField(
-        verbose_name="Observações",
-        max_length=256,
-        null=True,
-        blank=True,
-    )
-
-    # Aquisition
     aquisition_date = models.DateField(
         verbose_name="Data da Aquisição",
         null=True,
@@ -839,16 +783,15 @@ class ContractItemPurchaseProcess(BaseOrganizationTenantModel):
         verbose_name="Valor da Aquisição",
         decimal_places=2,
         max_digits=12,
-        null=True,
-        blank=True,
+        default=Decimal("0.00"),
     )
     aquisition_parcel_quantity = models.PositiveIntegerField(
         verbose_name="Quantidade de Parcelas",
         null=True,
         blank=True,
-    )    
+    )
 
-    # Supplier
+    # SUPPLIER
     supplier = models.CharField(
         verbose_name="Fornecedor",
         max_length=256,
@@ -880,20 +823,55 @@ class ContractItemPurchaseProcess(BaseOrganizationTenantModel):
         blank=True,
     )
 
+    history = HistoricalRecords()
+
     def __str__(self) -> str:
-        return f"Processo de Compra {self.item.name}"
+        return str(self.name)
+
+    @property
+    def source_label(self) -> str:
+        return ContractItem.ResourceSource(self.source).label
+
+    @property
+    def status_label(self) -> str:
+        return StatusChoices(self.status).label
+
+    @property
+    def nature_label(self) -> str:
+        return NatureChoices(self.nature).label
+
+    @property
+    def purchase_status_label(self) -> str:
+        return ContractItem.PurchaseStatus(self.purchase_status).label
+
+    @property
+    def anual_expense_with_point(self) -> str:
+        return str(self.anual_expense).replace(",", ".")
+
+    @property
+    def month_expense_with_point(self) -> str:
+        return str(self.month_expense).replace(",", ".")
+
+    @property
+    def last_reviews(self) -> str:
+        return self.item_reviews.order_by("-created_at")[:10]
+
+    def invalidate_cache(self):
+        """
+        Invalidate all cache related to this contract item.
+        """
+        if self.contract:
+            invalidate_contract_cache(self.contract.id)
 
     class Meta:
-        indexes = [
-            models.Index(fields=["item"]),
-        ]
-        verbose_name = "Processo de Compra"
-        verbose_name_plural = "Processos de Compra"
+        verbose_name = "Item"
+        verbose_name_plural = "Itens"
+        ordering = ("-month_expense",)
 
 
 class ContractItemPurchaseProcessDocument(BaseOrganizationTenantModel):
     purchase_process = models.ForeignKey(
-        ContractItemPurchaseProcess,
+        ContractItem,
         verbose_name="Processo de Compra",
         related_name="documents",
         on_delete=models.CASCADE,

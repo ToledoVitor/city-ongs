@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Processo de Compra - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+  Atualizar Processo de Compra
+</p>
+
+<!-- Breadcrumb -->
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <li class="inline-flex items-center">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+          </svg>
+          Inicio
+        </a>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="{% url 'contracts:item-purchases' item.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Processo de Compra {{ item.name }}</a>
+        </div>
+      </li>
+      <li aria-current="page">
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2">Atualizar Processo de Compra</span>
+        </div>
+      </li>
+    </ol>
+</nav>
+
+
+<form method="post" class="max-w-lg mx-auto">
+    {% csrf_token %}
+
+    <label class="block mb-2 text-2xl font-bold text-black">Detalhes da Aquisição</label>
+
+    <div class="mb-3">
+        <label for="id_purchase_status" class="block mb-2 text-base font-medium text-black">Status</label>
+        {{ form.purchase_status }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
+        {{ form.observations }}
+    </div>
+
+    <div class="my-3">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Aquisição</label>
+            <div class="relative max-w-sm">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                  </svg>
+                </div>
+                <input 
+                    required
+                    datepicker
+                    datepicker-format="dd/mm/yyyy"
+                    id="id_aquisition_date"
+                    name="aquisition_date"
+                    type="text"
+                    class="
+                      border
+                      text-sm
+                      rounded-lg
+                      block
+                      w-full
+                      ps-10
+                      p-2.5
+                      bg-gray-300
+                      border-gray-600
+                      placeholder-gray-800
+                      text-black
+                      focus:ring-blue-500
+                      focus:border-blue-500
+                    "
+                >
+            </div>
+          </div>
+
+          <div class="relative">
+            <label for="id_aquisition_value" class="block mb-2 text-base font-medium text-black">Valor</label>
+            <div class="relative w-full">
+                <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+                    </svg>
+                    </div>
+                    <input
+                    type="text"
+                    id="id_aquisition_value"
+                    name="aquisition_value"
+                    placeholder="000,00"
+                    oninput="formatMoney(this)"
+                    value="{{ form.aquisition_value.value }}"
+                    class="
+                        block
+                        p-2.5
+                        w-full
+                        z-20
+                        ps-10
+                        text-sm
+                        rounded-s-lg
+                        border-e-2
+                        border
+                        bg-gray-300
+                        border-e-gray-700
+                        border-gray-600
+                        placeholder-gray-800
+                        text-black
+                        focus:ring-blue-500
+                        focus:border-blue-500
+                    "
+                    required
+                    />  
+                </div>  
+            </div>
+        </div>
+    </div>
+
+    <div class="my-3">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Vencimento das Parcelas</label>
+            <div class="relative max-w-sm">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                  </svg>
+                </div>
+                <input
+                    datepicker
+                    datepicker-format="dd/mm/yyyy"
+                    id="id_parcel_due_date"
+                    name="parcel_due_date"
+                    type="text"
+                    class="
+                      border
+                      text-sm
+                      rounded-lg
+                      block
+                      w-full
+                      ps-10
+                      p-2.5
+                      bg-gray-300
+                      border-gray-600
+                      placeholder-gray-800
+                      text-black
+                      focus:ring-blue-500
+                      focus:border-blue-500
+                    "
+                >
+            </div>
+          </div>
+
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Quantidade de Parcelas</label>
+            {{ form.aquisition_parcel_quantity }}
+          </div>
+        </div>
+    </div>
+
+    <hr class="h-px my-4 border-0 bg-gray-500">
+
+    <label class="block mb-2 text-2xl font-bold text-black">Detalhes do Fornecedor</label>
+
+    <div class="mb-3">
+        <label for="id_supplier" class="block mb-2 text-base font-medium text-black">Fornecedor</label>
+        {{ form.supplier }}
+    </div>
+
+    <div class="my-3">
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Documento</label>
+            {{ form.supplier_document }}
+          </div>
+    
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Email</label>
+            {{ form.supplier_email }}
+          </div>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <label for="id_supplier_phone" class="block mb-2 text-base font-medium text-black">Telefone</label>
+        {{ form.supplier_phone }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_supplier_address" class="block mb-2 text-base font-medium text-black">Endereço</label>
+        {{ form.supplier_address }}
+    </div>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <button
+      type="submit"
+      class="
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-center
+        inline-flex
+        items-center
+        text-white
+        rounded-lg
+        focus:ring-4
+        focus:outline-none
+        bg-blue-600
+        hover:bg-blue-700
+        focus:ring-blue-800
+      "
+      style="display: flex; justify-self: center;"
+    >
+      Atualizar Processo
+    </button>
+</form>
+
+<script>
+    function formatMoney(input) {
+      let value = input.value.replace(/\D/g, "");
+  
+      if (!value) {
+        input.value = "0"
+        return
+      }
+  
+      value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  
+      input.value = value;
+    }
+</script>
+
+{% endblock %}

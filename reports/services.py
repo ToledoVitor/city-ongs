@@ -114,9 +114,7 @@ def export_pass_on_10(contract: Contract, start_date: date, end_date: date):
     ).handle()
 
 
-def export_pass_on_11(
-    contract: Contract, start_date: date, end_date: date
-):
+def export_pass_on_11(contract: Contract, start_date: date, end_date: date):
     return PassOn11PDFExporter(
         contract=contract,
         start_date=start_date,

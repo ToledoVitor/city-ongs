@@ -6,101 +6,144 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0016_alter_favored_unique_together_and_more'),
+        ("accountability", "0016_alter_favored_unique_together_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='historicalexpenseanalysis',
-            name='expense',
+            model_name="historicalexpenseanalysis",
+            name="expense",
         ),
         migrations.RemoveField(
-            model_name='historicalexpenseanalysis',
-            name='history_user',
+            model_name="historicalexpenseanalysis",
+            name="history_user",
         ),
         migrations.RemoveField(
-            model_name='historicalexpenseanalysis',
-            name='organization',
+            model_name="historicalexpenseanalysis",
+            name="organization",
         ),
         migrations.RemoveField(
-            model_name='historicalexpenseanalysis',
-            name='reviwer',
+            model_name="historicalexpenseanalysis",
+            name="reviwer",
         ),
         migrations.AlterModelOptions(
-            name='accountability',
-            options={'verbose_name': 'Prestação de Contas', 'verbose_name_plural': 'Prestações de Contas'},
+            name="accountability",
+            options={
+                "verbose_name": "Prestação de Contas",
+                "verbose_name_plural": "Prestações de Contas",
+            },
         ),
         migrations.AlterModelOptions(
-            name='historicalaccountability',
-            options={'get_latest_by': ('history_date', 'history_id'), 'ordering': ('-history_date', '-history_id'), 'verbose_name': 'historical Prestação de Contas', 'verbose_name_plural': 'historical Prestações de Contas'},
+            name="historicalaccountability",
+            options={
+                "get_latest_by": ("history_date", "history_id"),
+                "ordering": ("-history_date", "-history_id"),
+                "verbose_name": "historical Prestação de Contas",
+                "verbose_name_plural": "historical Prestações de Contas",
+            },
         ),
         migrations.AlterField(
-            model_name='accountability',
-            name='status',
-            field=models.CharField(choices=[('ANALYZING', 'em análise'), ('CORRECTING', 'correção'), ('APPROVED', 'aprovado'), ('APPROVED_WITH_PENDENCE', 'aprovado com ressalva'), ('REJECTED', 'rejeitado')], default='ANALYZING', max_length=22, verbose_name='Status'),
+            model_name="accountability",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("ANALYZING", "em análise"),
+                    ("CORRECTING", "correção"),
+                    ("APPROVED", "aprovado"),
+                    ("APPROVED_WITH_PENDENCE", "aprovado com ressalva"),
+                    ("REJECTED", "rejeitado"),
+                ],
+                default="ANALYZING",
+                max_length=22,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='expensefile',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='expense_files', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            model_name="expensefile",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="expense_files",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Criado por",
+            ),
         ),
         migrations.AlterField(
-            model_name='expensefile',
-            name='file',
-            field=models.FileField(upload_to='uploads/expenses/', verbose_name='Arquivo'),
+            model_name="expensefile",
+            name="file",
+            field=models.FileField(
+                upload_to="uploads/expenses/", verbose_name="Arquivo"
+            ),
         ),
         migrations.AlterField(
-            model_name='expensefile',
-            name='name',
-            field=models.CharField(max_length=128, verbose_name='Nome do Arquivo'),
+            model_name="expensefile",
+            name="name",
+            field=models.CharField(max_length=128, verbose_name="Nome do Arquivo"),
         ),
         migrations.AlterField(
-            model_name='historicalaccountability',
-            name='status',
-            field=models.CharField(choices=[('ANALYZING', 'em análise'), ('CORRECTING', 'correção'), ('APPROVED', 'aprovado'), ('APPROVED_WITH_PENDENCE', 'aprovado com ressalva'), ('REJECTED', 'rejeitado')], default='ANALYZING', max_length=22, verbose_name='Status'),
+            model_name="historicalaccountability",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("ANALYZING", "em análise"),
+                    ("CORRECTING", "correção"),
+                    ("APPROVED", "aprovado"),
+                    ("APPROVED_WITH_PENDENCE", "aprovado com ressalva"),
+                    ("REJECTED", "rejeitado"),
+                ],
+                default="ANALYZING",
+                max_length=22,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalexpensefile',
-            name='file',
-            field=models.TextField(max_length=100, verbose_name='Arquivo'),
+            model_name="historicalexpensefile",
+            name="file",
+            field=models.TextField(max_length=100, verbose_name="Arquivo"),
         ),
         migrations.AlterField(
-            model_name='historicalexpensefile',
-            name='name',
-            field=models.CharField(max_length=128, verbose_name='Nome do Arquivo'),
+            model_name="historicalexpensefile",
+            name="name",
+            field=models.CharField(max_length=128, verbose_name="Nome do Arquivo"),
         ),
         migrations.AlterField(
-            model_name='historicalrevenuefile',
-            name='file',
-            field=models.TextField(max_length=100, verbose_name='Arquivo'),
+            model_name="historicalrevenuefile",
+            name="file",
+            field=models.TextField(max_length=100, verbose_name="Arquivo"),
         ),
         migrations.AlterField(
-            model_name='historicalrevenuefile',
-            name='name',
-            field=models.CharField(max_length=128, verbose_name='Nome do Arquivo'),
+            model_name="historicalrevenuefile",
+            name="name",
+            field=models.CharField(max_length=128, verbose_name="Nome do Arquivo"),
         ),
         migrations.AlterField(
-            model_name='revenuefile',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='revenue_files', to=settings.AUTH_USER_MODEL, verbose_name='Criado por'),
+            model_name="revenuefile",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="revenue_files",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Criado por",
+            ),
         ),
         migrations.AlterField(
-            model_name='revenuefile',
-            name='file',
-            field=models.FileField(upload_to='uploads/revenues/', verbose_name='Arquivo'),
+            model_name="revenuefile",
+            name="file",
+            field=models.FileField(
+                upload_to="uploads/revenues/", verbose_name="Arquivo"
+            ),
         ),
         migrations.AlterField(
-            model_name='revenuefile',
-            name='name',
-            field=models.CharField(max_length=128, verbose_name='Nome do Arquivo'),
+            model_name="revenuefile",
+            name="name",
+            field=models.CharField(max_length=128, verbose_name="Nome do Arquivo"),
         ),
         migrations.DeleteModel(
-            name='ExpenseAnalysis',
+            name="ExpenseAnalysis",
         ),
         migrations.DeleteModel(
-            name='HistoricalExpenseAnalysis',
+            name="HistoricalExpenseAnalysis",
         ),
     ]

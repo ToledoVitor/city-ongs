@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0012_alter_cityhall_unique_together_and_more'),
+        ("accounts", "0012_alter_cityhall_unique_together_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='user',
-            options={'ordering': ['first_name', 'last_name']},
+            name="user",
+            options={"ordering": ["first_name", "last_name"]},
         ),
     ]

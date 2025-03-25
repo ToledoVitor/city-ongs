@@ -11,9 +11,8 @@ from contracts.models import (
     ContractGoal,
     ContractGoalReview,
     ContractItem,
-    ContractItemPurchaseProcess,
-    ContractItemPurchaseProcessDocument,
     ContractItemNewValueRequest,
+    ContractItemPurchaseProcessDocument,
     ContractItemReview,
     ContractStep,
 )
@@ -175,6 +174,12 @@ class ContractItemReviewInline(admin.TabularInline):
     fields = ("status", "description")
 
 
+class ContractItemPurchaseProcessDocumentInline(admin.TabularInline):
+    model = ContractItemPurchaseProcessDocument
+    extra = 0
+    fields = ("file",)
+
+
 @admin.register(ContractItem)
 class ContractItemAdmin(BaseModelAdmin):
     list_display = (
@@ -185,18 +190,15 @@ class ContractItemAdmin(BaseModelAdmin):
     )
     list_filter = ("organization", "contract")
     search_fields = ("name", "contract__name")
-    inlines = [ContractItemReviewInline, ContractItemNewValueRequestInline]
+    inlines = [
+        ContractItemReviewInline,
+        ContractItemNewValueRequestInline,
+        ContractItemPurchaseProcessDocumentInline,
+    ]
 
 
-class ContractItemPurchaseProcessDocumentInline(admin.TabularInline):
-    model = ContractItemPurchaseProcessDocument
-    extra = 0
-    fields = ("file",)
-
-
-@admin.register(ContractItemPurchaseProcess)
-class ContractItemPurchaseProcessAdmin(BaseModelAdmin):
-    list_display = ("organization", "item", "status", "created_at")
-    list_filter = ("organization", "status")
-    search_fields = ("item__name",)
-    inlines = [ContractItemPurchaseProcessDocumentInline]
+@admin.register(ContractItemPurchaseProcessDocument)
+class ContractItemPurchaseProcessDocumentAdmin(BaseModelAdmin):
+    list_display = ("organization", "file", "created_at")
+    list_filter = ("organization",)
+    search_fields = ("file",)

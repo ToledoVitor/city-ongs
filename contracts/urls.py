@@ -12,6 +12,8 @@ from contracts.views import (
     ContractTimelineView,
     ContractWorkPlanView,
     ItemValueRequestReviewView,
+    contract_item_purchases_list_view,
+    contract_item_purchases_update_view,
     contract_status_change_view,
     contract_timeline_update_view,
     create_contract_execution_view,
@@ -152,5 +154,15 @@ urlpatterns = [
         "requests/<uuid:pk>/review",
         ItemValueRequestReviewView.as_view(),
         name="review-value-requests",
+    ),
+    path(
+        "detail/<uuid:pk>/purchases/",
+        contract_item_purchases_list_view,
+        name="item-purchases",
+    ),
+    path(
+        "purchases/update/<uuid:pk>",
+        contract_item_purchases_update_view,
+        name="item-purchases-update",
     ),
 ]
