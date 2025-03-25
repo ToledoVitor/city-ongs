@@ -1146,3 +1146,47 @@ class ContractItemNewValueRequest(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Solicitação de Valor Item"
         verbose_name_plural = "Solicitações de Valores Item"
+
+
+class ContractItemSupplement(BaseOrganizationTenantModel):
+    class ReviewStatus(models.TextChoices):
+        IN_REVIEW = "IN_REVIEW", "Em revisão"
+        REJECTED = "REJECTED", "Rejeitado"
+        APPROVED = "APPROVED", "Aprovado"
+
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.IN_REVIEW,
+        max_length=9,
+    )
+
+    item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item",
+        related_name="supplements",
+        on_delete=models.CASCADE,
+    )
+    suplement_value = models.DecimalField(
+        verbose_name="Valor do suplemento",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    observations = models.TextField(
+        verbose_name="Observações",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self) -> str:
+        return f"{self.item.name} - {self.suplement_value}"
+
+    @property
+    def status_label(self) -> str:
+        return ContractItemSupplement.ReviewStatus(self.status).label
+
+    class Meta:
+        ordering = ("-suplement_value",)
+        verbose_name = "Suplemento de Item"
+        verbose_name_plural = "Suplementos de Itens"

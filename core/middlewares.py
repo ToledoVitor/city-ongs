@@ -121,9 +121,10 @@ class ErrorHandlingMiddleware:
         # Log the full exception details for other exceptions
         reporter = ExceptionReporter(request, is_email=False, *sys.exc_info())
         logger.error(
-            "Unhandled exception in %s %s",
+            "Unhandled exception in %s %s - %s",
             request.method,
             request.path,
+            str(exception),
             extra={
                 "request": request,
                 "exception": str(exception),

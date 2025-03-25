@@ -15,6 +15,7 @@ from contracts.models import (
     ContractItemPurchaseProcessDocument,
     ContractItemReview,
     ContractStep,
+    ContractItemSupplement,
 )
 from utils.admin import BaseModelAdmin
 
@@ -180,6 +181,12 @@ class ContractItemPurchaseProcessDocumentInline(admin.TabularInline):
     fields = ("file",)
 
 
+class ContractItemSupplementInline(admin.TabularInline):
+    model = ContractItemSupplement
+    extra = 0
+    fields = ("suplement_value",)
+
+
 @admin.register(ContractItem)
 class ContractItemAdmin(BaseModelAdmin):
     list_display = (
@@ -194,6 +201,7 @@ class ContractItemAdmin(BaseModelAdmin):
         ContractItemReviewInline,
         ContractItemNewValueRequestInline,
         ContractItemPurchaseProcessDocumentInline,
+        ContractItemSupplementInline,
     ]
 
 
@@ -202,3 +210,10 @@ class ContractItemPurchaseProcessDocumentAdmin(BaseModelAdmin):
     list_display = ("organization", "file", "created_at")
     list_filter = ("organization",)
     search_fields = ("file",)
+
+
+@admin.register(ContractItemSupplement)
+class ContractItemSupplementAdmin(BaseModelAdmin):
+    list_display = ("organization", "item", "suplement_value", "status")
+    list_filter = ("organization", "item", "status")
+    search_fields = ("item__name",)

@@ -16,6 +16,7 @@ from contracts.models import (
     ContractItem,
     ContractItemNewValueRequest,
     ContractStep,
+    ContractItemSupplement,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -508,4 +509,57 @@ class ContractItemPurchaseProcessForm(forms.ModelForm):
             "supplier_document": BaseCharFieldFormWidget(required=False),
             "supplier_email": BaseCharFieldFormWidget(required=False),
             "supplier_address": BaseCharFieldFormWidget(required=False),
+        }
+
+
+class ContractItemSupplementForm(forms.ModelForm):
+    supplement_value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+
+    class Meta:
+        model = ContractItemSupplement
+        fields = [
+            "item",
+            "supplement_value",
+            "observations",
+        ]
+
+        widgets = {
+            "item": BaseSelectFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["item"].queryset = ContractItem.objects.filter(contract=self.contract)
+
+
+class ContractItemSupplementUpdateForm(forms.ModelForm):
+    supplement_value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+
+    class Meta:
+        model = ContractItemSupplement
+        fields = [
+            "supplement_value",
+            "observations",
+        ]
+
+        widgets = {
+            "observations": BaseTextAreaFormWidget(required=False),
         }

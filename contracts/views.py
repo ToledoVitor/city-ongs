@@ -35,9 +35,12 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
+    ContractItemSupplementForm,
+    ContractItemSupplementUpdateForm,
 )
 from contracts.models import (
     Company,
+    ContractItemSupplement,
     Contract,
     ContractExecution,
     ContractExecutionActivity,
@@ -1456,4 +1459,92 @@ def contract_item_purchases_update_view(request, pk):
             request,
             "contracts/items/purchases-update.html",
             {"item": item, "form": form},
+        )
+
+
+@login_required
+def contract_item_supplementations_list_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.items.count:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    supplementations = ContractItemSupplement.objects.filter(item__contract=contract)
+    return render(
+        request,
+        "contracts/items/supplementations.html",
+        {"contract": contract, "supplementations": supplementations},
+    )
+
+
+@login_required
+def contract_item_supplementations_create_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if contract.is_finished:
+        return redirect("contracts:item-supplementations", pk=contract.id)
+
+    if request.method == "POST":
+        form = ContractItemSupplementForm(request.POST, contract=contract)
+        if form.is_valid():
+            with transaction.atomic():
+                supplement = form.save(commit=False)
+                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM_SUPPLEMENT,
+                    target_object_id=supplement.item.id,
+                    target_content_object=supplement.item,
+                )
+            return redirect("contracts:item-supplementations", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items/supplementations-create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = ContractItemSupplementForm(contract=contract)
+        return render(
+            request,
+            "contracts/items/supplementations-create.html",
+            {"contract": contract, "form": form},
+        )
+    
+
+@login_required
+def contract_item_supplementations_update_view(request, pk):
+    supplement = get_object_or_404(ContractItemSupplement, id=pk)
+    if request.method == "POST":
+        form = ContractItemSupplementUpdateForm(request.POST, instance=supplement)
+        if form.is_valid():
+            with transaction.atomic():
+                supplement = form.save(commit=False)
+                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                    target_object_id=supplement.item.id,
+                    target_content_object=supplement.item,
+                )
+                return redirect(
+                    "contracts:item-supplementations",
+                    pk=supplement.item.contract.id,
+                )
+        else:
+            return render(
+                request,
+                "contracts/items/supplementations-update.html",
+                {"supplement": supplement, "form": form},
+            )
+    else:
+        form = ContractItemSupplementUpdateForm(instance=supplement)
+        return render(
+            request,
+            "contracts/items/supplementations-update.html",
+            {"supplement": supplement, "form": form},
         )

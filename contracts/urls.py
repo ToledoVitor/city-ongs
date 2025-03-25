@@ -29,6 +29,9 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_interested_view,
     update_contract_item_view,
+    contract_item_supplementations_list_view,
+    contract_item_supplementations_create_view,
+    contract_item_supplementations_update_view,
 )
 
 urlpatterns = [
@@ -164,5 +167,20 @@ urlpatterns = [
         "purchases/update/<uuid:pk>",
         contract_item_purchases_update_view,
         name="item-purchases-update",
+    ),
+    path(
+        "detail/<uuid:pk>/supplementations/",
+        contract_item_supplementations_list_view,
+        name="item-supplementations",
+    ),
+    path(
+        "detail/<uuid:pk>/supplementations/create/",
+        contract_item_supplementations_create_view,
+        name="item-supplementations-create",
+    ),
+    path(
+        "supplementations/update/<uuid:pk>",
+        contract_item_supplementations_update_view,
+        name="item-supplementations-update",
     ),
 ]

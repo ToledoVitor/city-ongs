@@ -132,6 +132,19 @@ class ActivityLog(BaseOrganizationTenantModel):
             "ANALISED_NEW_VALUE_ITEM",
             "Analisou pedido de novo valor do item",
         )
+        # contract item supplements
+        CREATED_CONTRACT_ITEM_SUPPLEMENT = (
+            "CREATED_CONTRACT_ITEM_SUPPLEMENT",
+            "Cadastrou suplemento de item",
+        )
+        UPDATED_CONTRACT_ITEM_SUPPLEMENT = (
+            "UPDATED_CONTRACT_ITEM_SUPPLEMENT",
+            "Atualizou suplemento de item",
+        )
+        DELETED_CONTRACT_ITEM_SUPPLEMENT = (
+            "DELETED_CONTRACT_ITEM_SUPPLEMENT",
+            "Deletou suplemento de item",
+        )
         # contract executions
         CREATED_CONTRACT_EXECUTION = (
             "CREATED_CONTRACT_EXECUTION",
