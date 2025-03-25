@@ -61,5 +61,12 @@ urlpatterns = [
         "contracts/",
         include(("contracts.urls", "contracts"), namespace="contracts"),
     ),
-    path("reports/", include(("reports.urls", "reports"), namespace="reports")),
+    path(
+        "reports/",
+        include(("reports.urls", "reports"), namespace="reports"),
+    ),
+    path(
+        "dashboard/",
+        include(("dashboard.urls", "dashboard"), namespace="dashboard"),
+    ),
 ]

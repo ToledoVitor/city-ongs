@@ -179,6 +179,7 @@ INSTALLED_APPS = [
     "accounts",
     "bank",
     "contracts",
+    "dashboard",
     "reports",
     # Third parties
     "easy_tenants",

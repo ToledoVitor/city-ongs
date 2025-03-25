@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Portal SITTS{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <p class="text-gray-600 mt-2">Visão geral dos contratos e prestações de contas</p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="filterForm">
+      <div class="relative w-full">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+        <button id="periodDropdownButton" data-dropdown-toggle="periodDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
+          <span id="periodSelectedText">
+            {% if period == 'all' %}Todos
+            {% elif period == 'current_month' %}Mês Atual
+            {% elif period == 'last_3_months' %}Últimos 3 meses
+            {% elif period == 'last_6_months' %}Últimos 6 meses
+            {% elif period == 'last_year' %}Último ano
+            {% else %}Selecione o período{% endif %}
+          </span>
+          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+          </svg>
+        </button>
+        <div id="periodDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
+          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="periodDropdownButton">
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="period-all" type="radio" name="period" value="all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'all' %}checked{% endif %}>
+                <label for="period-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Todos</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="period-current" type="radio" name="period" value="current_month" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'current_month' %}checked{% endif %}>
+                <label for="period-current" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Mês Atual</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="period-3months" type="radio" name="period" value="last_3_months" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_3_months' %}checked{% endif %}>
+                <label for="period-3months" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Últimos 3 meses</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="period-6months" type="radio" name="period" value="last_6_months" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_6_months' %}checked{% endif %}>
+                <label for="period-6months" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Últimos 6 meses</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="period-year" type="radio" name="period" value="last_year" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_year' %}checked{% endif %}>
+                <label for="period-year" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Último ano</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="relative w-full">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <button id="statusDropdownButton" data-dropdown-toggle="statusDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
+          <span id="statusSelectedText">Selecione os status</span>
+          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+          </svg>
+        </button>
+        <div id="statusDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
+          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="statusDropdownButton">
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="status-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="status-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Selecionar Todos</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="status-wip" type="checkbox" value="WIP" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="status-wip" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Em Andamento</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="status-sent" type="checkbox" value="SENT" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="status-sent" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Enviada</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="status-correcting" type="checkbox" value="CORRECTING" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="status-correcting" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Corrigindo</label>
+              </div>
+            </li>
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="status-finished" type="checkbox" value="FINISHED" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="status-finished" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Finalizada</label>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <input type="hidden" name="status[]" id="statusValues">
+      </div>
+      <div class="relative w-full">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Contrato</label>
+        <button id="contractDropdownButton" data-dropdown-toggle="contractDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
+          <span id="contractSelectedText">Selecione os contratos</span>
+          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+          </svg>
+        </button>
+        <div id="contractDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
+          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="contractDropdownButton">
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="contract-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="contract-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Selecionar Todos</label>
+              </div>
+            </li>
+            {% for contract in contracts %}
+            <li>
+              <div class="flex items-center p-2 rounded hover:bg-gray-100">
+                <input id="contract-{{ contract.id }}" type="checkbox" value="{{ contract.id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="contract-{{ contract.id }}" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">{{ contract.name }}</label>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <input type="hidden" name="contract[]" id="contractValues">
+      </div>
+      <div class="flex items-end w-full">
+        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          Filtrar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-gray-600 text-sm">Total de Contratos</h2>
+          <p class="text-2xl font-semibold text-gray-800">{{ total_contracts }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-gray-600 text-sm">Prestações Ativas</h2>
+          <p class="text-2xl font-semibold text-gray-800">{{ active_accountabilities }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-gray-600 text-sm">Total em Receitas</h2>
+          <p class="text-2xl font-semibold text-gray-800">R$ {{ total_revenue|intcomma }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-gray-600 text-sm">Total em Despesas</h2>
+          <p class="text-2xl font-semibold text-gray-800">R$ {{ total_expenses|intcomma }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Progresso Mensal</h3>
+      <div class="h-64" id="monthlyProgressChart"></div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Receitas vs Despesas</h3>
+      <div class="h-64" id="revenueExpensesChart"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800">Atividades Recentes</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contrato</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receitas</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Despesas</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for accountability in recent_accountabilities %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ accountability.contract.name }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ accountability.month_label }} {{ accountability.year }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                  {% if accountability.status == 'WIP' %}bg-yellow-100 text-yellow-800
+                  {% elif accountability.status == 'SENT' %}bg-blue-100 text-blue-800
+                  {% elif accountability.status == 'CORRECTING' %}bg-red-100 text-red-800
+                  {% else %}bg-green-100 text-green-800{% endif %}">
+                  {{ accountability.status_label }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ accountability.count_revenues }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ accountability.count_expenses }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="text-blue-600 hover:text-blue-900">Detalhes</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                Nenhuma prestação de contas encontrada
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const periodDropdown = document.getElementById('periodDropdown');
+    const periodButton = document.getElementById('periodDropdownButton');
+    const periodSelectedText = document.getElementById('periodSelectedText');
+    const periodRadios = periodDropdown.querySelectorAll('input[type="radio"]');
+
+    periodRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        const label = this.nextElementSibling;
+        periodSelectedText.textContent = label.textContent;
+        const dropdown = document.getElementById('periodDropdown');
+        dropdown.classList.add('hidden');
+      });
+    });
+
+    const statusDropdown = document.getElementById('statusDropdown');
+    const statusButton = document.getElementById('statusDropdownButton');
+    const statusSelectedText = document.getElementById('statusSelectedText');
+    const statusValues = document.getElementById('statusValues');
+    const statusAllCheckbox = document.getElementById('status-all');
+    const statusCheckboxes = statusDropdown.querySelectorAll('input[type="checkbox"]:not(#status-all)');
+
+    const contractDropdown = document.getElementById('contractDropdown');
+    const contractButton = document.getElementById('contractDropdownButton');
+    const contractSelectedText = document.getElementById('contractSelectedText');
+    const contractValues = document.getElementById('contractValues');
+    const contractAllCheckbox = document.getElementById('contract-all');
+    const contractCheckboxes = contractDropdown.querySelectorAll('input[type="checkbox"]:not(#contract-all)');
+
+    function updateDropdownPosition(dropdown) {
+      dropdown.style.position = 'absolute';
+      dropdown.style.top = '100%';
+      dropdown.style.left = '0';
+      dropdown.style.right = '0';
+      dropdown.style.bottom = 'auto';
+      dropdown.style.marginTop = '0.25rem';
+      dropdown.style.marginBottom = '0';
+      dropdown.style.width = '100%';
+      
+      dropdown.style.maxHeight = '240px';
+      dropdown.style.overflowY = 'auto';
+    }
+
+    document.querySelectorAll('[data-dropdown-toggle]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dropdownId = this.getAttribute('data-dropdown-toggle');
+        const dropdown = document.getElementById(dropdownId);
+        
+        document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
+          if (d.id !== dropdownId) {
+            d.classList.add('hidden');
+          }
+        });
+
+        if (dropdown) {
+          dropdown.classList.toggle('hidden');
+          updateDropdownPosition(dropdown);
+        }
+      });
+    });
+
+    document.addEventListener('click', function(e) {
+      const dropdowns = document.querySelectorAll('[id$="Dropdown"]');
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target) && !e.target.hasAttribute('data-dropdown-toggle')) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    });
+
+    function updateStatusDropdown() {
+      const selectedStatuses = Array.from(statusCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+      
+      // Update hidden input with individual values
+      const hiddenInputs = selectedStatuses.map(status => 
+        `<input type="hidden" name="status[]" value="${status}">`
+      ).join('');
+      statusValues.innerHTML = hiddenInputs;
+      
+      // Update display text
+      const allChecked = selectedStatuses.length === statusCheckboxes.length;
+      statusAllCheckbox.checked = allChecked;
+      
+      if (selectedStatuses.length === 0) {
+        statusSelectedText.textContent = 'Selecione os status';
+      } else if (allChecked) {
+        statusSelectedText.textContent = 'Todos os status';
+      } else {
+        statusSelectedText.textContent = `${selectedStatuses.length} status selecionados`;
+      }
+    }
+
+    function updateContractDropdown() {
+      const selectedContracts = Array.from(contractCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+      
+      // Update hidden input with individual values
+      const hiddenInputs = selectedContracts.map(contract => 
+        `<input type="hidden" name="contract[]" value="${contract}">`
+      ).join('');
+      contractValues.innerHTML = hiddenInputs;
+      
+      // Update display text
+      const allChecked = selectedContracts.length === contractCheckboxes.length;
+      contractAllCheckbox.checked = allChecked;
+      
+      if (selectedContracts.length === 0) {
+        contractSelectedText.textContent = 'Selecione os contratos';
+      } else if (allChecked) {
+        contractSelectedText.textContent = 'Todos os contratos';
+      } else {
+        contractSelectedText.textContent = `${selectedContracts.length} contratos selecionados`;
+      }
+    }
+
+    statusAllCheckbox.addEventListener('change', function() {
+      const isChecked = this.checked;
+      statusCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+        cb.disabled = isChecked;
+      });
+      updateStatusDropdown();
+    });
+
+    statusCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (!this.checked) {
+          statusCheckboxes.forEach(checkbox => {
+            checkbox.disabled = false;
+          });
+        }
+        updateStatusDropdown();
+      });
+    });
+
+    contractAllCheckbox.addEventListener('change', function() {
+      const isChecked = this.checked;
+      contractCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+        cb.disabled = isChecked;
+      });
+      updateContractDropdown();
+    });
+
+    contractCheckboxes.forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (!this.checked) {
+          contractCheckboxes.forEach(checkbox => {
+            checkbox.disabled = false;
+          });
+        }
+        updateContractDropdown();
+      });
+    });
+
+    const selectedStatuses = '{{ selected_status|join:"," }}'.split(',').filter(Boolean);
+    const selectedContracts = '{{ selected_contracts|join:"," }}'.split(',').filter(Boolean);
+
+    if (selectedStatuses.length > 0) {
+      selectedStatuses.forEach(status => {
+        const checkbox = document.getElementById(`status-${status.toLowerCase()}`);
+        if (checkbox) checkbox.checked = true;
+      });
+      updateStatusDropdown();
+    }
+
+    if (selectedContracts.length > 0) {
+      selectedContracts.forEach(contract => {
+        const checkbox = document.getElementById(`contract-${contract}`);
+        if (checkbox) checkbox.checked = true;
+      });
+      updateContractDropdown();
+    }
+
+    updateStatusDropdown();
+    updateContractDropdown();
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      function translateMonth(englishMonth) {
+        const monthTranslations = {
+          'January': 'Janeiro',
+          'February': 'Fevereiro',
+          'March': 'Março',
+          'April': 'Abril',
+          'May': 'Maio',
+          'June': 'Junho',
+          'July': 'Julho',
+          'August': 'Agosto',
+          'September': 'Setembro',
+          'October': 'Outubro',
+          'November': 'Novembro',
+          'December': 'Dezembro'
+        };
+        return monthTranslations[englishMonth] || englishMonth;
+      }
+
+      const monthlyProgressCtx = document.getElementById('monthlyProgressChart');
+      if (!monthlyProgressCtx) {
+        console.error('Monthly progress chart element not found');
+        return;
+      }
+
+      const monthlyCanvas = document.createElement('canvas');
+      monthlyProgressCtx.appendChild(monthlyCanvas);
+      const monthlyContext = monthlyCanvas.getContext('2d');
+
+      const translatedMonthLabels = {{ monthly_labels|safe }}.map(translateMonth);
+
+      new Chart(monthlyContext, {
+        type: 'line',
+        data: {
+          labels: translatedMonthLabels,
+          datasets: [{
+            label: 'Prestações Concluídas',
+            data: {{ monthly_data|safe }},
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              min: 0,
+            }
+          }
+        }
+      });
+
+      const revenueExpensesCtx = document.getElementById('revenueExpensesChart');
+      if (!revenueExpensesCtx) {
+        console.error('Revenue vs expenses chart element not found');
+        return;
+      }
+
+      const revenueCanvas = document.createElement('canvas');
+      revenueExpensesCtx.appendChild(revenueCanvas);
+      const revenueContext = revenueCanvas.getContext('2d');
+
+      new Chart(revenueContext, {
+        type: 'bar',
+        data: {
+          labels: {{ months_labels|safe }}.map(translateMonth),
+          datasets: [
+            {
+              label: 'Receitas',
+              data: {{ revenue_data|safe }},
+              backgroundColor: 'rgba(16, 185, 129, 0.5)',
+              borderColor: 'rgb(16, 185, 129)',
+              borderWidth: 1
+            },
+            {
+              label: 'Despesas',
+              data: {{ expenses_data|safe }},
+              backgroundColor: 'rgba(239, 68, 68, 0.5)',
+              borderColor: 'rgb(239, 68, 68)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                }
+              }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing charts:', error);
+    }
+  });
+</script>
+{% endblock %}
