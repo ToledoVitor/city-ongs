@@ -5,12 +5,27 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from accountability.models import Accountability, Expense, Revenue
-from contracts.models import Contract
+from contracts.models import Contract, ContractMonthTransfer
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
     login_url = "/auth/login"
+
+    brazilian_months = {
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
+    }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -52,6 +67,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 start_date = (today - relativedelta(months=5)).replace(day=1)
             elif period == "last_year":
                 start_date = (today - relativedelta(months=11)).replace(day=1)
+            else:
+                start_date = (today - relativedelta(years=1)).replace(day=1)
 
             if start_date:
                 accountabilities = accountabilities.filter(
@@ -103,22 +120,27 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         monthly_data = []
         revenue_data = []
         expenses_data = []
+        transfer_data = []
 
-        if period == "all":
-            num_months = 12
-            start_date = today - relativedelta(months=11)
-        elif period == "current_month":
-            num_months = 1
-            start_date = today.replace(day=1)
-        elif period == "last_3_months":
-            num_months = 3
-            start_date = (today - relativedelta(months=2)).replace(day=1)
-        elif period == "last_6_months":
-            num_months = 6
-            start_date = (today - relativedelta(months=5)).replace(day=1)
-        else:  # last_year
-            num_months = 12
-            start_date = (today - relativedelta(months=11)).replace(day=1)
+        match period:
+            case "all":
+                num_months = 12
+                start_date = (today - relativedelta(months=11)).replace(day=1)
+            case "last_year":
+                num_months = 12
+                start_date = (today - relativedelta(months=11)).replace(day=1)
+            case "last_6_months":
+                num_months = 6
+                start_date = (today - relativedelta(months=5)).replace(day=1)
+            case "last_3_months":
+                num_months = 3
+                start_date = (today - relativedelta(months=2)).replace(day=1)
+            case "current_month":
+                num_months = 1
+                start_date = today.replace(day=1)
+            case _:
+                num_months = 1
+                start_date = today.replace(day=1)
 
         current_date = start_date
         for _ in range(num_months):
@@ -126,7 +148,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             months.append(month_name)
 
             monthly_count = accountabilities.filter(
-                year=current_date.year, month=current_date.month, status="FINISHED"
+                year=current_date.year, month=current_date.month,
             ).count()
             monthly_data.append(monthly_count)
 
@@ -148,6 +170,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             expenses_data.append(float(month_expenses))
 
+            month_transfer = (
+                ContractMonthTransfer.objects.filter(
+                    contract__in=contracts,
+                    year=current_date.year,
+                    month=current_date.month,
+                ).aggregate(total=Sum("value"))["total"]
+                or 0
+            )
+            transfer_data.append(float(month_transfer))
+
             current_date = current_date + relativedelta(months=1)
 
         context["monthly_labels"] = months
@@ -155,6 +187,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context["months_labels"] = months
         context["revenue_data"] = revenue_data
         context["expenses_data"] = expenses_data
-
+        context["transfer_data"] = transfer_data
         context["contracts"] = contracts
+        context["monthly_progress_data"] = list(
+            zip(months, revenue_data, expenses_data, transfer_data)
+        )
+
         return context
