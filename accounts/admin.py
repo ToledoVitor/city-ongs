@@ -88,7 +88,14 @@ class CustomUserAdmin(UserAdmin):
         (
             "Informações Pessoais",
             {
-                "fields": ("first_name", "last_name", "email", "cpf"),
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "cpf",
+                    "position",
+                    "phone_number",
+                ),
             },
         ),
         (
