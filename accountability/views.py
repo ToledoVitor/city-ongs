@@ -748,13 +748,12 @@ class FavoredCreateView(CommitteeMemberCreateMixin, LoginRequiredMixin, Template
 @login_required
 def update_favored_view(request, pk):
     favored = get_object_or_404(Favored, pk=pk)
-    accountability = favored.accountability
 
     if request.method == "POST":
         form = FavoredForm(request.POST, instance=favored)
         if form.is_valid():
             form.save()
-            return redirect("accountability:detail", pk=accountability.pk)
+            return redirect("accountability:favoreds-list")
     else:
         form = FavoredForm(instance=favored)
 
@@ -763,7 +762,6 @@ def update_favored_view(request, pk):
         "accountability/favoreds/create.html",
         {
             "form": form,
-            "accountability": accountability,
             "favored": favored,
         },
     )
