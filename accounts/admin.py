@@ -57,6 +57,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "email",
+        "cpf",
         "first_name",
         "last_name",
         "is_staff",
@@ -76,6 +77,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = (
         "username",
         "email",
+        "cpf",
         "first_name",
         "last_name",
     )
@@ -86,7 +88,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Informações Pessoais",
             {
-                "fields": ("first_name", "last_name", "email"),
+                "fields": ("first_name", "last_name", "email", "cpf"),
             },
         ),
         (
