@@ -36,14 +36,16 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.filter(
-            access_level=User.AccessChoices.FOLDER_MANAGER
-        )
+            access_level=User.AccessChoices.FOLDER_MANAGER,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+        
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
                 Q(email__icontains=query)
                 | Q(first_name__icontains=query)
-                | Q(last_name__icontains=query)
+                | Q(last_name__icontains=query),
             )
         return queryset.order_by("email")
 
@@ -61,8 +63,14 @@ class FolderManagersDetailView(LoginRequiredMixin, DetailView):
 
     login_url = "/auth/login"
 
+    def get_queryset(self) -> QuerySet[Any]:
+        return self.model.objects.filter(
+            access_level=User.AccessChoices.FOLDER_MANAGER,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+
     def get_object(self, queryset=None):
-        return self.model.objects.get(id=self.kwargs["pk"])
+        return self.get_queryset().get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -83,7 +91,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         if not request.user.can_add_new_folder_managers:
             logger.error(
-                f"{request.user.id} - dont have access to create new folder managers"
+                f"{request.user.id} - dont have access to create new folder managers",
             )
             return redirect("home")
 
@@ -94,7 +102,9 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
                     position=form.cleaned_data.get("position"),
-                    phone_number=str(form.cleaned_data["phone_number"].national_number),
+                    phone_number=str(
+                        form.cleaned_data["phone_number"].national_number,
+                    ),
                     cpf=form.cleaned_data.get("cpf"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
@@ -133,14 +143,16 @@ class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         queryset = self.model.objects.filter(
-            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT
-        )
+            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+        
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
                 Q(email__icontains=query)
                 | Q(first_name__icontains=query)
-                | Q(last_name__icontains=query)
+                | Q(last_name__icontains=query),
             )
         return queryset.order_by("email")
 
@@ -158,8 +170,14 @@ class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
 
     login_url = "/auth/login"
 
+    def get_queryset(self) -> QuerySet[Any]:
+        return self.model.objects.filter(
+            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+
     def get_object(self, queryset=None):
-        return self.model.objects.get(id=self.kwargs["pk"])
+        return self.get_queryset().get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
