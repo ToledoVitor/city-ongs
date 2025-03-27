@@ -72,12 +72,6 @@
           <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="periodDropdownButton">
             <li>
               <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="period-all" type="radio" name="period" value="all" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'all' %}checked{% endif %}>
-                <label for="period-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Todos</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
                 <input id="period-current" type="radio" name="period" value="current_month" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'current_month' %}checked{% endif %}>
                 <label for="period-current" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Mês Atual</label>
               </div>

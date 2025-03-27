@@ -3,7 +3,13 @@ from io import BytesIO
 
 import xlsxwriter
 
-from accountability.models import Accountability, Expense, Revenue
+from accountability.models import (
+    Accountability,
+    Expense,
+    Revenue,
+    ResourceSource,
+    Favored,
+)
 from accounts.models import Organization
 from contracts.choices import NatureChoices
 from contracts.models import Contract
@@ -509,7 +515,7 @@ class AccountabilityXLSXExporter:
         revenue_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         line = 1
-        for source in self.organization.resource_sources.all():
+        for source in ResourceSource.objects.filter(organization=self.organization):
             revenue_worksheet.write(line, 0, source.name)
             revenue_worksheet.write(line, 1, str(source.id))
             line += 1
@@ -601,7 +607,7 @@ class AccountabilityXLSXExporter:
         favored_worksheet.write(0, 1, "Documento", self.yellow_body_format)
 
         current_line = 1
-        for favored in self.organization.favoreds.all():
+        for favored in Favored.objects.filter(organization=self.organization):
             favored_worksheet.write(current_line, 0, favored.name)
             favored_worksheet.write(current_line, 1, str(favored.document))
             current_line += 1

@@ -784,8 +784,6 @@ def import_accountability_view(request, pk):
             )
             .prefetch_related(
                 "contract__items",
-                "contract__organization__favoreds",
-                "contract__organization__resource_sources",
             )
             .get(id=pk)
         )
