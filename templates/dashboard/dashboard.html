@@ -11,7 +11,42 @@
 {% load humanize %}
 {% load dashboard_filters %}
 
-<div class="container mx-auto px-4 py-8">
+<style>
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body * {
+      visibility: hidden;
+    }
+    #printable, #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .no-print, #printButton {
+      display: none !important;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 8pt;
+    }
+    th, td {
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      line-height: 1.2;
+    }
+  }
+</style>
+
+<div id="printable" class="container mx-auto px-4 py-8 print:bg-white">
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
     <p class="text-gray-600 mt-2">Visão geral dos contratos e prestações de contas</p>
@@ -23,8 +58,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
         <button id="periodDropdownButton" data-dropdown-toggle="periodDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
           <span id="periodSelectedText">
-            {% if period == 'all' %}Todos
-            {% elif period == 'current_month' %}Mês Atual
+            {% if period == 'current_month' %}Mês Atual
             {% elif period == 'last_3_months' %}Últimos 3 meses
             {% elif period == 'last_6_months' %}Últimos 6 meses
             {% elif period == 'last_year' %}Último ano
@@ -296,7 +330,7 @@
     <div class="space-y-6">
       {% if monthly_progress_data %}
         {% for month, revenue, expense, transfer in monthly_progress_data %}
-        <div class="p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+        <div class="p-3 sm:p-4 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200">
           <div class="flex flex-col gap-4">
             <!-- Header with month and values -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -331,11 +365,16 @@
                 <div class="flex justify-between items-center mb-1">
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-medium text-gray-700">Transferência</span>
-                    <span class="px-1.5 sm:px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">100%</span>
+                    <span class="px-1.5 sm:px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                      {% if transfer %}100{% else %}0,0{% endif %}%
+                    </span>
                   </div>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="h-2 rounded-full bg-blue-600 transition-all duration-500" style="width: 100%"></div>
+                  <div
+                    class="h-2 rounded-full bg-blue-600 transition-all duration-500"
+                    style="width: {% if transfer %}100{% else %}0{% endif %}%"
+                  ></div>
                 </div>
               </div>
               <div>
@@ -387,6 +426,120 @@
         </div>
       {% endif %}
     </div>
+  </div>
+
+  <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
+    <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
+      <button
+        type="button"
+        data-tooltip-target="tooltip-share"
+        data-tooltip-placement="left"
+        onclick="navigator.clipboard.writeText(window.location.href)"
+        class="
+          flex
+          justify-center
+          items-center
+          w-[52px]
+          h-[52px]
+          text-gray-500
+          hover:text-gray-900
+          bg-white
+          rounded-full
+          border
+          border-gray-200
+          shadow-xs
+          hover:bg-gray-50
+          focus:ring-4
+          focus:ring-gray-300
+          focus:outline-none
+        "
+      >
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+          <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
+        </svg>
+        <span class="sr-only">Compartilhar</span>
+      </button>
+      <div
+        id="tooltip-share"
+        role="tooltip"
+        class="
+          absolute
+          z-10
+          invisible
+          inline-block
+          w-auto
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-white
+          transition-opacity
+          duration-300
+          bg-gray-900
+          rounded-lg
+          shadow-xs
+          opacity-0
+          tooltip
+        "
+      >
+        Compartilhar
+        <div class="tooltip-arrow" data-popper-arrow></div>
+      </div>
+  
+      <button
+        type="button"
+        data-tooltip-target="tooltip-print"
+        data-tooltip-placement="left"
+        onclick="window.print()"
+        class="
+          flex
+          justify-center
+          items-center
+          w-[52px]
+          h-[52px]
+          text-gray-500
+          hover:text-gray-900
+          bg-white
+          rounded-full
+          border
+          border-gray-200
+          shadow-xs
+          hover:bg-gray-50
+          focus:ring-4
+          focus:ring-gray-300
+          focus:outline-none
+        "
+      >
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
+            <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
+        </svg>
+        <span class="sr-only">Imprimir</span>
+      </button>
+      <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
+        Imprimir
+        <div class="tooltip-arrow" data-popper-arrow></div>
+      </div>
+    </div>
+  
+    <button
+      type="button"
+      data-dial-toggle="speed-dial-menu-default"
+      aria-controls="speed-dial-menu-default"
+      aria-expanded="false"
+      class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
+    >
+        <svg
+          class="w-5 h-5 transition-transform group-hover:rotate-45"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 18 18"
+        >
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+        <span class="sr-only">Ações</span>
+    </button>
   </div>
 
 </div>

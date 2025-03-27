@@ -58,25 +58,22 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         )
 
         today = timezone.now().date()
-        if period != "all":
-            if period == "current_month":
+        match period:
+            case "current_month":
                 start_date = today.replace(day=1)
-            elif period == "last_3_months":
+            case "last_3_months":
                 start_date = (today - relativedelta(months=2)).replace(day=1)
-            elif period == "last_6_months":
+            case "last_6_months":
                 start_date = (today - relativedelta(months=5)).replace(day=1)
-            elif period == "last_year":
+            case "last_year":
                 start_date = (today - relativedelta(months=11)).replace(day=1)
-            else:
+            case _:
                 start_date = (today - relativedelta(years=1)).replace(day=1)
 
-            if start_date:
-                accountabilities = accountabilities.filter(
-                    Q(year__gt=start_date.year)
-                    | Q(year=start_date.year, month__gte=start_date.month)
-                ).filter(
-                    Q(year__lt=today.year) | Q(year=today.year, month__lte=today.month)
-                )
+        accountabilities = accountabilities.filter(
+            Q(year__gt=start_date.year)
+            | Q(year=start_date.year, month__gte=start_date.month)
+        ).filter(Q(year__lt=today.year) | Q(year=today.year, month__lte=today.month))
 
         if status_list:
             accountabilities = accountabilities.filter(status__in=status_list)
@@ -95,6 +92,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         expenses = Expense.objects.filter(
             accountability__in=accountabilities, deleted_at__isnull=True
         )
+
+        if contract_list:
+            revenues = revenues.filter(accountability__contract_id__in=contract_list)
+            expenses = expenses.filter(accountability__contract_id__in=contract_list)
 
         context["total_revenue"] = revenues.aggregate(total=Sum("value"))["total"] or 0
         context["total_expenses"] = expenses.aggregate(total=Sum("value"))["total"] or 0
@@ -123,9 +124,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         transfer_data = []
 
         match period:
-            case "all":
-                num_months = 12
-                start_date = (today - relativedelta(months=11)).replace(day=1)
             case "last_year":
                 num_months = 12
                 start_date = (today - relativedelta(months=11)).replace(day=1)
@@ -148,7 +146,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             months.append(month_name)
 
             monthly_count = accountabilities.filter(
-                year=current_date.year, month=current_date.month,
+                year=current_date.year,
+                month=current_date.month,
             ).count()
             monthly_data.append(monthly_count)
 
@@ -170,16 +169,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             expenses_data.append(float(month_expenses))
 
-            month_transfer = (
-                ContractMonthTransfer.objects.filter(
-                    contract__in=contracts,
-                    year=current_date.year,
-                    month=current_date.month,
-                ).aggregate(total=Sum("value"))["total"]
-                or 0
-            )
-            transfer_data.append(float(month_transfer))
+            if contract_list:
+                month_transfer = (
+                    ContractMonthTransfer.objects.filter(
+                        contract__id__in=contract_list,
+                        year=current_date.year,
+                        month=current_date.month,
+                    ).aggregate(total=Sum("value"))["total"]
+                    or 0
+                )
+            else:
+                month_transfer = (
+                    ContractMonthTransfer.objects.filter(
+                        contract__in=contracts,
+                        year=current_date.year,
+                        month=current_date.month,
+                    ).aggregate(total=Sum("value"))["total"]
+                    or 0
+                )
 
+            transfer_data.append(float(month_transfer))
             current_date = current_date + relativedelta(months=1)
 
         context["monthly_labels"] = months

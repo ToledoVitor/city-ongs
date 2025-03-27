@@ -39,7 +39,7 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
             access_level=User.AccessChoices.FOLDER_MANAGER,
             areas__in=self.request.user.areas.all(),
         ).distinct()
-        
+
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
@@ -146,7 +146,7 @@ class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
             access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
             areas__in=self.request.user.areas.all(),
         ).distinct()
-        
+
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(

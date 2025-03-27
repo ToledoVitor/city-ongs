@@ -154,21 +154,19 @@ class ForcePasswordChangeMiddleware:
 
         # List of paths that should be accessible even if password needs to be changed
         allowed_paths = [
-            '/auth/force-password-change/',
-            '/auth/logout/',
-            '/static/',
-            '/media/',
-            '/auth/login/',
+            "/auth/force-password-change/",
+            "/auth/logout/",
+            "/static/",
+            "/media/",
+            "/auth/login/",
         ]
 
         # Check if current path is allowed
         is_allowed_path = any(request.path.startswith(path) for path in allowed_paths)
 
-        if (
-            not request.user.password_redefined
-            and not is_allowed_path
-        ):
+        if not request.user.password_redefined and not is_allowed_path:
             from django.shortcuts import redirect
-            return redirect('force-password-change')
+
+            return redirect("force-password-change")
 
         return self.get_response(request)

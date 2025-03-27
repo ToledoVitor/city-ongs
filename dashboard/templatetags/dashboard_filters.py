@@ -1,14 +1,12 @@
 from django import template
 
-
 register = template.Library()
 
 
 @register.simple_tag
 def zip_months(months, revenues, expenses, transfers):
     if not all(
-        isinstance(lst, list)
-        for lst in [months, revenues, expenses, transfers]
+        isinstance(lst, list) for lst in [months, revenues, expenses, transfers]
     ):
         return []
 
@@ -53,5 +51,5 @@ def brazilian_month(month):
 def replace_comma(value):
     """Replace comma with period in a number string."""
     if isinstance(value, str):
-        return value.replace(',', '.')
+        return value.replace(",", ".")
     return value
