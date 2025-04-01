@@ -5,7 +5,6 @@ from accountability.models import (
     Accountability,
     AccountabilityFile,
     Expense,
-    ExpenseAnalysis,
     ExpenseFile,
     Favored,
     ResourceSource,
@@ -57,12 +56,6 @@ class AccountabilityAdmin(BaseModelAdmin):
             {"fields": ("start_date", "end_date", "created_at", "updated_at")},
         ),
     )
-
-
-class ExpenseAnalysisInline(admin.TabularInline):
-    model = ExpenseAnalysis
-    extra = 0
-    fields = ("status", "description")
 
 
 class ExpenseFileInline(admin.TabularInline):

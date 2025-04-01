@@ -6,172 +6,324 @@
 
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-  Prestações de Conta
-</p>
+<style>
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body * {
+      visibility: hidden;
+    }
+    #printable, #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .no-print, #printButton {
+      display: none !important;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 8pt;
+    }
+    th, td {
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      line-height: 1.2;
+    }
+  }
+</style>
 
-<!-- Breadcrumb -->
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ accountability.contract.trailing_code }}</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2">Pendências</span>
-        </div>
-      </li>
-    </ol>
-</nav>
 
-<div class="bg-white shadow-md rounded-lg p-6 mb-6">
-  <h2 class="text-lg font-bold mb-2">Comentários Gerais</h2>
-  <hr class="h-px my-2 border-0 bg-gray-400">
-  <p>{{ accountability.pendencies|default:"Sem comentários" }}</p>
-</div>
+<div id="printable" class="container mx-auto mx-4 my-6">
+  <p class="text-3xl mb-4 font-bold">
+    Prestações de Conta
+  </p>
 
-<p class="text-xl my-4 font-bold text-black">Despesas Com Pendências</p>
+  <!-- Breadcrumb -->
+  <nav class="flex py-3 text-black print:hidden" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+        <li class="inline-flex items-center">
+          <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+            <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+            </svg>
+            Inicio
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <a href="{% url 'contracts:contracts-detail' accountability.contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ accountability.contract.trailing_code }}</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
+          </div>
+        </li>
+        <li aria-current="page">
+          <div class="flex items-center">
+            <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="ms-1 text-sm font-medium text-black md:ms-2">Pendências</span>
+          </div>
+        </li>
+      </ol>
+  </nav>
 
-<div class="relative">
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">    
-      <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-          <thead class="text-xs text-white uppercase bg-gray-500">
-              <tr>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Despesa
-                  </th>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Favorecido
-                  </th>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Observações
-                  </th>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Pendências
-                  </th>
+  <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-lg font-bold mb-2">Comentários Gerais</h2>
+    <hr class="h-px my-2 border-0 bg-gray-400">
+    <p>{{ accountability.pendencies|default:"Sem comentários" }}</p>
+  </div>
+
+  <p class="text-xl my-4 font-bold text-black">Despesas Com Pendências</p>
+
+  <div class="relative">
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">    
+        <table class="w-full text-sm text-left rtl:text-right text-gray-400">
+            <thead class="text-xs text-white uppercase bg-gray-500">
+                <tr>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Despesa
+                    </th>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Favorecido
+                    </th>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Observações
+                    </th>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Pendências
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+              {% for expense in expenses %}
+              <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
+                  <th class="pl-10 pr-6 py-4 text-sm text-center text-black max-w-48">
+                      {{ expense.identification }}
+                  </td>
+
+                  <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
+                      {{ expense.favored.name }}
+                  </td>
+
+                  <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
+                      {{ expense.observations|default_if_none:"Sem Observações" }}
+                  </td>
+
+                  <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
+                      {{ expense.pendencies }}
+                  </td>
               </tr>
-          </thead>
-          <tbody>
-            {% for expense in expenses %}
-            <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                <th class="pl-10 pr-6 py-4 text-sm text-center text-black max-w-48">
-                    {{ expense.identification }}
-                </td>
-
-                <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
-                    {{ expense.favored.name }}
-                </td>
-
-                <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
-                    {{ expense.observations|default_if_none:"Sem Observações" }}
-                </td>
-
-                <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
-                    {{ expense.pendencies }}
-                </td>
-            </tr>
-            {% empty %}
-            <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhuma despesa com pendência
-                </th>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-      </table>
-    </div>
-</div>
-
-<p class="text-xl my-4 font-bold text-black">Receitas Com Pendências</p>
-
-<div class="relative">
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">    
-      <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-          <thead class="text-xs text-white uppercase bg-gray-500">
-              <tr>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Receita
+              {% empty %}
+              <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
+                  <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+                      Nenhuma despesa com pendência
                   </th>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Observações
-                  </th>
-                  <th scope="col" class="text-center px-6 py-3">
-                    Pendências
-                  </th>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
               </tr>
-          </thead>
-          <tbody>
-            {% for revenue in revenues %}
-            <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                <th class="pl-10 pr-6 py-4 text-sm text-center text-black max-w-48">
-                    {{ revenue.identification }}
-                </th>
+              {% endfor %}
+            </tbody>
+        </table>
+      </div>
+  </div>
 
-                <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
-                    {{ revenue.observations|default_if_none:"Sem Observações" }}
-                </td>
+  <p class="text-xl my-4 font-bold text-black">Receitas Com Pendências</p>
 
-                <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
-                    {{ revenue.pendencies }}
-                </td>
-            </tr>
-            {% empty %}
-            <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhuma receita com pendência
-                </th>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-      </table>
+  <div class="relative">
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">    
+        <table class="w-full text-sm text-left rtl:text-right text-gray-400">
+            <thead class="text-xs text-white uppercase bg-gray-500">
+                <tr>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Receita
+                    </th>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Observações
+                    </th>
+                    <th scope="col" class="text-center px-6 py-3">
+                      Pendências
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+              {% for revenue in revenues %}
+              <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
+                  <th class="pl-10 pr-6 py-4 text-sm text-center text-black max-w-48">
+                      {{ revenue.identification }}
+                  </th>
+
+                  <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
+                      {{ revenue.observations|default_if_none:"Sem Observações" }}
+                  </td>
+
+                  <td class="pl-2 pr-6 py-4 text-sm text-center whitespace-nowrap text-black max-w-48">
+                      {{ revenue.pendencies }}
+                  </td>
+              </tr>
+              {% empty %}
+              <tr class="border-b bg-gray-200 border-gray-500 hover:bg-gray-400">
+                  <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+                      Nenhuma receita com pendência
+                  </th>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+                  <td class="px-6 py-4">
+                      -
+                  </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+      </div>
+  </div>
+
+  <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
+    <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
+      <button
+        type="button"
+        data-tooltip-target="tooltip-share"
+        data-tooltip-placement="left"
+        onclick="navigator.clipboard.writeText(window.location.href)"
+        class="
+          flex
+          justify-center
+          items-center
+          w-[52px]
+          h-[52px]
+          text-gray-500
+          hover:text-gray-900
+          bg-white
+          rounded-full
+          border
+          border-gray-200
+          shadow-xs
+          hover:bg-gray-50
+          focus:ring-4
+          focus:ring-gray-300
+          focus:outline-none
+        "
+      >
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+          <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
+        </svg>
+        <span class="sr-only">Compartilhar</span>
+      </button>
+      <div
+        id="tooltip-share"
+        role="tooltip"
+        class="
+          absolute
+          z-10
+          invisible
+          inline-block
+          w-auto
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-white
+          transition-opacity
+          duration-300
+          bg-gray-900
+          rounded-lg
+          shadow-xs
+          opacity-0
+          tooltip
+        "
+      >
+        Compartilhar
+        <div class="tooltip-arrow" data-popper-arrow></div>
+      </div>
+
+      <button
+        type="button"
+        data-tooltip-target="tooltip-print"
+        data-tooltip-placement="left"
+        onclick="window.print()"
+        class="
+          flex
+          justify-center
+          items-center
+          w-[52px]
+          h-[52px]
+          text-gray-500
+          hover:text-gray-900
+          bg-white
+          rounded-full
+          border
+          border-gray-200
+          shadow-xs
+          hover:bg-gray-50
+          focus:ring-4
+          focus:ring-gray-300
+          focus:outline-none
+        "
+      >
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
+            <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
+        </svg>
+        <span class="sr-only">Imprimir</span>
+      </button>
+      <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
+        Imprimir
+        <div class="tooltip-arrow" data-popper-arrow></div>
+      </div>
     </div>
+
+    <button
+      type="button"
+      data-dial-toggle="speed-dial-menu-default"
+      aria-controls="speed-dial-menu-default"
+      aria-expanded="false"
+      class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
+    >
+        <svg
+          class="w-5 h-5 transition-transform group-hover:rotate-45"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 18 18"
+        >
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+        <span class="sr-only">Ações</span>
+    </button>
+  </div>
 </div>
 
 {% endblock %}

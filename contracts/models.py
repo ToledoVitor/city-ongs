@@ -138,7 +138,6 @@ class Contract(
         default=ConcessionChoices.MANAGEMENT,
         max_length=128,
     )
-    # TODO: remove null
     code = models.CharField(
         verbose_name="Código do contrato",
         max_length=16,
@@ -147,16 +146,11 @@ class Contract(
     )
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
-        null=True,
-        blank=True,
     )
     objective = models.CharField(verbose_name="Objeto", max_length=128)
     bidding = models.CharField(
-        # TODO: remove null
         verbose_name="Licitação",
         max_length=128,
-        null=True,
-        blank=True,
     )
 
     # Law and Agreement
@@ -424,7 +418,7 @@ class ContractInterestedPart(BaseOrganizationTenantModel):
 
     class Meta:
         verbose_name = "Parte Interessada"
-        verbose_name = "Partes Interessadas"
+        verbose_name_plural = "Partes Interessadas"
 
 
 class ContractMonthTransfer(
@@ -668,6 +662,11 @@ class ContractItem(
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
 
+    class PurchaseStatus(models.TextChoices):
+        ANALYZING = "ANALYZING", "Analisando Opções"
+        IN_PROGRESS = "IN_PROGRESS", "Em Andamento"
+        FINISHED = "FINISHED", "Finalizado"
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -737,13 +736,11 @@ class ContractItem(
 
     # DATES
     start_date = models.DateField(
-        # TODO: remove null
         verbose_name="Data Inicial",
         null=True,
         blank=True,
     )
     end_date = models.DateField(
-        # TODO: remove null
         verbose_name="Data Final",
         null=True,
         blank=True,
@@ -765,10 +762,71 @@ class ContractItem(
         blank=True,
     )
 
+    # AQUISITION STATUS
+    purchase_status = models.CharField(
+        verbose_name="Status de Compra",
+        choices=PurchaseStatus.choices,
+        default=PurchaseStatus.ANALYZING,
+        max_length=22,
+    )
+    aquisition_date = models.DateField(
+        verbose_name="Data da Aquisição",
+        null=True,
+        blank=True,
+    )
+    parcel_due_date = models.DateField(
+        verbose_name="Data de Vencimento das Parcelas",
+        null=True,
+        blank=True,
+    )
+    aquisition_value = models.DecimalField(
+        verbose_name="Valor da Aquisição",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    aquisition_parcel_quantity = models.PositiveIntegerField(
+        verbose_name="Quantidade de Parcelas",
+        null=True,
+        blank=True,
+    )
+
+    # SUPPLIER
+    supplier = models.CharField(
+        verbose_name="Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_document = models.CharField(
+        verbose_name="Documento do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_phone = models.CharField(
+        verbose_name="Telefone do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_email = models.EmailField(
+        verbose_name="Email do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    supplier_address = models.CharField(
+        verbose_name="Endereço do Fornecedor",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+
     history = HistoricalRecords()
 
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
 
     @property
     def source_label(self) -> str:
@@ -781,6 +839,10 @@ class ContractItem(
     @property
     def nature_label(self) -> str:
         return NatureChoices(self.nature).label
+
+    @property
+    def purchase_status_label(self) -> str:
+        return ContractItem.PurchaseStatus(self.purchase_status).label
 
     @property
     def anual_expense_with_point(self) -> str:
@@ -805,6 +867,37 @@ class ContractItem(
         verbose_name = "Item"
         verbose_name_plural = "Itens"
         ordering = ("-month_expense",)
+
+
+class ContractItemPurchaseProcessDocument(BaseOrganizationTenantModel):
+    item = models.ForeignKey(
+        # TODO: remove this null=True, blank=True
+        ContractItem,
+        verbose_name="Processo de Compra",
+        related_name="purchase_documents",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contract-item-purchase-process-documents/",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self) -> str:
+        return f"Documento de Compra - {self.file.name}"
+
+    class Meta:
+        verbose_name = "Documento do Processo de Compra"
+        verbose_name_plural = "Documentos do Processo de Compra"
 
 
 class ContractItemReview(BaseOrganizationTenantModel):
@@ -939,11 +1032,8 @@ class ContractExecutionActivity(BaseOrganizationTenantModel):
         max_length=128,
     )
     description = models.CharField(
-        # TODO: remove null
         verbose_name="Descrição",
         max_length=256,
-        null=True,
-        blank=True,
     )
     percentage = models.DecimalField(
         verbose_name="Porcentagem Completa",
@@ -977,25 +1067,18 @@ class ContractExecutionFile(
     CacheInvalidationMixin,
 ):
     execution = models.ForeignKey(
-        # TODO: remove null
         ContractExecution,
         verbose_name="Relatório de Execução",
         related_name="files",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     name = models.CharField(
         verbose_name="Nome",
         max_length=128,
-        null=True,
-        blank=True,
     )
     file = models.FileField(
         verbose_name="Arquivo",
         upload_to="uploads/contracts/executions",
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -1003,7 +1086,7 @@ class ContractExecutionFile(
         verbose_name_plural = "Arquivos de Atividades"
 
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
 
     @property
     def file_type(self) -> str:
@@ -1072,3 +1155,47 @@ class ContractItemNewValueRequest(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Solicitação de Valor Item"
         verbose_name_plural = "Solicitações de Valores Item"
+
+
+class ContractItemSupplement(BaseOrganizationTenantModel):
+    class ReviewStatus(models.TextChoices):
+        IN_REVIEW = "IN_REVIEW", "Em revisão"
+        REJECTED = "REJECTED", "Rejeitado"
+        APPROVED = "APPROVED", "Aprovado"
+
+    status = models.CharField(
+        verbose_name="Status",
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.IN_REVIEW,
+        max_length=9,
+    )
+
+    item = models.ForeignKey(
+        ContractItem,
+        verbose_name="Item",
+        related_name="supplements",
+        on_delete=models.CASCADE,
+    )
+    suplement_value = models.DecimalField(
+        verbose_name="Valor do suplemento",
+        decimal_places=2,
+        max_digits=12,
+        default=Decimal("0.00"),
+    )
+    observations = models.TextField(
+        verbose_name="Observações",
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self) -> str:
+        return f"{self.item.name} - {self.suplement_value}"
+
+    @property
+    def status_label(self) -> str:
+        return ContractItemSupplement.ReviewStatus(self.status).label
+
+    class Meta:
+        ordering = ("-suplement_value",)
+        verbose_name = "Suplemento de Item"
+        verbose_name_plural = "Suplementos de Itens"

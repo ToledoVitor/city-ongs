@@ -207,7 +207,7 @@
         </tbody>
     </table>
   
-    {% if contract.is_on_execution %}
+    {% if not contract.is_finished %}
       <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
         <a
           href="{% url 'contracts:contracts-interesteds-create' contract.id %}"

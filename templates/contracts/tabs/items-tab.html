@@ -457,69 +457,18 @@
       </tfoot>
     </table>
 
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
-      {% if user.can_change_statuses %}
-      <button
-        type="button"
-        data-modal-target="value-requests-modal"
-        data-modal-toggle="value-requests-modal"
-        class="
-          text-white
-          focus:ring-4
-          focus:outline-none
-          font-medium
-          rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-          inline-flex
-          items-center
-          me-2
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        Ver Solicitações
-        <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
-        </svg>
-      </button>
-      {% else %}
-      <a
-        href="{% url 'contracts:item-request-new-value' contract.id %}"
-        class="
-          px-3
-          py-2
-          mr-4
-          text-sm
-          font-medium
-          text-center
-          inline-flex
-          items-center
-          text-white
-          rounded-lg
-          focus:ring-4
-          focus:outline-none
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        Remanejar Valores
-        <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
-        </svg>
-      </a>
-      {% endif %}
-
-      {% if contract.is_on_planning %}
+    <div class="flex items-center flex-column justify-between flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
+      <div class="pt-2 px-4">
         <a
-          href="{% url 'contracts:contracts-item-create' contract.id %}"
+          {% if contract.items.count > 0 %}
+            href="{% url 'contracts:item-purchases' contract.id %}"
+          {% else %}
+            href="#"
+          {% endif %}
           class="
             px-3
             py-2
+            mr-4
             text-sm
             font-medium
             text-center
@@ -534,12 +483,127 @@
             focus:ring-blue-800
           "
         >
-          Adicionar novo item
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+          Processos de Aquisição
+          <svg class="ml-1 w-[16px] h-[16px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
           </svg>
         </a>
-      {% endif %}
+
+        <a
+          {% if contract.items.count > 0 %}
+            href="{% url 'contracts:item-supplementations' contract.id %}"
+          {% else %}
+            href="#"
+          {% endif %}
+          class="
+            px-3
+            py-2
+            mr-4
+            text-sm
+            font-medium
+            text-center
+            inline-flex
+            items-center
+            text-white
+            rounded-lg
+            focus:ring-4
+            focus:outline-none
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Suplementações
+          <svg class="ml-1 w-[16px] h-[16px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 2c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zm-1-11a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="pt-2 px-4">
+        {% if user.can_change_statuses %}
+        <button
+          type="button"
+          data-modal-target="value-requests-modal"
+          data-modal-toggle="value-requests-modal"
+          class="
+            text-white
+            focus:ring-4
+            focus:outline-none
+            font-medium
+            rounded-lg
+            text-sm
+            px-5
+            py-2.5
+            text-center
+            inline-flex
+            items-center
+            me-2
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Ver Solicitações
+          <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
+          </svg>
+        </button>
+        {% else %}
+        <a
+          href="{% url 'contracts:item-request-new-value' contract.id %}"
+          class="
+            px-3
+            py-2
+            mr-4
+            text-sm
+            font-medium
+            text-center
+            inline-flex
+            items-center
+            text-white
+            rounded-lg
+            focus:ring-4
+            focus:outline-none
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          Remanejar Valores
+          <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
+          </svg>
+        </a>
+        {% endif %}
+
+        {% if contract.is_on_planning %}
+          <a
+            href="{% url 'contracts:contracts-item-create' contract.id %}"
+            class="
+              px-3
+              py-2
+              text-sm
+              font-medium
+              text-center
+              inline-flex
+              items-center
+              text-white
+              rounded-lg
+              focus:ring-4
+              focus:outline-none
+              bg-blue-600
+              hover:bg-blue-700
+              focus:ring-blue-800
+            "
+          >
+            Adicionar novo item
+            <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+            </svg>
+          </a>
+        {% endif %}
+      </div>
     </div>
 </div>
 

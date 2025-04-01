@@ -121,9 +121,10 @@ class ErrorHandlingMiddleware:
         # Log the full exception details for other exceptions
         reporter = ExceptionReporter(request, is_email=False, *sys.exc_info())
         logger.error(
-            "Unhandled exception in %s %s",
+            "Unhandled exception in %s %s - %s",
             request.method,
             request.path,
+            str(exception),
             extra={
                 "request": request,
                 "exception": str(exception),
@@ -151,12 +152,19 @@ class ForcePasswordChangeMiddleware:
         if not request.user.is_authenticated:
             return self.get_response(request)
 
-        if (
-            not request.user.password_redefined
-            and request.path != "/force-password-change/"
-            and not request.path.startswith("/static/")
-            and not request.path.startswith("/media/")
-        ):
+        # List of paths that should be accessible even if password needs to be changed
+        allowed_paths = [
+            "/auth/force-password-change/",
+            "/auth/logout/",
+            "/static/",
+            "/media/",
+            "/auth/login/",
+        ]
+
+        # Check if current path is allowed
+        is_allowed_path = any(request.path.startswith(path) for path in allowed_paths)
+
+        if not request.user.password_redefined and not is_allowed_path:
             from django.shortcuts import redirect
 
             return redirect("force-password-change")

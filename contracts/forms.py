@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django import forms
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import Sum
 
 from accounts.models import User
@@ -14,6 +15,7 @@ from contracts.models import (
     ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
+    ContractItemSupplement,
     ContractStep,
 )
 from utils.fields import DecimalMaskedField
@@ -470,3 +472,96 @@ class ContractInterestedForm(forms.ModelForm):
         self.fields["user"].queryset = User.objects.filter(
             organization=self.contract.organization
         )
+
+
+class ContractItemPurchaseProcessForm(forms.ModelForm):
+    aquisition_value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+    supplier_phone = CustomPhoneNumberField(required=False)
+
+    class Meta:
+        model = ContractItem
+        fields = [
+            "purchase_status",
+            "observations",
+            "aquisition_date",
+            "parcel_due_date",
+            "aquisition_value",
+            "aquisition_parcel_quantity",
+            "supplier",
+            "supplier_document",
+            "supplier_phone",
+            "supplier_email",
+            "supplier_address",
+        ]
+
+        widgets = {
+            "purchase_status": BaseSelectFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
+            "aquisition_parcel_quantity": BaseNumberFormWidget(required=False),
+            "supplier": BaseCharFieldFormWidget(required=False),
+            "supplier_document": BaseCharFieldFormWidget(required=False),
+            "supplier_email": BaseCharFieldFormWidget(required=False),
+            "supplier_address": BaseCharFieldFormWidget(required=False),
+        }
+
+
+class ContractItemSupplementForm(forms.ModelForm):
+    supplement_value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+
+    class Meta:
+        model = ContractItemSupplement
+        fields = [
+            "item",
+            "supplement_value",
+            "observations",
+        ]
+
+        widgets = {
+            "item": BaseSelectFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["item"].queryset = ContractItem.objects.filter(
+                contract=self.contract
+            )
+
+
+class ContractItemSupplementUpdateForm(forms.ModelForm):
+    supplement_value = DecimalMaskedField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(Decimal("0.01"), "O valor deve ser maior que zero"),
+            MaxValueValidator(Decimal("9999999.99"), "Valor máximo excedido"),
+        ],
+    )
+
+    class Meta:
+        model = ContractItemSupplement
+        fields = [
+            "supplement_value",
+            "observations",
+        ]
+
+        widgets = {
+            "observations": BaseTextAreaFormWidget(required=False),
+        }

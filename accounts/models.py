@@ -207,7 +207,7 @@ class Area(BaseModel):
 
 class User(AbstractUser):
     class AccessChoices(models.TextChoices):
-        MASTER = "MASTER", "master"
+        MASTER = "MASTER", "Master"
         CIVIL_SERVANT = "CIVIL_SERVANT", "Funcionário público"
         FOLDER_MANAGER = "FOLDER_MANAGER", "Gestor da pasta"
         ORGANIZATION_ACCOUNTANT = (
@@ -215,11 +215,6 @@ class User(AbstractUser):
             "Contador / funcionário da organização",
         )
         COMMITTEE_MEMBER = "COMMITTEE_MEMBER", "Membro do comitê"
-
-    class ReviewStatus(models.TextChoices):
-        PENDING = "PENDING", "Pendente"
-        APPROVED = "APPROVED", "Aprovado"
-        REJECTED = "REJECTED", "Rejeitado"
 
     username = models.CharField(
         max_length=150,

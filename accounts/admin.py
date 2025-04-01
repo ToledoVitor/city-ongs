@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Area, CityHall, Committee, Organization, User
@@ -52,47 +53,93 @@ class CommitteeAdmin(BaseModelAdmin):
     )
 
 
-@admin.register(User)
-class UserAdmin(BaseModelAdmin):
+class CustomUserAdmin(UserAdmin):
     list_display = (
-        "organization",
+        "username",
         "email",
+        "cpf",
         "first_name",
         "last_name",
+        "is_staff",
         "is_active",
     )
-    list_filter = ("organization", "is_active", "is_staff")
-    search_fields = ("email", "first_name", "last_name")
-    readonly_fields = ("last_login",)
+    list_filter = (
+        "is_staff",
+        "is_active",
+        "groups",
+        "areas",
+    )
+    readonly_fields = (
+        "id",
+        "last_login",
+        "date_joined",
+    )
+    search_fields = (
+        "username",
+        "email",
+        "cpf",
+        "first_name",
+        "last_name",
+    )
+    ordering = ("username",)
+
     fieldsets = (
+        (None, {"fields": ("id", "username", "password")}),
         (
-            _("Informações Básicas"),
+            "Informações Pessoais",
             {
                 "fields": (
-                    "organization",
-                    "email",
                     "first_name",
                     "last_name",
-                    "is_active",
-                )
-            },
-        ),
-        (
-            _("Permissões"),
-            {
-                "fields": (
-                    "is_staff",
-                    "is_superuser",
-                    "groups",
-                    "user_permissions",
+                    "email",
+                    "cpf",
+                    "position",
+                    "phone_number",
                 ),
             },
         ),
         (
-            _("Datas Importantes"),
+            "Permissões",
             {
-                "fields": ("last_login",),
-                "classes": ("collapse",),
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "access_level",
+                    "groups",
+                    "user_permissions",
+                    "areas",
+                ),
+            },
+        ),
+        (
+            "Datas Importantes",
+            {
+                "fields": ("last_login", "date_joined"),
             },
         ),
     )
+
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "email",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_active",
+                    "groups",
+                    "areas",
+                ),
+            },
+        ),
+    )
+
+    filter_horizontal = ("groups", "user_permissions", "areas")
+
+
+admin.site.register(User, CustomUserAdmin)

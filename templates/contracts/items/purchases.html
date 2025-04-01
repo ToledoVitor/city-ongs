@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block title %}Processos de Aquisição - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<style>
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body * {
+      visibility: hidden;
+    }
+    #printable, #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .no-print, #printButton {
+      display: none !important;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 8pt;
+    }
+    th, td {
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      line-height: 1.2;
+    }
+  }
+</style>
+
+
+<div id="printable" class="container mx-auto mx-4 my-6">
+  <h1 class="text-2xl font-bold mb-3">Processos de Aquisição</h1>
+
+  <!-- Breadcrumb -->
+  <nav class="flex py-3 text-black print:hidden" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+      <li class="inline-flex items-center">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+          </svg>
+          Inicio
+        </a>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
+        </div>
+      </li>
+      <li>
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ contract.trailing_code }}</a>
+        </div>
+      </li>
+      <li aria-current="page">
+        <div class="flex items-center">
+          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+          </svg>
+          <span class="ms-1 text-sm font-medium text-black md:ms-2">Processos de Aquisição</span>
+        </div>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="overflow-x-auto my-5">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="text-xs text-white uppercase bg-gray-500">
+        <tr>
+            <th class="py-3 px-6">
+              Item
+            </th>
+            <th class="py-3 px-6">
+              Status
+            </th>
+            <th class="py-3 px-6">
+              Custo de Aquisição
+            </th>
+            <th class="py-3 px-6">
+              Quantidade de Parcelas
+            </th>
+            <th class="py-3 px-6">
+              Data de Aquisição
+            </th>
+            <th class="py-3 px-6">
+              Fornecedor
+            </th>
+            <th class="py-3 px-6">
+              Ações
+            </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for item in items %}
+          <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
+              <td class="px-6 py-4 text-base text-black max-w-60">
+                {{ item.name }}
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                {{ item.purchase_status_label }} <br>
+
+                <button
+                  type="button"
+                  data-modal-target="documents-modal-{{ item.id}}"
+                  data-modal-toggle="documents-modal-{{ item.id}}"
+                  class="
+                    text-white
+                    ml-2
+                    bg-blue-600
+                    hover:bg-blue-600
+                    focus:ring-4
+                    focus:outline-none
+                    focus:ring-blue-600
+                    font-medium
+                    rounded-full
+                    text-xs
+                    mt-2
+                    px-2.5
+                    py-1
+                    text-center
+                    inline-flex
+                    items-center
+                    me-2
+                    whitespace-nowrap
+                  "
+                >
+                  {{ item.files_count }} arquivos
+                  <svg class="ml-2 w-[12px] h-[12px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M3 6a2 2 0 0 1 2-2h5.532a2 2 0 0 1 1.536.72l1.9 2.28H3V6Zm0 3v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H3Z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                {{ item.aquisition_value|default_if_none:"-" }}
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                {{ item.aquisition_parcel_quantity|default_if_none:"-" }}
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                {{ item.aquisition_date|default_if_none:"-" }}
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                {{ item.supplier|default_if_none:"-" }}
+              </td>
+              <td class="px-6 py-4 text-sm text-black text-center">
+                <a href="{% url 'contracts:item-purchases-update' item.id %}" class="text-blue-600 hover:text-blue-800">
+                    <button
+                      class="
+                        px-3
+                        py-2
+                        text-sm
+                        font-medium
+                        text-center
+                        inline-flex
+                        items-center
+                        text-white
+                        rounded-lg
+                        focus:ring-4
+                        focus:outline-none
+                        bg-blue-600
+                        hover:bg-blue-700
+                        focus:ring-blue-800
+                      "
+                    >
+                    Editar
+                    </button>
+                  </a>
+              </td>
+          </tr>
+
+          <div
+            id="documents-modal-{{ item.id}}"
+            tabindex="-1"
+            data-modal-backdrop="static"
+            aria-hidden="true"
+            class="
+              hidden
+              overflow-y-auto
+              overflow-x-hidden
+              fixed
+              top-0
+              right-0
+              left-0
+              z-50
+              justify-center
+              items-center
+              w-full
+              md:inset-0
+              h-[calc(100%-1rem)]
+              max-h-full
+            "
+          >
+            <div class="relative p-4 w-full max-w-md max-h-full">
+              <!-- Modal content -->
+              <div class="relative rounded-lg shadow bg-gray-300">
+                <!-- Modal header -->
+                    <div class="flex items-center justify-between p-2 mb-2 md:p-5 border-b border-gray-600">
+                        <h3 class="text-xl font-semibold text-black">
+                        Documentos Anexados
+                      </h3>
+                      <button
+                        type="button"
+                        data-modal-hide="documents-modal-{{ item.id}}"
+                        class="
+                          end-2.5
+                          text-black
+                          hover:bg-gray-600
+                          hover:text-black
+                          bg-transparent
+                          rounded-lg
+                          text-sm
+                          w-6
+                          h-6
+                          ms-auto
+                          inline-flex
+                          justify-center
+                          items-center
+                        "
+                      >
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                          </svg>
+                          <span class="sr-only">Fechar modal</span>
+                      </button>
+                  </div>
+                  <!-- Modal body -->
+                  <div class="p-4 md:p-5">
+                      <div>
+                        <ul class="max-w-md divide-y divide-gray-700">
+                          {% for file in item.purchase_documents.all %}
+                            <li class="py-3 sm:pb-4">
+                              <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                                <div class="
+                                    text-white
+                                    ml-2
+                                    bg-blue-600
+                                    hover:bg-blue-600
+                                    focus:ring-4
+                                    focus:outline-none
+                                    focus:ring-blue-600
+                                    font-medium
+                                    rounded-full
+                                    text-sm
+                                    p-2.5
+                                    text-center
+                                    inline-flex
+                                    items-center
+                                    me-2
+                                  "
+                                >
+                                  <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
+                                  </svg>                      
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <a
+                                      href="{{ file.file.url }}"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      class="text-base font-medium text-blue-600 hover:underline"
+                                    >
+                                      {{ file.file.name }}
+                                    </a>
+                                    <p class="text-xs mt-2 text-gray-600 truncate">
+                                      Anexado em: {{ file.created_at }}
+                                    </p>
+                                </div>
+
+                                <form method="post" action="{% url 'contracts:item-purchase-file-delete' file.id %}">
+                                  {% csrf_token %}
+                                  <button
+                                    type="submit"
+                                    class="
+                                      text-white
+                                      ml-2
+                                      bg-red-600
+                                      hover:bg-red-600
+                                      focus:ring-4
+                                      focus:outline-none
+                                      focus:ring-red-600
+                                      font-medium
+                                      rounded-full
+                                      text-sm
+                                      p-2
+                                      text-center
+                                      inline-flex
+                                      items-center
+                                      me-2
+                                    "
+                                  >
+                                    <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                      <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                                    </svg>                                      
+                                  </button>
+                                </form>
+
+                              </div>
+                            </li>
+                          {% empty %}
+                          <li class="py-3 sm:pb-4">
+                            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                              <div class="
+                                  text-white
+                                  ml-2
+                                  bg-blue-600
+                                  hover:bg-blue-600
+                                  focus:ring-4
+                                  focus:outline-none
+                                  focus:ring-blue-600
+                                  font-medium
+                                  rounded-full
+                                  text-sm
+                                  p-2.5
+                                  text-center
+                                  inline-flex
+                                  items-center
+                                  me-2
+                                "
+                              >
+                                <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                  <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
+                                </svg>                      
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                  <p class="text-base font-medium truncate text-black">
+                                    Sem arquivos anexados
+                                  </p>
+                                  <p class="text-xs text-gray-600 truncate">
+                                    Anexado em: ----
+                                  </p>
+                              </div>
+                            </div>
+                          </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+
+                      <div id="uploadItemPurchaseFormContainer-{{ item.id }}" class="hidden mb-4">
+                        <form method="post" action="{% url 'contracts:item-purchase-file-upload' item.id %}" enctype="multipart/form-data">
+                          {% csrf_token %}
+                          <div class="my-3">
+                            <label class="block text-xl mb-2 font-medium text-black">Arquivos</label>
+                            <input
+                                class="
+                                    block
+                                    w-full
+                                    text-sm
+                                    text-gray-900
+                                    border
+                                    border-gray-500
+                                    rounded-lg
+                                    cursor-pointer
+                                    bg-gray-300
+                                    focus:outline-none
+                                "
+                                id="files"
+                                name="files"
+                                type="file"
+                                multiple
+                            >
+                          </div>
+                          <div class="flex justify-end">
+                            <button
+                              type="submit"
+                              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
+                            >
+                              Enviar Documento
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+
+                      <div class="grid gap-6 mb-10 my-6 md:grid-cols-2">
+                        <button
+                          type="button"
+                          data-modal-hide="documents-modal-{{ item.id}}"
+                          class="
+                            w-full
+                            text-white
+                            bg-gray-700
+                            hover:bg-gray-800
+                            focus:ring-4
+                            focus:outline-none
+                            focus:ring-gray-300
+                            font-medium rounded-lg
+                            text-sm
+                            px-5
+                            py-2
+                            text-center
+                          "
+                        >
+                          Fechar
+                        </button>
+                        <button
+                          type="button"
+                          id="btnShowItemPurchaseUploadForm-{{ item.id }}"
+                            class="
+                            w-full
+                            text-white
+                            bg-blue-700
+                            hover:bg-blue-800
+                            focus:ring-4
+                            focus:outline-none
+                            focus:ring-blue-300
+                            font-medium rounded-lg
+                            text-sm
+                            px-5
+                            py-2
+                            text-center
+                          "
+                        >
+                          Anexar Docs
+                        </button>
+                      </div>
+
+                  </div>
+              </div>
+            </div>
+          </div>
+
+        {% empty %}
+          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+                  Nenhum resultado encontrado
+              </th>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+              <td class="px-6 py-4">
+                    -
+              </td>
+              <td class="px-6 py-4">
+                  -
+              </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
+  <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
+    <button
+      type="button"
+      data-tooltip-target="tooltip-share"
+      data-tooltip-placement="left"
+      onclick="navigator.clipboard.writeText(window.location.href)"
+      class="
+        flex
+        justify-center
+        items-center
+        w-[52px]
+        h-[52px]
+        text-gray-500
+        hover:text-gray-900
+        bg-white
+        rounded-full
+        border
+        border-gray-200
+        shadow-xs
+        hover:bg-gray-50
+        focus:ring-4
+        focus:ring-gray-300
+        focus:outline-none
+      "
+    >
+      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+        <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
+      </svg>
+      <span class="sr-only">Compartilhar</span>
+    </button>
+    <div
+      id="tooltip-share"
+      role="tooltip"
+      class="
+        absolute
+        z-10
+        invisible
+        inline-block
+        w-auto
+        px-3
+        py-2
+        text-sm
+        font-medium
+        text-white
+        transition-opacity
+        duration-300
+        bg-gray-900
+        rounded-lg
+        shadow-xs
+        opacity-0
+        tooltip
+      "
+    >
+      Compartilhar
+      <div class="tooltip-arrow" data-popper-arrow></div>
+    </div>
+
+    <button
+      type="button"
+      data-tooltip-target="tooltip-print"
+      data-tooltip-placement="left"
+      onclick="window.print()"
+      class="
+        flex
+        justify-center
+        items-center
+        w-[52px]
+        h-[52px]
+        text-gray-500
+        hover:text-gray-900
+        bg-white
+        rounded-full
+        border
+        border-gray-200
+        shadow-xs
+        hover:bg-gray-50
+        focus:ring-4
+        focus:ring-gray-300
+        focus:outline-none
+      "
+    >
+      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
+          <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
+      </svg>
+      <span class="sr-only">Imprimir</span>
+    </button>
+    <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
+      Imprimir
+      <div class="tooltip-arrow" data-popper-arrow></div>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    data-dial-toggle="speed-dial-menu-default"
+    aria-controls="speed-dial-menu-default"
+    aria-expanded="false"
+    class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
+  >
+      <svg
+        class="w-5 h-5 transition-transform group-hover:rotate-45"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 18 18"
+      >
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+      </svg>
+      <span class="sr-only">Ações</span>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll('[id^="btnShowItemPurchaseUploadForm-"]').forEach(function(button) {
+    button.addEventListener('click', function() {
+        const itemId = this.id.replace("btnShowItemPurchaseUploadForm-", "");
+        const container = document.getElementById('uploadItemPurchaseFormContainer-' + itemId);
+        container.classList.toggle('hidden');
+    });
+  });
+</script>
+
+{% endblock %}

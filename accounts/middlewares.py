@@ -10,7 +10,7 @@ class TenantMiddleware:
             with tenant_context_disabled():
                 return self.get_response(request)
 
-        if request.path.startswith("/admin") and request.user.is_superuser:
+        if request.path.startswith("/__staff__/") and request.user.is_superuser:
             with tenant_context_disabled():
                 return self.get_response(request)
 

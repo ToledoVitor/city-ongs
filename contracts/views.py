@@ -9,13 +9,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Q, Sum, Value
+from django.db.models import Count, Prefetch, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from activity.models import ActivityLog
@@ -30,6 +31,9 @@ from contracts.forms import (
     ContractGoalForm,
     ContractInterestedForm,
     ContractItemForm,
+    ContractItemPurchaseProcessForm,
+    ContractItemSupplementForm,
+    ContractItemSupplementUpdateForm,
     ContractItemValueRequestForm,
     ContractStatusUpdateForm,
     ContractStepFormSet,
@@ -46,7 +50,9 @@ from contracts.models import (
     ContractInterestedPart,
     ContractItem,
     ContractItemNewValueRequest,
+    ContractItemPurchaseProcessDocument,
     ContractItemReview,
+    ContractItemSupplement,
     ContractMonthTransfer,
 )
 from utils.cache_keys import (
@@ -88,9 +94,11 @@ class ContractsListView(LoginRequiredMixin, ListView):
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
-                Q(name__icontains=query) | Q(code__icontains=query)
+                Q(name__icontains=query)
+                | Q(code__icontains=query)
+                | Q(internal_code__icontains=query)
             )
-        return queryset.order_by("code")
+        return queryset.order_by("-internal_code")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1415,3 +1423,191 @@ def interested_delete_view(request, pk):
         )
         interested.delete()
         return redirect("contracts:contracts-detail", pk=contract_id)
+
+
+@login_required
+def contract_item_purchases_list_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.items.count:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    items = (
+        ContractItem.objects.filter(contract=contract)
+        .prefetch_related(
+            Prefetch(
+                "purchase_documents",
+                queryset=ContractItemPurchaseProcessDocument.objects.filter(
+                    deleted_at__isnull=True,
+                ),
+            ),
+        )
+        .annotate(
+            files_count=Count(
+                "purchase_documents",
+                filter=Q(purchase_documents__deleted_at__isnull=True),
+                distinct=True,
+            ),
+        )
+    )
+
+    return render(
+        request,
+        "contracts/items/purchases.html",
+        {"contract": contract, "items": items},
+    )
+
+
+@login_required
+def contract_item_purchases_update_view(request, pk):
+    item = get_object_or_404(ContractItem, id=pk)
+
+    if request.method == "POST":
+        form = ContractItemPurchaseProcessForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect("contracts:item-purchases", pk=item.contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items/purchases-update.html",
+                {"item": item, "form": form},
+            )
+
+    else:
+        form = ContractItemPurchaseProcessForm(instance=item)
+        return render(
+            request,
+            "contracts/items/purchases-update.html",
+            {"item": item, "form": form},
+        )
+
+
+@login_required
+def contract_item_supplementations_list_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.items.count:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    supplementations = ContractItemSupplement.objects.filter(item__contract=contract)
+    return render(
+        request,
+        "contracts/items/supplementations.html",
+        {"contract": contract, "supplementations": supplementations},
+    )
+
+
+@login_required
+def contract_item_supplementations_create_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    if contract.is_finished:
+        return redirect("contracts:item-supplementations", pk=contract.id)
+
+    if request.method == "POST":
+        form = ContractItemSupplementForm(request.POST, contract=contract)
+        if form.is_valid():
+            with transaction.atomic():
+                supplement = form.save(commit=False)
+                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM_SUPPLEMENT,
+                    target_object_id=supplement.item.id,
+                    target_content_object=supplement.item,
+                )
+            return redirect("contracts:item-supplementations", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/items/supplementations-create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = ContractItemSupplementForm(contract=contract)
+        return render(
+            request,
+            "contracts/items/supplementations-create.html",
+            {"contract": contract, "form": form},
+        )
+
+
+@login_required
+def contract_item_supplementations_update_view(request, pk):
+    supplement = get_object_or_404(ContractItemSupplement, id=pk)
+    if request.method == "POST":
+        form = ContractItemSupplementUpdateForm(request.POST, instance=supplement)
+        if form.is_valid():
+            with transaction.atomic():
+                supplement = form.save(commit=False)
+                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                    target_object_id=supplement.item.id,
+                    target_content_object=supplement.item,
+                )
+                return redirect(
+                    "contracts:item-supplementations",
+                    pk=supplement.item.contract.id,
+                )
+        else:
+            return render(
+                request,
+                "contracts/items/supplementations-update.html",
+                {"supplement": supplement, "form": form},
+            )
+    else:
+        form = ContractItemSupplementUpdateForm(instance=supplement)
+        return render(
+            request,
+            "contracts/items/supplementations-update.html",
+            {"supplement": supplement, "form": form},
+        )
+
+
+@require_POST
+@login_required
+def contract_item_purchase_file_upload_view(request, pk):
+    """Upload files for an item purchase."""
+
+    item = get_object_or_404(ContractItem, id=pk)
+    files = request.FILES.getlist("files")
+    with transaction.atomic():
+        for file in files:
+            ContractItemPurchaseProcessDocument.objects.create(
+                item=item,
+                file=file,
+                name=file.name,
+            )
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPLOADED_CONTRACT_ITEM_PURCHASE_FILE,
+                target_object_id=item.id,
+                target_content_object=item,
+            )
+
+    return redirect("contracts:item-purchases", pk=item.contract.id)
+
+
+@require_POST
+@login_required
+def contract_item_purchase_file_delete_view(request, pk):
+    file = get_object_or_404(ContractItemPurchaseProcessDocument, id=pk)
+
+    with transaction.atomic():
+        file.delete()
+        _ = ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.DELETED_CONTRACT_ITEM_PURCHASE_FILE,
+            target_object_id=file.id,
+            target_content_object=file,
+        )
+
+    return redirect("contracts:item-purchases", pk=file.item.contract.id)
