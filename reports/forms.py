@@ -39,14 +39,16 @@ class AdditionalResponsibleForm(forms.ModelForm):
         model = ContractInterestedPart
         fields = ["user", "interest"]
         widgets = {
-            "user": BaseSelectFormWidget(),
-            "interest": BaseSelectFormWidget(),
+            "user": BaseSelectFormWidget(required=False),
+            "interest": BaseSelectFormWidget(required=False),
         }
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
         if self.request:
+            self.fields["user"].required = False
+            self.fields["interest"].required = False
             self.fields["user"].queryset = (
                 self.request.user.organization.users.filter(
                     areas__in=self.request.user.areas.all()
@@ -67,7 +69,6 @@ class AdditionalResponsibleFormSet(
         extra=1,
         can_delete=False,
         min_num=0,
-        validate_min=True,
     )
 ):
     def __init__(self, *args, **kwargs):
@@ -180,7 +181,7 @@ class ReportForm(forms.Form):
         if "contract" in cleaned_data:
             contract = cleaned_data["contract"]
             formset = self.get_responsible_formset(contract)
-            if formset and not formset.is_valid():
+            if formset and formset.is_bound and not formset.is_valid():
                 self.add_error(None, "Erro nos dados dos responsáveis")
 
         return cleaned_data

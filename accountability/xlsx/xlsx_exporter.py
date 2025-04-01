@@ -6,9 +6,9 @@ import xlsxwriter
 from accountability.models import (
     Accountability,
     Expense,
-    Revenue,
-    ResourceSource,
     Favored,
+    ResourceSource,
+    Revenue,
 )
 from accounts.models import Organization
 from contracts.choices import NatureChoices

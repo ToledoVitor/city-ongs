@@ -177,12 +177,12 @@ class ExpenseForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.request:
-            self.fields[
-                "source"
-            ].queryset = ResourceSource.objects.filter(organization=self.request.user.organization)
-            self.fields[
-                "favored"
-            ].queryset = Favored.objects.filter(organization=self.request.user.organization)
+            self.fields["source"].queryset = ResourceSource.objects.filter(
+                organization=self.request.user.organization
+            )
+            self.fields["favored"].queryset = Favored.objects.filter(
+                organization=self.request.user.organization
+            )
         else:
             self.fields["source"].queryset = ResourceSource.objects.none()
             self.fields["favored"].queryset = Favored.objects.none()
