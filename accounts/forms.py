@@ -156,3 +156,18 @@ class OrganizationCommitteeCreateForm(forms.ModelForm):
             self.add_error("areas", "Você deve escolher pelo menos uma pasta gestora.")
 
         return cleaned_data
+
+
+class AreasForm(forms.Form):
+    areas = forms.ModelMultipleChoiceField(
+        queryset=Area.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            self.fields["areas"].queryset = user.areas.all()

@@ -14,11 +14,12 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import (
+    AreasForm,
     FolderManagerCreateForm,
     OrganizationAccountantCreateForm,
     OrganizationCommitteeCreateForm,
 )
-from accounts.models import Area, User
+from accounts.models import User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
 from utils.mixins import AdminRequiredMixin
@@ -67,7 +68,9 @@ class FolderManagersDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["areas"] = Area.objects.all()
+        context["form"] = AreasForm(
+            user=self.request.user, initial={"areas": self.object.areas.all()}
+        )
         return context
 
     def post(self, request, *args, **kwargs):
@@ -75,24 +78,25 @@ class FolderManagersDetailView(LoginRequiredMixin, DetailView):
         if not request.user.has_admin_access:
             return JsonResponse({"error": "Unauthorized"}, status=403)
 
-        manager.first_name = request.POST.get("first_name")
-        manager.last_name = request.POST.get("last_name")
-        manager.cpf = request.POST.get("cpf")
-        manager.position = request.POST.get("position")
-        manager.is_active = request.POST.get("is_active") == "True"
-        manager.phone = request.POST.get("phone")
+        form = AreasForm(request.POST, user=request.user)
+        if form.is_valid():
+            manager.first_name = request.POST.get("first_name")
+            manager.last_name = request.POST.get("last_name")
+            manager.cpf = request.POST.get("cpf")
+            manager.position = request.POST.get("position")
+            manager.is_active = request.POST.get("is_active") == "True"
+            manager.phone_number = request.POST.get("phone_number")
 
-        areas = request.POST.getlist("areas")
-        manager.areas.set(areas)
+            manager.areas.set(form.cleaned_data["areas"])
+            manager.save()
 
-        manager.save()
-
-        ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.UPDATED_FOLDER_MANAGER,
-            target_object_id=str(manager.id),
-        )
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_FOLDER_MANAGER,
+                target_object_id=manager.id,
+                target_content_object=manager,
+            )
 
         return redirect("accounts:folder-managers-list")
 
@@ -194,7 +198,9 @@ class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["areas"] = Area.objects.all()
+        context["form"] = AreasForm(
+            user=self.request.user, initial={"areas": self.object.areas.all()}
+        )
         return context
 
     def post(self, request, *args, **kwargs):
@@ -202,24 +208,25 @@ class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
         if not request.user.has_admin_access:
             return JsonResponse({"error": "Unauthorized"}, status=403)
 
-        accountant.first_name = request.POST.get("first_name")
-        accountant.last_name = request.POST.get("last_name")
-        accountant.cpf = request.POST.get("cpf")
-        accountant.position = request.POST.get("position")
-        accountant.is_active = request.POST.get("is_active") == "True"
-        accountant.phone = request.POST.get("phone")
+        form = AreasForm(request.POST, user=request.user)
+        if form.is_valid():
+            accountant.first_name = request.POST.get("first_name")
+            accountant.last_name = request.POST.get("last_name")
+            accountant.cpf = request.POST.get("cpf")
+            accountant.position = request.POST.get("position")
+            accountant.is_active = request.POST.get("is_active") == "True"
+            accountant.phone_number = request.POST.get("phone_number")
 
-        areas = request.POST.getlist("areas")
-        accountant.areas.set(areas)
+            accountant.areas.set(form.cleaned_data["areas"])
+            accountant.save()
 
-        accountant.save()
-
-        ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_ACCOUNTANT,
-            target_object_id=str(accountant.id),
-        )
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_ACCOUNTANT,
+                target_object_id=accountant.id,
+                target_content_object=accountant,
+            )
 
         return redirect("accounts:organization-accountants-list")
 
@@ -370,7 +377,9 @@ class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["areas"] = Area.objects.all()
+        context["form"] = AreasForm(
+            user=self.request.user, initial={"areas": self.object.areas.all()}
+        )
         return context
 
     def post(self, request, *args, **kwargs):
@@ -378,24 +387,25 @@ class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
         if not request.user.has_admin_access:
             return JsonResponse({"error": "Unauthorized"}, status=403)
 
-        committee.first_name = request.POST.get("first_name")
-        committee.last_name = request.POST.get("last_name")
-        committee.cpf = request.POST.get("cpf")
-        committee.position = request.POST.get("position")
-        committee.is_active = request.POST.get("is_active") == "True"
-        committee.phone = request.POST.get("phone")
+        form = AreasForm(request.POST, user=request.user)
+        if form.is_valid():
+            committee.first_name = request.POST.get("first_name")
+            committee.last_name = request.POST.get("last_name")
+            committee.cpf = request.POST.get("cpf")
+            committee.position = request.POST.get("position")
+            committee.is_active = request.POST.get("is_active") == "True"
+            committee.phone_number = request.POST.get("phone_number")
 
-        areas = request.POST.getlist("areas")
-        committee.areas.set(areas)
+            committee.areas.set(form.cleaned_data["areas"])
+            committee.save()
 
-        committee.save()
-
-        ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_COMMITTEE,
-            target_object_id=str(committee.id),
-        )
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_COMMITTEE,
+                target_object_id=committee.id,
+                target_content_object=committee,
+            )
 
         return redirect("accounts:organization-committees-list")
 
