@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 
 from accounts.forms import (
@@ -17,7 +18,7 @@ from accounts.forms import (
     OrganizationAccountantCreateForm,
     OrganizationCommitteeCreateForm,
 )
-from accounts.models import User
+from accounts.models import Area, User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
 from utils.mixins import AdminRequiredMixin
@@ -58,24 +59,42 @@ class FolderManagersListView(AdminRequiredMixin, ListView):
 
 class FolderManagersDetailView(LoginRequiredMixin, DetailView):
     model = User
-
     template_name = "accounts/folder-managers/detail.html"
     context_object_name = "manager"
 
-    login_url = "/auth/login"
+    def get_queryset(self):
+        return User.objects.filter(access_level=User.AccessChoices.FOLDER_MANAGER)
 
-    def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.filter(
-            access_level=User.AccessChoices.FOLDER_MANAGER,
-            areas__in=self.request.user.areas.all(),
-        ).distinct()
-
-    def get_object(self, queryset=None):
-        return self.get_queryset().get(id=self.kwargs["pk"])
-
-    def get_context_data(self, **kwargs) -> dict:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["areas"] = Area.objects.all()
         return context
+
+    def post(self, request, *args, **kwargs):
+        manager = self.get_object()
+        if not request.user.has_admin_access:
+            return JsonResponse({"error": "Unauthorized"}, status=403)
+
+        manager.first_name = request.POST.get("first_name")
+        manager.last_name = request.POST.get("last_name")
+        manager.cpf = request.POST.get("cpf")
+        manager.position = request.POST.get("position")
+        manager.is_active = request.POST.get("is_active") == "True"
+        manager.phone = request.POST.get("phone")
+
+        areas = request.POST.getlist("areas")
+        manager.areas.set(areas)
+
+        manager.save()
+
+        ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.UPDATED_FOLDER_MANAGER,
+            target_object_id=str(manager.id),
+        )
+
+        return redirect("accounts:folder-managers-list")
 
 
 class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
@@ -165,24 +184,44 @@ class OrganizationAccountantsListView(AdminRequiredMixin, ListView):
 
 class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
     model = User
-
     template_name = "accounts/organization-accountants/detail.html"
     context_object_name = "accountant"
 
-    login_url = "/auth/login"
+    def get_queryset(self):
+        return User.objects.filter(
+            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT
+        )
 
-    def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.filter(
-            access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT,
-            areas__in=self.request.user.areas.all(),
-        ).distinct()
-
-    def get_object(self, queryset=None):
-        return self.get_queryset().get(id=self.kwargs["pk"])
-
-    def get_context_data(self, **kwargs) -> dict:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["areas"] = Area.objects.all()
         return context
+
+    def post(self, request, *args, **kwargs):
+        accountant = self.get_object()
+        if not request.user.has_admin_access:
+            return JsonResponse({"error": "Unauthorized"}, status=403)
+
+        accountant.first_name = request.POST.get("first_name")
+        accountant.last_name = request.POST.get("last_name")
+        accountant.cpf = request.POST.get("cpf")
+        accountant.position = request.POST.get("position")
+        accountant.is_active = request.POST.get("is_active") == "True"
+        accountant.phone = request.POST.get("phone")
+
+        areas = request.POST.getlist("areas")
+        accountant.areas.set(areas)
+
+        accountant.save()
+
+        ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_ACCOUNTANT,
+            target_object_id=str(accountant.id),
+        )
+
+        return redirect("accounts:organization-accountants-list")
 
 
 class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
@@ -323,22 +362,42 @@ class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
 
 class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
     model = User
-
     template_name = "accounts/organization-committees/detail.html"
     context_object_name = "committee"
 
-    def get_queryset(self) -> QuerySet[Any]:
-        return self.model.objects.filter(
-            access_level=User.AccessChoices.COMMITTEE_MEMBER,
-            areas__in=self.request.user.areas.all(),
-        ).distinct()
+    def get_queryset(self):
+        return User.objects.filter(access_level=User.AccessChoices.COMMITTEE_MEMBER)
 
-    def get_object(self, queryset=None):
-        return self.get_queryset().get(id=self.kwargs["pk"])
-
-    def get_context_data(self, **kwargs) -> dict:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["areas"] = Area.objects.all()
         return context
+
+    def post(self, request, *args, **kwargs):
+        committee = self.get_object()
+        if not request.user.has_admin_access:
+            return JsonResponse({"error": "Unauthorized"}, status=403)
+
+        committee.first_name = request.POST.get("first_name")
+        committee.last_name = request.POST.get("last_name")
+        committee.cpf = request.POST.get("cpf")
+        committee.position = request.POST.get("position")
+        committee.is_active = request.POST.get("is_active") == "True"
+        committee.phone = request.POST.get("phone")
+
+        areas = request.POST.getlist("areas")
+        committee.areas.set(areas)
+
+        committee.save()
+
+        ActivityLog.objects.create(
+            user=request.user,
+            user_email=request.user.email,
+            action=ActivityLog.ActivityLogChoices.UPDATED_ORGANIZATION_COMMITTEE,
+            target_object_id=str(committee.id),
+        )
+
+        return redirect("accounts:organization-committees-list")
 
 
 @login_required
@@ -387,3 +446,96 @@ def read_notification_view(request, pk):
         return redirect("home")
 
     return redirect(destiny_url, pk=notification.object_id)
+
+
+@login_required
+@require_POST
+def toggle_folder_manager_status(request, pk):
+    manager = get_object_or_404(
+        User, pk=pk, access_level=User.AccessChoices.FOLDER_MANAGER
+    )
+    if not request.user.has_admin_access:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    manager.is_active = not manager.is_active
+    if not manager.is_active:
+        manager.deactivated_at = timezone.now()
+    else:
+        manager.deactivated_at = None
+    manager.save()
+
+    action = (
+        "DESACTIVATED_FOLDER_MANAGER"
+        if not manager.is_active
+        else "ACTIVATED_FOLDER_MANAGER"
+    )
+    ActivityLog.objects.create(
+        user=request.user,
+        user_email=request.user.email,
+        action=action,
+        target_object_id=str(manager.id),
+    )
+
+    return redirect("accounts:folder-managers-list")
+
+
+@login_required
+@require_POST
+def toggle_organization_accountant_status(request, pk):
+    accountant = get_object_or_404(
+        User, pk=pk, access_level=User.AccessChoices.ORGANIZATION_ACCOUNTANT
+    )
+    if not request.user.has_admin_access:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    accountant.is_active = not accountant.is_active
+    if not accountant.is_active:
+        accountant.deactivated_at = timezone.now()
+    else:
+        accountant.deactivated_at = None
+    accountant.save()
+
+    action = (
+        "DESACTIVATED_ORGANIZATION_ACCOUNTANT"
+        if not accountant.is_active
+        else "ACTIVATED_ORGANIZATION_ACCOUNTANT"
+    )
+    ActivityLog.objects.create(
+        user=request.user,
+        user_email=request.user.email,
+        action=action,
+        target_object_id=str(accountant.id),
+    )
+
+    return redirect("accounts:organization-accountants-list")
+
+
+@login_required
+@require_POST
+def toggle_organization_committee_status(request, pk):
+    committee = get_object_or_404(
+        User, pk=pk, access_level=User.AccessChoices.COMMITTEE_MEMBER
+    )
+    if not request.user.has_admin_access:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    committee.is_active = not committee.is_active
+    if not committee.is_active:
+        committee.deactivated_at = timezone.now()
+    else:
+        committee.deactivated_at = None
+    committee.save()
+
+    action = (
+        "DESACTIVATED_ORGANIZATION_COMMITTEE"
+        if not committee.is_active
+        else "ACTIVATED_ORGANIZATION_COMMITTEE"
+    )
+    ActivityLog.objects.create(
+        user=request.user,
+        user_email=request.user.email,
+        action=action,
+        target_object_id=str(committee.id),
+    )
+
+    return redirect("accounts:organization-committees-list")

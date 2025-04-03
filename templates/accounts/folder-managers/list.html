@@ -54,6 +54,9 @@
                 <th scope="col" class="px-6 py-3">
                     Pastas Gestoras
                 </th>
+                <th scope="col" class="px-6 py-3">
+                    Status
+                </th>
                 <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500 border-l border-gray-300"></th>
             </tr>
         </thead>
@@ -82,28 +85,73 @@
                         -
                       {% endif %}
                     </td>
+                    <td class="px-6 py-4 text-base text-black">
+                      {% if manager.is_active %}
+                        <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Ativo</span>
+                      {% else %}
+                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full" title="Desativado em {{ manager.deactivated_at|date:'d/m/Y H:i' }}">Inativo</span>
+                      {% endif %}
+                    </td>
                     <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-                      <a
-                        href="{% url 'accounts:folder-managers-detail' manager.id %}"
-                        class="
-                          px-3
-                          py-2
-                          text-sm
-                          font-medium
-                          text-center
-                          inline-flex
-                          items-center
-                          text-white
-                          rounded-lg
-                          focus:ring-4
-                          focus:outline-none
-                          bg-blue-600
-                          hover:bg-blue-700
-                          focus:ring-blue-800
-                        "
-                      >
-                        Visualizar
-                      </a>
+                      <div class="flex gap-2">
+                        <a
+                          href="{% url 'accounts:folder-managers-detail' manager.id %}"
+                          class="
+                            px-3
+                            py-2
+                            text-sm
+                            font-medium
+                            text-center
+                            inline-flex
+                            items-center
+                            text-white
+                            rounded-lg
+                            focus:ring-4
+                            focus:outline-none
+                            bg-blue-600
+                            hover:bg-blue-700
+                            focus:ring-blue-800
+                          "
+                        >
+                          Visualizar
+                        </a>
+                        {% if user.has_admin_access %}
+                          <form method="post" action="{% url 'accounts:folder-managers-toggle-status' manager.id %}" class="inline">
+                            {% csrf_token %}
+                            <button
+                              type="submit"
+                              class="
+                                px-3
+                                py-2
+                                text-sm
+                                font-medium
+                                text-center
+                                inline-flex
+                                items-center
+                                text-white
+                                rounded-lg
+                                focus:ring-4
+                                focus:outline-none
+                                {% if manager.is_active %}
+                                  bg-red-600
+                                  hover:bg-red-700
+                                  focus:ring-red-800
+                                {% else %}
+                                  bg-green-600
+                                  hover:bg-green-700
+                                  focus:ring-green-800
+                                {% endif %}
+                              "
+                            >
+                              {% if manager.is_active %}
+                                Desativar
+                              {% else %}
+                                Ativar
+                              {% endif %}
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
                     </td>
                 </tr>
               {% endfor %}

@@ -11,6 +11,9 @@ from accounts.views import (
     OrganizationCommitteesDetailView,
     OrganizationCommitteesListView,
     read_notification_view,
+    toggle_folder_manager_status,
+    toggle_organization_accountant_status,
+    toggle_organization_committee_status,
     user_unread_notifications,
 )
 
@@ -37,9 +40,14 @@ urlpatterns = [
         name="folder-managers-create",
     ),
     path(
-        "folder-managers/detail/<int:pk>/",
+        "folder-managers/<int:pk>/",
         FolderManagersDetailView.as_view(),
         name="folder-managers-detail",
+    ),
+    path(
+        "folder-managers/<int:pk>/toggle-status/",
+        toggle_folder_manager_status,
+        name="folder-managers-toggle-status",
     ),
     # Organization Accountant Views
     path(
@@ -53,9 +61,14 @@ urlpatterns = [
         name="organization-accountants-create",
     ),
     path(
-        "organization-accountants/detail/<int:pk>/",
+        "organization-accountants/<int:pk>/",
         OrganizationAccountantsDetailView.as_view(),
         name="organization-accountants-detail",
+    ),
+    path(
+        "organization-accountants/<int:pk>/toggle-status/",
+        toggle_organization_accountant_status,
+        name="organization-accountants-toggle-status",
     ),
     # Organization Committee Views
     path(
@@ -69,8 +82,13 @@ urlpatterns = [
         name="organization-committees-create",
     ),
     path(
-        "organization-committees/detail/<int:pk>/",
+        "organization-committees/<int:pk>/",
         OrganizationCommitteesDetailView.as_view(),
         name="organization-committees-detail",
+    ),
+    path(
+        "organization-committees/<int:pk>/toggle-status/",
+        toggle_organization_committee_status,
+        name="organization-committees-toggle-status",
     ),
 ]

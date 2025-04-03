@@ -251,6 +251,12 @@ class User(AbstractUser):
         help_text="Indica se o usuário já alterou sua senha inicial",
         default=False,
     )
+    deactivated_at = models.DateTimeField(
+        verbose_name="Data de Desativação",
+        null=True,
+        blank=True,
+        help_text="Data em que o usuário foi desativado",
+    )
     access_level = models.CharField(
         verbose_name="Nível de Acesso",
         choices=AccessChoices,
@@ -295,6 +301,8 @@ class User(AbstractUser):
             ("organization", "email"),
             ("organization", "cpf"),
         ]
+        verbose_name = "Usuário"
+        verbose_name_plural = "Usuários"
 
     def clean(self):
         """Validate the user data."""
