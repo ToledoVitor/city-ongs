@@ -217,6 +217,9 @@
     // Initialize fields
     toggleDocumentFields();
 
+    // Format phone on page load
+    phoneInput.value = phoneInput.value.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+
     cpfInput.addEventListener('input', function(e) {
       e.target.value = formatCPF(e.target.value);
     });
