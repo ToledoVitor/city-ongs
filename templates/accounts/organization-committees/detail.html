@@ -61,32 +61,39 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Documento</label>
-          <div class="mt-1 flex items-center space-x-4">
-            <div class="flex-1">
-              <div class="flex items-center space-x-2">
+          <div class="mt-1 space-y-2">
+            <input
+              type="text"
+              name="cpf"
+              id="cpf"
+              required
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              pattern="[0-9]{3}.[0-9]{3}.[0-9]{3}-[0-9]{2}"
+              placeholder="000.000.000-00"
+              value="{{ committee.cpf|default:'' }}"
+              {% if not committee.cpf %}style="display: none;"{% endif %}
+            >
+            <input
+            type="text"
+              name="cnpj"
+              id="cnpj"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              pattern="[0-9]{2}.[0-9]{3}.[0-9]{3}/[0-9]{4}-[0-9]{2}"
+              placeholder="00.000.000/0000-00"
+              value="{{ committee.cnpj|default:'' }}"
+              {% if not committee.cnpj %}style="display: none;"{% endif %}
+            >
+            <div class="flex items-center space-x-4">
+              <label class="inline-flex items-center">
                 <input type="radio" name="document_type" value="cpf" class="form-radio h-4 w-4 text-blue-600"
                   {% if committee.cpf %}checked{% endif %}>
-                <span class="text-sm">CPF</span>
-              </div>
-              <input type="text" name="cpf" id="cpf" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                pattern="[0-9]{3}.[0-9]{3}.[0-9]{3}-[0-9]{2}"
-                placeholder="000.000.000-00"
-                value="{{ committee.cpf }}"
-                {% if not committee.cpf %}style="display: none;"{% endif %}>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center space-x-2">
+                <span class="ml-2 text-sm">CPF</span>
+              </label>
+              <label class="inline-flex items-center">
                 <input type="radio" name="document_type" value="cnpj" class="form-radio h-4 w-4 text-blue-600"
                   {% if committee.cnpj %}checked{% endif %}>
-                <span class="text-sm">CNPJ</span>
-              </div>
-              <input type="text" name="cnpj" id="cnpj"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                pattern="[0-9]{2}.[0-9]{3}.[0-9]{3}/[0-9]{4}-[0-9]{2}"
-                placeholder="00.000.000/0000-00"
-                value="{{ committee.cnpj }}"
-                {% if not committee.cnpj %}style="display: none;"{% endif %}>
+                <span class="ml-2 text-sm">CNPJ</span>
+              </label>
             </div>
           </div>
         </div>
@@ -168,6 +175,29 @@
     const phoneInput = document.getElementById('phone');
     const documentTypeRadios = document.querySelectorAll('input[name="document_type"]');
 
+    // Function to format CPF
+    function formatCPF(value) {
+      if (!value) return '';
+      value = value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      return value;
+    }
+
+    // Function to format CNPJ
+    function formatCNPJ(value) {
+      if (!value) return '';
+      value = value.replace(/\D/g, '');
+      if (value.length > 14) value = value.slice(0, 14);
+      value = value.replace(/(\d{2})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1/$2');
+      value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+      return value;
+    }
+
     // Function to toggle document fields visibility
     function toggleDocumentFields() {
       const selectedType = document.querySelector('input[name="document_type"]:checked').value;
@@ -177,11 +207,15 @@
         cnpjInput.style.display = 'none';
         cpfInput.required = true;
         cnpjInput.required = false;
+        cnpjInput.value = '';
+        if (cpfInput.value === 'None') cpfInput.value = '';
       } else {
         cpfInput.style.display = 'none';
         cnpjInput.style.display = 'block';
         cpfInput.required = false;
         cnpjInput.required = true;
+        cpfInput.value = '';
+        if (cnpjInput.value === 'None') cnpjInput.value = '';
       }
     }
 
@@ -190,26 +224,17 @@
       radio.addEventListener('change', toggleDocumentFields);
     });
 
-    // Initialize fields
+    // Initialize fields and format initial values
     toggleDocumentFields();
+    if (cpfInput.value) cpfInput.value = formatCPF(cpfInput.value);
+    if (cnpjInput.value) cnpjInput.value = formatCNPJ(cnpjInput.value);
 
     cpfInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 11) value = value.slice(0, 11);
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-      e.target.value = value;
+      e.target.value = formatCPF(e.target.value);
     });
 
     cnpjInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 14) value = value.slice(0, 14);
-      value = value.replace(/(\d{2})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1/$2');
-      value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
-      e.target.value = value;
+      e.target.value = formatCNPJ(e.target.value);
     });
 
     phoneInput.addEventListener('input', function(e) {
