@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Contas - Gestores de Pasta{% endblock %}
+{% block title %} Contas - Membros do Comitê{% endblock %}
 
 {% block content %}
 
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-  Cadastrar Gestor de Pasta
+  Cadastrar Membro do Comitê
 </p>
 
 <!-- Breadcrumb -->
@@ -22,11 +22,11 @@
       </a>
     </li>
     <li class="inline-flex items-center">
-      <a href="{% url 'accounts:folder-managers-list' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+      <a href="{% url 'accounts:organization-committees-list' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        Gestores
+        Membros do Comitê
       </a>
     </li>
     <li aria-current="page">
@@ -34,7 +34,7 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium md:ms-2 text-black">Cadastrar Gestor</span>
+        <span class="ms-1 text-sm font-medium md:ms-2 text-black">Cadastrar Membro</span>
       </div>
     </li>
   </ol>
@@ -56,11 +56,6 @@
   <div class="mb-3">
     <label for="id_phone_number" class="block mb-2 text-base font-medium text-black">Telefone</label>
     {{ form.phone_number }}
-  </div>
-
-  <div class="mb-3">
-    <label for="id_position" class="block mb-2 text-base font-medium text-black">Cargo</label>
-    {{ form.position }}
   </div>
 
   <div class="my-3">

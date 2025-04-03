@@ -300,9 +300,7 @@ class User(AbstractUser):
         """Validate the user data."""
         # Check if email is unique within the organization
         if self.email:
-            existing = User.objects.filter(
-                email=self.email, organization=self.organization
-            ).exclude(pk=self.pk)
+            existing = User.objects.filter(email=self.email).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
                     "Já existe um usuário com este email nesta organização"
@@ -310,9 +308,7 @@ class User(AbstractUser):
 
         # Check if CPF is unique within the organization
         if self.cpf:
-            existing = User.objects.filter(
-                cpf=self.cpf, organization=self.organization
-            ).exclude(pk=self.pk)
+            existing = User.objects.filter(cpf=self.cpf).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
                     "Já existe um usuário com este CPF nesta organização"
@@ -371,6 +367,18 @@ class User(AbstractUser):
     @property
     def can_add_new_organization_accountants(self) -> bool:
         """Check if user can add new organization accountants."""
+        return not self.is_committee_member and (
+            self.is_superuser
+            or self.access_level
+            in {
+                self.AccessChoices.MASTER,
+                self.AccessChoices.CIVIL_SERVANT,
+            }
+        )
+
+    @property
+    def can_add_new_organization_committees(self) -> bool:
+        """Check if user can add new organization committees."""
         return not self.is_committee_member and (
             self.is_superuser
             or self.access_level

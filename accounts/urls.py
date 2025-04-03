@@ -7,6 +7,9 @@ from accounts.views import (
     OrganizationAccountantCreateView,
     OrganizationAccountantsDetailView,
     OrganizationAccountantsListView,
+    OrganizationCommitteeCreateView,
+    OrganizationCommitteesDetailView,
+    OrganizationCommitteesListView,
     read_notification_view,
     user_unread_notifications,
 )
@@ -53,5 +56,21 @@ urlpatterns = [
         "organization-accountants/detail/<int:pk>/",
         OrganizationAccountantsDetailView.as_view(),
         name="organization-accountants-detail",
+    ),
+    # Organization Committee Views
+    path(
+        "organization-committees/",
+        OrganizationCommitteesListView.as_view(),
+        name="organization-committees-list",
+    ),
+    path(
+        "organization-committees/create/",
+        OrganizationCommitteeCreateView.as_view(),
+        name="organization-committees-create",
+    ),
+    path(
+        "organization-committees/detail/<int:pk>/",
+        OrganizationCommitteesDetailView.as_view(),
+        name="organization-committees-detail",
     ),
 ]

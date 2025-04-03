@@ -20,6 +20,10 @@ class ActivityLog(BaseOrganizationTenantModel):
             "CREATED_ORGANIZATION_ACCOUNTANT",
             "Criou contador / funcionário organização",
         )
+        CREATED_ORGANIZATION_COMMITTEE = (
+            "CREATED_ORGANIZATION_COMMITTEE",
+            "Criou membro do comitê",
+        )
         # accountability
         CREATED_ACCOUNTABILITY = (
             "CREATED_ACCOUNTABILITY",

@@ -15,6 +15,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from accounts.forms import (
     FolderManagerCreateForm,
     OrganizationAccountantCreateForm,
+    OrganizationCommitteeCreateForm,
 )
 from accounts.models import User
 from accounts.services import notify_user_account_created
@@ -235,6 +236,109 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
             return redirect("accounts:organization-accountants-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class OrganizationCommitteesListView(AdminRequiredMixin, ListView):
+    model = User
+    context_object_name = "committees_list"
+    paginate_by = 10
+    ordering = "email"
+
+    template_name = "accounts/organization-committees/list.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = self.model.objects.filter(
+            access_level=User.AccessChoices.COMMITTEE_MEMBER,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(
+                Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query),
+            )
+        return queryset.order_by("email")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
+
+
+class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
+    template_name = "accounts/organization-committees/create.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        if not context.get("form", None):
+            context["form"] = OrganizationCommitteeCreateForm(request=self.request)
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.can_add_new_organization_committees:
+            logger.error(
+                f"{request.user.id} - dont have access to create new organization committee"
+            )
+            return redirect("home")
+
+        form = OrganizationCommitteeCreateForm(request.POST, request=request)
+        if form.is_valid():
+            with transaction.atomic():
+                password = generate_random_password()
+                new_user = User.objects.create(
+                    email=form.cleaned_data.get("email"),
+                    position="Membro do Comitê",
+                    phone_number=str(form.cleaned_data["phone_number"].national_number),
+                    cpf=form.cleaned_data.get("cpf"),
+                    username=form.cleaned_data.get("email"),
+                    first_name=form.cleaned_data.get("first_name"),
+                    last_name=form.cleaned_data.get("last_name"),
+                    organization=self.request.user.organization,
+                    access_level=User.AccessChoices.COMMITTEE_MEMBER,
+                )
+                new_user.set_password(password)
+                new_user.save()
+                new_user.areas.set(form.cleaned_data["areas"])
+
+                logger.info(f"{request.user.id} - Created new organization committee")
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_ORGANIZATION_COMMITTEE,
+                    target_object_id=new_user.id,
+                    target_content_object=new_user,
+                )
+
+                notify_user_account_created(new_user, password)
+
+            return redirect("accounts:organization-committees-list")
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
+    model = User
+
+    template_name = "accounts/organization-committees/detail.html"
+    context_object_name = "committee"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return self.model.objects.filter(
+            access_level=User.AccessChoices.COMMITTEE_MEMBER,
+            areas__in=self.request.user.areas.all(),
+        ).distinct()
+
+    def get_object(self, queryset=None):
+        return self.get_queryset().get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 @login_required
