@@ -4,6 +4,7 @@ from accounts.models import Area, User
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseEmailFormWidget,
+    CustomCNPJWidget,
     CustomCPFWidget,
     CustomPhoneNumberField,
 )
@@ -26,6 +27,7 @@ class FolderManagerCreateForm(forms.ModelForm):
         fields = [
             "email",
             "cpf",
+            "cnpj",
             "phone_number",
             "first_name",
             "last_name",
@@ -36,6 +38,7 @@ class FolderManagerCreateForm(forms.ModelForm):
         widgets = {
             "email": BaseEmailFormWidget(placeholder=""),
             "cpf": CustomCPFWidget(),
+            "cnpj": CustomCNPJWidget(),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
             "position": BaseCharFieldFormWidget(placeholder=""),
@@ -75,6 +78,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         fields = [
             "email",
             "cpf",
+            "cnpj",
             "phone_number",
             "first_name",
             "last_name",
@@ -85,6 +89,7 @@ class OrganizationAccountantCreateForm(forms.ModelForm):
         widgets = {
             "email": BaseEmailFormWidget(placeholder=""),
             "cpf": CustomCPFWidget(),
+            "cnpj": CustomCNPJWidget(),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
             "position": BaseCharFieldFormWidget(placeholder=""),
@@ -124,6 +129,7 @@ class OrganizationCommitteeCreateForm(forms.ModelForm):
         fields = [
             "email",
             "cpf",
+            "cnpj",
             "phone_number",
             "first_name",
             "last_name",
@@ -133,6 +139,7 @@ class OrganizationCommitteeCreateForm(forms.ModelForm):
         widgets = {
             "email": BaseEmailFormWidget(placeholder=""),
             "cpf": CustomCPFWidget(),
+            "cnpj": CustomCNPJWidget(),
             "first_name": BaseCharFieldFormWidget(placeholder=""),
             "last_name": BaseCharFieldFormWidget(placeholder=""),
         }

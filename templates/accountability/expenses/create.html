@@ -10,278 +10,174 @@
   Adicionar Despesa
 </p>
 
-<!-- Breadcrumb -->
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2">Criar Despesa</span>
-        </div>
-      </li>
-    </ol>
+<nav class="flex mb-6" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Início
+      </a>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
+      </div>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Criar Despesa</span>
+      </div>
+    </li>
+  </ol>
 </nav>
 
-<form method="post" class="max-w-lg mx-auto">
+<form method="post" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
   {% csrf_token %}
 
+  <div class="space-y-6">
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Detalhes da Despesa</h2>
+      <div class="space-y-4">
+        <div>
+          <label for="id_identification" class="block mb-2 text-base font-medium text-black">Identificação</label>
+          {{ form.identification }}
+        </div>
 
-  <label class="block mb-2 text-2xl font-bold text-black">Detalhes</label>
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Item do Contrato Relacionado</label>
+            {{ form.item }}
+          </div>
 
-  <div class="mb-3">
-    <label for="id_identification" class="block mb-2 text-base font-medium text-black">Identificação</label>
-    {{ form.identification }}
-  </div>
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Natureza</label>
+            {% include 'commons/nature-select.html' with id='id_nature' name='nature' %}
+          </div>
+        </div>
 
-  <div class="my-3">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Item do Contrato Relacionado</label>
-        {{ form.item }}
-      </div>
+        <div>
+          <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
+          {{ form.observations }}
+        </div>
 
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Natureza</label>
-        {% include 'commons/nature-select.html' with id='id_nature' name='nature' %}
-      </div>
-    </div>
-  </div>
-
-  <div class="mb-3">
-    <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
-    {{ form.observations }}
-  </div>
-
-  <div class="mb-3 flex justify-between">
-    <label for="id_identification" class="block mb-2 text-base font-medium text-black">Despesa Planejada:</label>
-    <div class="flex items-center">
-      <input
-        checked
-        id="checkbox"
-        type="checkbox"
-        value="true"
-        name="planned"
-        class="
-          w-4
-          h-4
-          text-blue-600
-          rounded-sm
-          focus:ring-blue-600
-          ring-offset-gray-800
-          focus:ring-2
-          bg-gray-700
-          border-gray-600
-        "
-      >
-      <label for="checkbox" class="ms-2 text-sm font-medium text-dark">Planejada</label>
-    </div>
-  </div>
-
-  <hr class="h-px my-4 border-0 bg-gray-500">
-
-  <label class="block mb-2 text-2xl font-bold text-black">Bancário</label>
-
-  <div class="my-3">
-    <label for="id_value" class="block mb-2 text-base font-medium text-black">Valor</label>
-    <div class="relative w-full">
-      <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-        <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-        </svg>
-      </div>
-      <input
-        type="text"
-        id="id_value"
-        name="value"
-        placeholder="000,00"
-        oninput="formatMoney(this)"
-        class="
-          block
-          p-2.5
-          w-full
-          z-20
-          ps-10
-          text-sm
-          rounded-s-lg
-          border-e-2
-          border
-          focus:ring-blue-500
-          bg-gray-300
-          border-e-gray-700
-          border-gray-600
-          placeholder-gray-800
-          text-black
-          focus:border-blue-500
-        "
-        required
-      />  
-    </div>  
-    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">
-      Escreva somente os números, sem o R$, seperados por vírgula
-    </p>
-  </div>
-
-  <div class="my-3">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Fonte</label>
-        {{ form.source }}
-        <a href="{% url 'accountability:sources-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar fonte</a>
-      </div>
-
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">
-          Favorecido <span class="text-gray-400">(opcional)</span>
-        </label>
-        {{ form.favored }}
-        <a href="{% url 'accountability:favoreds-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar favorecido</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="my-3">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Competência</label>
-        <div class="relative max-w-sm">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-              </svg>
-            </div>
-            <input 
-                required
-                datepicker
-                datepicker-format="dd/mm/yyyy"
-                id="id_competency"
-                name="competency"
-                type="text"
-                class="
-                  border
-                  text-sm
-                  rounded-lg
-                  block
-                  w-full
-                  ps-10
-                  p-2.5
-                  bg-gray-300
-                  border-gray-600
-                  placeholder-gray-800
-                  text-black
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                "
-            >
+        <div class="flex justify-between items-center">
+          <label class="block text-base font-medium text-black">Despesa Planejada</label>
+          <div class="flex items-center">
+            <input checked id="checkbox" type="checkbox" value="true" name="planned" class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
+            <label for="checkbox" class="ms-2 text-sm font-medium text-dark">Planejada</label>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Vencimento</label>
-        <div class="relative max-w-sm">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Dados Bancários</h2>
+      <div class="space-y-4">
+        <div>
+          <label for="id_value" class="block mb-2 text-base font-medium text-black">Valor</label>
+          <div class="relative w-full">
+            <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
               </svg>
             </div>
-            <input
-                required
-                datepicker
-                datepicker-format="dd/mm/yyyy"
-                id="id_due_date"
-                name="due_date"
-                type="text"
-                class="
-                  border
-                  text-sm
-                  rounded-lg
-                  block
-                  w-full
-                  ps-10
-                  p-2.5
-                  bg-gray-300
-                  border-gray-600
-                  placeholder-gray-800
-                  text-black
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                "
-            >
+            <input type="text" id="id_value" name="value" placeholder="000,00" oninput="formatMoney(this)" class="block p-2.5 w-full z-20 ps-10 text-sm rounded-lg border focus:ring-blue-500 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500" required>
+          </div>
+          <p class="mt-2 text-sm text-gray-400">Escreva somente os números, sem o R$, seperados por vírgula</p>
+        </div>
+
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Fonte</label>
+            {{ form.source }}
+            <a href="{% url 'accountability:sources-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar fonte</a>
+          </div>
+
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Favorecido <span class="text-gray-400">(opcional)</span></label>
+            {{ form.favored }}
+            <a href="{% url 'accountability:favoreds-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar favorecido</a>
+          </div>
+        </div>
+
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Competência</label>
+            <div class="relative max-w-sm">
+              <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                </svg>
+              </div>
+              <input required datepicker datepicker-format="dd/mm/yyyy" id="id_competency" name="competency" type="text" class="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+
+          <div class="relative">
+            <label class="block mb-2 text-base font-medium text-black">Vencimento</label>
+            <div class="relative max-w-sm">
+              <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                </svg>
+              </div>
+              <input required datepicker datepicker-format="dd/mm/yyyy" id="id_due_date" name="due_date" type="text" class="border text-sm rounded-lg block w-full ps-10 p-2.5 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="id_liquidation_form" class="block mb-2 text-base font-medium text-black">Forma de Liquidação</label>
+          {{ form.liquidation_form }}
         </div>
       </div>
-
     </div>
-  </div>
 
-  <div class="mb-3">
-    <label for="id_liquidation_form" class="block mb-2 text-base font-medium text-black">Forma de Liquidação</label>
-    {{ form.liquidation_form }}
-  </div>
-
-  <hr class="h-px my-4 border-0 bg-gray-500">
-
-  <div class="flex justify-between">
-    <label class="block text-2xl font-bold text-black">
-      Documento
-    </label>
-    <span class="text-lg text-gray-400">(opcional)</span>
-  </div>
-
-  <div class="my-3">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Tipo</label>
-        {{ form.document_type }}
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Documento</h2>
+        <span class="text-sm text-gray-400">(opcional)</span>
       </div>
+      <div class="grid gap-6 mb-6 md:grid-cols-2">
+        <div class="relative">
+          <label class="block mb-2 text-base font-medium text-black">Tipo</label>
+          {{ form.document_type }}
+        </div>
 
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Número</label>
-        {{ form.document_number }}
+        <div class="relative">
+          <label class="block mb-2 text-base font-medium text-black">Número</label>
+          {{ form.document_number }}
+        </div>
       </div>
     </div>
   </div>
 
   {% include 'commons/form-errors.html' with form=form %}
 
-  <button
-    type="submit"
-    class="
-      px-3
-      py-2
-      text-sm
-      font-medium
-      text-center
-      inline-flex
-      items-center
-      text-white
-      rounded-lg
-      focus:ring-4
-      focus:outline-none
-      bg-blue-600
-      hover:bg-blue-700
-      focus:ring-blue-800
-    "
-    style="display: flex; justify-self: center;"
-  >
-    Criar Despesa
-  </button>
+  <div class="py-6">
+    <div class="flex justify-end items-center gap-4">
+      <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
+        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+        </svg>
+        Voltar
+      </a>
+      <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
+        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+        </svg>
+        Criar Despesa
+      </button>
+    </div>
+  </div>
 </form>
 
 <script>

@@ -232,6 +232,16 @@ class User(AbstractUser):
         max_length=16,
         validators=[validate_cpf],
         help_text="Número do CPF do usuário. Deve ser único dentro da organização.",
+        null=True,
+        blank=True,
+    )
+    cnpj = models.CharField(
+        verbose_name="CNPJ",
+        max_length=18,
+        validators=[validate_cpf_cnpj],
+        help_text="Número do CNPJ do usuário. Deve ser único dentro da organização.",
+        null=True,
+        blank=True,
     )
     phone_number = PhoneNumberField(
         region="BR",
@@ -292,6 +302,7 @@ class User(AbstractUser):
         indexes = [
             models.Index(fields=["email"]),
             models.Index(fields=["cpf"]),
+            models.Index(fields=["cnpj"]),
             models.Index(fields=["access_level"]),
             models.Index(fields=["organization", "access_level"]),
             models.Index(fields=["password_expires_at"]),
@@ -300,6 +311,7 @@ class User(AbstractUser):
         unique_together = [
             ("organization", "email"),
             ("organization", "cpf"),
+            ("organization", "cnpj"),
         ]
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
@@ -322,6 +334,20 @@ class User(AbstractUser):
                     "Já existe um usuário com este CPF nesta organização"
                 )
 
+        # Check if CNPJ is unique within the organization
+        if self.cnpj:
+            existing = User.objects.filter(cnpj=self.cnpj).exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(
+                    "Já existe um usuário com este CNPJ nesta organização"
+                )
+
+        # Ensure user has either CPF or CNPJ, but not both
+        if not self.cpf and not self.cnpj:
+            raise ValidationError("O usuário deve ter um CPF ou CNPJ")
+        if self.cpf and self.cnpj:
+            raise ValidationError("O usuário não pode ter CPF e CNPJ simultaneamente")
+
         # Validate password expiration
         if self.password_expires_at and self.password_expires_at < timezone.now():
             raise ValidationError(
@@ -334,7 +360,18 @@ class User(AbstractUser):
         if self.cpf is not None:
             string_doc = "".join([i for i in str(self.cpf) if i.isdigit()])
             self.cpf = str(string_doc)
+        if self.cnpj is not None:
+            string_doc = "".join([i for i in str(self.cnpj) if i.isdigit()])
+            self.cnpj = str(string_doc)
         super().save(*args, **kwargs)
+
+    @property
+    def document(self) -> str:
+        if self.cpf:
+            return str(self.cpf)
+        if self.cnpj:
+            return str(self.cnpj)
+        return ""
 
     @property
     def masked_phone(self) -> str:

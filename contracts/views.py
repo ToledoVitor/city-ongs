@@ -23,6 +23,7 @@ from activity.models import ActivityLog
 from contracts.choices import NatureCategories
 from contracts.forms import (
     CompanyCreateForm,
+    CompanyUpdateForm,
     ContractCreateForm,
     ContractExecutionActivityForm,
     ContractExecutionCreateForm,
@@ -38,7 +39,6 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
-    CompanyUpdateForm,
 )
 from contracts.models import (
     Company,
@@ -658,7 +658,9 @@ class CompanyUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         with transaction.atomic():
             company = form.save(commit=False)
-            company.phone_number = str(form.cleaned_data["phone_number"].national_number)
+            company.phone_number = str(
+                form.cleaned_data["phone_number"].national_number
+            )
             company.save()
 
             logger.info(f"{self.request.user.id} - Updated company")

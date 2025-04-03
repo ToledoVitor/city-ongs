@@ -83,6 +83,7 @@ class FolderManagersDetailView(LoginRequiredMixin, DetailView):
             manager.first_name = request.POST.get("first_name")
             manager.last_name = request.POST.get("last_name")
             manager.cpf = request.POST.get("cpf")
+            manager.cnpj = request.POST.get("cnpj")
             manager.position = request.POST.get("position")
             manager.is_active = request.POST.get("is_active") == "True"
             manager.phone_number = request.POST.get("phone_number")
@@ -130,6 +131,7 @@ class FolderManagerCreateView(AdminRequiredMixin, TemplateView):
                         form.cleaned_data["phone_number"].national_number,
                     ),
                     cpf=form.cleaned_data.get("cpf"),
+                    cnpj=form.cleaned_data.get("cnpj"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
                     last_name=form.cleaned_data.get("last_name"),
@@ -213,6 +215,7 @@ class OrganizationAccountantsDetailView(LoginRequiredMixin, DetailView):
             accountant.first_name = request.POST.get("first_name")
             accountant.last_name = request.POST.get("last_name")
             accountant.cpf = request.POST.get("cpf")
+            accountant.cnpj = request.POST.get("cnpj")
             accountant.position = request.POST.get("position")
             accountant.is_active = request.POST.get("is_active") == "True"
             accountant.phone_number = request.POST.get("phone_number")
@@ -258,6 +261,7 @@ class OrganizationAccountantCreateView(AdminRequiredMixin, TemplateView):
                     position=form.cleaned_data.get("position"),
                     phone_number=str(form.cleaned_data["phone_number"].national_number),
                     cpf=form.cleaned_data.get("cpf"),
+                    cnpj=form.cleaned_data.get("cnpj"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
                     last_name=form.cleaned_data.get("last_name"),
@@ -341,6 +345,7 @@ class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
                     position="Membro do Comitê",
                     phone_number=str(form.cleaned_data["phone_number"].national_number),
                     cpf=form.cleaned_data.get("cpf"),
+                    cnpj=form.cleaned_data.get("cnpj"),
                     username=form.cleaned_data.get("email"),
                     first_name=form.cleaned_data.get("first_name"),
                     last_name=form.cleaned_data.get("last_name"),
@@ -392,6 +397,7 @@ class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
             committee.first_name = request.POST.get("first_name")
             committee.last_name = request.POST.get("last_name")
             committee.cpf = request.POST.get("cpf")
+            committee.cnpj = request.POST.get("cnpj")
             committee.position = request.POST.get("position")
             committee.is_active = request.POST.get("is_active") == "True"
             committee.phone_number = request.POST.get("phone_number")

@@ -72,6 +72,33 @@
         </div>
 
         <div>
+          <label for="cnpj" class="block text-sm font-medium text-gray-700">CNPJ</label>
+          <input
+            type="text"
+            name="cnpj"
+            id="cnpj"
+            value="{{ manager.cnpj }}"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            pattern="[0-9]{2}.[0-9]{3}.[0-9]{3}/[0-9]{4}-[0-9]{2}"
+            placeholder="00.000.000/0000-00"
+          >
+        </div>
+
+        <div>
+          <label for="document_type" class="block text-sm font-medium text-gray-700">Tipo de Documento</label>
+          <div class="mt-1 flex items-center">
+            <label class="inline-flex items-center mr-4">
+              <input type="radio" name="document_type" value="cpf" class="form-radio h-4 w-4 text-blue-600" {% if manager.cpf %}checked{% endif %}>
+              <span class="ml-2">CPF</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="radio" name="document_type" value="cnpj" class="form-radio h-4 w-4 text-blue-600" {% if manager.cnpj %}checked{% endif %}>
+              <span class="ml-2">CNPJ</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
           <label for="phone_number" class="block text-sm font-medium text-gray-700">Telefone</label>
           <input
             type="tel"
@@ -151,10 +178,35 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    debugger
-
     const cpfInput = document.getElementById('cpf');
+    const cnpjInput = document.getElementById('cnpj');
     const phoneInput = document.getElementById('phone_number');
+    const documentTypeRadios = document.querySelectorAll('input[name="document_type"]');
+
+    // Function to toggle required attribute based on document type
+    function toggleDocumentFields() {
+      const selectedType = document.querySelector('input[name="document_type"]:checked').value;
+      
+      if (selectedType === 'cpf') {
+        cpfInput.required = true;
+        cnpjInput.required = false;
+        cpfInput.disabled = false;
+        cnpjInput.disabled = true;
+      } else {
+        cpfInput.required = false;
+        cnpjInput.required = true;
+        cpfInput.disabled = true;
+        cnpjInput.disabled = false;
+      }
+    }
+
+    // Add event listeners to radio buttons
+    documentTypeRadios.forEach(radio => {
+      radio.addEventListener('change', toggleDocumentFields);
+    });
+
+    // Initialize fields
+    toggleDocumentFields();
 
     function formatCPF(value) {
       if (!value) return '';
@@ -163,6 +215,17 @@
       value = value.replace(/(\d{3})(\d)/, '$1.$2');
       value = value.replace(/(\d{3})(\d)/, '$1.$2');
       value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      return value;
+    }
+
+    function formatCNPJ(value) {
+      if (!value) return '';
+      value = value.replace(/\D/g, '');
+      if (value.length > 14) value = value.slice(0, 14);
+      value = value.replace(/(\d{2})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1/$2');
+      value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
       return value;
     }
 
@@ -179,6 +242,10 @@
       e.target.value = formatCPF(e.target.value);
     });
 
+    cnpjInput.addEventListener('input', function(e) {
+      e.target.value = formatCNPJ(e.target.value);
+    });
+
     phoneInput.addEventListener('input', function(e) {
       e.target.value = formatPhone(e.target.value);
     });
@@ -188,6 +255,12 @@
       cpfInput.value = formatCPF(cpfInput.value);
     } else {
       cpfInput.value = '';
+    }
+
+    if (cnpjInput.value) {
+      cnpjInput.value = formatCNPJ(cnpjInput.value);
+    } else {
+      cnpjInput.value = '';
     }
 
     if (phoneInput.value) {

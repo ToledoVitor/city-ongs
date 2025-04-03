@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Area, CityHall, Committee, Organization, User
@@ -53,11 +52,13 @@ class CommitteeAdmin(BaseModelAdmin):
     )
 
 
-class CustomUserAdmin(UserAdmin):
+@admin.register(User)
+class CustomUserAdmin(BaseModelAdmin):
     list_display = (
         "username",
         "email",
         "cpf",
+        "cnpj",
         "first_name",
         "last_name",
         "is_staff",
@@ -78,6 +79,7 @@ class CustomUserAdmin(UserAdmin):
         "username",
         "email",
         "cpf",
+        "cnpj",
         "first_name",
         "last_name",
     )
@@ -93,6 +95,7 @@ class CustomUserAdmin(UserAdmin):
                     "last_name",
                     "email",
                     "cpf",
+                    "cnpj",
                     "position",
                     "phone_number",
                 ),
@@ -140,6 +143,3 @@ class CustomUserAdmin(UserAdmin):
     )
 
     filter_horizontal = ("groups", "user_permissions", "areas")
-
-
-admin.site.register(User, CustomUserAdmin)
