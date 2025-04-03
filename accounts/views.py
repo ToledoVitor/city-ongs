@@ -19,7 +19,7 @@ from accounts.forms import (
     OrganizationAccountantCreateForm,
     OrganizationCommitteeCreateForm,
 )
-from accounts.models import User
+from accounts.models import Committee, User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
 from utils.mixins import AdminRequiredMixin
@@ -326,7 +326,9 @@ class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
             context["form"] = OrganizationCommitteeCreateForm(request=self.request)
-
+        context["committees"] = Committee.objects.filter(
+            organization=self.request.user.organization
+        )
         return context
 
     def post(self, request, *args, **kwargs):
@@ -342,7 +344,7 @@ class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
                 password = generate_random_password()
                 new_user = User.objects.create(
                     email=form.cleaned_data.get("email"),
-                    position="Membro do Comitê",
+                    position=request.POST.get("position", "Membro do Comitê"),
                     phone_number=str(form.cleaned_data["phone_number"].national_number),
                     cpf=form.cleaned_data.get("cpf"),
                     cnpj=form.cleaned_data.get("cnpj"),
@@ -351,10 +353,16 @@ class OrganizationCommitteeCreateView(AdminRequiredMixin, TemplateView):
                     last_name=form.cleaned_data.get("last_name"),
                     organization=self.request.user.organization,
                     access_level=User.AccessChoices.COMMITTEE_MEMBER,
+                    is_active=request.POST.get("is_active") == "True",
                 )
                 new_user.set_password(password)
                 new_user.save()
                 new_user.areas.set(form.cleaned_data["areas"])
+
+                committee_id = request.POST.get("committee")
+                if committee_id:
+                    committee = Committee.objects.get(id=committee_id)
+                    committee.members.add(new_user)
 
                 logger.info(f"{request.user.id} - Created new organization committee")
                 _ = ActivityLog.objects.create(
@@ -385,6 +393,10 @@ class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
         context["form"] = AreasForm(
             user=self.request.user, initial={"areas": self.object.areas.all()}
         )
+        context["committees"] = Committee.objects.filter(
+            organization=self.request.user.organization
+        )
+        context["current_committee"] = self.object.committees.first()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -396,14 +408,26 @@ class OrganizationCommitteesDetailView(LoginRequiredMixin, DetailView):
         if form.is_valid():
             committee.first_name = request.POST.get("first_name")
             committee.last_name = request.POST.get("last_name")
-            committee.cpf = request.POST.get("cpf")
-            committee.cnpj = request.POST.get("cnpj")
             committee.position = request.POST.get("position")
             committee.is_active = request.POST.get("is_active") == "True"
             committee.phone_number = request.POST.get("phone_number")
 
+            document_type = request.POST.get("document_type")
+            if document_type == "cpf":
+                committee.cpf = request.POST.get("cpf")
+                committee.cnpj = None
+            else:
+                committee.cnpj = request.POST.get("cnpj")
+                committee.cpf = None
+
             committee.areas.set(form.cleaned_data["areas"])
             committee.save()
+
+            new_committee_id = request.POST.get("committee")
+            if new_committee_id:
+                new_committee = Committee.objects.get(id=new_committee_id)
+                committee.committees.clear()
+                new_committee.members.add(committee)
 
             _ = ActivityLog.objects.create(
                 user=request.user,

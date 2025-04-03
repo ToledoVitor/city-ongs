@@ -19,6 +19,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
+from accounts.models import Committee
 from activity.models import ActivityLog
 from contracts.choices import NatureCategories
 from contracts.forms import (
@@ -90,20 +91,80 @@ class ContractsListView(LoginRequiredMixin, ListView):
             .select_related(
                 "contractor_manager",
                 "hired_manager",
+                "area",
+                "committee",
+                "accountability_autority",
+                "supervision_autority",
             )
         )
+
+        # Basic search
         query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(
                 Q(name__icontains=query)
                 | Q(code__icontains=query)
                 | Q(internal_code__icontains=query)
+                | Q(bidding__icontains=query)
             )
+
+        # Status filter
+        status = self.request.GET.get("status")
+        if status and status != "all":
+            queryset = queryset.filter(status=status)
+
+        # Date range filters
+        start_date = self.request.GET.get("start_date")
+        end_date = self.request.GET.get("end_date")
+        date_type = self.request.GET.get("date_type", "vigency")
+
+        if start_date and end_date:
+            if date_type == "vigency":
+                queryset = queryset.filter(
+                    start_of_vigency__gte=start_date,
+                    end_of_vigency__lte=end_date,
+                )
+            elif date_type == "created":
+                queryset = queryset.filter(
+                    created_at__date__gte=start_date,
+                    created_at__date__lte=end_date,
+                )
+
+        # Area filter
+        area = self.request.GET.get("area")
+        if area and area != "all":
+            queryset = queryset.filter(area_id=area)
+
+        # Committee filter
+        committee = self.request.GET.get("committee")
+        if committee and committee != "all":
+            queryset = queryset.filter(committee_id=committee)
+
+        # Concession type filter
+        concession_type = self.request.GET.get("concession_type")
+        if concession_type and concession_type != "all":
+            queryset = queryset.filter(concession_type=concession_type)
+
         return queryset.order_by("-internal_code")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "")
+        context.update(
+            {
+                "search_query": self.request.GET.get("q", ""),
+                "status": self.request.GET.get("status", "all"),
+                "start_date": self.request.GET.get("start_date", ""),
+                "end_date": self.request.GET.get("end_date", ""),
+                "date_type": self.request.GET.get("date_type", "vigency"),
+                "area": self.request.GET.get("area", "all"),
+                "committee": self.request.GET.get("committee", "all"),
+                "concession_type": self.request.GET.get("concession_type", "all"),
+                "areas_list": self.request.user.areas.all(),
+                "committees_list": Committee.objects.filter(
+                    organization=self.request.user.organization
+                ),
+            }
+        )
         return context
 
 

@@ -10,7 +10,6 @@
   Listagem de Contratos
 </p>
 
-<!-- Breadcrumb -->
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
     <li class="inline-flex items-center">
@@ -26,80 +25,237 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2">Contratos</span>
+        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Contratos</span>
       </div>
     </li>
   </ol>
 </nav>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome..." %}
+<form class="my-5" method="get">
+  <div class="relative">
+    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+      <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+      </svg>
+    </div>
+    <input
+      class="block w-full p-4 ps-10 text-sm border rounded-lg bg-gray-300 border-gray-600 placeholder-gray-600 text-black focus:ring-blue-500 focus:border-blue-500"
+      type="search"
+      id="id-search-input"
+      name="q"
+      value="{{ search_query }}"
+      placeholder="Pesquisar por nome, código, licitação..."
+    />
+    <button
+      type="button"
+      id="toggle-filters"
+      class="text-white absolute end-24 bottom-2.5 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2 bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
+    >
+      Filtros Avançados
+      <span id="filter-icon" class="ml-1">▼</span>
+    </button>
+    <button
+      type="submit"
+      class="text-white absolute end-2.5 bottom-2.5 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+    >
+      Buscar
+    </button>
+  </div>
+
+  <div id="advanced-filters" class="hidden mt-4 p-4 bg-gray-200 rounded-lg border border-gray-600">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div class="w-full">
+        <p class="text-xs mb-2">Status</p>
+        <select name="status" class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+          <option value="all" {% if status == "all" %}selected{% endif %}>Todos</option>
+          <option value="ACTIVE" {% if status == "ACTIVE" %}selected{% endif %}>Ativo</option>
+          <option value="INACTIVE" {% if status == "INACTIVE" %}selected{% endif %}>Inativo</option>
+          <option value="FINISHED" {% if status == "FINISHED" %}selected{% endif %}>Finalizado</option>
+        </select>
+      </div>
+
+      <div class="w-full">
+        <p class="text-xs mb-2">Área</p>
+        <select name="area" class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+          <option value="all" {% if area == "all" %}selected{% endif %}>Todas</option>
+          {% for area_item in areas_list %}
+            <option value="{{ area_item.id }}" {% if area == area_item.id %}selected{% endif %}>{{ area_item.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="w-full">
+        <p class="text-xs mb-2">Comitê</p>
+        <select name="committee" class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+          <option value="all" {% if committee == "all" %}selected{% endif %}>Todos</option>
+          {% for committee_item in committees_list %}
+            <option value="{{ committee_item.id }}" {% if committee == committee_item.id %}selected{% endif %}>{{ committee_item.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="w-full">
+        <p class="text-xs mb-2">Tipo de Concessão</p>
+        <select name="concession_type" class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+          <option value="all" {% if concession_type == "all" %}selected{% endif %}>Todos</option>
+          <option value="MUNICIPAL" {% if concession_type == "MUNICIPAL" %}selected{% endif %}>Municipal</option>
+          <option value="FEDERAL" {% if concession_type == "FEDERAL" %}selected{% endif %}>Federal</option>
+          <option value="STATE" {% if concession_type == "STATE" %}selected{% endif %}>Estadual</option>
+        </select>
+      </div>
+
+      <div class="w-full">
+        <p class="text-xs mb-2">Período</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="w-full">
+            <input
+              type="date"
+              name="start_date"
+              value="{{ start_date }}"
+              class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
+              placeholder="Data inicial"
+            />
+          </div>
+          <div class="w-full">
+            <input
+              type="date"
+              name="end_date"
+              value="{{ end_date }}"
+              class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
+              placeholder="Data final"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full">
+        <p class="text-xs mb-2">Tipo de Data</p>
+        <select name="date_type" class="w-full bg-gray-300 border border-gray-600 text-black text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+          <option value="vigency" {% if date_type == "vigency" %}selected{% endif %}>Data de Vigência</option>
+          <option value="created" {% if date_type == "created" %}selected{% endif %}>Data de Criação</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</form>
 
 <div class="relative">
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-      <thead class="text-xs text-white uppercase bg-gray-500">
+      <thead class="text-xs uppercase bg-gray-500 text-white">
         <tr>
-          <th scope="col" class="px-6 py-3">
-            Contrato <br>
+          <th scope="col" class="px-6 py-3 w-[35%]">
+            Contrato
           </th>
-          <th scope="col" class="px-6 py-3">
-            Valor
+          <th scope="col" class="px-6 py-3 w-[20%]">
+            Área / Tipo
           </th>
-          <th scope="col" class="px-6 py-3">
-            Início Vigência
+          <th scope="col" class="px-6 py-3 w-[15%]">
+            Valores
           </th>
-          <th scope="col" class="px-6 py-3">
-            Fim Vigência
+          <th scope="col" class="px-6 py-3 w-[15%]">
+            Vigência
           </th>
-          <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500 border-l border-gray-300"></th>
+          <th scope="col" class="px-6 py-3 w-[15%]">
+            Responsáveis
+          </th>
+          <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500 border-l border-gray-300" />
         </tr>
       </thead>
       <tbody>
         {% if contracts_list %}
           {% for contract in contracts_list %}
-            <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-              <th scope="row" class="w-100 px-6 py-4 text-base text-black">
+            <tr class="bg-white border-b hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm text-gray-900">
                 <span class="px-2.5 py-0.5 mb-2 rounded bg-blue-700 text-white uppercase text-sm font-medium">{{ contract.status_label }}</span> <br>
-                {{ contract.name_with_code }} <br>
-                <p class="mt-2 font-medium text-xs">Gestora do Contratante: {{ contract.contractor_manager.name }}</p>
-                <p class="mt-1 font-medium text-xs">Gestora do Contratado: {{ contract.hired_manager.name }}</p>
-              </th>
-              <td class="px-6 py-4 text-base text-sm text-black">
-                R$ {{ contract.total_value|intcomma }}
+                <div class="truncate max-w-[400px] font-medium">{{ contract.name_with_code }}</div>
+                <p class="mt-2 text-xs text-gray-500">Gestora Contratante: {{ contract.contractor_manager.name }}</p>
+                <p class="mt-1 text-xs text-gray-500">Gestora Contratada: {{ contract.hired_manager.name }}</p>
+                {% if contract.bidding %}
+                  <p class="mt-1 text-xs text-gray-500">Licitação: {{ contract.bidding }}</p>
+                {% endif %}
               </td>
-              <td class="px-6 py-4 text-base text-sm text-black">
-                {{ contract.start_of_vigency }}
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <p class="truncate max-w-[200px]">{{ contract.area.name }}</p>
+                <p class="mt-1 text-xs text-gray-500">{{ contract.get_concession_type_display }}</p>
+                {% if contract.committee %}
+                  <p class="mt-1 text-xs text-gray-500 truncate max-w-[200px]">Comitê: {{ contract.committee.name }}</p>
+                {% endif %}
               </td>
-              <td class="px-6 py-4 text-base text-sm text-black">
-                {{ contract.end_of_vigency }}
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                <p class="font-medium">R$ {{ contract.total_value|intcomma }}</p>
+                <p class="mt-1 text-xs text-gray-500">
+                  <b>Municipal:</b> R$ {{ contract.municipal_value|intcomma }}
+                </p>
+                <p class="mt-1 text-xs text-gray-500">
+                  <b>Contrapartida:</b> R$ {{ contract.counterpart_value|intcomma }}
+                </p>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                <p>
+                  <b>Início:</b> {{ contract.start_of_vigency|date:"d/m/Y" }}
+                </p>
+                <p>
+                  <b>Término:</b> {{ contract.end_of_vigency|date:"d/m/Y" }}
+                </p>
+                {% if contract.addendums.exists %}
+                  <p class="mt-1 text-xs text-gray-500">{{ contract.addendums.count }} aditivo(s)</p>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                {% if contract.accountability_autority %}
+                  <p class="text-xs text-gray-500 truncate max-w-[150px]">
+                    <b>Contábil:</b> {{ contract.accountability_autority.get_full_name }}
+                  </p>
+                {% endif %}
+                {% if contract.supervision_autority %}
+                  <p class="mt-1 text-xs text-gray-500 truncate max-w-[150px]">
+                    <b>Fiscal:</b> {{ contract.supervision_autority.get_full_name }}
+                  </p>
+                {% endif %}
               </td>
               <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
                 <a
                   href="{% url 'contracts:contracts-detail' contract.id %}"
                   class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
                 >
+                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
+                  </svg>
                   Visualizar
                 </a>
               </td>
             </tr>
           {% endfor %}
         {% else %}
-          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900">
               Nenhum resultado encontrado
             </th>
-            <td class="px-6 py-4">-</td>
-            <td class="px-6 py-4">-</td>
-            <td class="px-6 py-4">-</td>
-            <td class="px-6 py-4 sticky right-0 z-10 bg-gray-100 hover:bg-gray-400 border-l border-gray-300" />
+            <td class="px-6 py-4 text-gray-900">
+              -
+            </td>
+            <td class="px-6 py-4 text-gray-900">
+              -
+            </td>
+            <td class="px-6 py-4 text-gray-900">
+              -
+            </td>
+            <td class="px-6 py-4 text-gray-900">
+              -
+            </td>
+            <td class="px-6 py-4 text-gray-900">
+              -
+            </td>
           </tr>
         {% endif %}
       </tbody>
     </table>
   </div>
-  
+
   {% if user.has_admin_access %}
-    <div class="sticky right-0 flex items-center justify-end px-4 pt-2 bg-gray-200">
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
       <a
         href="{% url 'contracts:contracts-create' %}"
         class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
@@ -115,5 +271,26 @@
   {% include 'commons/paginator.html' with page_obje=page_obj %}
 </div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const toggleButton = document.getElementById('toggle-filters');
+    const filterIcon = document.getElementById('filter-icon');
+    const advancedFilters = document.getElementById('advanced-filters');
+    
+    toggleButton.addEventListener('click', function() {
+      advancedFilters.classList.toggle('hidden');
+      filterIcon.textContent = advancedFilters.classList.contains('hidden') ? '▼' : '▲';
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('start_date') || urlParams.has('end_date') || 
+        urlParams.has('date_type') || urlParams.has('status') || 
+        urlParams.has('area') || urlParams.has('committee') || 
+        urlParams.has('concession_type')) {
+      advancedFilters.classList.remove('hidden');
+      filterIcon.textContent = '▲';
+    }
+  });
+</script>
 
 {% endblock %}

@@ -310,8 +310,7 @@ class User(AbstractUser):
         ordering = ["first_name", "last_name"]
         unique_together = [
             ("organization", "email"),
-            ("organization", "cpf"),
-            ("organization", "cnpj"),
+            ("organization", "cpf", "cnpj"),
         ]
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
@@ -326,20 +325,14 @@ class User(AbstractUser):
                     "Já existe um usuário com este email nesta organização"
                 )
 
-        # Check if CPF is unique within the organization
-        if self.cpf:
-            existing = User.objects.filter(cpf=self.cpf).exclude(pk=self.pk)
+        # Check if document is unique within the organization
+        if self.cpf or self.cnpj:
+            existing = User.objects.filter(
+                organization=self.organization, cpf=self.cpf, cnpj=self.cnpj
+            ).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
-                    "Já existe um usuário com este CPF nesta organização"
-                )
-
-        # Check if CNPJ is unique within the organization
-        if self.cnpj:
-            existing = User.objects.filter(cnpj=self.cnpj).exclude(pk=self.pk)
-            if existing.exists():
-                raise ValidationError(
-                    "Já existe um usuário com este CNPJ nesta organização"
+                    "Já existe um usuário com este documento nesta organização"
                 )
 
         # Ensure user has either CPF or CNPJ, but not both
@@ -473,3 +466,6 @@ class Committee(OrganizationTenantBaseClass):
     class Meta:
         verbose_name = "Comitê"
         verbose_name_plural = "Comitês"
+
+    def __str__(self) -> str:
+        return str(self.name)
