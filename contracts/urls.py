@@ -36,6 +36,13 @@ from contracts.views import (
     update_contract_goal_view,
     update_contract_interested_view,
     update_contract_item_view,
+    ContractDetailsTabView,
+    ContractInterestedsTabView,
+    ContractAccountsTabView,
+    ContractGoalsTabView,
+    ContractItemsTabView,
+    ContractAccountabilityTabView,
+    ContractExecutionTabView,
 )
 
 urlpatterns = [
@@ -45,6 +52,41 @@ urlpatterns = [
         "detail/<uuid:pk>/",
         ContractsDetailView.as_view(),
         name="contracts-detail",
+    ),
+    path(
+        "detail/<uuid:pk>/details/",
+        ContractDetailsTabView.as_view(),
+        name="contracts-details-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/interesteds/",
+        ContractInterestedsTabView.as_view(),
+        name="contracts-interesteds-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/accounts/",
+        ContractAccountsTabView.as_view(),
+        name="contracts-accounts-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/goals/",
+        ContractGoalsTabView.as_view(),
+        name="contracts-goals-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/items/",
+        ContractItemsTabView.as_view(),
+        name="contracts-items-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/accountability/",
+        ContractAccountabilityTabView.as_view(),
+        name="contracts-accountability-tab",
+    ),
+    path(
+        "detail/<uuid:pk>/execution/",
+        ContractExecutionTabView.as_view(),
+        name="contracts-execution-tab",
     ),
     path(
         "detail/<uuid:pk>/workplan/",

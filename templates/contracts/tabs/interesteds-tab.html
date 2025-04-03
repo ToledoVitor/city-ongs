@@ -1,5 +1,7 @@
+{% extends "contracts/tab_base.html" %}
 {% load humanize %}
 
+{% block tab_content %}
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
         <thead class="text-xs text-white uppercase bg-gray-500">
@@ -237,3 +239,4 @@
     {% endif %}
 
 </div>
+{% endblock %}

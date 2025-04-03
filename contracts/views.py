@@ -221,20 +221,6 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                 "inversting_account",
                 "checking_account",
             )
-            .prefetch_related(
-                "accountabilities",
-                "addendums",
-                "items",
-                "items__items_reviews",
-                "items__items_reviews__reviewer",
-                "interested_parts",
-                "interested_parts__user",
-                "goals",
-                "goals__goals_reviews",
-                "goals__goals_reviews__reviewer",
-                "goals",
-                "goals__steps",
-            )
         )
 
     def get_object(self, queryset=None):
@@ -243,112 +229,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         ).get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
-        # try to get from cache
-        cache_key = get_contract_detail_key(self.object.id)
-        cached_data = cache.get(cache_key)
-
-        if cached_data is None:
-            # Create a fresh context instead of using super()
-            context = {}
-
-            # Convert contract to cacheable format, excluding the file field
-            contract_dict = model_to_dict(self.object, exclude=["file"])
-            if self.object.file:
-                contract_dict["file_url"] = self.object.file.url
-            context["contract"] = contract_dict
-
-            # Convert executions to cacheable format
-            executions = (
-                self.object.executions.filter(deleted_at__isnull=True)
-                .annotate(
-                    count_activities=Count(
-                        "activities",
-                        filter=Q(activities__deleted_at__isnull=True),
-                        distinct=True,
-                    ),
-                    count_files=Count(
-                        "files",
-                        filter=Q(files__deleted_at__isnull=True),
-                        distinct=True,
-                    ),
-                )
-                .prefetch_related("activities", "files")
-                .order_by("-year", "-month")[:12]
-            )
-
-            # Convert executions to cacheable format
-            context["executions"] = [
-                {
-                    **model_to_dict(execution, exclude=["file"]),
-                    "count_activities": execution.count_activities,
-                    "count_files": execution.count_files,
-                    "file_url": execution.file.url if execution.file else None,
-                }
-                for execution in executions
-            ]
-
-            # Accountabilities with light caching for list view
-            accountabilities = (
-                self.object.accountabilities.filter(deleted_at__isnull=True)
-                .prefetch_related(
-                    "revenues",
-                    "expenses",
-                )
-                .annotate(
-                    count_revenues=Count(
-                        "revenues",
-                        filter=Q(revenues__deleted_at__isnull=True)
-                        & Q(deleted_at__isnull=True),
-                        distinct=True,
-                    ),
-                    count_expenses=Count(
-                        "expenses",
-                        filter=Q(expenses__deleted_at__isnull=True)
-                        & Q(deleted_at__isnull=True),
-                        distinct=True,
-                    ),
-                )[:12]
-            )
-
-            # Convert accountabilities to cacheable format
-            context["accountabilities"] = [
-                {
-                    **model_to_dict(accountability),
-                    "count_revenues": accountability.count_revenues,
-                    "count_expenses": accountability.count_expenses,
-                }
-                for accountability in accountabilities
-            ]
-
-            # Value requests with cacheable conversion
-            value_requests = ContractItemNewValueRequest.objects.filter(
-                raise_item__contract=self.object,
-                status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
-            ).select_related("raise_item")[:12]
-
-            # Convert value requests to cacheable format
-            context["value_requests"] = [
-                model_to_dict(request) for request in value_requests
-            ]
-
-            # Items totals
-            context["items_totals"] = self.object.items.aggregate(
-                total_month=Coalesce(Sum("month_expense"), Value(Decimal("0.00"))),
-                total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
-            )
-
-            # Store in cache
-            cache.set(cache_key, context, CACHE_TIMES["DETAIL"])
-
-            # Now merge with the standard context data
-            standard_context = super().get_context_data(**kwargs)
-            context.update(standard_context)
-            return context
-
-        # Merge cached data with standard context
-        standard_context = super().get_context_data(**kwargs)
-        cached_data.update(standard_context)
-        return cached_data
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        return context
 
     def post(self, request, pk, *args, **kwargs):
         if not self.request.POST.get("csrfmiddlewaretoken"):
@@ -1712,3 +1595,241 @@ def contract_item_purchase_file_delete_view(request, pk):
         )
 
     return redirect("contracts:item-purchases", pk=file.item.contract.id)
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractDetailsTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/details-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractInterestedsTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/interesteds-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+            .prefetch_related(
+                "interested_parts",
+                "interested_parts__user",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractAccountsTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/banks-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractGoalsTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/goals-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+            .prefetch_related(
+                "goals",
+                "goals__goals_reviews",
+                "goals__goals_reviews__reviewer",
+                "goals__steps",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        context["csrf_token"] = get_token(self.request)
+        return context
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractItemsTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/items-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+            .prefetch_related(
+                "items",
+                "items__items_reviews",
+                "items__items_reviews__reviewer",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        context["csrf_token"] = get_token(self.request)
+        return context
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractAccountabilityTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/accountability-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+            .prefetch_related(
+                "accountabilities",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        context["csrf_token"] = get_token(self.request)
+        return context
+
+
+@method_decorator(log_view_access, name="dispatch")
+class ContractExecutionTabView(LoginRequiredMixin, DetailView):
+    model = Contract
+    template_name = "contracts/tabs/execution-tab.html"
+    context_object_name = "contract"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "contractor_company",
+                "contractor_manager",
+                "hired_company",
+                "hired_manager",
+                "organization",
+                "inversting_account",
+                "checking_account",
+            )
+        )
+
+    def get_object(self, queryset=None):
+        return self.model.objects.filter(
+            area__in=self.request.user.areas.all(),
+        ).get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        context["csrf_token"] = get_token(self.request)
+        return context

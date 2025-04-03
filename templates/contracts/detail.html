@@ -44,168 +44,83 @@
   <ul
     class="flex flex-wrap -mb-px text-sm font-medium text-center"
     id="default-styled-tab"
-    data-tabs-toggle="#default-styled-tab-content" 
-    data-tabs-active-classes="text-white hover:text-gray-800 rounded-t-lg active bg-blue-600"
-    data-tabs-inactive-classes="border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
     role="tablist"
   >
     <li class="me-2" role="presentation">
-      <button
-        id="details-tab"
-        class="inline-block p-4 border-b-2 rounded-t-lg"
-        data-tabs-target="#details"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-details-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-details-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="details"
-        aria-selected="false"
       >
         Detalhes
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="interesteds-tab"
-        data-tabs-target="#interesteds"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-interesteds-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-interesteds-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="interesteds"
-        aria-selected="false"
       >
         Interessados
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="accounts-tab"
-        data-tabs-target="#accounts"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-accounts-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-accounts-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="accounts"
-        aria-selected="false"
       >
         Contas
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="goals-tab"
-        data-tabs-target="#goals"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-goals-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-goals-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="goals"
-        aria-selected="false"
       >
         Metas
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="items-tab"
-        data-tabs-target="#items"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-items-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-items-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="items"
-        aria-selected="false"
       >
         Itens
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="accountability-tab"
-        data-tabs-target="#accountability"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-accountability-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-accountability-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="accountability"
-        aria-selected="false"
       >
         Prestação
-      </button>
+      </a>
     </li>
 
     <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="execution-tab"
-        data-tabs-target="#execution"
-        type="button"
+      <a
+        href="{% url 'contracts:contracts-execution-tab' pk=contract.id %}"
+        class="inline-block p-4 border-b-2 rounded-t-lg {% if request.resolver_match.url_name == 'contracts-execution-tab' %}text-white bg-blue-600{% else %}text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800{% endif %}"
         role="tab"
-        aria-controls="execution"
-        aria-selected="false"
       >
         Execução
-      </button>
+      </a>
     </li>
-  
-    {% comment %} <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="addendums-tab"
-        data-tabs-target="#addendums"
-        type="button"
-        role="tab"
-        aria-controls="addendums"
-        aria-selected="false"
-      >
-        Aditivos
-      </button>
-    </li> {% endcomment %}
   </ul>
 </div>
 
-<div class="mr-10" id="default-styled-tab-content">
-  <!-- Details Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
-    {% include 'contracts/tabs/details-tab.html' with contract=contract %}
-  </div>
-
-  <!-- Interesteds Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="interesteds" role="tabpanel" aria-labelledby="interesteds-tab">
-    {% include 'contracts/tabs/interesteds-tab.html' with contract=contract %}
-  </div>
-
-  <!-- Bank Accounts Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
-    {% include 'contracts/tabs/banks-tab.html' with contract=contract %}
-  </div>
-
-  <!-- Goals Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
-    {% include 'contracts/tabs/goals-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>  
-
-  <!-- Items Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="items" role="tabpanel" aria-labelledby="items-tab">
-    {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>  
-
-  <!-- Month Accountability Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
-    {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>
-  
-  <!-- Execution Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="execution" role="tabpanel" aria-labelledby="execution-tab">
-    {% include 'contracts/tabs/execution-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-  </div>
-
-  <!-- Addendums Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-200" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
-    <p class="text-lg my-4 font-bold text-black">Nenhum aditivo cadastrado.</p>
-  </div>
-  
+<div class="mr-10">
+  {% block tab_content %}{% endblock %}
 </div>
-
 
 <p class="text-3xl mt-6 font-bold">
   Histórico de Edições
