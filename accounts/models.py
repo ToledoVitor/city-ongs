@@ -10,7 +10,7 @@ from simple_history.models import HistoricalRecords
 from utils.fields import LowerCaseEmailField
 from utils.managers import TenantManagerAllObjects
 from utils.models import BaseModel
-from utils.validators import validate_cpf, validate_cpf_cnpj
+from utils.validators import validate_cnpj, validate_cpf, validate_cpf_cnpj
 
 
 class CityHall(BaseModel):
@@ -238,7 +238,7 @@ class User(AbstractUser):
     cnpj = models.CharField(
         verbose_name="CNPJ",
         max_length=18,
-        validators=[validate_cpf_cnpj],
+        validators=[validate_cnpj],
         help_text="Número do CNPJ do usuário. Deve ser único dentro da organização.",
         null=True,
         blank=True,

@@ -112,6 +112,7 @@ class CustomUserAdmin(BaseModelAdmin):
                     "groups",
                     "user_permissions",
                     "areas",
+                    "organization",
                 ),
             },
         ),

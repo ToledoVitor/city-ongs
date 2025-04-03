@@ -47,7 +47,6 @@ class AccountabilityAdmin(BaseModelAdmin):
                     "organization",
                     "contract",
                     "status",
-                    "description",
                 )
             },
         ),
