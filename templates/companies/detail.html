@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<div class="flex justify-between items-center mb-4">
+  <p class="text-3xl font-bold">
+    {{ company.name }}
+  </p>
+  {% if user.has_admin_access %}
+  <a href="{% url 'contracts:companies-update' company.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
+    <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+    </svg>
+    Editar Empresa
+  </a>
+  {% endif %}
+</div>
+
+<nav class="flex mb-6" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Início
+      </a>
+    </li>
+    <li class="inline-flex items-center">
+      <a href="{% url 'contracts:companies-list' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        Empresas
+      </a>
+    </li>
+    <li aria-current="page">
+      <div class="flex items-center">
+        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">{{ company.name }}</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+<div class="bg-white shadow-md rounded-lg p-6 mb-6">
+  <h2 class="text-xl font-semibold mb-4">Informações da Empresa</h2>
+  <div class="grid gap-6 mb-6 md:grid-cols-2">
+    <div>
+      <p class="text-sm text-gray-500">CNPJ</p>
+      <p class="text-base">{{ company.cnpj }}</p>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Telefone</p>
+      <p class="text-base">{{ company.phone_number }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white shadow-md rounded-lg p-6">
+  <h2 class="text-xl font-semibold mb-4">Endereço</h2>
+  <div class="grid gap-6 mb-6 md:grid-cols-2">
+    <div>
+      <p class="text-sm text-gray-500">Logradouro</p>
+      <p class="text-base">{{ company.street }}, {{ company.number }}</p>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Complemento</p>
+      <p class="text-base">{{ company.complement|default:"-" }}</p>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Bairro</p>
+      <p class="text-base">{{ company.district }}</p>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">Cidade/UF</p>
+      <p class="text-base">{{ company.city }}/{{ company.uf }}</p>
+    </div>
+    <div>
+      <p class="text-sm text-gray-500">CEP</p>
+      <p class="text-base">{{ company.postal_code }}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %} 

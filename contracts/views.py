@@ -38,6 +38,7 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
+    CompanyUpdateForm,
 )
 from contracts.models import (
     Company,
@@ -642,6 +643,43 @@ class CompanyCreateView(LoginRequiredMixin, TemplateView):
                 return redirect("contracts:companies-list")
 
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class CompanyUpdateView(LoginRequiredMixin, UpdateView):
+    model = Company
+    template_name = "companies/update.html"
+    form_class = CompanyUpdateForm
+    login_url = "/auth/login"
+    success_url = reverse_lazy("contracts:companies-list")
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().select_related("organization")
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            company = form.save(commit=False)
+            company.phone_number = str(form.cleaned_data["phone_number"].national_number)
+            company.save()
+
+            logger.info(f"{self.request.user.id} - Updated company")
+            _ = ActivityLog.objects.create(
+                user=self.request.user,
+                user_email=self.request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_COMPANY,
+                target_object_id=company.id,
+                target_content_object=company,
+            )
+            return redirect("contracts:companies-list")
+
+
+class CompanyDetailView(LoginRequiredMixin, DetailView):
+    model = Company
+    template_name = "companies/detail.html"
+    context_object_name = "company"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().select_related("organization")
 
 
 class ContractItemDetailView(LoginRequiredMixin, DetailView):

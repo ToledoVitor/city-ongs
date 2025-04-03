@@ -276,6 +276,36 @@ class CompanyCreateForm(forms.ModelForm):
         }
 
 
+class CompanyUpdateForm(forms.ModelForm):
+    phone_number = CustomPhoneNumberField()
+
+    class Meta:
+        model = Company
+        fields = [
+            "name",
+            "phone_number",
+            # Address
+            "street",
+            "number",
+            "complement",
+            "district",
+            "city",
+            "uf",
+            "postal_code",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(),
+            "street": BaseCharFieldFormWidget(),
+            "number": BaseNumberFormWidget(),
+            "complement": BaseCharFieldFormWidget(required=False),
+            "district": BaseCharFieldFormWidget(),
+            "city": BaseCharFieldFormWidget(),
+            "uf": BaseSelectFormWidget(),
+            "postal_code": BaseNumberFormWidget(),
+        }
+
+
 class ContractExecutionCreateForm(forms.ModelForm):
     class Meta:
         model = ContractExecution

@@ -34,114 +34,116 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome do favorecido ou documento..." %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+<div class="relative">
+  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs text-white uppercase bg-gray-500">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    Nome
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Documento
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Atualizado em
-                </th>
-                <th scope="col" class="px-6 py-3" />
+      <thead class="text-xs uppercase bg-gray-500 text-white">
+        <tr>
+          <th scope="col" class="px-6 py-3">
+            Nome
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Documento
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Atualizado em
+          </th>
+          <th scope="col" class="px-6 py-3" />
+        </tr>
+      </thead>
+      <tbody>
+        {% if favoreds_list %}
+          {% for favored in favoreds_list %}
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
+              {{ favored.name }}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+              {{ favored.document }}
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+              {{ favored.updated_at.date }}
+            </td>
+            <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+              {% if not user.is_committee_member %}
+                <a
+                  href="{% url 'accountability:favoreds-update' favored.id %}"
+                  class="
+                    px-3
+                    py-2
+                    text-sm
+                    font-medium
+                    text-center
+                    inline-flex
+                    items-center
+                    text-white
+                    rounded-lg
+                    focus:ring-4
+                    focus:outline-none
+                    bg-gray-600
+                    hover:bg-gray-700
+                    focus:ring-gray-800
+                  "
+                >
+                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                  </svg>
+                  Editar
+                </a>
+              {% endif %}
+              </td>
             </tr>
-        </thead>
-        <tbody>
-            {% if favoreds_list %}
-              {% for favored in favoreds_list %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ favored.name }}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ favored.document }}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ favored.updated_at.date }}
-                    </td>
-                    <td class="px-6 py-4 text-sm flex justify-end">
-                      {% if not user.is_committee_member %}
-                      <a
-                        href="{% url 'accountability:favoreds-update' favored.id %}"
-                      >
-                        <button
-                          class="
-                            px-3
-                            py-2
-                            text-sm
-                            font-medium
-                            text-center
-                            inline-flex
-                            items-center
-                            text-white
-                            rounded-lg
-                            focus:ring-4
-                            focus:outline-none
-                            bg-blue-600
-                            hover:bg-blue-700
-                            focus:ring-blue-800
-                          "
-                        >
-                        Editar
-                        </button>
-                      </a>
-                      {% endif %}
-                    </td>
-                  </tr>
-              {% endfor %}
-            {% else %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhum resultado encontrado
-                </th>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-              </tr>
-            {% endif %}     
-        </tbody>
+          {% endfor %}
+        {% else %}
+          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
+            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+              Nenhum resultado encontrado
+            </th>
+            <td class="px-6 py-4">
+              -
+            </td>
+            <td class="px-6 py-4">
+              -
+            </td>
+            <td class="px-6 py-4">
+              -
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
     </table>
+  </div>
+
+  {% if not user.is_committee_member %}
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+      <a
+        href="{% url 'accountability:favoreds-create' %}"
+        class="
+          px-3
+          py-2
+          text-sm
+          font-medium
+          text-center
+          inline-flex
+          items-center
+          text-white
+          rounded-lg
+          focus:ring-4
+          focus:outline-none
+          bg-blue-600
+          hover:bg-blue-700
+          focus:ring-blue-800
+        "
+      >
+        Adicionar novo
+        <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+      </a>
+    </div>
+  {% endif %}
   
-    {% if not user.is_committee_member %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
-        <a
-          href="{% url 'accountability:favoreds-create' %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Adicionar novo
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
-  
-    {% include 'commons/paginator.html' with page_obje=page_obj %}
+  {% include 'commons/paginator.html' with page_obje=page_obj %}
 
 </div>
   

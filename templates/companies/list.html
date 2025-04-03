@@ -37,57 +37,106 @@
 <div class="relative">
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs text-white uppercase bg-gray-500">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    Empresa
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    CNPJ
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Telefone
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Endereço
-                </th>
+      <thead class="text-xs uppercase bg-gray-500 text-white">
+        <tr>
+          <th scope="col" class="px-6 py-4 font-medium">
+            Empresa
+          </th>
+          <th scope="col" class="px-6 py-4 font-medium">
+            CNPJ
+          </th>
+          <th scope="col" class="px-6 py-4 font-medium">
+            Telefone
+          </th>
+          <th scope="col" class="px-6 py-4 font-medium">
+            Endereço
+          </th>
+          <th scope="col" class="px-6 py-4 font-medium">
+            <span class="sr-only">Ações</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if companies_list %}
+          {% for company in companies_list %}
+            <tr class="bg-white border-b hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                {{ company.name }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                {{ company.cnpj }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                {{ company.masked_phone }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
+                {{ company.full_address }}
+              </td>
+              <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+                <div class="flex gap-2">
+                  <a
+                    href="{% url 'contracts:companies-detail' company.id %}"
+                    class="
+                    px-3
+                    py-2
+                    text-sm
+                    font-medium
+                    text-center
+                    inline-flex
+                    items-center
+                    text-white
+                    rounded-lg
+                    focus:ring-4
+                    focus:outline-none
+                    bg-blue-600
+                    hover:bg-blue-700
+                    focus:ring-blue-800
+                  "
+                >
+                    <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                    </svg>
+                    Visualizar
+                  </a>
+                  {% if user.has_admin_access %}
+                  <a
+                    href="{% url 'contracts:companies-update' company.id %}"
+                    class="
+                      px-3
+                      py-2
+                      text-sm
+                      font-medium
+                      text-center
+                      inline-flex
+                      items-center
+                      text-white
+                      rounded-lg
+                      focus:ring-4
+                      focus:outline-none
+                      bg-gray-600
+                      hover:bg-gray-700
+                      focus:ring-gray-800
+                    "
+                  >
+                    <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                    </svg>
+                    Editar
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
             </tr>
-        </thead>
-        <tbody>
-            {% if companies_list %}
-              {% for company in companies_list %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                    <td class="px-6 py-4 text-base text-black max-w-60">
-                      {{ company.name }}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ company.cnpj }}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-black">
-                      {{ company.masked_phone }}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-black max-w-60">
-                      {{ company.full_address }}
-                    </td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhum resultado encontrado
-                </th>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                  -
-                </td>
-              </tr>
-            {% endif %}     
-        </tbody>
+          {% endfor %}
+        {% else %}
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900" colspan="5">
+              Nenhum resultado encontrado
+            </td>
+          </tr>
+        {% endif %}     
+      </tbody>
     </table>
   </div>
 
