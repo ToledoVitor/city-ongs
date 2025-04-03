@@ -154,7 +154,9 @@ def update_accountability_revenue_view(request, pk):
     accountability = revenue.accountability
 
     if request.method == "POST":
-        form = RevenueForm(request.POST, instance=revenue)
+        form = RevenueForm(
+            request.POST, instance=revenue, accountability=accountability
+        )
         if form.is_valid():
             with transaction.atomic():
                 revenue = form.save()
@@ -169,7 +171,7 @@ def update_accountability_revenue_view(request, pk):
                 "accountability:accountability-detail", pk=accountability.pk
             )
     else:
-        form = RevenueForm(instance=revenue)
+        form = RevenueForm(instance=revenue, accountability=accountability)
 
     return render(
         request,
@@ -189,7 +191,9 @@ def update_accountability_expense_view(request, pk):
     accountability = expense.accountability
 
     if request.method == "POST":
-        form = ExpenseForm(request.POST, instance=expense)
+        form = ExpenseForm(
+            request.POST, instance=expense, accountability=accountability
+        )
         if form.is_valid():
             with transaction.atomic():
                 expense = form.save()
@@ -204,7 +208,7 @@ def update_accountability_expense_view(request, pk):
                 "accountability:accountability-detail", pk=accountability.pk
             )
     else:
-        form = ExpenseForm(instance=expense)
+        form = ExpenseForm(instance=expense, accountability=accountability)
 
     return render(
         request,
