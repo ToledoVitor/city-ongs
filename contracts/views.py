@@ -7,12 +7,9 @@ from typing import Any
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.query import QuerySet
-from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -56,10 +53,6 @@ from contracts.models import (
     ContractItemReview,
     ContractItemSupplement,
     ContractMonthTransfer,
-)
-from utils.cache_keys import (
-    CACHE_TIMES,
-    get_contract_detail_key,
 )
 from utils.choices import StatusChoices
 from utils.logging import log_database_operation, log_view_access
