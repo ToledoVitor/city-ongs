@@ -1,5 +1,7 @@
 import logging
 from typing import Any
+from accounts.models import Area
+from contracts.models import Contract
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,7 +15,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, TemplateView, UpdateView
+from django.views.generic import ListView, TemplateView, UpdateView, DetailView
 
 from accountability.forms import (
     AccountabilityCreateForm,
@@ -38,7 +40,6 @@ from accountability.models import (
 )
 from accountability.services import export_xlsx_model, import_xlsx_model
 from activity.models import ActivityLog
-from contracts.models import Contract
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
 
@@ -1525,3 +1526,112 @@ def delete_revenue_file_view(request, pk):
         )
 
     return redirect("accountability:accountability-detail", pk=accountability.pk)
+
+
+class BeneficiariesDashboardView(LoginRequiredMixin, ListView):
+    """View to display a dashboard of all beneficiaries with expenses."""
+    
+    model = Favored
+    template_name = "accountability/beneficiaries/dashboard.html"
+    context_object_name = "beneficiaries"
+    paginate_by = 20
+    
+    def get_queryset(self) -> QuerySet[Any]:
+        queryset = self.model.objects.filter(
+            organization=self.request.user.organization,
+            expenses__deleted_at__isnull=True
+        ).distinct()
+        
+        search_query = self.request.GET.get("search", "")
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | 
+                Q(document__icontains=search_query)
+            )
+        
+        area_id = self.request.GET.get("area")
+        if area_id:
+            queryset = queryset.filter(
+                expenses__accountability__contract__area_id=area_id
+            )
+        
+        contract_id = self.request.GET.get("contract")
+        if contract_id:
+            queryset = queryset.filter(
+                expenses__accountability__contract_id=contract_id
+            )
+        
+        queryset = queryset.annotate(
+            total_cost=Sum("expenses__value", filter=Q(expenses__deleted_at__isnull=True))
+        ).filter(total_cost__gt=0)  # Only include beneficiaries with expenses
+        
+        return queryset.order_by("-total_cost")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context["areas"] = Area.objects.filter(
+            organization=self.request.user.organization
+        ).order_by("name")
+        
+        context["contracts"] = Contract.objects.filter(
+            organization=self.request.user.organization
+        ).order_by("name")
+        
+        context["selected_area"] = self.request.GET.get("area")
+        context["selected_contract"] = self.request.GET.get("contract")
+        context["search_query"] = self.request.GET.get("search", "")
+        
+        return context
+
+
+class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
+    """View to display detailed information about a beneficiary."""
+    
+    model = Favored
+    template_name = "accountability/beneficiaries/detail.html"
+    context_object_name = "beneficiary"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        beneficiary = self.get_object()
+        
+        # Get expenses for this beneficiary
+        from accountability.models import Expense
+        expenses = Expense.objects.filter(
+            favored=beneficiary,
+            deleted_at__isnull=True
+        ).select_related("accountability__contract").order_by("-competency")
+        
+        # Get contracts with costs
+        from contracts.models import Contract
+        contracts = Contract.objects.filter(
+            accountabilities__expenses__favored=beneficiary,
+            accountabilities__expenses__deleted_at__isnull=True
+        ).distinct()
+        
+        contract_costs = []
+        for contract in contracts:
+            # Calculate cost for this contract
+            cost = Expense.objects.filter(
+                favored=beneficiary,
+                accountability__contract=contract,
+                deleted_at__isnull=True
+            ).aggregate(total=Sum('value'))['total'] or 0
+            
+            contract_costs.append({
+                "contract": contract,
+                "cost": cost
+            })
+        
+        # Calculate total cost
+        total_cost = Expense.objects.filter(
+            favored=beneficiary,
+            deleted_at__isnull=True
+        ).aggregate(total=Sum('value'))['total'] or 0
+        
+        context["contract_costs"] = contract_costs
+        context["total_cost"] = total_cost
+        context["expenses"] = expenses
+        
+        return context

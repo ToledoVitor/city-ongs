@@ -35,6 +35,8 @@ from accountability.views import (
     update_favored_view,
     upload_expense_file_view,
     upload_revenue_file_view,
+    BeneficiariesDashboardView,
+    BeneficiaryDetailView,
 )
 
 urlpatterns = [
@@ -199,5 +201,15 @@ urlpatterns = [
         "revenue-file/<uuid:pk>/delete/",
         delete_revenue_file_view,
         name="revenue-file-delete",
+    ),
+    path(
+        "beneficiaries/dashboard/",
+        BeneficiariesDashboardView.as_view(),
+        name="beneficiaries-dashboard",
+    ),
+    path(
+        "beneficiaries/<uuid:pk>/",
+        BeneficiaryDetailView.as_view(),
+        name="beneficiary-detail",
     ),
 ]
