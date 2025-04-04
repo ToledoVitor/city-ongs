@@ -63,7 +63,8 @@ def get_multiple_cached_data(
         Dictionary of cached/fresh data
     """
     try:
-        with cache.get_client().pipeline() as pipe:
+        redis_client = cache.client.get_client()
+        with redis_client.pipeline() as pipe:
             for key in keys:
                 pipe.get(key)
             values = pipe.execute()
@@ -77,7 +78,7 @@ def get_multiple_cached_data(
             timeout = timeout or settings.CACHE_TIMEOUTS.get(cache_type, 300)
 
             # Cache the fresh data
-            with cache.get_client().pipeline() as pipe:
+            with redis_client.pipeline() as pipe:
                 for key, value in fresh_data.items():
                     pipe.set(key, value, timeout=timeout)
                 pipe.execute()

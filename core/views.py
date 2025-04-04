@@ -92,18 +92,15 @@ def force_password_change_view(request: HttpRequest) -> HttpResponse:
 def test_redis(request):
     try:
         start_time = time.time()
+        redis_client = cache.client.get_client()
 
-        # Use pipeline for better performance
-        with cache.get_client().pipeline() as pipe:
-            # Test setting a value
-            pipe.set("test_key", "test_value", timeout=60)
-            # Test getting the value
-            pipe.get("test_key")
-            # Execute all commands at once
-            _, value = pipe.execute()
+        # Test setting a value
+        redis_client.set("test_key", "test_value", ex=60)
+        # Test getting the value
+        value = redis_client.get("test_key")
 
         end_time = time.time()
-        operation_time = (end_time - start_time) * 1000  # Convert to milliseconds
+        operation_time = (end_time - start_time) * 1000
 
         return JsonResponse(
             {
