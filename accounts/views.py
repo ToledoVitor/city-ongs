@@ -610,35 +610,35 @@ class OrganizationDocumentListView(LoginRequiredMixin, ListView):
 class OrganizationDocumentCreateView(LoginRequiredMixin, CreateView):
     model = OrganizationDocument
     form_class = OrganizationDocumentForm
-    template_name = 'accounts/org_documents/create.html'
+    template_name = "accounts/org_documents/create.html"
 
     def get_success_url(self):
-        kwargs = {'organization_id': self.request.user.organization.id}
-        return reverse_lazy('accounts:document_list', kwargs=kwargs)
+        kwargs = {"organization_id": self.request.user.organization.id}
+        return reverse_lazy("accounts:document_list", kwargs=kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['organization'] = self.request.user.organization
+        kwargs["organization"] = self.request.user.organization
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['organization'] = self.request.user.organization
+        context["organization"] = self.request.user.organization
         return context
 
 
 class OrganizationDocumentUpdateView(LoginRequiredMixin, UpdateView):
     model = OrganizationDocument
     form_class = OrganizationDocumentForm
-    template_name = 'accounts/org_documents/create.html'
+    template_name = "accounts/org_documents/create.html"
 
     def get_success_url(self):
-        kwargs = {'organization_id': self.request.user.organization.id}
-        return reverse_lazy('accounts:document_list', kwargs=kwargs)
+        kwargs = {"organization_id": self.request.user.organization.id}
+        return reverse_lazy("accounts:document_list", kwargs=kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['organization'] = self.request.user.organization
+        context["organization"] = self.request.user.organization
         return context
 
 

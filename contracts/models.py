@@ -963,7 +963,13 @@ class ContractExecution(
     class Meta:
         verbose_name = "Relatório de Execução"
         verbose_name_plural = "Relatórios de Execução"
-        unique_together = ("contract", "month", "year")
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("contract", "month", "year"),
+                name="unique_execution_per_contract_month_year",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"Execution {self.month}/{self.year}"

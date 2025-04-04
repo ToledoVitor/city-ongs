@@ -2,80 +2,56 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs text-white uppercase bg-gray-500">
+        <thead class="text-xs uppercase bg-gray-500 text-white">
             <tr>
-              <th scope="col" class="px-6 py-3" />
-              <th scope="col" class="px-6 py-3 text-left">
+              <th scope="col" class="px-4 py-4 font-medium w-[180px]">
+                <span class="sr-only">Ações</span>
+              </th>
+              <th scope="col" class="px-6 py-4 font-medium w-[40%]">
                 Usuário
               </th>
-              <th scope="col" class="px-6 py-3 text-left">
+              <th scope="col" class="px-6 py-4 font-medium">
                 Interesse
               </th>
-          </tr>
+            </tr>
         </thead>
         <tbody>
             {% if contract.interested_parts.count %}
               {% for interested in contract.interested_parts.all %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center">
-                  <td scope="row" class="flex justify-center align-center py-4 text-sm whitespace-nowrap text-black">
-                    <button
-                      type="button"
-                      data-modal-target="interesteds-delete-{{ interested.id}}"
-                      data-modal-toggle="interesteds-delete-{{ interested.id}}"
-                      class="
-                        text-white
-                        ml-2
-                        bg-red-600
-                        hover:bg-red-600
-                        focus:ring-4
-                        focus:outline-none
-                        focus:ring-red-600
-                        font-medium
-                        rounded-full
-                        text-sm
-                        p-2.5
-                        text-center
-                        inline-flex
-                        items-center
-                        me-2
-                      "
-                    >
-                      <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
-                      </svg>
-                    </button>
-
-                    {% if not user.is_committee_member %}
-                      <a
-                        href="{% url 'contracts:contracts-interesteds-update' contract.id interested.id %}"
-                        class="
-                          ml-4
-                          px-3
-                          py-2
-                          text-sm
-                          font-medium
-                          text-center
-                          inline-flex
-                          items-center
-                          text-white
-                          rounded-lg
-                          focus:ring-4
-                          focus:outline-none
-                          bg-blue-600
-                          hover:bg-blue-700
-                          focus:ring-blue-800
-                        "
+              <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                  <td class="px-2 py-4 text-base text-sm sticky left-0 z-10 bg-gray-300 hover:bg-gray-400 border-r border-gray-300 w-[180px]">
+                    <div class="flex gap-1 justify-center">
+                      <button
+                        type="button"
+                        data-modal-target="interesteds-delete-{{ interested.id}}"
+                        data-modal-toggle="interesteds-delete-{{ interested.id}}"
+                        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-red-800"
                       >
-                        Editar
-                      </a>
-                    {% endif %}
+                        <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                        </svg>
+                        Remover
+                      </button>
+
+                      {% if not user.is_committee_member %}
+                        <a
+                          href="{% url 'contracts:contracts-interesteds-update' contract.id interested.id %}"
+                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
+                        >
+                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                          </svg>
+                          Editar
+                        </a>
+                      {% endif %}
+                    </div>
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black text-left">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
                     {{ interested.user.get_full_name }}
                   </td>
                   
-                  <td class="px-6 py-4 text-sm text-black text-left">
+                  <td class="px-6 py-4 text-sm text-gray-900">
                     {{ interested.interest_label }}
                   </td>
               </tr>
@@ -85,27 +61,10 @@
                 tabindex="-1"
                 data-modal-backdrop="static"
                 aria-hidden="true"
-                class="
-                  hidden
-                  overflow-y-auto
-                  overflow-x-hidden
-                  fixed
-                  top-0
-                  right-0
-                  left-0
-                  z-50
-                  justify-center
-                  items-center
-                  w-full
-                  md:inset-0
-                  h-[calc(100%-1rem)]
-                  max-h-full
-                "
+                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
               >
                 <div class="relative p-4 w-full max-w-md max-h-full">
-                    <!-- Modal content -->
                     <div class="relative rounded-lg shadow bg-gray-300">
-                      <!-- Modal header -->
                         <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
                             <h3 class="text-xl font-semibold text-black">
                                 Deletar Interessado?
@@ -113,21 +72,7 @@
                             <button
                               type="button"
                               data-modal-hide="interesteds-delete-{{ interested.id}}"
-                              class="
-                                end-2.5
-                                text-black
-                                hover:bg-gray-600
-                                hover:text-black
-                                bg-transparent
-                                rounded-lg
-                                text-sm
-                                w-6
-                                h-6
-                                ms-auto
-                                inline-flex
-                                justify-center
-                                items-center
-                              "
+                              class="end-2.5 text-black hover:bg-gray-600 hover:text-black bg-transparent rounded-lg text-sm w-6 h-6 ms-auto inline-flex justify-center items-center"
                             >
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -135,9 +80,8 @@
                                 <span class="sr-only">Fechar modal</span>
                             </button>
                         </div>
-                        <!-- Modal body -->
                         <div class="p-4 md:p-5">
-                            <form class="space-y-4"  method="post" action="{% url 'contracts:interested-delete' interested.pk %}">
+                            <form class="space-y-4" method="post" action="{% url 'contracts:interested-delete' interested.pk %}">
                                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                 <input type="hidden" name="interested_id" value="{{ interested.id }}">
 
@@ -147,39 +91,13 @@
                                   <button
                                     type="button"
                                     data-modal-hide="interesteds-delete-{{ interested.id}}"
-                                    class="
-                                      w-full
-                                      text-white
-                                      bg-gray-700
-                                      hover:bg-gray-800
-                                      focus:ring-4
-                                      focus:outline-none
-                                      focus:ring-gray-300
-                                      font-medium rounded-lg
-                                      text-sm
-                                      px-5
-                                      py-2.5
-                                      text-center
-                                    "
+                                    class="w-full text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                   >
                                       Cancelar
                                   </button>
                                   <button
                                       type="submit"
-                                      class="
-                                        w-full
-                                        text-white
-                                        bg-red-700
-                                        hover:bg-red-800
-                                        focus:ring-4
-                                        focus:outline-none
-                                        focus:ring-red-300
-                                        font-medium rounded-lg
-                                        text-sm
-                                        px-5
-                                        py-2.5
-                                        text-center
-                                      "
+                                      class="w-full text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                   >
                                       Deletar
                                   </button>
@@ -189,18 +107,11 @@
                     </div>
                 </div>
               </div>
-
               {% endfor %}
             {% else %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
+              <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                <td colspan="3" class="px-6 py-4 text-sm font-medium text-gray-900">
                   Nenhum resultado
-                </th>
-                <td class="px-6 py-4">
-                  -
-                </td>
-                <td class="px-6 py-4">
-                  -
                 </td>
               </tr>
             {% endif %}     
@@ -208,25 +119,10 @@
     </table>
   
     {% if not contract.is_finished %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
+      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-400">
         <a
           href="{% url 'contracts:contracts-interesteds-create' contract.id %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
+          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
         >
           Adicionar Interessado
           <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -235,5 +131,4 @@
         </a>
       </div>
     {% endif %}
-
 </div>
