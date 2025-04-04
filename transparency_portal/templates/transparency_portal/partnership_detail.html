@@ -1,0 +1,222 @@
+{% extends "transparency_portal/base.html" %}
+
+{% block title %}{{ partnership.contract.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'transparency:partnership_list' %}">
+                        <i class="fas fa-list me-1"></i>
+                        Parcerias
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">{{ partnership.contract.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">{{ partnership.contract.name }}</h4>
+                <h6 class="card-subtitle mb-3 text-muted">
+                    {{ partnership.organization.name }}
+                </h6>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Informações Gerais</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <strong>Objeto:</strong><br>
+                                {{ partnership.contract.objective }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Tipo de Instrumento:</strong><br>
+                                {{ partnership.contract.concession_type_label }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Número do Instrumento:</strong><br>
+                                {{ partnership.contract.agreement_num }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Data de Assinatura:</strong><br>
+                                {{ partnership.contract.agreement_date|date:"d/m/Y" }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Valores e Status</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <strong>Valor Total:</strong><br>
+                                R$ {{ partnership.total_value|floatformat:2 }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Valor Liberado:</strong><br>
+                                R$ {{ partnership.released_value|floatformat:2 }}
+                            </li>
+                            <li class="mb-2">
+                                <strong>Status da Parceria:</strong><br>
+                                <span class="status-badge {% if partnership.contract.is_on_execution %}status-active{% elif partnership.contract.is_finished %}status-finished{% else %}status-pending{% endif %}">
+                                    {{ partnership.contract.status_label }}
+                                </span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Status da Prestação de Contas:</strong><br>
+                                {{ partnership.accountability_status }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-2">Período de Vigência</h6>
+                        <p>
+                            <i class="fas fa-calendar me-1"></i>
+                            De {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}
+                            até {{ partnership.contract.end_of_vigency|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Repasses Financeiros</h5>
+                
+                {% if transfers %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Conta</th>
+                                <th>Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transfer in transfers %}
+                            <tr>
+                                <td>{{ transfer.transfer_date|date:"d/m/Y" }}</td>
+                                <td>R$ {{ transfer.value|floatformat:2 }}</td>
+                                <td>{{ transfer.account }}</td>
+                                <td>
+                                    {{ transfer.document_type }}
+                                    {{ transfer.document_number }}/{{ transfer.document_year }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nenhum repasse registrado.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Prestações de Contas</h5>
+                
+                {% if accountability_reports %}
+                <div class="accordion" id="accountabilityAccordion">
+                    {% for report in accountability_reports %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse{{ report.id }}">
+                                {{ report.accountability.month_label }}/{{ report.accountability.year }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ report.id }}" class="accordion-collapse collapse" 
+                             data-bs-parent="#accountabilityAccordion">
+                            <div class="accordion-body">
+                                <h6 class="mb-3">Atividades Realizadas</h6>
+                                <p>{{ report.activities_description }}</p>
+                                
+                                <h6 class="mb-3">Metas e Resultados</h6>
+                                <p>{{ report.goals_achievement }}</p>
+                                
+                                <h6 class="mb-3">Resultados Esperados</h6>
+                                <p>{{ report.expected_results }}</p>
+                                
+                                {% if report.rejection_reason %}
+                                <div class="alert alert-danger mt-3">
+                                    <h6 class="alert-heading">Motivo da Rejeição</h6>
+                                    <p class="mb-0">{{ report.rejection_reason }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nenhuma prestação de contas registrada.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Relatórios de Irregularidades</h5>
+                
+                {% if irregularity_reports %}
+                <div class="list-group">
+                    {% for report in irregularity_reports %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                {{ report.report_date|date:"d/m/Y H:i" }}
+                            </small>
+                            <span class="badge {% if report.status == 'PENDING' %}bg-warning{% elif report.status == 'INVESTIGATING' %}bg-info{% elif report.status == 'RESOLVED' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ report.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="mb-2">{{ report.description }}</p>
+                        {% if report.resolution %}
+                        <small class="text-muted">
+                            <strong>Resolução:</strong> {{ report.resolution }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nenhum relatório de irregularidade registrado.
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{% url 'transparency:report_irregularity' partnership.pk %}" 
+                       class="btn btn-outline-primary w-100">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Reportar Irregularidade
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -319,6 +319,10 @@ class Contract(
         return Contract.ContractStatusChoices(self.status).label
 
     @property
+    def concession_type_label(self) -> str:
+        return Contract.ConcessionChoices(self.concession_type).label
+
+    @property
     def total_value_with_point(self) -> str:
         return str(self.total_value).replace(".", ",")
 

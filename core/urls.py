@@ -69,4 +69,11 @@ urlpatterns = [
         "dashboard/",
         include(("dashboard.urls", "dashboard"), namespace="dashboard"),
     ),
+    path(
+        "transparency/",
+        include(
+            ("transparency_portal.urls", "transparency_portal"),
+            namespace="transparency_portal",
+        ),
+    ),
 ]

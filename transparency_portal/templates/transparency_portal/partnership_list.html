@@ -1,0 +1,144 @@
+{% extends "transparency_portal/base.html" %}
+
+{% block title %}Parcerias{% endblock %}
+
+{% block content %}
+<div class="search-box mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label for="search" class="form-label">Buscar</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Nome da parceria ou organização">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label for="year" class="form-label">Ano</label>
+            <select class="form-select" id="year" name="year">
+                <option value="">Todos os anos</option>
+                {% for year in years %}
+                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>
+                    {{ year }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="organization" class="form-label">Organização</label>
+            <select class="form-select" id="organization" name="organization">
+                <option value="">Todas as organizações</option>
+                {% for org in organizations %}
+                <option value="{{ org.organization }}" {% if request.GET.organization == org.organization|stringformat:"s" %}selected{% endif %}>
+                    {{ org.organization__name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+                Buscar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for partnership in partnerships %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="card-title mb-1">{{ partnership.contract.name }}</h5>
+                        <h6 class="card-subtitle text-muted">
+                            {{ partnership.organization.name }}
+                        </h6>
+                    </div>
+                    <span class="status-badge ms-2 {% if partnership.contract.is_on_execution %}status-active{% elif partnership.contract.is_finished %}status-finished{% else %}status-pending{% endif %}">
+                        {{ partnership.contract.status_label }}
+                    </span>
+                </div>
+
+                <p class="card-text text-muted small mb-3">
+                    <strong>Objeto:</strong> {{ partnership.contract.objective|truncatechars:150 }}
+                </p>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-4">
+                        <div class="value-box">
+                            <small class="text-muted d-block">Valor Total</small>
+                            <strong>R$ {{ partnership.total_value|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="value-box">
+                            <small class="text-muted d-block">Liberado</small>
+                            <strong>R$ {{ partnership.released_value|floatformat:2 }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="value-box">
+                            <small class="text-muted d-block">Status PC</small>
+                            <strong>{{ partnership.accountability_status }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}
+                    </small>
+                    <a href="{% url 'transparency:partnership_detail' partnership.pk %}" 
+                       class="btn btn-sm btn-outline-primary">
+                        Ver Detalhes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="fas fa-info-circle me-3 fs-4"></i>
+            <div>
+                Nenhuma parceria encontrada com os filtros selecionados.
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Navegação de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
+                {{ num }}
+            </a>
+        </li>
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %} 

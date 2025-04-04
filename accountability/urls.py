@@ -2,6 +2,8 @@ from django.urls import path
 
 from accountability.views import (
     AccountabilityListView,
+    BeneficiariesDashboardView,
+    BeneficiaryDetailView,
     FavoredCreateView,
     FavoredListView,
     ResourceSourceCreateView,
@@ -35,8 +37,6 @@ from accountability.views import (
     update_favored_view,
     upload_expense_file_view,
     upload_revenue_file_view,
-    BeneficiariesDashboardView,
-    BeneficiaryDetailView,
 )
 
 urlpatterns = [

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITTS - Portal da Transparência - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #37404a;
+            --secondary-color: #0d6efd;
+            --background-color: #f3f4f6;
+            --text-color: #333;
+            --card-background: #ffffff;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-color: #6b7280;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-color);
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 8px;
+            background-color: var(--card-background);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .main-content {
+            flex: 1 0 auto;
+            padding: 1.5rem 0;
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: rgba(255,255,255,0.9);
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+        
+        .search-box {
+            background-color: var(--card-background);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        
+        .status-active {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .status-finished {
+            background-color: var(--gray-color);
+            color: white;
+        }
+
+        .value-box {
+            padding: 0.75rem;
+            background-color: rgba(243,244,246,0.5);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .value-box strong {
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        input.form-control,
+        select.form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.95rem;
+            box-shadow: none;
+        }
+
+        .input-group-text {
+            border-color: var(--border-color);
+            color: var(--gray-color);
+        }
+
+        input.form-control:focus,
+        select.form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .alert-info {
+            background-color: rgba(13,110,253,0.1);
+            color: #0c63e4;
+        }
+
+        .pagination {
+            gap: 0.25rem;
+        }
+
+        .page-link {
+            border: none;
+            padding: 0.5rem 0.75rem;
+            color: var(--primary-color);
+            border-radius: 6px;
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--secondary-color);
+        }
+
+        .page-link:hover {
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+        }
+
+        .page-item.active .page-link:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'transparency:partnership_list' %}">
+                <i class="fas fa-balance-scale me-2"></i>
+                SITTS - Portal da Transparência
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'transparency:partnership_list' %}">
+                            <i class="fas fa-list me-1"></i>
+                            Parcerias
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content flex-shrink-0">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-2 fw-semibold">Portal da Transparência</h5>
+                    <p class="mb-0">Informações sobre parcerias com organizações do terceiro setor.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; {% now "Y" %} Todos os direitos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,83 @@
+{% extends "transparency_portal/base.html" %}
+
+{% block title %}Reportar Irregularidade - {{ partnership.contract.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'transparency:partnership_list' %}">
+                        <i class="fas fa-list me-1"></i>
+                        Parcerias
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'transparency:partnership_detail' partnership.pk %}">
+                        {{ partnership.contract.name }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Reportar Irregularidade</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Reportar Irregularidade</h4>
+                
+                <div class="alert alert-info mb-4">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Informações da Parceria
+                    </h6>
+                    <p class="mb-0">
+                        <strong>Parceria:</strong> {{ partnership.contract.name }}<br>
+                        <strong>Organização:</strong> {{ partnership.organization.name }}
+                    </p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Descrição da Irregularidade
+                        </label>
+                        <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                                id="{{ form.description.id_for_label }}"
+                                name="{{ form.description.html_name }}"
+                                rows="5"
+                                required>{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.description.errors|join:", " }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Descreva detalhadamente a irregularidade observada na aplicação dos recursos.
+                            Inclua informações como valores, datas e documentos relevantes.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            Enviar Relatório
+                        </button>
+                        <a href="{% url 'transparency:partnership_detail' partnership.pk %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
