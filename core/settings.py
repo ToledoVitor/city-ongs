@@ -181,6 +181,7 @@ INSTALLED_APPS = [
     "contracts",
     "dashboard",
     "reports",
+    "transparency_portal",
     # Third parties
     "easy_tenants",
     "django_cpf_cnpj",

@@ -10,15 +10,75 @@ class ActivityLog(BaseOrganizationTenantModel):
         # accounts
         CREATED_CIVIL_SERVANT = (
             "CREATED_CIVIL_SERVANT",
-            "Criou funcionário público",
+            "Cadastrou funcionário público",
+        )
+        UPDATED_CIVIL_SERVANT = (
+            "UPDATED_CIVIL_SERVANT",
+            "Atualizou funcionário público",
+        )
+        DELETED_CIVIL_SERVANT = (
+            "DELETED_CIVIL_SERVANT",
+            "Deletou funcionário público",
         )
         CREATED_FOLDER_MANAGER = (
             "CREATED_FOLDER_MANAGER",
-            "Criou gestor de pasta",
+            "Cadastrou gestor de pasta",
+        )
+        UPDATED_FOLDER_MANAGER = (
+            "UPDATED_FOLDER_MANAGER",
+            "Atualizou gestor de pasta",
+        )
+        DELETED_FOLDER_MANAGER = (
+            "DELETED_FOLDER_MANAGER",
+            "Deletou gestor de pasta",
+        )
+        ACTIVATED_FOLDER_MANAGER = (
+            "ACTIVATED_FOLDER_MANAGER",
+            "Ativou gestor de pasta",
+        )
+        DESACTIVATED_FOLDER_MANAGER = (
+            "DESACTIVATED_FOLDER_MANAGER",
+            "Desativou gestor de pasta",
         )
         CREATED_ORGANIZATION_ACCOUNTANT = (
             "CREATED_ORGANIZATION_ACCOUNTANT",
-            "Criou contador / funcionário organização",
+            "Cadastrou contador / funcionário da organização",
+        )
+        UPDATED_ORGANIZATION_ACCOUNTANT = (
+            "UPDATED_ORGANIZATION_ACCOUNTANT",
+            "Atualizou contador / funcionário da organização",
+        )
+        DELETED_ORGANIZATION_ACCOUNTANT = (
+            "DELETED_ORGANIZATION_ACCOUNTANT",
+            "Deletou contador / funcionário da organização",
+        )
+        ACTIVATED_ORGANIZATION_ACCOUNTANT = (
+            "ACTIVATED_ORGANIZATION_ACCOUNTANT",
+            "Ativou contador / funcionário da organização",
+        )
+        DESACTIVATED_ORGANIZATION_ACCOUNTANT = (
+            "DESACTIVATED_ORGANIZATION_ACCOUNTANT",
+            "Desativou contador / funcionário da organização",
+        )
+        CREATED_ORGANIZATION_COMMITTEE = (
+            "CREATED_ORGANIZATION_COMMITTEE",
+            "Cadastrou membro do comitê",
+        )
+        UPDATED_ORGANIZATION_COMMITTEE = (
+            "UPDATED_ORGANIZATION_COMMITTEE",
+            "Atualizou membro do comitê",
+        )
+        DELETED_ORGANIZATION_COMMITTEE = (
+            "DELETED_ORGANIZATION_COMMITTEE",
+            "Deletou membro do comitê",
+        )
+        ACTIVATED_ORGANIZATION_COMMITTEE = (
+            "ACTIVATED_ORGANIZATION_COMMITTEE",
+            "Ativou membro do comitê",
+        )
+        DESACTIVATED_ORGANIZATION_COMMITTEE = (
+            "DESACTIVATED_ORGANIZATION_COMMITTEE",
+            "Desativou membro do comitê",
         )
         # accountability
         CREATED_ACCOUNTABILITY = (

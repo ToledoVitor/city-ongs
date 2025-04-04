@@ -30,7 +30,7 @@ class ContractAddendumInline(admin.TabularInline):
 class ContractGoalInline(admin.TabularInline):
     model = ContractGoal
     extra = 0
-    fields = ("description", "status")
+    fields = ("name", "objective", "status")
 
 
 class ContractStepInline(admin.TabularInline):
@@ -48,7 +48,14 @@ class ContractStepInline(admin.TabularInline):
 class ContractItemInline(admin.TabularInline):
     model = ContractItem
     extra = 0
-    fields = ("description", "value")
+    fields = (
+        "name",
+        "month_quantity",
+        "month_expense",
+        "anual_expense",
+        "quantity",
+        "unit_type",
+    )
 
 
 class ContractExecutionInline(admin.TabularInline):
@@ -92,7 +99,7 @@ class ContractAdmin(BaseModelAdmin):
         "status",
         "created_at",
     )
-    search_fields = ("name", "description")
+    search_fields = ("name", "objective", "code", "internal_code")
     inlines = [
         ContractGoalInline,
         ContractItemInline,
@@ -104,8 +111,33 @@ class ContractAdmin(BaseModelAdmin):
                 "fields": (
                     "organization",
                     "name",
+                    "code",
+                    "internal_code",
+                    "concession_type",
                     "status",
-                    "description",
+                    "objective",
+                    "bidding",
+                )
+            },
+        ),
+        (
+            _("Informações Legais"),
+            {
+                "fields": (
+                    "law_num",
+                    "law_date",
+                    "agreement_num",
+                    "agreement_date",
+                )
+            },
+        ),
+        (
+            _("Valores"),
+            {
+                "fields": (
+                    "total_value",
+                    "municipal_value",
+                    "counterpart_value",
                 )
             },
         ),
@@ -113,12 +145,48 @@ class ContractAdmin(BaseModelAdmin):
             _("Datas"),
             {
                 "fields": (
+                    "start_of_vigency",
+                    "end_of_vigency",
                     "created_at",
                     "updated_at",
                 )
             },
         ),
-        (_("Valores"), {"fields": ("total_value", "monthly_value")}),
+        (
+            _("Partes Envolvidas"),
+            {
+                "fields": (
+                    "contractor_company",
+                    "contractor_manager",
+                    "hired_company",
+                    "hired_manager",
+                    "area",
+                    "committee",
+                )
+            },
+        ),
+        (
+            _("Contas Bancárias"),
+            {
+                "fields": (
+                    "checking_account",
+                    "investing_account",
+                )
+            },
+        ),
+        (
+            _("Responsáveis"),
+            {
+                "fields": (
+                    "accountability_autority",
+                    "supervision_autority",
+                )
+            },
+        ),
+        (
+            _("Arquivos"),
+            {"fields": ("file",)},
+        ),
     )
 
 

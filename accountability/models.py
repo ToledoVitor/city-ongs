@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from django.forms.models import model_to_dict
 from simple_history.models import HistoricalRecords
 
@@ -287,6 +287,47 @@ class Favored(BaseOrganizationTenantModel):
             string_doc = "".join([i for i in str(self.document) if i.isdigit()])
             self.document = str(string_doc)
         super().save(*args, **kwargs)
+
+    def get_total_cost(self):
+        """Calculate the total cost of this beneficiary across all contracts."""
+        return (
+            self.expenses.filter(deleted_at__isnull=True).aggregate(total=Sum("value"))[
+                "total"
+            ]
+            or 0
+        )
+
+    def get_cost_by_contract(self, contract):
+        """Calculate the cost of this beneficiary for a specific contract."""
+        return (
+            self.expenses.filter(
+                deleted_at__isnull=True, accountability__contract=contract
+            ).aggregate(total=Sum("value"))["total"]
+            or 0
+        )
+
+    def get_cost_by_municipality(self, city_hall):
+        """Calculate the cost of this beneficiary for a specific municipality."""
+        return (
+            self.expenses.filter(
+                deleted_at__isnull=True,
+                accountability__contract__area__city_hall=city_hall,
+            ).aggregate(total=Sum("value"))["total"]
+            or 0
+        )
+
+    def get_contracts(self):
+        """Get all contracts this beneficiary is involved with."""
+        return (
+            self.expenses.filter(deleted_at__isnull=True)
+            .values(
+                "accountability__contract__id",
+                "accountability__contract__name",
+                "accountability__contract__area__city_hall__name",
+            )
+            .annotate(total_cost=Sum("value"), expense_count=Count("id"))
+            .order_by("-total_cost")
+        )
 
     class Meta:
         verbose_name = "Favorecido"

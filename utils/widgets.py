@@ -215,7 +215,69 @@ class CustomPhoneNumberField(PhoneNumberField):
                     ),
                     "placeholder": "(00) 00000-0000",
                     "data-mask": "(00) 00000-0000",
+                    "type": "tel",
+                    "inputmode": "numeric",
                 }
             ),
+        )
+        super().__init__(*args, **kwargs)
+
+
+class CustomCPFWidget(forms.TextInput):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "attrs",
+            {
+                "class": " ".join(
+                    [
+                        "w-full",
+                        "p-2.5",
+                        "block",
+                        "text-sm",
+                        "border",
+                        "rounded-lg",
+                        "placeholder-gray-600",
+                        "bg-gray-300",
+                        "border-gray-600",
+                        "text-black",
+                        "focus:ring-blue-500",
+                        "focus:border-blue-500",
+                    ]
+                ),
+                "placeholder": "000.000.000-00",
+                "data-mask": "000.000.000-00",
+                "type": "text",
+                "inputmode": "numeric",
+            },
+        )
+        super().__init__(*args, **kwargs)
+
+
+class CustomCNPJWidget(forms.TextInput):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "attrs",
+            {
+                "class": " ".join(
+                    [
+                        "w-full",
+                        "p-2.5",
+                        "block",
+                        "text-sm",
+                        "border",
+                        "rounded-lg",
+                        "placeholder-gray-600",
+                        "bg-gray-300",
+                        "border-gray-600",
+                        "text-black",
+                        "focus:ring-blue-500",
+                        "focus:border-blue-500",
+                    ]
+                ),
+                "placeholder": "00.000.000/0000-00",
+                "data-mask": "00.000.000/0000-00",
+                "type": "text",
+                "inputmode": "numeric",
+            },
         )
         super().__init__(*args, **kwargs)

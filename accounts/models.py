@@ -10,7 +10,7 @@ from simple_history.models import HistoricalRecords
 from utils.fields import LowerCaseEmailField
 from utils.managers import TenantManagerAllObjects
 from utils.models import BaseModel
-from utils.validators import validate_cpf, validate_cpf_cnpj
+from utils.validators import validate_cnpj, validate_cpf, validate_cpf_cnpj
 
 
 class CityHall(BaseModel):
@@ -232,6 +232,16 @@ class User(AbstractUser):
         max_length=16,
         validators=[validate_cpf],
         help_text="Número do CPF do usuário. Deve ser único dentro da organização.",
+        null=True,
+        blank=True,
+    )
+    cnpj = models.CharField(
+        verbose_name="CNPJ",
+        max_length=18,
+        validators=[validate_cnpj],
+        help_text="Número do CNPJ do usuário. Deve ser único dentro da organização.",
+        null=True,
+        blank=True,
     )
     phone_number = PhoneNumberField(
         region="BR",
@@ -250,6 +260,12 @@ class User(AbstractUser):
         verbose_name="Senha Redefinida",
         help_text="Indica se o usuário já alterou sua senha inicial",
         default=False,
+    )
+    deactivated_at = models.DateTimeField(
+        verbose_name="Data de Desativação",
+        null=True,
+        blank=True,
+        help_text="Data em que o usuário foi desativado",
     )
     access_level = models.CharField(
         verbose_name="Nível de Acesso",
@@ -286,6 +302,7 @@ class User(AbstractUser):
         indexes = [
             models.Index(fields=["email"]),
             models.Index(fields=["cpf"]),
+            models.Index(fields=["cnpj"]),
             models.Index(fields=["access_level"]),
             models.Index(fields=["organization", "access_level"]),
             models.Index(fields=["password_expires_at"]),
@@ -293,30 +310,36 @@ class User(AbstractUser):
         ordering = ["first_name", "last_name"]
         unique_together = [
             ("organization", "email"),
-            ("organization", "cpf"),
+            ("organization", "cpf", "cnpj"),
         ]
+        verbose_name = "Usuário"
+        verbose_name_plural = "Usuários"
 
     def clean(self):
         """Validate the user data."""
         # Check if email is unique within the organization
         if self.email:
-            existing = User.objects.filter(
-                email=self.email, organization=self.organization
-            ).exclude(pk=self.pk)
+            existing = User.objects.filter(email=self.email).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
                     "Já existe um usuário com este email nesta organização"
                 )
 
-        # Check if CPF is unique within the organization
-        if self.cpf:
+        # Check if document is unique within the organization
+        if self.cpf or self.cnpj:
             existing = User.objects.filter(
-                cpf=self.cpf, organization=self.organization
+                organization=self.organization, cpf=self.cpf, cnpj=self.cnpj
             ).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
-                    "Já existe um usuário com este CPF nesta organização"
+                    "Já existe um usuário com este documento nesta organização"
                 )
+
+        # Ensure user has either CPF or CNPJ, but not both
+        if not self.cpf and not self.cnpj:
+            raise ValidationError("O usuário deve ter um CPF ou CNPJ")
+        if self.cpf and self.cnpj:
+            raise ValidationError("O usuário não pode ter CPF e CNPJ simultaneamente")
 
         # Validate password expiration
         if self.password_expires_at and self.password_expires_at < timezone.now():
@@ -330,7 +353,18 @@ class User(AbstractUser):
         if self.cpf is not None:
             string_doc = "".join([i for i in str(self.cpf) if i.isdigit()])
             self.cpf = str(string_doc)
+        if self.cnpj is not None:
+            string_doc = "".join([i for i in str(self.cnpj) if i.isdigit()])
+            self.cnpj = str(string_doc)
         super().save(*args, **kwargs)
+
+    @property
+    def document(self) -> str:
+        if self.cpf:
+            return str(self.cpf)
+        if self.cnpj:
+            return str(self.cnpj)
+        return ""
 
     @property
     def masked_phone(self) -> str:
@@ -381,6 +415,18 @@ class User(AbstractUser):
         )
 
     @property
+    def can_add_new_organization_committees(self) -> bool:
+        """Check if user can add new organization committees."""
+        return not self.is_committee_member and (
+            self.is_superuser
+            or self.access_level
+            in {
+                self.AccessChoices.MASTER,
+                self.AccessChoices.CIVIL_SERVANT,
+            }
+        )
+
+    @property
     def can_change_statuses(self) -> bool:
         """Check if user can change statuses."""
         return not self.is_committee_member and (
@@ -420,3 +466,6 @@ class Committee(OrganizationTenantBaseClass):
     class Meta:
         verbose_name = "Comitê"
         verbose_name_plural = "Comitês"
+
+    def __str__(self) -> str:
+        return str(self.name)

@@ -3,7 +3,9 @@ from django.urls import path
 from bank.views import create_bank_account_view
 from contracts.views import (
     CompanyCreateView,
+    CompanyDetailView,
     CompanyListView,
+    CompanyUpdateView,
     ContractCreateView,
     ContractExecutionActivityUpdateView,
     ContractExecutionDetailView,
@@ -154,6 +156,16 @@ urlpatterns = [
         "company/create/",
         CompanyCreateView.as_view(),
         name="companies-create",
+    ),
+    path(
+        "company/<uuid:pk>/",
+        CompanyDetailView.as_view(),
+        name="companies-detail",
+    ),
+    path(
+        "company/<uuid:pk>/update/",
+        CompanyUpdateView.as_view(),
+        name="companies-update",
     ),
     path(
         "requests/<uuid:pk>/review",
