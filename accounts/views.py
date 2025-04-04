@@ -1,25 +1,34 @@
 import logging
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from accounts.forms import (
     AreasForm,
     FolderManagerCreateForm,
     OrganizationAccountantCreateForm,
     OrganizationCommitteeCreateForm,
+    OrganizationDocumentForm,
 )
-from accounts.models import Committee, User
+from accounts.models import Committee, OrganizationDocument, User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
 from utils.mixins import AdminRequiredMixin
@@ -579,3 +588,87 @@ def toggle_organization_committee_status(request, pk):
     )
 
     return redirect("accounts:organization-committees-list")
+
+
+class OrganizationDocumentListView(LoginRequiredMixin, ListView):
+    model = OrganizationDocument
+    template_name = "accounts/org_documents/list.html"
+    context_object_name = "documents"
+    paginate_by = 10
+
+    def get_queryset(self):
+        return OrganizationDocument.objects.filter(
+            organization=self.request.user.organization
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["organization"] = self.request.user.organization
+        return context
+
+
+class OrganizationDocumentCreateView(LoginRequiredMixin, CreateView):
+    model = OrganizationDocument
+    form_class = OrganizationDocumentForm
+    template_name = 'accounts/org_documents/create.html'
+
+    def get_success_url(self):
+        kwargs = {'organization_id': self.request.user.organization.id}
+        return reverse_lazy('accounts:document_list', kwargs=kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['organization'] = self.request.user.organization
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['organization'] = self.request.user.organization
+        return context
+
+
+class OrganizationDocumentUpdateView(LoginRequiredMixin, UpdateView):
+    model = OrganizationDocument
+    form_class = OrganizationDocumentForm
+    template_name = 'accounts/org_documents/create.html'
+
+    def get_success_url(self):
+        kwargs = {'organization_id': self.request.user.organization.id}
+        return reverse_lazy('accounts:document_list', kwargs=kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['organization'] = self.request.user.organization
+        return context
+
+
+class OrganizationDocumentDeleteView(LoginRequiredMixin, DeleteView):
+    model = OrganizationDocument
+    template_name = "accounts/org_documents/confirm_delete.html"
+    success_url = reverse_lazy("accounts:documents-list")
+
+    def get_success_url(self):
+        return reverse_lazy("accounts:documents-list")
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Documento excluído com sucesso!")
+        return super().delete(request, *args, **kwargs)
+
+
+class OrganizationDocumentToggleVisibilityView(LoginRequiredMixin, UpdateView):
+    model = OrganizationDocument
+    fields = ["is_public"]
+    http_method_names = ["post"]
+
+    def form_valid(self, form):
+        document = self.get_object()
+        document.is_public = not document.is_public
+        document.save()
+
+        status = "público" if document.is_public else "privado"
+        messages.success(self.request, f"Documento marcado como {status}!")
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy("accounts:documents-list")

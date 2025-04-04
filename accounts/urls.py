@@ -10,6 +10,11 @@ from accounts.views import (
     OrganizationCommitteeCreateView,
     OrganizationCommitteesDetailView,
     OrganizationCommitteesListView,
+    OrganizationDocumentCreateView,
+    OrganizationDocumentDeleteView,
+    OrganizationDocumentListView,
+    OrganizationDocumentToggleVisibilityView,
+    OrganizationDocumentUpdateView,
     read_notification_view,
     toggle_folder_manager_status,
     toggle_organization_accountant_status,
@@ -90,5 +95,31 @@ urlpatterns = [
         "organization-committees/<int:pk>/toggle-status/",
         toggle_organization_committee_status,
         name="organization-committees-toggle-status",
+    ),
+    # Organization Documents
+    path(
+        "documents/",
+        OrganizationDocumentListView.as_view(),
+        name="documents-list",
+    ),
+    path(
+        "documents/add/",
+        OrganizationDocumentCreateView.as_view(),
+        name="documents-add",
+    ),
+    path(
+        "documents/<uuid:pk>/edit/",
+        OrganizationDocumentUpdateView.as_view(),
+        name="documents-edit",
+    ),
+    path(
+        "documents/<uuid:pk>/delete/",
+        OrganizationDocumentDeleteView.as_view(),
+        name="documents-delete",
+    ),
+    path(
+        "documents/<uuid:pk>/toggle-visibility/",
+        OrganizationDocumentToggleVisibilityView.as_view(),
+        name="documents-toggle-visibility",
     ),
 ]

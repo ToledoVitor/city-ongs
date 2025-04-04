@@ -5,12 +5,13 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
+from accounts.models import OrganizationDocument
 from contracts.models import Contract
-
-from .models import (
+from transparency_portal.models import (
     AccountabilityReport,
     FinancialTransfer,
     IrregularityReport,
+    Organization,
     PartnershipTransparency,
 )
 
@@ -135,5 +136,25 @@ class IrregularityReportCreateView(LoginRequiredMixin, CreateView):
         partnership_id = self.kwargs["partnership_id"]
         context["partnership"] = get_object_or_404(
             PartnershipTransparency, id=partnership_id
+        )
+        return context
+
+
+class OrganizationDocumentListView(ListView):
+    model = OrganizationDocument
+    template_name = "transparency_portal/organization_documents.html"
+    context_object_name = "documents"
+    paginate_by = 10
+    ordering = ["-uploaded_at"]
+
+    def get_queryset(self):
+        return OrganizationDocument.objects.filter(
+            organization_id=self.kwargs["organization_id"], is_public=True
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["organization"] = get_object_or_404(
+            Organization, id=self.kwargs["organization_id"]
         )
         return context

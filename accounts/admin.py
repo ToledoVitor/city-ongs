@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from accounts.models import Area, CityHall, Committee, Organization, User
+from accounts.models import (
+    Area,
+    CityHall,
+    Committee,
+    Organization,
+    OrganizationDocument,
+    User,
+)
 from utils.admin import BaseModelAdmin
 
 
@@ -144,3 +151,10 @@ class CustomUserAdmin(BaseModelAdmin):
     )
 
     filter_horizontal = ("groups", "user_permissions", "areas")
+
+
+@admin.register(OrganizationDocument)
+class OrganizationDocumentAdmin(BaseModelAdmin):
+    list_display = ("organization", "title", "created_at", "updated_at")
+    list_filter = ("organization",)
+    search_fields = ("title",)

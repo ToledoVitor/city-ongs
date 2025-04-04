@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 from easy_tenants import get_current_tenant, tenant_context
@@ -469,3 +470,54 @@ class Committee(OrganizationTenantBaseClass):
 
     def __str__(self) -> str:
         return str(self.name)
+
+
+class OrganizationDocument(OrganizationTenantBaseClass):
+    DOCUMENT_TYPES = [
+        ("balance", "Balanço Patrimonial"),
+        ("dre", "Demonstrativo do Resultado do Exercício"),
+        ("statute", "Estatuto Social"),
+        ("other", "Outro"),
+    ]
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPES,
+        verbose_name="Tipo de Documento",
+    )
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Título",
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name="Descrição",
+    )
+    file = models.FileField(
+        upload_to="organization_documents/%Y/%m/",
+        validators=[FileExtensionValidator(["pdf", "doc", "docx", "xls", "xlsx"])],
+        verbose_name="Arquivo",
+    )
+    is_public = models.BooleanField(
+        default=False,
+        verbose_name="Visível no portal da transparência",
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Data de Upload",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Última Atualização",
+    )
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, verbose_name="Enviado por"
+    )
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = "Documento da Organização"
+        verbose_name_plural = "Documentos da Organização"
+
+    def __str__(self):
+        return f"{self.get_document_type_display()} - {self.organization.name}"
