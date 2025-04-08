@@ -35,7 +35,7 @@
         <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <a href="{% url 'contracts:contract-detail' contract.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">{{ contract.name }}</a>
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">{{ contract.name }}</a>
       </div>
     </li>
     <li aria-current="page">
@@ -68,28 +68,89 @@
         </div>
 
         <div>
-          <label for="id_description" class="block mb-2 text-base font-medium text-black">Descrição</label>
-          {{ form.description }}
+          <label for="id_objective" class="block mb-2 text-base font-medium text-black">Objetivo</label>
+          {{ form.objective }}
         </div>
 
         <div>
-          <label for="id_value" class="block mb-2 text-base font-medium text-black">Valor</label>
-          {{ form.value }}
+          <label for="id_methodology" class="block mb-2 text-base font-medium text-black">Metodologia</label>
+          {{ form.methodology }}
         </div>
 
         <div>
-          <label for="id_deadline" class="block mb-2 text-base font-medium text-black">Prazo</label>
-          {{ form.deadline }}
+          <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
+          {{ form.observations }}
         </div>
       </div>
     </div>
+    
+    <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Etapas da Meta</h2>
+      <p class="mb-4 text-sm text-gray-500">
+        As etapas são uma maneira de dividir a meta principal em menores metas, a fim de acompanhar seu progresso
+      </p>
+      
+      <div id="steps-formset">
+        {{ steps_formset.management_form }}
+        
+        {% for form in steps_formset %}
+          {{ form.id }}
+          
+          <div class="steps-form mb-6 p-4 border border-gray-200 rounded-lg">
+            <div class="flex justify-between mb-2">
+              <h3 class="text-lg font-medium step-title">Etapa 1</h3>
+              <button
+                type="button"
+                class="remove-form px-3 py-1 text-xs font-medium text-center text-white rounded-lg focus:ring-4 focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-red-800"
+                {% if forloop.first %}style="display: none;"{% endif %}
+              >
+                Remover
+              </button>
+            </div>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block mb-2 text-base font-medium text-black">Nome</label>
+                {{ form.name }}
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-base font-medium text-black">Objetivo</label>
+                {{ form.objective }}
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-base font-medium text-black">Metodologia</label>
+                {{ form.methodology }}
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-base font-medium text-black">Recursos Necessários</label>
+                {{ form.resources }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <button
+        type="button"
+        id="add-step"
+        class="px-3 py-2 mt-4 text-xs font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+      >
+        <svg class="w-[12px] h-[12px] text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+        Adicionar Outra Etapa
+      </button>
+    </div>
   </div>
 
-  {% include 'commons/form-errors.html' with form=form %}
+  {% include 'commons/form-errors.html' with form=form subform=steps_formset %}
 
   <div class="py-6">
     <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'contracts:contract-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
         <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
         </svg>
@@ -108,5 +169,47 @@
     </div>
   </div>
 </form>
+
+<script>
+  const addStepButton = document.getElementById('add-step');
+  const formsetDiv = document.getElementById('steps-formset');
+  const totalFormsInput = document.querySelector('#id_steps-TOTAL_FORMS');
+  
+  addStepButton.addEventListener('click', () => {
+      const formCount = parseInt(totalFormsInput.value, 10);
+      const newForm = formsetDiv.querySelector('.steps-form').cloneNode(true);
+  
+      // Atualiza os índices nos campos do novo formulário
+      newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
+      newForm.innerHTML = newForm.innerHTML.replace(/_0_/g, `_${formCount}_`);
+      newForm.querySelector('.step-title').textContent = `Etapa ${formCount + 1}`;
+  
+      const removeButton = newForm.querySelector('.remove-form');
+      if (formCount === 0 && removeButton) {
+          removeButton.style.display = 'none';
+      } else if (removeButton) {
+          removeButton.style.display = '';
+      }
+  
+      formsetDiv.appendChild(newForm);
+      totalFormsInput.value = formCount + 1;
+      updateStepNumbers();
+  });
+  
+  formsetDiv.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-form')) {
+          e.target.closest('.steps-form').remove();
+          totalFormsInput.value -= 1;
+          updateStepNumbers();
+      }
+  });
+  
+  function updateStepNumbers() {
+    const steps = formsetDiv.querySelectorAll('.steps-form');
+    steps.forEach((step, index) => {
+      step.querySelector('.step-title').textContent = `Etapa ${index + 1}`;
+    });
+  }
+</script>
 
 {% endblock %}

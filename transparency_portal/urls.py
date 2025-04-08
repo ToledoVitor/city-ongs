@@ -25,4 +25,9 @@ urlpatterns = [
         views.IrregularityReportCreateView.as_view(),
         name="report_irregularity",
     ),
+    path(
+        "organizations/<int:organization_id>/documents/",
+        views.OrganizationDocumentListView.as_view(),
+        name="organization_documents",
+    ),
 ]

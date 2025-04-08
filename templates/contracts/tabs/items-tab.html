@@ -1,195 +1,126 @@
 {% load humanize %}
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs uppercase bg-gray-500 text-white">
+        <thead class="text-xs uppercase bg-gray-500 text-white sticky top-0 z-30">
             <tr>
-                <th scope="col" class="px-6 py-3" />
-                <th scope="col" class="px-6 py-3 text-center">
+                <th scope="col" class="px-4 py-4 font-medium w-[180px] sticky left-0 z-40 bg-gray-500">
+                    <span class="sr-only">Ações</span>
+                </th>
+                <th scope="col" class="px-6 py-4 font-medium w-[25%]">
                     Item
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
+                <th scope="col" class="px-6 py-4 font-medium w-[20%]">
                     Natureza
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
-                    Período (meses)
+                <th scope="col" class="px-6 py-4 font-medium w-[8%]">
+                    Período
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
-                    Quantidade
+                <th scope="col" class="px-6 py-4 font-medium w-[7%]">
+                    Qtd
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
+                <th scope="col" class="px-6 py-4 font-medium w-[15%]">
                     Custo Mensal
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
+                <th scope="col" class="px-6 py-4 font-medium w-[15%]">
                     Custo Total
                 </th>
-                <th scope="col" class="px-6 py-3 text-center">
+                <th scope="col" class="px-6 py-4 font-medium w-[120px]">
                     Status
                 </th>
-          </tr>
+            </tr>
         </thead>
         <tbody>
             {% if contract.items.count %}
               {% for item in contract.items.all %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400 text-center align-center">
-                  <td
-                    scope="row"
-                    class="text-sm text-black w-24 py-2 inline-flex"
-                  >
-                    {% if not user.can_change_statuses %}
-                      <!-- items approve Modal toggle -->
-                      <button
-                        data-modal-target="items-modal-{{ item.id }}"
-                        data-modal-toggle="items-modal-{{ item.id }}"
-                        class="
-                          ml-4
-                          block
-                          text-white
-                          bg-blue-600
-                          hover:bg-blue-700
-                          focus:ring-blue-800
-                          focus:ring-4
-                          focus:outline-none
-                          font-sm
-                          rounded-lg
-                          text-sm
-                          px-3
-                          py-2.5
-                          text-center
-                        "
-                        type="button"
-                      >
-                        Avaliar
-                      </button>
-                    {% else %}
-
-                      <div class="grid grid-cols-1 gap-0 sm:grid-cols-2">
-                        <a>
-                          <button
-                            data-modal-target="items-modal-{{ item.id }}"
-                            data-modal-toggle="items-modal-{{ item.id }}"
-                            type="button"
-                            class="
-                              text-white
-                              ml-4
-                              bg-blue-600
-                              hover:bg-blue-600
-                              focus:ring-4
-                              focus:outline-none
-                              focus:ring-blue-600
-                              font-medium
-                              rounded-full
-                              text-xs
-                              mt-2
-                              px-2.5
-                              py-1
-                              text-center
-                              inline-flex
-                              items-center
-                              me-2
-                            "
-                          >
-                            Detalhes
-                          </button>
-                        </a>
+                <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                  <td class="px-2 py-4 text-base text-sm sticky left-0 z-10 bg-gray-300 hover:bg-gray-400 border-r border-gray-300 w-[180px]">
+                    <div class="flex gap-1 justify-center">
+                      {% if not user.can_change_statuses %}
+                        <button
+                          data-modal-target="items-modal-{{ item.id }}"
+                          data-modal-toggle="items-modal-{{ item.id }}"
+                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+                          type="button"
+                        >
+                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4"/>
+                          </svg>
+                          Avaliar
+                        </button>
+                      {% else %}
+                        <button
+                          data-modal-target="items-modal-{{ item.id }}"
+                          data-modal-toggle="items-modal-{{ item.id }}"
+                          type="button"
+                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+                        >
+                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                          </svg>
+                          Detalhes
+                        </button>
                         
                         {% if contract.is_on_planning and not user.is_committee_member %}
-                        <br>
-                        <a
-                          href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
-                        >
-                          <button
-                            type="button"
-                            class="
-                              text-white
-                              ml-4
-                              bg-blue-600
-                              hover:bg-blue-600
-                              focus:ring-4
-                              focus:outline-none
-                              focus:ring-blue-600
-                              font-medium
-                              rounded-full
-                              text-xs
-                              mt-2
-                              px-2.5
-                              py-1
-                              text-center
-                              inline-flex
-                              items-center
-                              me-2
-                            "
+                          <a
+                            href="{% url 'contracts:contracts-item-update' contract.id item.id %}"
+                            class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
                           >
+                            <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                            </svg>
                             Editar
-                          </button>
+                          </a>
                         {% endif %}
-                      </div>         
-                    {% endif %}
+                      {% endif %}
+                    </div>
                   </td>
 
-                  <th class="px-6 py-4 text-sm text-black max-w-48">
+                  <td class="truncate max-w-[200px] px-6 py-4 text-sm font-medium text-gray-900">
                     {{ item.name }}
-                  </th>
+                  </td>
 
-                  <td class="px-6 py-4 text-sm text-black max-w-48">
+                  <td class="px-6 py-4 text-xs text-gray-900">
                     {{ item.nature_label }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
+                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
                     {{ item.month_quantity }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
-                    {{ item.quantity }}<b>
+                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                    {{ item.quantity }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
-                    R$ <b>{{ item.month_expense|intcomma }}<b>
+                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                    R$ {{ item.month_expense|intcomma }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
-                    R$ <b>{{ item.anual_expense|intcomma }}<b>
+                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                    R$ {{ item.anual_expense|intcomma }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-black">
+                  <td class="px-6 py-4 text-sm text-gray-900 w-[120px] text-center whitespace-nowrap">
                     {% if item.status == "ANALYZING" %}
-                      <span
-                        class="
-                          whitespace-nowrap
-                          bg-indigo-900
-                          text-indigo-100
-                          text-xs
-                          font-medium
-                          me-2
-                          px-2.5
-                          py-0.5
-                          rounded
-                        "
-                      >
+                      <span class="inline-flex text-xs font-medium px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100">
                         Em análise
                       </span>
                     {% elif item.status == "CORRECTING" %}
-                      <span
-                        class="bg-indigo-100 whitespace-nowrap text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
+                      <span class="inline-flex text-xs font-medium px-2.5 py-0.5 rounded bg-indigo-100 text-indigo-800">
                         Em correção
                       </span>
                     {% elif item.status == "APPROVED" %}
-                      <span
-                        class="bg-gray-100 whitespace-nowrap text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
+                      <span class="inline-flex text-xs font-medium px-2.5 py-0.5 rounded bg-gray-100 text-gray-800">
                         Aprovado
                       </span>
                     {% elif item.status == "APPROVED_WITH_PENDENCE" %}
-                      <span
-                        class="bg-yellow-300 whitespace-nowrap text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
+                      <span class="inline-flex text-xs font-medium px-2.5 py-0.5 rounded bg-yellow-300 text-yellow-800">
                         Pendências
                       </span>
                     {% elif item.status == "REJECTED" %}
-                      <span
-                        class="bg-red-100 whitespace-nowrap text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded"
-                      >
+                      <span class="inline-flex text-xs font-medium px-2.5 py-0.5 rounded bg-red-100 text-red-800">
                         Rejeitado
                       </span>
                     {% endif %}
@@ -399,212 +330,104 @@
                 </div>
               {% endfor %}
             {% else %}
-              <tr
-                class="
-                  border-b
-                  bg-gray-200
-                  border-gray-700
-                  hover:bg-gray-400
-                "
-              >
-                <th
-                  scope="row"
-                  class="px-6 py-4 font-medium whitespace-nowrap text-black"
-                >
-                    Nenhum item cadastrado
-                </th>
-                <td class="px-6 py-4">
-                  -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                  -
-                </td>
-                <td class="px-6 py-4">
-                    -
+              <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                <td colspan="8" class="px-6 py-4 text-sm font-medium text-gray-900 text-center">
+                  Nenhum item cadastrado
                 </td>
               </tr>
             {% endif %}     
         </tbody>
-        <tfoot class="bg-gray-500 text-white font-base">
-          <tr>
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
-              <th scope="row" class="px-6 py-3 text-center">
-                <span class="text-sm font-normal">Cadastrado Mensal:</span> <br> R${{ items_totals.total_month|intcomma }}
-              </th>
-              <th scope="row" class="px-6 py-3 text-center">
-                <span class="text-sm font-normal">Cadastrado Anual:</span> <br> R${{ items_totals.total_year|intcomma }}
-              </td>
-              <th scope="row" class="px-6 py-3 text-center">
-                <span class="text-sm font-normal">Valor Contrato:</span> <br> R${{ contract.total_value|intcomma }}
-              </td>
-          </tr>
+    </table>
+  </div>
+
+  <div class="w-full">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
+      <tfoot class="bg-gray-500 text-white font-base">
+        <tr>
+            <td class="px-6 py-3 w-[180px]" />
+            <td class="px-6 py-3 w-[25%]" />
+            <td class="px-6 py-3 w-[20%]" />
+            <td class="px-6 py-3 w-[8%]" />
+            <td class="px-6 py-3 w-[7%] text-center font-medium">TOTAL</td>
+            <td class="px-6 py-3 w-[15%] text-center">
+              <span class="text-sm font-normal">Cadastrado Mensal:</span> <br> R${{ items_totals.total_month|intcomma }}
+            </td>
+            <td class="px-6 py-3 w-[15%] text-center">
+              <span class="text-sm font-normal">Cadastrado Anual:</span> <br> R${{ items_totals.total_year|intcomma }}
+            </td>
+            <td class="px-6 py-3 w-[120px] text-center">
+              <span class="text-sm font-normal">Valor Contrato:</span> <br> R${{ contract.total_value|intcomma }}
+            </td>
+        </tr>
       </tfoot>
     </table>
+  </div>
 
-    <div class="flex items-center flex-column justify-between flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-200">
-      <div class="pt-2 px-4">
-        <a
-          {% if contract.items.count > 0 %}
-            href="{% url 'contracts:item-purchases' contract.id %}"
-          {% else %}
-            href="#"
-          {% endif %}
-          class="
-            px-3
-            py-2
-            mr-4
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Processos de Aquisição
-          <svg class="ml-1 w-[16px] h-[16px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
-          </svg>
-        </a>
+  <div class="flex items-center justify-end gap-2 p-4 bg-gray-200">
+    <a
+      {% if contract.items.count > 0 %}
+        href="{% url 'contracts:item-purchases' contract.id %}"
+      {% else %}
+        href="#"
+      {% endif %}
+      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+    >
+      <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+      </svg>
+      Processos de Aquisição
+    </a>
 
-        <a
-          {% if contract.items.count > 0 %}
-            href="{% url 'contracts:item-supplementations' contract.id %}"
-          {% else %}
-            href="#"
-          {% endif %}
-          class="
-            px-3
-            py-2
-            mr-4
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Suplementações
-          <svg class="ml-1 w-[16px] h-[16px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M12 2c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zm-1-11a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1z" clip-rule="evenodd"/>
-          </svg>
-        </a>
-      </div>
+    <a
+      {% if contract.items.count > 0 %}
+        href="{% url 'contracts:item-supplementations' contract.id %}"
+      {% else %}
+        href="#"
+      {% endif %}
+      class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+    >
+      <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" d="M12 2c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zm-1-11a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2h-2a1 1 0 0 1-1-1z" clip-rule="evenodd"/>
+      </svg>
+      Suplementações
+    </a>
 
-      <div class="pt-2 px-4">
-        {% if user.can_change_statuses %}
-        <button
-          type="button"
-          data-modal-target="value-requests-modal"
-          data-modal-toggle="value-requests-modal"
-          class="
-            text-white
-            focus:ring-4
-            focus:outline-none
-            font-medium
-            rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-            inline-flex
-            items-center
-            me-2
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Ver Solicitações
-          <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
-          </svg>
-        </button>
-        {% else %}
-        <a
-          href="{% url 'contracts:item-request-new-value' contract.id %}"
-          class="
-            px-3
-            py-2
-            mr-4
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Remanejar Valores
-          <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
-          </svg>
-        </a>
-        {% endif %}
+    {% if user.can_change_statuses %}
+      <button
+        type="button"
+        data-modal-target="value-requests-modal"
+        data-modal-toggle="value-requests-modal"
+        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+      >
+        <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
+        </svg>
+        Ver Solicitações
+      </button>
+    {% else %}
+      <a
+        href="{% url 'contracts:item-request-new-value' contract.id %}"
+        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+      >
+        <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17.345a4.76 4.76 0 0 0 2.558 1.618c2.274.589 4.512-.446 4.999-2.31.487-1.866-1.273-3.9-3.546-4.49-2.273-.59-4.034-2.623-3.547-4.488.486-1.865 2.724-2.899 4.998-2.31.982.236 1.87.793 2.538 1.592m-3.879 12.171V21m0-18v2.2"/>
+        </svg>
+        Remanejar Valores
+      </a>
+    {% endif %}
 
-        {% if contract.is_on_planning %}
-          <a
-            href="{% url 'contracts:contracts-item-create' contract.id %}"
-            class="
-              px-3
-              py-2
-              text-sm
-              font-medium
-              text-center
-              inline-flex
-              items-center
-              text-white
-              rounded-lg
-              focus:ring-4
-              focus:outline-none
-              bg-blue-600
-              hover:bg-blue-700
-              focus:ring-blue-800
-            "
-          >
-            Adicionar novo item
-            <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-            </svg>
-          </a>
-        {% endif %}
-      </div>
-    </div>
+    {% if contract.is_on_planning %}
+      <a
+        href="{% url 'contracts:contracts-item-create' contract.id %}"
+        class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+      >
+        <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+        </svg>
+        Adicionar novo item
+      </a>
+    {% endif %}
+  </div>
 </div>
 
 
@@ -614,135 +437,83 @@
   tabindex="-1"
   data-modal-backdrop="static"
   aria-hidden="true"
-  class="
-    hidden
-    overflow-y-auto
-    overflow-x-hidden
-    fixed
-    top-0
-    right-0
-    left-0
-    z-50
-    justify-center
-    items-center
-    w-full
-    md:inset-0
-    h-[calc(100%-1rem)]
-    max-h-full
-  "
-  >
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
   <div class="relative p-4 w-full max-w-2xl max-h-full">
-    <!-- Modal content -->
     <div class="relative rounded-lg shadow bg-gray-300">
-      <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-            <h3 class="text-xl font-semibold text-black">
-                Solicitações de Remanejamento
-            </h3>
-            <button
-              type="button"
-              data-modal-hide="value-requests-modal"
-              class="
-                end-2.5
-                text-black
-                hover:bg-gray-600
-                hover:text-black
-                bg-transparent
-                rounded-lg
-                text-sm
-                w-6
-                h-6
-                ms-auto
-                inline-flex
-                justify-center
-                items-center
-              "
-            >
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                </svg>
-                <span class="sr-only">Fechar modal</span>
-            </button>
-        </div>
-        <!-- Modal body -->
-        <div class="p-4 md:p-5">
-
-          <table class="w-full text-sm text-left rtl:text-right text-center text-gray-400">
-            <thead class="text-xs uppercase bg-gray-500 text-white">
-              <tr>
-                <th scope="col" class="px-6 py-3">
-                  Item
-                </th>
-                <th scope="col" class="px-6 py-3">
-                  Aumento
-                </th>
-                <th scope="col" class="px-6 py-3">
-                  Solicitado em
-                </th>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {% if value_requests.all %}
-                {% for request in value_requests.all %}
-                <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                  <th scope="row" class="px-6 py-4 text-sm text-black">
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+        <h3 class="text-xl font-semibold text-black">
+          Solicitações de Remanejamento
+        </h3>
+        <button
+          type="button"
+          data-modal-hide="value-requests-modal"
+          class="text-gray-400 bg-transparent hover:bg-gray-600 hover:text-black rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+        >
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">Fechar modal</span>
+        </button>
+      </div>
+      <div class="p-4 md:p-5">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-400">
+          <thead class="text-xs uppercase bg-gray-500 text-white">
+            <tr>
+              <th scope="col" class="px-6 py-4 font-medium w-[40%]">
+                Item
+              </th>
+              <th scope="col" class="px-6 py-4 font-medium w-[40%]">
+                Aumento
+              </th>
+              <th scope="col" class="px-6 py-4 font-medium w-[20%]">
+                Solicitado em
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if value_requests.all %}
+              {% for request in value_requests.all %}
+                <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
                     <a
                       href="{% url 'contracts:review-value-requests' request.id %}"
-                      class="text-blue-600 hover:underline mr-2 flex items-center" 
+                      class="text-blue-600 hover:underline flex items-center" 
                     >
                       {{ request.raise_item.name }}
                     </a>
-                  </th>
-                  <td class="px-6 py-4 text-xs text-black text-left">
-                    Mensal: R$ {{ request.month_raise|intcomma }} <br>
-                    Anual: R$ {{ request.anual_raise|intcomma }}
                   </td>
-                  <td class="px-6 py-4 text-xs text-black">
+                  <td class="px-6 py-4 text-sm text-gray-900">
+                    <div class="flex flex-col">
+                      <span>Mensal: R$ {{ request.month_raise|intcomma }}</span>
+                      <span>Anual: R$ {{ request.anual_raise|intcomma }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-900">
                     {{ request.created_at.date }}
                   </td>
                 </tr>
-                {% endfor %}
-              {% else %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 text-sm text-black">
+              {% endfor %}
+            {% else %}
+              <tr class="bg-gray-50 border-b hover:bg-gray-200">
+                <td colspan="3" class="px-6 py-4 text-sm font-medium text-gray-900 text-center">
                   Sem solicitações ativas
-                </th>
-                <td class="px-6 py-4 text-xs text-black text-left">
-                  -
-                </td>
-                <td class="px-6 py-4 text-xs text-black">
-                  -
                 </td>
               </tr>
-              {% endif %}
-            </tbody>
-          </table>
+            {% endif %}
+          </tbody>
+        </table>
 
-          <div class="my-6">
-            <button
-              type="button"
-              data-modal-hide="value-requests-modal"
-              class="
-                w-full
-                text-white
-                bg-gray-700
-                hover:bg-gray-800
-                focus:ring-4
-                focus:outline-none
-                focus:ring-gray-300
-                font-medium rounded-lg
-                text-sm
-                px-5
-                py-2.5
-                text-center
-              "
-            >
-              Fechar
-            </button>
-          </div>
-
+        <div class="mt-6">
+          <button
+            type="button"
+            data-modal-hide="value-requests-modal"
+            class="w-full text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+          >
+            Fechar
+          </button>
         </div>
+      </div>
     </div>
   </div>
 </div>
