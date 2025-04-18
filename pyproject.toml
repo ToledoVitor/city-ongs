@@ -2,7 +2,7 @@
 name = "orgs"
 version = "0.1.0"
 description = ""
-authors = ["Vitor Toledo <vitor.toledo@grupomateus.com>"]
+authors = ["Vitor Toledo <pr.vitortoledo@gmail.com>"]
 readme = "README.md"
 package-mode = false
 
@@ -31,9 +31,6 @@ sendgrid = "^6.11.0"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^8.0.0"}
 ipython = "^9.0.2"
 phonenumbers = "^8.13.30"
-django-redis = "^5.4.0"
-redis = "^5.0.1"
-hiredis = "^3.1.0"
 
 
 [build-system]

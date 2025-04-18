@@ -2,7 +2,6 @@ import time
 from functools import wraps
 from typing import Callable
 
-from django.core.cache import cache
 from django.db import connection
 from django.http import HttpRequest, HttpResponse
 
@@ -17,8 +16,6 @@ class PerformanceMetrics:
             "response_times": [],
             "db_query_counts": [],
             "db_query_times": [],
-            "cache_hits": [],
-            "cache_misses": [],
         }
 
     def add_metric(self, category: str, value: float) -> None:
@@ -54,10 +51,6 @@ class PerformanceMonitor:
             start_time = time.time()
             initial_queries = len(connection.queries)
 
-            # Monitora cache hits/misses
-            initial_hits = cache.get("cache_hits", 0)
-            initial_misses = cache.get("cache_misses", 0)
-
             try:
                 response = view_func(request, *args, **kwargs)
 
@@ -76,12 +69,6 @@ class PerformanceMonitor:
                     for q in connection.queries[initial_queries:final_queries]
                 )
                 self.metrics.add_metric("db_query_times", query_time)
-
-                # Atualiza métricas de cache
-                final_hits = cache.get("cache_hits", 0)
-                final_misses = cache.get("cache_misses", 0)
-                self.metrics.add_metric("cache_hits", final_hits - initial_hits)
-                self.metrics.add_metric("cache_misses", final_misses - initial_misses)
 
                 return response
 

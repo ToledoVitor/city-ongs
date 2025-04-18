@@ -1,6 +1,4 @@
 import logging
-import os
-import time
 from typing import Any
 
 from django.contrib.auth import update_session_auth_hash
@@ -9,8 +7,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView
-from django.core.cache import cache
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -87,30 +84,3 @@ def force_password_change_view(request: HttpRequest) -> HttpResponse:
     else:
         form = PasswordChangeForm(user=request.user)
     return render(request, "force_password_change.html", {"form": form})
-
-
-def test_redis(request):
-    try:
-        start_time = time.time()
-        redis_client = cache.client.get_client()
-
-        # Test setting a value
-        redis_client.set("test_key", "test_value", ex=60)
-        # Test getting the value
-        value = redis_client.get("test_key")
-
-        end_time = time.time()
-        operation_time = (end_time - start_time) * 1000
-
-        return JsonResponse(
-            {
-                "status": "success",
-                "message": "Redis connection is working",
-                "value": value,
-                "host": os.environ.get("REDIS_HOST"),
-                "port": os.environ.get("REDIS_PORT"),
-                "operation_time_ms": round(operation_time, 2),
-            }
-        )
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
