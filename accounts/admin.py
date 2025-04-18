@@ -70,6 +70,7 @@ class CustomUserAdmin(BaseModelAdmin):
         "last_name",
         "is_staff",
         "is_active",
+        "password_redefined",
     )
     list_filter = (
         "is_staff",
@@ -105,6 +106,8 @@ class CustomUserAdmin(BaseModelAdmin):
                     "cnpj",
                     "position",
                     "phone_number",
+                    "password_expires_at",
+                    "password_redefined",
                 ),
             },
         ),
