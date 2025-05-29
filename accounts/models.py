@@ -329,7 +329,7 @@ class User(AbstractUser):
         # Check if document is unique within the organization
         if self.cpf or self.cnpj:
             existing = User.objects.filter(
-                organization=self.organization, cpf=self.cpf, cnpj=self.cnpj
+                cpf=self.cpf, cnpj=self.cnpj
             ).exclude(pk=self.pk)
             if existing.exists():
                 raise ValidationError(
