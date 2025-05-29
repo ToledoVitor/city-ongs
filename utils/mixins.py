@@ -3,8 +3,6 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.db import models
-from django.forms.models import model_to_dict
 from django.shortcuts import redirect
 
 logger = logging.getLogger(__name__)
@@ -129,38 +127,3 @@ class ContractPermissionMixin(OrganizationPermissionMixin):
 
         # Verifica se o usuário é parte interessada do contrato
         return obj.interested_parts.filter(user=self.request.user).exists()
-
-
-class CacheableModelMixin:
-    """
-    Mixin to make model instances cacheable by handling file fields.
-    """
-
-    def to_cacheable_dict(self):
-        """
-        Convert model instance to a dictionary safe for caching.
-        Handles file fields by storing their URLs instead of file objects.
-        """
-        data = model_to_dict(self)
-
-        # Handle file fields
-        for field in self._meta.fields:
-            if isinstance(field, models.FileField):
-                file_field = getattr(self, field.name)
-                if file_field:
-                    # Store the URL instead of the file object
-                    data[field.name] = file_field.url if file_field else None
-                else:
-                    data[field.name] = None
-
-        return data
-
-    @classmethod
-    def from_cached_dict(cls, data):
-        """
-        Create a model instance from cached dictionary data.
-        """
-        instance = cls()
-        for key, value in data.items():
-            setattr(instance, key, value)
-        return instance

@@ -12,12 +12,7 @@ from accounts.models import Area, BaseOrganizationTenantModel, Committee, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
-from utils.cache_invalidation import (
-    CacheInvalidationMixin,
-    invalidate_contract_cache,
-)
 from utils.choices import MonthChoices, StatesChoices, StatusChoices
-from utils.mixins import CacheableModelMixin
 
 
 class Company(BaseOrganizationTenantModel):
@@ -108,11 +103,7 @@ class Company(BaseOrganizationTenantModel):
         verbose_name_plural = "Empresas"
 
 
-class Contract(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class Contract(BaseOrganizationTenantModel):
     """
     Contract model representing agreements between organizations.
     """
@@ -378,12 +369,6 @@ class Contract(
             self.internal_code = 1 if max_code is None else max_code + 1
         super().save(*args, **kwargs)
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this contract.
-        """
-        invalidate_contract_cache(self.id)
-
 
 class ContractInterestedPart(BaseOrganizationTenantModel):
     class InterestLevel(models.TextChoices):
@@ -427,8 +412,6 @@ class ContractInterestedPart(BaseOrganizationTenantModel):
 
 class ContractMonthTransfer(
     BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
 ):
     class TransferSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
@@ -464,19 +447,8 @@ class ContractMonthTransfer(
         verbose_name = "Repasse Mensal"
         verbose_name_plural = "Repasses Mensais"
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this transfer.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
 
-
-class ContractAddendum(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ContractAddendum(BaseOrganizationTenantModel):
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -513,18 +485,9 @@ class ContractAddendum(
         verbose_name = "Aditivo de Contrato"
         verbose_name_plural = "Aditivos de Contrato"
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this addendum.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
-
 
 class ContractGoal(
     BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
 ):
     """Model representing a goal within a contract with its specifications."""
 
@@ -575,13 +538,6 @@ class ContractGoal(
     def last_reviews(self) -> str:
         return self.goal_reviews.order_by("-created_at")[:10]
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this goal.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
-
     class Meta:
         verbose_name = "Meta"
         verbose_name_plural = "Metas"
@@ -612,11 +568,7 @@ class ContractGoalReview(BaseOrganizationTenantModel):
         verbose_name_plural = "Revisões de Metas"
 
 
-class ContractStep(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ContractStep(BaseOrganizationTenantModel):
     """Model representing a step within a contract goal."""
 
     goal = models.ForeignKey(
@@ -645,23 +597,12 @@ class ContractStep(
     def __str__(self) -> str:
         return str(f"Etapa: {self.name} | Meta: {self.goal.name}")
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this step.
-        """
-        if self.goal and self.goal.contract:
-            invalidate_contract_cache(self.goal.contract.id)
-
     class Meta:
         verbose_name = "Etapa"
         verbose_name_plural = "Etapas"
 
 
-class ContractItem(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ContractItem(BaseOrganizationTenantModel):
     class ResourceSource(models.TextChoices):
         CITY_HALL = "CITY_HALL", "Prefeitura"
         COUNTERPART = "COUNTERPART", "Contrapartida de Parceiro"
@@ -860,13 +801,6 @@ class ContractItem(
     def last_reviews(self) -> str:
         return self.item_reviews.order_by("-created_at")[:10]
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this contract item.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
-
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Itens"
@@ -927,11 +861,7 @@ class ContractItemReview(BaseOrganizationTenantModel):
         verbose_name_plural = "Revisões de Itens"
 
 
-class ContractExecution(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ContractExecution(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em Andamento"
         SENT = "SENT", "Enviada para análise"
@@ -1016,13 +946,6 @@ class ContractExecution(
         combined_querset = (execution_logs | activities_logs | files_logs).distinct()
         return combined_querset.order_by("-created_at")[:10]
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this execution.
-        """
-        if self.contract:
-            invalidate_contract_cache(self.contract.id)
-
 
 class ContractExecutionActivity(BaseOrganizationTenantModel):
     execution = models.ForeignKey(
@@ -1071,11 +994,7 @@ class ContractExecutionActivity(BaseOrganizationTenantModel):
         ]
 
 
-class ContractExecutionFile(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ContractExecutionFile(BaseOrganizationTenantModel):
     execution = models.ForeignKey(
         ContractExecution,
         verbose_name="Relatório de Execução",
@@ -1101,13 +1020,6 @@ class ContractExecutionFile(
     @property
     def file_type(self) -> str:
         return os.path.splitext(self.file.name)[1]
-
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this execution file.
-        """
-        if self.execution and self.execution.contract:
-            invalidate_contract_cache(self.execution.contract.id)
 
 
 class ContractItemNewValueRequest(BaseOrganizationTenantModel):

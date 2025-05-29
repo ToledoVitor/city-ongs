@@ -25,16 +25,6 @@ if DEVELOPMENT:
             "PORT": env("DB_PORT", default=None),
         }
     }
-    # Cache para desenvolvimento
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://localhost:6379/1",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
-        }
-    }
 else:
     print("reading gcloud env settings")
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "sitts-project")
@@ -57,52 +47,6 @@ else:
             "PORT": "",
         }
     }
-
-    # Cache configuration for production
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f'redis://{os.environ.get("REDIS_HOST", "localhost")}:{os.environ.get("REDIS_PORT", "6379")}/1',
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "SOCKET_CONNECT_TIMEOUT": 2,
-                "SOCKET_TIMEOUT": 2,
-                "RETRY_ON_TIMEOUT": True,
-                "MAX_CONNECTIONS": 1000,
-                "CONNECTION_POOL_CLASS": "redis.BlockingConnectionPool",
-                "CONNECTION_POOL_CLASS_KWARGS": {
-                    "max_connections": 50,
-                    "timeout": 10,
-                    "retry_on_timeout": True,
-                    "socket_keepalive": True,
-                },
-                "PARSER_CLASS": "redis.connection._HiredisParser",
-                "COMPRESSOR_CLASS": "django_redis.compressors.lzma.LzmaCompressor",
-                "COMPRESS_MIN_LEN": 100,  # Only compress values larger than 100 bytes
-                "IGNORE_EXCEPTIONS": True,
-                "SERIALIZER": "django_redis.serializers.json.JSONSerializer",
-                "USE_REDIS_CLIENT": True,
-                "REDIS_CLIENT_KWARGS": {
-                    "decode_responses": True,
-                    "health_check_interval": 30,
-                },
-            },
-            "KEY_PREFIX": "sitts",
-            "VERSION": "1",  # Cache version for bulk invalidation
-            "TIMEOUT": 300,  # 5 minutes default timeout
-        }
-    }
-
-    # Cache timeouts for different types of content
-    CACHE_TIMEOUTS = {
-        "STATIC": 3600,  # 1 hour for static data
-        "DYNAMIC": 300,  # 5 minutes for dynamic data
-        "VOLATILE": 60,  # 1 minute for frequently changing data
-    }
-
-    # Cache middleware settings
-    CACHE_MIDDLEWARE_SECONDS = 300  # 5 minutes
-    CACHE_MIDDLEWARE_KEY_PREFIX = "sitts"
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
@@ -127,20 +71,10 @@ LOGGING = {
             "filename": os.path.join(BASE_DIR, "logs/django.log"),
             "formatter": "verbose",
         },
-        "cache_file": {
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/cache.log"),
-            "formatter": "verbose",
-        },
     },
     "loggers": {
         "django": {
             "handlers": ["console", "file"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "django.core.cache": {
-            "handlers": ["cache_file"],
             "level": "INFO",
             "propagate": True,
         },

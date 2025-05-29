@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q, Sum
-from django.forms.models import model_to_dict
 from simple_history.models import HistoricalRecords
 
 from accounts.models import BaseOrganizationTenantModel, User
@@ -9,19 +8,12 @@ from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from contracts.models import Contract, ContractItem
-from utils.cache_invalidation import (
-    CacheInvalidationMixin,
-    invalidate_accountability_cache,
-)
 from utils.choices import MonthChoices, StatusChoices
-from utils.mixins import CacheableModelMixin
 from utils.validators import validate_cpf_cnpj
 
 
 class Accountability(
-    CacheInvalidationMixin,
     BaseOrganizationTenantModel,
-    CacheableModelMixin,
 ):
     class ReviewStatus(models.TextChoices):
         WIP = "WIP", "Em Andamento"
@@ -109,68 +101,6 @@ class Accountability(
             .order_by("-created_at")[:10]
         )
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this accountability.
-        """
-        # Access organization_id from BaseOrganizationTenantModel
-        invalidate_accountability_cache(self.id, self.organization.id)
-
-    def to_cacheable_dict(self, full=False):
-        """
-        Convert model instance to a dictionary safe for caching.
-        Args:
-            full (bool): If True, include all relationships for detail view.
-                        If False, only include basic data for list view.
-        """
-        if not full:
-            # Light version for contract page
-            return {
-                "id": self.id,
-                "month": self.month,
-                "year": self.year,
-                "month_label": self.month_label,
-                "status": self.status,
-                "status_label": self.status_label,
-                "count_revenues": self.revenues.filter(deleted_at__isnull=True).count(),
-                "count_expenses": self.expenses.filter(deleted_at__isnull=True).count(),
-            }
-
-        # Full version for detail page
-        data = super().to_cacheable_dict()
-
-        # Add computed properties
-        data.update(
-            {
-                "month_label": self.month_label,
-                "is_on_execution": self.is_on_execution,
-                "is_sent": self.is_sent,
-                "is_finished": self.is_finished,
-                "status_label": self.status_label,
-            }
-        )
-
-        # Handle related objects for detail view
-        if hasattr(self, "revenues"):
-            data["revenues"] = [
-                revenue.to_cacheable_dict()
-                for revenue in self.revenues.filter(deleted_at__isnull=True)[:10]
-            ]
-
-        if hasattr(self, "expenses"):
-            data["expenses"] = [
-                expense.to_cacheable_dict()
-                for expense in self.expenses.filter(deleted_at__isnull=True)[:10]
-            ]
-
-        if hasattr(self, "files"):
-            data["files"] = [
-                file.to_cacheable_dict()
-                for file in self.files.filter(deleted_at__isnull=True)[:10]
-            ]
-
-        return data
-
     class Meta:
         verbose_name = "Prestação de Contas"
         verbose_name_plural = "Prestações de Contas"
@@ -179,8 +109,6 @@ class Accountability(
 
 class AccountabilityFile(
     BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
 ):
     accountability = models.ForeignKey(
         Accountability,
@@ -213,37 +141,6 @@ class AccountabilityFile(
 
     def __str__(self) -> str:
         return f"Arquivo de Prestação {self.id}"
-
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this file.
-        """
-        if self.accountability_id:
-            invalidate_accountability_cache(self.accountability_id)
-
-    def to_cacheable_dict(self):
-        """
-        Convert model instance to a dictionary safe for caching.
-        Override to handle file field.
-        """
-        data = model_to_dict(self)
-        data.update(
-            {
-                "id": self.id,
-                "name": self.name,
-                "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat() if self.created_at else None,
-                "created_by": {
-                    "id": self.created_by.id,
-                    "name": self.created_by.get_full_name()
-                    if self.created_by
-                    else None,
-                }
-                if self.created_by
-                else None,
-            }
-        )
-        return data
 
     class Meta:
         verbose_name = "Arquivo de Prestação"
@@ -441,7 +338,7 @@ class ResourceSource(BaseOrganizationTenantModel):
         return ResourceSource.CategoryChoices(self.category).label
 
 
-class Expense(BaseOrganizationTenantModel, CacheableModelMixin):
+class Expense(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         IN_ANALISIS = "IN_ANALISIS", "Em Análise"
         REJECTED = "REJECTED", "Rejeitada"
@@ -630,50 +527,8 @@ class Expense(BaseOrganizationTenantModel, CacheableModelMixin):
     def __str__(self) -> str:
         return f"Despesa {self.id}"
 
-    def to_cacheable_dict(self):
-        """Convert model instance to a dictionary safe for caching."""
-        # Exclude file-related fields and foreign keys that might have files
-        exclude_fields = ["files"]
 
-        # Get base data excluding file fields
-        data = model_to_dict(self, exclude=exclude_fields)
-
-        # Add computed properties
-        data.update(
-            {
-                "nature_label": self.nature_label,
-                "status_label": self.status_label,
-                "is_rejected": self.is_rejected,
-                "document_type_label": self.document_type_label,
-                "liquidation_form_label": self.liquidation_form_label,
-            }
-        )
-
-        # Handle related objects carefully
-        if hasattr(self, "source"):
-            data["source_name"] = self.source.name if self.source else None
-
-        if hasattr(self, "favored"):
-            data["favored_name"] = self.favored.name if self.favored else None
-
-        if hasattr(self, "item"):
-            data["item_name"] = self.item.name if self.item else None
-
-        # Handle files separately - only store minimal file info
-        if hasattr(self, "files"):
-            data["files"] = [
-                {
-                    "id": file.id,
-                    "name": file.name,
-                    "file_url": file.file.url if file.file else None,
-                }
-                for file in self.files.filter(deleted_at__isnull=True)
-            ]
-
-        return data
-
-
-class Revenue(BaseOrganizationTenantModel, CacheableModelMixin):
+class Revenue(BaseOrganizationTenantModel):
     """Model representing revenue entries in the system."""
 
     class RevenueSource(models.TextChoices):
@@ -805,43 +660,12 @@ class Revenue(BaseOrganizationTenantModel, CacheableModelMixin):
             return Revenue.Nature(self.revenue_nature).label
         return "-"
 
-    def to_cacheable_dict(self):
-        """Convert model instance to a dictionary safe for caching."""
-        data = model_to_dict(self, exclude=["files"])
-
-        # Add computed properties
-        data.update(
-            {
-                "source_label": self.source_label,
-                "status_label": self.status_label,
-                "is_rejected": self.is_rejected,
-                "revenue_nature_label": self.revenue_nature_label,
-            }
-        )
-
-        # Handle files
-        if hasattr(self, "files"):
-            data["files"] = [
-                {
-                    "id": file.id,
-                    "name": file.name,
-                    "file_url": file.file.url if file.file else None,
-                }
-                for file in self.files.filter(deleted_at__isnull=True)
-            ]
-
-        return data
-
     class Meta:
         verbose_name = "Receita"
         verbose_name_plural = "Receitas"
 
 
-class ExpenseFile(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class ExpenseFile(BaseOrganizationTenantModel):
     expense = models.ForeignKey(
         Expense,
         verbose_name="Despesa",
@@ -869,49 +693,12 @@ class ExpenseFile(
     def __str__(self) -> str:
         return f"Arquivo de Despesa {self.id}"
 
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this file.
-        """
-        if self.expense_id:
-            expense = self.expense
-            if expense and expense.accountability_id:
-                invalidate_accountability_cache(expense.accountability_id)
-
-    def to_cacheable_dict(self):
-        """
-        Convert model instance to a dictionary safe for caching.
-        Override to handle file field.
-        """
-        data = model_to_dict(self)
-        data.update(
-            {
-                "id": self.id,
-                "name": self.name,
-                "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat() if self.created_at else None,
-                "created_by": {
-                    "id": self.created_by.id,
-                    "name": self.created_by.get_full_name()
-                    if self.created_by
-                    else None,
-                }
-                if self.created_by
-                else None,
-            }
-        )
-        return data
-
     class Meta:
         verbose_name = "Arquivo de Despesa"
         verbose_name_plural = "Arquivo de Despesas"
 
 
-class RevenueFile(
-    BaseOrganizationTenantModel,
-    CacheableModelMixin,
-    CacheInvalidationMixin,
-):
+class RevenueFile(BaseOrganizationTenantModel):
     revenue = models.ForeignKey(
         Revenue,
         verbose_name="Recurso",
@@ -938,39 +725,6 @@ class RevenueFile(
 
     def __str__(self) -> str:
         return f"Arquivo de Receita {self.id}"
-
-    def invalidate_cache(self):
-        """
-        Invalidate all cache related to this file.
-        """
-        if self.revenue_id:
-            revenue = self.revenue
-            if revenue and revenue.accountability_id:
-                invalidate_accountability_cache(revenue.accountability_id)
-
-    def to_cacheable_dict(self):
-        """
-        Convert model instance to a dictionary safe for caching.
-        Override to handle file field.
-        """
-        data = model_to_dict(self)
-        data.update(
-            {
-                "id": self.id,
-                "name": self.name,
-                "file_url": self.file.url if self.file else None,
-                "created_at": self.created_at.isoformat() if self.created_at else None,
-                "created_by": {
-                    "id": self.created_by.id,
-                    "name": self.created_by.get_full_name()
-                    if self.created_by
-                    else None,
-                }
-                if self.created_by
-                else None,
-            }
-        )
-        return data
 
     class Meta:
         verbose_name = "Arquivo de Receita"
