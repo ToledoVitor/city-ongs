@@ -281,6 +281,13 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         )
         context["accountabilities"] = accountabilities
 
+        interested_parts = (
+            self.object.interested_parts.filter(deleted_at__isnull=True)
+            .select_related("user")
+            .order_by("-created_at")[:12]
+        )
+        context["interested_parts"] = interested_parts
+
         value_requests = ContractItemNewValueRequest.objects.filter(
             raise_item__contract=self.object,
             status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
@@ -940,8 +947,6 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
                 "hired_company",
             )
             .prefetch_related(
-                "interested_parts",
-                "interested_parts__user",
                 "goals",
                 "items",
             )
@@ -998,6 +1003,11 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["groupped_natures"] = self.group_nature_expenses()
         context["transfers"] = get_monthly_transfers(self.object)
+        context["interested_parts"] = (
+            self.object.interested_parts.filter(deleted_at__isnull=True)
+            .select_related("user")
+            .order_by("-user__first_name")[:12]
+        )
         return context
 
 

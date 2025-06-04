@@ -16,8 +16,8 @@
             </tr>
         </thead>
         <tbody>
-            {% if contract.interested_parts.count %}
-              {% for interested in contract.interested_parts.all %}
+            {% if interested_parts.count %}
+              {% for interested in interested_parts.all %}
               <tr class="bg-gray-50 border-b hover:bg-gray-200">
                   <td class="px-2 py-4 text-base text-sm sticky left-0 z-10 bg-gray-300 hover:bg-gray-400 border-r border-gray-300 w-[180px]">
                     <div class="flex gap-1 justify-center">
