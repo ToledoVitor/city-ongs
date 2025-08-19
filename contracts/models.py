@@ -170,6 +170,13 @@ class Contract(BaseOrganizationTenantModel):
     )
 
     # Values
+    original_value = models.DecimalField(
+        verbose_name="Valor original do contrato",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
     total_value = models.DecimalField(
         verbose_name="Valor do contrato",
         decimal_places=2,
