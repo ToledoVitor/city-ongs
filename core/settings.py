@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env(DEBUG=(bool, False), DEVELOPMENT=(bool, False))
 env_file = os.path.join(BASE_DIR, ".env")
 
-DEVELOPMENT = True
+DEVELOPMENT = env("DEVELOPMENT")
 
 if DEVELOPMENT:
     env.read_env(env_file)
