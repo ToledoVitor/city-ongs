@@ -460,6 +460,12 @@ class ContractAddendum(BaseOrganizationTenantModel):
         related_name="addendums",
         on_delete=models.CASCADE,
     )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contract-addendums/",
+        null=True,
+        blank=True,
+    )
 
     # Datas
     start_of_vigency = models.DateField(verbose_name="Começo da vigência")
@@ -489,6 +495,42 @@ class ContractAddendum(BaseOrganizationTenantModel):
     class Meta:
         verbose_name = "Aditivo de Contrato"
         verbose_name_plural = "Aditivos de Contrato"
+
+
+class ContractDocument(BaseOrganizationTenantModel):
+    class DocumentType(models.TextChoices):
+        ADDENDUM = "ADDENDUM", "Aditivo"
+        CONTRACT = "CONTRACT", "Contrato"
+        SPREADSHEET = "SPREADSHEET", "Planilha"
+        TERMS = "TERMS", "Termos"
+        OTHER = "OTHER", "Outro"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Contrato",
+        related_name="documents",
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        verbose_name="Nome",
+        max_length=128,
+    )
+    type = models.CharField(
+        verbose_name="Tipo",
+        choices=DocumentType.choices,
+        default=DocumentType.OTHER,
+        max_length=128,
+    )
+    file = models.FileField(
+        verbose_name="Arquivo",
+        upload_to="uploads/contract-documents/",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Documento de Contrato"
+        verbose_name_plural = "Documentos de Contrato"
 
 
 class ContractGoal(

@@ -23,6 +23,8 @@ from contracts.views import (
     contract_item_supplementations_update_view,
     contract_status_change_view,
     contract_timeline_update_view,
+    create_contract_addendum_view,
+    create_contract_document_view,
     create_contract_execution_view,
     create_contract_goal_view,
     create_contract_interested_view,
@@ -33,6 +35,8 @@ from contracts.views import (
     item_new_value_request_view,
     send_accountability_review_analisys,
     send_execution_to_analisys_view,
+    delete_contract_document_view,
+    update_contract_document_view,
     update_contract_goal_view,
     update_contract_interested_view,
     update_contract_item_view,
@@ -143,8 +147,23 @@ urlpatterns = [
     ),
     path(
         "detail/<uuid:pk>/addendums/create/",
-        ContractsDetailView.as_view(),
+        create_contract_addendum_view,
         name="contracts-addendum-create",
+    ),
+    path(
+        "detail/<uuid:pk>/documents/create/",
+        create_contract_document_view,
+        name="contracts-document-create",
+    ),
+    path(
+        "detail/<uuid:pk>/documents/update/<uuid:document_pk>",
+        update_contract_document_view,
+        name="contracts-document-update",
+    ),
+    path(
+        "detail/documents/delete/<uuid:pk>",
+        delete_contract_document_view,
+        name="contracts-document-delete",
     ),
     path(
         "detail/<uuid:pk>/accounts/create/",
