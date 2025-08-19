@@ -87,7 +87,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for interested in contract.interested_parts.all %}
+          {% for interested in interested_parts.all %}
             <tr class="{% cycle 'bg-white' 'bg-gray-100' %} border-b">
               <td class="py-4 px-6">{{ interested.user.get_full_name }}</td>
               <td class="py-4 px-6">{{ interested.interest_label }}</td>

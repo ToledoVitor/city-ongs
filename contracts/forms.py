@@ -17,6 +17,8 @@ from contracts.models import (
     ContractItemNewValueRequest,
     ContractItemSupplement,
     ContractStep,
+    ContractAddendum,
+    ContractDocument,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
@@ -232,6 +234,102 @@ ContractExtraStepFormSet = forms.inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+class ContractAddendumForm(forms.ModelForm):
+    total_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+    municipal_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+    counterpart_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = ContractAddendum
+        fields = [
+            "file",
+            "start_of_vigency",
+            "end_of_vigency",
+            "total_value",
+            "municipal_value",
+            "counterpart_value",
+        ]
+
+        widgets = {
+            "file": BaseFileFormWidget(required=True),
+            "start_of_vigency": BaseCharFieldFormWidget(placeholder="dd/mm/aaaa"),
+            "end_of_vigency": BaseCharFieldFormWidget(placeholder="dd/mm/aaaa"),
+        }
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+
+        if file:
+            if not file.name.lower().endswith(".pdf"):
+                raise forms.ValidationError(
+                    "Somente arquivos do tipo PDF são permitidos."
+                )
+
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(
+                    "O tamanho máximo permitido para o arquivo é 10MB."
+                )
+
+        return file
+
+
+class ContractDocumentForm(forms.ModelForm):
+    class Meta:
+        model = ContractDocument
+        fields = [
+            "name",
+            "type",
+            "file",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="Nome do documento"),
+            "type": BaseSelectFormWidget(),
+            "file": BaseFileFormWidget(required=True),
+        }
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+
+        if file:
+            extension = file.name.split(".")[-1].lower()
+            if extension not in [
+                "pdf",
+                "doc",
+                "docx",
+                "xls",
+                "xlsx",
+                "jpg",
+                "jpeg",
+                "png",
+            ]:
+                raise forms.ValidationError(
+                    "Arquivo inválido. Somente arquivos do tipo PDF, DOC, "
+                    "DOCX, XLS, XLSX, JPG, JPEG ou PNG são permitidos."
+                )
+
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(
+                    "O tamanho máximo permitido para o arquivo é 10MB."
+                )
+
+        return file
+
+
+class ContractDocumentUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ContractDocument
+        fields = [
+            "name",
+            "type",
+        ]
+
+        widgets = {
+            "name": BaseCharFieldFormWidget(placeholder="Nome do documento"),
+            "type": BaseSelectFormWidget(),
+        }
 
 
 ContractStepFormSet = forms.inlineformset_factory(

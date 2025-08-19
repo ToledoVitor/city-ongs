@@ -136,6 +136,18 @@ class ActivityLog(BaseOrganizationTenantModel):
             "CREATED_CONTRACT_ADDENDUM",
             "Criou aditivo de contrato",
         )
+        UPDATED_CONTRACT_ADDENDUM = (
+            "UPDATED_CONTRACT_ADDENDUM",
+            "Atualizou aditivo de contrato",
+        )
+        CREATED_CONTRACT_DOCUMENT = (
+            "CREATED_CONTRACT_DOCUMENT",
+            "Criou documento de contrato",
+        )
+        UPDATED_CONTRACT_DOCUMENT = (
+            "UPDATED_CONTRACT_DOCUMENT",
+            "Atualizou documento de contrato",
+        )
         UPDATED_CONTRACT_STATUS = (
             "UPDATED_CONTRACT_STATUS",
             "Atualizou status do contrato",

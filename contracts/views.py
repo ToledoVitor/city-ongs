@@ -38,6 +38,9 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
+    ContractAddendumForm,
+    ContractDocumentForm,
+    ContractDocumentUpdateForm,
 )
 from contracts.models import (
     Company,
@@ -54,6 +57,8 @@ from contracts.models import (
     ContractItemReview,
     ContractItemSupplement,
     ContractMonthTransfer,
+    ContractAddendum,
+    ContractDocument,
 )
 from utils.choices import StatusChoices
 from utils.logging import log_database_operation, log_view_access
@@ -281,6 +286,13 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         )
         context["accountabilities"] = accountabilities
 
+        interested_parts = (
+            self.object.interested_parts.filter(deleted_at__isnull=True)
+            .select_related("user")
+            .order_by("-created_at")[:12]
+        )
+        context["interested_parts"] = interested_parts
+
         value_requests = ContractItemNewValueRequest.objects.filter(
             raise_item__contract=self.object,
             status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
@@ -291,6 +303,18 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             total_month=Coalesce(Sum("month_expense"), Value(Decimal("0.00"))),
             total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
         )
+
+        addendums = (
+            self.object.addendums.filter(deleted_at__isnull=True)
+            .order_by("-created_at")[:12]
+        )
+        context["addendums"] = addendums
+
+        documents = (
+            self.object.documents.filter(deleted_at__isnull=True)
+            .order_by("-created_at")[:12]
+        )
+        context["documents"] = documents
 
         return context
 
@@ -940,8 +964,6 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
                 "hired_company",
             )
             .prefetch_related(
-                "interested_parts",
-                "interested_parts__user",
                 "goals",
                 "items",
             )
@@ -998,6 +1020,11 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["groupped_natures"] = self.group_nature_expenses()
         context["transfers"] = get_monthly_transfers(self.object)
+        context["interested_parts"] = (
+            self.object.interested_parts.filter(deleted_at__isnull=True)
+            .select_related("user")
+            .order_by("-user__first_name")[:12]
+        )
         return context
 
 
@@ -1657,3 +1684,147 @@ def contract_item_purchase_file_delete_view(request, pk):
         )
 
     return redirect("contracts:item-purchases", pk=file.item.contract.id)
+
+
+@login_required
+def create_contract_addendum_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    if request.method == "POST":
+        form = ContractAddendumForm(request.POST, request.FILES)
+        if form.is_valid():
+            with transaction.atomic():
+                addendum: ContractAddendum = form.save(commit=False)
+                addendum.contract = contract
+                addendum.save()
+
+                contract.total_value = addendum.total_value
+                contract.municipal_value = addendum.municipal_value
+                contract.counterpart_value = addendum.counterpart_value
+                contract.end_of_vigency = addendum.end_of_vigency
+                contract.save(
+                    update_fields=[
+                        "updated_at",
+                        "total_value",
+                        "municipal_value",
+                        "counterpart_value",
+                        "end_of_vigency",
+                    ]
+                )
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ADDENDUM,
+                    target_object_id=addendum.id,
+                    target_content_object=addendum,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/addendums-create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = ContractAddendumForm()
+        return render(
+            request,
+            "contracts/addendums-create.html",
+            {"contract": contract, "form": form},
+        )
+
+
+@login_required
+def create_contract_document_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    if request.method == "POST":
+        form = ContractDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            with transaction.atomic():
+                document: ContractDocument = form.save(commit=False)
+                document.contract = contract
+                document.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_DOCUMENT,
+                    target_object_id=document.id,
+                    target_content_object=document,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/documents-create.html",
+                {"contract": contract, "form": form},
+            )
+    else:
+        form = ContractDocumentForm()
+        return render(
+            request,
+            "contracts/documents-create.html",
+            {"contract": contract, "form": form},
+        )
+
+
+@login_required
+def update_contract_document_view(request, pk, document_pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    contract = get_object_or_404(Contract, id=pk)
+    if not contract.is_on_planning:
+        return redirect("contracts:contracts-detail", pk=contract.id)
+
+    document = get_object_or_404(ContractDocument, id=document_pk)
+
+    if request.method == "POST":
+        form = ContractDocumentUpdateForm(request.POST, instance=document)
+        if form.is_valid():
+            with transaction.atomic():
+                form.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_DOCUMENT,
+                    target_object_id=document.id,
+                    target_content_object=document,
+                )
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        else:
+            return render(
+                request,
+                "contracts/documents-update.html",
+                {"contract": contract, "document": document, "form": form},
+            )
+    else:
+        form = ContractDocumentUpdateForm(instance=document)
+        return render(
+            request,
+            "contracts/documents-update.html",
+            {"contract": contract, "document": document, "form": form},
+        )
+
+
+@login_required
+def delete_contract_document_view(request, pk):
+    if not request.user:
+        return redirect("/accounts-login/")
+
+    document = get_object_or_404(ContractDocument, id=pk)
+    document.delete()
+    return redirect("contracts:contracts-detail", pk=document.contract.id)
