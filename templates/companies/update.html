@@ -52,12 +52,20 @@
       <div class="relative">
         <label class="block mb-2 text-base font-medium text-black">CNPJ</label>
         <div class="px-4 py-2.5 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full">
-          {{ company.cnpj }}
+          {{ company.masked_cnpj }}
         </div>
       </div>
       <div class="relative">
         <label class="block mb-2 text-base font-medium text-black">Telefone</label>
-        {{ form.phone_number }}
+        <input
+          type="tel"
+          name="phone_number"
+          id="phone_number"
+          value="{{ company.phone_number.as_national }}"
+          required
+          class="block w-full text-sm rounded-lg border focus:ring-blue-500 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
+          pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
+          placeholder="(00) 00000-0000">
       </div>
     </div>
   </div>
@@ -107,5 +115,23 @@
     </button>
   </div>
 </form>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone_number');
+    phoneInput.value = phoneInput.value.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    
+    phoneInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+      value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+      e.target.value = value;
+    });
+  });
+
+</script>
+{% endblock %}
 
 {% endblock %} 

@@ -249,7 +249,7 @@ class User(AbstractUser):
         help_text="Número de telefone pessoal no formato brasileiro (ex: +55 11 99999-9999)",
         null=True,
         blank=True,
-    )  # type: PhoneNumberField
+    )
 
     password_expires_at = models.DateTimeField(
         verbose_name="Data de Expiração da Senha",
