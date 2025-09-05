@@ -183,6 +183,7 @@ class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, Templat
         if form.is_valid():
             with transaction.atomic():
                 contract = form.save(commit=False)
+                contract.original_value = contract.total_value
                 contract.organization = request.user.organization
                 contract.file = request.FILES["file"]
                 contract.save()
