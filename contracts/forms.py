@@ -31,7 +31,7 @@ from utils.widgets import (
 )
 
 
-class ContractCreateForm(forms.ModelForm):
+class ContractCreateUpdateForm(forms.ModelForm):
     municipal_value = DecimalMaskedField(max_digits=12, decimal_places=2)
     counterpart_value = DecimalMaskedField(max_digits=12, decimal_places=2)
     total_value = DecimalMaskedField(max_digits=12, decimal_places=2)
