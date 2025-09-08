@@ -7,7 +7,17 @@
       <p class="text-2xl mt-1 mb-2 font-bold text-black">{{ contract.name_with_code }}</p>
       <b>Licitação:</b> {{ contract.bidding }} <br>
       <b>Organização:</b> {{ contract.organization.name }} <br>
-      <b>Area de atuação:</b> {{ contract.area.name }}
+      <b>Area de atuação:</b> {{ contract.area.name }} <br>
+      {% if contract.file and user.has_admin_access %}
+        <b>
+          <a href="{{ contract.file.url }}" target="_blank" class="mt-2 px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
+            <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-4c0-.6-.4-1-1-1h-2m-1-5-4 5-4-5"/>
+            </svg>
+            Arquivo
+          </a>
+        </b>
+      {% endif %}
     </div>
 
     <div class="max-w-60 text-center">
@@ -67,6 +77,33 @@
       </a>
 
       {% if user.has_admin_access %}
+        <a
+          href="{% url 'contracts:contracts-update' contract.id %}"
+          class="
+            w-48
+            px-3
+            py-2
+            mb-2
+            text-sm
+            font-medium
+            text-center
+            inline-flex
+            items-center
+            text-white
+            rounded-lg
+            focus:ring-4
+            focus:outline-none
+            bg-blue-600
+            hover:bg-blue-700
+            focus:ring-blue-800
+          "
+        >
+          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+          </svg>
+          Editar Contrato
+        </a>
+
         <a
           href="{% url 'contracts:contract-status-change' contract.id %}"
           class="

@@ -7,6 +7,7 @@ from contracts.views import (
     CompanyListView,
     CompanyUpdateView,
     ContractCreateView,
+    ContractUpdateView,
     ContractExecutionActivityUpdateView,
     ContractExecutionDetailView,
     ContractsDetailView,
@@ -45,6 +46,11 @@ from contracts.views import (
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
     path("create/", ContractCreateView.as_view(), name="contracts-create"),
+    path(
+        "update/<uuid:pk>/",
+        ContractUpdateView.as_view(),
+        name="contracts-update",
+    ),
     path(
         "detail/<uuid:pk>/",
         ContractsDetailView.as_view(),

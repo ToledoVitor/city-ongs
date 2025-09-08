@@ -138,10 +138,10 @@ class Contract(BaseOrganizationTenantModel):
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
     )
-    objective = models.CharField(verbose_name="Objeto", max_length=128)
+    objective = models.CharField(verbose_name="Objeto", max_length=255)
     bidding = models.CharField(
         verbose_name="Licitação",
-        max_length=128,
+        max_length=255,
     )
 
     # Law and Agreement

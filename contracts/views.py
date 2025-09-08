@@ -23,7 +23,7 @@ from contracts.choices import NatureCategories
 from contracts.forms import (
     CompanyCreateForm,
     CompanyUpdateForm,
-    ContractCreateForm,
+    ContractCreateUpdateForm,
     ContractExecutionActivityForm,
     ContractExecutionCreateForm,
     ContractExecutionFileForm,
@@ -174,15 +174,16 @@ class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, Templat
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         if not context.get("form", None):
-            context["form"] = ContractCreateForm(request=self.request)
+            context["form"] = ContractCreateUpdateForm(request=self.request)
 
         return context
 
     def post(self, request, *args, **kwargs):
-        form = ContractCreateForm(request.POST, request=request)
+        form = ContractCreateUpdateForm(request.POST, request=request)
         if form.is_valid():
             with transaction.atomic():
                 contract = form.save(commit=False)
+                contract.original_value = contract.total_value
                 contract.organization = request.user.organization
                 contract.file = request.FILES["file"]
                 contract.save()
@@ -196,6 +197,54 @@ class ContractCreateView(CommitteeMemberCreateMixin, AdminRequiredMixin, Templat
                     target_content_object=contract,
                 )
             return redirect("contracts:contracts-list")
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+class ContractUpdateView(CommitteeMemberUpdateMixin, AdminRequiredMixin, TemplateView):
+    template_name = "contracts/edit.html"
+    login_url = "/auth/login"
+
+    def get_contract(self):
+        return get_object_or_404(Contract, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        contract = self.get_contract()
+
+        if not context.get("form", None):
+            context["form"] = ContractCreateUpdateForm(
+                instance=contract, request=self.request
+            )
+
+        context["contract"] = contract
+        return context
+
+    def post(self, request, *args, **kwargs):
+        contract = self.get_contract()
+        form = ContractCreateUpdateForm(
+            request.POST, request.FILES, instance=contract, request=request
+        )
+
+        if form.is_valid():
+            with transaction.atomic():
+                updated_contract = form.save(commit=False)
+                if 'file' in request.FILES:
+                    updated_contract.file = request.FILES["file"]
+                updated_contract.save()
+
+                logger.info(
+                    "%s - Updated contract %s", request.user.id, contract.id
+                )
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_STATUS,
+                    target_object_id=contract.id,
+                    target_content_object=contract,
+                )
+
+            return redirect("contracts:contracts-detail", pk=contract.id)
 
         return self.render_to_response(self.get_context_data(form=form))
 
