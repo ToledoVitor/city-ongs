@@ -46,8 +46,8 @@ class Accountability(
 
     status = models.CharField(
         verbose_name="Status",
-        choices=StatusChoices,
-        default=StatusChoices.ANALYZING,
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.WIP,
         max_length=22,
     )
 

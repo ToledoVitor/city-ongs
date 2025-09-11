@@ -17,7 +17,7 @@ from utils.admin import BaseModelAdmin
 class AccountabilityFileInline(admin.TabularInline):
     model = AccountabilityFile
     extra = 0
-    fields = ("name", "type")
+    fields = ("name", "file")
 
 
 @admin.register(Accountability)
@@ -52,7 +52,12 @@ class AccountabilityAdmin(BaseModelAdmin):
         ),
         (
             _("Datas"),
-            {"fields": ("start_date", "end_date", "created_at", "updated_at")},
+            {"fields": (
+                "month",
+                "year",
+                "created_at",
+                "updated_at",
+            )},
         ),
     )
 
