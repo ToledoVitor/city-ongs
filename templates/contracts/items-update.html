@@ -108,7 +108,7 @@
         >
             Natureza da Despesa
         </label>
-        {% include 'commons/nature-select.html' with id='id_nature' name='nature' %}
+        {% include 'commons/nature-select.html' with id='id_nature' name='nature' selected_value=form.nature.value %}
       </div>
 
       <div class="relative">
@@ -141,6 +141,7 @@
                 id="id_start_date"
                 name="start_date"
                 type="text"
+                value="{{ form.start_date.value }}"
                 class="
                   border
                   text-sm
@@ -191,6 +192,7 @@
                   focus:ring-blue-500
                   focus:border-blue-500
                 "
+                value="{{ form.end_date.value }}"
             >
         </div>
       </div>
@@ -237,6 +239,7 @@
             id="id_month_expense"
             name="month_expense"
             oninput="formatMoney(this)"
+            value="{{ form.month_expense.value }}"
             placeholder="000,00"
             class="
               block
@@ -398,6 +401,7 @@
 
 <script>
   function formatMoney(input) {
+    console.log(input.value)
     let value = input.value.replace(/\D/g, "");
 
     if (!value) {
@@ -444,6 +448,9 @@
   document.getElementById('id_month_quantity').addEventListener('input', calculateAnnualExpense);
   document.getElementById('id_quantity').addEventListener('input', calculateAnnualExpense);
   document.getElementById('id_month_expense').addEventListener('input', calculateAnnualExpense);
+
+  formatMoney(document.getElementById('id_month_expense'));
+  calculateAnnualExpense();
 </script>
 
 {% endblock %}
