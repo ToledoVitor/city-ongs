@@ -464,11 +464,16 @@ class ContractExecutionFileForm(forms.ModelForm):
         }
 
 
-class ContractStatusUpdateForm(forms.Form):
-    status = forms.ChoiceField(
-        choices=Contract.ContractStatusChoices.choices,
-        widget=BaseSelectFormWidget(),
-    )
+class ContractStatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Contract
+        fields = [
+            "status",
+        ]
+
+        widgets = {
+            "status": BaseSelectFormWidget(),
+        }
 
 
 class ContractItemValueRequestForm(forms.ModelForm):

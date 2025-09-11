@@ -1280,7 +1280,7 @@ def contract_status_change_view(request, pk):
         return redirect("contracts:contracts-detail", pk=contract.id)
 
     if request.method == "POST":
-        form = ContractStatusUpdateForm(request.POST)
+        form = ContractStatusUpdateForm(request.POST, instance=contract)
         if form.is_valid():
             with transaction.atomic():
                 contract.status = form.cleaned_data["status"]
@@ -1295,7 +1295,7 @@ def contract_status_change_view(request, pk):
                 )
                 return redirect("contracts:contracts-detail", pk=contract.id)
     else:
-        form = ContractStatusUpdateForm()
+        form = ContractStatusUpdateForm(instance=contract)
         return render(
             request,
             "contracts/status-update.html",
