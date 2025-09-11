@@ -110,7 +110,7 @@ class AccountabilityXLSXImporter:
             )
 
         if new_favoreds:
-            Favored.objects.bulk_create(new_favoreds)
+            Favored.objects.bulk_create(new_favoreds, ignore_conflicts=True)
 
         all_favored = Favored.objects.filter(
             organization=organization,
