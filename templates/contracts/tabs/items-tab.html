@@ -78,7 +78,7 @@
                     </div>
                   </td>
 
-                  <td class="truncate max-w-[200px] px-6 py-4 text-sm font-medium text-gray-900">
+                  <td class="truncate max-w-[200px] px-6 py-4 text-xs font-medium text-gray-900">
                     {{ item.name }}
                   </td>
 
@@ -94,8 +94,9 @@
                     {{ item.quantity }}
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
-                    R$ {{ item.month_expense|intcomma }}
+                  <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap text-center">
+                    <span class="text-xs text-gray-500">Unitário: </span>R$ {{ item.month_expense|intcomma }} <br>
+                    <span class="text-xs text-gray-500">Total: </span>R$ {{ item.total_month_expense|intcomma }}
                   </td>
 
                   <td class="px-6 py-4 text-sm text-gray-900 text-center">

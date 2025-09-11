@@ -845,6 +845,10 @@ class ContractItem(BaseOrganizationTenantModel):
         return str(self.month_expense).replace(",", ".")
 
     @property
+    def total_month_expense(self) -> str:
+        return self.month_expense * self.quantity
+
+    @property
     def last_reviews(self) -> str:
         return self.item_reviews.order_by("-created_at")[:10]
 
