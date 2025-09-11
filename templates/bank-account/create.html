@@ -27,7 +27,7 @@
         <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <a href="{% url 'bank-account:bank-account-list' %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Contas Bancárias</a>
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Contas Bancárias</a>
       </div>
     </li>
     <li aria-current="page">
@@ -54,29 +54,41 @@
     <div class="bg-white shadow-md rounded-lg p-6">
       <h2 class="text-xl font-semibold mb-4">Dados da Conta</h2>
       <div class="space-y-4">
-        <div>
-          <label for="id_bank" class="block mb-2 text-base font-medium text-black">Banco</label>
-          {{ form.bank }}
+
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label for="id_bank_name" class="block mb-2 text-base font-medium text-black">Banco</label>
+            {{ form.bank_name }}
+          </div>
+
+          <div class="relative">
+            <label for="id_bank_id" class="block mb-2 text-base font-medium text-black">Id do Banco</label>
+            {{ form.bank_id }}
+          </div>
         </div>
 
-        <div>
-          <label for="id_agency" class="block mb-2 text-base font-medium text-black">Agência</label>
-          {{ form.agency }}
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label for="id_account" class="block mb-2 text-base font-medium text-black">Conta</label>
+            {{ form.account }}
+          </div>
+
+          <div>
+            <label for="id_account_type" class="block mb-2 text-base font-medium text-black">Tipo</label>
+            {{ form.account_type }}
+          </div>
         </div>
 
-        <div>
-          <label for="id_account" class="block mb-2 text-base font-medium text-black">Conta</label>
-          {{ form.account }}
-        </div>
+        <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="relative">
+            <label for="id_agency" class="block mb-2 text-base font-medium text-black">Agência</label>
+            {{ form.agency }}
+          </div>
 
-        <div>
-          <label for="id_type" class="block mb-2 text-base font-medium text-black">Tipo</label>
-          {{ form.type }}
-        </div>
-
-        <div>
-          <label for="id_balance" class="block mb-2 text-base font-medium text-black">Saldo Inicial</label>
-          {{ form.balance }}
+          <div>
+            <label for="id_origin" class="block mb-2 text-base font-medium text-black">Origem</label>
+            {{ form.origin }}
+          </div>
         </div>
       </div>
     </div>
@@ -86,7 +98,7 @@
 
   <div class="py-6">
     <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'bank-account:bank-account-list' %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
         <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
         </svg>
