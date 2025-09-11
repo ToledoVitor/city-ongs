@@ -4,20 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0029_alter_contractexecution_unique_together_and_more'),
+        ("contracts", "0029_alter_contractexecution_unique_together_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='contract',
-            name='original_value',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Valor original do contrato'),
+            model_name="contract",
+            name="original_value",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=12,
+                null=True,
+                verbose_name="Valor original do contrato",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcontract',
-            name='original_value',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Valor original do contrato'),
+            model_name="historicalcontract",
+            name="original_value",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=12,
+                null=True,
+                verbose_name="Valor original do contrato",
+            ),
         ),
     ]

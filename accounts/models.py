@@ -328,9 +328,9 @@ class User(AbstractUser):
 
         # Check if document is unique within the organization
         if self.cpf or self.cnpj:
-            existing = User.objects.filter(
-                cpf=self.cpf, cnpj=self.cnpj
-            ).exclude(pk=self.pk)
+            existing = User.objects.filter(cpf=self.cpf, cnpj=self.cnpj).exclude(
+                pk=self.pk
+            )
             if existing.exists():
                 raise ValidationError(
                     "Já existe um usuário com este documento nesta organização"

@@ -4,20 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0019_expense_conciled_at_historicalexpense_conciled_at'),
+        ("accountability", "0019_expense_conciled_at_historicalexpense_conciled_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='accountability',
-            name='status',
-            field=models.CharField(choices=[('WIP', 'Em Andamento'), ('SENT', 'Enviada para análise'), ('CORRECTING', 'Corrigindo'), ('FINISHED', 'Finalizada')], default='WIP', max_length=22, verbose_name='Status'),
+            model_name="accountability",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("WIP", "Em Andamento"),
+                    ("SENT", "Enviada para análise"),
+                    ("CORRECTING", "Corrigindo"),
+                    ("FINISHED", "Finalizada"),
+                ],
+                default="WIP",
+                max_length=22,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalaccountability',
-            name='status',
-            field=models.CharField(choices=[('WIP', 'Em Andamento'), ('SENT', 'Enviada para análise'), ('CORRECTING', 'Corrigindo'), ('FINISHED', 'Finalizada')], default='WIP', max_length=22, verbose_name='Status'),
+            model_name="historicalaccountability",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("WIP", "Em Andamento"),
+                    ("SENT", "Enviada para análise"),
+                    ("CORRECTING", "Corrigindo"),
+                    ("FINISHED", "Finalizada"),
+                ],
+                default="WIP",
+                max_length=22,
+                verbose_name="Status",
+            ),
         ),
     ]

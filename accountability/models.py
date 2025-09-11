@@ -8,7 +8,7 @@ from activity.models import ActivityLog
 from bank.models import BankAccount
 from contracts.choices import NatureChoices
 from contracts.models import Contract, ContractItem
-from utils.choices import MonthChoices, StatusChoices
+from utils.choices import MonthChoices
 from utils.validators import validate_cpf_cnpj
 
 
@@ -77,7 +77,7 @@ class Accountability(
 
     @property
     def status_label(self) -> str:
-        return StatusChoices(self.status).label
+        return Accountability.ReviewStatus(self.status).label
 
     @property
     def recent_logs(self):

@@ -52,12 +52,14 @@ class AccountabilityAdmin(BaseModelAdmin):
         ),
         (
             _("Datas"),
-            {"fields": (
-                "month",
-                "year",
-                "created_at",
-                "updated_at",
-            )},
+            {
+                "fields": (
+                    "month",
+                    "year",
+                    "created_at",
+                    "updated_at",
+                )
+            },
         ),
     )
 
