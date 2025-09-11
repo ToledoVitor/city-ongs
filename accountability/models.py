@@ -77,7 +77,7 @@ class Accountability(
 
     @property
     def status_label(self) -> str:
-        return Accountability.ReviewStatus(self.status).label
+        return StatusChoices(self.status).label
 
     @property
     def recent_logs(self):
