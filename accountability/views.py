@@ -822,20 +822,7 @@ def import_accountability_view(request, pk):
                     file=form.cleaned_data["xlsx_file"],
                     accountability=accountability,
                 )
-                if any([revenues_error, expenses_error, applications_error]):
-                    return render(
-                        request,
-                        "accountability/accountability/import.html",
-                        {
-                            "accountability": accountability,
-                            "form": form,
-                            "imported": imported,
-                            "revenues_error": revenues_error,
-                            "expenses_error": expenses_error,
-                            "applications_error": applications_error,
-                        },
-                    )
-                else:
+                if imported:
                     _ = ActivityLog.objects.create(
                         user=request.user,
                         user_email=request.user.email,
@@ -843,10 +830,18 @@ def import_accountability_view(request, pk):
                         target_object_id=accountability.id,
                         target_content_object=accountability,
                     )
-                    return redirect(
-                        "accountability:accountability-detail",
-                        pk=accountability.id,
-                    )
+                return render(
+                    request,
+                    "accountability/accountability/import.html",
+                    {
+                        "accountability": accountability,
+                        "form": form,
+                        "imported": imported,
+                        "revenues_error": revenues_error,
+                        "expenses_error": expenses_error,
+                        "applications_error": applications_error,
+                    },
+                )
             else:
                 return render(
                     request,
