@@ -81,34 +81,37 @@ def preparse_ofx_file_view(request, pk):
             reference_year=period_info["year"],
         ).exists()
 
-        return JsonResponse({
-            "success": True,
-            "period": period_info,
-            "statement_exists": existing_statement,
-            "account_info": {
-                "bank_name": parser.account_data.get("bank_name"),
-                "account_id": parser.account_data.get("account_id"),
+        return JsonResponse(
+            {
+                "success": True,
+                "period": period_info,
+                "statement_exists": existing_statement,
+                "account_info": {
+                    "bank_name": parser.account_data.get("bank_name"),
+                    "account_id": parser.account_data.get("account_id"),
+                },
             }
-        })
+        )
 
     except ValidationError as e:
         logger.error(f"Validation error parsing OFX file: {str(e)}")
         error_message = str(e)
-        if hasattr(e, 'message'):
+        if hasattr(e, "message"):
             error_message = e.message
-        elif hasattr(e, 'messages') and e.messages:
-            error_message = e.messages[0] if isinstance(e.messages, list) else str(e.messages)
-        
-        return JsonResponse({
-            "success": False,
-            "error": error_message
-        })
+        elif hasattr(e, "messages") and e.messages:
+            error_message = (
+                e.messages[0] if isinstance(e.messages, list) else str(e.messages)
+            )
+
+        return JsonResponse({"success": False, "error": error_message})
     except Exception as e:
         logger.error(f"Unexpected error parsing OFX file: {str(e)}")
-        return JsonResponse({
-            "success": False,
-            "error": "Erro ao analisar arquivo OFX. Verifique se o arquivo está válido."
-        })
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Erro ao analisar arquivo OFX. Verifique se o arquivo está válido.",
+            }
+        )
 
 
 @login_required

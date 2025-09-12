@@ -161,7 +161,7 @@ class OFXFileParser:
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
         # Try multiple encodings to handle different OFX file formats
-        encodings_to_try = ['latin1', 'utf-8', 'windows-1252', 'iso-8859-1']
+        encodings_to_try = ["latin1", "utf-8", "windows-1252", "iso-8859-1"]
         ofx_content = None
 
         for encoding in encodings_to_try:
@@ -173,7 +173,9 @@ class OFXFileParser:
                 continue
 
         if ofx_content is None:
-            raise ValidationError("Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido.")
+            raise ValidationError(
+                "Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido."
+            )
 
         modified_ofx_content = self._truncate_checknum_in_memory(ofx_content)
         with tempfile.NamedTemporaryFile(
