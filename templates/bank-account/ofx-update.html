@@ -52,15 +52,73 @@
   {% csrf_token %}
   
   <div class="my-3">
-    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black">
+    <label class="block mb-2 text-base font-medium text-black">
         Conta: {{ object }}
     </label>
   </div>
 
   <div class="mt-6 mb-3">
-    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black">Arquivo Bancário (OFX):</label>
+    <label class="block mb-2 text-base font-medium text-black">Arquivo Bancário (OFX):</label>
     {{ form.ofx_file }}
     <p class="mt-1 text-sm text-black" id="file_input_help">Apenas arquivos tipo .ofx</p>
+
+    <!-- Loading spinner for file analysis -->
+    <div id="analysis-spinner" class="hidden mt-3 flex items-center">
+      <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-sm text-gray-600">Analisando arquivo OFX...</span>
+    </div>
+    
+    <!-- File analysis results -->
+    <div id="file-analysis" class="hidden mt-3">
+      <!-- Success state -->
+      <div id="analysis-success" class="hidden bg-green-100 p-4 rounded-lg border">
+        <div class="flex items-start space-x-3">
+          <svg class="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-green-800">Arquivo analisado com sucesso</h4>
+            <div class="mt-2 text-sm text-gray-700">
+              <p><strong>Período:</strong> <span id="period-range"></span></p>
+              <p><strong>Mês/Ano:</strong> <span id="period-month-year"></span></p>
+              <p><strong>Banco:</strong> <span id="bank-info"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Warning state (statement exists) -->
+      <div id="analysis-warning" class="hidden bg-yellow-100 p-4 rounded-lg border">
+        <div class="flex items-start space-x-3">
+          <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-yellow-800">Extrato já existe</h4>
+            <div class="mt-2 text-sm text-gray-700">
+              <p><strong>Período:</strong> <span id="warning-period-range"></span></p>
+              <p class="text-yellow-700 mt-1">Já existe um extrato cadastrado para este período.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error state -->
+      <div id="analysis-error" class="hidden p-4 bg-red-100 rounded-lg border">
+        <div class="flex items-start space-x-3">
+          <svg class="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-red-800">Erro ao analisar arquivo</h4>
+            <p id="error-message" class="mt-1 text-sm text-red-700"></p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="mb-6 text-base text-justify">
@@ -125,6 +183,8 @@
 
   <button
     type="submit"
+    id="submit-btn"
+    disabled
     class="
       px-3
       py-2
@@ -137,15 +197,197 @@
       rounded-lg
       focus:ring-4
       focus:outline-none
-      bg-blue-600
-      hover:bg-blue-700
-      focus:ring-blue-800
+      bg-gray-400
+      cursor-not-allowed
     "
     style="display: flex; justify-self: center;"
   >
-    Atualizar Extrato
+    <span id="submit-text">Selecione um arquivo OFX</span>
+    <svg id="submit-spinner" class="hidden animate-spin ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
   </button>
 
 </form>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById('id_ofx_file');
+    const analysisSpinner = document.getElementById('analysis-spinner');
+    const fileAnalysis = document.getElementById('file-analysis');
+    const analysisSuccess = document.getElementById('analysis-success');
+    const analysisWarning = document.getElementById('analysis-warning');
+    const analysisError = document.getElementById('analysis-error');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const form = document.querySelector('form');
+    
+    let fileAnalyzed = false;
+    let hasWarning = false;
+    
+    function resetAnalysisUI() {
+        analysisSpinner.classList.add('hidden');
+        fileAnalysis.classList.add('hidden');
+        analysisSuccess.classList.add('hidden');
+        analysisWarning.classList.add('hidden');
+        analysisError.classList.add('hidden');
+        fileAnalyzed = false;
+        hasWarning = false;
+        updateSubmitButton();
+    }
+    
+    function updateSubmitButton() {
+        if (!fileAnalyzed) {
+            submitBtn.disabled = true;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-gray-400').replace(/hover:bg-\w+-\d+/, '');
+            submitBtn.classList.add('cursor-not-allowed');
+            submitText.textContent = fileInput.files.length > 0 ? 'Analisando arquivo...' : 'Selecione um arquivo OFX';
+        } else if (hasWarning) {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-yellow-600').replace(/cursor-not-allowed/, '');
+            submitBtn.classList.add('hover:bg-yellow-700');
+            submitText.textContent = 'Processar mesmo assim';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-blue-600').replace(/cursor-not-allowed/, '');
+            submitBtn.classList.add('hover:bg-blue-700');
+            submitText.textContent = 'Atualizar Extrato';
+        }
+    }
+    
+    fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            console.log('No file selected, resetting UI');
+            resetAnalysisUI();
+            return;
+        }
+        
+        console.log('File name:', file.name);
+        if (!file.name.toLowerCase().endsWith('.ofx')) {
+            console.log('Invalid file type');
+            showError('Selecione um arquivo OFX válido.');
+            return;
+        }
+        
+        console.log('Starting file analysis');
+        analyzeFile(file);
+    });
+    
+    function analyzeFile(file) {
+        resetAnalysisUI();
+        analysisSpinner.classList.remove('hidden');
+        
+        const formData = new FormData();
+        formData.append('ofx_file', file);
+        
+        const url = `{% url 'bank:preparse-ofx' object.id %}`;
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            analysisSpinner.classList.add('hidden');
+            fileAnalysis.classList.remove('hidden');
+            
+            return response.json().then(data => {
+                if (data.success) {
+                    fileAnalyzed = true;
+                    
+                    if (data.statement_exists) {
+                        hasWarning = true;
+                        showWarning(data.period);
+                    } else {
+                        showSuccess(data.period, data.account_info);
+                    }
+                } else {
+                    showError(data.error || 'Erro desconhecido ao analisar arquivo.');
+                }
+                
+                updateSubmitButton();
+            }).catch(() => {
+                // If response is not JSON (like HTML error page)
+                showError('Erro do servidor. Tente novamente.');
+            });
+        })
+        .catch(error => {
+            // Network errors only
+            console.error('Network error:', error);
+            analysisSpinner.classList.add('hidden');
+            showError('Erro de conexão. Tente novamente.');
+        });
+    }
+    
+    function showSuccess(period, accountInfo) {
+        analysisSuccess.classList.remove('hidden');
+        document.getElementById('period-range').textContent = `${period.start_date} - ${period.end_date}`;
+        document.getElementById('period-month-year').textContent = `${period.month_name}/${period.year}`;
+        document.getElementById('bank-info').textContent = `${accountInfo.bank_name} - Conta: ${accountInfo.account_id}`;
+    }
+    
+    function showWarning(period) {
+        analysisWarning.classList.remove('hidden');
+        document.getElementById('warning-period-range').textContent = `${period.start_date} - ${period.end_date}`;
+    }
+    
+    function showError(message) {
+        analysisError.classList.remove('hidden');
+        document.getElementById('error-message').textContent = message;
+        fileAnalyzed = false;
+        updateSubmitButton();
+    }
+    
+    form.addEventListener('submit', function(event) {
+        if (!fileAnalyzed) {
+            event.preventDefault();
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitText.textContent = 'Processando...';
+        submitSpinner.classList.remove('hidden');
+    });
+    
+    // Initialize with a small delay to ensure DOM is fully ready
+    setTimeout(function() {
+        console.log('Initializing after timeout...');
+        updateSubmitButton();
+        
+        // Try to find file input again if not found initially
+        if (!fileInput) {
+            const retryFileInput = document.getElementById('id_ofx_file') || 
+                                 document.querySelector('input[type="file"]');
+            if (retryFileInput) {
+                console.log('Found file input on retry:', retryFileInput);
+                // Re-attach event listener
+                retryFileInput.addEventListener('change', function(event) {
+                    console.log('File input changed (retry)!', event);
+                    const file = event.target.files[0];
+                    console.log('Selected file (retry):', file);
+                    
+                    if (!file) {
+                        resetAnalysisUI();
+                        return;
+                    }
+                    
+                    if (!file.name.toLowerCase().endsWith('.ofx')) {
+                        showError('Selecione um arquivo OFX válido.');
+                        return;
+                    }
+                    
+                    analyzeFile(file);
+                });
+            }
+        }
+    }, 100);
+    
+    updateSubmitButton();
+});
+</script>
 {% endblock %}

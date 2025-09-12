@@ -8,9 +8,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
 from django.db.models import Prefetch, Sum
 from django.db.models.query import QuerySet
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now as tz_now
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView
 
 from activity.models import ActivityLog
@@ -61,6 +62,56 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
 
 
 @login_required
+@csrf_exempt
+def preparse_ofx_file_view(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    bank_account = get_object_or_404(BankAccount, id=pk)
+    if "ofx_file" not in request.FILES:
+        return JsonResponse({"error": "No file provided"}, status=400)
+
+    try:
+        parser = OFXFileParser(ofx_file=request.FILES["ofx_file"])
+        period_info = parser.statement_period_info
+
+        existing_statement = BankStatement.objects.filter(
+            bank_account=bank_account,
+            reference_month=period_info["month"],
+            reference_year=period_info["year"],
+        ).exists()
+
+        return JsonResponse({
+            "success": True,
+            "period": period_info,
+            "statement_exists": existing_statement,
+            "account_info": {
+                "bank_name": parser.account_data.get("bank_name"),
+                "account_id": parser.account_data.get("account_id"),
+            }
+        })
+
+    except ValidationError as e:
+        logger.error(f"Validation error parsing OFX file: {str(e)}")
+        error_message = str(e)
+        if hasattr(e, 'message'):
+            error_message = e.message
+        elif hasattr(e, 'messages') and e.messages:
+            error_message = e.messages[0] if isinstance(e.messages, list) else str(e.messages)
+        
+        return JsonResponse({
+            "success": False,
+            "error": error_message
+        })
+    except Exception as e:
+        logger.error(f"Unexpected error parsing OFX file: {str(e)}")
+        return JsonResponse({
+            "success": False,
+            "error": "Erro ao analisar arquivo OFX. Verifique se o arquivo está válido."
+        })
+
+
+@login_required
 def update_bank_account_ofx_view(request, pk):
     bank_account = get_object_or_404(BankAccount, id=pk)
     if request.method == "POST":
@@ -80,7 +131,8 @@ def update_bank_account_ofx_view(request, pk):
                     target_content_object=bank_account,
                 )
                 return redirect("bank:bank-accounts-detail", pk=bank_account.id)
-            except ValidationError:
+            except Exception as e:
+                logger.error(f"Error updating bank account: {str(e)}")
                 return render(
                     request,
                     "bank-account/ofx-update.html",

@@ -45,6 +45,22 @@ class OFXFileParser:
         return self.ofx_data.bankmsgsrsv1.statements[0].dtend
 
     @property
+    def statement_start_date(self) -> datetime:
+        return self.ofx_data.bankmsgsrsv1.statements[0].dtstart
+
+    @property
+    def statement_period_info(self) -> dict:
+        start_date = self.statement_start_date
+        end_date = self.balance_date
+        return {
+            "start_date": start_date.strftime("%d/%m/%Y"),
+            "end_date": end_date.strftime("%d/%m/%Y"),
+            "month": end_date.month,
+            "year": end_date.year,
+            "month_name": end_date.strftime("%B"),
+        }
+
+    @property
     def transactions_list(self) -> list:
         return self.ofx_data.statements[0].transactions
 
@@ -144,7 +160,20 @@ class OFXFileParser:
         ]
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
-        ofx_content = ofx_file.read().decode("latin1")
+        # Try multiple encodings to handle different OFX file formats
+        encodings_to_try = ['latin1', 'utf-8', 'windows-1252', 'iso-8859-1']
+        ofx_content = None
+
+        for encoding in encodings_to_try:
+            try:
+                ofx_file.seek(0)  # Reset file pointer
+                ofx_content = ofx_file.read().decode(encoding)
+                break
+            except UnicodeDecodeError:
+                continue
+
+        if ofx_content is None:
+            raise ValidationError("Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido.")
 
         modified_ofx_content = self._truncate_checknum_in_memory(ofx_content)
         with tempfile.NamedTemporaryFile(
@@ -153,11 +182,14 @@ class OFXFileParser:
             temp_file.write(modified_ofx_content)
             temp_file_path = temp_file.name
 
-        ofx_tree = OFXTree()
-        ofx_tree.parse(temp_file_path)
-
-        ofx = ofx_tree.convert()
-        return ofx
+        try:
+            ofx_tree = OFXTree()
+            ofx_tree.parse(temp_file_path)
+            ofx = ofx_tree.convert()
+            return ofx
+        except Exception as e:
+            logger.error(f"Error parsing OFX file structure: {str(e)}")
+            raise ValidationError(f"Arquivo OFX inválido ou corrompido: {str(e)}")
 
     def _truncate_checknum_in_memory(self, ofx_content, max_length=12):
         """

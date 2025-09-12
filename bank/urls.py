@@ -4,6 +4,7 @@ from bank.views import (
     BankAccountDetailView,
     bank_statement_ofx_export_view,
     bank_statement_view,
+    preparse_ofx_file_view,
     update_bank_account_manual_view,
     update_bank_account_ofx_view,
 )
@@ -28,6 +29,11 @@ urlpatterns = [
         "detail/<uuid:pk>/update-statements/",
         update_bank_account_ofx_view,
         name="bank-statements-update",
+    ),
+    path(
+        "detail/<uuid:pk>/preparse-ofx/",
+        preparse_ofx_file_view,
+        name="preparse-ofx",
     ),
     path(
         "detail/<uuid:pk>/manual-update-statements/",
