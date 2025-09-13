@@ -324,10 +324,24 @@
         });
     }
     
+    const months = {
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
+    }
     function showSuccess(period, accountInfo) {
         analysisSuccess.classList.remove('hidden');
         document.getElementById('period-range').textContent = `${period.start_date} - ${period.end_date}`;
-        document.getElementById('period-month-year').textContent = `${period.month_name}/${period.year}`;
+        document.getElementById('period-month-year').textContent = `${months[period.month]}/${period.year}`;
         document.getElementById('bank-info').textContent = `${accountInfo.bank_name} - Conta: ${accountInfo.account_id}`;
     }
     
