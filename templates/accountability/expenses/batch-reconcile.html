@@ -149,6 +149,47 @@
 document.addEventListener('DOMContentLoaded', function() {
     const selects = document.querySelectorAll('select[name^="transaction_"]');
     
+    // Store original options for each select
+    const originalOptions = new Map();
+    selects.forEach(select => {
+        originalOptions.set(select, Array.from(select.options).map(option => option.cloneNode(true)));
+    });
+    
+    function updateAvailableOptions() {
+        // Get all currently selected transaction IDs
+        const selectedTransactionIds = new Set();
+        selects.forEach(select => {
+            if (select.value) {
+                selectedTransactionIds.add(select.value);
+            }
+        });
+        
+        // Update each select to hide already selected options
+        selects.forEach(select => {
+            const currentValue = select.value;
+            
+            // Clear all options except the first one (placeholder)
+            while (select.options.length > 1) {
+                select.removeChild(select.options[1]);
+            }
+            
+            // Add back options that aren't selected elsewhere
+            const originalSelectOptions = originalOptions.get(select);
+            for (let i = 1; i < originalSelectOptions.length; i++) { // Skip first option (placeholder)
+                const option = originalSelectOptions[i].cloneNode(true);
+                const transactionId = option.value;
+                
+                // Only add if not selected elsewhere, or if it's the current value of this select
+                if (!selectedTransactionIds.has(transactionId) || transactionId === currentValue) {
+                    select.appendChild(option);
+                }
+            }
+            
+            // Restore the current value
+            select.value = currentValue;
+        });
+    }
+    
     selects.forEach(select => {
         select.addEventListener('change', function() {
             const row = this.closest('tr');
@@ -161,10 +202,13 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 this.classList.remove('border-red-300', 'bg-red-50', 'border-green-300', 'bg-green-50');
             }
+            updateAvailableOptions();
         });
 
         select.dispatchEvent(new Event('change'));
     });
+
+    updateAvailableOptins();
 });
 </script>
 
