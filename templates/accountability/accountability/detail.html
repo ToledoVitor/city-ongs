@@ -157,113 +157,94 @@
 </form>
 
 
-<div class="my-3">
-  <div class="grid gap-6 mb-6 md:grid-cols-2">
-    <div class="relative text-lg font-semibold pt-2">
-      Status:
-      <span class="text-lg me-2 px-2.5 py-2.5 rounded-full text-purple-800 bg-purple-100">{{ accountability.status_label }}</span>
-      <a href="{% url 'accountability:accountability-pendencies' accountability.id %}" class="text-sm hover:underline text-blue-500">Ver Pendências</a>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-sm font-medium text-gray-600">Status:</span>
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+          {{ accountability.status_label }}
+        </span>
+      </div>
+      <a href="{% url 'accountability:accountability-pendencies' accountability.id %}" 
+         class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+        </svg>
+        Ver Pendências
+      </a>
     </div>
 
-    <div class="relative text-right">
+    <div class="flex flex-wrap gap-3">
       {% if accountability.is_on_execution %}
-      <button
-        type="button"
-        data-modal-target="send-to-review-modal"
-        data-modal-toggle="send-to-review-modal"
-        class="
-          text-white
-          focus:ring-4
-          focus:outline-none
-          font-medium
-          rounded-lg
-          text-xs
-          px-3
-          py-2.5
-          text-center
-          inline-flex
-          items-center
-          me-2
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        Enviar para Análise
-        <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
-          <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
-        </svg>
-      </button>
-      <a href="{% url 'accountability:accountability-import' accountability.id %}">
         <button
           type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-2 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+          data-modal-target="send-to-review-modal"
+          data-modal-toggle="send-to-review-modal"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Importar Dados
-          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5h7.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H4V9h5a2 2 0 0 0 2-2Z" clip-rule="evenodd"/>
-          </svg>          
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
+          </svg>
+          Enviar para Análise
         </button>
-      </a>
+        
+        <a href="{% url 'accountability:accountability-import' accountability.id %}">
+          <button
+            type="button"
+            class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5h7.586l-.293.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414l.293.293H4V9h5a2 2 0 0 0 2-2Z" clip-rule="evenodd"/>
+            </svg>
+            Importar Dados
+          </button>
+        </a>
+        
       {% elif accountability.is_sent and user.can_change_statuses %}
-      <a href="{% url 'accountability:review-all-expenses' accountability.id 0 %}">
-        <button
-          type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
-        >
-          Revisar Despesas
-          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
-            <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
-            <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
-          </svg>
-        </button>
-      </a>
-      <a href="{% url 'accountability:review-all-revenues' accountability.id 0 %}">
-        <button
-          type="button"
-          class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-2.5 text-center inline-flex items-center me-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
-        >
-          Revisar Receitas
-          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z" clip-rule="evenodd"/>
-            <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </a>
-      <a>
+        <a href="{% url 'accountability:review-all-expenses' accountability.id 0 %}">
+          <button
+            type="button"
+            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
+              <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
+            </svg>
+            Revisar Despesas
+          </button>
+        </a>
+        
+        <a href="{% url 'accountability:review-all-revenues' accountability.id 0 %}">
+          <button
+            type="button"
+            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z" clip-rule="evenodd"/>
+            </svg>
+            Revisar Receitas
+          </button>
+        </a>
+        
         <button
           type="button"
           data-modal-target="send-review-analisys"
           data-modal-toggle="send-review-analisys"
-          class="
-            text-white
-            focus:ring-4
-            focus:outline-none
-            font-medium
-            rounded-lg
-            text-xs
-            px-3
-            py-2.5
-            text-center
-            inline-flex
-            items-center
-            me-1
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
+          class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
         >
-          Emitir Análise
-          <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12 8a1 1 0 0 0-1 1v10H9a1 1 0 1 0 0 2h11a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8Zm4 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" clip-rule="evenodd"/>
             <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
           </svg>
+          Emitir Análise
         </button>
-      </a>
       {% endif %}
     </div>
+  </div>
 </div>
 
 {% if accountability.is_on_execution %}
@@ -544,17 +525,20 @@
 </div>
 {% endif %}
 
-<div class="my-4">
-  <p class="text-xl font-bold text-black">Despesas Cadastradas</p>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+  <h2 class="text-xl font-bold text-gray-900">Despesas Cadastradas</h2>
   {% if accountability.is_on_execution %}
-  <a href="{% url 'accountability:batch-reconcile' accountability.id %}">
-    <button
-      type="button"
-      class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-2.5 py-1.5 text-center inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-green-800"
-    >
-      Conciliar em Lote
-    </button>
-  </a>
+    <a href="{% url 'accountability:batch-reconcile' accountability.id %}">
+      <button
+        type="button"
+        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Conciliar em Lote
+      </button>
+    </a>
   {% endif %}
 </div>
 
@@ -562,13 +546,13 @@
   {% include 'accountability/accountability/expenses-table.html' with accountability=accountability expenses_page=expenses_page revenue_page_number=revenues_page.number q=search_query csrf_token=csrf_token %}
 </div>
 
-<p class="text-xl my-4 font-bold text-black">Receitas Cadastradas</p>
+<h2 class="text-xl font-bold text-gray-900 mb-6">Receitas Cadastradas</h2>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
   {% include 'accountability/accountability/revenues-table.html' with accountability=accountability revenues_page=revenues_page expenses_page_number=expenses_page.number q=search_query csrf_token=csrf_token %}
 </div>
 
-<p class="text-xl my-4 font-bold text-black">Documentos Adicionais</p>
+<h2 class="text-xl font-bold text-gray-900 mb-6">Documentos Adicionais</h2>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
   {% include 'accountability/accountability/documents-table.html' with accountability=accountability csrf_token=csrf_token %}
