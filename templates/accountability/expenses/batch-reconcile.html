@@ -71,6 +71,7 @@
                     <th scope="col" class="px-6 py-3">Despesa</th>
                     <th scope="col" class="px-6 py-3">Favorecido</th>
                     <th scope="col" class="px-6 py-3">Valor</th>
+                    <th scope="col" class="px-6 py-3">Data</th>
                     <th scope="col" class="px-6 py-3">Transação Bancária</th>
                     <th scope="col" class="px-6 py-3">Status</th>
                 </tr>
@@ -91,8 +92,11 @@
                             <span class="text-gray-400">-</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 font-semibold">
+                    <td class="px-6 py-4 font-semibold whitespace-nowrap">
                         R$ {{ match.expense.value|floatformat:2 }}
+                    </td>
+                    <td class="px-6 py-4 font-semibold whitespace-nowrap">
+                        {{ match.expense.due_date|date:"d/m/Y" }}
                     </td>
                     <td class="px-6 py-4">
                         <select name="transaction_{{ match.expense.id }}" 
