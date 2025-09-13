@@ -1,7 +1,7 @@
 import logging
 import unicodedata
 from typing import Any
-
+from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -1671,6 +1671,13 @@ def batch_reconcile_expenses_view(request, pk):
         .select_related("favored", "item")
         .order_by("-value")
     )
+
+    start_date = date(accountability.year, accountability.month, 1)
+    if accountability.month == 12:
+        end_date = date(accountability.year + 1, 1, 1)
+    else:
+        end_date = date(accountability.year, accountability.month + 1, 1)
+
     available_transactions = (
         Transaction.objects.filter(
             Q(bank_account=contract.checking_account)
@@ -1679,6 +1686,8 @@ def batch_reconcile_expenses_view(request, pk):
         .filter(
             expenses__isnull=True,
             amount__lt=0,  # Negative amounts for expenses
+            date__gte=start_date,
+            date__lt=end_date,
         )
         .order_by("date")
     )
