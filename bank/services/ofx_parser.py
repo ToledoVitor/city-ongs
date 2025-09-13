@@ -161,37 +161,52 @@ class OFXFileParser:
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
         # Try multiple encodings to handle different OFX file formats
-        encodings_to_try = ["latin1", "utf-8", "windows-1252", "iso-8859-1"]
+        encodings_to_try = ["cp1252", "windows-1252", "latin1", "utf-8", "iso-8859-1"]
         ofx_content = None
-
         for encoding in encodings_to_try:
             try:
                 ofx_file.seek(0)  # Reset file pointer
-                ofx_content = ofx_file.read().decode(encoding)
+                ofx_content = ofx_file.read().decode(encoding, errors="replace")
+                logger.info(f"Successfully decoded OFX file using {encoding} encoding")
                 break
-            except UnicodeDecodeError:
+            except Exception as e:
+                logger.warning(f"Failed to decode with {encoding}: {str(e)}")
                 continue
 
         if ofx_content is None:
-            raise ValidationError(
-                "Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido."
-            )
+            try:
+                ofx_file.seek(0)
+                raw_content = ofx_file.read()
+                ofx_content = raw_content.decode("cp1252", errors="replace")
+                logger.warning("Used forced cp1252 decoding with error replacement")
+            except Exception:
+                raise ValidationError(
+                    "Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido."
+                )
 
-        modified_ofx_content = self._truncate_checknum_in_memory(ofx_content)
-        with tempfile.NamedTemporaryFile(
-            delete=False, mode="w", suffix=".ofx"
-        ) as temp_file:
-            temp_file.write(modified_ofx_content)
-            temp_file_path = temp_file.name
+        fixed_ofx_content = self._fix_malformed_ofx(ofx_content)
+        modified_ofx_content = self._truncate_checknum_in_memory(fixed_ofx_content)
 
-        try:
-            ofx_tree = OFXTree()
-            ofx_tree.parse(temp_file_path)
-            ofx = ofx_tree.convert()
-            return ofx
-        except Exception as e:
-            logger.error(f"Error parsing OFX file structure: {str(e)}")
-            raise ValidationError(f"Arquivo OFX inválido ou corrompido: {str(e)}")
+        # Simple approach: try different encodings for the temp file
+        for encoding in ["cp1252", "latin1", "utf-8"]:
+            try:
+                with tempfile.NamedTemporaryFile(
+                    delete=False, mode="w", suffix=".ofx", encoding=encoding
+                ) as temp_file:
+                    temp_file.write(modified_ofx_content)
+                    temp_file_path = temp_file.name
+
+                ofx_tree = OFXTree()
+                ofx_tree.parse(temp_file_path)
+                ofx = ofx_tree.convert()
+                logger.info(f"Successfully parsed OFX file with {encoding}")
+                return ofx
+
+            except Exception as e:
+                logger.warning(f"Failed with {encoding}: {str(e)}")
+                continue
+
+        raise ValidationError("Arquivo OFX corrompido e não pode ser processado.")
 
     def _truncate_checknum_in_memory(self, ofx_content, max_length=12):
         """
@@ -206,3 +221,69 @@ class OFXFileParser:
         pattern = r"<CHECKNUM>(.*?) \r\n\t"
         modified_ofx_content = re.sub(pattern, truncate_match, ofx_content)
         return modified_ofx_content
+
+    def _fix_malformed_ofx(self, ofx_content):
+        logger.info("Fixing missing closing tags...")
+
+        lines = ofx_content.split("\n")
+        fixed_lines = self._fix_missing_closing_tags(lines)
+        result_lines = self._fix_stmttrn_blocks(fixed_lines)
+
+        result = "\n".join(result_lines)
+        logger.info("Missing closing tags fixed")
+        return result
+
+    def _fix_missing_closing_tags(self, lines):
+        tags_to_fix = [
+            "DTSERVER",
+            "LANGUAGE",
+            "DTACCTUP",
+            "TRNUID",
+            "CODE",
+            "SEVERITY",
+            "CURDEF",
+            "BALAMT",
+            "DTASOF",
+            "MKTGINFO",
+        ]
+
+        fixed_lines = []
+        for line in lines:
+            processed_line = line
+
+            for tag in tags_to_fix:
+                if self._needs_closing_tag(processed_line, tag):
+                    processed_line = processed_line.rstrip() + f"</{tag}>"
+                    break
+
+            fixed_lines.append(processed_line)
+
+        return fixed_lines
+
+    def _needs_closing_tag(self, line, tag):
+        opening_tag = f"<{tag}>"
+        closing_tag = f"</{tag}>"
+        return opening_tag in line and closing_tag not in line
+
+    def _fix_stmttrn_blocks(self, lines):
+        result_lines = []
+
+        for i, line in enumerate(lines):
+            result_lines.append(line)
+
+            if self._should_close_stmttrn(lines, i, line):
+                result_lines.append("\t </STMTTRN>")
+
+        return result_lines
+
+    def _should_close_stmttrn(self, lines, current_index, current_line):
+        if current_index + 1 >= len(lines):
+            return False
+
+        if not current_line.strip() or current_line.strip().startswith("<"):
+            return False
+
+        next_line = lines[current_index + 1].strip()
+        return next_line.startswith("<STMTTRN>") or next_line.startswith(
+            "</BANKTRANLIST>"
+        )
