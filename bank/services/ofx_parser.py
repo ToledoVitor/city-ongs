@@ -153,7 +153,7 @@ class OFXFileParser:
                 transaction_number=transaction.checknum,
                 name=transaction.name,
                 amount=transaction.trnamt,
-                date=transaction.dtposted,
+                date=datetime.strptime(transaction.dtposted, "%Y%m%d").date(),
                 memo=getattr(transaction, "memo", None),
             )
             for transaction in self.transactions_list
