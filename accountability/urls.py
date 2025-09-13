@@ -33,6 +33,8 @@ from accountability.views import (
     review_accountability_single_revenue,
     send_accountability_review_analisys,
     send_accountability_to_analisys_view,
+    unreconcile_expense_view,
+    unreconcile_revenue_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
     update_favored_view,
@@ -149,6 +151,11 @@ urlpatterns = [
         name="expense-reconcile",
     ),
     path(
+        "expenses/<uuid:pk>/unreconcile",
+        unreconcile_expense_view,
+        name="expense-unreconcile",
+    ),
+    path(
         "detail/<uuid:pk>/batch-reconcile",
         batch_reconcile_expenses_view,
         name="batch-reconcile",
@@ -182,6 +189,11 @@ urlpatterns = [
         "revenues/<uuid:pk>/reconcile",
         reconcile_revenue_view,
         name="revenue-reconcile",
+    ),
+    path(
+        "revenues/<uuid:pk>/unreconcile",
+        unreconcile_revenue_view,
+        name="revenue-unreconcile",
     ),
     path(
         "revenues/<uuid:pk>/review/<uuid:revenue_pk>",

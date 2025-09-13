@@ -211,7 +211,9 @@ def update_accountability_expense_view(request, pk):
                 "accountability:accountability-detail", pk=accountability.pk
             )
     else:
-        form = ExpenseForm(request=request, instance=expense, accountability=accountability)
+        form = ExpenseForm(
+            request=request, instance=expense, accountability=accountability
+        )
 
     return render(
         request,
@@ -549,7 +551,10 @@ def create_accountability_revenue_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
-        return redirect("accountability:accountability-detail", pk=accountability.id)
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
 
     if request.method == "POST":
         form = RevenueForm(request.POST, accountability=accountability)
@@ -1261,11 +1266,15 @@ def reconcile_expense_view(request, pk):
 
             action = request.POST.get("action")
             if action == "next":
-                next_expense = Expense.objects.filter(
-                    accountability=expense.accountability,
-                    conciled=False,
-                    paid=False,
-                ).order_by("value", "identification").first()
+                next_expense = (
+                    Expense.objects.filter(
+                        accountability=expense.accountability,
+                        conciled=False,
+                        paid=False,
+                    )
+                    .order_by("value", "identification")
+                    .first()
+                )
                 if next_expense:
                     return redirect(
                         "accountability:expense-reconcile", pk=next_expense.id
@@ -1352,11 +1361,15 @@ def reconcile_revenue_view(request, pk):
 
             action = request.POST.get("action")
             if action == "next":
-                next_revenue = Revenue.objects.filter(
-                    accountability=revenue.accountability,
-                    conciled=False,
-                    paid=False,
-                ).order_by("value", "identification").first()
+                next_revenue = (
+                    Revenue.objects.filter(
+                        accountability=revenue.accountability,
+                        conciled=False,
+                        paid=False,
+                    )
+                    .order_by("value", "identification")
+                    .first()
+                )
                 if next_revenue:
                     return redirect(
                         "accountability:revenue-reconcile", pk=next_revenue.id
@@ -1645,26 +1658,27 @@ def batch_reconcile_expenses_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
 
     if not accountability.is_on_execution:
-        return redirect("accountability:accountability-detail", pk=accountability.id)
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
 
     contract = accountability.contract
     unreconciled_expenses = (
         Expense.objects.filter(
-            accountability=accountability,
-            conciled=False,
-            deleted_at__isnull=True
+            accountability=accountability, conciled=False, deleted_at__isnull=True
         )
         .select_related("favored", "item")
         .order_by("-value")
     )
     available_transactions = (
         Transaction.objects.filter(
-            Q(bank_account=contract.checking_account) |
-            Q(bank_account=contract.investing_account)
+            Q(bank_account=contract.checking_account)
+            | Q(bank_account=contract.investing_account)
         )
         .filter(
             expenses__isnull=True,
-            amount__lt=0  # Negative amounts for expenses
+            amount__lt=0,  # Negative amounts for expenses
         )
         .order_by("date")
     )
@@ -1682,8 +1696,10 @@ def batch_reconcile_expenses_view(request, pk):
 
     for expense in unreconciled_expenses:
         candidate_transactions = [
-            t for t in available_transactions
-            if abs(abs(t.amount) - expense.value) < 0.01 and t.id not in used_transaction_ids
+            t
+            for t in available_transactions
+            if abs(abs(t.amount) - expense.value) < 0.01
+            and t.id not in used_transaction_ids
         ]
 
         matched_transaction = None
@@ -1692,7 +1708,7 @@ def batch_reconcile_expenses_view(request, pk):
             matched_transaction = candidate_transactions[0]
         elif len(candidate_transactions) > 1 and expense.favored:
             first_name = expense.favored.name.split()[0] if expense.favored.name else ""
-            first_name_normalized = normalize_text(first_name)            
+            first_name_normalized = normalize_text(first_name)
             if first_name_normalized and len(first_name_normalized) > 2:
                 matching_by_name = []
                 for transaction in candidate_transactions:
@@ -1701,29 +1717,27 @@ def batch_reconcile_expenses_view(request, pk):
                     )
                     if first_name_normalized in transaction_text:
                         matching_by_name.append(transaction)
-                
+
                 if len(matching_by_name) == 1:
                     matched_transaction = matching_by_name[0]
 
         if matched_transaction:
             used_transaction_ids.add(matched_transaction.id)
-            matches.append({
-                "expense": expense,
-                "transaction": matched_transaction,
-                "matched": True
-            })
+            matches.append(
+                {
+                    "expense": expense,
+                    "transaction": matched_transaction,
+                    "matched": True,
+                }
+            )
         else:
-            matches.append({
-                "expense": expense,
-                "transaction": None,
-                "matched": False
-            })
+            matches.append({"expense": expense, "transaction": None, "matched": False})
 
     if request.method == "POST":
         reconciliations = []
 
         for expense in unreconciled_expenses:
-            transaction_id = request.POST.get(f'transaction_{expense.id}')
+            transaction_id = request.POST.get(f"transaction_{expense.id}")
             # Only process if user selected a transaction (not empty)
             if transaction_id and transaction_id.strip():
                 try:
@@ -1751,8 +1765,7 @@ def batch_reconcile_expenses_view(request, pk):
                     )
 
                 return redirect(
-                    "accountability:accountability-detail",
-                    pk=accountability.id
+                    "accountability:accountability-detail", pk=accountability.id
                 )
 
     context = {
@@ -1762,8 +1775,105 @@ def batch_reconcile_expenses_view(request, pk):
         "unreconciled_count": unreconciled_expenses.count(),
     }
 
-    return render(
-        request,
-        "accountability/expenses/batch-reconcile.html",
-        context
+    return render(request, "accountability/expenses/batch-reconcile.html", context)
+
+
+@log_database_operation("unreconcile_expense")
+@log_view_access
+@login_required
+def unreconcile_expense_view(request, pk):
+    expense = get_object_or_404(
+        Expense.objects.select_related(
+            "accountability",
+            "accountability__contract",
+        ),
+        id=pk,
+    )
+
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    if not expense.conciled:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    if request.method == "POST":
+        with db_transaction.atomic():
+            expense.conciled = False
+            expense.conciled_at = None
+            expense.paid = False
+            expense.liquidation = None
+            expense.save()
+            expense.bank_transactions.clear()
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_EXPENSE,
+                target_object_id=expense.id,
+                target_content_object=expense,
+            )
+
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    return redirect(
+        "accountability:accountability-detail",
+        pk=expense.accountability.id,
+    )
+
+
+@log_database_operation("unreconcile_revenue")
+@log_view_access
+@login_required
+def unreconcile_revenue_view(request, pk):
+    revenue = get_object_or_404(
+        Revenue.objects.select_related(
+            "accountability",
+            "accountability__contract",
+        ),
+        id=pk,
+    )
+
+    if not revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    if not revenue.conciled:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    if request.method == "POST":
+        with db_transaction.atomic():
+            revenue.conciled = False
+            revenue.conciled_at = None
+            revenue.paid = False
+            revenue.save()
+            revenue.transactions.clear()
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_REVENUE,
+                target_object_id=revenue.id,
+                target_content_object=revenue,
+            )
+
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    return redirect(
+        "accountability:accountability-detail",
+        pk=revenue.accountability.id,
     )

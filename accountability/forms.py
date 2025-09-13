@@ -373,10 +373,7 @@ class ReconcileExpenseForm(forms.Form):
             )
 
         if not all(
-            [
-                transaction.date == self.expense.due_date
-                for transaction in transactions
-            ]
+            [transaction.date == self.expense.due_date for transaction in transactions]
         ):
             raise forms.ValidationError(
                 "As transações devem ter a mesma data da despesa."
