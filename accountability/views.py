@@ -317,19 +317,15 @@ def create_contract_accountability_view(request, pk):
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
 
-    # Get filter parameters
     search_query = request.GET.get("q", "")
     paid_filter = request.GET.get("paid", "all")
     reviwed_filter = request.GET.get("reviwed", "all")
     start_date = request.GET.get("start_date", "")
     end_date = request.GET.get("end_date", "")
-    date_type = request.GET.get(
-        "date_type", "competence"
-    )  # competence, liquidation, due_date, conciliation
+    date_type = request.GET.get("date_type", "competence")
     payment_status = request.GET.get("payment_status", "all")  # all, paid, unpaid
     expense_type = request.GET.get("expense_type", "all")  # all, planned, unplanned
 
-    # Base querysets
     expenses_list = (
         Expense.objects.filter(accountability=accountability)
         .select_related("item", "favored")
@@ -349,6 +345,7 @@ def accountability_detail_view(request, pk):
             )
         )
         .order_by("-value")
+        .filter(deleted_at__isnull=True)
     )
 
     revenues_list = (
@@ -370,6 +367,7 @@ def accountability_detail_view(request, pk):
             )
         )
         .order_by("-value")
+        .filter(deleted_at__isnull=True)
     )
 
     documents_list = AccountabilityFile.objects.filter(
@@ -888,7 +886,7 @@ def expense_delete_view(request, pk):
             target_content_object=expense,
         )
         expense.delete()
-        return redirect(next_url, pk=expense.accountability.id)
+    return redirect(next_url, pk=expense.accountability.id)
 
 
 @login_required
