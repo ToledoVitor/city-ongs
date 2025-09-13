@@ -2,12 +2,12 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-white bg-gray-500 sticky top-0 z-30">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-400 border-0">
+        <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-white bg-gray-500 sticky top-0 z-30 border-0">
             Contabilidade Mensal
             <p class="mt-1 text-sm font-normal text-gray-200">Confira o andamento das prestações dos últimos meses, ou inicie uma para um novo mês.</p>
         </caption>
-        <thead class="text-xs text-white uppercase bg-gray-500 sticky top-[104px] z-30">
+        <thead class="text-xs text-white uppercase bg-gray-500 sticky top-[104px] z-30 border-0">
             <tr>
                 <th scope="col" class="px-6 py-4 font-medium w-[25%]">
                   Prestação
@@ -21,7 +21,7 @@
                 <th scope="col" class="px-6 py-4 font-medium w-[15%]">
                   Status
                 </th>
-                <th scope="col" class="px-4 py-4 font-medium w-[180px] sticky right-0 z-40 bg-gray-500 border-l border-gray-300">
+                <th scope="col" class="px-4 py-4 font-medium w-[180px] sticky right-0 z-40 bg-gray-500">
                   <span class="sr-only">Ações</span>
                 </th>
             </tr>
@@ -61,7 +61,7 @@
                   {% endif %}
                 </td>
 
-                <td class="px-2 py-4 text-base text-sm sticky right-0 z-20 bg-gray-300 hover:bg-gray-400 border-l border-gray-300 w-[180px]">
+                <td class="px-2 py-4 text-base text-sm sticky right-0 z-20 bg-gray-300 hover:bg-gray-400 w-[180px]">
                   <div class="flex justify-center">
                     <a
                       href="{% url 'accountability:accountability-detail' accountability.id %}"

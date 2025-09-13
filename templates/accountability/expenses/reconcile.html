@@ -86,6 +86,9 @@
     <div class="mb-2 text-base flex justify-between">
         <b>Valor: </b> R${{ expense.value|intcomma }}
     </div>
+    <div class="mb-2 text-base flex justify-between">
+        <b>Data: </b> {{ expense.due_date|date:"d/m/Y" }}
+    </div>
 
     <hr class="max-w-lg mx-auto h-px mt-4 mb-2 border-0 bg-gray-400">
 
