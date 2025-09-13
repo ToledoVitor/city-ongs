@@ -59,7 +59,7 @@
 
           <div class="relative">
             <label class="block mb-2 text-base font-medium text-black">Natureza</label>
-            {% include 'commons/nature-select.html' with id='id_nature' name='nature' selected_value=expense.nature %}
+            {% include 'commons/nature-select.html' with id='id_nature' name='nature' selected_value=form.nature.value %}
           </div>
         </div>
 

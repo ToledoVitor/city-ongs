@@ -12,6 +12,7 @@ from accountability.views import (
     accountability_detail_view,
     accountability_file_delete_view,
     accountability_pendencies_view,
+    batch_reconcile_expenses_view,
     create_accountability_expense_view,
     create_accountability_file_view,
     create_accountability_revenue_view,
@@ -146,6 +147,11 @@ urlpatterns = [
         "expenses/<uuid:pk>/reconcile",
         reconcile_expense_view,
         name="expense-reconcile",
+    ),
+    path(
+        "detail/<uuid:pk>/batch-reconcile",
+        batch_reconcile_expenses_view,
+        name="batch-reconcile",
     ),
     path(
         "expenses/<uuid:pk>/gloss/",
