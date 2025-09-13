@@ -309,7 +309,14 @@ class ImportXLSXAccountabilityForm(forms.Form):
 
 class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        return f"{obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}, {obj.memo}, {obj.name}"
+        base_string = (
+            f"{obj.date:%d/%m/%Y}, "
+            f"{format_into_brazilian_currency(obj.amount)}, "
+            f"{obj.memo}"
+        )
+        if obj.name:
+            base_string += f", {obj.name}"
+        return base_string
 
 
 class ReconcileExpenseForm(forms.Form):
@@ -367,7 +374,7 @@ class ReconcileExpenseForm(forms.Form):
 
         if not all(
             [
-                transaction.date == self.expense.date
+                transaction.date == self.expense.due_date
                 for transaction in transactions
             ]
         ):
