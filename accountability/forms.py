@@ -365,6 +365,16 @@ class ReconcileExpenseForm(forms.Form):
                 "Soma das transações diferente do valor da despesa."
             )
 
+        if not all(
+            [
+                transaction.date == self.expense.date
+                for transaction in transactions
+            ]
+        ):
+            raise forms.ValidationError(
+                "As transações devem ter a mesma data da despesa."
+            )
+
         return transactions
 
 
