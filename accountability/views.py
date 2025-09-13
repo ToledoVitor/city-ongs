@@ -195,7 +195,10 @@ def update_accountability_expense_view(request, pk):
 
     if request.method == "POST":
         form = ExpenseForm(
-            request.POST, instance=expense, accountability=accountability
+            request.POST,
+            request=request,
+            instance=expense,
+            accountability=accountability,
         )
         if form.is_valid():
             with db_transaction.atomic():
