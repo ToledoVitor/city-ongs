@@ -101,7 +101,7 @@
                             {% for transaction in available_transactions %}
                                 <option value="{{ transaction.id }}" 
                                         {% if match.transaction and match.transaction.id == transaction.id %}selected{% endif %}
-                                        data-amount="{{ transaction.amount }}">
+                                        data-amount="{{ transaction.amount|floatformat:2 }}">
                                     {{ transaction.date|date:"d/m/Y" }} - R$ {{ transaction.amount|floatformat:2 }} - {{ transaction.memo|default:transaction.name|default:"Sem descrição" }}
                                 </option>
                             {% endfor %}
@@ -151,19 +151,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     selects.forEach(select => {
         select.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const transactionAmount = Math.abs(parseFloat(selectedOption.dataset.amount || 0));
-            
             const row = this.closest('tr');
-            const expenseAmountText = row.querySelector('td:nth-child(3)').textContent;
-            const expenseAmount = parseFloat(expenseAmountText.replace('R$ ', '').replace(',', '.'));
+            const statusElement = row.querySelector('td:nth-child(5) span');
+            const isAutoMatched = statusElement && statusElement.textContent.includes('Auto-correspondido');
             
-            if (transactionAmount > 0 && Math.abs(transactionAmount - expenseAmount) < 0.01) {
+            if (isAutoMatched) {
                 this.classList.remove('border-red-300', 'bg-red-50');
                 this.classList.add('border-green-300', 'bg-green-50');
-            } else if (transactionAmount > 0) {
-                this.classList.remove('border-green-300', 'bg-green-50');
-                this.classList.add('border-red-300', 'bg-red-50');
             } else {
                 this.classList.remove('border-red-300', 'bg-red-50', 'border-green-300', 'bg-green-50');
             }

@@ -96,11 +96,9 @@ class AccountabilityXLSXImporter:
         new_favoreds = []
         for record in records:
             doc = record.get("document")
-            # Skip if favored already exists
             if doc and doc in existing_map:
                 continue
 
-            # Create new favored
             new_favoreds.append(
                 Favored(
                     organization=organization,

@@ -544,19 +544,15 @@
 </div>
 {% endif %}
 
-<div class="flex justify-between items-center my-4">
+<div class="my-4">
   <p class="text-xl font-bold text-black">Despesas Cadastradas</p>
   {% if accountability.is_on_execution %}
   <a href="{% url 'accountability:batch-reconcile' accountability.id %}">
     <button
       type="button"
-      class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2 text-center inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-green-800"
+      class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-2.5 py-1.5 text-center inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-green-800"
     >
       Conciliar em Lote
-      <svg class="ml-2 w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-        <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22Z" clip-rule="evenodd"/>
-        <path fill-rule="evenodd" d="M11 2H9v5a2 2 0 0 1-2 2H2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Zm-.293 9.293a1 1 0 0 1 1.414 0L13 12.172l1.879-1.879a1 1 0 0 1 1.414 1.414l-2.586 2.586a1 1 0 0 1-1.414 0L9.707 11.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"/>
-      </svg>
     </button>
   </a>
   {% endif %}
