@@ -165,7 +165,7 @@ class OFXFileParser:
         ofx_content = None
         for encoding in encodings_to_try:
             try:
-                ofx_file.seek(0)  # Reset file pointer
+                ofx_file.seek(0)
                 ofx_content = ofx_file.read().decode(encoding, errors="replace")
                 logger.info(f"Successfully decoded OFX file using {encoding} encoding")
                 break
