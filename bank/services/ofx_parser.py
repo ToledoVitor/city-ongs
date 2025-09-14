@@ -121,6 +121,7 @@ class OFXFileParser:
     def update_bank_account_balance(self, bank_account: BankAccount) -> bool:
         if BankStatement.objects.filter(
             bank_account=bank_account,
+            reference_day=self.balance_date.day,
             reference_month=self.balance_date.month,
             reference_year=self.balance_date.year,
         ).exists():
@@ -137,6 +138,7 @@ class OFXFileParser:
                 bank_account=bank_account,
                 opening_balance=self.opening_balance_amount,
                 closing_balance=self.closing_balance_amount,
+                reference_day=self.balance_date.day,
                 reference_month=self.balance_date.month,
                 reference_year=self.balance_date.year,
             )
@@ -150,14 +152,18 @@ class OFXFileParser:
         return [
             Transaction(
                 bank_account=bank_account,
-                transaction_type=transaction.trntype,
-                transaction_number=transaction.checknum,
-                name=transaction.name,
-                amount=transaction.trnamt,
-                date=datetime.strptime(transaction.dtposted, "%Y%m%d").date(),
-                memo=getattr(transaction, "memo", None),
+                transaction_type=tran.trntype,
+                transaction_number=tran.checknum,
+                name=tran.name,
+                amount=tran.trnamt,
+                date=(
+                    tran.dtposted.date()
+                    if isinstance(tran.dtposted, datetime)
+                    else datetime.strptime(tran.dtposted, "%Y%m%d").date()
+                ),
+                memo=getattr(tran, "memo", None),
             )
-            for transaction in self.transactions_list
+            for tran in self.transactions_list
         ]
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
