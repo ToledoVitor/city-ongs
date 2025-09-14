@@ -387,7 +387,7 @@ def accountability_detail_view(request, pk):
             | Q(favored__name__icontains=search_query)
         )
         revenues_list = revenues_list.filter(
-            Q(bank_account__name__icontains=search_query)
+            Q(identification__icontains=search_query)
         )
         documents_list = documents_list.filter(Q(name__icontains=search_query))
 

@@ -1,71 +1,94 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-    <p class="text-2xl mb-2 font-bold text-black">{{ object }}</p>
-    <b>Tipo de conta:</b> {{ object.account_type_label }} <br>
-    <b>Agência:</b> {{ object.agency|default_if_none:"N/A" }} <br>
-    <b>Saldo:</b> R${{ object.balance|intcomma }} <br>
-    <b>Origem da Receita:</b> {{ object.origin_label }}
-</div>
+<div class="space-y-6">
+  <!-- Header Section -->
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900">{{ object }}</h2>
+        <p class="text-sm text-blue-700">Informações da conta bancária</p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-white rounded-lg p-4 border border-blue-200">
+        <label class="block text-sm font-medium text-blue-800 mb-1">Tipo de Conta</label>
+        <p class="text-lg font-semibold text-gray-900">{{ object.account_type_label }}</p>
+      </div>
+      
+      <div class="bg-white rounded-lg p-4 border border-blue-200">
+        <label class="block text-sm font-medium text-blue-800 mb-1">Agência</label>
+        <p class="text-lg font-semibold text-gray-900">{{ object.agency|default_if_none:"N/A" }}</p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+        <label class="block text-sm font-medium text-green-800 mb-1">Saldo Atual</label>
+        <p class="text-2xl font-bold text-green-900">R$ {{ object.balance|intcomma }}</p>
+      </div>
+      
+      <div class="bg-white rounded-lg p-4 border border-blue-200">
+        <label class="block text-sm font-medium text-blue-800 mb-1">Origem da Receita</label>
+        <p class="text-lg font-semibold text-gray-900">{{ object.origin_label }}</p>
+      </div>
+    </div>
+  </div>
 
-<hr class="h-px my-8 border-0 bg-gray-500">
-
-<div class="my-3 mx-5">
-    <label class="block mb-2 text-xl font-semibold text-black">Último Extrato:</label>
-    <b>Mês de Referência:</b> {{ object.last_statement_update }} <br>
-    <a
-        href="{% url 'bank:bank-accounts-statement' object.id %}"
-    >
-        <button
-        class="
-            mt-2
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-        "
-        >
-        Conferir Extrato
+  <!-- Last Statement Section -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Último Extrato
+      </h3>
+      
+      <a href="{% url 'bank:bank-accounts-statement' object.id %}">
+        <button class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          Conferir Extrato
         </button>
-    </a>
-</div>
+      </a>
+    </div>
+    
+    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
+      <label class="block text-sm font-medium text-purple-800 mb-1">Mês de Referência</label>
+      <p class="text-lg font-semibold text-purple-900">{{ object.last_statement_update }}</p>
+    </div>
+  </div>
 
-<hr class="h-px my-8 border-0 bg-gray-500">
-
-<label class="block mx-5 mb-2 text-2xl font-bold text-black">Atualizar extrato:</label>
-
-<div class="my-3 mx-5">
-    <p class="mb-2">Para atualizar o saldo atual, extrato e transações, suba um novo arquivo com o período posterior ao ultimo extrato.</p>
-    <a
-        href="{% url 'bank:bank-statements-update' object.id %}"
-    >
-        <button
-        class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-        "
-        >
-        Atualizar
+  <!-- Update Statement Section -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+        </svg>
+        Atualizar Extrato
+      </h3>
+      
+      <a href="{% url 'bank:bank-statements-update' object.id %}">
+        <button class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+          </svg>
+          Atualizar Extrato
         </button>
-    </a>
+      </a>
+    </div>
+    
+    <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg p-4 border border-orange-200">
+      <p class="text-sm text-orange-800">
+        Para atualizar o saldo atual, extrato e transações, suba um novo arquivo com o período posterior ao último extrato.
+      </p>
+    </div>
+  </div>
 </div>

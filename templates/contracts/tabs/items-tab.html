@@ -1,35 +1,64 @@
 {% load humanize %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs uppercase bg-gray-500 text-white sticky top-0 z-30">
-            <tr>
-                <th scope="col" class="px-4 py-4 font-medium w-[180px] sticky left-0 z-40 bg-gray-500">
-                    <span class="sr-only">Ações</span>
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[25%]">
-                    Item
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[20%]">
-                    Natureza
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[8%]">
-                    Período
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[7%]">
-                    Qtd
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[15%]">
-                    Custo Mensal
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[15%]">
-                    Custo Total
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[120px]">
-                    Status
-                </th>
-            </tr>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <div class="p-1.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg">
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Itens do Contrato</h2>
+        <p class="text-xs text-gray-600">Itens orçamentários e recursos do projeto</p>
+      </div>
+    </div>
+    
+    {% if contract.is_on_planning %}
+      <a
+        href="{% url 'contracts:contracts-items-create' contract.id %}"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Adicionar Item
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Items List -->
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-500 text-white sticky top-0 z-30">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[180px]">
+              Ações
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[25%]">
+              Item
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[20%]">
+              Natureza
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[8%]">
+              Período
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[7%]">
+              Qtd
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[15%]">
+              Custo Mensal
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[15%]">
+              Custo Total
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[120px]">
+              Status
+            </th>
+          </tr>
         </thead>
         <tbody>
             {% if contract.items.count %}

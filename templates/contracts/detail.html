@@ -40,167 +40,194 @@
   </ol>
 </nav>
 
-<div class="mb-4 mr-10 border-b border-gray-700">
-  <ul
-    class="flex flex-wrap -mb-px text-sm font-medium text-center"
-    id="default-styled-tab"
-    data-tabs-toggle="#default-styled-tab-content" 
-    data-tabs-active-classes="text-white hover:text-gray-800 rounded-t-lg active bg-blue-600"
-    data-tabs-inactive-classes="border-transparent text-gray-600 hover:text-gray-400 border-gray-100 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-800"
-    role="tablist"
-  >
-    <li class="me-2" role="presentation">
-      <button
-        id="details-tab"
-        class="inline-block p-4 border-b-2 rounded-t-lg"
-        data-tabs-target="#details"
-        type="button"
-        role="tab"
-        aria-controls="details"
-        aria-selected="false"
-      >
-        Detalhes
-      </button>
-    </li>
+<div class="mb-6 mr-10">
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <ul
+      class="flex flex-wrap text-sm font-medium text-center bg-gradient-to-r from-gray-50 to-gray-100"
+      id="default-styled-tab"
+      data-tabs-toggle="#default-styled-tab-content" 
+      data-tabs-active-classes="text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg transform scale-105"
+      data-tabs-inactive-classes="text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+      role="tablist"
+    >
+      <li class="flex-1" role="presentation">
+        <button
+          id="details-tab"
+          class="w-full px-6 py-4 font-semibold rounded-tl-xl transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          data-tabs-target="#details"
+          type="button"
+          role="tab"
+          aria-controls="details"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Detalhes
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="interesteds-tab"
-        data-tabs-target="#interesteds"
-        type="button"
-        role="tab"
-        aria-controls="interesteds"
-        aria-selected="false"
-      >
-        Interessados
-      </button>
-    </li>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="interesteds-tab"
+          data-tabs-target="#interesteds"
+          type="button"
+          role="tab"
+          aria-controls="interesteds"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          Interessados
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="accounts-tab"
-        data-tabs-target="#accounts"
-        type="button"
-        role="tab"
-        aria-controls="accounts"
-        aria-selected="false"
-      >
-        Contas
-      </button>
-    </li>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="accounts-tab"
+          data-tabs-target="#accounts"
+          type="button"
+          role="tab"
+          aria-controls="accounts"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+          </svg>
+          Contas
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="goals-tab"
-        data-tabs-target="#goals"
-        type="button"
-        role="tab"
-        aria-controls="goals"
-        aria-selected="false"
-      >
-        Metas
-      </button>
-    </li>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="goals-tab"
+          data-tabs-target="#goals"
+          type="button"
+          role="tab"
+          aria-controls="goals"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Metas
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="items-tab"
-        data-tabs-target="#items"
-        type="button"
-        role="tab"
-        aria-controls="items"
-        aria-selected="false"
-      >
-        Itens
-      </button>
-    </li>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="items-tab"
+          data-tabs-target="#items"
+          type="button"
+          role="tab"
+          aria-controls="items"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          Itens
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="accountability-tab"
-        data-tabs-target="#accountability"
-        type="button"
-        role="tab"
-        aria-controls="accountability"
-        aria-selected="false"
-      >
-        Prestação
-      </button>
-    </li>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="accountability-tab"
+          data-tabs-target="#accountability"
+          type="button"
+          role="tab"
+          aria-controls="accountability"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+          </svg>
+          Prestação
+        </button>
+      </li>
 
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="execution-tab"
-        data-tabs-target="#execution"
-        type="button"
-        role="tab"
-        aria-controls="execution"
-        aria-selected="false"
-      >
-        Execução
-      </button>
-    </li>
-  
-    <li class="me-2" role="presentation">
-      <button
-        class="inline-block p-4 border-b-2 rounded-t-lg hover:border-black hover:black"
-        id="addendums-tab"
-        data-tabs-target="#addendums"
-        type="button"
-        role="tab"
-        aria-controls="addendums"
-        aria-selected="false"
-      >
-        Aditivos
-      </button>
-    </li>
-  </ul>
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="execution-tab"
+          data-tabs-target="#execution"
+          type="button"
+          role="tab"
+          aria-controls="execution"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Execução
+        </button>
+      </li>
+    
+      <li class="flex-1" role="presentation">
+        <button
+          class="w-full px-6 py-4 font-semibold rounded-tr-xl transition-all duration-200 ease-in-out flex items-center justify-center gap-2 hover:shadow-md"
+          id="addendums-tab"
+          data-tabs-target="#addendums"
+          type="button"
+          role="tab"
+          aria-controls="addendums"
+          aria-selected="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Aditivos
+        </button>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <div class="mr-10" id="default-styled-tab-content">
   <!-- Details Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-200" id="details" role="tabpanel" aria-labelledby="details-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="details" role="tabpanel" aria-labelledby="details-tab">
     {% include 'contracts/tabs/details-tab.html' with contract=contract %}
   </div>
 
   <!-- Interesteds Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="interesteds" role="tabpanel" aria-labelledby="interesteds-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="interesteds" role="tabpanel" aria-labelledby="interesteds-tab">
     {% include 'contracts/tabs/interesteds-tab.html' with contract=contract %}
   </div>
 
   <!-- Bank Accounts Tab -->
-  <div class="hidden p-4 rounded-lg bg-gray-200" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
     {% include 'contracts/tabs/banks-tab.html' with contract=contract %}
   </div>
 
   <!-- Goals Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="goals" role="tabpanel" aria-labelledby="goals-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="goals" role="tabpanel" aria-labelledby="goals-tab">
     {% include 'contracts/tabs/goals-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>  
 
   <!-- Items Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="items" role="tabpanel" aria-labelledby="items-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="items" role="tabpanel" aria-labelledby="items-tab">
     {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>  
 
   <!-- Month Accountability Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
+    <h1>teste</h1>
     {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
   
   <!-- Execution Tab -->
-  <div class="hidden rounded-lg bg-gray-200" id="execution" role="tabpanel" aria-labelledby="execution-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="execution" role="tabpanel" aria-labelledby="execution-tab">
     {% include 'contracts/tabs/execution-tab.html' with contract=contract user=user csrf_token=csrf_token %}
   </div>
 
   <!-- Addendums Tab -->
-  <div class="hidden rounded-lg" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
+  <div class="hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-4 transition-all duration-300 ease-in-out" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
     {% include 'contracts/tabs/documents-tab.html' with contract=contract %}
   </div>
   
