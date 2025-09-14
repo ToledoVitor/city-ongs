@@ -1352,7 +1352,7 @@ def reconcile_revenue_view(request, pk):
                 revenue.paid = True
                 revenue.liquidation = form.cleaned_data["transactions"][0].date
                 revenue.save()
-                revenue.transactions.set(form.cleaned_data["transactions"])
+                revenue.bank_transactions.set(form.cleaned_data["transactions"])
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
