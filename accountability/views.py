@@ -1469,6 +1469,9 @@ def upload_expense_file_view(request, pk):
                 target_content_object=expense,
             )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1496,6 +1499,9 @@ def upload_revenue_file_view(request, pk):
                 target_content_object=revenue,
             )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1516,6 +1522,9 @@ def delete_expense_file_view(request, pk):
             target_content_object=file.expense,
         )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1536,6 +1545,9 @@ def delete_revenue_file_view(request, pk):
             target_content_object=file.revenue,
         )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 

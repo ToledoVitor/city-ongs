@@ -82,22 +82,6 @@ class ExpenseForm(forms.ModelForm):
                     "A identificação deve ter pelo menos 5 caracteres"
                 )
 
-            # Verifica se já existe uma despesa com essa identificação no mesmo mês
-            if self.instance and self.instance.accountability:
-                exists = (
-                    Expense.objects.filter(
-                        accountability=self.instance.accountability,
-                        identification=identification,
-                    )
-                    .exclude(id=self.instance.id)
-                    .exists()
-                )
-
-                if exists:
-                    raise forms.ValidationError(
-                        "Já existe uma despesa com essa identificação neste mês"
-                    )
-
         return identification
 
     def clean_document_number(self):

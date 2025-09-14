@@ -448,28 +448,28 @@ class PassOn3PDFExporter:
                 self.pdf.cell(
                     text=(
                         "Tipo de ato sob sua responsabilidade: "
-                        f"{responsible["interest_label"]}"
+                        f"{responsible['interest_label']}"
                     ),
                     h=self.default_cell_height,
                 )
                 self.pdf.ln(6)
                 self.pdf.cell(
-                    text=f"Nome: {responsible["user"].get_full_name()}",
+                    text=f"Nome: {responsible['user'].get_full_name()}",
                     h=self.default_cell_height,
                 )
                 self.pdf.ln(6)
                 self.pdf.cell(
-                    text=f"Cargo: {responsible["user"].position}",
+                    text=f"Cargo: {responsible['user'].position}",
                     h=self.default_cell_height,
                 )
                 self.pdf.ln(6)
                 self.pdf.cell(
-                    text=f"Documento: {document_mask(str(responsible["user"].cpf))}",
+                    text=f"Documento: {document_mask(str(responsible['user'].cpf))}",
                     h=self.default_cell_height,
                 )
                 self.pdf.ln(6)
                 self.pdf.multi_cell(
-                    text=("Assinatura:" "______________________________________"),
+                    text=("Assinatura:______________________________________"),
                     w=190,
                     h=self.default_cell_height,
                     new_x=XPos.LMARGIN,
@@ -499,7 +499,7 @@ class PassOn3PDFExporter:
             )
             self.pdf.ln(6)
             self.pdf.multi_cell(
-                text=("Assinatura:" "______________________________________"),
+                text=("Assinatura:______________________________________"),
                 w=190,
                 h=self.default_cell_height,
                 new_x=XPos.LMARGIN,

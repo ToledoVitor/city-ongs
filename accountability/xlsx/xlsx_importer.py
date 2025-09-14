@@ -166,7 +166,7 @@ class AccountabilityXLSXImporter:
                 revenue.full_clean()
                 revenues.append(revenue)
             except ValidationError as e:
-                errors.append(f"Receita {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Receita {line[0]}: {' '.join(e.messages)}")
 
         if errors:
             return errors
@@ -225,7 +225,7 @@ class AccountabilityXLSXImporter:
                     new_expense_per_item.setdefault(item_id, Decimal("0.00"))
                     new_expense_per_item[item_id] += expense.value
             except ValidationError as e:
-                errors.append(f"Despesa {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Despesa {line[0]}: {' '.join(e.messages)}")
 
         for item_id, new_value in new_expense_per_item.items():
             existing_expenses = Expense.objects.filter(
@@ -302,7 +302,7 @@ class AccountabilityXLSXImporter:
                 transaction.full_clean()
                 transactions.append(transaction)
             except ValidationError as e:
-                errors.append(f"Aplicação {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Aplicação {line[0]}: {' '.join(e.messages)}")
 
         if errors:
             return errors
