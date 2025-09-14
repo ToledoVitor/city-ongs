@@ -20,6 +20,7 @@
     .status-badge:hover {
         transform: scale(1.05);
     }
+    
 </style>
 {% endblock %}
 
@@ -291,9 +292,9 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                 required
                             >
-                                <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>🔍 Em Análise</option>
-                                <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>❌ Rejeitada</option>
-                                <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>✅ Aprovada</option>
+                                <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Em Análise</option>
+                                <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
+                                <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
                             </select>
                         </div>
                         
@@ -316,9 +317,9 @@
                                 {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800
                                 {% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800
                                 {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                {% if expense.status == 'APPROVED' %}✅ Aprovada
-                                {% elif expense.status == 'REJECTED' %}❌ Rejeitada
-                                {% else %}🔍 Em Análise{% endif %}
+                                {% if expense.status == 'APPROVED' %}Aprovada
+                                {% elif expense.status == 'REJECTED' %}Rejeitada
+                                {% else %}Em Análise{% endif %}
                             </span>
                         </div>
                     </div>
@@ -446,6 +447,7 @@
               {% endif %}
             </div>
 
+
             <div class="my-6">
               <button
                 type="button"
@@ -472,5 +474,6 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}

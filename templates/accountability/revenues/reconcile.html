@@ -22,12 +22,28 @@
     }
     
     .main-content {
-        min-height: calc(100vh - 200px);
+        height: calc(100vh - 200px);
+        display: flex;
+        flex-direction: column;
     }
     
     .drawers-container {
-        max-height: calc(100vh - 300px);
+        flex: 1;
         overflow-y: auto;
+        margin-bottom: 0;
+        min-height: 0;
+    }
+    
+    .drawer-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .transactions-scroll {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 300px;
     }
 </style>
 {% endblock %}
@@ -78,9 +94,27 @@
 <form method="post" enctype="multipart/form-data" class="max-w-7xl mx-auto">
     {% csrf_token %}
     
+    {% if form.errors %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-sm font-medium text-red-800">Erro ao Conciliar Receita</h3>
+            </div>
+            <div class="mt-2">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p class="text-sm text-red-700">{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     <div class="main-content">
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch drawers-container mb-4">
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch drawers-container">
+            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
                 <div class="mb-3 flex justify-between items-center">
                     <h1 class="text-xl font-bold text-gray-900">Conciliar Receita</h1>
                     <div class="text-right">
@@ -153,7 +187,7 @@
 
             <div class="hidden lg:block w-0.5 bg-gradient-to-b from-gray-200 via-gray-400 to-gray-200 min-h-[400px] mx-2"></div>
 
-            <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
+            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
                 <div class="flex flex-col h-full">
                     <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
                         <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,8 +224,8 @@
                         />
                     </div>
 
-                    <div class="flex-1">
-                        <div class="h-full p-2 rounded-lg bg-gray-50 border border-gray-200 text-black overflow-y-auto" id="transactions-container" style="min-height: 200px; max-height: 400px;">
+                    <div class="transactions-scroll">
+                        <div class="h-full p-2 rounded-lg bg-gray-50 border border-gray-200 text-black overflow-y-auto" id="transactions-container">
                             {{ form.transactions }}
                         </div>
                     </div>
@@ -199,7 +233,6 @@
             </div>
         </div>
             
-        {% include 'commons/form-errors.html' with form=form error_message="Erro ao Conciliar Receita" %}
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
@@ -380,21 +413,24 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFileUpload();
 });
 
-document.getElementById('checkbox-search').addEventListener('keyup', function() {
-    var searchTerm = this.value.toLowerCase();
-    var optionDivs = document.querySelectorAll('#id_transactions > div');
-    
-    optionDivs.forEach(function(div) {
-        var checkbox = div.querySelector('input[type="checkbox"]');
-        if (checkbox && checkbox.checked) {
-            div.style.display = '';
-        } else if (div.textContent.toLowerCase().includes(searchTerm)) {
-            div.style.display = '';
-        } else {
-            div.style.display = 'none';
-        }
+const searchInput = document.getElementById('checkbox-search');
+if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        var optionDivs = document.querySelectorAll('#id_transactions > div');
+        
+        optionDivs.forEach(function(div) {
+            var checkbox = div.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+                div.style.display = '';
+            } else if (div.textContent.toLowerCase().includes(searchTerm)) {
+                div.style.display = '';
+            } else {
+                div.style.display = 'none';
+            }
+        });
     });
-});
+}
 </script>
 
 {% endblock %}

@@ -20,6 +20,7 @@
     .status-badge:hover {
         transform: scale(1.05);
     }
+    
 </style>
 {% endblock %}
 
@@ -244,8 +245,8 @@
                             required
                         >
                             <option value="" {% if revenue.status == "IN_ANALISIS" %}selected{% endif %}>Selecione o Status</option>
-                            <option value="REJECTED" {% if revenue.status == "REJECTED" %}selected{% endif %}>❌ Rejeitada</option>
-                            <option value="APPROVED" {% if revenue.status == "APPROVED" %}selected{% endif %}>✅ Aprovada</option>
+                            <option value="REJECTED" {% if revenue.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
+                            <option value="APPROVED" {% if revenue.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
                         </select>
                     </div>
 
@@ -485,6 +486,7 @@
               {% endif %}
             </div>
 
+
             <div class="my-6">
               <button
                 type="button"
@@ -511,5 +513,6 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}
