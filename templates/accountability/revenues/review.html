@@ -95,17 +95,25 @@
                         type="button"
                         data-modal-target="documents-modal"
                         data-modal-toggle="documents-modal"    
-                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center relative group"
+                        title="{% if revenue.files.all %}{{ revenue.files.all|length }} documento{{ revenue.files.all|length|pluralize }} anexado{{ revenue.files.all|length|pluralize }}{% else %}Nenhum documento anexado{% endif %}"
                     >
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                         Documentos
+                        {% if revenue.files.all %}
+                        <span class="ml-2 bg-blue-500 text-xs px-2 py-1 rounded-full">{{ revenue.files.all|length }}</span>
+                        {% endif %}
                     </button>
                 </div>
 
                 <!-- Basic Information -->
                 <div class="space-y-2 mb-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">ID da Receita:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded">{{ revenue.id }}</span>
+                    </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Identificação:</span>
                         <span class="sm:text-right flex-1 text-sm text-gray-900 font-medium">{{ revenue.identification }}</span>
@@ -135,10 +143,6 @@
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Fonte:</span>
                         <span class="sm:text-right flex-1 text-sm text-gray-900">{{ revenue.source.name|default:"-" }}</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Natureza da Receita:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ revenue.revenue_nature_label }}</span>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Conta Bancária:</span>
@@ -179,6 +183,54 @@
                         Análise da Receita
                     </h1>
                     <p class="text-sm text-gray-600 mt-2">Avalie a receita e defina seu status de aprovação.</p>
+                </div>
+
+                <!-- Bank Transactions Section -->
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center mb-3">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                        Transações Bancárias Relacionadas
+                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1 sm:gap-0">
+                      <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Natureza da Receita:</span>
+                      <span class="sm:text-right flex-1 text-sm text-gray-900">{{ revenue.revenue_nature_label }}</span>
+                    </div>
+                    {% if revenue.bank_transactions.all %}
+                        <div class="space-y-2 max-h-32 overflow-y-auto">
+                            {% for transaction in revenue.bank_transactions.all %}
+                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1 min-w-0 mr-3">
+                                        <div class="text-sm font-medium text-gray-900 break-words leading-tight">
+                                            {{ transaction.memo }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ transaction.date }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <span class="text-sm font-semibold {% if transaction.amount < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                            R$ {{ transaction.amount|intcomma }}
+                                        </span>
+                                        <div class="text-xs text-gray-500">{{ transaction.transaction_type }}</div>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                    {{ transaction.bank_account.bank_name }} - {{ transaction.bank_account.account }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-gray-500">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <p class="text-sm">Nenhuma transação bancária relacionada</p>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="flex flex-col h-full">
