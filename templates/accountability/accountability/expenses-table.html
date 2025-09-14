@@ -1091,36 +1091,72 @@
         Array.from(files).forEach((file, index) => {
             const fileItem = document.createElement('div');
             fileItem.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
-            fileItem.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${file.name}</div>
-                        <div class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                    </div>
-                </div>
-                <button type="button" onclick="removeExpenseFile(this, ${expenseId})" class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            
+            fileItem.innerHTML = 
+                '<div class="flex items-center">' +
+                    '<svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
+                    '</svg>' +
+                    '<div>' +
+                        '<div class="text-sm font-medium text-gray-900">' + file.name + '</div>' +
+                        '<div class="text-xs text-gray-500">' + fileSize + ' MB</div>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" onclick="removeExpenseFile(' + index + ', \'' + expenseId + '\')" class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded">' +
+                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                    '</svg>' +
+                '</button>';
             fileList.appendChild(fileItem);
         });
     }
   }
 
-  function removeExpenseFile(button, expenseId) {
-    const fileItem = button.closest('.flex');
-    fileItem.remove();
-    
+  window.removeExpenseFile = function(index, expenseId) {
     const fileInput = document.getElementById(`expense-files-${expenseId}`);
     const fileList = document.getElementById(`expense-file-list-${expenseId}`);
     
-    if (fileList.children.length === 0) {
-        fileInput.value = '';
+    if (!fileInput || !fileList) return;
+    
+    const dt = new DataTransfer();
+    const currentFiles = Array.from(fileInput.files);
+    
+    currentFiles.forEach((file, i) => {
+        if (i !== parseInt(index)) {
+            dt.items.add(file);
+        }
+    });
+    
+    fileInput.files = dt.files;
+    
+    fileList.innerHTML = '';
+    
+    if (fileInput.files.length === 0) {
+        return;
     }
-  }
+    
+    Array.from(fileInput.files).forEach((file, i) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md';
+        
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        fileItem.innerHTML = 
+            '<div class="flex items-center">' +
+                '<svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
+                '</svg>' +
+                '<span class="text-sm text-gray-700">' + file.name + '</span>' +
+                '<span class="text-xs text-gray-500 ml-2">(' + fileSize + ' MB)</span>' +
+            '</div>' +
+            '<button type="button" onclick="removeExpenseFile(' + i + ', \'' + expenseId + '\')" class="text-red-500 hover:text-red-700">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                '</svg>' +
+            '</button>';
+        
+        fileList.appendChild(fileItem);
+    });
+  };
 </script>
