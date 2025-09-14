@@ -2,6 +2,7 @@ from django.urls import path
 
 from accountability.views import (
     AccountabilityListView,
+    AdvancedSearchView,
     BeneficiariesDashboardView,
     BeneficiaryDetailView,
     FavoredCreateView,
@@ -129,6 +130,7 @@ urlpatterns = [
         duplicate_accountability_revenue_view,
         name="revenues-duplicate",
     ),
+    path("search/", AdvancedSearchView.as_view(), name="advanced-search"),
     path("favoreds/", FavoredListView.as_view(), name="favoreds-list"),
     path(
         "favoreds/create/",

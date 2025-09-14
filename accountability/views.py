@@ -1609,6 +1609,127 @@ class BeneficiariesDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
+class AdvancedSearchView(LoginRequiredMixin, TemplateView):
+    template_name = "accountability/search/advanced_search.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get filter parameters
+        search_query = self.request.GET.get("q", "")
+        record_type = self.request.GET.get("type", "all")  # all, expense, revenue
+        start_date = self.request.GET.get("start_date", "")
+        end_date = self.request.GET.get("end_date", "")
+        conciled_status = self.request.GET.get("conciled", "all")  # all, conciled, not_conciled
+        contract_id = self.request.GET.get("contract", "")
+        favored_id = self.request.GET.get("favored", "")
+        status = self.request.GET.get("status", "all")  # all, pending, approved, rejected
+        paid_status = self.request.GET.get("paid", "all")  # all, paid, unpaid
+
+        expenses_list = []
+        revenues_list = []
+        if record_type in ["all", "expense"]:
+            expenses_qs = Expense.objects.select_related(
+                "accountability__contract", "item", "favored"
+            ).filter(
+                deleted_at__isnull=True,
+                accountability__contract__area__in=self.request.user.areas.all()
+            )
+
+            if search_query:
+                expenses_qs = expenses_qs.filter(
+                    Q(identification__icontains=search_query) |
+                    Q(item__name__icontains=search_query) |
+                    Q(favored__name__icontains=search_query) |
+                    Q(accountability__contract__name__icontains=search_query)
+                )
+
+            if start_date and end_date:
+                expenses_qs = expenses_qs.filter(
+                    competency__range=[start_date, end_date]
+                )
+
+            if conciled_status != "all":
+                expenses_qs = expenses_qs.filter(conciled=conciled_status == "conciled")
+
+            if contract_id:
+                expenses_qs = expenses_qs.filter(accountability__contract_id=contract_id)
+
+            if favored_id:
+                expenses_qs = expenses_qs.filter(favored_id=favored_id)
+
+            if status != "all":
+                expenses_qs = expenses_qs.filter(status=status)
+            
+            if paid_status != "all":
+                expenses_qs = expenses_qs.filter(paid=paid_status == "paid")
+            
+            expenses_list = expenses_qs.order_by("-competency", "-value")[:100]
+
+        if record_type in ["all", "revenue"]:
+            revenues_qs = Revenue.objects.select_related(
+                "accountability__contract", "bank_account"
+            ).filter(
+                deleted_at__isnull=True,
+                accountability__contract__area__in=self.request.user.areas.all()
+            )
+            
+            if search_query:
+                revenues_qs = revenues_qs.filter(
+                    Q(bank_account__name__icontains=search_query) |
+                    Q(source__icontains=search_query) |
+                    Q(accountability__contract__name__icontains=search_query)
+                )
+            
+            if start_date and end_date:
+                revenues_qs = revenues_qs.filter(
+                    competency__range=[start_date, end_date]
+                )
+            
+            if conciled_status != "all":
+                revenues_qs = revenues_qs.filter(conciled=conciled_status == "conciled")
+            
+            if contract_id:
+                revenues_qs = revenues_qs.filter(accountability__contract_id=contract_id)
+            
+            if status != "all":
+                revenues_qs = revenues_qs.filter(status=status)
+            
+            if paid_status != "all":
+                revenues_qs = revenues_qs.filter(paid=paid_status == "paid")
+            
+            revenues_list = revenues_qs.order_by("-competency", "-value")[:100]
+
+        contracts = Contract.objects.filter(
+            area__in=self.request.user.areas.all()
+        ).order_by("name")
+        
+        favoreds = Favored.objects.filter(
+            organization=self.request.user.organization
+        ).order_by("name")
+        
+        context.update({
+            "expenses": expenses_list,
+            "revenues": revenues_list,
+            "contracts": contracts,
+            "favoreds": favoreds,
+            "search_query": search_query,
+            "record_type": record_type,
+            "start_date": start_date,
+            "end_date": end_date,
+            "conciled_status": conciled_status,
+            "contract_id": contract_id,
+            "favored_id": favored_id,
+            "status": status,
+            "paid_status": paid_status,
+            "expenses_total": sum(e.value for e in expenses_list),
+            "revenues_total": sum(r.value for r in revenues_list),
+        })
+
+        return context
+
+
 class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
     """View to display detailed information about a beneficiary."""
 
@@ -1619,9 +1740,6 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         beneficiary = self.get_object()
-
-        # Get expenses for this beneficiary
-        from accountability.models import Expense
 
         expenses = (
             Expense.objects.filter(favored=beneficiary, deleted_at__isnull=True)
