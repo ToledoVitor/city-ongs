@@ -1022,7 +1022,14 @@ def review_accountability_expenses(request, pk, index):
             "favored",
             "item",
         )
-        .prefetch_related("files")
+        .prefetch_related(
+            Prefetch(
+                "files",
+                queryset=ExpenseFile.objects.select_related("created_by").filter(
+                    deleted_at__isnull=True
+                ),
+            )
+        )
         .filter(status=Expense.ReviewStatus.IN_ANALISIS)
         .order_by("-value")
     )
@@ -1126,7 +1133,14 @@ def review_accountability_revenues(request, pk, index):
         accountability.revenues.select_related(
             "bank_account",
         )
-        .prefetch_related("files")
+        .prefetch_related(
+            Prefetch(
+                "files",
+                queryset=RevenueFile.objects.select_related("created_by").filter(
+                    deleted_at__isnull=True
+                ),
+            )
+        )
         .filter(status=Revenue.ReviewStatus.IN_ANALISIS)
         .order_by("-value")
     )

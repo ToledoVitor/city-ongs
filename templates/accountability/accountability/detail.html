@@ -203,7 +203,7 @@
         </a>
         
       {% elif accountability.is_sent and user.can_change_statuses %}
-        <a href="{% url 'accountability:review-all-expenses' accountability.id 0 %}">
+        <a href="{% url 'accountability:expenses-review' accountability.id 0 %}">
           <button
             type="button"
             class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
@@ -217,7 +217,7 @@
           </button>
         </a>
         
-        <a href="{% url 'accountability:review-all-revenues' accountability.id 0 %}">
+        <a href="{% url 'accountability:revenues-review' accountability.id 0 %}">
           <button
             type="button"
             class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
