@@ -38,240 +38,253 @@
     class="
       inline-flex
       items-center
-      p-2
-      mt-2
-      ms-3
+      justify-center
+      p-3
+      mt-3
+      ml-3
       text-sm
-      rounded-lg
+      rounded-xl
       sm:hidden
       focus:outline-none
-      focus:ring-2
+      focus:ring-4
       text-gray-400
-      hover:bg-gray-500
+      bg-gray-800
+      hover:bg-gray-700
+      hover:text-white
       focus:ring-gray-600
+      transition-all
+      duration-200
+      shadow-lg
     "
   >
-    <span class="sr-only">Open sidebar</span>
+    <span class="sr-only">Abrir menu</span>
     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
     <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
     </svg>
   </button>
  
-  <aside id="separator-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-    <div class="h-full px-3 py-4 overflow-y-auto bg-gray-500 inline-flex flex-col	justify-between	">
-        <ul class="space-y-2 font-medium content-between justify-between">
+  <aside id="separator-sidebar" class="fixed top-0 left-0 z-40 w-56 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-xl" aria-label="Sidebar">
+    <div class="h-full px-3 py-4 overflow-y-auto bg-gray-800 flex flex-col justify-between">
+        <div class="space-y-1">
+          <div class="mb-6 px-2">
+            <h2 class="text-lg font-bold text-white mb-1">Portal SITTS</h2>
+            <div class="h-0.5 w-12 bg-blue-500 rounded-full"></div>
+          </div>
 
-          <li>
-            <a href="{% url 'home' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+          <nav class="space-y-1">
+            <a href="{% url 'home' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+                <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                   <path fill-rule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clip-rule="evenodd"/>
                 </svg>
-                <span class="ms-3">Inicio</span>
-              </a>
-          </li>
+                <span class="group-hover:translate-x-1 transition-transform duration-200">Início</span>
+            </a>
 
-          <div class="inline-flex items-center justify-center w-full">
-            <hr class="w-32 h-px mt-4 border-0 bg-white">
-          </div>
+            <div class="my-4">
+              <div class="flex items-center px-2 mb-2">
+                <div class="flex-1 h-px bg-gray-600"></div>
+                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Gestão</span>
+                <div class="flex-1 h-px bg-gray-600"></div>
+              </div>
+            </div>
 
-          <li>
-            <a href="{% url 'contracts:contracts-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'contracts:contracts-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
               </svg>                  
-              <span class="flex-1 ms-3 whitespace-nowrap">Contratos</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Contratos</span>
             </a>
-          </li>
 
-          <li>
-            <a href="{% url 'contracts:companies-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'contracts:companies-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2v14a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2V5a1 1 0 0 1-1-1Zm5 2a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H9Zm5 0a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1Zm-5 4a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1H9Zm5 0a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1h-1Zm-3 4a2 2 0 0 0-2 2v3h2v-3h2v3h2v-3a2 2 0 0 0-2-2h-2Z" clip-rule="evenodd"/>
               </svg>                              
-              <span class="flex-1 ms-3 whitespace-nowrap">Empresas</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Empresas</span>
             </a>
-          </li>
 
-          <li>
-            <a href="{% url 'reports:reports-page' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">    
-              <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'reports:reports-page' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">    
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9h5a2 2 0 0 0 2-2Zm-1 9a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2Zm2-5a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Zm4 4a1 1 0 1 0-2 0v3a1 1 0 1 0 2 0v-3Z" clip-rule="evenodd"/>
               </svg>             
-              <span class="flex-1 ms-3 whitespace-nowrap">Relatórios</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Relatórios</span>
             </a>
-          </li>
 
-          <div class="inline-flex items-center justify-center w-full">
-            <hr class="w-32 h-px mt-4 border-0 bg-white">
-          </div>
+            <div class="my-4">
+              <div class="flex items-center px-2 mb-2">
+                <div class="flex-1 h-px bg-gray-600"></div>
+                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Prestações</span>
+                <div class="flex-1 h-px bg-gray-600"></div>
+              </div>
+            </div>
 
-          <li>
-            <a href="{% url 'accountability:accountabilities-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg className="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'accountability:accountabilities-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
                 <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Prestações</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Prestações</span>
             </a>
-          </li>
 
-          <li>
-            <a href="{% url 'dashboard:index' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <a href="{% url 'dashboard:index' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Inteligência</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Inteligência</span>
             </a>
-          </li>
 
-          <li>
-            <a href="{% url 'accountability:sources-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg className="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'accountability:sources-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z" clip-rule="evenodd"/>
                 <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z" clip-rule="evenodd"/>
               </svg>                          
-              <span class="flex-1 ms-3 whitespace-nowrap">Recursos</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Recursos</span>
             </a>
-          </li>
 
-          <li>
-            <a href="{% url 'accountability:favoreds-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-              <svg className="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <a href="{% url 'accountability:favoreds-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
                 <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
                 <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Favorecidos</span>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Favorecidos</span>
             </a>
-          </li>
 
           {% if user.has_admin_access %}
-            <div class="inline-flex items-center justify-center w-full">
-              <hr class="w-32 h-px mt-4 border-0 bg-white">
+            <div class="my-4">
+              <div class="flex items-center px-2 mb-2">
+                <div class="flex-1 h-px bg-gray-600"></div>
+                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Administração</span>
+                <div class="flex-1 h-px bg-gray-600"></div>
+              </div>
             </div>
 
-            <li>
-              <a href="{% url 'accounts:folder-managers-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                </svg>
-                <span class="flex-1 ms-3 whitespace-nowrap">Gestores</span>
-              </a>
-            </li>
+            <a href="{% url 'accounts:folder-managers-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+              </svg>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Gestores</span>
+            </a>
 
-            <li>
-              <a href="{% url 'accounts:organization-accountants-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                </svg>               
-                <span class="flex-1 ms-3 whitespace-nowrap">Prestadores</span>
-              </a>
-            </li>
+            <a href="{% url 'accounts:organization-accountants-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>               
+              </svg>               
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Prestadores</span>
+            </a>
 
-            <li>
-              <a href="{% url 'accounts:organization-committees-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                </svg>               
-                <span class="flex-1 ms-3 whitespace-nowrap">Comitê</span>
-              </a>
-            </li>
+            <a href="{% url 'accounts:organization-committees-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>               
+              </svg>               
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Comitê</span>
+            </a>
 
-            <li>
-              <a href="{% url 'accounts:documents-list' %}" class="flex items-center p-2 rounded-lg text-white hover:bg-gray-500 group">
-                <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M4 4a2 2 0 0 1 2-2h4.586A2 2 0 0 1 12 2.586L15.414 6A2 2 0 0 1 16 7.414V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Zm2 6a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1Zm1 3a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H7Z" clip-rule="evenodd"/>
-                </svg>
-                <span class="flex-1 ms-3 whitespace-nowrap">Documentos</span>
-              </a>
-            </li>
+            <a href="{% url 'accounts:documents-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
+              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 0 1 2-2h4.586A2 2 0 0 1 12 2.586L15.414 6A2 2 0 0 1 16 7.414V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Zm2 6a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1Zm1 3a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H7Z" clip-rule="evenodd"/>
+              </svg>
+              <span class="group-hover:translate-x-1 transition-transform duration-200">Documentos</span>
+            </a>
           {% endif %}
-        </ul>
+          </nav>
+        </div>
 
-        <div>
+        <div class="mt-auto pt-4 space-y-3">
           <button
             id="notifications-btn"
             data-modal-target="notifications-modal"
             data-modal-toggle="notifications-modal"
             type="button"
             class="
-              mb-4
+              w-full
               relative
-              inline-flex
+              flex
               items-center
-              p-3
+              justify-center
+              px-3
+              py-2
               text-sm
               font-medium
-              text-center
               text-white
-              bg-blue-700
+              bg-blue-600
               rounded-lg
-              hover:bg-blue-800
+              hover:bg-blue-700
               focus:ring-4
               focus:outline-none
-              focus:ring-blue-300
+              focus:ring-blue-300/50
+              transition-all
+              duration-200
             "
           >
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+            <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
               <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
               <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
             </svg>
-            <span class="text-sm ml-2">Notificações</span>
+            <span class="font-medium">Notificações</span>
+            {% if user.unread_notifications > 0 %}
             <div
               class="
                 absolute
                 inline-flex
                 items-center
                 justify-center
-                w-6
-                h-6
+                w-5
+                h-5
                 text-xs
-                font-semibold
+                font-bold
                 text-white
                 bg-red-500
                 border-2
-                border-gray-700
+                border-gray-800
                 rounded-full
-                -top-2
-                -end-2
+                -top-1
+                -right-1
+                animate-pulse
               "
             >
               {{ user.unread_notifications }}
             </div>
+            {% endif %}
           </button>
 
-          <form action="{% url 'logout' %}" method="post" class="justify-center">
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="
-                text-white
-                focus:outline-none
-                focus:ring-4
-                font-medium
-                rounded-full
-                text-sm
-                px-8
-                py-2.5
-                text-center
-                me-2
-                mb-2
-                bg-red-600
-                hover:bg-red-700
-                focus:ring-red-900
-              "
-              style="display: flex; justify-self: center;"
-            >
-              Sair
-            </button>
-            <p class="text-sm text-white" style="display: flex; justify-self: center;">v0.0.1</p>
-          </form>
+          <div class="border-t border-gray-600 pt-3">
+            <form action="{% url 'logout' %}" method="post" class="space-y-2">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="
+                  w-full
+                  flex
+                  items-center
+                  justify-center
+                  px-3
+                  py-2
+                  text-sm
+                  font-medium
+                  text-white
+                  bg-red-600
+                  rounded-lg
+                  hover:bg-red-700
+                  focus:ring-4
+                  focus:outline-none
+                  focus:ring-red-300/50
+                  transition-all
+                  duration-200
+                "
+              >
+                <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+                </svg>
+                <span class="font-medium">Sair</span>
+              </button>
+              <p class="text-xs text-gray-400 text-center font-mono">v0.0.1</p>
+            </form>
+          </div>
         </div>
     </div>
 
   </aside>
   
-  <div class="py-4 px-2 mr-4 sm:ml-64">
+  <div class="py-4 px-2 mr-4 sm:ml-56">
   {% block content %}
   {% endblock %}
   </div>
