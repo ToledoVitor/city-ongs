@@ -231,6 +231,7 @@ def update_bank_account_manual_view(request, pk):
             with django_transaction.atomic():
                 BankStatement.objects.create(
                     bank_account=bank_account,
+                    reference_day=form.cleaned_data["reference_day"],
                     reference_month=form.cleaned_data["reference_month"],
                     reference_year=form.cleaned_data["reference_year"],
                     opening_balance=form.cleaned_data["opening_balance"],
