@@ -169,6 +169,12 @@ class BankStatement(BaseOrganizationTenantModel):
         help_text="The balance at the end of the statement period",
     )
 
+    reference_day = models.IntegerField(
+        verbose_name="Dia de Referência",
+        help_text="The day this statement refers to",
+        null=True,
+        blank=True,
+    )
     reference_month = models.IntegerField(
         verbose_name="Mês",
         choices=MonthChoices,
@@ -189,7 +195,7 @@ class BankStatement(BaseOrganizationTenantModel):
         constraints = [
             models.UniqueConstraint(
                 condition=models.Q(deleted_at__isnull=True),
-                fields=("bank_account", "reference_month", "reference_year"),
+                fields=("bank_account", "reference_month", "reference_year", "reference_day"),
                 name="unique_bank_statement_per_month_year",
             ),
         ]

@@ -79,6 +79,7 @@ def preparse_ofx_file_view(request, pk):
             bank_account=bank_account,
             reference_month=period_info["month"],
             reference_year=period_info["year"],
+            reference_day=period_info["day"],
         ).exists()
 
         return JsonResponse(

@@ -55,6 +55,7 @@ class OFXFileParser:
         return {
             "start_date": start_date.strftime("%d/%m/%Y"),
             "end_date": end_date.strftime("%d/%m/%Y"),
+            "day": end_date.day,
             "month": end_date.month,
             "year": end_date.year,
             "month_name": end_date.strftime("%B"),
