@@ -56,8 +56,8 @@
                       <p class="font-medium">R$ {{ expense.value|intcomma }}</p>
                       <button
                         type="button"
-                        data-modal-target="documents-modal-{{ expense.id}}"
-                        data-modal-toggle="documents-modal-{{ expense.id}}"
+                        data-modal-target="exp-documents-modal-{{ expense.id}}"
+                        data-modal-toggle="exp-documents-modal-{{ expense.id}}"
                         class="text-white mt-2 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-2.5 py-1 inline-flex items-center"
                       >
                         {{ expense.count_files }} arquivos
@@ -288,24 +288,41 @@
                 </tr>
 
                 <div
-                  id="documents-modal-{{ expense.id}}"
+                  id="exp-documents-modal-{{ expense.id}}"
                   tabindex="-1"
                   data-modal-backdrop="static"
                   aria-hidden="true"
-                  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+                  class="
+                    hidden
+                    overflow-y-auto
+                    overflow-x-hidden
+                    fixed
+                    top-0
+                    right-0
+                    left-0
+                    z-50
+                    justify-center
+                    items-center
+                    w-full
+                    md:inset-0
+                    h-[calc(100%-1rem)]
+                    max-h-full
+                  "
                 >
                   <div class="relative p-4 w-full max-w-4xl max-h-full">
+                    <!-- Modal content -->
                     <div class="relative rounded-lg shadow bg-white">
+                      <!-- Modal header -->
                         <div class="flex items-center justify-between p-6 border-b border-gray-200">
                             <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                              <svg class="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                               </svg>
                               Documentos da Despesa
                             </h3>
                             <button
                               type="button"
-                              data-modal-hide="documents-modal-{{ expense.id}}"
+                              data-modal-hide="exp-documents-modal-{{ expense.id}}"
                               class="
                                 text-gray-400
                                 hover:bg-gray-200
@@ -334,7 +351,7 @@
                             <!-- Left Column: Existing Files -->
                             <div class="space-y-4">
                               <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                                 Arquivos Anexados ({{ expense.count_files }})
@@ -344,7 +361,7 @@
                                   <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-3 last:mb-0 hover:shadow-sm transition-shadow">
                                     <div class="flex items-center space-x-3">
                                       <div class="flex-shrink-0">
-                                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
                                       </div>
@@ -353,7 +370,7 @@
                                           href="{{ file.file.url }}"
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline block truncate"
+                                          class="text-sm font-medium text-green-600 hover:text-green-800 hover:underline block truncate"
                                         >
                                           {{ file.name }}
                                         </a>
@@ -362,7 +379,7 @@
                                         </p>
                                       </div>
                                     </div>
-                                    {% if accountability.is_on_execution %}
+                                    {% if not user.is_committee_member %}
                                     <form method="post" action="{% url 'accountability:expense-file-delete' file.id %}" class="inline">
                                       {% csrf_token %}
                                       <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -390,11 +407,10 @@
                               </div>
                             </div>
                             
-                            <!-- Right Column: Upload Area -->
                             <div class="space-y-4">
                               {% if not accountability.is_sent %}
                               <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                 </svg>
                                 Adicionar Arquivos
@@ -404,7 +420,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                 
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 bg-gray-50 hover:border-blue-500 hover:bg-blue-50" id="expense-file-upload-area-{{ expense.id }}">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 bg-gray-50 hover:border-green-500 hover:bg-green-50" id="expense-file-upload-area-{{ expense.id }}">
                                   <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                   </svg>
@@ -417,7 +433,7 @@
                                     multiple
                                     accept=".pdf,.jpg,.jpeg,.png"
                                   >
-                                  <label for="expense-files-{{ expense.id }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md cursor-pointer transition-colors duration-200">
+                                  <label for="expense-files-{{ expense.id }}" class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-md cursor-pointer transition-colors duration-200">
                                     Escolher Arquivos
                                   </label>
                                   <p class="text-xs text-gray-500 mt-3">PDF, JPG, PNG (máx. 10MB cada)</p>
@@ -425,10 +441,10 @@
                                 
                                 <div id="expense-file-list-{{ expense.id }}" class="mt-4 space-y-2"></div>
                                 
-                                <div class="mt-6">
+                                <div class="mt-4">
                                   <button
                                     type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center justify-center"
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center justify-center"
                                   >
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -450,11 +466,12 @@
                               {% endif %}
                             </div>
                           </div>
+                        </div>
                         <!-- Modal footer -->
                         <div class="flex items-center justify-end p-6 border-t border-gray-200">
                           <button
                             type="button"
-                            data-modal-hide="documents-modal-{{ expense.id}}"
+                            data-modal-hide="exp-documents-modal-{{ expense.id}}"
                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
                           >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1047,126 +1064,116 @@
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      document.querySelectorAll('[id^="documents-modal-"]').forEach(function(modal) {
-        const expenseId = modal.id.replace('documents-modal-', '');
-        setupExpenseFileUpload(expenseId);
-      });
-    }, 500);
+{% for expense in expenses_page %}
+document.addEventListener('DOMContentLoaded', function() {
+  const expenseId = '{{ expense.id }}';
+  const fileInput = document.getElementById(`expense-files-${expenseId}`);
+  const fileUploadArea = document.getElementById(`expense-file-upload-area-${expenseId}`);
+  
+  if (!fileInput || !fileUploadArea) return;
+  
+  fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
+      fileUploadArea.classList.add('border-green-500', 'bg-green-50');
   });
-
-  function setupExpenseFileUpload(expenseId) {
-    const fileInput = document.getElementById(`expense-files-${expenseId}`);
-    const fileUploadArea = document.getElementById(`expense-file-upload-area-${expenseId}`);
-    const fileList = document.getElementById(`expense-file-list-${expenseId}`);
-    
-    if (!fileInput || !fileUploadArea || !fileList) return;
-    
-    if (fileUploadArea.hasAttribute('data-setup')) return;
-    fileUploadArea.setAttribute('data-setup', 'true');
-    
-    fileUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.add('border-blue-500', 'bg-blue-50');
-        fileUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
-    });
-    
-    fileUploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-        fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
-    });
-    
-    fileUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-        fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
-        const files = e.dataTransfer.files;
-        handleExpenseFiles(files, expenseId);
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-        handleExpenseFiles(e.target.files, expenseId);
-    });
-    
-    function handleExpenseFiles(files, expenseId) {
-        const fileInput = document.getElementById(`expense-files-${expenseId}`);
-        const fileList = document.getElementById(`expense-file-list-${expenseId}`);
-        
-        // Update the file input with the new files
-        fileInput.files = files;
-        
-        fileList.innerHTML = '';
-        Array.from(files).forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            
-            fileItem.innerHTML = 
-                '<div class="flex items-center">' +
-                    '<svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
-                    '</svg>' +
-                    '<div>' +
-                        '<div class="text-sm font-medium text-gray-900">' + file.name + '</div>' +
-                        '<div class="text-xs text-gray-500">' + fileSize + ' MB</div>' +
-                    '</div>' +
-                '</div>' +
-                '<button type="button" onclick="removeExpenseFile(' + index + ', \'' + expenseId + '\')" class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded">' +
-                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
-                    '</svg>' +
-                '</button>';
-            fileList.appendChild(fileItem);
-        });
-    }
+  
+  fileUploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
+      fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+  });
+  
+  fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
+      fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+      const files = e.dataTransfer.files;
+      handleExpenseFiles(files, expenseId);
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+      handleExpenseFiles(e.target.files, expenseId);
+  });
+  
+  function handleExpenseFiles(files, expenseId) {
+      const fileInput = document.getElementById(`expense-files-${expenseId}`);
+      const fileList = document.getElementById(`expense-file-list-${expenseId}`);
+      
+      fileInput.files = files;
+      
+      fileList.innerHTML = '';
+      
+      Array.from(files).forEach((file, index) => {
+          const fileItem = document.createElement('div');
+          fileItem.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md';
+          
+          const fileSize = (file.size / 1024 / 1024).toFixed(2);
+          
+          fileItem.innerHTML = 
+              '<div class="flex items-center">' +
+                  '<svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
+                  '</svg>' +
+                  '<span class="text-sm text-gray-700">' + file.name + '</span>' +
+                  '<span class="text-xs text-gray-500 ml-2">(' + fileSize + ' MB)</span>' +
+              '</div>' +
+              '<button type="button" onclick="removeExpenseFile(' + index + ', \'' + expenseId + '\')" class="text-red-500 hover:text-red-700">' +
+                  '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                  '</svg>' +
+              '</button>';
+          
+          fileList.appendChild(fileItem);
+      });
   }
-
+  
   window.removeExpenseFile = function(index, expenseId) {
-    const fileInput = document.getElementById(`expense-files-${expenseId}`);
-    const fileList = document.getElementById(`expense-file-list-${expenseId}`);
-    
-    if (!fileInput || !fileList) return;
-    
-    const dt = new DataTransfer();
-    const currentFiles = Array.from(fileInput.files);
-    
-    currentFiles.forEach((file, i) => {
-        if (i !== parseInt(index)) {
-            dt.items.add(file);
-        }
-    });
-    
-    fileInput.files = dt.files;
-    
-    fileList.innerHTML = '';
-    
-    if (fileInput.files.length === 0) {
-        return;
-    }
-    
-    Array.from(fileInput.files).forEach((file, i) => {
-        const fileItem = document.createElement('div');
-        fileItem.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md';
-        
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        
-        fileItem.innerHTML = 
-            '<div class="flex items-center">' +
-                '<svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
-                '</svg>' +
-                '<span class="text-sm text-gray-700">' + file.name + '</span>' +
-                '<span class="text-xs text-gray-500 ml-2">(' + fileSize + ' MB)</span>' +
-            '</div>' +
-            '<button type="button" onclick="removeExpenseFile(' + i + ', \'' + expenseId + '\')" class="text-red-500 hover:text-red-700">' +
-                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
-                '</svg>' +
-            '</button>';
-        
-        fileList.appendChild(fileItem);
-    });
+      const fileInput = document.getElementById(`expense-files-${expenseId}`);
+      const fileList = document.getElementById(`expense-file-list-${expenseId}`);
+      
+      if (!fileInput || !fileList) return;
+      
+      const dt = new DataTransfer();
+      const currentFiles = Array.from(fileInput.files);
+      
+      currentFiles.forEach((file, i) => {
+          if (i !== parseInt(index)) {
+              dt.items.add(file);
+          }
+      });
+      
+      fileInput.files = dt.files;
+      
+      fileList.innerHTML = '';
+      
+      if (fileInput.files.length === 0) {
+          return;
+      }
+      
+      Array.from(fileInput.files).forEach((file, i) => {
+          const fileItem = document.createElement('div');
+          fileItem.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-md';
+          
+          const fileSize = (file.size / 1024 / 1024).toFixed(2);
+          
+          fileItem.innerHTML = 
+              '<div class="flex items-center">' +
+                  '<svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>' +
+                  '</svg>' +
+                  '<span class="text-sm text-gray-700">' + file.name + '</span>' +
+                  '<span class="text-xs text-gray-500 ml-2">(' + fileSize + ' MB)</span>' +
+              '</div>' +
+              '<button type="button" onclick="removeExpenseFile(' + i + ', \'' + expenseId + '\')" class="text-red-500 hover:text-red-700">' +
+                  '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                  '</svg>' +
+              '</button>';
+          
+          fileList.appendChild(fileItem);
+      });
   };
+});
+{% endfor %}
 </script>

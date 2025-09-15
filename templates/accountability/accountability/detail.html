@@ -542,23 +542,23 @@
   {% endif %}
 </div>
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-6"> 
   {% include 'accountability/accountability/expenses-table.html' with accountability=accountability expenses_page=expenses_page revenue_page_number=revenues_page.number q=search_query csrf_token=csrf_token %}
 </div>
 
 <h2 class="text-xl font-bold text-gray-900 mb-6">Receitas Cadastradas</h2>
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-6"> 
   {% include 'accountability/accountability/revenues-table.html' with accountability=accountability revenues_page=revenues_page expenses_page_number=expenses_page.number q=search_query csrf_token=csrf_token %}
 </div>
 
 <h2 class="text-xl font-bold text-gray-900 mb-6">Documentos Adicionais</h2>
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-6"> 
   {% include 'accountability/accountability/documents-table.html' with accountability=accountability csrf_token=csrf_token %}
 </div>
 
-<div class="mt-8 mr-10">
+<div class="mt-8">
   <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
     <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-4 border-b border-gray-200">
       <div class="flex items-center gap-3">
