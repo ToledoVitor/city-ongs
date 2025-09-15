@@ -329,7 +329,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                     & Q(deleted_at__isnull=True),
                     distinct=True,
                 ),
-            )[:12]
+            ).order_by("-year", "-month")[:12]
         )
         context["accountabilities"] = accountabilities
 

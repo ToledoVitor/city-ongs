@@ -339,6 +339,13 @@ class Transaction(BaseOrganizationTenantModel):
             models.Index(fields=["transaction_type", "date"]),
             models.Index(fields=["transaction_number"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["transaction_number", "memo", "bank_account"],
+                name="unique_transaction_number_per_bank_account",
+                condition=models.Q(deleted_at__isnull=True),
+            ),
+        ]
         ordering = ["-date", "-id"]
 
     def clean(self):

@@ -48,7 +48,7 @@
 <form method="post" enctype="multipart/form-data" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
   {% csrf_token %}
 
-  <div class="space-y-6">
+  <div class="space-y-6 mb-4">
     <div class="bg-white shadow-md rounded-lg p-6">
       <h2 class="text-xl font-semibold mb-4">Detalhes do Documento</h2>
       <div class="space-y-4">
@@ -81,7 +81,7 @@
           {% if form.file.errors %}
             <p class="mt-1 text-sm text-red-600">{{ form.file.errors.0 }}</p>
           {% endif %}
-          <p class="mt-2 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG ou PNG. Tamanho máximo: 10MB.</p>
+          <p class="mt-2 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, JPG, JPEG ou PNG. Tamanho máximo: 10MB.</p>
         </div>
       </div>
     </div>
@@ -89,7 +89,7 @@
 
   {% include 'commons/form-errors.html' with form=form %}
 
-  <div class="py-6">
+  <div class="pt-4">
     <div class="flex justify-end items-center gap-4">
       <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
         <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">

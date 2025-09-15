@@ -1,5 +1,6 @@
 import logging
 import unicodedata
+from contracts.models import Contract
 from typing import Any
 from datetime import date
 from django.contrib.auth.decorators import login_required
@@ -41,7 +42,6 @@ from bank.models import Transaction
 from accountability.services import export_xlsx_model, import_xlsx_model
 from accounts.models import Area
 from activity.models import ActivityLog
-from contracts.models import Contract
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
 
@@ -1760,9 +1760,6 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
             .select_related("accountability__contract")
             .order_by("-competency")
         )
-
-        # Get contracts with costs
-        from contracts.models import Contract
 
         contracts = Contract.objects.filter(
             accountabilities__expenses__favored=beneficiary,

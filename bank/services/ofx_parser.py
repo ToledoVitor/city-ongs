@@ -144,7 +144,7 @@ class OFXFileParser:
             )
 
             transactions = self._updated_transactions(bank_account)
-            Transaction.objects.bulk_create(transactions)
+            Transaction.objects.bulk_create(transactions, ignore_conflicts=True)
 
             return
 

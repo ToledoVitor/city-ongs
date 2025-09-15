@@ -156,208 +156,6 @@
                     {% endif %}
                   </td>
                 </tr>
-
-                <div
-                    id="items-modal-{{ item.id }}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="
-                      hidden
-                      overflow-y-auto
-                      overflow-x-hidden
-                      fixed
-                      top-0
-                      right-0
-                      left-0
-                      z-50
-                      justify-center
-                      items-center
-                      w-full
-                      md:inset-0
-                      h-[calc(100%-1rem)]
-                      max-h-full
-                    "
-                >
-                  <div class="relative p-4 w-full max-w-md max-h-full">
-                      <!-- Modal content -->
-                      <div class="relative rounded-lg shadow bg-gray-300">
-                          <!-- Modal header -->
-                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-                              <h3 class="text-xl font-semibold text-black">
-                                  Selecione uma opção
-                              </h3>
-                              <button
-                                type="button"
-                                class="
-                                  end-2.5
-                                  text-gray-400
-                                  bg-transparent
-                                  hover:bg-gray-600
-                                  hover:text-black
-                                  rounded-lg
-                                  text-sm
-                                  w-6
-                                  h-6
-                                  ms-auto
-                                  inline-flex
-                                  justify-center
-                                  items-center
-                                "
-                                data-modal-hide="items-modal-{{ item.id }}"
-                              >
-                                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
-                          </div>
-                          <!-- Modal body -->
-                          <div class="p-4 md:p-5">
-                              <form class="space-y-4"  method="post">
-
-                                  <div>
-                                      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                                      <input type="hidden" name="form_type" value="items_modal">
-                                      <input type="hidden" name="item_id" value="{{ item.id }}">
-
-                                      <label class="block mb-2 text-sm font-medium text-black">Escolha uma opção</label>
-                                      <select
-                                          id="item-status-select"
-                                          name="status"
-                                          class="
-                                            border
-                                            text-sm
-                                            rounded-lg
-                                            block
-                                            w-full
-                                            p-2.5
-                                            border-gray-600
-                                            placeholder-gray-400
-                                            text-black
-                                            focus:ring-blue-500
-                                            focus:border-blue-500
-                                          "
-                                          {% if not user.can_change_statuses %}
-                                          disabled
-                                          {% endif %}
-                                      >
-                                        <option value="ANALYZING">Em análise</option>
-                                        <option value="APPROVED">Aprovado</option>
-                                        <option value="APPROVED_WITH_PENDENCE">Pendências</option>
-                                        <option value="CORRECTING">Corrigir</option>
-                                        <option value="REJECTED">Rejeitado</option>
-                                      </select>
-                                  </div>
-
-                                  <hr class="h-px my-4 border-0 bg-gray-500">
-
-                                  <b class="mt-2 inline-flex text-center">HISTÓRICO DE COMENTÁRIOS</b>
-
-                                  <div class="h-64 w-full overflow-y-scroll rounded-lg p-4">
-                                    {% if not item.last_reviews %}
-                                      <div class="flex items-start gap-2.5 mb-4">
-                                        <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                          <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                          <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                                              <span class="text-sm font-semibold text-black">----</span>
-                                              <span class="text-sm font-normal text-gray-600">00:00</span>
-                                          </div>
-                                          <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                            <p class="text-sm font-normal text-black">Sem nenhum comentário...</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    {% endif %}
-
-                                    {% for review in item.last_reviews %}
-                                      {% if review.reviewer.id == user.id%}
-                                        <div class="flex items-start gap-2.5 mb-4 flex-row-reverse">
-                                          <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                          </svg>
-                                          <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                            <div class="flex items-center justify-end space-x-2 rtl:space-x-reverse">
-                                              <span class="text-sm font-normal text-gray-600">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
-                                              <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
-                                            </div>
-                                            <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      {% else %}
-                                        <div class="flex items-start gap-2.5 mb-4">
-                                          <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                          </svg>
-                                          <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                                                <span class="text-sm font-semibold text-black">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
-                                                <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
-                                            </div>
-                                            <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      {% endif %}
-                                    {% endfor %}
-                                  </div>
-
-                                  <div>
-                                      <label for="comment" class="block my-2 text-sm font-medium text-black">Comentários</label>
-                                      <textarea
-                                          id="comment"
-                                          name="comment"
-                                          rows="4"
-                                          maxlength="254"
-                                          class="
-                                            block
-                                            p-2.5
-                                            w-full
-                                            text-sm
-                                            rounded-lg
-                                            border
-                                            border-gray-600
-                                            placeholder-gray-400
-                                            text-black
-                                            focus:ring-blue-500
-                                            focus:border-blue-500
-                                          "
-                                          placeholder="....."
-                                      ></textarea>
-                                      <p id="helper-text-explanation" class="my-2 text-sm text-gray-800">
-                                          Adicionar um novo comentário
-                                      </p>
-                                  </div>
-                                  <button
-                                      type="submit"
-                                      class="
-                                        w-full
-                                        text-white
-                                        bg-blue-600
-                                        hover:bg-blue-700
-                                        focus:ring-blue-800
-                                        focus:ring-4
-                                        focus:outline-none
-                                        font-medium
-                                        rounded-lg
-                                        text-sm
-                                        px-5
-                                        py-2.5
-                                        text-center
-                                      "
-                                  >
-                                      Atualizar
-                                  </button>
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-                </div>
               {% endfor %}
             {% else %}
               <tr class="bg-gray-50 border-b hover:bg-gray-200">
@@ -460,6 +258,140 @@
   </div>
 </div>
 
+
+<!-- Item modals - placed outside table structure -->
+{% if contract.items.count %}
+  {% for item in contract.items.all %}
+    <div
+        id="items-modal-{{ item.id }}"
+        tabindex="-1"
+        data-modal-backdrop="static"
+        aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+    >
+      <div class="relative p-4 w-full max-w-md max-h-full">
+          <div class="relative rounded-lg shadow bg-gray-300">
+              <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
+                  <h3 class="text-xl font-semibold text-black">
+                      Selecione uma opção
+                  </h3>
+                  <button
+                    type="button"
+                    class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-600 hover:text-black rounded-lg text-sm w-6 h-6 ms-auto inline-flex justify-center items-center"
+                    data-modal-hide="items-modal-{{ item.id }}"
+                  >
+                      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                      </svg>
+                      <span class="sr-only">Fechar modal</span>
+                  </button>
+              </div>
+              <div class="p-4 md:p-5">
+                  <form class="space-y-4" method="post">
+                      <div>
+                          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                          <input type="hidden" name="form_type" value="items_modal">
+                          <input type="hidden" name="item_id" value="{{ item.id }}">
+
+                          <label class="block mb-2 text-sm font-medium text-black">Escolha uma opção</label>
+                          <select
+                              id="item-status-select"
+                              name="status"
+                              class="border text-sm rounded-lg block w-full p-2.5 border-gray-600 placeholder-gray-400 text-black focus:ring-blue-500 focus:border-blue-500"
+                              {% if not user.can_change_statuses %}disabled{% endif %}
+                          >
+                            <option value="ANALYZING">Em análise</option>
+                            <option value="APPROVED">Aprovado</option>
+                            <option value="APPROVED_WITH_PENDENCE">Pendências</option>
+                            <option value="CORRECTING">Corrigir</option>
+                            <option value="REJECTED">Rejeitado</option>
+                          </select>
+                      </div>
+
+                      <hr class="h-px my-4 border-0 bg-gray-500">
+
+                      <b class="mt-2 inline-flex text-center">HISTÓRICO DE COMENTÁRIOS</b>
+
+                      <div class="h-64 w-full overflow-y-scroll rounded-lg p-4">
+                        {% if not item.last_reviews %}
+                          <div class="flex items-start gap-2.5 mb-4">
+                            <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                              <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="flex flex-col gap-1 w-full max-w-[320px]">
+                              <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                  <span class="text-sm font-semibold text-black">----</span>
+                                  <span class="text-sm font-normal text-gray-600">00:00</span>
+                              </div>
+                              <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
+                                <p class="text-sm font-normal text-black">Sem nenhum comentário...</p>
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
+
+                        {% for review in item.last_reviews %}
+                          {% if review.reviewer.id == user.id%}
+                            <div class="flex items-start gap-2.5 mb-4 flex-row-reverse">
+                              <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+                              </svg>
+                              <div class="flex flex-col gap-1 w-full max-w-[320px]">
+                                <div class="flex items-center justify-end space-x-2 rtl:space-x-reverse">
+                                  <span class="text-sm font-normal text-gray-600">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
+                                  <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
+                                </div>
+                                <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
+                                  <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                </div>
+                              </div>
+                            </div>
+                          {% else %}
+                            <div class="flex items-start gap-2.5 mb-4">
+                              <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
+                              </svg>
+                              <div class="flex flex-col gap-1 w-full max-w-[320px]">
+                                <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                                    <span class="text-sm font-semibold text-black">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
+                                    <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
+                                </div>
+                                <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
+                                  <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                </div>
+                              </div>
+                            </div>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+
+                      <div>
+                          <label for="comment" class="block my-2 text-sm font-medium text-black">Comentários</label>
+                          <textarea
+                              id="comment"
+                              name="comment"
+                              rows="4"
+                              maxlength="254"
+                              class="block p-2.5 w-full text-sm rounded-lg border border-gray-600 placeholder-gray-400 text-black focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="....."
+                          ></textarea>
+                          <p id="helper-text-explanation" class="my-2 text-sm text-gray-800">
+                              Adicionar um novo comentário
+                          </p>
+                      </div>
+                      <button
+                          type="submit"
+                          class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                      >
+                          Atualizar
+                      </button>
+                  </form>
+              </div>
+          </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
 
 {% if user.can_change_statuses %}
 <div

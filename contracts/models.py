@@ -441,6 +441,7 @@ class ContractMonthTransfer(
         verbose_name="Fonte do Repasse",
         choices=TransferSource.choices,
         default=TransferSource.CITY_HALL,
+        max_length=255,
     )
     value = models.DecimalField(
         verbose_name="Valor do Repasse",

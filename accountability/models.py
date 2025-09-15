@@ -160,6 +160,7 @@ class Favored(BaseOrganizationTenantModel):
         blank=True,
         validators=[validate_cpf_cnpj],
         help_text="CPF ou CNPJ do favorecido",
+        max_length=255,
     )
 
     def __str__(self) -> str:
@@ -274,6 +275,7 @@ class ResourceSource(BaseOrganizationTenantModel):
         blank=True,
         validators=[validate_cpf_cnpj],
         help_text="CPF ou CNPJ da fonte de recursos",
+        max_length=255,
     )
     contract_number = models.CharField(
         verbose_name="Número do contrato",
@@ -623,6 +625,7 @@ class Revenue(BaseOrganizationTenantModel):
         verbose_name="Fonte de Recurso",
         choices=RevenueSource.choices,
         default=RevenueSource.CITY_HALL,
+        max_length=255,
     )
     bank_account = models.ForeignKey(
         BankAccount,

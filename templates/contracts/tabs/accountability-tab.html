@@ -52,7 +52,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-            {% for accountability in contract.accountabilities.all %}
+            {% for accountability in accountabilities.all %}
               <tr class="hover:bg-gray-50 transition-colors duration-150">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ accountability.month_label }} {{ accountability.year }}</div>

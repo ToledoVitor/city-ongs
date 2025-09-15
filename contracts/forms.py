@@ -299,8 +299,6 @@ class ContractDocumentForm(forms.ModelForm):
                 "pdf",
                 "doc",
                 "docx",
-                "xls",
-                "xlsx",
                 "jpg",
                 "jpeg",
                 "png",
