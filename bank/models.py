@@ -21,8 +21,8 @@ class BankAccount(BaseOrganizationTenantModel):
         PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
 
     class AccountTypeChoices(models.TextChoices):
-        CHECKING = "CHECKING", "conta corrente"
-        INVESTING = "INVESTING", "investimento"
+        CHECKING = "CHECKING", "Conta Corrente"
+        INVESTING = "INVESTING", "Investimento"
 
     bank_name = models.CharField(
         verbose_name="Nome do Banco",
