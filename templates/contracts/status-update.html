@@ -10,7 +10,6 @@
   Atualizar Status
 </p>
 
-<!-- Breadcrumb -->
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
   <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
     <li class="inline-flex items-center">
@@ -40,41 +39,54 @@
   </ol>
 </nav>
 
-<form method="post" class="max-w-lg mx-auto">
+<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-2xl mx-auto">
+  <form method="post">
     {% csrf_token %}
 
-    <span class="mb-6 text-lg"><b>Status Atual do Contrato:</b> {{ contract.status_label }}</span>
-
-    <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
-
-    <div class="my-3">
-      <label for="id_status" class="block mb-2 text-base font-medium text-black">Alterar Status para:</label>
-      {{ form.status }}
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-sm">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-blue-800 mb-1">Status Atual do Contrato</p>
+          <p class="text-lg font-bold text-blue-900">{{ contract.status_label }}</p>
+        </div>
+      </div>
     </div>
 
-    <button
-      type="submit"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        focus:outline-none
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-      "
-      style="display: flex; justify-self: center;"
-    >
-      Atualizar Status
-    </button>
-  
-</form>
+    <div class="bg-white border border-gray-300 rounded-lg p-6 mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        <label for="id_status" class="text-lg font-semibold text-gray-900">Alterar Status para:</label>
+      </div>
+      
+      <div class="relative">
+        {{ form.status }}
+      </div>
+    </div>
+
+    <div class="py-6">
+      <div class="flex justify-end items-center gap-4">
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
+          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+          </svg>
+          Voltar
+        </a>
+        <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
+          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Atualizar Status
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
 
 {% endblock %}
