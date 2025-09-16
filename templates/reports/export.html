@@ -2,6 +2,40 @@
 
 {% block title %}Relatórios - Portal SITTS{% endblock %}
 
+{% block customcss %}
+<style>
+  .form-select, .form-control, select, input[type="text"], input[type="number"] {
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+    appearance: none !important;
+  }
+  
+  .form-select:focus, .form-control:focus, select:focus, input:focus {
+    border-color: #3b82f6 !important;
+    ring: 2px solid #3b82f6 !important;
+    ring-opacity: 0.2 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+  
+  select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E") !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1rem 1rem !important;
+    padding-right: 2.5rem !important;
+  }
+  
+  .dropdown-icon {
+    display: none !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% load humanize %}
@@ -32,175 +66,196 @@
     </ol>
 </nav>
 
-<form method="post" target="download_iframe" class="max-w-lg mx-auto">
-    {% csrf_token %}
-  
-    <div class="mb-3">
-      <label class="block mb-2 text-base font-medium text-black">Escolher Contrato</label>
-      {{ form.contract }}
-    </div>
-  
-    <div class="mb-3">
-      <label class="block mb-2 text-base font-medium text-black">Modelo de Relatório</label>
-      {{ form.report_model }}
-    </div>
-
-    <hr class="h-px my-4 border-0 bg-gray-500">
-
-    <div class="mt-3">
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Mês de Início</label>
-          {{ form.start_month }}
-        </div>
+<div class="max-w-4xl mx-auto">
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+    <form method="post" target="download_iframe" class="space-y-8">
+      {% csrf_token %}
     
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Ano de Início</label>
-          {{ form.start_year }}
-        </div>
-      </div>
-    </div>
-    
-    <div class="mt-1">
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Mês de Término</label>
-          {{ form.end_month }}
-        </div>
-    
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Ano de Término</label>
-          {{ form.end_year }}
-        </div>
-      </div>
-    </div>
-
-    <hr class="h-px my-4 border-0 bg-gray-500">
-    <div class="mb-4">
-      <button type="button" id="toggle-responsibles" class="flex items-center w-full text-left mb-2" onclick="toggleResponsibles()">
-        <span class="text-base font-medium text-black">Demais Responsáveis</span>
-        <svg class="w-4 h-4 ml-2 transition-transform" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      
-      <div id="responsibles-container" class="hidden bg-gray-200 border border-gray-300 p-4 rounded-lg">
-        {% if form.responsible_formset %}
-          {{ form.responsible_formset.management_form }}
-          {% for responsible_form in form.responsible_formset %}
-            <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
-              <div class="grid gap-4">
-                <div>
-                  <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
-                  {{ responsible_form.user }}
-                </div>
-                <div>
-                  <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
-                  {{ responsible_form.interest }}
-                </div>
-              </div>
-              {% if forloop.counter > 1 %}
-                <button type="button" class="remove-responsible mt-2 text-red-600 hover:text-red-800">
-                  Remover Responsável
-                </button>
-              {% endif %}
+      <div class="space-y-6">
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Configurações Básicas
+          </h3>
+          
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">
+                Escolher Contrato
+                <span class="text-red-500">*</span>
+              </label>
+              {{ form.contract }}
             </div>
-          {% endfor %}
-        {% else %}
-          <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
-            <div class="grid gap-4">
-              <div>
-                <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
-                <select name="responsibles-0-user" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  <option value="">Selecione um usuário</option>
-                </select>
+            
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">
+                Modelo de Relatório
+                <span class="text-red-500">*</span>
+              </label>
+              {{ form.report_model }}
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 11-4 0 2 2 0 014 0zM3 21h18a2 2 0 002-2V9a2 2 0 00-2-2H3a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Período de Análise
+          </h3>
+          
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="space-y-4">
+              <h4 class="text-sm font-medium text-gray-600 border-b border-gray-300 pb-2">Data de Início</h4>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Mês</label>
+                  {{ form.start_month }}
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Ano</label>
+                  {{ form.start_year }}
+                </div>
               </div>
-              <div>
-                <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
-                <select name="responsibles-0-interest" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  <option value="">Selecione o tipo de responsabilidade</option>
-                </select>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="text-sm font-medium text-gray-600 border-b border-gray-300 pb-2">Data de Término</h4>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Mês</label>
+                  {{ form.end_month }}
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Ano</label>
+                  {{ form.end_year }}
+                </div>
               </div>
             </div>
           </div>
-        {% endif %}
-        <button type="button" id="add-responsible" class="mb-2 text-blue-600 hover:text-blue-800">
-          + Adicionar Responsável
-        </button>
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-        focus:outline-none
-      "
-      style="display: flex; justify-self: center;"
-    >
-      Exportar
-    </button>
-
-    {{ form.errors }}
-
-    {% if missing_banks %}
-      <div id="alert-bank" class="flex p-4 my-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert-bank">
-        <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-        </svg>
-        <span class="sr-only">Danger</span>
-        <div>
-            <span class="font-medium">Erro ao gerar relatório</span>
-            <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">
-                    O contrato escolhido ainda está em planejamento e/ou não tem contas bancárias cadastradas.
-                </li>
-            </ul>
         </div>
-    
-        <button
-          type="button"
-          class="
-            ms-auto
-            -mx-1.5
-            -my-1.5
-            bg-red-300
-            text-white
-            rounded-lg
-            focus:ring-2
-            focus:ring-white
-            hover:bg-red-500
-            p-1.5
-            inline-flex
-            items-center
-            justify-center
-            h-6
-            w-6
-          "
-          data-dismiss-target="#alert-bank"
-          aria-label="Close"
-        >
-            <span class="sr-only">Close</span>
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+          <button type="button" id="toggle-responsibles" class="flex items-center justify-between w-full text-left group hover:bg-gray-100 rounded-lg p-3 transition-colors duration-200" onclick="toggleResponsibles()">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+              <span class="text-lg font-semibold text-gray-900">Demais Responsáveis</span>
+              <span class="ml-2 text-sm text-gray-500">(Opcional)</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 group-hover:text-gray-600" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
-        </button>
-    
+          </button>
+          
+          <div id="responsibles-container" class="hidden mt-4 space-y-4">
+            {% if form.responsible_formset %}
+              {{ form.responsible_formset.management_form }}
+              {% for responsible_form in form.responsible_formset %}
+                <div class="responsible-form bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                  <div class="grid gap-4 md:grid-cols-2">
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700">Usuário</label>
+                      {{ responsible_form.user }}
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-gray-700">Tipo de Responsabilidade</label>
+                      {{ responsible_form.interest }}
+                    </div>
+                  </div>
+                  {% if forloop.counter > 1 %}
+                    <button type="button" class="remove-responsible mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors duration-200">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                      Remover Responsável
+                    </button>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="responsible-form bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Usuário</label>
+                    <select name="responsibles-0-user" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors duration-200">
+                      <option value="">Selecione um usuário</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Tipo de Responsabilidade</label>
+                    <select name="responsibles-0-interest" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors duration-200">
+                      <option value="">Selecione o tipo de responsabilidade</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            <button type="button" id="add-responsible" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Adicionar Responsável
+            </button>
+          </div>
+        </div>
       </div>
-    {% endif %}
-</form>
+
+      <div class="flex justify-center pt-6 border-t border-gray-200">
+        <button
+          type="submit"
+          class="inline-flex items-center px-8 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Exportar Relatório
+        </button>
+      </div>
+
+      {{ form.errors }}
+
+      {% if missing_banks %}
+        <div id="alert-bank" class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-semibold text-red-800">Erro ao gerar relatório</h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>O contrato escolhido ainda está em planejamento e/ou não tem contas bancárias cadastradas.</p>
+              </div>
+            </div>
+            <div class="ml-auto pl-3">
+              <div class="-mx-1.5 -my-1.5">
+                <button
+                  type="button"
+                  class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                  data-dismiss-target="#alert-bank"
+                  aria-label="Fechar"
+                >
+                  <span class="sr-only">Fechar</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
 
 {% block extra_js %}
 <script>
@@ -255,8 +310,10 @@ document.addEventListener("DOMContentLoaded", function() {
 function toggleResponsibles() {
   const container = document.getElementById("responsibles-container");
   const icon = document.getElementById("toggle-icon");
+  const isHidden = container.classList.contains("hidden");
+  
   container.classList.toggle("hidden");
-  icon.style.transform = container.classList.contains("hidden") ? "" : "rotate(180deg)";
+  icon.style.transform = isHidden ? "rotate(180deg)" : "";
 }
 </script>
 {% endblock %}
