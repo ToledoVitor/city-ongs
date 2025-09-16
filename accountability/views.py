@@ -1,6 +1,7 @@
 import logging
 import unicodedata
 from contracts.models import Contract
+from accounts.models import User
 from typing import Any
 from datetime import date
 from django.contrib.auth.decorators import login_required
@@ -926,17 +927,57 @@ def send_accountability_to_analisys_view(request, pk):
     if accountability.is_finished:
         return redirect("home")
 
-    with db_transaction.atomic():
-        _ = ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS,
-            target_object_id=accountability.id,
-            target_content_object=accountability,
+    if request.method == "GET":
+        user_org = request.user.organization
+        available_reviewers = User.objects.filter(
+            organization=user_org,
+            access_level=User.AccessChoices.FOLDER_MANAGER,
+            is_active=True
+        ).order_by("first_name", "last_name")
+
+        default_reviewer = accountability.contract.supervision_autority
+        context = {
+            "accountability": accountability,
+            "available_reviewers": available_reviewers,
+            "default_reviewer": default_reviewer,
+        }
+        return render(
+            request, "accountability/send_to_analysis.html", context
         )
-        accountability.status = Accountability.ReviewStatus.SENT
-        accountability.save()
-        return redirect("accountability:accountability-detail", pk=accountability.id)
+
+    if request.method == "POST":
+        reviewer_id = request.POST.get("reviewer")
+        if not reviewer_id:
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
+        try:
+            selected_reviewer = User.objects.get(
+                id=reviewer_id,
+                organization=request.user.organization,
+                access_level=User.AccessChoices.FOLDER_MANAGER,
+                is_active=True
+            )
+        except Exception:
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
+        with db_transaction.atomic():
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS,
+                target_object_id=accountability.id,
+                target_content_object=accountability,
+            )
+            accountability.status = Accountability.ReviewStatus.SENT
+            accountability.reviewer = selected_reviewer
+            accountability.save()
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
 
 
 def send_accountability_review_analisys(request, pk):

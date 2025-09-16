@@ -50,6 +50,14 @@ class Accountability(
         default=ReviewStatus.WIP,
         max_length=22,
     )
+    reviewer = models.ForeignKey(
+        User,
+        verbose_name="Responsável pela Análise",
+        related_name="accountability_reviews",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     history = HistoricalRecords()
 

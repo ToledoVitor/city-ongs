@@ -177,10 +177,8 @@
 
     <div class="flex flex-wrap gap-3">
       {% if accountability.is_on_execution %}
-        <button
-          type="button"
-          data-modal-target="send-to-review-modal"
-          data-modal-toggle="send-to-review-modal"
+        <a
+          href="{% url 'accountability:send-to-analisys' accountability.id %}"
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -188,7 +186,7 @@
             <path fill-rule="evenodd" d="M5 3a2 2 0 0 0-2 2v6h6V9a3 3 0 0 1 3-3h8c.35 0 .687.06 1 .17V5a2 2 0 0 0-2-2H5Zm4 10H3v2a2 2 0 0 0 2 2h4v-4Z" clip-rule="evenodd"/>
           </svg>
           Enviar para Análise
-        </button>
+        </a>
         
         <a href="{% url 'accountability:accountability-import' accountability.id %}">
           <button
