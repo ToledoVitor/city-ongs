@@ -363,164 +363,242 @@
   tabindex="-1"
   data-modal-backdrop="static"
   aria-hidden="true"
-  class="
-    hidden
-    overflow-y-auto
-    overflow-x-hidden
-    fixed
-    top-0
-    right-0
-    left-0
-    z-50
-    justify-center
-    items-center
-    w-full
-    md:inset-0
-    h-[calc(100%-1rem)]
-    max-h-full
-  "
-  >
-  <div class="relative p-4 w-full max-w-md max-h-full">
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900 bg-opacity-50"
+>
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
     <!-- Modal content -->
-    <div class="relative rounded-lg shadow bg-gray-300">
+    <div class="relative bg-white rounded-xl shadow-2xl transform transition-all duration-300">
       <!-- Modal header -->
-        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-            <h3 class="text-xl font-semibold text-black">
-                Emitir análise?
+      <div class="flex items-center justify-between p-6 border-b border-gray-200 rounded-t-xl bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900">
+              Análise da Prestação
             </h3>
-            <button
-              type="button"
-              data-modal-hide="send-review-analisys"
-              class="
-                end-2.5
-                text-black
-                hover:bg-gray-600
-                hover:text-black
-                bg-transparent
-                rounded-lg
-                text-sm
-                w-6
-                h-6
-                ms-auto
-                inline-flex
-                justify-center
-                items-center
-              "
-            >
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            <p class="text-sm text-gray-600 mt-1">
+              Defina o status e adicione observações se necessário
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          data-modal-hide="send-review-analisys"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
+        >
+          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">Fechar modal</span>
+        </button>
+      </div>
+      
+      <!-- Modal body -->
+      <div class="p-6 space-y-6">
+        <form id="review-form" class="space-y-6" method="post" action="{% url 'accountability:send-review-analisys' accountability.id %}">
+          {% csrf_token %}
+          
+          <!-- Status Selection -->
+          <div class="space-y-3">
+            <label for="review_status" class="block text-sm font-medium text-gray-700">
+              Status da Análise *
+            </label>
+            <div class="relative">
+              <select
+                id="review_status"
+                name="review_status"
+                class="block w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-colors duration-200"
+                required
+              >
+                <option value="" disabled selected>Selecione o status da análise</option>
+                <option value="CORRECTING" class="text-orange-600">
+                  Solicitar Correções
+                </option>
+                <option value="FINISHED" class="text-green-600">
+                  Aprovar Prestação
+                </option>
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
-                <span class="sr-only">Fechar modal</span>
-            </button>
-        </div>
-        <!-- Modal body -->
-        <div class="p-4 md:p-5">
-            <form class="space-y-4"  method="post" action="{% url 'accountability:send-review-analisys' accountability.id %}">
-                <select
-                  id="review_status"
-                  name="review_status"
-                  class="
-                    border
-                    text-sm
-                    rounded-lg
-                    block
-                    w-full p-2.5
-                    bg-gray-300
-                    border-gray-600
-                    text-black
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                  "
-                  required
-                >
-                  <option selected value="">Status</option>
-                  <option value="CORRECTING">Corrigir</option>
-                  <option value="FINISHED">Finalizada / Aprovada</option>
-                </select>
+              </div>
+            </div>
+          </div>
 
-                <div class="mb-3">
-                  <label for="review_pendencies">Pendências:</label>
-                  <textarea
-                    id="review_pendencies"
-                    name="review_pendencies"
-                    rows="4"
-                    maxlength="254"
-                    class="
-                        block
-                        p-2.5
-                        mt-2
-                        w-full
-                        text-sm
-                        text-gray-900
-                        bg-gray-300
-                        border-gray-600
-                        rounded-lg
-                        border
-                        focus:ring-blue-500
-                        focus:border-blue-500
-                    "
-                    placeholder="Motivo ..."
-                  ></textarea>
-                  <p id="helper-text-explanation" class="mt-2 text-sm text-black">
-                    Caso rejeite a prestação, escreva aqui a razão
-                  </p>
-                </div>
-              
+          <!-- Comments/Pendencies -->
+          <div class="space-y-3">
+            <label for="review_pendencies" class="block text-sm font-medium text-gray-700">
+              Observações e Pendências
+            </label>
+            <div class="relative">
+              <textarea
+                id="review_pendencies"
+                name="review_pendencies"
+                rows="4"
+                maxlength="254"
+                class="block w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500 transition-colors duration-200 resize-none"
+                placeholder="Descreva as pendências, correções necessárias ou observações sobre a prestação..."
+              ></textarea>
+              <div class="absolute bottom-3 right-3 text-xs text-gray-400">
+                <span id="char-count">0</span>/254
+              </div>
+            </div>
+            <div class="flex items-start space-x-2 text-sm text-gray-600">
+              <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p>
+                <strong>Correções:</strong> Descreva detalhadamente os pontos que precisam ser corrigidos.
                 <br>
+                <strong>Aprovação:</strong> Adicione observações finais se desejar.
+              </p>
+            </div>
+          </div>
 
-                <span class="py-10 my-10 text-base">
-                  Se a prestação for aprovada ela não poderá mais ser alterada.
-                </span>
+          <!-- Warning Alert -->
+          <div id="approval-warning" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-amber-800">Atenção - Ação Irreversível</h4>
+                <p class="mt-1 text-sm text-amber-700">
+                  Ao aprovar esta prestação, ela não poderá mais ser alterada ou editada. Certifique-se de que todos os dados estão corretos.
+                </p>
+              </div>
+            </div>
+          </div>
 
-                <div class="grid gap-6 my-6 md:grid-cols-2">
-                  <button
-                    type="button"
-                    data-modal-hide="send-review-analisys"
-                    class="
-                      w-full
-                      text-white
-                      bg-gray-700
-                      hover:bg-gray-800
-                      focus:ring-4
-                      focus:outline-none
-                      focus:ring-gray-300
-                      font-medium rounded-lg
-                      text-sm
-                      px-5
-                      py-2.5
-                      text-center
-                    "
-                  >
-                      Cancelar
-                  </button>
-                  <button
-                      type="submit"
-                      class="
-                        w-full
-                        text-white
-                        bg-blue-700
-                        hover:bg-blue-800
-                        focus:ring-4
-                        focus:outline-none
-                        focus:ring-blue-300
-                        font-medium rounded-lg
-                        text-sm
-                        px-5
-                        py-2.5
-                        text-center
-                      "
-                  >
-                      Emitir
-                  </button>
-                </div>
+          <div id="correction-info" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-blue-800">Solicitação de Correções</h4>
+                <p class="mt-1 text-sm text-blue-700">
+                  A prestação retornará ao status "Em Correção" e o responsável será notificado sobre as pendências identificadas.
+                </p>
+              </div>
+            </div>
+          </div>
 
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                <input type="hidden" name="expense_id" value="{{ expense.id }}">
-            </form>
-        </div>
+          <input type="hidden" name="expense_id" value="{{ expense.id }}">
+        </form>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+        <button
+          type="button"
+          data-modal-hide="send-review-analisys"
+          class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 focus:outline-none transition-all duration-200"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          form="review-form"
+          id="submit-review"
+          disabled
+          class="inline-flex items-center px-6 py-2.5 text-sm font-medium text-white bg-gray-400 rounded-lg cursor-not-allowed transition-all duration-200"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span id="submit-text">Selecione um Status</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const statusSelect = document.getElementById("review_status");
+  const pendenciesTextarea = document.getElementById("review_pendencies");
+  const submitButton = document.getElementById("submit-review");
+  const submitText = document.getElementById("submit-text");
+  const approvalWarning = document.getElementById("approval-warning");
+  const correctionInfo = document.getElementById("correction-info");
+  const charCount = document.getElementById("char-count");
+
+  pendenciesTextarea.addEventListener("input", function() {
+    const count = this.value.length;
+    charCount.textContent = count;
+    
+    if (count > 200) {
+      charCount.classList.add("text-red-500");
+      charCount.classList.remove("text-gray-400");
+    } else {
+      charCount.classList.add("text-gray-400");
+      charCount.classList.remove("text-red-500");
+    }
+  });
+
+  statusSelect.addEventListener("change", function() {
+    const selectedValue = this.value;
+    
+    approvalWarning.classList.add("hidden");
+    correctionInfo.classList.add("hidden");
+    
+    if (selectedValue) {
+      submitButton.disabled = false;
+      submitButton.classList.remove("bg-gray-400", "cursor-not-allowed");
+      
+      if (selectedValue === "FINISHED") {
+        approvalWarning.classList.remove("hidden");
+        submitButton.classList.add("bg-green-600", "hover:bg-green-700", "focus:ring-green-500");
+        submitButton.classList.remove("bg-blue-600", "hover:bg-blue-700", "focus:ring-blue-500");
+        submitText.textContent = "Aprovar Prestação";
+      } else if (selectedValue === "CORRECTING") {
+        correctionInfo.classList.remove("hidden");
+        submitButton.classList.add("bg-orange-600", "hover:bg-orange-700", "focus:ring-orange-500");
+        submitButton.classList.remove("bg-green-600", "hover:bg-green-700", "focus:ring-green-500");
+        submitText.textContent = "Solicitar Correções";
+      }
+    } else {
+      submitButton.disabled = true;
+      submitButton.classList.add("bg-gray-400", "cursor-not-allowed");
+      submitButton.classList.remove("bg-green-600", "hover:bg-green-700", "focus:ring-green-500", "bg-orange-600", "hover:bg-orange-700", "focus:ring-orange-500");
+      submitText.textContent = "Selecione um Status";
+    }
+  });
+
+  document.getElementById("review-form").addEventListener("submit", function(e) {
+    const status = statusSelect.value;
+    const pendencies = pendenciesTextarea.value.trim();
+    
+    if (status === "CORRECTING" && !pendencies) {
+      e.preventDefault();
+      alert("Por favor, descreva as pendências que precisam ser corrigidas.");
+      pendenciesTextarea.focus();
+      return false;
+    }
+    
+    if (status === "FINISHED") {
+      const confirmed = confirm("Tem certeza que deseja aprovar esta prestação? Esta ação não pode ser desfeita.");
+      if (!confirmed) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  });
+});
+</script>
 {% endif %}
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
