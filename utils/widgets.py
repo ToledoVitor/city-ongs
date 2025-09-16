@@ -15,18 +15,22 @@ class BaseCharFieldFormWidget(forms.TextInput):
             {
                 "class": " ".join(
                     [
-                        "w-full",
-                        "p-2.5",
                         "block",
+                        "w-full",
+                        "px-3",
+                        "py-2.5",
                         "text-sm",
+                        "text-gray-900",
+                        "bg-gray-200",
                         "border",
+                        "border-gray-300",
                         "rounded-lg",
-                        "placeholder-gray-600",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "text-black",
+                        "placeholder-gray-400",
+                        "focus:ring-2",
                         "focus:ring-blue-500",
                         "focus:border-blue-500",
+                        "transition-colors",
+                        "duration-200",
                     ]
                 ),
                 "required": required,
@@ -47,18 +51,22 @@ class BaseNumberFormWidget(forms.NumberInput):
             {
                 "class": " ".join(
                     [
-                        "w-full",
-                        "p-2.5",
                         "block",
+                        "w-full",
+                        "px-3",
+                        "py-2.5",
                         "text-sm",
+                        "text-gray-900",
+                        "bg-gray-200",
                         "border",
+                        "border-gray-300",
                         "rounded-lg",
-                        "placeholder-gray-600",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "text-black",
+                        "placeholder-gray-400",
+                        "focus:ring-2",
                         "focus:ring-blue-500",
                         "focus:border-blue-500",
+                        "transition-colors",
+                        "duration-200",
                     ]
                 ),
                 "required": required,
@@ -71,24 +79,30 @@ class BaseNumberFormWidget(forms.NumberInput):
 
 
 class BaseTextAreaFormWidget(forms.Textarea):
-    def __init__(self, *args, placeholder=None, required=True, rows=3, **kwargs):
+    def __init__(
+        self, *args, placeholder=None, required=True, rows=3, **kwargs
+    ):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(
                     [
-                        "w-full",
-                        "p-2.5",
                         "block",
+                        "w-full",
+                        "px-3",
+                        "py-2.5",
                         "text-sm",
+                        "text-gray-900",
+                        "bg-gray-200",
                         "border",
+                        "border-gray-300",
                         "rounded-lg",
-                        "border",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "placeholder-gray-600",
-                        "text-black",
+                        "placeholder-gray-400",
+                        "focus:ring-2",
                         "focus:ring-blue-500",
                         "focus:border-blue-500",
+                        "transition-colors",
+                        "duration-200",
+                        "resize-vertical",
                     ]
                 ),
                 "rows": rows,
@@ -107,18 +121,21 @@ class BaseSelectFormWidget(forms.Select):
             {
                 "class": " ".join(
                     [
-                        "w-full",
-                        "p-2.5",
                         "block",
+                        "w-full",
+                        "px-3",
+                        "py-2.5",
                         "text-sm",
+                        "text-gray-900",
+                        "bg-gray-200",
                         "border",
+                        "border-gray-300",
                         "rounded-lg",
-                        "placeholder-gray-600",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "text-black",
+                        "focus:ring-2",
                         "focus:ring-blue-500",
                         "focus:border-blue-500",
+                        "transition-colors",
+                        "duration-200",
                     ]
                 ),
                 "required": required,
@@ -142,7 +159,7 @@ class BaseEmailFormWidget(forms.EmailInput):
                         "block",
                         "w-full",
                         "p-2.5",
-                        "bg-gray-300",
+                        "bg-gray-200",
                         "border-gray-600",
                         "placeholder-gray-600",
                         "text-black",
@@ -165,8 +182,9 @@ class BaseFileFormWidget(forms.FileInput):
             {
                 "class": " ".join(
                     [
-                        "block w-full text-sm text-gray-900 border border-gray-600",
-                        "rounded-lg cursor-pointer bg-gray-300 focus:outline-none",
+                        "block w-full text-sm text-gray-900 border",
+                        "border-gray-600 rounded-lg cursor-pointer",
+                        "bg-gray-300 focus:outline-none",
                     ]
                 ),
                 "required": required,

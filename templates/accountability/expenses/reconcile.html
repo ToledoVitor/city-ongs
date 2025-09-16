@@ -231,7 +231,7 @@
                             <p class="mb-4 text-base text-gray-500">Selecione as despesas não pagas relacionadas:</p>
                             <div class="max-h-60 overflow-y-auto mb-4">
                                 {% for expense_item in unpaid_expenses %}
-                                    <div class="flex items-center mb-2 transaction-item" onclick="toggleModalCheckbox('expense-{{ expense_item.id }}')">
+                                    <div class="flex items-center mb-2 transaction-item" onclick="toggleModalCheckbox('expense-{{ expense_item.id }}', event)">
                                         <input id="expense-{{ expense_item.id }}" name="related_expenses" type="checkbox" value="{{ expense_item.id }}" class="modal-checkbox transaction-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                         <label for="expense-{{ expense_item.id }}" class="ml-2 text-sm font-medium text-gray-900 cursor-pointer">
                                             {{ expense_item.identification }} - {{ expense_item.favored.name }}R${{ expense_item.value|intcomma }}
@@ -378,7 +378,10 @@
 </form>
 
 <script>
-function toggleModalCheckbox(checkboxId) {
+function toggleModalCheckbox(checkboxId, event) {
+    if (event && event.target.type === 'checkbox') {
+        return;
+    }
     const checkbox = document.getElementById(checkboxId);
     checkbox.checked = !checkbox.checked;
     updateSelectedCount();
@@ -445,9 +448,23 @@ function setupTransactionInteractions() {
             checkbox.className += ' w-4 h-4 mr-2';
             
             div.addEventListener('click', function(e) {
+                if (e.target === checkbox) {
+                    return;
+                }
                 e.preventDefault();
                 e.stopPropagation();
                 checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
+                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
+                } else {
+                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
+                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
+                }
+                updateSelectedTransactions();
+            });
+            
+            checkbox.addEventListener('change', function(e) {
                 if (checkbox.checked) {
                     div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
                     div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');

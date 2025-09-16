@@ -329,9 +329,23 @@ function setupTransactionInteractions() {
             checkbox.className += ' w-4 h-4 mr-2';
             
             div.addEventListener('click', function(e) {
+                if (e.target === checkbox) {
+                    return;
+                }
                 e.preventDefault();
                 e.stopPropagation();
                 checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
+                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
+                } else {
+                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
+                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
+                }
+                updateSelectedTransactions();
+            });
+            
+            checkbox.addEventListener('change', function(e) {
                 if (checkbox.checked) {
                     div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
                     div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
