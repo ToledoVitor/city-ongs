@@ -928,22 +928,7 @@ def send_accountability_to_analisys_view(request, pk):
         return redirect("home")
 
     if request.method == "GET":
-        user_org = request.user.organization
-        available_reviewers = User.objects.filter(
-            organization=user_org,
-            access_level=User.AccessChoices.FOLDER_MANAGER,
-            is_active=True
-        ).order_by("first_name", "last_name")
-
-        default_reviewer = accountability.contract.supervision_autority
-        context = {
-            "accountability": accountability,
-            "available_reviewers": available_reviewers,
-            "default_reviewer": default_reviewer,
-        }
-        return render(
-            request, "accountability/send_to_analysis.html", context
-        )
+        return redirect("accountability:accountability-detail", pk=accountability.id)
 
     if request.method == "POST":
         reviewer_id = request.POST.get("reviewer")
@@ -978,6 +963,37 @@ def send_accountability_to_analisys_view(request, pk):
             return redirect(
                 "accountability:accountability-detail", pk=accountability.id
             )
+
+
+@login_required
+def get_available_reviewers_view(request, pk):
+    """API endpoint to get available reviewers for accountability analysis"""
+    from django.http import JsonResponse
+    
+    accountability = get_object_or_404(Accountability, id=pk)
+    user_org = request.user.organization
+    
+    available_reviewers = User.objects.filter(
+        organization=user_org,
+        access_level=User.AccessChoices.FOLDER_MANAGER,
+        is_active=True
+    ).order_by("first_name", "last_name")
+    
+    default_reviewer = accountability.contract.supervision_autority
+    
+    reviewers_data = []
+    for reviewer in available_reviewers:
+        reviewers_data.append({
+            "id": str(reviewer.id),
+            "name": reviewer.get_full_name(),
+            "email": reviewer.email,
+            "is_default": reviewer == default_reviewer
+        })
+    
+    return JsonResponse({
+        "reviewers": reviewers_data,
+        "default_reviewer": str(default_reviewer.id) if default_reviewer else None
+    })
 
 
 def send_accountability_review_analisys(request, pk):

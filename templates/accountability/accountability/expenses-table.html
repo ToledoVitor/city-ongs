@@ -36,9 +36,13 @@
                         <a href="{% url 'accountability:expense-reconcile' expense.id %}">
                           <button
                             type="button"
-                            class="text-white mt-2 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-2.5 py-1 inline-flex items-center"
+                            class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200"
+                            title="Conciliar despesa"
                           >
-                            conciliar
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Conciliar
                           </button>
                         </a>
                       {% elif accountability.is_on_execution and expense.conciled %}
@@ -46,9 +50,13 @@
                           type="button"
                           data-modal-target="expenses-unreconcile-{{ expense.id}}"
                           data-modal-toggle="expenses-unreconcile-{{ expense.id}}"
-                          class="text-white mt-2 bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-lg text-xs px-2.5 py-1 inline-flex items-center"
+                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors duration-200"
+                          title="Desfazer conciliação"
                         >
-                          desconciliar
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                          Desconciliar
                         </button>
                       {% endif %}
                     </th>
@@ -58,43 +66,47 @@
                         type="button"
                         data-modal-target="exp-documents-modal-{{ expense.id}}"
                         data-modal-toggle="exp-documents-modal-{{ expense.id}}"
-                        class="text-white mt-2 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-2.5 py-1 inline-flex items-center"
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200 mt-1"
+                        title="Ver arquivos anexados"
                       >
-                        {{ expense.count_files }} arquivos
-                        <svg class="ml-2 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" d="M3 6a2 2 0 0 1 2-2h5.532a2 2 0 0 1 1.536.72l1.9 2.28H3V6Zm0 3v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H3Z" clip-rule="evenodd"/>
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                         </svg>
+                        {{ expense.count_files }}
+                        {% if expense.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
                       </button>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-900">
-                      <p class="text-sm">
-                        <span class="inline-flex items-center">
+                      <div class="flex flex-col gap-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                          {% if expense.paid %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
                           {% if expense.paid %}
-                            <svg class="w-4 h-4 text-green-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
+                            Paga
                           {% else %}
-                            <svg class="w-4 h-4 text-red-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"/>
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
+                            Não Paga
                           {% endif %}
-                          Paga
                         </span>
-                      </p>
-                      <p class="text-sm mt-2">
-                        <span class="inline-flex items-center">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                          {% if expense.conciled %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
                           {% if expense.conciled %}
-                            <svg class="w-4 h-4 text-green-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
+                            Conciliada
                           {% else %}
-                            <svg class="w-4 h-4 text-red-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"/>
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
+                            Pendente
                           {% endif %}
-                          Conciliada
                         </span>
-                      </p>
+                      </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-900">
                       <p class="text-sm">
@@ -117,34 +129,35 @@
                           type="button"
                           data-modal-target="expenses-gloss-{{ expense.id}}"
                           data-modal-toggle="expenses-gloss-{{ expense.id}}"
-                          class="
-                            text-white
-                            mt-2
-                            bg-blue-600
-                            hover:bg-blue-700
-                            focus:ring-4
-                            focus:outline-none
-                            focus:ring-blue-800
-                            font-medium
-                            rounded-lg
-                            text-xs
-                            px-2.5
-                            py-1
-                            inline-flex
-                            items-center
-                            justify-center
-                          "
+                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 hover:text-orange-800 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-colors duration-200 mt-2 w-fit"
+                          title="Adicionar glosa"
                         >
-                          glosar
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Glosar
                         </button>
                       {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                      <span class="px-2.5 py-0.5 rounded-full text-xs font-medium 
-                        {% if expense.is_approved %}bg-green-100 text-green-800
-                        {% elif expense.is_rejected %}bg-red-100 text-red-800
-                        {% else %}bg-yellow-100 text-yellow-800{% endif %}
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                      <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border w-fit
+                        {% if expense.is_approved %}bg-green-100 text-green-700 border-green-200
+                        {% elif expense.is_rejected %}bg-red-100 text-red-700 border-red-200
+                        {% else %}bg-orange-100 text-orange-700 border-orange-200{% endif %}
                       ">
+                        {% if expense.is_approved %}
+                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        {% elif expense.is_rejected %}
+                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        {% else %}
+                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                        {% endif %}
                         {{ expense.status_label }}
                       </span>
                       {% if expense.is_rejected %}
@@ -152,9 +165,13 @@
                           type="button"
                           data-modal-target="expenses-errors-{{ expense.id}}"
                           data-modal-toggle="expenses-errors-{{ expense.id}}"
-                          class="text-white mt-2 bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-lg text-xs px-2.5 py-1 inline-flex items-center"
+                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors duration-200 mt-2 w-fit"
+                          title="Ver pendências"
                         >
-                          pendência
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                          </svg>
+                          Ver Pendências
                         </button>
 
                         <div

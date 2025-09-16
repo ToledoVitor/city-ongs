@@ -23,6 +23,7 @@ from accountability.views import (
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
+    get_available_reviewers_view,
     gloss_accountability_expense_view,
     import_accountability_view,
     reconcile_expense_view,
@@ -74,6 +75,11 @@ urlpatterns = [
         "detail/<uuid:pk>/send-to-analisys",
         send_accountability_to_analisys_view,
         name="send-to-analisys",
+    ),
+    path(
+        "detail/<uuid:pk>/get-available-reviewers",
+        get_available_reviewers_view,
+        name="get-available-reviewers",
     ),
     path(
         "detail/<uuid:pk>/send-review-analisys",
