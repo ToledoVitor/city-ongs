@@ -98,11 +98,11 @@
                   </td>
 
                   <td class="px-6 py-4">
-                    <div class="text-sm font-semibold text-gray-900">{{ goal.name }}</div>
+                    <div class="text-sm font-semibold text-gray-900 truncate max-w-xs" title="{{ goal.name }}">{{ goal.name }}</div>
                   </td>
 
                   <td class="px-6 py-4">
-                    <div class="text-sm text-gray-700 max-w-md">{{ goal.objective }}</div>
+                    <div class="text-sm text-gray-700 truncate max-w-md" title="{{ goal.objective }}">{{ goal.objective }}</div>
                   </td>
 
                   <td class="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
@@ -161,10 +161,10 @@
                     {% if goal.steps.count %}
                       {% for step in goal.steps.all %}
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 pb-3">
-                          <p><strong>Etapa:</strong> {{ step.name }}</p>
-                          <p><strong>Objetivo:</strong> {{ step.objective }}</p>
-                          <p><strong>Metodologia:</strong> {{ step.methodology }}</p>
-                          <p><strong>Recursos:</strong> {{ step.resources|default:"n/a" }}</p>
+                          <p><strong>Etapa:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.name }}">{{ step.name }}</span></p>
+                          <p><strong>Objetivo:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.objective }}">{{ step.objective }}</span></p>
+                          <p><strong>Metodologia:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.methodology }}">{{ step.methodology }}</span></p>
+                          <p><strong>Recursos:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.resources|default:'n/a' }}">{{ step.resources|default:"n/a" }}</span></p>
                         </div>
 
                         <hr class="h-px mb-3 border-0 bg-gray-500">
@@ -305,7 +305,7 @@
                                               <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
@@ -320,7 +320,7 @@
                                                 <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
