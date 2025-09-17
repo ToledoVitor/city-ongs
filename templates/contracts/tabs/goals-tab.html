@@ -164,7 +164,7 @@
                           <p><strong>Etapa:</strong> {{ step.name }}</p>
                           <p><strong>Objetivo:</strong> {{ step.objective }}</p>
                           <p><strong>Metodologia:</strong> {{ step.methodology }}</p>
-                          <p><strong>Recursos:</strong> {{ step.resources }}</p>
+                          <p><strong>Recursos:</strong> {{ step.resources|default:"n/a" }}</p>
                         </div>
 
                         <hr class="h-px mb-3 border-0 bg-gray-500">

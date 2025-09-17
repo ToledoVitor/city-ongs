@@ -553,15 +553,15 @@ class ContractGoal(
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=512,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=512,
     )
     observations = models.CharField(
         verbose_name="Observações",
-        max_length=256,
+        max_length=512,
         null=True,
         blank=True,
     )
@@ -608,7 +608,7 @@ class ContractGoalReview(BaseOrganizationTenantModel):
     )
     comment = models.CharField(
         verbose_name="Comentário",
-        max_length=255,
+        max_length=512,
     )
 
     class Meta:
@@ -629,15 +629,17 @@ class ContractStep(BaseOrganizationTenantModel):
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=512,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=512,
     )
     resources = models.CharField(
         verbose_name="Recursos",
-        max_length=256,
+        max_length=512,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -680,17 +682,17 @@ class ContractItem(BaseOrganizationTenantModel):
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=512,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=512,
         null=True,
         blank=True,
     )
     observations = models.CharField(
         verbose_name="Observações",
-        max_length=256,
+        max_length=512,
         null=True,
         blank=True,
     )

@@ -222,7 +222,7 @@ class ContractStepForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
-            "resources": BaseTextAreaFormWidget(),
+            "resources": BaseTextAreaFormWidget(required=False),
         }
 
 

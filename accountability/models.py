@@ -39,7 +39,7 @@ class Accountability(
     )
     pendencies = models.CharField(
         verbose_name="Pendências",
-        max_length=255,
+        max_length=512,
         null=True,
         blank=True,
     )
@@ -420,7 +420,7 @@ class Expense(BaseOrganizationTenantModel):
     )
     observations = models.CharField(
         verbose_name="Observações",
-        max_length=256,
+        max_length=512,
         null=True,
         blank=True,
     )
