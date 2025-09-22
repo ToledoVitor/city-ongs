@@ -67,8 +67,10 @@ class AdditionalResponsibleFormSet(
         ContractInterestedPart,
         form=AdditionalResponsibleForm,
         extra=1,
-        can_delete=False,
+        can_delete=True,
         min_num=0,
+        validate_min=False,
+        max_num=6,
     )
 ):
     def __init__(self, *args, **kwargs):
@@ -96,7 +98,9 @@ class ReportForm(forms.Form):
         (11, "Novembro"),
         (12, "Dezembro"),
     ]
-    YEAR_CHOICES = [(year, year) for year in range(2020, datetime.now().year + 1)]
+    YEAR_CHOICES = [
+        (year, year) for year in range(2020, datetime.now().year + 1)
+    ]
 
     start_month = forms.ChoiceField(
         choices=MONTH_CHOICES,
@@ -146,9 +150,16 @@ class ReportForm(forms.Form):
         self.responsible_formset = None
 
     def get_responsible_formset(self, contract=None):
-        if contract and not self.responsible_formset:
+        if contract:
             self.responsible_formset = AdditionalResponsibleFormSet(
                 instance=contract,
+                data=self.data if self.is_bound else None,
+                prefix="responsibles",
+                request=self.request,
+            )
+        elif not self.responsible_formset:
+            # Create formset without instance for truly empty forms
+            self.responsible_formset = AdditionalResponsibleFormSet(
                 data=self.data if self.is_bound else None,
                 prefix="responsibles",
                 request=self.request,
@@ -178,10 +189,10 @@ class ReportForm(forms.Form):
         cleaned_data["start_date"] = start_date
         cleaned_data["end_date"] = end_date
 
-        if "contract" in cleaned_data:
-            contract = cleaned_data["contract"]
-            formset = self.get_responsible_formset(contract)
-            if formset and formset.is_bound and not formset.is_valid():
-                self.add_error(None, "Erro nos dados dos responsáveis")
+        # if "contract" in cleaned_data:
+        #     contract = cleaned_data["contract"]
+        #     formset = self.get_responsible_formset(contract)
+        #     if formset and formset.is_bound and not formset.is_valid():
+        #         self.add_error(None, "Erro nos dados dos responsáveis")
 
         return cleaned_data
