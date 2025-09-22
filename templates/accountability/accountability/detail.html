@@ -462,6 +462,36 @@
             </div>
           </div>
 
+          <!-- Committee Member Selection -->
+          <div id="committee-member-section" class="hidden space-y-3">
+            <label for="committee_member" class="block text-sm font-medium text-gray-700">
+              Membro do Comitê para Notificação *
+            </label>
+            <div class="relative">
+              <select
+                id="committee_member"
+                name="committee_member"
+                class="block w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white text-gray-900 transition-colors duration-200"
+              >
+                <option value="" disabled selected>Selecione o membro do comitê</option>
+                <!-- Options will be loaded dynamically -->
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-start space-x-2 text-sm text-gray-600">
+              <svg class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p>
+                Este membro do comitê será notificado quando a prestação for aprovada e poderá visualizá-la no sistema.
+              </p>
+            </div>
+          </div>
+
           <!-- Warning Alert -->
           <div id="approval-warning" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <div class="flex items-start space-x-3">
@@ -537,6 +567,33 @@ document.addEventListener("DOMContentLoaded", function() {
   const approvalWarning = document.getElementById("approval-warning");
   const correctionInfo = document.getElementById("correction-info");
   const charCount = document.getElementById("char-count");
+  const committeeMemberSection = document.getElementById("committee-member-section");
+  const committeeMemberSelect = document.getElementById("committee_member");
+
+  function loadCommitteeMembers() {
+    committeeMemberSelect.innerHTML = '<option value="" disabled selected>Carregando...</option>';
+    
+    fetch(`/accounts/get-committee-members/`)
+      .then(response => response.json())
+      .then(data => {
+        committeeMemberSelect.innerHTML = '<option value="" disabled selected>Selecione o membro do comitê</option>';
+        
+        if (data.members && data.members.length > 0) {
+          data.members.forEach(member => {
+            const option = document.createElement('option');
+            option.value = member.id;
+            option.textContent = member.name;
+            committeeMemberSelect.appendChild(option);
+          });
+        } else {
+          committeeMemberSelect.innerHTML = '<option value="" disabled>Nenhum membro do comitê disponível</option>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading committee members:', error);
+        committeeMemberSelect.innerHTML = '<option value="" disabled>Erro ao carregar membros</option>';
+      });
+  }
 
   pendenciesTextarea.addEventListener("input", function() {
     const count = this.value.length;
@@ -556,6 +613,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     approvalWarning.classList.add("hidden");
     correctionInfo.classList.add("hidden");
+    committeeMemberSection.classList.add("hidden");
     
     if (selectedValue) {
       submitButton.disabled = false;
@@ -563,6 +621,8 @@ document.addEventListener("DOMContentLoaded", function() {
       
       if (selectedValue === "FINISHED") {
         approvalWarning.classList.remove("hidden");
+        committeeMemberSection.classList.remove("hidden");
+        loadCommitteeMembers();
         submitButton.classList.add("bg-green-600", "hover:bg-green-700", "focus:ring-green-500");
         submitButton.classList.remove("bg-blue-600", "hover:bg-blue-700", "focus:ring-blue-500");
         submitText.textContent = "Aprovar Prestação";
@@ -583,6 +643,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("review-form").addEventListener("submit", function(e) {
     const status = statusSelect.value;
     const pendencies = pendenciesTextarea.value.trim();
+    const committeeMember = committeeMemberSelect.value;
     
     if (status === "CORRECTING" && !pendencies) {
       e.preventDefault();
@@ -592,6 +653,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     if (status === "FINISHED") {
+      if (!committeeMember) {
+        e.preventDefault();
+        alert("Por favor, selecione um membro do comitê para notificação.");
+        committeeMemberSelect.focus();
+        return false;
+      }
+      
       const confirmed = confirm("Tem certeza que deseja aprovar esta prestação? Esta ação não pode ser desfeita.");
       if (!confirmed) {
         e.preventDefault();

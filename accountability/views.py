@@ -1007,11 +1007,25 @@ def send_accountability_review_analisys(request, pk):
     with db_transaction.atomic():
         review_status = request.POST.get("review_status")
         review_pendencies = request.POST.get("review_pendencies")
+        committee_member_id = request.POST.get("committee_member")
 
         if review_status == Accountability.ReviewStatus.CORRECTING:
             action = ActivityLog.ActivityLogChoices.SENT_TO_CORRECT
         elif review_status == Accountability.ReviewStatus.FINISHED:
             action = ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED
+            
+            # Validate committee member selection for approved accountabilities
+            if committee_member_id:
+                try:
+                    committee_member = User.objects.get(
+                        id=committee_member_id,
+                        organization=request.user.organization,
+                        access_level=User.AccessChoices.COMMITTEE_MEMBER,
+                        is_active=True
+                    )
+                    accountability.committee_member = committee_member
+                except User.DoesNotExist:
+                    return redirect("accountability:accountability-detail", pk=accountability.id)
         else:
             raise ValueError(f"{review_status} - Is an unnknow status review")
 

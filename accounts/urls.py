@@ -15,6 +15,7 @@ from accounts.views import (
     OrganizationDocumentListView,
     OrganizationDocumentToggleVisibilityView,
     OrganizationDocumentUpdateView,
+    get_committee_members,
     read_notification_view,
     toggle_folder_manager_status,
     toggle_organization_accountant_status,
@@ -23,6 +24,12 @@ from accounts.views import (
 )
 
 urlpatterns = [
+    # API Endpoints
+    path(
+        "get-committee-members/",
+        get_committee_members,
+        name="get-committee-members",
+    ),
     # Folder Managers Views
     path(
         "notifications/",

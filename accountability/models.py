@@ -58,6 +58,15 @@ class Accountability(
         null=True,
         blank=True,
     )
+    committee_member = models.ForeignKey(
+        User,
+        verbose_name="Membro do Comitê para Notificação",
+        related_name="accountability_notifications",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Membro do comitê que será notificado quando a prestação for aprovada",
+    )
 
     history = HistoricalRecords()
 
