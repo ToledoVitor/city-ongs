@@ -2,15 +2,36 @@
 
 {% block title %}Despesas - Portal SITTS{% endblock %}
 
+{% block customcss %}
+<style>
+    .main-content {
+        min-height: calc(100vh - 200px);
+    }
+    
+    .review-container {
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+    }
+    
+    .status-badge {
+        transition: all 0.2s ease;
+    }
+    
+    .status-badge:hover {
+        transform: scale(1.05);
+    }
+    
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-    Revisar Despesas
+    Revisar Despesa
 </p>
   
-<!-- Breadcrumb -->
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
@@ -50,271 +71,318 @@
           <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
           </svg>
-          <span class="ms-1 text-sm font-medium md:ms-2 text-black">Revisar Despesas</span>
+          <span class="ms-1 text-sm font-medium md:ms-2 text-black">Revisar Despesa</span>
         </div>
       </li>
     </ol>
   </nav>
 
-<form method="post" class="max-w-lg mx-auto">
+<form method="post" class="max-w-7xl mx-auto">
     {% csrf_token %}
-
-    <div class="flex justify-between mb-4">
-      <label class="block py-2 text-2xl font-bold text-black">Dados da Despesa</label>
-      <button
-        type="button"
-        data-modal-target="documents-modal"
-        data-modal-toggle="documents-modal"    
-        class="
-          text-white
-          ml-2
-          bg-blue-600
-          hover:bg-blue-600
-          focus:ring-4
-          focus:outline-none
-          focus:ring-blue-600
-          font-medium
-          rounded-full
-          text-sm
-          p-2.5
-          text-center
-          inline-flex
-          items-center
-          me-2
-        "
-      >
-        Documentos
-        <svg class="ml-2 w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path fill-rule="evenodd" d="M6 5a2 2 0 0 1 2-2h4.157a2 2 0 0 1 1.656.879L15.249 6H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2v-5a3 3 0 0 0-3-3h-3.22l-1.14-1.682A3 3 0 0 0 9.157 6H6V5Z" clip-rule="evenodd"/>
-          <path fill-rule="evenodd" d="M3 9a2 2 0 0 1 2-2h4.157a2 2 0 0 1 1.656.879L12.249 10H3V9Zm0 3v7a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-7H3Z" clip-rule="evenodd"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="mb-2 text-base flex justify-between">
-        <b>Identificação: </b> <span class="text-right">{{ expense.identification }}</span>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> <span class="text-right">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-      <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
-  </div>
-    <div class="mb-2 text-base flex justify-between">
-        <b>Valor: </b> <span class="text-right">R${{ expense.value|intcomma }}</span>
-    </div>
-
-    <hr class="h-px my-3 border-0 bg-gray-500">
-
-    <div class="mb-2 text-base flex justify-between">
-        {% if expense.source %}
-            <b>Fonte: </b> <span class="text-right">{{ expense.source.name }}</span>
-        {% else %}
-            <b>Fonte: </b> -
-        {% endif %}
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        {% if expense.favored %}
-            <b>Favorecido: </b> <span class="text-right">{{ expense.favored.name }}</span>
-        {% else %}
-            <b>Favorecido: </b> -
-        {% endif %}
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        {% if expense.item %}
-            <b>Item de Aquisição: </b> <span class="text-right">{{ expense.item.name }}</span>
-        {% else %}
-            <b>Item de Aquisição: </b> -
-        {% endif %}
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-      <b>Natureza: </b> <span class="text-right">{{ expense.nature_label }}</span>
-    </div>
     
-    <hr class="h-px my-3 border-0 bg-gray-500">
+    <div class="main-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 review-container mb-4">
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-xl font-bold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Dados da Despesa
+                    </h1>
+                    <button
+                        type="button"
+                        data-modal-target="documents-modal"
+                        data-modal-toggle="documents-modal"    
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center relative group"
+                        title="{% if expense.files.all %}{{ expense.files.all|length }} documento{{ expense.files.all|length|pluralize }} anexado{{ expense.files.all|length|pluralize }}{% else %}Nenhum documento anexado{% endif %}"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Documentos
+                        {% if expense.files.all %}
+                        <span class="ml-2 bg-blue-500 text-xs px-2 py-1 rounded-full">{{ expense.files.all|length }}</span>
+                        {% endif %}
+                    </button>
+                </div>
 
-    <div class="mb-2 text-base flex justify-between">
-      <b>Vencimento: </b> <span class="text-right">{{ expense.due_date }}</span>
+                <div class="space-y-2 mb-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">ID da Despesa:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded">{{ expense.id }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Identificação:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900 font-medium">{{ expense.identification }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Observações:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Favorecido:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.favored.name }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Valor:</span>
+                        <span class="sm:text-right flex-1 text-sm font-semibold text-red-600">R$ {{ expense.value|intcomma }}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 mb-4">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center border-t pt-3">
+                        <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Detalhes Adicionais
+                    </h3>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Fonte:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.source.name|default:"-" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Item de Aquisição:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.item.name|default:"-" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Natureza:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.nature_label }}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center border-t pt-3">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Datas e Liquidação
+                    </h3>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Vencimento:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.due_date|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Competência:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.competency|date:"m/Y" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Liquidação:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.liquidation|date:"d/m/Y"|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                <div class="mb-4">
+                    <h1 class="text-xl font-bold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        Análise da Despesa
+                    </h1>
+                    <p class="text-sm text-gray-600 mt-2">Avalie a despesa e defina seu status de aprovação.</p>
+                </div>
+
+                <!-- Bank Transactions Section -->
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center mb-3">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                        Transações Bancárias Relacionadas
+                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1 sm:gap-0">
+                      <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Forma de Liquidação:</span>
+                      <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.liquidation_form_label }}</span>
+                    </div>
+                    {% if expense.bank_transactions.all %}
+                        <div class="space-y-2 max-h-32 overflow-y-auto">
+                            {% for transaction in expense.bank_transactions.all %}
+                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1 min-w-0 mr-3">
+                                        <div class="text-sm font-medium text-gray-900 break-words leading-tight">
+                                            {{ transaction.memo }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ transaction.date }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <span class="text-sm font-semibold {% if transaction.amount < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                            R$ {{ transaction.amount|intcomma }}
+                                        </span>
+                                        <div class="text-xs text-gray-500">{{ transaction.transaction_type }}</div>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                    {{ transaction.bank_account.bank_name }} - {{ transaction.bank_account.account }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-gray-500">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <p class="text-sm">Nenhuma transação bancária relacionada</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col h-full">
+                    <div class="space-y-4 mb-4">
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status da Análise</label>
+                        <select
+                            id="status"
+                            name="status"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            required
+                        >
+                            <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Selecione o Status</option>
+                            <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
+                            <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
+                        </select>
+                    </div>
+
+                        <div class="flex-1 flex flex-col">
+                            <label for="pendencies" class="block text-sm font-medium text-gray-700 mb-2">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                                Pendências e Observações
+                            </label>
+                            <textarea
+                                id="pendencies"
+                                name="pendencies"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none flex-1"
+                                placeholder="Descreva as pendências encontradas ou observações sobre a despesa..."
+                            >{{ expense.pendencies|default_if_none:"" }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Este campo é obrigatório quando a despesa for rejeitada.</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div class="mt-auto p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">Status Atual:</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium status-badge
+                            {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800
+                            {% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}
+                        ">
+                            {% if expense.status == 'APPROVED' %}
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Aprovada
+                            {% elif expense.status == 'REJECTED' %}
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Rejeitada
+                            {% else %}
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Em Análise
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-2 text-base flex justify-between">
-      <b>Competência: </b> <span class="text-right">{{ expense.competency }}</span>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-      <b>Liquidação: </b> <span class="text-right">{{ expense.liquidation|default_if_none:"-" }}</span>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-      <b>Forma de Liquidação: </b> <span class="text-right">{{ expense.liquidation_form_label }}</span>
-    </div>
 
-    <hr class="h-px my-3 border-0 bg-gray-500">
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center lg:ml-64">
+            <a
+              href="{% url 'accountability:accountability-detail' accountability.id %}"
+              class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Voltar
+            </a>
 
-    <label class="block mb-2 text-2xl font-bold text-black">Análise</label>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">{{ current_expense_index }} de {{ total_expenses }}</span>
+                <div class="w-32 bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {% widthratio current_expense_index total_expenses 100 %}%"></div>
+                </div>
+            </div>
 
-    <div class="mb-3">
-      <label for="status" class="block mb-2 text-base font-medium text-black">Status</label>
-      <select
-        id="status"
-        name="status"
-        class="
-          border
-          text-sm
-          rounded-lg
-          block
-          w-full p-2.5
-          bg-gray-300
-          border-gray-600
-          text-black
-          focus:ring-blue-500
-          focus:border-blue-500
-        "
-        required
-      >
-        <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Status</option>
-        <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
-        <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
-      </select>
-    </div>
+            <div class="flex gap-3">
+                {% if current_expense_index == 1 %}
+                <button
+                    type="submit"
+                    name="action"
+                    value="previous"
+                    disabled
+                    class="bg-gray-300 text-gray-500 text-sm font-medium py-2 px-4 rounded-md cursor-not-allowed flex items-center"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Anterior
+                </button>
+                {% else %}
+                <button
+                    type="submit"
+                    name="action"
+                    value="previous"
+                    class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Anterior
+                </button>
+                {% endif %}
 
-    <div class="mb-3">
-        <label for="pendencies">Pendências:</label>
-        <textarea
-          id="pendencies"
-          name="pendencies"
-          rows="4"
-          class="
-              block
-              p-2.5
-              mt-2
-              w-full
-              text-sm
-              text-gray-900
-              bg-gray-300
-              border-gray-600
-              rounded-lg
-              border
-              focus:ring-blue-500
-              focus:border-blue-500
-          "
-          placeholder="Escreva as pendências aqui..."
-        >{{ expense.pendencies|default_if_none:"" }}</textarea>
-    </div>
+                <button
+                    type="submit"
+                    name="action"
+                    value="save_all"
+                    class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Salvar
+                </button>
 
-    <div class="flex gap-10">
-      {% if current_expense_index == 1 %}
-      <button
-        type="submit"
-        name="action"
-        value="previous"
-        disabled
-        class="
-            w-full
-            text-white
-            bg-gray-200
-            hover:bg-gray-300
-            focus:ring-4
-            focus:outline-none
-            focus:ring-gray-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Anterior
-      </button>
-      {% else %}
-      <button
-        type="submit"
-        name="action"
-        value="previous"
-        class="
-            w-full
-            text-white
-            bg-gray-500
-            hover:bg-gray-600
-            focus:ring-4
-            focus:outline-none
-            focus:ring-gray-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Anterior
-      </button>
-      {% endif %}
-
-      {% if current_expense_index == total_expenses %}
-      <button
-        type="submit"
-        name="action"
-        value="next"
-        disabled
-        class="
-          w-full
-          text-white
-          bg-gray-200
-          hover:bg-gray-300
-          focus:ring-4
-          focus:outline-none
-          focus:ring-gray-300
-          font-medium rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-        "
-      >
-        Próximo
-      </button>
-      {% else %}
-      <button
-        type="submit"
-        name="action"
-        value="next"
-        class="
-          w-full
-          text-white
-          bg-gray-500
-          hover:bg-gray-600
-          focus:ring-4
-          focus:outline-none
-          focus:ring-gray-300
-          font-medium rounded-lg
-          text-sm
-          px-5
-          py-2.5
-          text-center
-        "
-      >
-        Próximo
-      </button>
-      {% endif %}
-
-      <button
-        type="submit"
-        name="action"
-        value="save_all"
-        class="
-            w-full
-            text-white
-            bg-blue-700
-            hover:bg-blue-800
-            focus:ring-4
-            focus:outline-none
-            focus:ring-blue-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-        "
-      >
-        Salvar Análise
-      </button>
+                {% if current_expense_index == total_expenses %}
+                <button
+                    type="submit"
+                    name="action"
+                    value="next"
+                    disabled
+                    class="bg-gray-300 text-gray-500 text-sm font-medium py-2 px-4 rounded-md cursor-not-allowed flex items-center"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                    Próximo
+                </button>
+                {% else %}
+                <button
+                    type="submit"
+                    name="action"
+                    value="next"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                    Próximo
+                </button>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </form>
 
@@ -341,9 +409,7 @@
   "
 >
   <div class="relative p-4 w-full max-w-md max-h-full">
-    <!-- Modal content -->
     <div class="relative rounded-lg shadow bg-gray-300">
-      <!-- Modal header -->
         <div class="flex items-center justify-between p-2 mb-2 md:p-5 border-b border-gray-600">
             <h3 class="text-xl font-semibold text-black">
               Documentos Anexados
@@ -373,90 +439,48 @@
                 <span class="sr-only">Fechar modal</span>
             </button>
         </div>
-        <!-- Modal body -->
         <div class="p-4 md:p-5">
-            <div>
-              <ul class="max-w-md divide-y divide-gray-700">
-                {% if expense.files.count %}
-                  {% for file in expense.files.all %}
-                  <li class="py-3 sm:pb-4">
-                    <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                      <div class="
-                          text-white
-                          ml-2
-                          bg-blue-600
-                          hover:bg-blue-600
-                          focus:ring-4
-                          focus:outline-none
-                          focus:ring-blue-600
-                          font-medium
-                          rounded-full
-                          text-sm
-                          p-2.5
-                          text-center
-                          inline-flex
-                          items-center
-                          me-2
-                        "
-                      >
-                        <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
-                        </svg>                      
-                      </div>
-                      <div class="flex-1 min-w-0">
-                          <a
-                            href="{{ file.file.url }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="text-base font-medium text-blue-600 hover:underline"
-                          >
-                            {{ file.name }}
-                          </a>
-                          <p class="text-xs mt-2 text-gray-600 truncate">
-                            Anexado em: {{ file.created_at }}
-                          </p>
-                      </div>
-                    </div>
-                  </li>
-                  {% endfor %}  
-                {% else %}
-                <li class="py-3 sm:pb-4">
-                  <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                     <div class="
-                         text-white
-                         ml-2
-                         bg-blue-600
-                         hover:bg-blue-600
-                         focus:ring-4
-                         focus:outline-none
-                         focus:ring-blue-600
-                         font-medium
-                         rounded-full
-                         text-sm
-                         p-2.5
-                         text-center
-                         inline-flex
-                         items-center
-                         me-2
-                       "
-                     >
-                       <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                         <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clip-rule="evenodd"/>
-                       </svg>                      
-                     </div>
-                     <div class="flex-1 min-w-0">
-                        <p class="text-base font-medium truncate text-black">
-                           Sem arquivos anexados
-                        </p>
-                        <p class="text-xs text-gray-600 truncate">
-                           Anexado em: ----
-                        </p>
-                     </div>
+            <div class="space-y-3">
+              {% if expense.files.all %}
+                {% for file in expense.files.all %}
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                  <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
                   </div>
-                </li>
-                {% endif %}
-              </ul>
+                  <div class="flex-1 min-w-0">
+                    <a
+                      href="{{ file.file.url }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors block truncate"
+                    >
+                      {{ file.name }}
+                    </a>
+                    <p class="text-xs text-gray-500 mt-1">
+                      Anexado em {{ file.created_at|date:"d/m/Y" }}
+                    </p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="text-center py-8">
+                  <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </div>
+                  <p class="text-sm text-gray-500">Nenhum arquivo anexado</p>
+                </div>
+              {% endif %}
             </div>
+
 
             <div class="my-6">
               <button

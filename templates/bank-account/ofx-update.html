@@ -12,7 +12,7 @@
 
 <!-- Breadcrumb -->
 <nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
         <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
           <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -48,104 +48,393 @@
     </ol>
 </nav>
 
-<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto">
-  {% csrf_token %}
-  
-  <div class="my-3">
-    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black">
-        Conta: {{ object }}
-    </label>
-  </div>
+<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-2xl mx-auto">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 border border-gray-200 mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+        <label class="text-lg font-semibold text-gray-900">Conta Selecionada</label>
+      </div>
+      <p class="text-gray-700 font-medium">{{ object }}</p>
+    </div>
 
-  <div class="mt-6 mb-3">
-    <label for="id_ofx_file" class="block mb-2 text-base font-medium text-black">Arquivo Bancário (OFX):</label>
-    {{ form.ofx_file }}
-    <p class="mt-1 text-sm text-black" id="file_input_help">Apenas arquivos tipo .ofx</p>
-  </div>
-
-  <div class="mb-6 text-base text-justify">
-    O sistema criará sua conta com base nas informações do arquivo. Após criada, você poderá
-    <b>atualizar os extratos na página de detalhes da conta.</b>
-  </div>
-
-  <hr class="h-px my-4 border-0 bg-gray-500">
-
-  <div class="flex mb-2 items-start">
-    <p class="text-sm">
-      Em alguns casos, a instituição bancária pode não disponibilizar o extrato no formato OFX para contas do tipo investimento. Se esse for o caso,
-      <a href="{% url 'bank:bank-statements-manual-update' object.id %}" class="text-sm hover:underline text-blue-500">atualize manualmente a conta.</a>
-    </p>
-  </div>
-
-  {% include 'commons/form-errors.html' with form=form %}
-
-  {% if statement_exists %}
-  <div id="alert" class="flex p-4 mb-4 text-sm text-red-600 rounded-lg bg-gray-300" role="alert">
-      <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-      </svg>
-      <span class="sr-only">Danger</span>
-      <div>
-          <span class="font-medium">Erro ao criar conta</span>
-          <ul class="my-1.5 list-disc list-inside">
-              <li class="my-1">Já existe um extrato cadastrado para essa data</li>
-          </ul>
+    <div class="bg-white border border-gray-300 rounded-lg p-6 mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <label class="text-lg font-semibold text-gray-900">Arquivo Bancário (OFX)</label>
+      </div>
+      
+      <div class="mb-3">
+        {{ form.ofx_file }}
+        <p class="mt-2 text-sm text-gray-600 flex items-center gap-1">
+          <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Apenas arquivos tipo .ofx
+        </p>
       </div>
 
-      <button
-        type="button"
-        class="
-          ms-auto
-          -mx-1.5
-          -my-1.5
-          bg-red-300
-          text-white
-          rounded-lg
-          focus:ring-2
-          focus:ring-white
-          hover:bg-red-500
-          p-1.5
-          inline-flex
-          items-center
-          justify-center
-          h-6
-          w-6
-        "
-        data-dismiss-target="#alert"
-        aria-label="Close"
-      >
-        <span class="sr-only">Close</span>
-          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+      <div id="analysis-spinner" class="hidden mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+        <div class="flex items-center">
+          <svg class="animate-spin h-5 w-5 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
+          <span class="text-sm font-medium text-blue-800">Analisando arquivo OFX...</span>
+        </div>
+      </div>
+    
+      <div id="file-analysis" class="hidden mt-4">
+        <div id="analysis-success" class="hidden bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+          <div class="flex items-start space-x-3">
+            <div class="p-1 bg-green-100 rounded-full">
+              <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-lg font-semibold text-green-800 mb-3">Arquivo analisado com sucesso</h4>
+              <div class="grid grid-cols-1 gap-3">
+                <div class="bg-white rounded-lg p-3 border border-green-200">
+                  <p class="text-sm font-medium text-green-800">Período:</p>
+                  <p class="text-gray-700 font-semibold" id="period-range"></p>
+                </div>
+                <div class="bg-white rounded-lg p-3 border border-green-200">
+                  <p class="text-sm font-medium text-green-800">Mês/Ano:</p>
+                  <p class="text-gray-700 font-semibold" id="period-month-year"></p>
+                </div>
+                <div class="bg-white rounded-lg p-3 border border-green-200">
+                  <p class="text-sm font-medium text-green-800">Banco:</p>
+                  <p class="text-gray-700 font-semibold" id="bank-info"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <div id="analysis-warning" class="hidden bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200 shadow-sm">
+          <div class="flex items-start space-x-3">
+            <div class="p-1 bg-yellow-100 rounded-full">
+              <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-lg font-semibold text-yellow-800 mb-3">Extrato já existe</h4>
+              <div class="bg-white rounded-lg p-3 border border-yellow-200 mb-3">
+                <p class="text-sm font-medium text-yellow-800">Período:</p>
+                <p class="text-gray-700 font-semibold" id="warning-period-range"></p>
+              </div>
+              <p class="text-yellow-700 text-sm font-medium bg-yellow-100 rounded-lg p-3 border border-yellow-200">
+                ⚠️ Já existe um extrato cadastrado para este período.
+              </p>
+            </div>
+          </div>
+        </div>
+      
+        <div id="analysis-error" class="hidden bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-xl border border-red-200 shadow-sm">
+          <div class="flex items-start space-x-3">
+            <div class="p-1 bg-red-100 rounded-full">
+              <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-lg font-semibold text-red-800 mb-3">Erro ao analisar arquivo</h4>
+              <div class="bg-white rounded-lg p-3 border border-red-200">
+                <p id="error-message" class="text-red-700 font-medium"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="p-1 bg-blue-100 rounded-full mt-1">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-blue-800 font-medium mb-2">Como funciona:</p>
+          <p class="text-blue-700 text-sm leading-relaxed">
+            O sistema criará sua conta com base nas informações do arquivo. Após criada, você poderá
+            <strong>atualizar os extratos na página de detalhes da conta.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-6 border border-amber-200 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="p-1 bg-amber-100 rounded-full mt-1">
+          <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-amber-800 font-medium mb-2">Atualização Manual:</p>
+          <p class="text-amber-700 text-sm leading-relaxed">
+            Em alguns casos, a instituição bancária pode não disponibilizar o extrato no formato OFX para contas do tipo investimento. Se esse for o caso,
+            <a href="{% url 'bank:bank-statements-manual-update' object.id %}" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200">atualize manualmente a conta.</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    {% if statement_exists %}
+    <div id="alert" class="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-6 mb-6 shadow-sm" role="alert">
+      <div class="flex items-start">
+        <div class="p-1 bg-red-100 rounded-full mr-3">
+          <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h4 class="text-lg font-semibold text-red-800 mb-2">Erro ao criar conta</h4>
+          <div class="bg-white rounded-lg p-3 border border-red-200">
+            <ul class="text-red-700 font-medium">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                Já existe um extrato cadastrado para essa data
+              </li>
+            </ul>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="ml-3 p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-red-300"
+          data-dismiss-target="#alert"
+          aria-label="Close"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="flex justify-center mt-8">
+      <button
+        type="submit"
+        id="submit-btn"
+        disabled
+        class="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-white bg-gray-400 cursor-not-allowed rounded-xl shadow-lg hover:shadow-xl focus:ring-4 focus:outline-none focus:ring-gray-300 transition-all duration-200 transform hover:scale-105 min-w-[200px]"
+      >
+        <span id="submit-text">Selecione um arquivo OFX</span>
+        <svg id="submit-spinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </button>
+    </div>
+  </form>
+</div>
 
-  </div>
-  {% endif %}
-
-  <button
-    type="submit"
-    class="
-      px-3
-      py-2
-      text-sm
-      font-medium
-      text-center
-      inline-flex
-      items-center
-      text-white
-      rounded-lg
-      focus:ring-4
-      focus:outline-none
-      bg-blue-600
-      hover:bg-blue-700
-      focus:ring-blue-800
-    "
-    style="display: flex; justify-self: center;"
-  >
-    Atualizar Extrato
-  </button>
-
-</form>
-
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById('id_ofx_file');
+    const analysisSpinner = document.getElementById('analysis-spinner');
+    const fileAnalysis = document.getElementById('file-analysis');
+    const analysisSuccess = document.getElementById('analysis-success');
+    const analysisWarning = document.getElementById('analysis-warning');
+    const analysisError = document.getElementById('analysis-error');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const form = document.querySelector('form');
+    
+    let fileAnalyzed = false;
+    let hasWarning = false;
+    
+    function resetAnalysisUI() {
+        analysisSpinner.classList.add('hidden');
+        fileAnalysis.classList.add('hidden');
+        analysisSuccess.classList.add('hidden');
+        analysisWarning.classList.add('hidden');
+        analysisError.classList.add('hidden');
+        fileAnalyzed = false;
+        hasWarning = false;
+        updateSubmitButton();
+    }
+    
+    function updateSubmitButton() {
+        if (!fileAnalyzed) {
+            submitBtn.disabled = true;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-gray-400').replace(/hover:bg-\w+-\d+/, '');
+            submitBtn.classList.add('cursor-not-allowed');
+            submitText.textContent = fileInput.files.length > 0 ? 'Analisando arquivo...' : 'Selecione um arquivo OFX';
+        } else if (hasWarning) {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-yellow-600').replace(/cursor-not-allowed/, '');
+            submitBtn.classList.add('hover:bg-yellow-700');
+            submitText.textContent = 'Processar mesmo assim';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace(/bg-\w+-\d+/, 'bg-blue-600').replace(/cursor-not-allowed/, '');
+            submitBtn.classList.add('hover:bg-blue-700');
+            submitText.textContent = 'Atualizar Extrato';
+        }
+    }
+    
+    fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            console.log('No file selected, resetting UI');
+            resetAnalysisUI();
+            return;
+        }
+        
+        console.log('File name:', file.name);
+        if (!file.name.toLowerCase().endsWith('.ofx')) {
+            console.log('Invalid file type');
+            showError('Selecione um arquivo OFX válido.');
+            return;
+        }
+        
+        console.log('Starting file analysis');
+        analyzeFile(file);
+    });
+    
+    function analyzeFile(file) {
+        resetAnalysisUI();
+        analysisSpinner.classList.remove('hidden');
+        
+        const formData = new FormData();
+        formData.append('ofx_file', file);
+        
+        const url = `{% url 'bank:preparse-ofx' object.id %}`;
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            analysisSpinner.classList.add('hidden');
+            fileAnalysis.classList.remove('hidden');
+            
+            return response.json().then(data => {
+                if (data.success) {
+                    fileAnalyzed = true;
+                    
+                    if (data.statement_exists) {
+                        hasWarning = true;
+                        showWarning(data.period);
+                    } else {
+                        showSuccess(data.period, data.account_info);
+                    }
+                } else {
+                    showError(data.error || 'Erro desconhecido ao analisar arquivo.');
+                }
+                
+                updateSubmitButton();
+            }).catch(() => {
+                // If response is not JSON (like HTML error page)
+                showError('Erro do servidor. Tente novamente.');
+            });
+        })
+        .catch(error => {
+            // Network errors only
+            console.error('Network error:', error);
+            analysisSpinner.classList.add('hidden');
+            showError('Erro de conexão. Tente novamente.');
+        });
+    }
+    
+    const months = {
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
+    }
+    function showSuccess(period, accountInfo) {
+        analysisSuccess.classList.remove('hidden');
+        document.getElementById('period-range').textContent = `${period.start_date} - ${period.end_date}`;
+        document.getElementById('period-month-year').textContent = `${months[period.month]}/${period.year}`;
+        document.getElementById('bank-info').textContent = `${accountInfo.bank_name} - Conta: ${accountInfo.account_id}`;
+    }
+    
+    function showWarning(period) {
+        analysisWarning.classList.remove('hidden');
+        document.getElementById('warning-period-range').textContent = `${period.start_date} - ${period.end_date}`;
+    }
+    
+    function showError(message) {
+        analysisError.classList.remove('hidden');
+        document.getElementById('error-message').textContent = message;
+        fileAnalyzed = false;
+        updateSubmitButton();
+    }
+    
+    form.addEventListener('submit', function(event) {
+        if (!fileAnalyzed) {
+            event.preventDefault();
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitText.textContent = 'Processando...';
+        submitSpinner.classList.remove('hidden');
+    });
+    
+    // Initialize with a small delay to ensure DOM is fully ready
+    setTimeout(function() {
+        console.log('Initializing after timeout...');
+        updateSubmitButton();
+        
+        // Try to find file input again if not found initially
+        if (!fileInput) {
+            const retryFileInput = document.getElementById('id_ofx_file') || 
+                                 document.querySelector('input[type="file"]');
+            if (retryFileInput) {
+                console.log('Found file input on retry:', retryFileInput);
+                // Re-attach event listener
+                retryFileInput.addEventListener('change', function(event) {
+                    console.log('File input changed (retry)!', event);
+                    const file = event.target.files[0];
+                    console.log('Selected file (retry):', file);
+                    
+                    if (!file) {
+                        resetAnalysisUI();
+                        return;
+                    }
+                    
+                    if (!file.name.toLowerCase().endsWith('.ofx')) {
+                        showError('Selecione um arquivo OFX válido.');
+                        return;
+                    }
+                    
+                    analyzeFile(file);
+                });
+            }
+        }
+    }, 100);
+    
+    updateSubmitButton();
+});
+</script>
 {% endblock %}

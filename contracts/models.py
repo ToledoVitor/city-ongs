@@ -441,6 +441,7 @@ class ContractMonthTransfer(
         verbose_name="Fonte do Repasse",
         choices=TransferSource.choices,
         default=TransferSource.CITY_HALL,
+        max_length=255,
     )
     value = models.DecimalField(
         verbose_name="Valor do Repasse",
@@ -548,19 +549,19 @@ class ContractGoal(
     # ITEM ESPECIFICATION
     name = models.CharField(
         verbose_name="Item",
-        max_length=128,
+        max_length=256,
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=1024,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=1024,
     )
     observations = models.CharField(
         verbose_name="Observações",
-        max_length=256,
+        max_length=1024,
         null=True,
         blank=True,
     )
@@ -607,7 +608,7 @@ class ContractGoalReview(BaseOrganizationTenantModel):
     )
     comment = models.CharField(
         verbose_name="Comentário",
-        max_length=255,
+        max_length=1024,
     )
 
     class Meta:
@@ -628,15 +629,17 @@ class ContractStep(BaseOrganizationTenantModel):
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=1024,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=1024,
     )
     resources = models.CharField(
         verbose_name="Recursos",
-        max_length=256,
+        max_length=1024,
+        null=True,
+        blank=True,
     )
 
     history = HistoricalRecords()
@@ -679,17 +682,17 @@ class ContractItem(BaseOrganizationTenantModel):
     )
     objective = models.CharField(
         verbose_name="Objetivo",
-        max_length=256,
+        max_length=1024,
     )
     methodology = models.CharField(
         verbose_name="Metodologia",
-        max_length=256,
+        max_length=1024,
         null=True,
         blank=True,
     )
     observations = models.CharField(
         verbose_name="Observações",
-        max_length=256,
+        max_length=1024,
         null=True,
         blank=True,
     )
@@ -843,6 +846,10 @@ class ContractItem(BaseOrganizationTenantModel):
     @property
     def month_expense_with_point(self) -> str:
         return str(self.month_expense).replace(",", ".")
+
+    @property
+    def total_month_expense(self) -> str:
+        return self.month_expense * self.quantity
 
     @property
     def last_reviews(self) -> str:

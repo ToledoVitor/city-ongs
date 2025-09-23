@@ -2,6 +2,7 @@ from django import forms
 
 from bank.models import BankAccount, BankStatement, Transaction
 from utils.fields import DecimalMaskedField
+from utils.regex import only_digits
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseNumberFormWidget,
@@ -29,6 +30,14 @@ class BankAccountForm(forms.ModelForm):
             "agency": BaseCharFieldFormWidget(),
             "origin": BaseSelectFormWidget(),
         }
+
+    def clean_account(self):
+        account = self.cleaned_data.get("account")
+        return only_digits(account)
+
+    def clean_agency(self):
+        agency = self.cleaned_data.get("agency")
+        return only_digits(agency)
 
 
 class UpdateOFXForm(forms.Form):

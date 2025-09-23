@@ -222,7 +222,7 @@ class ContractStepForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(),
             "objective": BaseTextAreaFormWidget(),
             "methodology": BaseTextAreaFormWidget(),
-            "resources": BaseTextAreaFormWidget(),
+            "resources": BaseTextAreaFormWidget(required=False),
         }
 
 
@@ -299,8 +299,6 @@ class ContractDocumentForm(forms.ModelForm):
                 "pdf",
                 "doc",
                 "docx",
-                "xls",
-                "xlsx",
                 "jpg",
                 "jpeg",
                 "png",
@@ -464,11 +462,16 @@ class ContractExecutionFileForm(forms.ModelForm):
         }
 
 
-class ContractStatusUpdateForm(forms.Form):
-    status = forms.ChoiceField(
-        choices=Contract.ContractStatusChoices.choices,
-        widget=BaseSelectFormWidget(),
-    )
+class ContractStatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Contract
+        fields = [
+            "status",
+        ]
+
+        widgets = {
+            "status": BaseSelectFormWidget(),
+        }
 
 
 class ContractItemValueRequestForm(forms.ModelForm):

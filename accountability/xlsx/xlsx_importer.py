@@ -96,11 +96,9 @@ class AccountabilityXLSXImporter:
         new_favoreds = []
         for record in records:
             doc = record.get("document")
-            # Skip if favored already exists
             if doc and doc in existing_map:
                 continue
 
-            # Create new favored
             new_favoreds.append(
                 Favored(
                     organization=organization,
@@ -110,7 +108,7 @@ class AccountabilityXLSXImporter:
             )
 
         if new_favoreds:
-            Favored.objects.bulk_create(new_favoreds)
+            Favored.objects.bulk_create(new_favoreds, ignore_conflicts=True)
 
         all_favored = Favored.objects.filter(
             organization=organization,
@@ -168,7 +166,7 @@ class AccountabilityXLSXImporter:
                 revenue.full_clean()
                 revenues.append(revenue)
             except ValidationError as e:
-                errors.append(f"Receita {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Receita {line[0]}: {' '.join(e.messages)}")
 
         if errors:
             return errors
@@ -227,7 +225,7 @@ class AccountabilityXLSXImporter:
                     new_expense_per_item.setdefault(item_id, Decimal("0.00"))
                     new_expense_per_item[item_id] += expense.value
             except ValidationError as e:
-                errors.append(f"Despesa {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Despesa {line[0]}: {' '.join(e.messages)}")
 
         for item_id, new_value in new_expense_per_item.items():
             existing_expenses = Expense.objects.filter(
@@ -304,7 +302,7 @@ class AccountabilityXLSXImporter:
                 transaction.full_clean()
                 transactions.append(transaction)
             except ValidationError as e:
-                errors.append(f"Aplicação {line[0]}: {" ".join(e.messages)}")
+                errors.append(f"Aplicação {line[0]}: {' '.join(e.messages)}")
 
         if errors:
             return errors

@@ -376,7 +376,7 @@ class PassOn12PDFExporter:
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEIS NO EXERCÍCIO (E + F)",
                 "",
-                f"{format_into_brazilian_currency(sum_items_a_to_d+self.own_resources)}",
+                f"{format_into_brazilian_currency(sum_items_a_to_d + self.own_resources)}",
             ],
         ]
 

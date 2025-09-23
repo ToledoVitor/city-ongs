@@ -21,8 +21,8 @@ class BankAccount(BaseOrganizationTenantModel):
         PRIVATE_SPONSOR = "PRIVATE_SPONSOR", "Patrocinador privado"
 
     class AccountTypeChoices(models.TextChoices):
-        CHECKING = "CHECKING", "conta corrente"
-        INVESTING = "INVESTING", "investimento"
+        CHECKING = "CHECKING", "Conta Corrente"
+        INVESTING = "INVESTING", "Investimento"
 
     bank_name = models.CharField(
         verbose_name="Nome do Banco",
@@ -169,6 +169,12 @@ class BankStatement(BaseOrganizationTenantModel):
         help_text="The balance at the end of the statement period",
     )
 
+    reference_day = models.IntegerField(
+        verbose_name="Dia de Referência",
+        help_text="The day this statement refers to",
+        null=True,
+        blank=True,
+    )
     reference_month = models.IntegerField(
         verbose_name="Mês",
         choices=MonthChoices,
@@ -189,7 +195,7 @@ class BankStatement(BaseOrganizationTenantModel):
         constraints = [
             models.UniqueConstraint(
                 condition=models.Q(deleted_at__isnull=True),
-                fields=("bank_account", "reference_month", "reference_year"),
+                fields=("bank_account", "reference_month", "reference_year", "reference_day"),
                 name="unique_bank_statement_per_month_year",
             ),
         ]
@@ -332,6 +338,13 @@ class Transaction(BaseOrganizationTenantModel):
             models.Index(fields=["bank_account", "date"]),
             models.Index(fields=["transaction_type", "date"]),
             models.Index(fields=["transaction_number"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["transaction_number", "memo", "bank_account"],
+                name="unique_transaction_number_per_bank_account",
+                condition=models.Q(deleted_at__isnull=True),
+            ),
         ]
         ordering = ["-date", "-id"]
 

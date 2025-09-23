@@ -116,14 +116,23 @@ class ActivityLogEmailNotificationHandler:
             "email/accountability_analisys_email.html", context
         )
 
-        recipient = accountability.contract.supervision_autority
-        Notification.objects.create(
-            category=Notification.Category.ACCOUNTABILITY_ANALISYS,
-            recipient=recipient,
-            object_id=accountability.id,
-            text=f"Prestação {accountability.month}/{accountability.year} para o contrato {contract.name} enviada para análise",
+        recipient = (
+            accountability.reviewer or
+            accountability.contract.supervision_autority
         )
-        recipients = [recipient]
+        if recipient:
+            Notification.objects.create(
+                category=Notification.Category.ACCOUNTABILITY_ANALISYS,
+                recipient=recipient,
+                object_id=accountability.id,
+                text=(
+                    f"Prestação {accountability.month}/{accountability.year} "
+                    f"para o contrato {contract.name} enviada para análise"
+                ),
+            )
+            recipients = [recipient.email]
+        else:
+            recipients = []
 
         return subject, html_content, recipients
 

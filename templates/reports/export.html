@@ -2,6 +2,40 @@
 
 {% block title %}Relatórios - Portal SITTS{% endblock %}
 
+{% block customcss %}
+<style>
+  .form-select, .form-control, select, input[type="text"], input[type="number"] {
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+    appearance: none !important;
+  }
+  
+  .form-select:focus, .form-control:focus, select:focus, input:focus {
+    border-color: #3b82f6 !important;
+    ring: 2px solid #3b82f6 !important;
+    ring-opacity: 0.2 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+  
+  select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E") !important;
+    background-position: right 0.75rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1rem 1rem !important;
+    padding-right: 2.5rem !important;
+  }
+  
+  .dropdown-icon {
+    display: none !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% load humanize %}
@@ -32,186 +66,666 @@
     </ol>
 </nav>
 
-<form method="post" target="download_iframe" class="max-w-lg mx-auto">
-    {% csrf_token %}
-  
-    <div class="mb-3">
-      <label class="block mb-2 text-base font-medium text-black">Escolher Contrato</label>
-      {{ form.contract }}
+<!-- Error Alert -->
+<div id="error-alert" class="hidden mb-2 bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
+  <div class="flex items-start">
+    <div class="flex-shrink-0">
+      <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
     </div>
-  
-    <div class="mb-3">
-      <label class="block mb-2 text-base font-medium text-black">Modelo de Relatório</label>
-      {{ form.report_model }}
-    </div>
-
-    <hr class="h-px my-4 border-0 bg-gray-500">
-
-    <div class="mt-3">
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Mês de Início</label>
-          {{ form.start_month }}
-        </div>
-    
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Ano de Início</label>
-          {{ form.start_year }}
-        </div>
+    <div class="ml-3 flex-1">
+      <h3 class="text-sm font-semibold text-red-800">Erro ao gerar relatório</h3>
+      <div class="mt-2 text-sm text-red-700">
+        <p id="error-message">Ocorreu um erro inesperado.</p>
       </div>
     </div>
-    
-    <div class="mt-1">
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Mês de Término</label>
-          {{ form.end_month }}
-        </div>
-    
-        <div class="relative">
-          <label class="block mb-2 text-base font-medium text-black">Ano de Término</label>
-          {{ form.end_year }}
-        </div>
+    <div class="ml-auto pl-3">
+      <div class="-mx-1.5 -my-1.5">
+        <button
+          type="button"
+          id="close-error"
+          class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+        >
+          <span class="sr-only">Fechar</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
     </div>
+  </div>
+</div>
 
-    <hr class="h-px my-4 border-0 bg-gray-500">
-    <div class="mb-4">
-      <button type="button" id="toggle-responsibles" class="flex items-center w-full text-left mb-2" onclick="toggleResponsibles()">
-        <span class="text-base font-medium text-black">Demais Responsáveis</span>
-        <svg class="w-4 h-4 ml-2 transition-transform" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+<div class="max-w-7xl mx-auto">
+  <!-- Two Column Layout -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 h-full">
+    
+    <!-- Left Column - Form -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-fit">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Configuração do Relatório</h2>
+        <p class="text-sm text-gray-600 mt-1">Preencha as informações para gerar seu documento</p>
+      </div>
       
-      <div id="responsibles-container" class="hidden bg-gray-200 border border-gray-300 p-4 rounded-lg">
-        {% if form.responsible_formset %}
-          {{ form.responsible_formset.management_form }}
-          {% for responsible_form in form.responsible_formset %}
-            <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
-              <div class="grid gap-4">
-                <div>
-                  <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
-                  {{ responsible_form.user }}
-                </div>
-                <div>
-                  <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
-                  {{ responsible_form.interest }}
-                </div>
+      <form method="post" class="px-6 space-y-6">
+      {% csrf_token %}
+    
+      <!-- Basic Configuration -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-medium text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Informações Básicas
+        </h3>
+        
+        <div class="space-y-2">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Escolher Contrato <span class="text-red-500">*</span>
+            </label>
+            {{ form.contract }}
+            {% if form.contract.errors %}
+              <div class="mt-1 text-sm text-red-600">
+                {% for error in form.contract.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
               </div>
-              {% if forloop.counter > 1 %}
-                <button type="button" class="remove-responsible mt-2 text-red-600 hover:text-red-800">
-                  Remover Responsável
-                </button>
-              {% endif %}
-            </div>
-          {% endfor %}
-        {% else %}
-          <div class="responsible-form mb-4 p-4 border rounded-lg bg-white">
-            <div class="grid gap-4">
+            {% endif %}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Modelo de Relatório <span class="text-red-500">*</span>
+            </label>
+            {{ form.report_model }}
+            {% if form.report_model.errors %}
+              <div class="mt-1 text-sm text-red-600">
+                {% for error in form.report_model.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Period Configuration -->
+      <div class="space-y-4 pt-4 border-t border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path>
+          </svg>
+          Período de Análise
+        </h3>
+        
+        <div class="space-y-2">
+          <!-- Start Date -->
+          <div class="space-y-2">
+            <h4 class="text-sm font-medium text-gray-600">Data de Início</h4>
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-medium text-black">Usuário</label>
-                <select name="responsibles-0-user" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  <option value="">Selecione um usuário</option>
-                </select>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Mês</label>
+                {{ form.start_month }}
+                {% if form.start_month.errors %}
+                  <div class="mt-1 text-xs text-red-600">
+                    {% for error in form.start_month.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
               <div>
-                <label class="block mb-2 text-sm font-medium text-black">Tipo de Responsabilidade</label>
-                <select name="responsibles-0-interest" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                  <option value="">Selecione o tipo de responsabilidade</option>
-                </select>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Ano</label>
+                {{ form.start_year }}
+                {% if form.start_year.errors %}
+                  <div class="mt-1 text-xs text-red-600">
+                    {% for error in form.start_year.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
             </div>
           </div>
-        {% endif %}
-        <button type="button" id="add-responsible" class="mb-2 text-blue-600 hover:text-blue-800">
-          + Adicionar Responsável
+          
+          <!-- End Date -->
+          <div class="space-y-2">
+            <h4 class="text-sm font-medium text-gray-600">Data de Término</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Mês</label>
+                {{ form.end_month }}
+                {% if form.end_month.errors %}
+                  <div class="mt-1 text-xs text-red-600">
+                    {% for error in form.end_month.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Ano</label>
+                {{ form.end_year }}
+                {% if form.end_year.errors %}
+                  <div class="mt-1 text-xs text-red-600">
+                    {% for error in form.end_year.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Responsible Section -->
+      <div class="space-y-4 pt-4 border-t border-gray-200">
+        <button type="button" id="toggle-responsibles" class="flex items-center justify-between w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200" onclick="toggleResponsibles()">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+            </svg>
+            <span class="font-medium text-gray-900">Demais Responsáveis</span>
+            <span class="ml-2 text-sm text-gray-500">(Opcional)</span>
+          </div>
+          <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
+        
+        <div id="responsibles-container" class="hidden space-y-4">
+          {% if form.responsible_formset %}
+            {{ form.responsible_formset.management_form }}
+            
+            {% if form.responsible_formset.non_form_errors %}
+              <div class="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
+                <div class="text-sm font-medium text-red-800">Erro nos responsáveis:</div>
+                {% for error in form.responsible_formset.non_form_errors %}
+                  <div class="text-sm text-red-700">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            
+            {% for responsible_form in form.responsible_formset %}
+              <div class="responsible-form bg-gray-50 border border-gray-200 rounded-lg p-4 {% if responsible_form.errors %}border-red-300 bg-red-50{% endif %}">
+                {% if responsible_form.errors %}
+                  <div class="mb-3 p-2 bg-red-100 border border-red-200 rounded text-sm text-red-700">
+                    <strong>Erros neste responsável:</strong>
+                    {% for field, errors in responsible_form.errors.items %}
+                      <div>{{ field }}: {% for error in errors %}{{ error }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                    {{ responsible_form.user }}
+                    {% if responsible_form.user.errors %}
+                      <div class="mt-1 text-xs text-red-600">
+                        {% for error in responsible_form.user.errors %}
+                          <p>{{ error }}</p>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Responsabilidade</label>
+                    {{ responsible_form.interest }}
+                    {% if responsible_form.interest.errors %}
+                      <div class="mt-1 text-xs text-red-600">
+                        {% for error in responsible_form.interest.errors %}
+                          <p>{{ error }}</p>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <!-- Hidden fields for formset -->
+                  {% for hidden in responsible_form.hidden_fields %}
+                    {{ hidden }}
+                  {% endfor %}
+                </div>
+                {% if forloop.counter > 1 %}
+                  <button type="button" class="remove-responsible mt-3 inline-flex items-center px-2 py-1 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Remover
+                  </button>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="responsible-form bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                  <select name="responsibles-0-user" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="">Selecione um usuário</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Responsabilidade</label>
+                  <select name="responsibles-0-interest" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="">Selecione o tipo de responsabilidade</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+          <button type="button" id="add-responsible" class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Adicionar Responsável
+          </button>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="py-2 border-t border-gray-200">
+        <button
+          type="button"
+          id="generate-button"
+          onclick="generateReport()"
+          class="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg id="generate-icon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <svg id="loading-icon" class="w-5 h-5 mr-2 animate-spin hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span id="generate-text">Gerar Relatório</span>
+        </button>
+      </div>
+
+      {% if form.errors %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4" role="alert">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-semibold text-red-800">Erro de validação</h3>
+              <div class="mt-2 text-sm text-red-700">
+                {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                  {% endfor %}
+                {% endif %}
+                {% for field, errors in form.errors.items %}
+                  {% if field != '__all__' %}
+                    <p><strong>{{ field }}:</strong> 
+                    {% for error in errors %}
+                      {{ error }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    </p>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if missing_banks %}
+        <div id="alert-bank" class="bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-semibold text-red-800">Erro ao gerar relatório</h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>O contrato escolhido ainda está em planejamento e/ou não tem contas bancárias cadastradas.</p>
+              </div>
+            </div>
+            <div class="ml-auto pl-3">
+              <div class="-mx-1.5 -my-1.5">
+                <button
+                  type="button"
+                  class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
+                  data-dismiss-target="#alert-bank"
+                  aria-label="Fechar"
+                >
+                  <span class="sr-only">Fechar</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Right Column - Preview -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Visualização</h3>
+            <p id="report-info" class="text-sm text-gray-600">Aguardando geração...</p>
+          </div>
+        </div>
+        <div id="preview-actions" class="hidden flex items-center space-x-2">
+          <button
+            type="button"
+            id="download-button"
+            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Baixar
+          </button>
+          <button
+            type="button"
+            id="regenerate-button"
+            class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+            title="Voltar ao formulário com os mesmos dados"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Editar
+          </button>
+        </div>
       </div>
     </div>
 
-    <button
-      type="submit"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-        focus:outline-none
-      "
-      style="display: flex; justify-self: center;"
-    >
-      Exportar
-    </button>
-
-    {{ form.errors }}
-
-    {% if missing_banks %}
-      <div id="alert-bank" class="flex p-4 my-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert-bank">
-        <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-        </svg>
-        <span class="sr-only">Danger</span>
-        <div>
-            <span class="font-medium">Erro ao gerar relatório</span>
-            <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">
-                    O contrato escolhido ainda está em planejamento e/ou não tem contas bancárias cadastradas.
-                </li>
-            </ul>
-        </div>
-    
-        <button
-          type="button"
-          class="
-            ms-auto
-            -mx-1.5
-            -my-1.5
-            bg-red-300
-            text-white
-            rounded-lg
-            focus:ring-2
-            focus:ring-white
-            hover:bg-red-500
-            p-1.5
-            inline-flex
-            items-center
-            justify-center
-            h-6
-            w-6
-          "
-          data-dismiss-target="#alert-bank"
-          aria-label="Close"
-        >
-            <span class="sr-only">Close</span>
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+    <!-- Content Area -->
+    <div class="flex-1 p-6">
+      <div id="preview-container" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-dashed border-gray-300 h-full min-h-[600px] flex items-center justify-center overflow-hidden">
+        
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-12">
+          <div class="mx-auto w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
+            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-        </button>
-    
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Pronto para Visualizar</h3>
+          <p class="text-gray-500 mb-6 max-w-sm mx-auto">Selecione os dados necessários e clique em <strong>"Gerar Relatório"</strong> para consultar o relatório.</p>
+          <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Visualização em tempo real</span>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden text-center py-12">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
+            <svg class="animate-spin w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Gerando Relatório</h3>
+          <p class="text-gray-600">Processando dados e criando documento...</p>
+          <div class="mt-4 w-full bg-gray-200 rounded-full h-2 max-w-xs mx-auto">
+            <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div id="success-state" class="hidden text-center py-12">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Relatório Pronto!</h3>
+          <p id="success-details" class="text-gray-600 mb-6">Seu documento foi gerado com sucesso</p>
+          <div class="space-y-3">
+            <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm max-w-sm mx-auto">
+              <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                  <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p id="file-name-display" class="text-sm font-medium text-gray-900 truncate">relatorio.pdf</p>
+                  <p id="file-size-display" class="text-sm text-gray-500">PDF Document</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500">Clique em "Abrir em nova aba" para visualizar ou "Baixar" para salvar</p>
+          </div>
+        </div>
+
       </div>
-    {% endif %}
-</form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+        <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Gerando Relatório</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500">
+          Processando dados e criando documento...
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% block extra_js %}
 <script>
+let currentPdfData = null;
+let currentFilename = null;
+
+function showError(message) {
+    const errorAlert = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
+    
+    if (message.includes('\n')) {
+        errorMessage.innerHTML = message.replace(/\n/g, '<br>');
+    } else {
+        errorMessage.textContent = message;
+    }
+    errorAlert.classList.remove("hidden");
+    showEmptyState();
+    errorAlert.scrollIntoView({ behavior: "smooth" });
+}
+
+function hideErrorAlert() {
+    const errorAlert = document.getElementById("error-alert");
+    errorAlert.classList.add("hidden");
+}
+
+function showEmptyState() {
+    const emptyState = document.getElementById("empty-state");
+    const loadingState = document.getElementById("loading-state");
+    const successState = document.getElementById("success-state");
+    const previewActions = document.getElementById("preview-actions");
+    const reportInfo = document.getElementById("report-info");
+    
+    if (emptyState) emptyState.classList.remove("hidden");
+    if (loadingState) loadingState.classList.add("hidden");
+    if (successState) successState.classList.add("hidden");
+    if (previewActions) previewActions.classList.add("hidden");
+    if (reportInfo) reportInfo.textContent = "Aguardando geração...";
+}
+
+window.generateReport = function() {
+    
+    const contractSelect = document.querySelector('#id_contract');
+    const reportModelSelect = document.querySelector('#id_report_model');
+    const startMonthSelect = document.querySelector('#id_start_month');
+    const startYearSelect = document.querySelector('#id_start_year');
+    const endMonthSelect = document.querySelector('#id_end_month');
+    const endYearSelect = document.querySelector('#id_end_year');
+    
+    const contract = contractSelect ? contractSelect.value : '';
+    const reportModel = reportModelSelect ? reportModelSelect.value : '';
+    const startMonth = startMonthSelect ? startMonthSelect.value : '';
+    const startYear = startYearSelect ? startYearSelect.value : '';
+    const endMonth = endMonthSelect ? endMonthSelect.value : '';
+    const endYear = endYearSelect ? endYearSelect.value : '';
+    
+    if (!contract || !reportModel || !startMonth || !startYear || !endMonth || !endYear) {
+        showError("Por favor, preencha todos os campos obrigatórios.");
+        return;
+    }
+    
+    const generateButton = document.getElementById("generate-button");
+    const generateText = document.getElementById("generate-text");
+    const generateIcon = document.getElementById("generate-icon");
+    const loadingIcon = document.getElementById("loading-icon");
+    
+    const loadingModal = document.getElementById('loading-modal');
+    loadingModal.classList.remove('hidden');
+    generateButton.disabled = true;
+    generateText.textContent = "Gerando...";
+    generateIcon.classList.add("hidden");
+    loadingIcon.classList.remove("hidden");
+
+    // Create FormData manually with the values we found
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', document.querySelector("[name=csrfmiddlewaretoken]").value);
+    formData.append('contract', contract);
+    formData.append('report_model', reportModel);
+    formData.append('start_month', startMonth);
+    formData.append('start_year', startYear);
+    formData.append('end_month', endMonth);
+    formData.append('end_year', endYear);
+    
+    fetch("{% url 'reports:reports-generate-api' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(async response => {
+        loadingModal.classList.add('hidden');
+        
+        generateButton.disabled = false;
+        generateText.textContent = "Gerar Relatório";
+        generateIcon.classList.remove("hidden");
+        loadingIcon.classList.add("hidden");
+        
+        const contentType = response.headers.get("content-type");
+        
+        if (!response.ok) {
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                let errorMessage = data.message || "Erro ao gerar relatório";
+                
+                if (data.errors) {
+                    const errorDetails = [];
+                    for (const [field, errors] of Object.entries(data.errors)) {
+                        if (Array.isArray(errors)) {
+                            errorDetails.push(`${field}: ${errors.join(', ')}`);
+                        } else {
+                            errorDetails.push(`${field}: ${errors}`);
+                        }
+                    }
+                    if (errorDetails.length > 0) {
+                        errorMessage += "\n\nDetalhes:\n" + errorDetails.join('\n');
+                    }
+                }
+                
+                showError(errorMessage);
+            } else {
+                showError("Erro: " + response.status + " - " + response.statusText);
+            }
+            return;
+        }
+        
+        if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            
+            if (data.success) {
+                showSuccessPreview(data);
+            } else {
+                showError(data.message || "Erro ao gerar relatório");
+            }
+        } else {
+            showError("Formato de resposta inesperado");
+        }
+    })
+    .catch(error => {
+        loadingModal.classList.add('hidden');
+        
+        generateButton.disabled = false;
+        generateText.textContent = "Gerar Relatório";
+        generateIcon.classList.remove("hidden");
+        loadingIcon.classList.add("hidden");
+        
+        showError("Erro de conexão. Tente novamente.");
+    });
+};
+
+function showSuccessPreview(data) {
+    const emptyState = document.getElementById("empty-state");
+    const loadingState = document.getElementById("loading-state");
+    const successState = document.getElementById("success-state");
+    const previewActions = document.getElementById("preview-actions");
+    const reportInfo = document.getElementById("report-info");
+    const successDetails = document.getElementById("success-details");
+    const fileNameDisplay = document.getElementById("file-name-display");
+    
+    if (emptyState) emptyState.classList.add("hidden");
+    if (loadingState) loadingState.classList.add("hidden");
+    if (successState) successState.classList.remove("hidden");
+    if (previewActions) previewActions.classList.remove("hidden");
+    
+    if (reportInfo) reportInfo.textContent = `${data.contract_name} - ${data.start_date} a ${data.end_date}`;
+    if (successDetails) successDetails.textContent = `Relatório de ${data.contract_name} gerado com sucesso`;
+    if (fileNameDisplay) fileNameDisplay.textContent = data.filename || "relatorio.pdf";
+    
+    // Store PDF data for download (global variables for existing event handlers)
+    window.currentPdfData = data.pdf_data;
+    window.currentFilename = data.filename;
+    
+    currentPdfData = data.pdf_data;
+    currentFilename = data.filename;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const container = document.getElementById("responsibles-container");
     const addButton = document.getElementById("add-responsible");
-    const totalFormsInput = document.querySelector('#id_responsibles-TOTAL_FORMS');
+    const totalFormsInput = document.querySelector("#id_responsibles-TOTAL_FORMS");
     let formCount = parseInt(totalFormsInput.value, 10);
 
     addButton.addEventListener("click", function () {
-        const newForm = container.querySelector('.responsible-form').cloneNode(true);
+        const newForm = container.querySelector(".responsible-form").cloneNode(true);
         const formRegex = RegExp(`responsibles-(\\d+)-`, "g");
 
         formCount++;
@@ -241,8 +755,7 @@ document.addEventListener("DOMContentLoaded", function() {
             formCount--;
             totalFormsInput.value = formCount;
             
-            // Update indices of remaining forms
-            container.querySelectorAll('.responsible-form').forEach((form, index) => {
+            container.querySelectorAll(".responsible-form").forEach((form, index) => {
                 form.innerHTML = form.innerHTML.replace(
                     /responsibles-\d+-/g,
                     `responsibles-${index}-`
@@ -250,13 +763,189 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
     });
+
+    // Main elements
+    const form = document.querySelector("form");
+    const generateButton = document.getElementById("generate-button");
+    const generateText = document.getElementById("generate-text");
+    const generateIcon = document.getElementById("generate-icon");
+    const loadingIcon = document.getElementById("loading-icon");
+    const errorAlert = document.getElementById("error-alert");
+    const errorMessage = document.getElementById("error-message");
+    const closeError = document.getElementById("close-error");
+
+    // Preview elements
+    const reportInfo = document.getElementById("report-info");
+    const previewActions = document.getElementById("preview-actions");
+    const downloadButton = document.getElementById("download-button");
+    const regenerateButton = document.getElementById("regenerate-button");
+
+    // State elements
+    const emptyState = document.getElementById("empty-state");
+    const loadingState = document.getElementById("loading-state");
+    const successState = document.getElementById("success-state");
+    const successDetails = document.getElementById("success-details");
+    const fileNameDisplay = document.getElementById("file-name-display");
+    const fileSizeDisplay = document.getElementById("file-size-display");
+
+    // State variables
+    let currentReportUrl = null;
+    let formState = null;
+
+    function saveFormState() {
+        const formData = new FormData(form);
+        formState = {};
+        for (let [key, value] of formData.entries()) {
+            formState[key] = value;
+        }
+    }
+
+    function restoreFormState() {
+        if (formState) {
+            for (let [key, value] of Object.entries(formState)) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = value === 'on' || value === input.value;
+                    } else {
+                        input.value = value;
+                    }
+                }
+            }
+        }
+    }
+
+
+    function showLoadingState() {
+        emptyState.classList.add("hidden");
+        loadingState.classList.remove("hidden");
+        successState.classList.add("hidden");
+        previewActions.classList.add("hidden");
+        reportInfo.textContent = "Gerando relatório...";
+    }
+
+    function showSuccessState(data) {
+        emptyState.classList.add("hidden");
+        loadingState.classList.add("hidden");
+        successState.classList.remove("hidden");
+        previewActions.classList.remove("hidden");
+        
+        reportInfo.textContent = `${data.contract_name} - ${data.start_date} a ${data.end_date}`;
+        successDetails.textContent = `Relatório de ${data.contract_name} gerado com sucesso`;
+        fileNameDisplay.textContent = currentFilename || "relatorio.pdf";
+        
+        if (currentPdfData) {
+            const sizeInBytes = Math.ceil((currentPdfData.length * 3) / 4);
+            fileSizeDisplay.textContent = formatFileSize(sizeInBytes);
+        } else {
+            fileSizeDisplay.textContent = "PDF Document";
+        }
+        
+    }
+
+    function setButtonLoadingState(isLoading) {
+        generateButton.disabled = isLoading;
+        generateText.textContent = isLoading ? "Gerando..." : "Gerar Relatório";
+        generateIcon.classList.toggle("hidden", isLoading);
+        loadingIcon.classList.toggle("hidden", !isLoading);
+    }
+
+    downloadButton.addEventListener("click", function() {
+        if (currentPdfData && currentFilename) {
+            try {
+                const blob = base64ToBlob(currentPdfData, "application/pdf");
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = currentFilename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                showError("Erro ao baixar o arquivo");
+            }
+        } else {
+            showError("Nenhum relatório disponível para download");
+        }
+    });
+
+    function submitFormToNewWindow(forceDownload = false) {
+        const form2 = document.createElement("form");
+        form2.method = "POST";
+        form2.action = currentReportUrl || "{% url 'reports:reports-generate-api' %}";
+        form2.target = "_blank";
+        form2.style.display = "none";
+        
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = value;
+            form2.appendChild(input);
+        }
+        
+        if (forceDownload) {
+            const downloadInput = document.createElement("input");
+            downloadInput.type = "hidden";
+            downloadInput.name = "download";
+            downloadInput.value = "1";
+            form2.appendChild(downloadInput);
+        }
+        
+        document.body.appendChild(form2);
+        form2.submit();
+        document.body.removeChild(form2);
+    }
+
+    regenerateButton.addEventListener("click", function() {
+        showEmptyState();
+        hideErrorAlert();
+        currentPdfData = null;
+        currentFilename = null;
+        currentReportUrl = null;
+        restoreFormState();
+        form.scrollIntoView({ behavior: "smooth" });
+    });
+
+    closeError.addEventListener("click", function() {
+        hideErrorAlert();
+    });
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+    }
+
+    function base64ToBlob(base64, contentType) {
+        const byteCharacters = atob(base64);
+        const byteArrays = [];
+        
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+        
+        return new Blob(byteArrays, {type: contentType});
+    }
 });
 
 function toggleResponsibles() {
   const container = document.getElementById("responsibles-container");
   const icon = document.getElementById("toggle-icon");
+  const isHidden = container.classList.contains("hidden");
+  
   container.classList.toggle("hidden");
-  icon.style.transform = container.classList.contains("hidden") ? "" : "rotate(180deg)";
+  icon.style.transform = isHidden ? "rotate(180deg)" : "";
 }
 </script>
 {% endblock %}

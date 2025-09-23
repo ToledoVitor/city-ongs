@@ -1,38 +1,68 @@
 {% load humanize %}
 
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs uppercase bg-gray-500 text-white">
-            <tr>
-                <th scope="col" class="px-4 py-4 font-medium w-[180px]">
-                    <span class="sr-only">Ações</span>
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[30%]">
-                    Meta
-                </th>
-                <th scope="col" class="px-6 py-4 font-medium w-[40%]">
-                    Objetivo
-                </th>
-                <th scope="col" class="px-4 py-4 font-medium w-[120px]">
-                    Status
-                </th>
-                <th scope="col" class="px-4 py-4 font-medium w-[140px]">
-                    <span class="sr-only">Ver Etapas</span>
-                </th>
-            </tr>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <div class="p-1.5 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg">
+        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Metas do Contrato</h2>
+        <p class="text-xs text-gray-600">Objetivos e metas estabelecidas para o projeto</p>
+      </div>
+    </div>
+    
+    {% if contract.is_on_planning %}
+      <a
+        href="{% url 'contracts:contracts-goals-create' contract.id %}"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Adicionar Meta
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Goals List -->
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-500 text-white sticky top-0 z-30">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[180px]">
+              Ações
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[30%]">
+              Meta
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[40%]">
+              Objetivo
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[120px]">
+              Status
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[140px]">
+              Etapas
+            </th>
+          </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-200">
             {% if contract.goals.count %}
               {% for goal in contract.goals.all %}
-                <tr class="bg-gray-50 border-b hover:bg-gray-200">
-                  <td class="px-2 py-4 text-base text-sm sticky left-0 z-10 bg-gray-300 hover:bg-gray-400 border-r border-gray-300 w-[180px]">
-                    <div class="flex gap-1 justify-center">
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
                       {% if contract.is_on_planning and not user.is_committee_member %}
                         <a href="{% url 'contracts:contracts-goals-update' contract.id goal.id %}"
-                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
                         >
-                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
                           </svg>
                           Editar
                         </a>
@@ -42,11 +72,11 @@
                         <button
                           data-modal-target="goals-modal-{{ goal.id}}"
                           data-modal-toggle="goals-modal-{{ goal.id}}"
-                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
                           type="button"
                         >
-                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4"/>
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-width="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4"/>
                           </svg>
                           Avaliar
                         </button>
@@ -55,11 +85,11 @@
                           data-modal-target="goals-modal-{{ goal.id}}"
                           data-modal-toggle="goals-modal-{{ goal.id}}"
                           type="button"
-                          class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
                         >
-                          <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
                           </svg>
                           Detalhes
                         </button>
@@ -67,33 +97,48 @@
                     </div>
                   </td>
 
-                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                    {{ goal.name }}
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-semibold text-gray-900 truncate max-w-xs" title="{{ goal.name }}">{{ goal.name }}</div>
                   </td>
 
-                  <td class="px-6 py-4 text-sm text-gray-900">
-                    {{ goal.objective }}
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-700 truncate max-w-md" title="{{ goal.objective }}">{{ goal.objective }}</div>
                   </td>
 
                   <td class="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
                     {% if goal.status == "ANALYZING" %}
-                      <span class="text-xs font-medium me-2 px-2.5 py-0.5 rounded bg-indigo-900 text-indigo-100">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-300 text-blue-800 text-xs font-bold uppercase tracking-wide shadow-sm">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
                         Em análise
                       </span>
                     {% elif goal.status == "CORRECTING" %}
-                      <span class="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wide shadow-sm">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
                         Em correção
                       </span>
                     {% elif goal.status == "APPROVED" %}
-                      <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 text-green-800 text-xs font-bold uppercase tracking-wide shadow-sm">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
                         Aprovado
                       </span>
                     {% elif goal.status == "APPROVED_WITH_PENDENCE" %}
-                      <span class="bg-yellow-300 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-100 to-amber-100 border border-yellow-300 text-yellow-800 text-xs font-bold uppercase tracking-wide shadow-sm">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
                         Pendências
                       </span>
                     {% elif goal.status == "REJECTED" %}
-                      <span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-100 to-pink-100 border border-red-300 text-red-800 text-xs font-bold uppercase tracking-wide shadow-sm">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
                         Rejeitado
                       </span>
                     {% endif %}
@@ -116,10 +161,10 @@
                     {% if goal.steps.count %}
                       {% for step in goal.steps.all %}
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 pb-3">
-                          <p><strong>Etapa:</strong> {{ step.name }}</p>
-                          <p><strong>Objetivo:</strong> {{ step.objective }}</p>
-                          <p><strong>Metodologia:</strong> {{ step.methodology }}</p>
-                          <p><strong>Recursos:</strong> {{ step.resources }}</p>
+                          <p><strong>Etapa:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.name }}">{{ step.name }}</span></p>
+                          <p><strong>Objetivo:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.objective }}">{{ step.objective }}</span></p>
+                          <p><strong>Metodologia:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.methodology }}">{{ step.methodology }}</span></p>
+                          <p><strong>Recursos:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.resources|default:'n/a' }}">{{ step.resources|default:"n/a" }}</span></p>
                         </div>
 
                         <hr class="h-px mb-3 border-0 bg-gray-500">
@@ -260,7 +305,7 @@
                                               <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
@@ -275,7 +320,7 @@
                                                 <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
                                             </div>
                                             <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                              <p class="text-sm font-normal text-black">{{ review.comment }}</p>
+                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
                                             </div>
                                           </div>
                                         </div>
@@ -338,54 +383,26 @@
 
               {% endfor %}
             {% else %}
-              <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-                    Nenhuma meta cadastrada
-                </th>
-                <td class="px-6 py-4">
-                    -
+              <tr>
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center justify-center space-y-3">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">Nenhuma meta cadastrada</p>
+                      <p class="text-xs text-gray-500">Defina metas e objetivos para este contrato</p>
+                    </div>
+                  </div>
                 </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4">
-                    -
-                </td>
-                <td class="px-6 py-4" />
               </tr>
             {% endif %}     
         </tbody>
-    </table>
-
-    {% if contract.is_on_planning %}
-      <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-2 pb-4 px-4 bg-gray-400">
-        <a
-          href="{% url 'contracts:contracts-goals-create' contract.id %}"
-          class="
-            px-3
-            py-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          Adicionar nova meta
-          <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-          </svg>
-        </a>
-      </div>
-    {% endif %}
-      
+      </table>
+    </div>
+  </div>
 </div>
 
 

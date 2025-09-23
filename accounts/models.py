@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.contrib.auth.models import UserManager
 from django.utils import timezone
 from easy_tenants import get_current_tenant, tenant_context
 from easy_tenants.models import TenantAwareAbstract, TenantManager
@@ -296,6 +297,8 @@ class User(AbstractUser):
         help_text="Cargo ou função do usuário na organização",
     )
 
+    objects = UserManager()
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
@@ -328,9 +331,9 @@ class User(AbstractUser):
 
         # Check if document is unique within the organization
         if self.cpf or self.cnpj:
-            existing = User.objects.filter(
-                cpf=self.cpf, cnpj=self.cnpj
-            ).exclude(pk=self.pk)
+            existing = User.objects.filter(cpf=self.cpf, cnpj=self.cnpj).exclude(
+                pk=self.pk
+            )
             if existing.exists():
                 raise ValidationError(
                     "Já existe um usuário com este documento nesta organização"

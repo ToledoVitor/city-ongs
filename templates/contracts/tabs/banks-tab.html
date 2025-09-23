@@ -1,114 +1,187 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-    <p class="text-2xl mb-2 font-bold text-black">Contas Bancárias Cadastradas</p>
-</div>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="p-2 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900">Contas Bancárias</h2>
+        <p class="text-sm text-gray-600">Contas cadastradas para movimentação financeira</p>
+      </div>
+    </div>
+    
+    {% if not contract.checking_account or not contract.investing_account %}
+      <a
+        href="{% url 'contracts:contracts-accounts-create' contract.id %}"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Adicionar Conta
+      </a>
+    {% endif %}
+  </div>
 
-<hr class="h-px mb-8 border-0 bg-gray-500">
-
-<div class="my-3 mx-5">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <p class="text-xl mb-2 font-bold text-black">Conta Corrente</p>
+  <!-- Bank Accounts Grid -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <!-- Checking Account -->
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Conta Corrente</h3>
+        </div>
         {% if contract.checking_account %}
-            <b>Banco:</b> {{ contract.checking_account.bank_name }} - {{ contract.checking_account.bank_id }}<br>
-            <b>Conta:</b> {{ contract.checking_account.account }}<br>
-            <b>Agência:</b> {{ contract.checking_account.agency|default_if_none:"N/A" }}<br>
-            <b>Origem da Receita:</b> {{ contract.checking_account.origin_label }}<br>
-            <a
-                href="{% url 'bank:bank-accounts-detail' contract.checking_account.id %}"
-                class="
-                    px-3
-                    py-1
-                    my-4
-                    text-sm
-                    font-medium
-                    text-center
-                    inline-flex
-                    items-center
-                    text-white
-                    rounded-lg
-                    focus:ring-4
-                    focus:outline-none
-                    bg-blue-600
-                    hover:bg-blue-700
-                    focus:ring-blue-800
-                "
-            >
-                Visualizar
-            </a>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Ativa
+          </span>
         {% else %}
-            <b>Banco:</b> Ainda não cadastrada.<br>
-            <b>Conta:</b> -<br>
-            <b>Agência:</b> -<br>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Não cadastrada
+          </span>
         {% endif %}
       </div>
 
-      <div class="relative">
-        <p class="text-xl mb-2 font-bold text-black">Conta Investimento</p>
-        {% if contract.investing_account %}
-            <b>Banco:</b> {{ contract.investing_account.bank_name }} - {{ contract.investing_account.bank_id }}<br>
-            <b>Conta:</b> {{ contract.investing_account.account }}<br>
-            <b>Agência:</b> {{ contract.investing_account.agency }}<br>
-            <b>Origem da Receita:</b> {{ contract.investing_account.origin_label }}<br>
-            <a
-                href="{% url 'bank:bank-accounts-detail' contract.investing_account.id %}"
-                class="
-                    px-3
-                    py-1
-                    my-4
-                    text-sm
-                    font-medium
-                    text-center
-                    inline-flex
-                    items-center
-                    text-white
-                    rounded-lg
-                    focus:ring-4
-                    focus:outline-none
-                    bg-blue-600
-                    hover:bg-blue-700
-                    focus:ring-blue-800
-                "
-            >
-                Visualizar
-            </a>
-        {% else %}
-            <b>Banco:</b> Ainda não cadastrada.<br>
-            <b>Conta:</b> -<br>
-            <b>Agência:</b> -<br>
-        {% endif %}    
-      </div>
-
+      {% if contract.checking_account %}
+        <div class="space-y-3 mb-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Banco:</span>
+            <span class="text-sm font-medium text-gray-900">{{ contract.checking_account.bank_name }} - {{ contract.checking_account.bank_id }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Conta:</span>
+            <span class="text-sm font-medium text-gray-900 font-mono">{{ contract.checking_account.account }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Agência:</span>
+            <span class="text-sm font-medium text-gray-900 font-mono">{{ contract.checking_account.agency|default_if_none:"N/A" }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Origem:</span>
+            <span class="text-sm font-medium text-gray-900">{{ contract.checking_account.origin_label }}</span>
+          </div>
+        </div>
+        <a
+          href="{% url 'bank:bank-accounts-detail' contract.checking_account.id %}"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full justify-center"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          Visualizar Detalhes
+        </a>
+      {% else %}
+        <div class="text-center py-8">
+          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-900 mb-1">Conta não cadastrada</p>
+          <p class="text-xs text-gray-500">Configure uma conta corrente para este contrato</p>
+        </div>
+      {% endif %}
     </div>
 
-    {% if not contract.checking_account or not contract.investing_account %}
-        <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
-        <a
-            href="{% url 'contracts:contracts-accounts-create' contract.id %}"
-            class="
-                px-3
-                py-2
-                text-sm
-                font-medium
-                text-center
-                inline-flex
-                items-center
-                text-white
-                rounded-lg
-                focus:ring-4
-                focus:outline-none
-                bg-blue-600
-                hover:bg-blue-700
-                focus:ring-blue-800
-            "
-        >
-            Adicionar conta
-            <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+    <!-- Investment Account -->
+    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
             </svg>
-        </a>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Conta Investimento</h3>
         </div>
-    {% endif %}
+        {% if contract.investing_account %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Ativa
+          </span>
+        {% else %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Não cadastrada
+          </span>
+        {% endif %}
+      </div>
 
+      {% if contract.investing_account %}
+        <div class="space-y-3 mb-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Banco:</span>
+            <span class="text-sm font-medium text-gray-900">{{ contract.investing_account.bank_name }} - {{ contract.investing_account.bank_id }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Conta:</span>
+            <span class="text-sm font-medium text-gray-900 font-mono">{{ contract.investing_account.account }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Agência:</span>
+            <span class="text-sm font-medium text-gray-900 font-mono">{{ contract.investing_account.agency }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">Origem:</span>
+            <span class="text-sm font-medium text-gray-900">{{ contract.investing_account.origin_label }}</span>
+          </div>
+        </div>
+        <a
+          href="{% url 'bank:bank-accounts-detail' contract.investing_account.id %}"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full justify-center"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          Visualizar Detalhes
+        </a>
+      {% else %}
+        <div class="text-center py-8">
+          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-900 mb-1">Conta não cadastrada</p>
+          <p class="text-xs text-gray-500">Configure uma conta de investimento para este contrato</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>

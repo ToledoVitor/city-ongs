@@ -17,7 +17,7 @@ from utils.admin import BaseModelAdmin
 class AccountabilityFileInline(admin.TabularInline):
     model = AccountabilityFile
     extra = 0
-    fields = ("name", "type")
+    fields = ("name", "file")
 
 
 @admin.register(Accountability)
@@ -52,7 +52,14 @@ class AccountabilityAdmin(BaseModelAdmin):
         ),
         (
             _("Datas"),
-            {"fields": ("start_date", "end_date", "created_at", "updated_at")},
+            {
+                "fields": (
+                    "month",
+                    "year",
+                    "created_at",
+                    "updated_at",
+                )
+            },
         ),
     )
 
@@ -60,7 +67,7 @@ class AccountabilityAdmin(BaseModelAdmin):
 class ExpenseFileInline(admin.TabularInline):
     model = ExpenseFile
     extra = 0
-    fields = ("name",)
+    fields = ("name", "file")
 
 
 @admin.register(Expense)
@@ -68,24 +75,34 @@ class ExpenseAdmin(BaseModelAdmin):
     list_display = (
         "organization",
         "accountability",
+        "identification",
         "favored",
         "value",
         "competency",
         "status",
+        "paid",
+        "conciled",
         "created_at",
     )
     list_filter = (
         "organization",
-        "accountability",
+        "accountability__contract",
         "status",
-        "competency",
         "paid",
         "conciled",
+        "planned",
+        "competency",
+        "liquidation",
+        "source",
+        "nature",
     )
     search_fields = (
         "identification",
         "favored__name",
+        "favored__document",
         "accountability__contract__name",
+        "observations",
+        "document_number",
     )
     inlines = [ExpenseFileInline]
     fieldsets = (
@@ -95,20 +112,66 @@ class ExpenseAdmin(BaseModelAdmin):
                 "fields": (
                     "organization",
                     "accountability",
+                    "identification",
                     "favored",
+                    "source",
+                    "item",
                     "value",
-                    "date",
+                    "nature",
                 )
             },
         ),
-        (_("Detalhes"), {"fields": ("description", "created_at", "updated_at")}),
+        (
+            _("Status e Flags"),
+            {
+                "fields": (
+                    "status",
+                    "paid",
+                    "conciled",
+                    "planned",
+                    "pendencies",
+                )
+            },
+        ),
+        (
+            _("Datas"),
+            {
+                "fields": (
+                    "competency",
+                    "due_date",
+                    "liquidation",
+                    "conciled_at",
+                    "deleted_at",
+                )
+            },
+        ),
+        (
+            _("Documentos"),
+            {
+                "fields": (
+                    "document_type",
+                    "document_number",
+                    "liquidation_form",
+                )
+            },
+        ),
+        (
+            _("Observações"),
+            {
+                "fields": (
+                    "observations",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
     )
 
 
 class RevenueFileInline(admin.TabularInline):
     model = RevenueFile
     extra = 0
-    fields = ("name",)
+    fields = ("name", "file")
 
 
 @admin.register(Revenue)
@@ -129,7 +192,11 @@ class RevenueAdmin(BaseModelAdmin):
         "competency",
         "receive_date",
     )
-    search_fields = ("description", "accountability__contract__number", "source__name")
+    search_fields = (
+        "identification",
+        "accountability__contract__name",
+        "observations",
+    )
     inlines = [RevenueFileInline]
     fieldsets = (
         (
@@ -138,13 +205,18 @@ class RevenueAdmin(BaseModelAdmin):
                 "fields": (
                     "organization",
                     "accountability",
+                    "identification",
                     "source",
+                    "bank_account",
                     "value",
-                    "date",
+                    "revenue_nature",
                 )
             },
         ),
-        (_("Detalhes"), {"fields": ("description", "created_at", "updated_at")}),
+        (
+            _("Detalhes"),
+            {"fields": ("observations", "created_at", "updated_at")},
+        ),
     )
 
 

@@ -1,38 +1,89 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-    <p class="text-2xl mb-2 font-bold text-black">Listando as últimas 10 transações</p>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <div class="p-1.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Transações Recentes</h2>
+        <p class="text-xs text-gray-600">Últimas 10 transações da conta</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions List -->
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+    <div class="p-6">
+      {% if object.last_transactions %}
+        <div class="space-y-4">
+          {% for transaction in object.last_transactions %}
+            <div class="flex items-start gap-4 p-4 {% if transaction.amount < 0 %}bg-red-50 border border-red-200{% else %}bg-green-50 border border-green-200{% endif %} rounded-lg transition-all duration-200 hover:shadow-md">
+              <!-- Transaction Icon -->
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center {% if transaction.amount < 0 %}bg-red-100{% else %}bg-green-100{% endif %}">
+                  {% if transaction.amount < 0 %}
+                    <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm5.757-1a1 1 0 1 0 0 2h8.486a1 1 0 1 0 0-2H7.757Z" clip-rule="evenodd"/>
+                    </svg>
+                  {% else %}
+                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clip-rule="evenodd"/>
+                    </svg>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <!-- Transaction Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-sm font-medium text-gray-900">{{ transaction.transaction_type }}</p>
+                  <p class="text-lg font-bold {% if transaction.amount < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                    R$ {{ transaction.amount|intcomma }}
+                  </p>
+                </div>
+                
+                <div class="flex items-center gap-4 text-xs text-gray-500 mb-2">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ transaction.date }}
+                  </span>
+                  
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                    </svg>
+                    {{ transaction.transaction_number|default_if_none:"S.N." }}
+                  </span>
+                </div>
+                
+                {% if transaction.memo %}
+                  <p class="text-sm {% if transaction.amount < 0 %}text-red-700{% else %}text-green-700{% endif %} bg-white bg-opacity-50 rounded px-2 py-1 mt-2">
+                    {{ transaction.memo }}
+                  </p>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhuma transação encontrada</h3>
+          <p class="text-sm text-gray-500">As transações aparecerão aqui quando disponíveis</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
-
-<hr class="h-px mb-8 border-0 bg-gray-500">
-
-
-<ol class="mx-5 mt-6 relative border-s border-gray-700">
-    {% for transaction in object.last_transactions %}
-        {% if transaction.amount < 0 %}
-            <li class="mb-6 ms-6">
-                <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-4 ring-gray-500 bg-gray-500">
-                    <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm5.757-1a1 1 0 1 0 0 2h8.486a1 1 0 1 0 0-2H7.757Z" clip-rule="evenodd"/>
-                    </svg>                                                           
-                </span>
-                <time class="block ml-2 mb-2 text-sm font-normal leading-none text-black">{{ transaction.date }}</time>
-                <p class="ml-2 text-base font-normal text-red-600">R${{ transaction.amount|intcomma }}</p>
-                <p class="ml-2 text-base font-normal text-red-600">{{ transaction.transaction_number|default_if_none:"S.N." }} - {{ transaction.transaction_type }}</p>
-                <p class="ml-2 text-base font-normal text-red-600">{{ transaction.memo }}</p>
-            </li>
-        {% else %}
-            <li class="mb-6 ms-6">
-                <span class="absolute flex items-center justify-center w-6 h-6 rounded-full -start-3 ring-4 ring-gray-500 bg-gray-500">
-                    <svg class="w-[16px] h-[16px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clip-rule="evenodd"/>
-                    </svg>                                             
-                </span>
-                <time class="block ml-2 mb-2 text-sm font-normal leading-none text-black">{{ transaction.date }}</time>
-                <p class="ml-2 text-base font-normal text-green-600">R${{ transaction.amount|intcomma }}</p>
-                <p class="ml-2 text-base font-normal text-green-600">{{ transaction.transaction_number }} - {{ transaction.transaction_type }}</p>
-                <p class="ml-2 text-base font-normal text-green-600">{{ transaction.memo }}</p>
-            </li>
-        {% endif %}
-    {% endfor %}
-</ol>

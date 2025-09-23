@@ -1,209 +1,219 @@
 {% load humanize %}
 
-<div class="my-4 mx-5">
-  <div class="flex justify-between">
-    <div>
-      <span class="px-2.5 py-0.5  mb-2 rounded bg-blue-700 text-white uppercase text-sm font-medium">{{ contract.status_label }}</span> <br>
-      <p class="text-2xl mt-1 mb-2 font-bold text-black">{{ contract.name_with_code }}</p>
-      <b>Licitação:</b> {{ contract.bidding }} <br>
-      <b>Organização:</b> {{ contract.organization.name }} <br>
-      <b>Area de atuação:</b> {{ contract.area.name }} <br>
-      {% if contract.file and user.has_admin_access %}
-        <b>
-          <a href="{{ contract.file.url }}" target="_blank" class="mt-2 px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
-            <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-4c0-.6-.4-1-1-1h-2m-1-5-4 5-4-5"/>
+<div class="space-y-6">
+  <!-- Header Section -->
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold shadow-lg whitespace-nowrap">
+            {{ contract.status_label }}
+          </span>
+        </div>
+        <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight break-words">{{ contract.name_with_code }}</h2>
+        
+        <div class="grid grid-cols-1 gap-4 text-sm">
+          <div class="flex items-start gap-4">
+            <div class="flex items-center gap-2 flex-shrink-0 w-40">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="font-bold text-gray-700">Licitação:</span>
+            </div>
+            <span class="text-gray-900 break-words text-justify flex-1">{{ contract.bidding }}</span>
+          </div>
+          
+          <div class="flex items-start gap-4">
+            <div class="flex items-center gap-2 flex-shrink-0 w-40">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <span class="font-bold text-gray-700">Organização:</span>
+            </div>
+            <span class="text-gray-900 break-words text-justify flex-1">{{ contract.organization.name }}</span>
+          </div>
+          
+          <div class="flex items-start gap-4">
+            <div class="flex items-center gap-2 flex-shrink-0 w-40">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+              </svg>
+              <span class="font-bold text-gray-700">Área de atuação:</span>
+            </div>
+            <span class="text-gray-900 break-words text-justify flex-1">{{ contract.area.name }}</span>
+          </div>
+        </div>
+        
+        {% if contract.file and user.has_admin_access %}
+          <div class="mt-4">
+            <a href="{{ contract.file.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="whitespace-nowrap">Baixar Arquivo</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="flex flex-col gap-3 lg:max-w-xs w-full flex-shrink-0">
+        <a
+          href="{% url 'contracts:contract-workplan' contract.id %}"
+          target="_blank"
+          class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-full"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 1 0 0-2h-2v-2h2a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2h-8v16h5v2H7a1 1 0 1 1 0-2h1V2H6Z" clip-rule="evenodd"/>
+          </svg>
+          <span class="whitespace-nowrap">Plano de Trabalho</span>
+        </a>
+
+        <a
+          href="{% url 'contracts:contract-timeline' contract.id %}"
+          class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-full"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6.01-6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm-10 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" clip-rule="evenodd"/>
+          </svg>
+          <span class="whitespace-nowrap">Cronograma Repasse</span>
+        </a>
+
+        {% if user.has_admin_access %}
+          <a
+            href="{% url 'contracts:contracts-update' contract.id %}"
+            class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
             </svg>
-            Arquivo
+            <span class="whitespace-nowrap">Editar Contrato</span>
           </a>
-        </b>
-      {% endif %}
-    </div>
 
-    <div class="max-w-60 text-center">
-      <a
-        href="{% url 'contracts:contract-workplan' contract.id %}"
-        target="_blank"
-        class="
-          w-48
-          px-3
-          py-2
-          mb-2
-          text-sm
-          font-medium
-          text-center
-          inline-flex
-          items-center
-          text-white
-          rounded-lg
-          focus:ring-4
-          focus:outline-none
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M6 2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 1 0 0-2h-2v-2h2a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2h-8v16h5v2H7a1 1 0 1 1 0-2h1V2H6Z" clip-rule="evenodd"/>
-        </svg>
-        Plano de Trabalho
-      </a>
-
-      <a
-        href="{% url 'contracts:contract-timeline' contract.id %}"
-        class="
-          w-48
-          px-3
-          py-2
-          mb-2
-          text-sm
-          font-medium
-          text-center
-          inline-flex
-          items-center
-          text-white
-          rounded-lg
-          focus:ring-4
-          focus:outline-none
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6.01-6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm-10 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" clip-rule="evenodd"/>
-        </svg>
-        Cronograma Repasse
-      </a>
-
-      {% if user.has_admin_access %}
-        <a
-          href="{% url 'contracts:contracts-update' contract.id %}"
-          class="
-            w-48
-            px-3
-            py-2
-            mb-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-          </svg>
-          Editar Contrato
-        </a>
-
-        <a
-          href="{% url 'contracts:contract-status-change' contract.id %}"
-          class="
-            w-48
-            px-3
-            py-2
-            mb-2
-            text-sm
-            font-medium
-            text-center
-            inline-flex
-            items-center
-            text-white
-            rounded-lg
-            focus:ring-4
-            focus:outline-none
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-        >
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clip-rule="evenodd"/>
-            <path fill-rule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clip-rule="evenodd"/>
-          </svg>
-          Alterar Status
-        </a>
-      {% endif %}
-
+          <a
+            href="{% url 'contracts:contract-status-change' contract.id %}"
+            class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clip-rule="evenodd"/>
+            </svg>
+            <span class="whitespace-nowrap">Alterar Status</span>
+          </a>
+        {% endif %}
+      </div>
     </div>
   </div>
-</div>
 
-<hr class="h-px mb-8 border-0 bg-gray-500">
-
-<div class="my-3 mx-5">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Valor do Contrato:</label>
-        <p class="text-lg">
-          R${{ contract.total_value|intcomma }} (atualizado) |
-          <span class="text-sm font-normal">R${{ contract.original_value|intcomma }} (original)</span>
-        </p>
+  <!-- Financial Information -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+      </svg>
+      Informações Financeiras
+    </h3>
+    
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+        <label class="block mb-2 text-sm font-medium text-green-800">Valor do Contrato</label>
+        <div class="space-y-1">
+          <p class="text-2xl font-bold text-green-900">R$ {{ contract.total_value|intcomma }}</p>
+          <p class="text-sm text-green-700">Atualizado</p>
+          <p class="text-xs font-bold text-green-600">Original: R$ {{ contract.original_value|intcomma }}</p>
+        </div>
       </div>
 
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Vigência:</label>
-        <p class="text-lg">{{ contract.start_of_vigency }} - {{ contract.end_of_vigency }}</p>
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+        <label class="block mb-2 text-sm font-medium text-blue-800">Período de Vigência</label>
+        <div class="space-y-1">
+          <p class="text-lg font-semibold text-blue-900">{{ contract.start_of_vigency }}</p>
+          <p class="text-sm text-blue-700">até</p>
+          <p class="text-lg font-semibold text-blue-900">{{ contract.end_of_vigency }}</p>
+        </div>
       </div>
-
     </div>
-</div>
+  </div>
 
-<div class="my-3 mx-5">
-    <label class="block mb-2 text-xl font-semibold text-black">Objetivo do contrato:</label>
-    <p class="text-lg">{{ contract.objective }}</p>
-</div>
-
-<hr class="h-px mb-8 border-0 bg-gray-500">
-
-<label class="block mx-5 mb-2 text-2xl font-bold text-black">Partes Interessadas</label>
-
-<div class="my-3 mx-5">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Contratante:</label>
-        <p class="text-lg">
-            Nome: {{ contract.contractor_company.name }} <br>
-            Cnpj: {{ contract.contractor_company.cnpj }} <br>
-        </p>
-      </div>
-
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Gestor da Contratante:</label>
-        <p class="text-lg">
-            Nome: {{ contract.contractor_manager.name }} <br>
-            Cnpj: {{ contract.contractor_manager.cnpj }} <br>
-        </p>
-      </div>
-
+  <!-- Contract Objective -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      Objetivo do Contrato
+    </h3>
+    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+      <p class="text-gray-800 leading-relaxed">{{ contract.objective }}</p>
     </div>
-</div>
+  </div>
 
-<div class="my-3 mx-5">
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Contratada:</label>
-        <p class="text-lg">
-            Nome: {{ contract.hired_company.name }} <br>
-            Cnpj: {{ contract.hired_company.cnpj }} <br>
-        </p>
+  <!-- Stakeholders -->
+  <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+      </svg>
+      Partes Interessadas
+    </h3>
+    
+    <div class="grid gap-6 md:grid-cols-2">
+      <!-- Contractor Section -->
+      <div class="flex flex-col space-y-4">
+        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-200 flex-1">
+          <h4 class="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            Contratante
+          </h4>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-blue-800">Nome:</span> <span class="text-blue-900">{{ contract.contractor_company.name }}</span></p>
+            <p><span class="font-medium text-blue-800">CNPJ:</span> <span class="text-blue-900 font-mono">{{ contract.contractor_company.cnpj }}</span></p>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-4 border border-indigo-200 flex-1">
+          <h4 class="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            Gestor da Contratante
+          </h4>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-indigo-800">Nome:</span> <span class="text-indigo-900">{{ contract.contractor_manager.name }}</span></p>
+            <p><span class="font-medium text-indigo-800">CNPJ:</span> <span class="text-indigo-900 font-mono">{{ contract.contractor_manager.cnpj }}</span></p>
+          </div>
+        </div>
       </div>
 
-      <div class="relative">
-        <label class="block mb-2 text-xl font-semibold text-black">Gestor da Contratada:</label>
-        <p class="text-lg">
-            Nome: {{ contract.hired_manager.name }} <br>
-            Cnpj: {{ contract.hired_manager.cnpj }} <br>
-        </p>
-      </div>
+      <!-- Hired Section -->
+      <div class="flex flex-col space-y-4">
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-4 border border-emerald-200 flex-1">
+          <h4 class="font-semibold text-emerald-900 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            Contratada
+          </h4>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-emerald-800">Nome:</span> <span class="text-emerald-900">{{ contract.hired_company.name }}</span></p>
+            <p><span class="font-medium text-emerald-800">CNPJ:</span> <span class="text-emerald-900 font-mono">{{ contract.hired_company.cnpj }}</span></p>
+          </div>
+        </div>
 
+        <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-200 flex-1">
+          <h4 class="font-semibold text-teal-900 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            Gestor da Contratada
+          </h4>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-medium text-teal-800">Nome:</span> <span class="text-teal-900">{{ contract.hired_manager.name }}</span></p>
+            <p><span class="font-medium text-teal-800">CNPJ:</span> <span class="text-teal-900 font-mono">{{ contract.hired_manager.cnpj }}</span></p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

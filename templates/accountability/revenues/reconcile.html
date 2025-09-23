@@ -4,11 +4,46 @@
 
 {% block customcss %}
 <style>
-    #id_transactions {
-        max-height: 200px;
-        overflow-y: scroll;
-        padding: 10px;
-        margin-bottom: 10px;
+    .transaction-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .transaction-item:hover {
+        transform: translateY(-1px);
+    }
+    
+    .selected-transactions.empty {
+        display: none;
+    }
+    
+    .file-upload-area.dragover {
+        @apply border-blue-500 bg-blue-50;
+    }
+    
+    .main-content {
+        height: calc(100vh - 200px);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .drawers-container {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 0;
+        min-height: 0;
+    }
+    
+    .drawer-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .transactions-scroll {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 300px;
     }
 </style>
 {% endblock %}
@@ -18,7 +53,7 @@
 {% load humanize %}
 
 <p class="text-3xl mb-4 font-bold">
-    Conciliar Despesa
+    Conciliar Receita
 </p>
   
 <!-- Breadcrumb -->
@@ -50,187 +85,357 @@
         <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2">Conciliar Despesa</span>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">Conciliar Receita</span>
         </div>
     </li>
     </ol>
 </nav>
   
-<form method="post" enctype="multipart/form-data" class="max-w-lg mx-auto">
+<form method="post" enctype="multipart/form-data" class="max-w-7xl mx-auto">
     {% csrf_token %}
     
-    <div class="mb-3 text-base flex justify-between">
-        <label class="block text-xl font-bold text-black">Conciliar</label>
-        <span class="underline">Conciliados: <b>{{conciled}}/{{total}}</b></span>
-    </div>
-
-    <h2 class="mb-4 text-base text-left">
-        Anexe os arquivos comprovando o pagamento da despesa e vincule as transações bancárias relacionadas.
-        A despesa será marca como paga.
-    <h2>
-        
-    <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
-
-    <div class="mb-2 text-base flex justify-between">
-        <b>Identificação: </b>
-        <a href="{% url 'accountability:expenses-update' revenue.id %}" class="ms-auto hover:underline font-medium text-blue-800">
-            {{ revenue.identification }}
-        </a>
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        <b>Observações: </b> {{ revenue.observations|default_if_none:"Sem Observações" }}
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        <b>Favorecido: </b> {{ revenue.favored.name }}
-    </div>
-    <div class="mb-2 text-base flex justify-between">
-        <b>Valor: </b> R${{ revenue.value|intcomma }}
-    </div>
-
-    <hr class="max-w-lg mx-auto h-px my-4 border-0 bg-gray-400">
-
-    <div class="my-3">
-        <label class="block text-xl font-medium text-black">Transações</label>
-        <p id="helper-text-explanation" class="mb-2 text-sm text-gray-400">
-            Ao vincular com uma transação, a receita será marcada como conciliada.
-        </p>
-        
-        <div class="relative mb-4">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+    {% if form.errors %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
+                <h3 class="text-sm font-medium text-red-800">Erro ao Conciliar Receita</h3>
             </div>
-            <input
-                type="text"
-                id="checkbox-search"
-                class="
-                    block
-                    w-full
-                    p-4
-                    ps-10
-                    text-sm
-                    text-black
-                    border
-                    border-gray-500
-                    rounded-lg
-                    bg-gray-300
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                "
-                placeholder="Pesquisar transações..."
-            />
+            <div class="mt-2">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p class="text-sm text-red-700">{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-
-        <div
-            class="p-2 rounded-lg bg-gray-300 border-gray-500 text-black checkbox-container"
-        >
-          {{ form.transactions }}
-        </div>
-    </div>
-
-    {% include 'commons/form-errors.html' with form=form error_message="Erro ao Conciliar Receita" %}
-
-    {% if missing_files %}
-    <div id="alert-revenue" class="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-100 border border-red-300" role="alert">
-        <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-        </svg>
-        <span class="sr-only">Danger</span>
-        <div>
-            <span class="font-medium">Erro ao conciliar despesa</span>
-            <ul class="my-1.5 list-disc list-inside">
-                <li class="my-1">É necessário anexar algum arquivo de comprovante.</li>
-            </ul>
-        </div>
-
-        <button
-            type="button"
-            class="
-                ms-auto
-                -mx-1.5
-                -my-1.5
-                bg-red-300
-                text-white
-                rounded-lg
-                focus:ring-2
-                focus:ring-white
-                hover:bg-red-500
-                p-1.5
-                inline-flex
-                items-center
-                justify-center
-                h-6
-                w-6
-            "
-            data-dismiss-target="#alert-revenue"
-            aria-label="Close"
-        >
-            <span class="sr-only">Close</span>
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-            </svg>
-        </button>
-
-    </div>
     {% endif %}
 
-    <div class="flex gap-10">
-        <button
-          type="submit"
-          name="action"
-          value="current"
-          class="
-            w-full
-            text-white
-            bg-gray-500
-            hover:bg-gray-600
-            focus:ring-4
-            focus:outline-none
-            focus:ring-gray-300
-            font-medium rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-          "
-        >
-          Conciliar Este
-        </button>
+    <div class="main-content">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch drawers-container">
+            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
+                <div class="mb-3 flex justify-between items-center">
+                    <h1 class="text-xl font-bold text-gray-900">Conciliar Receita</h1>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500">Progresso</div>
+                        <div class="text-sm font-semibold text-blue-600">{{conciled}}/{{total}}</div>
+                        <div class="w-20 bg-gray-200 rounded-full h-1.5 mt-1">
+                            <div class="bg-green-600 h-1.5 rounded-full transition-all duration-300" style="width: {% widthratio conciled total 100 %}%"></div>
+                        </div>
+                    </div>
+                </div>
 
-        <button
-          type="submit"
-          name="action"
-          value="next"
-          class="
-              w-full
-              text-white
-              bg-blue-700
-              hover:bg-blue-800
-              focus:ring-4
-              focus:outline-none
-              focus:ring-blue-300
-              font-medium rounded-lg
-              text-sm
-              px-5
-              py-2.5
-              text-center
-          "
-        >
-          Conciliar Próximo
-        </button>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-xs leading-relaxed">
+                        Anexe os arquivos comprovando o recebimento da receita e vincule as transações bancárias relacionadas.
+                        A receita será marcada como recebida.
+                    </p>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Identificação:</span>
+                        <a href="{% url 'accountability:revenues-update' revenue.id %}" class="sm:text-right flex-1 hover:underline text-sm font-medium text-blue-800">
+                            {{ revenue.identification }}
+                        </a>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Observações:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ revenue.observations|default_if_none:"Sem Observações" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Valor:</span>
+                        <span class="sm:text-right flex-1 text-sm font-semibold text-green-600">R${{ revenue.value|intcomma }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Data:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ revenue.receive_date|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Arquivos de Comprovante
+                    </h3>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center transition-all duration-200 bg-gray-50 hover:border-blue-500 hover:bg-blue-50" id="file-upload-area">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-gray-600 text-xs mb-2">Arraste e solte os arquivos aqui ou</p>
+                        <input
+                            class="hidden"
+                            id="files"
+                            name="files"
+                            type="file"
+                            multiple
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        >
+                        <label for="files" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded-md cursor-pointer transition-colors duration-200">
+                            Escolher Arquivos
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG, DOC, DOCX (máx. 10MB cada)</p>
+                    </div>
+                    
+                    <div id="file-list" class="mt-2 space-y-1"></div>
+                </div>
+            </div>
+
+            <div class="hidden lg:block w-0.5 bg-gradient-to-b from-gray-200 via-gray-400 to-gray-200 min-h-[400px] mx-2"></div>
+
+            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
+                <div class="flex flex-col h-full">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span class="text-xl font-semibold text-gray-900">Transações Bancárias</span>
+                    </h3>
+                    
+                    <p class="text-xs text-gray-600 mb-3">
+                        A receita pode corresponder a uma ou mais transações. Ao vincular com uma transação, a receita será marcada como conciliada.
+                    </p>
+                    
+                    <div id="selected-transactions" class="bg-green-50 border border-green-200 rounded-lg p-2 mb-3 empty">
+                        <h4 class="text-sm font-medium text-green-800 mb-1 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Transações Selecionadas:
+                        </h4>
+                        <div id="selected-list"></div>
+                    </div>
+                    
+                    <div class="relative mb-3">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-3 h-3 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            id="checkbox-search"
+                            class="block w-full p-2 ps-8 text-xs text-gray-900 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Pesquisar transações..."
+                        />
+                    </div>
+
+                    <div class="transactions-scroll">
+                        <div class="h-full p-2 rounded-lg bg-gray-50 border border-gray-200 text-black overflow-y-auto" id="transactions-container">
+                            {{ form.transactions }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center lg:ml-64">
+            <a
+              href="{% url 'accountability:accountability-detail' revenue.accountability.id %}"
+              class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Voltar
+            </a>
+
+            <div class="flex gap-3">
+              <button
+                type="submit"
+                name="action"
+                value="current"
+                class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Conciliar Este
+              </button>
+
+              <button
+                type="submit"
+                name="action"
+                value="next"
+                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+                Conciliar Próximo
+              </button>
+            </div>
+        </div>
     </div>
 </form>
 
 <script>
-    document.getElementById('checkbox-search').addEventListener('keyup', function() {
+function updateSelectedTransactions() {
+    const selectedContainer = document.getElementById('selected-transactions');
+    const selectedList = document.getElementById('selected-list');
+    const checkboxes = document.querySelectorAll('#id_transactions input[type="checkbox"]');
+    
+    selectedList.innerHTML = '';
+    let hasSelected = false;
+    
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            hasSelected = true;
+            const label = checkbox.parentElement.querySelector('label');
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-2 bg-white rounded border mb-2';
+            div.innerHTML = `
+                <span class="text-sm">${label.textContent.trim()}</span>
+                <button type="button" onclick="unselectTransaction('${checkbox.id}')" class="text-red-600 hover:text-red-800 text-sm">
+                    ✕
+                </button>
+            `;
+            selectedList.appendChild(div);
+        }
+    });
+    
+    if (hasSelected) {
+        selectedContainer.classList.remove('empty');
+    } else {
+        selectedContainer.classList.add('empty');
+    }
+}
+
+function unselectTransaction(checkboxId) {
+    const checkbox = document.getElementById(checkboxId);
+    const div = checkbox.parentElement;
+    checkbox.checked = false;
+    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
+    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
+    updateSelectedTransactions();
+}
+
+function setupTransactionInteractions() {
+    const transactionDivs = document.querySelectorAll('#id_transactions > div');
+    
+    transactionDivs.forEach(div => {
+        const checkbox = div.querySelector('input[type="checkbox"]');
+        const label = div.querySelector('label');
+        
+        if (checkbox && label) {
+            div.className += ' cursor-pointer p-2 rounded-md mb-1 transition-all duration-200 border border-transparent hover:bg-blue-50 hover:border-blue-200 hover:-translate-y-0.5 hover:shadow-sm';
+            checkbox.className += ' w-4 h-4 mr-2';
+            
+            div.addEventListener('click', function(e) {
+                if (e.target === checkbox) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
+                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
+                } else {
+                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
+                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
+                }
+                updateSelectedTransactions();
+            });
+            
+            checkbox.addEventListener('change', function(e) {
+                if (checkbox.checked) {
+                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
+                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
+                } else {
+                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
+                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
+                }
+                updateSelectedTransactions();
+            });
+            
+            if (checkbox.checked) {
+                div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
+                div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
+            }
+        }
+    });
+    
+    updateSelectedTransactions();
+}
+
+function setupFileUpload() {
+    const fileInput = document.getElementById('files');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileList = document.getElementById('file-list');
+    
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+    });
+    
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+        fileList.innerHTML = '';
+        Array.from(files).forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
+            fileItem.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${file.name}</div>
+                        <div class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                    </div>
+                </div>
+                <button type="button" onclick="removeFile(this)" class="text-red-600 hover:text-red-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    }
+}
+
+function removeFile(button) {
+    button.parentElement.remove();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupTransactionInteractions();
+    setupFileUpload();
+});
+
+const searchInput = document.getElementById('checkbox-search');
+if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
         var searchTerm = this.value.toLowerCase();
         var optionDivs = document.querySelectorAll('#id_transactions > div');
         
         optionDivs.forEach(function(div) {
             var checkbox = div.querySelector('input[type="checkbox"]');
             if (checkbox && checkbox.checked) {
-                // Always show selected checkbox
                 div.style.display = '';
             } else if (div.textContent.toLowerCase().includes(searchTerm)) {
                 div.style.display = '';
@@ -239,6 +444,7 @@
             }
         });
     });
+}
 </script>
 
 {% endblock %}

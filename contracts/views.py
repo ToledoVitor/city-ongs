@@ -206,7 +206,7 @@ class ContractUpdateView(CommitteeMemberUpdateMixin, AdminRequiredMixin, Templat
     login_url = "/auth/login"
 
     def get_contract(self):
-        return get_object_or_404(Contract, pk=self.kwargs['pk'])
+        return get_object_or_404(Contract, pk=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -229,13 +229,11 @@ class ContractUpdateView(CommitteeMemberUpdateMixin, AdminRequiredMixin, Templat
         if form.is_valid():
             with transaction.atomic():
                 updated_contract = form.save(commit=False)
-                if 'file' in request.FILES:
+                if "file" in request.FILES:
                     updated_contract.file = request.FILES["file"]
                 updated_contract.save()
 
-                logger.info(
-                    "%s - Updated contract %s", request.user.id, contract.id
-                )
+                logger.info("%s - Updated contract %s", request.user.id, contract.id)
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -331,7 +329,7 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                     & Q(deleted_at__isnull=True),
                     distinct=True,
                 ),
-            )[:12]
+            ).order_by("-year", "-month")[:12]
         )
         context["accountabilities"] = accountabilities
 
@@ -353,16 +351,14 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
             total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
         )
 
-        addendums = (
-            self.object.addendums.filter(deleted_at__isnull=True)
-            .order_by("-created_at")[:12]
-        )
+        addendums = self.object.addendums.filter(deleted_at__isnull=True).order_by(
+            "-created_at"
+        )[:12]
         context["addendums"] = addendums
 
-        documents = (
-            self.object.documents.filter(deleted_at__isnull=True)
-            .order_by("-created_at")[:12]
-        )
+        documents = self.object.documents.filter(deleted_at__isnull=True).order_by(
+            "-created_at"
+        )[:12]
         context["documents"] = documents
 
         return context
@@ -1284,7 +1280,7 @@ def contract_status_change_view(request, pk):
         return redirect("contracts:contracts-detail", pk=contract.id)
 
     if request.method == "POST":
-        form = ContractStatusUpdateForm(request.POST)
+        form = ContractStatusUpdateForm(request.POST, instance=contract)
         if form.is_valid():
             with transaction.atomic():
                 contract.status = form.cleaned_data["status"]
@@ -1299,7 +1295,7 @@ def contract_status_change_view(request, pk):
                 )
                 return redirect("contracts:contracts-detail", pk=contract.id)
     else:
-        form = ContractStatusUpdateForm()
+        form = ContractStatusUpdateForm(instance=contract)
         return render(
             request,
             "contracts/status-update.html",

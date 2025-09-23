@@ -2,6 +2,7 @@ from django.urls import path
 
 from accountability.views import (
     AccountabilityListView,
+    AdvancedSearchView,
     BeneficiariesDashboardView,
     BeneficiaryDetailView,
     FavoredCreateView,
@@ -12,6 +13,7 @@ from accountability.views import (
     accountability_detail_view,
     accountability_file_delete_view,
     accountability_pendencies_view,
+    batch_reconcile_expenses_view,
     create_accountability_expense_view,
     create_accountability_file_view,
     create_accountability_revenue_view,
@@ -21,6 +23,7 @@ from accountability.views import (
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
+    get_available_reviewers_view,
     gloss_accountability_expense_view,
     import_accountability_view,
     reconcile_expense_view,
@@ -32,6 +35,8 @@ from accountability.views import (
     review_accountability_single_revenue,
     send_accountability_review_analisys,
     send_accountability_to_analisys_view,
+    unreconcile_expense_view,
+    unreconcile_revenue_view,
     update_accountability_expense_view,
     update_accountability_revenue_view,
     update_favored_view,
@@ -70,6 +75,11 @@ urlpatterns = [
         "detail/<uuid:pk>/send-to-analisys",
         send_accountability_to_analisys_view,
         name="send-to-analisys",
+    ),
+    path(
+        "detail/<uuid:pk>/get-available-reviewers",
+        get_available_reviewers_view,
+        name="get-available-reviewers",
     ),
     path(
         "detail/<uuid:pk>/send-review-analisys",
@@ -126,6 +136,7 @@ urlpatterns = [
         duplicate_accountability_revenue_view,
         name="revenues-duplicate",
     ),
+    path("search/", AdvancedSearchView.as_view(), name="advanced-search"),
     path("favoreds/", FavoredListView.as_view(), name="favoreds-list"),
     path(
         "favoreds/create/",
@@ -146,6 +157,16 @@ urlpatterns = [
         "expenses/<uuid:pk>/reconcile",
         reconcile_expense_view,
         name="expense-reconcile",
+    ),
+    path(
+        "expenses/<uuid:pk>/unreconcile",
+        unreconcile_expense_view,
+        name="expense-unreconcile",
+    ),
+    path(
+        "detail/<uuid:pk>/batch-reconcile",
+        batch_reconcile_expenses_view,
+        name="batch-reconcile",
     ),
     path(
         "expenses/<uuid:pk>/gloss/",
@@ -176,6 +197,11 @@ urlpatterns = [
         "revenues/<uuid:pk>/reconcile",
         reconcile_revenue_view,
         name="revenue-reconcile",
+    ),
+    path(
+        "revenues/<uuid:pk>/unreconcile",
+        unreconcile_revenue_view,
+        name="revenue-unreconcile",
     ),
     path(
         "revenues/<uuid:pk>/review/<uuid:revenue_pk>",

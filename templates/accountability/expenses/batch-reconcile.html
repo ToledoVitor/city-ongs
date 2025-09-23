@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Conciliação em Lote - Portal SITTS{% endblock %}
+
+{% block content %}
+
+{% load humanize %}
+
+<p class="text-3xl mb-4 font-bold">
+    Conciliação em Lote de Despesas
+</p>
+  
+<nav class="flex py-3 text-black" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+    <li class="inline-flex items-center">
+        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
+        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+        </svg>
+        Inicio
+        </a>
+    </li>
+    <li>
+        <div class="flex items-center">
+        <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <a
+            href="{% url 'accountability:accountability-detail' accountability.id %}"
+            class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2"
+        >
+            Prestação {{ accountability.month }}/{{ accountability.year }}
+        </a>
+        </div>
+    </li>
+    <li aria-current="page">
+        <div class="flex items-center">
+        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+        <span class="ms-1 text-sm font-medium text-black md:ms-2">Conciliação em Lote</span>
+        </div>
+    </li>
+    </ol>
+</nav>
+
+<div class="mb-4 bg-gray-50 rounded-lg p-4">
+    <div class="flex justify-between items-center mb-3">
+        <div>
+            <p class="text-sm text-gray-600">
+                <strong>Total de despesas não conciliadas:</strong> {{ unreconciled_count }}
+            </p>
+        </div>
+        <div class="text-right">
+            <p class="text-sm text-green-800">
+                <strong>Auto-correspondidas:</strong> 
+                <span class="font-bold" id="auto-match-count">0</span>
+                <span class="text-xs text-gray-600 ml-1" id="auto-match-percentage">
+                    (0/{{ unreconciled_count }} - 0%)
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+        <div class="bg-green-500 h-3 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
+            id="progress-bar" 
+            style="width: 0%">
+        </div>
+    </div>
+</div>
+
+<div class="bg-blue-50 text-sm border border-blue-200 text-blue-800 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+        <svg class="flex-shrink-0 w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+        </svg>
+        <div>
+            <span class="font-medium">Atenção:</span>
+            O sistema fez correspondências automáticas usando diferentes métodos. Deixe vazio se não tiver certeza - essas despesas não serão conciliadas.
+            <span class="font-medium">Lembre-se de conferir. O sistema pode cometer erros.</span>
+        </div>
+    </div>
+</div>
+
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-6">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+            <thead class="text-xs text-white uppercase bg-gray-500">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Despesa</th>
+                    <th scope="col" class="px-6 py-3">Favorecido</th>
+                    <th scope="col" class="px-6 py-3">Valor</th>
+                    <th scope="col" class="px-6 py-3">Data</th>
+                    <th scope="col" class="px-6 py-3">Transação Bancária</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for match in matches %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        {{ match.expense.identification }}
+                        {% if match.expense.item %}
+                            <br><small class="text-gray-500">{{ match.expense.item.name }}</small>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if match.expense.favored %}
+                            {{ match.expense.favored.name }}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 font-semibold whitespace-nowrap">
+                        R$ {{ match.expense.value|floatformat:2 }}
+                    </td>
+                    <td class="px-6 py-4 font-semibold whitespace-nowrap">
+                        {{ match.expense.due_date|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <select name="transaction_{{ match.expense.id }}" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            <option value="">Selecione uma transação</option>
+                            {% for transaction in available_transactions %}
+                                <option value="{{ transaction.id }}" 
+                                        {% if match.transaction and match.transaction.id == transaction.id %}selected{% endif %}
+                                        data-amount="{{ transaction.amount|floatformat:2 }}">
+                                    {{ transaction.date|date:"d/m/Y" }} - R$ {{ transaction.amount|floatformat:2 }} - {{ transaction.memo|default:transaction.name|default:"Sem descrição" }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if match.matched %}
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                Auto-correspondido
+                            </span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded">
+                                Selecione manualmente
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        Não há despesas não conciliadas para esta prestação.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if matches %}
+    <div class="flex justify-between items-center">
+        <a href="{% url 'accountability:accountability-detail' accountability.id %}" 
+           class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+            Cancelar
+        </a>
+        
+        <button type="submit" 
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+            Salvar Conciliações
+        </button>
+    </div>
+    {% endif %}
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('select[name^="transaction_"]');
+    
+    // Calculate and display auto-match count
+    function updateAutoMatchCount() {
+        const autoMatchedRows = document.querySelectorAll('span:contains("Auto-correspondido")').length;
+        const totalCount = {{ unreconciled_count }};
+        const percentage = totalCount > 0 ? Math.round((autoMatchedRows / totalCount) * 100) : 0;
+        
+        document.getElementById('auto-match-count').textContent = autoMatchedRows;
+        document.getElementById('auto-match-percentage').textContent = 
+            `(${autoMatchedRows}/${totalCount} - ${percentage}%)`;
+    }
+    
+    // Better way to count auto-matched items
+    function countAutoMatched() {
+        let count = 0;
+        const statusSpans = document.querySelectorAll('td:nth-child(6) span');
+        statusSpans.forEach(span => {
+            if (span.textContent.includes('Auto-correspondido')) {
+                count++;
+            }
+        });
+        
+        const totalCount = {{ unreconciled_count }};
+        const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
+        
+        // Update text displays
+        document.getElementById('auto-match-count').textContent = count;
+        document.getElementById('auto-match-percentage').textContent = 
+            `(${count}/${totalCount} - ${percentage}%)`;
+        
+        // Update progress bar
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        progressBar.style.width = `${percentage}%`;
+        
+        // Show percentage in progress bar if there's enough space (>15%)
+        if (percentage > 15) {
+            progressText.textContent = `${percentage}%`;
+            progressText.style.display = 'block';
+        } else {
+            progressText.style.display = 'none';
+        }
+        
+        // Change color based on percentage
+        if (percentage >= 80) {
+            progressBar.className = progressBar.className.replace('bg-green-500', 'bg-green-600');
+        } else if (percentage >= 50) {
+            progressBar.className = progressBar.className.replace('bg-green-600', 'bg-green-500');
+        } else {
+            progressBar.className = progressBar.className.replace('bg-green-600', 'bg-green-400');
+        }
+    }
+    
+    // Initial count
+    countAutoMatched();
+    
+    // Store original options for each select
+    const originalOptions = new Map();
+    selects.forEach(select => {
+        originalOptions.set(select, Array.from(select.options).map(option => option.cloneNode(true)));
+    });
+    
+    function updateAvailableOptions() {
+        // Get all currently selected transaction IDs
+        const selectedTransactionIds = new Set();
+        selects.forEach(select => {
+            if (select.value) {
+                selectedTransactionIds.add(select.value);
+            }
+        });
+        
+        // Update each select to hide already selected options
+        selects.forEach(select => {
+            const currentValue = select.value;
+            
+            // Clear all options except the first one (placeholder)
+            while (select.options.length > 1) {
+                select.removeChild(select.options[1]);
+            }
+            
+            // Add back options that aren't selected elsewhere
+            const originalSelectOptions = originalOptions.get(select);
+            for (let i = 1; i < originalSelectOptions.length; i++) { // Skip first option (placeholder)
+                const option = originalSelectOptions[i].cloneNode(true);
+                const transactionId = option.value;
+                
+                // Only add if not selected elsewhere, or if it's the current value of this select
+                if (!selectedTransactionIds.has(transactionId) || transactionId === currentValue) {
+                    select.appendChild(option);
+                }
+            }
+            
+            // Restore the current value
+            select.value = currentValue;
+        });
+    }
+    
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            const row = this.closest('tr');
+            const statusElement = row.querySelector('td:nth-child(6) span');
+            const isAutoMatched = statusElement && statusElement.textContent.includes('Auto-correspondido');
+            
+            if (isAutoMatched) {
+                this.classList.remove('border-red-300', 'bg-red-50');
+                this.classList.add('border-green-300', 'bg-green-50');
+            } else {
+                this.classList.remove('border-red-300', 'bg-red-50', 'border-green-300', 'bg-green-50');
+            }
+            
+            // Update auto-match count when selection changes
+            countAutoMatched();
+            updateAvailableOptions();
+        });
+
+        select.dispatchEvent(new Event('change'));
+    });
+
+    updateAvailableOptions();
+});
+</script>
+
+{% endblock %}

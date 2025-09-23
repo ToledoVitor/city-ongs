@@ -672,3 +672,36 @@ class OrganizationDocumentToggleVisibilityView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy("accounts:documents-list")
+
+
+@login_required
+def get_committee_members(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    try:
+        committee_members = User.objects.filter(
+            areas__in=request.user.areas.all(),
+            access_level=User.AccessChoices.COMMITTEE_MEMBER,
+            is_active=True
+        ).values("id", "first_name", "last_name", "email")
+
+        members_data = []
+        for member in committee_members:
+            full_name = f"{member["first_name"]} {member["last_name"]}".strip()
+            if not full_name:
+                full_name = member["email"]
+
+            members_data.append({
+                "id": member["id"],
+                "name": full_name,
+                "email": member["email"]
+            })
+
+        return JsonResponse({
+            "members": members_data,
+            "count": len(members_data)
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

@@ -45,6 +45,23 @@ class OFXFileParser:
         return self.ofx_data.bankmsgsrsv1.statements[0].dtend
 
     @property
+    def statement_start_date(self) -> datetime:
+        return self.ofx_data.bankmsgsrsv1.statements[0].dtstart
+
+    @property
+    def statement_period_info(self) -> dict:
+        start_date = self.statement_start_date
+        end_date = self.balance_date
+        return {
+            "start_date": start_date.strftime("%d/%m/%Y"),
+            "end_date": end_date.strftime("%d/%m/%Y"),
+            "day": end_date.day,
+            "month": end_date.month,
+            "year": end_date.year,
+            "month_name": end_date.strftime("%B"),
+        }
+
+    @property
     def transactions_list(self) -> list:
         return self.ofx_data.statements[0].transactions
 
@@ -104,6 +121,7 @@ class OFXFileParser:
     def update_bank_account_balance(self, bank_account: BankAccount) -> bool:
         if BankStatement.objects.filter(
             bank_account=bank_account,
+            reference_day=self.balance_date.day,
             reference_month=self.balance_date.month,
             reference_year=self.balance_date.year,
         ).exists():
@@ -120,12 +138,13 @@ class OFXFileParser:
                 bank_account=bank_account,
                 opening_balance=self.opening_balance_amount,
                 closing_balance=self.closing_balance_amount,
+                reference_day=self.balance_date.day,
                 reference_month=self.balance_date.month,
                 reference_year=self.balance_date.year,
             )
 
             transactions = self._updated_transactions(bank_account)
-            Transaction.objects.bulk_create(transactions)
+            Transaction.objects.bulk_create(transactions, ignore_conflicts=True)
 
             return
 
@@ -133,31 +152,68 @@ class OFXFileParser:
         return [
             Transaction(
                 bank_account=bank_account,
-                transaction_type=transaction.trntype,
-                transaction_number=transaction.checknum,
-                name=transaction.name,
-                amount=transaction.trnamt,
-                date=transaction.dtposted,
-                memo=getattr(transaction, "memo", None),
+                transaction_type=tran.trntype,
+                transaction_number=tran.checknum,
+                name=tran.name,
+                amount=tran.trnamt,
+                date=(
+                    tran.dtposted.date()
+                    if isinstance(tran.dtposted, datetime)
+                    else datetime.strptime(tran.dtposted, "%Y%m%d").date()
+                ),
+                memo=getattr(tran, "memo", None),
             )
-            for transaction in self.transactions_list
+            for tran in self.transactions_list
         ]
 
     def _parse_ofx_file(self, ofx_file: InMemoryUploadedFile):
-        ofx_content = ofx_file.read().decode("latin1")
+        # Try multiple encodings to handle different OFX file formats
+        encodings_to_try = ["cp1252", "windows-1252", "latin1", "utf-8", "iso-8859-1"]
+        ofx_content = None
+        for encoding in encodings_to_try:
+            try:
+                ofx_file.seek(0)
+                ofx_content = ofx_file.read().decode(encoding, errors="replace")
+                logger.info(f"Successfully decoded OFX file using {encoding} encoding")
+                break
+            except Exception as e:
+                logger.warning(f"Failed to decode with {encoding}: {str(e)}")
+                continue
 
-        modified_ofx_content = self._truncate_checknum_in_memory(ofx_content)
-        with tempfile.NamedTemporaryFile(
-            delete=False, mode="w", suffix=".ofx"
-        ) as temp_file:
-            temp_file.write(modified_ofx_content)
-            temp_file_path = temp_file.name
+        if ofx_content is None:
+            try:
+                ofx_file.seek(0)
+                raw_content = ofx_file.read()
+                ofx_content = raw_content.decode("cp1252", errors="replace")
+                logger.warning("Used forced cp1252 decoding with error replacement")
+            except Exception:
+                raise ValidationError(
+                    "Não foi possível decodificar o arquivo OFX. Verifique se o arquivo não está corrompido."
+                )
 
-        ofx_tree = OFXTree()
-        ofx_tree.parse(temp_file_path)
+        fixed_ofx_content = self._fix_malformed_ofx(ofx_content)
+        modified_ofx_content = self._truncate_checknum_in_memory(fixed_ofx_content)
 
-        ofx = ofx_tree.convert()
-        return ofx
+        # Simple approach: try different encodings for the temp file
+        for encoding in ["cp1252", "latin1", "utf-8"]:
+            try:
+                with tempfile.NamedTemporaryFile(
+                    delete=False, mode="w", suffix=".ofx", encoding=encoding
+                ) as temp_file:
+                    temp_file.write(modified_ofx_content)
+                    temp_file_path = temp_file.name
+
+                ofx_tree = OFXTree()
+                ofx_tree.parse(temp_file_path)
+                ofx = ofx_tree.convert()
+                logger.info(f"Successfully parsed OFX file with {encoding}")
+                return ofx
+
+            except Exception as e:
+                logger.warning(f"Failed with {encoding}: {str(e)}")
+                continue
+
+        raise ValidationError("Arquivo OFX corrompido e não pode ser processado.")
 
     def _truncate_checknum_in_memory(self, ofx_content, max_length=12):
         """
@@ -172,3 +228,69 @@ class OFXFileParser:
         pattern = r"<CHECKNUM>(.*?) \r\n\t"
         modified_ofx_content = re.sub(pattern, truncate_match, ofx_content)
         return modified_ofx_content
+
+    def _fix_malformed_ofx(self, ofx_content):
+        logger.info("Fixing missing closing tags...")
+
+        lines = ofx_content.split("\n")
+        fixed_lines = self._fix_missing_closing_tags(lines)
+        result_lines = self._fix_stmttrn_blocks(fixed_lines)
+
+        result = "\n".join(result_lines)
+        logger.info("Missing closing tags fixed")
+        return result
+
+    def _fix_missing_closing_tags(self, lines):
+        tags_to_fix = [
+            "DTSERVER",
+            "LANGUAGE",
+            "DTACCTUP",
+            "TRNUID",
+            "CODE",
+            "SEVERITY",
+            "CURDEF",
+            "BALAMT",
+            "DTASOF",
+            "MKTGINFO",
+        ]
+
+        fixed_lines = []
+        for line in lines:
+            processed_line = line
+
+            for tag in tags_to_fix:
+                if self._needs_closing_tag(processed_line, tag):
+                    processed_line = processed_line.rstrip() + f"</{tag}>"
+                    break
+
+            fixed_lines.append(processed_line)
+
+        return fixed_lines
+
+    def _needs_closing_tag(self, line, tag):
+        opening_tag = f"<{tag}>"
+        closing_tag = f"</{tag}>"
+        return opening_tag in line and closing_tag not in line
+
+    def _fix_stmttrn_blocks(self, lines):
+        result_lines = []
+
+        for i, line in enumerate(lines):
+            result_lines.append(line)
+
+            if self._should_close_stmttrn(lines, i, line):
+                result_lines.append("\t </STMTTRN>")
+
+        return result_lines
+
+    def _should_close_stmttrn(self, lines, current_index, current_line):
+        if current_index + 1 >= len(lines):
+            return False
+
+        if not current_line.strip() or current_line.strip().startswith("<"):
+            return False
+
+        next_line = lines[current_index + 1].strip()
+        return next_line.startswith("<STMTTRN>") or next_line.startswith(
+            "</BANKTRANLIST>"
+        )

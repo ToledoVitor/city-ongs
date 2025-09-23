@@ -4,35 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0032_contractaddendum_file_and_more'),
+        ("contracts", "0032_contractaddendum_file_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contract',
-            name='bidding',
-            field=models.CharField(max_length=255, verbose_name='Licitação'),
+            model_name="contract",
+            name="bidding",
+            field=models.CharField(max_length=255, verbose_name="Licitação"),
         ),
         migrations.AlterField(
-            model_name='contract',
-            name='objective',
-            field=models.CharField(max_length=255, verbose_name='Objeto'),
+            model_name="contract",
+            name="objective",
+            field=models.CharField(max_length=255, verbose_name="Objeto"),
         ),
         migrations.AlterField(
-            model_name='contractdocument',
-            name='type',
-            field=models.CharField(choices=[('ADDENDUM', 'Aditivo'), ('CONTRACT', 'Contrato'), ('SPREADSHEET', 'Planilha'), ('TERMS', 'Termos'), ('OTHER', 'Outro')], default='OTHER', max_length=128, verbose_name='Tipo'),
+            model_name="contractdocument",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("ADDENDUM", "Aditivo"),
+                    ("CONTRACT", "Contrato"),
+                    ("SPREADSHEET", "Planilha"),
+                    ("TERMS", "Termos"),
+                    ("OTHER", "Outro"),
+                ],
+                default="OTHER",
+                max_length=128,
+                verbose_name="Tipo",
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalcontract',
-            name='bidding',
-            field=models.CharField(max_length=255, verbose_name='Licitação'),
+            model_name="historicalcontract",
+            name="bidding",
+            field=models.CharField(max_length=255, verbose_name="Licitação"),
         ),
         migrations.AlterField(
-            model_name='historicalcontract',
-            name='objective',
-            field=models.CharField(max_length=255, verbose_name='Objeto'),
+            model_name="historicalcontract",
+            name="objective",
+            field=models.CharField(max_length=255, verbose_name="Objeto"),
         ),
     ]

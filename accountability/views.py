@@ -1,10 +1,13 @@
 import logging
+import unicodedata
+from contracts.models import Contract
+from accounts.models import User
 from typing import Any
-
+from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import transaction as db_transaction
 from django.db.models import Count, Q, Sum
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse
@@ -36,10 +39,10 @@ from accountability.models import (
     Revenue,
     RevenueFile,
 )
+from bank.models import Transaction
 from accountability.services import export_xlsx_model, import_xlsx_model
 from accounts.models import Area
 from activity.models import ActivityLog
-from contracts.models import Contract
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
 
@@ -130,7 +133,7 @@ class ResourceSourceCreateView(
     def post(self, request, *args, **kwargs):
         form = ResourceSourceForm(request.POST)
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 source = form.save(commit=False)
                 source.organization = request.user.organization
                 source.save()
@@ -159,7 +162,7 @@ def update_accountability_revenue_view(request, pk):
             request.POST, instance=revenue, accountability=accountability
         )
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 revenue = form.save()
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -193,10 +196,13 @@ def update_accountability_expense_view(request, pk):
 
     if request.method == "POST":
         form = ExpenseForm(
-            request.POST, instance=expense, accountability=accountability
+            request.POST,
+            request=request,
+            instance=expense,
+            accountability=accountability,
         )
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 expense = form.save()
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -209,7 +215,9 @@ def update_accountability_expense_view(request, pk):
                 "accountability:accountability-detail", pk=accountability.pk
             )
     else:
-        form = ExpenseForm(instance=expense, accountability=accountability)
+        form = ExpenseForm(
+            request=request, instance=expense, accountability=accountability
+        )
 
     return render(
         request,
@@ -279,7 +287,7 @@ def create_contract_accountability_view(request, pk):
                     },
                 )
 
-            with transaction.atomic():
+            with db_transaction.atomic():
                 accountability = Accountability.objects.create(
                     contract=contract,
                     month=form.cleaned_data["month"],
@@ -315,19 +323,15 @@ def create_contract_accountability_view(request, pk):
 def accountability_detail_view(request, pk):
     accountability = get_object_or_404(Accountability, id=pk)
 
-    # Get filter parameters
     search_query = request.GET.get("q", "")
     paid_filter = request.GET.get("paid", "all")
     reviwed_filter = request.GET.get("reviwed", "all")
     start_date = request.GET.get("start_date", "")
     end_date = request.GET.get("end_date", "")
-    date_type = request.GET.get(
-        "date_type", "competence"
-    )  # competence, liquidation, due_date, conciliation
+    date_type = request.GET.get("date_type", "competence")
     payment_status = request.GET.get("payment_status", "all")  # all, paid, unpaid
     expense_type = request.GET.get("expense_type", "all")  # all, planned, unplanned
 
-    # Base querysets
     expenses_list = (
         Expense.objects.filter(accountability=accountability)
         .select_related("item", "favored")
@@ -347,6 +351,7 @@ def accountability_detail_view(request, pk):
             )
         )
         .order_by("-value")
+        .filter(deleted_at__isnull=True)
     )
 
     revenues_list = (
@@ -368,6 +373,7 @@ def accountability_detail_view(request, pk):
             )
         )
         .order_by("-value")
+        .filter(deleted_at__isnull=True)
     )
 
     documents_list = AccountabilityFile.objects.filter(
@@ -382,7 +388,7 @@ def accountability_detail_view(request, pk):
             | Q(favored__name__icontains=search_query)
         )
         revenues_list = revenues_list.filter(
-            Q(bank_account__name__icontains=search_query)
+            Q(identification__icontains=search_query)
         )
         documents_list = documents_list.filter(Q(name__icontains=search_query))
 
@@ -485,7 +491,7 @@ def create_accountability_file_view(request, pk):
     if request.method == "POST":
         form = AccountabilityFileForm(request.POST)
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 file = AccountabilityFile.objects.create(
                     accountability=accountability,
                     created_by=request.user,
@@ -530,7 +536,7 @@ def accountability_file_delete_view(request, pk):
     if not file.accountability.is_on_execution:
         return redirect(next_url, pk=file.accountability.id)
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
             user_email=request.user.email,
@@ -549,12 +555,15 @@ def create_accountability_revenue_view(request, pk):
 
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
-        return redirect("accountability:accountability-detail", pk=accountability.id)
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
 
     if request.method == "POST":
         form = RevenueForm(request.POST, accountability=accountability)
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 revenue = form.save(commit=False)
                 revenue.accountability = accountability
                 revenue.save()
@@ -592,7 +601,7 @@ def duplicate_accountability_revenue_view(request, pk):
     if not revenue.accountability.is_on_execution:
         return redirect(next_url, pk=revenue.accountability.id)
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         revenue.id = None
         revenue.save()
         _ = ActivityLog.objects.create(
@@ -617,7 +626,7 @@ def create_accountability_expense_view(request, pk):
     if request.method == "POST":
         form = ExpenseForm(request.POST, request=request, accountability=accountability)
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 expense = form.save(commit=False)
                 expense.accountability = accountability
                 expense.save()
@@ -655,7 +664,7 @@ def duplicate_accountability_expense_view(request, pk):
     if not expense.accountability.is_on_execution:
         return redirect(next_url, pk=expense.accountability.id)
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         expense.id = None
         expense.paid = False
         expense.conciled = False
@@ -678,7 +687,7 @@ def gloss_accountability_expense_view(request, pk):
     if not expense.accountability.is_on_execution:
         return redirect(next_url, pk=expense.accountability.id)
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         expense.planned = False
         expense.item = None
         expense.save()
@@ -732,7 +741,7 @@ class FavoredCreateView(CommitteeMemberCreateMixin, LoginRequiredMixin, Template
     def post(self, request, *args, **kwargs):
         form = FavoredForm(request.POST)
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 favored = form.save(commit=False)
                 favored.organization = request.user.organization
                 favored.save()
@@ -822,20 +831,7 @@ def import_accountability_view(request, pk):
                     file=form.cleaned_data["xlsx_file"],
                     accountability=accountability,
                 )
-                if any([revenues_error, expenses_error, applications_error]):
-                    return render(
-                        request,
-                        "accountability/accountability/import.html",
-                        {
-                            "accountability": accountability,
-                            "form": form,
-                            "imported": imported,
-                            "revenues_error": revenues_error,
-                            "expenses_error": expenses_error,
-                            "applications_error": applications_error,
-                        },
-                    )
-                else:
+                if imported:
                     _ = ActivityLog.objects.create(
                         user=request.user,
                         user_email=request.user.email,
@@ -843,10 +839,18 @@ def import_accountability_view(request, pk):
                         target_object_id=accountability.id,
                         target_content_object=accountability,
                     )
-                    return redirect(
-                        "accountability:accountability-detail",
-                        pk=accountability.id,
-                    )
+                return render(
+                    request,
+                    "accountability/accountability/import.html",
+                    {
+                        "accountability": accountability,
+                        "form": form,
+                        "imported": imported,
+                        "revenues_error": revenues_error,
+                        "expenses_error": expenses_error,
+                        "applications_error": applications_error,
+                    },
+                )
             else:
                 return render(
                     request,
@@ -882,7 +886,7 @@ def expense_delete_view(request, pk):
         )
 
     next_url = request.POST.get("next", "accountability:accountability-detail")
-    with transaction.atomic():
+    with db_transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
             user_email=request.user.email,
@@ -891,7 +895,7 @@ def expense_delete_view(request, pk):
             target_content_object=expense,
         )
         expense.delete()
-        return redirect(next_url, pk=expense.accountability.id)
+    return redirect(next_url, pk=expense.accountability.id)
 
 
 @login_required
@@ -905,7 +909,7 @@ def revenue_delete_view(request, pk):
         )
 
     next_url = request.POST.get("next", "accountability:accountability-detail")
-    with transaction.atomic():
+    with db_transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
             user_email=request.user.email,
@@ -923,17 +927,73 @@ def send_accountability_to_analisys_view(request, pk):
     if accountability.is_finished:
         return redirect("home")
 
-    with transaction.atomic():
-        _ = ActivityLog.objects.create(
-            user=request.user,
-            user_email=request.user.email,
-            action=ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS,
-            target_object_id=accountability.id,
-            target_content_object=accountability,
-        )
-        accountability.status = Accountability.ReviewStatus.SENT
-        accountability.save()
+    if request.method == "GET":
         return redirect("accountability:accountability-detail", pk=accountability.id)
+
+    if request.method == "POST":
+        reviewer_id = request.POST.get("reviewer")
+        if not reviewer_id:
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
+        try:
+            selected_reviewer = User.objects.get(
+                id=reviewer_id,
+                organization=request.user.organization,
+                access_level=User.AccessChoices.FOLDER_MANAGER,
+                is_active=True
+            )
+        except Exception:
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
+        with db_transaction.atomic():
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.SENT_TO_ANALISYS,
+                target_object_id=accountability.id,
+                target_content_object=accountability,
+            )
+            accountability.status = Accountability.ReviewStatus.SENT
+            accountability.reviewer = selected_reviewer
+            accountability.save()
+            return redirect(
+                "accountability:accountability-detail", pk=accountability.id
+            )
+
+
+@login_required
+def get_available_reviewers_view(request, pk):
+    """API endpoint to get available reviewers for accountability analysis"""
+    from django.http import JsonResponse
+    
+    accountability = get_object_or_404(Accountability, id=pk)
+    user_org = request.user.organization
+    
+    available_reviewers = User.objects.filter(
+        organization=user_org,
+        access_level=User.AccessChoices.FOLDER_MANAGER,
+        is_active=True
+    ).order_by("first_name", "last_name")
+    
+    default_reviewer = accountability.contract.supervision_autority
+    
+    reviewers_data = []
+    for reviewer in available_reviewers:
+        reviewers_data.append({
+            "id": str(reviewer.id),
+            "name": reviewer.get_full_name(),
+            "email": reviewer.email,
+            "is_default": reviewer == default_reviewer
+        })
+    
+    return JsonResponse({
+        "reviewers": reviewers_data,
+        "default_reviewer": str(default_reviewer.id) if default_reviewer else None
+    })
 
 
 def send_accountability_review_analisys(request, pk):
@@ -944,14 +1004,28 @@ def send_accountability_review_analisys(request, pk):
     if not request.user or not request.user.can_change_statuses:
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         review_status = request.POST.get("review_status")
         review_pendencies = request.POST.get("review_pendencies")
+        committee_member_id = request.POST.get("committee_member")
 
         if review_status == Accountability.ReviewStatus.CORRECTING:
             action = ActivityLog.ActivityLogChoices.SENT_TO_CORRECT
         elif review_status == Accountability.ReviewStatus.FINISHED:
             action = ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED
+            
+            # Validate committee member selection for approved accountabilities
+            if committee_member_id:
+                try:
+                    committee_member = User.objects.get(
+                        id=committee_member_id,
+                        organization=request.user.organization,
+                        access_level=User.AccessChoices.COMMITTEE_MEMBER,
+                        is_active=True
+                    )
+                    accountability.committee_member = committee_member
+                except User.DoesNotExist:
+                    return redirect("accountability:accountability-detail", pk=accountability.id)
         else:
             raise ValueError(f"{review_status} - Is an unnknow status review")
 
@@ -983,7 +1057,7 @@ def review_accountability_single_expense(request, pk, expense_pk):
     )
 
     if request.method == "POST":
-        with transaction.atomic():
+        with db_transaction.atomic():
             expense.status = request.POST.get("status")
             expense.pendencies = request.POST.get("pendencies")
             expense.save()
@@ -1019,7 +1093,14 @@ def review_accountability_expenses(request, pk, index):
             "favored",
             "item",
         )
-        .prefetch_related("files")
+        .prefetch_related(
+            Prefetch(
+                "files",
+                queryset=ExpenseFile.objects.select_related("created_by").filter(
+                    deleted_at__isnull=True
+                ),
+            )
+        )
         .filter(status=Expense.ReviewStatus.IN_ANALISIS)
         .order_by("-value")
     )
@@ -1030,7 +1111,7 @@ def review_accountability_expenses(request, pk, index):
 
     current_expense = expenses[index]
     if request.method == "POST":
-        with transaction.atomic():
+        with db_transaction.atomic():
             current_expense.status = request.POST.get("status")
             current_expense.pendencies = request.POST.get("pendencies")
             current_expense.save()
@@ -1089,7 +1170,7 @@ def review_accountability_single_revenue(request, pk, revenue_pk):
     )
 
     if request.method == "POST":
-        with transaction.atomic():
+        with db_transaction.atomic():
             revenue.status = request.POST.get("status")
             revenue.pendencies = request.POST.get("pendencies")
             revenue.save()
@@ -1123,7 +1204,14 @@ def review_accountability_revenues(request, pk, index):
         accountability.revenues.select_related(
             "bank_account",
         )
-        .prefetch_related("files")
+        .prefetch_related(
+            Prefetch(
+                "files",
+                queryset=RevenueFile.objects.select_related("created_by").filter(
+                    deleted_at__isnull=True
+                ),
+            )
+        )
         .filter(status=Revenue.ReviewStatus.IN_ANALISIS)
         .order_by("-value")
     )
@@ -1134,7 +1222,7 @@ def review_accountability_revenues(request, pk, index):
 
     current_revenue = revenues[index]
     if request.method == "POST":
-        with transaction.atomic():
+        with db_transaction.atomic():
             current_revenue.status = request.POST.get("status")
             current_revenue.pendencies = request.POST.get("pendencies")
             current_revenue.save()
@@ -1225,7 +1313,7 @@ def reconcile_expense_view(request, pk):
         files = request.FILES.getlist("files")
 
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 expense.conciled = True
                 expense.conciled_at = timezone.now()
                 expense.paid = True
@@ -1266,11 +1354,15 @@ def reconcile_expense_view(request, pk):
 
             action = request.POST.get("action")
             if action == "next":
-                next_expense = Expense.objects.filter(
-                    accountability=expense.accountability,
-                    conciled=False,
-                    paid=False,
-                ).first()
+                next_expense = (
+                    Expense.objects.filter(
+                        accountability=expense.accountability,
+                        conciled=False,
+                        paid=False,
+                    )
+                    .order_by("value", "identification")
+                    .first()
+                )
                 if next_expense:
                     return redirect(
                         "accountability:expense-reconcile", pk=next_expense.id
@@ -1339,13 +1431,13 @@ def reconcile_revenue_view(request, pk):
         form = ReconcileRevenueForm(request.POST, contract=contract, revenue=revenue)
 
         if form.is_valid():
-            with transaction.atomic():
+            with db_transaction.atomic():
                 revenue.conciled = True
                 revenue.conciled_at = timezone.now()
                 revenue.paid = True
                 revenue.liquidation = form.cleaned_data["transactions"][0].date
                 revenue.save()
-                revenue.transactions.set(form.cleaned_data["transactions"])
+                revenue.bank_transactions.set(form.cleaned_data["transactions"])
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
@@ -1357,11 +1449,15 @@ def reconcile_revenue_view(request, pk):
 
             action = request.POST.get("action")
             if action == "next":
-                next_revenue = Revenue.objects.filter(
-                    accountability=revenue.accountability,
-                    conciled=False,
-                    paid=False,
-                ).first()
+                next_revenue = (
+                    Revenue.objects.filter(
+                        accountability=revenue.accountability,
+                        conciled=False,
+                        paid=False,
+                    )
+                    .order_by("value", "identification")
+                    .first()
+                )
                 if next_revenue:
                     return redirect(
                         "accountability:revenue-reconcile", pk=next_revenue.id
@@ -1442,7 +1538,7 @@ def upload_expense_file_view(request, pk):
     accountability = expense.accountability
 
     files = request.FILES.getlist("files")
-    with transaction.atomic():
+    with db_transaction.atomic():
         for file in files:
             ExpenseFile.objects.create(
                 expense=expense,
@@ -1458,6 +1554,9 @@ def upload_expense_file_view(request, pk):
                 target_content_object=expense,
             )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1469,7 +1568,7 @@ def upload_revenue_file_view(request, pk):
     accountability = revenue.accountability
 
     files = request.FILES.getlist("files")
-    with transaction.atomic():
+    with db_transaction.atomic():
         for file in files:
             RevenueFile.objects.create(
                 revenue=revenue,
@@ -1485,6 +1584,9 @@ def upload_revenue_file_view(request, pk):
                 target_content_object=revenue,
             )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1495,7 +1597,7 @@ def delete_expense_file_view(request, pk):
     file = get_object_or_404(ExpenseFile, pk=pk)
     accountability = file.expense.accountability
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         file.delete()
         _ = ActivityLog.objects.create(
             user=request.user,
@@ -1505,6 +1607,9 @@ def delete_expense_file_view(request, pk):
             target_content_object=file.expense,
         )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1515,7 +1620,7 @@ def delete_revenue_file_view(request, pk):
     file = get_object_or_404(RevenueFile, pk=pk)
     accountability = file.revenue.accountability
 
-    with transaction.atomic():
+    with db_transaction.atomic():
         file.delete()
         _ = ActivityLog.objects.create(
             user=request.user,
@@ -1525,6 +1630,9 @@ def delete_revenue_file_view(request, pk):
             target_content_object=file.revenue,
         )
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
@@ -1586,6 +1694,127 @@ class BeneficiariesDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
+class AdvancedSearchView(LoginRequiredMixin, TemplateView):
+    template_name = "accountability/search/advanced_search.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get filter parameters
+        search_query = self.request.GET.get("q", "")
+        record_type = self.request.GET.get("type", "all")  # all, expense, revenue
+        start_date = self.request.GET.get("start_date", "")
+        end_date = self.request.GET.get("end_date", "")
+        conciled_status = self.request.GET.get("conciled", "all")  # all, conciled, not_conciled
+        contract_id = self.request.GET.get("contract", "")
+        favored_id = self.request.GET.get("favored", "")
+        status = self.request.GET.get("status", "all")  # all, pending, approved, rejected
+        paid_status = self.request.GET.get("paid", "all")  # all, paid, unpaid
+
+        expenses_list = []
+        revenues_list = []
+        if record_type in ["all", "expense"]:
+            expenses_qs = Expense.objects.select_related(
+                "accountability__contract", "item", "favored"
+            ).filter(
+                deleted_at__isnull=True,
+                accountability__contract__area__in=self.request.user.areas.all()
+            )
+
+            if search_query:
+                expenses_qs = expenses_qs.filter(
+                    Q(identification__icontains=search_query) |
+                    Q(item__name__icontains=search_query) |
+                    Q(favored__name__icontains=search_query) |
+                    Q(accountability__contract__name__icontains=search_query)
+                )
+
+            if start_date and end_date:
+                expenses_qs = expenses_qs.filter(
+                    competency__range=[start_date, end_date]
+                )
+
+            if conciled_status != "all":
+                expenses_qs = expenses_qs.filter(conciled=conciled_status == "conciled")
+
+            if contract_id:
+                expenses_qs = expenses_qs.filter(accountability__contract_id=contract_id)
+
+            if favored_id:
+                expenses_qs = expenses_qs.filter(favored_id=favored_id)
+
+            if status != "all":
+                expenses_qs = expenses_qs.filter(status=status)
+            
+            if paid_status != "all":
+                expenses_qs = expenses_qs.filter(paid=paid_status == "paid")
+            
+            expenses_list = expenses_qs.order_by("-competency", "-value")[:100]
+
+        if record_type in ["all", "revenue"]:
+            revenues_qs = Revenue.objects.select_related(
+                "accountability__contract", "bank_account"
+            ).filter(
+                deleted_at__isnull=True,
+                accountability__contract__area__in=self.request.user.areas.all()
+            )
+            
+            if search_query:
+                revenues_qs = revenues_qs.filter(
+                    Q(bank_account__name__icontains=search_query) |
+                    Q(source__icontains=search_query) |
+                    Q(accountability__contract__name__icontains=search_query)
+                )
+            
+            if start_date and end_date:
+                revenues_qs = revenues_qs.filter(
+                    competency__range=[start_date, end_date]
+                )
+            
+            if conciled_status != "all":
+                revenues_qs = revenues_qs.filter(conciled=conciled_status == "conciled")
+            
+            if contract_id:
+                revenues_qs = revenues_qs.filter(accountability__contract_id=contract_id)
+            
+            if status != "all":
+                revenues_qs = revenues_qs.filter(status=status)
+            
+            if paid_status != "all":
+                revenues_qs = revenues_qs.filter(paid=paid_status == "paid")
+            
+            revenues_list = revenues_qs.order_by("-competency", "-value")[:100]
+
+        contracts = Contract.objects.filter(
+            area__in=self.request.user.areas.all()
+        ).order_by("name")
+        
+        favoreds = Favored.objects.filter(
+            organization=self.request.user.organization
+        ).order_by("name")
+        
+        context.update({
+            "expenses": expenses_list,
+            "revenues": revenues_list,
+            "contracts": contracts,
+            "favoreds": favoreds,
+            "search_query": search_query,
+            "record_type": record_type,
+            "start_date": start_date,
+            "end_date": end_date,
+            "conciled_status": conciled_status,
+            "contract_id": contract_id,
+            "favored_id": favored_id,
+            "status": status,
+            "paid_status": paid_status,
+            "expenses_total": sum(e.value for e in expenses_list),
+            "revenues_total": sum(r.value for r in revenues_list),
+        })
+
+        return context
+
+
 class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
     """View to display detailed information about a beneficiary."""
 
@@ -1597,17 +1826,11 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         beneficiary = self.get_object()
 
-        # Get expenses for this beneficiary
-        from accountability.models import Expense
-
         expenses = (
             Expense.objects.filter(favored=beneficiary, deleted_at__isnull=True)
             .select_related("accountability__contract")
             .order_by("-competency")
         )
-
-        # Get contracts with costs
-        from contracts.models import Contract
 
         contracts = Contract.objects.filter(
             accountabilities__expenses__favored=beneficiary,
@@ -1641,3 +1864,240 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
         context["expenses"] = expenses
 
         return context
+
+
+@log_view_access
+@login_required
+def batch_reconcile_expenses_view(request, pk):
+    """Batch reconciliation view for expenses."""
+    accountability = get_object_or_404(Accountability, id=pk)
+
+    if not accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
+
+    contract = accountability.contract
+    unreconciled_expenses = (
+        Expense.objects.filter(
+            accountability=accountability, conciled=False, deleted_at__isnull=True
+        )
+        .select_related("favored", "item")
+        .order_by("-value")
+    )
+
+    start_date = date(accountability.year, accountability.month, 1)
+    if accountability.month == 12:
+        end_date = date(accountability.year + 1, 1, 1)
+    else:
+        end_date = date(accountability.year, accountability.month + 1, 1)
+
+    available_transactions = (
+        Transaction.objects.filter(
+            Q(bank_account=contract.checking_account)
+            | Q(bank_account=contract.investing_account)
+        )
+        .filter(
+            expenses__isnull=True,
+            amount__lt=0,  # Negative amounts for expenses
+            date__gte=start_date,
+            date__lt=end_date,
+        )
+        .order_by("date")
+    )
+
+    def normalize_text(text):
+        if not text:
+            return ""
+
+        text = unicodedata.normalize("NFD", text)
+        text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+        return text.upper()
+
+    matches = []
+    used_transaction_ids = set()
+
+    for expense in unreconciled_expenses:
+        candidate_transactions = [
+            t
+            for t in available_transactions
+            if abs(abs(t.amount) - expense.value) < 0.01
+            and t.id not in used_transaction_ids
+        ]
+
+        matched_transaction = None
+
+        if len(candidate_transactions) == 1:
+            matched_transaction = candidate_transactions[0]
+        elif len(candidate_transactions) > 1 and expense.favored:
+            first_name = expense.favored.name.split()[0] if expense.favored.name else ""
+            first_name_normalized = normalize_text(first_name)
+            if first_name_normalized and len(first_name_normalized) > 2:
+                matching_by_name = []
+                for transaction in candidate_transactions:
+                    transaction_text = normalize_text(
+                        f"{transaction.memo or ''} {transaction.name or ''}"
+                    )
+                    if first_name_normalized in transaction_text:
+                        matching_by_name.append(transaction)
+
+                if len(matching_by_name) == 1:
+                    matched_transaction = matching_by_name[0]
+
+        if matched_transaction:
+            used_transaction_ids.add(matched_transaction.id)
+            matches.append(
+                {
+                    "expense": expense,
+                    "transaction": matched_transaction,
+                    "matched": True,
+                }
+            )
+        else:
+            matches.append({"expense": expense, "transaction": None, "matched": False})
+
+    if request.method == "POST":
+        reconciliations = []
+
+        for expense in unreconciled_expenses:
+            transaction_id = request.POST.get(f"transaction_{expense.id}")
+            # Only process if user selected a transaction (not empty)
+            if transaction_id and transaction_id.strip():
+                try:
+                    trans = Transaction.objects.get(id=transaction_id)
+                    reconciliations.append((expense, trans))
+                except Transaction.DoesNotExist:
+                    continue
+            # If transaction_id is empty or None, we skip this expense (user was unsure)
+        if reconciliations:
+            with db_transaction.atomic():
+                for expense, trans in reconciliations:
+                    expense.conciled = True
+                    expense.conciled_at = timezone.now()
+                    expense.paid = True
+                    expense.liquidation = trans.date
+                    expense.save()
+
+                    expense.bank_transactions.add(trans)
+                    ActivityLog.objects.create(
+                        user=request.user,
+                        user_email=request.user.email,
+                        action=ActivityLog.ActivityLogChoices.RECONCILED_EXPENSE,
+                        target_object_id=expense.id,
+                        target_content_object=expense,
+                    )
+
+                return redirect(
+                    "accountability:accountability-detail", pk=accountability.id
+                )
+
+    context = {
+        "accountability": accountability,
+        "matches": matches,
+        "available_transactions": available_transactions,
+        "unreconciled_count": unreconciled_expenses.count(),
+    }
+
+    return render(request, "accountability/expenses/batch-reconcile.html", context)
+
+
+@log_database_operation("unreconcile_expense")
+@log_view_access
+@login_required
+def unreconcile_expense_view(request, pk):
+    expense = get_object_or_404(
+        Expense.objects.select_related(
+            "accountability",
+            "accountability__contract",
+        ),
+        id=pk,
+    )
+
+    if not expense.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    if not expense.conciled:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    if request.method == "POST":
+        with db_transaction.atomic():
+            expense.conciled = False
+            expense.conciled_at = None
+            expense.paid = False
+            expense.liquidation = None
+            expense.save()
+            expense.bank_transactions.clear()
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_EXPENSE,
+                target_object_id=expense.id,
+                target_content_object=expense,
+            )
+
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
+    return redirect(
+        "accountability:accountability-detail",
+        pk=expense.accountability.id,
+    )
+
+
+@log_database_operation("unreconcile_revenue")
+@log_view_access
+@login_required
+def unreconcile_revenue_view(request, pk):
+    revenue = get_object_or_404(
+        Revenue.objects.select_related(
+            "accountability",
+            "accountability__contract",
+        ),
+        id=pk,
+    )
+
+    if not revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    if not revenue.conciled:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    if request.method == "POST":
+        with db_transaction.atomic():
+            revenue.conciled = False
+            revenue.conciled_at = None
+            revenue.paid = False
+            revenue.save()
+            revenue.transactions.clear()
+            _ = ActivityLog.objects.create(
+                user=request.user,
+                user_email=request.user.email,
+                action=ActivityLog.ActivityLogChoices.UPDATED_REVENUE,
+                target_object_id=revenue.id,
+                target_content_object=revenue,
+            )
+
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    return redirect(
+        "accountability:accountability-detail",
+        pk=revenue.accountability.id,
+    )

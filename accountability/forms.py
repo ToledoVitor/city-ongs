@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from django import forms
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
 
 from accountability.models import (
     Accountability,
@@ -82,22 +83,6 @@ class ExpenseForm(forms.ModelForm):
                     "A identificação deve ter pelo menos 5 caracteres"
                 )
 
-            # Verifica se já existe uma despesa com essa identificação no mesmo mês
-            if self.instance and self.instance.accountability:
-                exists = (
-                    Expense.objects.filter(
-                        accountability=self.instance.accountability,
-                        identification=identification,
-                    )
-                    .exclude(id=self.instance.id)
-                    .exists()
-                )
-
-                if exists:
-                    raise forms.ValidationError(
-                        "Já existe uma despesa com essa identificação neste mês"
-                    )
-
         return identification
 
     def clean_document_number(self):
@@ -123,13 +108,16 @@ class ExpenseForm(forms.ModelForm):
 
         if value and item:
             # Verifica se o valor excede o orçamento do item
-            if item.remaining_budget < value:
+            if item.expenses.filter(
+                deleted_at__isnull=True
+            ).aggregate(
+                total=Coalesce(Sum("value"), Decimal("0.00"))
+            )["total"] + value > item.anual_expense:
                 raise forms.ValidationError(
                     f"O valor excede o orçamento disponível do item "
-                    f"({format_into_brazilian_currency(item.remaining_budget)})"
+                    f"({format_into_brazilian_currency(item.anual_expense)})"
                 )
 
-        # Verifica se a data de vencimento é anterior à data de competência
         due_date = cleaned_data.get("due_date")
         competency = cleaned_data.get("competency")
         if due_date and competency and due_date < competency:
@@ -160,7 +148,7 @@ class ExpenseForm(forms.ModelForm):
 
         widgets = {
             "identification": BaseCharFieldFormWidget(),
-            "observations": BaseTextAreaFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
             "value": BaseNumberFormWidget(),
             "source": BaseSelectFormWidget(required=False),
             "favored": BaseSelectFormWidget(required=False),
@@ -211,7 +199,7 @@ class RevenueForm(forms.ModelForm):
 
         widgets = {
             "identification": BaseCharFieldFormWidget(),
-            "observations": BaseTextAreaFormWidget(),
+            "observations": BaseTextAreaFormWidget(required=False),
             "value": BaseCharFieldFormWidget(),
             "bank_account": BaseSelectFormWidget(),
             "source": BaseSelectFormWidget(),
@@ -309,7 +297,14 @@ class ImportXLSXAccountabilityForm(forms.Form):
 
 class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        return f"{obj.date:%d/%m/%Y}, {format_into_brazilian_currency(obj.amount)}, {obj.memo}, {obj.name}"
+        base_string = (
+            f"{obj.date:%d/%m/%Y}, "
+            f"{format_into_brazilian_currency(obj.amount)}, "
+            f"{obj.memo}"
+        )
+        if obj.name:
+            base_string += f", {obj.name}"
+        return base_string
 
 
 class ReconcileExpenseForm(forms.Form):
@@ -363,6 +358,13 @@ class ReconcileExpenseForm(forms.Form):
         if abs(transaction_amount) != abs(expenses_amount):
             raise forms.ValidationError(
                 "Soma das transações diferente do valor da despesa."
+            )
+
+        if not all(
+            [transaction.date == self.expense.due_date for transaction in transactions]
+        ):
+            raise forms.ValidationError(
+                "As transações devem ter a mesma data da despesa."
             )
 
         return transactions

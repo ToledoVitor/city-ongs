@@ -64,7 +64,19 @@
                   <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                 </svg>
               </div>
-              <input id="id_start_of_vigency" name="start_of_vigency" type="text" class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5" placeholder="Início da Vigência" required datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt">
+              <input
+                id="id_start_of_vigency"
+                name="start_of_vigency"
+                type="text"
+                class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
+                placeholder="Início da Vigência"
+                required
+                datepicker
+                datepicker-autohide
+                datepicker-format="dd/mm/yyyy"
+                datepicker-language="pt"
+                value="{{ form.start_of_vigency.value|date:'d/m/Y' }}"
+              >
             </div>
 
             <div class="relative">
@@ -73,7 +85,19 @@
                   <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                 </svg>
               </div>
-              <input id="id_end_of_vigency" name="end_of_vigency" type="text" class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5" placeholder="Fim da Vigência" required datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt">
+              <input
+                id="id_end_of_vigency"
+                name="end_of_vigency"
+                type="text"
+                class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
+                placeholder="Fim da Vigência"
+                required
+                datepicker
+                datepicker-autohide
+                datepicker-format="dd/mm/yyyy"
+                datepicker-language="pt"
+                value="{{ form.end_of_vigency.value|date:'d/m/Y' }}"
+              >
             </div>
           </div>
         </div>
@@ -105,7 +129,17 @@
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
             </div>
-            <input id="id_law_date" name="law_date" type="text" class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5" placeholder="Data da Lei" datepicker datepicker-autohide datepicker-format="dd/mm/yyyy">
+            <input
+              id="id_law_date"
+              name="law_date"
+              type="text"
+              class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
+              placeholder="Data da Lei"
+              datepicker
+              datepicker-autohide
+              datepicker-format="dd/mm/yyyy"
+              value="{{ form.law_date.value|date:'d/m/Y' }}"
+            >
           </div>
         </div>
 
@@ -121,7 +155,18 @@
                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
               </svg>
             </div>
-            <input id="id_agreement_date" name="agreement_date" type="text" class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5" placeholder="Data do Convênio" datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt">
+            <input
+              id="id_agreement_date"
+              name="agreement_date"
+              type="text"
+              class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
+              placeholder="Data do Convênio"
+              datepicker
+              datepicker-autohide
+              datepicker-format="dd/mm/yyyy"
+              datepicker-language="pt"
+              value="{{ form.agreement_date.value|date:'d/m/Y' }}"
+            >
           </div>
         </div>
       </div>
@@ -172,7 +217,16 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
               </svg>
             </div>
-            <input type="text" id="id_total_value" name="total_value" placeholder="000,00" oninput="formatMoney(this)" class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500" required/>
+            <input
+              type="text"
+              id="id_total_value"
+              name="total_value"
+              placeholder="000,00"
+              oninput="formatMoney(this)"
+              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
+              required
+              value="{{ form.total_value.value }}"
+            />
           </div>
         </div>
 
@@ -184,7 +238,16 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
               </svg>
             </div>
-            <input type="text" id="id_municipal_value" name="municipal_value" placeholder="000,00" oninput="formatMoney(this)" class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500" required/>
+            <input
+              type="text"
+              id="id_municipal_value"
+              name="municipal_value"
+              placeholder="000,00"
+              oninput="formatMoney(this)"
+              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
+              required
+              value="{{ form.municipal_value.value }}"
+            />
           </div>
         </div>
 
@@ -196,7 +259,16 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
               </svg>
             </div>
-            <input type="text" id="id_counterpart_value" name="counterpart_value" placeholder="000,00" oninput="formatMoney(this)" class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500" required/>
+            <input
+              type="text"
+              id="id_counterpart_value"
+              name="counterpart_value"
+              placeholder="000,00"
+              oninput="formatMoney(this)"
+              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
+              required
+              value="{{ form.counterpart_value.value }}"
+            />
           </div>
           <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">Escreva somente os números, sem o R$, separados por vírgula</p>
         </div>
@@ -263,27 +335,6 @@
 </form>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('#id_start_of_vigency', '#id_end_of_vigency', '#id_law_date', '#id_agreement_date');
-
-    inputs.forEach(input => {
-      input.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 8) value = value.slice(0, 8);
-
-        if (value.length > 4) {
-          value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-        } else if (value.length > 2) {
-          value = `${value.slice(0, 2)}/${value.slice(2)}`;
-        }
-
-        e.target.value = value;
-      });
-    });
-  });
-</script>
-
-<script>
   function formatMoney(input) {
     let value = input.value.replace(/\D/g, "");
 
@@ -299,6 +350,73 @@
 
     input.value = value;
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const startOfVigencyInput = document.getElementById('id_start_of_vigency');
+    const endOfVigencyInput = document.getElementById('id_end_of_vigency');
+    const lawDateInput = document.getElementById('id_law_date');
+    const agreementDateInput = document.getElementById('id_agreement_date');
+
+    startOfVigencyInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 8) value = value.slice(0, 8);
+
+      if (value.length > 4) {
+        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+      } else if (value.length > 2) {
+        value = `${value.slice(0, 2)}/${value.slice(2)}`;
+      }
+
+      e.target.value = value;
+    });
+
+    endOfVigencyInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 8) value = value.slice(0, 8);
+
+      if (value.length > 4) {
+        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+      } else if (value.length > 2) {
+        value = `${value.slice(0, 2)}/${value.slice(2)}`;
+      }
+
+      e.target.value = value;
+    });
+
+    lawDateInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 8) value = value.slice(0, 8);
+
+      if (value.length > 4) {
+        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+      } else if (value.length > 2) {
+        value = `${value.slice(0, 2)}/${value.slice(2)}`;
+      }
+
+      e.target.value = value;
+    });
+
+    agreementDateInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 8) value = value.slice(0, 8);
+
+      if (value.length > 4) {
+        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+      } else if (value.length > 2) {
+        value = `${value.slice(0, 2)}/${value.slice(2)}`;
+      }
+
+      e.target.value = value;
+    });
+
+    const counterpartValueInput = document.getElementById('id_counterpart_value');
+    const municipalValueInput = document.getElementById('id_municipal_value');
+    const totalValueInput = document.getElementById('id_total_value');
+
+    formatMoney(counterpartValueInput);
+    formatMoney(municipalValueInput);
+    formatMoney(totalValueInput);
+  });
 </script>
 
 {% endblock %}

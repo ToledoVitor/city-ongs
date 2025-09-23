@@ -515,7 +515,9 @@ class AccountabilityXLSXExporter:
         revenue_worksheet.write(0, 1, "ID", self.yellow_body_format)
 
         line = 1
-        for source in ResourceSource.objects.filter(organization=self.organization):
+        for source in ResourceSource.objects.filter(
+            organization=self.organization
+        ).order_by("name", "document"):
             revenue_worksheet.write(line, 0, source.name)
             revenue_worksheet.write(line, 1, str(source.id))
             line += 1
@@ -607,7 +609,9 @@ class AccountabilityXLSXExporter:
         favored_worksheet.write(0, 1, "Documento", self.yellow_body_format)
 
         current_line = 1
-        for favored in Favored.objects.filter(organization=self.organization):
+        for favored in Favored.objects.filter(organization=self.organization).order_by(
+            "name", "document"
+        ):
             favored_worksheet.write(current_line, 0, favored.name)
             favored_worksheet.write(current_line, 1, str(favored.document))
             current_line += 1

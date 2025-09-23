@@ -80,199 +80,246 @@
 </nav>
 
 <div id="printable" class="container mx-auto px-4 py-6">
-  <h1 class="text-2xl font-bold mb-6">Extrato da Conta: {{ account.bank_name }} - {{ account.account }} / {{ account.account_type_label }}</h1>
-
-  <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-    <div>
-      <label for="start_date" class="block text-sm font-medium text-gray-700">Data de Início</label>
-      <input
-        type="date"
-        name="start_date"
-        id="start_date"
-        value="{{ start_date }}"
-        class="
-          mt-1
-          block
-          w-full
-          rounded-md
-          bg-gray-300
-          border-gray-600
-          shadow-sm
-          focus:border-blue-500
-          focus:ring-blue-500
-        "
-      >
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Extrato da Conta</h1>
+    <div class="flex items-center space-x-2 text-gray-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+      </svg>
+      <span class="font-medium">{{ account.bank_name }}</span>
+      <span class="text-gray-400">•</span>
+      <span>{{ account.account }}</span>
+      <span class="text-gray-400">•</span>
+      <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">{{ account.account_type_label }}</span>
     </div>
+  </div>
 
-    <div>
-      <label for="end_date" class="block text-sm font-medium text-gray-700">Data de Término</label>
-      <input
-        type="date"
-        name="end_date"
-        id="end_date"
-        value="{{ end_date }}"
-        class="
-          mt-1
-          block
-          w-full
-          rounded-md
-          bg-gray-300
-          border-gray-600
-          shadow-sm
-          focus:border-blue-500
-          focus:ring-blue-500
-        "
-        >
-    </div>
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 no-print">
+    <form method="get" class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Data de Início</label>
+          <input
+            type="date"
+            name="start_date"
+            id="start_date"
+            value="{{ start_date }}"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+        </div>
 
-    <div>
-      <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-      <select
-        name="status"
-        id="status"
-        class="
-          mt-1
-          border
-          text-sm
-          rounded-lg
-          block
-          w-full p-2.5
-          bg-gray-300
-          border-gray-600
-          text-black
-          focus:ring-blue-500
-          focus:border-blue-500
-        "
-      >
-        <option value="all" {% if status == 'all' %}selected{% endif %}>Todas</option>
-        <option value="reconciled" {% if status == 'reconciled' %}selected{% endif %}>Conciliadas</option>
-        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pendentes</option>
-      </select>
-    </div>
+        <div>
+          <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Data de Término</label>
+          <input
+            type="date"
+            name="end_date"
+            id="end_date"
+            value="{{ end_date }}"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+        </div>
 
-    <div class="flex items-end">
-      <button type="submit"
-        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Filtrar
-      </button>
-    </div>
-  </form>
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+          <select
+            name="status"
+            id="status"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+            <option value="all" {% if status == 'all' %}selected{% endif %}>Todas as Transações</option>
+            <option value="reconciled" {% if status == 'reconciled' %}selected{% endif %}>Conciliadas</option>
+            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pendentes</option>
+          </select>
+        </div>
 
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-500 text-white">
-        <tr>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Data
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Nome
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Valor
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Tipo
-          </th>
-          <th
-            scope="col"
-            class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-            Status
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        {% for day in statement_days %}
+        <div class="flex items-end">
+          <button type="submit"
+            class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors font-medium">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"></path>
+            </svg>
+            Filtrar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
           <tr>
-            <td class="px-6 py-4 font-bold bg-gray-200" colspan="5">
-              {{ day.date }} &mdash; Saldo Inicial: R$ {{ day.open_balance|intcomma }} | Saldo Final: R$ {{ day.close_balance|intcomma }}
-            </td>
+            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Data
+              </div>
+            </th>
+            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                </svg>
+                Descrição
+              </div>
+            </th>
+            <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <div class="flex items-center justify-end">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+                Valor
+              </div>
+            </th>
+            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <div class="flex items-center justify-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Tipo
+              </div>
+            </th>
+            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <div class="flex items-center justify-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Status
+              </div>
+            </th>
           </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for day in statement_days %}
+            <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500">
+              <td colspan="5" class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 class="text-base font-semibold text-gray-900">{{ day.date }}</h3>
+                      <p class="text-sm text-gray-600">{{ day.transactions|length }} transação{{ day.transactions|length|pluralize:"ões" }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="flex items-center space-x-6">
+                      <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">Saldo Inicial</p>
+                        <p class="text-sm font-semibold text-gray-900">R$ {{ day.open_balance|intcomma }}</p>
+                      </div>
+                      <div class="w-px h-8 bg-gray-300"></div>
+                      <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">Saldo Final</p>
+                        <p class="text-sm font-semibold text-gray-900">R$ {{ day.close_balance|intcomma }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-          {% for transaction in day.transactions %}
+            {% for transaction in day.transactions %}
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">{{ transaction.obj.date|date:"d/m/Y" }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">
+                    {{ transaction.obj.memo|default:"Sem descrição" }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <div class="text-sm font-semibold {% if transaction.obj.amount >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                    {% if transaction.obj.amount >= 0 %}+{% endif %}R$ {{ transaction.obj.amount|intcomma }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if transaction.obj.get_transaction_type_display == 'Crédito' %}
+                      bg-green-100 text-green-800
+                    {% else %}
+                      bg-red-100 text-red-800
+                    {% endif %}
+                  ">
+                    {% if transaction.obj.get_transaction_type_display == 'Crédito' %}
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                      </svg>
+                    {% else %}
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path>
+                      </svg>
+                    {% endif %}
+                    {{ transaction.obj.get_transaction_type_display }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  {% if transaction.status == 'Conciliada' or transaction.status == 'reconciled' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      Conciliada
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Pendente
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% empty %}
             <tr>
-              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.obj.date }}</td>
-              <td class="px-6 py-4 text-xs">{{ transaction.obj.memo|default:"-" }}</td>
-              <td class="px-6 py-4 text-xs whitespace-nowrap">R$ {{ transaction.obj.amount|intcomma }}</td>
-              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.obj.get_transaction_type_display }}</td>
-              <td class="px-6 py-4 text-xs whitespace-nowrap">{{ transaction.status }}</td>
+              <td colspan="5" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center">
+                  <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhuma transação encontrada</h3>
+                  <p class="text-gray-500">Não há transações para o período selecionado.</p>
+                </div>
+              </td>
             </tr>
           {% endfor %}
-        {% empty %}
-          <tr>
-            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-              Nenhuma transação encontrada para o período selecionado.
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
 <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
-  <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
+  <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-3">
     <button
       type="button"
       data-tooltip-target="tooltip-share"
       data-tooltip-placement="left"
       onclick="navigator.clipboard.writeText(window.location.href)"
-      class="
-        flex
-        justify-center
-        items-center
-        w-[52px]
-        h-[52px]
-        text-gray-500
-        hover:text-gray-900
-        bg-white
-        rounded-full
-        border
-        border-gray-200
-        shadow-xs
-        hover:bg-gray-50
-        focus:ring-4
-        focus:ring-gray-300
-        focus:outline-none
-      "
+      class="flex justify-center items-center w-12 h-12 text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 rounded-full border border-blue-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-200"
     >
-      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-        <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
       </svg>
       <span class="sr-only">Compartilhar</span>
     </button>
     <div
       id="tooltip-share"
       role="tooltip"
-      class="
-        absolute
-        z-10
-        invisible
-        inline-block
-        w-auto
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-white
-        transition-opacity
-        duration-300
-        bg-gray-900
-        rounded-lg
-        shadow-xs
-        opacity-0
-        tooltip
-      "
+      class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-lg opacity-0 tooltip"
     >
-      Compartilhar
+      Compartilhar Link
       <div class="tooltip-arrow" data-popper-arrow></div>
     </div>
 
@@ -281,27 +328,10 @@
         type="button"
         data-tooltip-target="tooltip-ofx"
         data-tooltip-placement="left"
-        class="
-          flex
-          justify-center
-          items-center
-          w-[52px]
-          h-[52px]
-          text-gray-500
-          hover:text-gray-900
-          bg-white
-          rounded-full
-          border
-          border-gray-200
-          shadow-xs
-          hover:bg-gray-50
-          focus:ring-4
-          focus:ring-gray-300
-          focus:outline-none
-        "
+        class="flex justify-center items-center w-12 h-12 text-green-600 hover:text-green-700 bg-white hover:bg-green-50 rounded-full border border-green-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-green-300 focus:outline-none transition-all duration-200"
       >
-        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-          <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Zm3 2h2.01v2.01h-2V8h2v2.01h-2V12h2v2.01h-2V16h2v2.01h-2v2H12V18h2v-1.99h-2V14h2v-1.99h-2V10h2V8.01h-2V6h2V4Z" clip-rule="evenodd"/>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
         <span class="sr-only">Exportar OFX</span>
       </button>
@@ -309,25 +339,7 @@
     <div
       id="tooltip-ofx"
       role="tooltip"
-      class="
-        absolute
-        z-10
-        invisible
-        inline-block
-        w-auto
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-white
-        transition-opacity
-        duration-300
-        bg-gray-900
-        rounded-lg
-        shadow-xs
-        opacity-0
-        tooltip
-      "
+      class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-lg opacity-0 tooltip"
     >
       Exportar OFX
       <div class="tooltip-arrow" data-popper-arrow></div>
@@ -338,33 +350,15 @@
       data-tooltip-target="tooltip-print"
       data-tooltip-placement="left"
       onclick="window.print()"
-      class="
-        flex
-        justify-center
-        items-center
-        w-[52px]
-        h-[52px]
-        text-gray-500
-        hover:text-gray-900
-        bg-white
-        rounded-full
-        border
-        border-gray-200
-        shadow-xs
-        hover:bg-gray-50
-        focus:ring-4
-        focus:ring-gray-300
-        focus:outline-none
-      "
+      class="flex justify-center items-center w-12 h-12 text-purple-600 hover:text-purple-700 bg-white hover:bg-purple-50 rounded-full border border-purple-200 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-purple-300 focus:outline-none transition-all duration-200"
     >
-      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
-          <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
       </svg>
       <span class="sr-only">Imprimir</span>
     </button>
-    <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
-      Imprimir
+    <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-lg opacity-0 tooltip">
+      Imprimir Extrato
       <div class="tooltip-arrow" data-popper-arrow></div>
     </div>
   </div>
@@ -374,18 +368,17 @@
     data-dial-toggle="speed-dial-menu-default"
     aria-controls="speed-dial-menu-default"
     aria-expanded="false"
-    class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
+    class="flex items-center justify-center text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-full w-14 h-14 shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-200"
   >
       <svg
-        class="w-5 h-5 transition-transform group-hover:rotate-45"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6 transition-transform group-hover:rotate-45"
         fill="none"
-        viewBox="0 0 18 18"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
       >
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
       </svg>
-      <span class="sr-only">Ações</span>
+      <span class="sr-only">Ações do Extrato</span>
   </button>
 </div>
 
