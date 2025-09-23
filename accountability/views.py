@@ -1,9 +1,8 @@
 import logging
 import unicodedata
-from contracts.models import Contract
-from accounts.models import User
-from typing import Any
 from datetime import date
+from typing import Any
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -39,10 +38,11 @@ from accountability.models import (
     Revenue,
     RevenueFile,
 )
-from bank.models import Transaction
 from accountability.services import export_xlsx_model, import_xlsx_model
-from accounts.models import Area
+from accounts.models import Area, User
 from activity.models import ActivityLog
+from bank.models import Transaction
+from contracts.models import Contract
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
 
@@ -387,9 +387,7 @@ def accountability_detail_view(request, pk):
             | Q(item__name__icontains=search_query)
             | Q(favored__name__icontains=search_query)
         )
-        revenues_list = revenues_list.filter(
-            Q(identification__icontains=search_query)
-        )
+        revenues_list = revenues_list.filter(Q(identification__icontains=search_query))
         documents_list = documents_list.filter(Q(name__icontains=search_query))
 
     # Apply payment status filter
@@ -942,7 +940,7 @@ def send_accountability_to_analisys_view(request, pk):
                 id=reviewer_id,
                 organization=request.user.organization,
                 access_level=User.AccessChoices.FOLDER_MANAGER,
-                is_active=True
+                is_active=True,
             )
         except Exception:
             return redirect(
@@ -969,31 +967,35 @@ def send_accountability_to_analisys_view(request, pk):
 def get_available_reviewers_view(request, pk):
     """API endpoint to get available reviewers for accountability analysis"""
     from django.http import JsonResponse
-    
+
     accountability = get_object_or_404(Accountability, id=pk)
     user_org = request.user.organization
-    
+
     available_reviewers = User.objects.filter(
         organization=user_org,
         access_level=User.AccessChoices.FOLDER_MANAGER,
-        is_active=True
+        is_active=True,
     ).order_by("first_name", "last_name")
-    
+
     default_reviewer = accountability.contract.supervision_autority
-    
+
     reviewers_data = []
     for reviewer in available_reviewers:
-        reviewers_data.append({
-            "id": str(reviewer.id),
-            "name": reviewer.get_full_name(),
-            "email": reviewer.email,
-            "is_default": reviewer == default_reviewer
-        })
-    
-    return JsonResponse({
-        "reviewers": reviewers_data,
-        "default_reviewer": str(default_reviewer.id) if default_reviewer else None
-    })
+        reviewers_data.append(
+            {
+                "id": str(reviewer.id),
+                "name": reviewer.get_full_name(),
+                "email": reviewer.email,
+                "is_default": reviewer == default_reviewer,
+            }
+        )
+
+    return JsonResponse(
+        {
+            "reviewers": reviewers_data,
+            "default_reviewer": str(default_reviewer.id) if default_reviewer else None,
+        }
+    )
 
 
 def send_accountability_review_analisys(request, pk):
@@ -1013,7 +1015,7 @@ def send_accountability_review_analisys(request, pk):
             action = ActivityLog.ActivityLogChoices.SENT_TO_CORRECT
         elif review_status == Accountability.ReviewStatus.FINISHED:
             action = ActivityLog.ActivityLogChoices.MARKED_AS_FINISHED
-            
+
             # Validate committee member selection for approved accountabilities
             if committee_member_id:
                 try:
@@ -1021,11 +1023,13 @@ def send_accountability_review_analisys(request, pk):
                         id=committee_member_id,
                         organization=request.user.organization,
                         access_level=User.AccessChoices.COMMITTEE_MEMBER,
-                        is_active=True
+                        is_active=True,
                     )
                     accountability.committee_member = committee_member
                 except User.DoesNotExist:
-                    return redirect("accountability:accountability-detail", pk=accountability.id)
+                    return redirect(
+                        "accountability:accountability-detail", pk=accountability.id
+                    )
         else:
             raise ValueError(f"{review_status} - Is an unnknow status review")
 
@@ -1706,10 +1710,14 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
         record_type = self.request.GET.get("type", "all")  # all, expense, revenue
         start_date = self.request.GET.get("start_date", "")
         end_date = self.request.GET.get("end_date", "")
-        conciled_status = self.request.GET.get("conciled", "all")  # all, conciled, not_conciled
+        conciled_status = self.request.GET.get(
+            "conciled", "all"
+        )  # all, conciled, not_conciled
         contract_id = self.request.GET.get("contract", "")
         favored_id = self.request.GET.get("favored", "")
-        status = self.request.GET.get("status", "all")  # all, pending, approved, rejected
+        status = self.request.GET.get(
+            "status", "all"
+        )  # all, pending, approved, rejected
         paid_status = self.request.GET.get("paid", "all")  # all, paid, unpaid
 
         expenses_list = []
@@ -1719,15 +1727,15 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
                 "accountability__contract", "item", "favored"
             ).filter(
                 deleted_at__isnull=True,
-                accountability__contract__area__in=self.request.user.areas.all()
+                accountability__contract__area__in=self.request.user.areas.all(),
             )
 
             if search_query:
                 expenses_qs = expenses_qs.filter(
-                    Q(identification__icontains=search_query) |
-                    Q(item__name__icontains=search_query) |
-                    Q(favored__name__icontains=search_query) |
-                    Q(accountability__contract__name__icontains=search_query)
+                    Q(identification__icontains=search_query)
+                    | Q(item__name__icontains=search_query)
+                    | Q(favored__name__icontains=search_query)
+                    | Q(accountability__contract__name__icontains=search_query)
                 )
 
             if start_date and end_date:
@@ -1739,17 +1747,19 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
                 expenses_qs = expenses_qs.filter(conciled=conciled_status == "conciled")
 
             if contract_id:
-                expenses_qs = expenses_qs.filter(accountability__contract_id=contract_id)
+                expenses_qs = expenses_qs.filter(
+                    accountability__contract_id=contract_id
+                )
 
             if favored_id:
                 expenses_qs = expenses_qs.filter(favored_id=favored_id)
 
             if status != "all":
                 expenses_qs = expenses_qs.filter(status=status)
-            
+
             if paid_status != "all":
                 expenses_qs = expenses_qs.filter(paid=paid_status == "paid")
-            
+
             expenses_list = expenses_qs.order_by("-competency", "-value")[:100]
 
         if record_type in ["all", "revenue"]:
@@ -1757,60 +1767,64 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
                 "accountability__contract", "bank_account"
             ).filter(
                 deleted_at__isnull=True,
-                accountability__contract__area__in=self.request.user.areas.all()
+                accountability__contract__area__in=self.request.user.areas.all(),
             )
-            
+
             if search_query:
                 revenues_qs = revenues_qs.filter(
-                    Q(bank_account__name__icontains=search_query) |
-                    Q(source__icontains=search_query) |
-                    Q(accountability__contract__name__icontains=search_query)
+                    Q(bank_account__name__icontains=search_query)
+                    | Q(source__icontains=search_query)
+                    | Q(accountability__contract__name__icontains=search_query)
                 )
-            
+
             if start_date and end_date:
                 revenues_qs = revenues_qs.filter(
                     competency__range=[start_date, end_date]
                 )
-            
+
             if conciled_status != "all":
                 revenues_qs = revenues_qs.filter(conciled=conciled_status == "conciled")
-            
+
             if contract_id:
-                revenues_qs = revenues_qs.filter(accountability__contract_id=contract_id)
-            
+                revenues_qs = revenues_qs.filter(
+                    accountability__contract_id=contract_id
+                )
+
             if status != "all":
                 revenues_qs = revenues_qs.filter(status=status)
-            
+
             if paid_status != "all":
                 revenues_qs = revenues_qs.filter(paid=paid_status == "paid")
-            
+
             revenues_list = revenues_qs.order_by("-competency", "-value")[:100]
 
         contracts = Contract.objects.filter(
             area__in=self.request.user.areas.all()
         ).order_by("name")
-        
+
         favoreds = Favored.objects.filter(
             organization=self.request.user.organization
         ).order_by("name")
-        
-        context.update({
-            "expenses": expenses_list,
-            "revenues": revenues_list,
-            "contracts": contracts,
-            "favoreds": favoreds,
-            "search_query": search_query,
-            "record_type": record_type,
-            "start_date": start_date,
-            "end_date": end_date,
-            "conciled_status": conciled_status,
-            "contract_id": contract_id,
-            "favored_id": favored_id,
-            "status": status,
-            "paid_status": paid_status,
-            "expenses_total": sum(e.value for e in expenses_list),
-            "revenues_total": sum(r.value for r in revenues_list),
-        })
+
+        context.update(
+            {
+                "expenses": expenses_list,
+                "revenues": revenues_list,
+                "contracts": contracts,
+                "favoreds": favoreds,
+                "search_query": search_query,
+                "record_type": record_type,
+                "start_date": start_date,
+                "end_date": end_date,
+                "conciled_status": conciled_status,
+                "contract_id": contract_id,
+                "favored_id": favored_id,
+                "status": status,
+                "paid_status": paid_status,
+                "expenses_total": sum(e.value for e in expenses_list),
+                "revenues_total": sum(r.value for r in revenues_list),
+            }
+        )
 
         return context
 

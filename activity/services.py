@@ -117,8 +117,7 @@ class ActivityLogEmailNotificationHandler:
         )
 
         recipient = (
-            accountability.reviewer or
-            accountability.contract.supervision_autority
+            accountability.reviewer or accountability.contract.supervision_autority
         )
         if recipient:
             Notification.objects.create(

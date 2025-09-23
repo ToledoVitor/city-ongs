@@ -2,8 +2,9 @@ import calendar
 from datetime import datetime
 
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import formset_factory
 
+from accounts.models import User
 from contracts.models import Contract, ContractInterestedPart
 from utils.widgets import BaseSelectFormWidget
 
@@ -34,25 +35,33 @@ REPORTS_OPTIONS = [
 ]
 
 
-class AdditionalResponsibleForm(forms.ModelForm):
-    class Meta:
-        model = ContractInterestedPart
-        fields = ["user", "interest"]
-        widgets = {
-            "user": BaseSelectFormWidget(required=False),
-            "interest": BaseSelectFormWidget(required=False),
-        }
+class AdditionalResponsibleForm(forms.Form):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        widget=BaseSelectFormWidget(required=False),
+        empty_label="Selecione um usuário",
+    )
+    interest = forms.ChoiceField(
+        choices=[], required=False, widget=BaseSelectFormWidget(required=False)
+    )
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
+        self.contract = kwargs.pop("contract", None)
         super().__init__(*args, **kwargs)
+
         if self.request:
-            self.fields["user"].required = False
-            self.fields["interest"].required = False
-            self.fields["user"].queryset = (
-                self.request.user.organization.users.filter(
-                    areas__in=self.request.user.areas.all()
+            interested_part_users = (
+                ContractInterestedPart.objects.filter(
+                    contract__area__in=self.request.user.areas.all()
                 )
+                .values_list("user", flat=True)
+                .distinct()
+            )
+
+            self.fields["user"].queryset = (
+                User.objects.filter(id__in=interested_part_users)
                 .order_by("first_name", "last_name")
                 .distinct()
             )
@@ -61,25 +70,26 @@ class AdditionalResponsibleForm(forms.ModelForm):
             ] + list(ContractInterestedPart.InterestLevel.choices)
 
 
-class AdditionalResponsibleFormSet(
-    inlineformset_factory(
-        Contract,
-        ContractInterestedPart,
-        form=AdditionalResponsibleForm,
-        extra=1,
-        can_delete=True,
-        min_num=0,
-        validate_min=False,
-        max_num=6,
-    )
-):
+AdditionalResponsibleFormSet = formset_factory(
+    AdditionalResponsibleForm,
+    extra=1,
+    can_delete=True,
+    min_num=0,
+    validate_min=False,
+    max_num=6,
+)
+
+
+class AdditionalResponsibleFormSetWrapper(AdditionalResponsibleFormSet):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
+        self.contract = kwargs.pop("contract", None)
         super().__init__(*args, **kwargs)
 
     def get_form_kwargs(self, index):
         kwargs = super().get_form_kwargs(index)
         kwargs["request"] = self.request
+        kwargs["contract"] = self.contract
         return kwargs
 
 
@@ -98,9 +108,7 @@ class ReportForm(forms.Form):
         (11, "Novembro"),
         (12, "Dezembro"),
     ]
-    YEAR_CHOICES = [
-        (year, year) for year in range(2020, datetime.now().year + 1)
-    ]
+    YEAR_CHOICES = [(year, year) for year in range(2020, datetime.now().year + 1)]
 
     start_month = forms.ChoiceField(
         choices=MONTH_CHOICES,
@@ -150,19 +158,14 @@ class ReportForm(forms.Form):
         self.responsible_formset = None
 
     def get_responsible_formset(self, contract=None):
-        if contract:
-            self.responsible_formset = AdditionalResponsibleFormSet(
-                instance=contract,
+        # Always create formset without instance since we're not editing
+        # existing records, just collecting data for the report
+        if not self.responsible_formset:
+            self.responsible_formset = AdditionalResponsibleFormSetWrapper(
                 data=self.data if self.is_bound else None,
                 prefix="responsibles",
                 request=self.request,
-            )
-        elif not self.responsible_formset:
-            # Create formset without instance for truly empty forms
-            self.responsible_formset = AdditionalResponsibleFormSet(
-                data=self.data if self.is_bound else None,
-                prefix="responsibles",
-                request=self.request,
+                contract=contract,
             )
         return self.responsible_formset
 
@@ -173,8 +176,8 @@ class ReportForm(forms.Form):
             start_year = int(cleaned_data.get("start_year"))
             end_month = int(cleaned_data.get("end_month"))
             end_year = int(cleaned_data.get("end_year"))
-        except (TypeError, ValueError):
-            raise forms.ValidationError("Valores inválidos para mês ou ano.")
+        except (TypeError, ValueError) as exc:
+            raise forms.ValidationError("Valores inválidos para mês ou ano.") from exc
 
         start_date = datetime(start_year, start_month, 1)
 
@@ -189,10 +192,26 @@ class ReportForm(forms.Form):
         cleaned_data["start_date"] = start_date
         cleaned_data["end_date"] = end_date
 
-        # if "contract" in cleaned_data:
-        #     contract = cleaned_data["contract"]
-        #     formset = self.get_responsible_formset(contract)
-        #     if formset and formset.is_bound and not formset.is_valid():
-        #         self.add_error(None, "Erro nos dados dos responsáveis")
+        if "contract" in cleaned_data:
+            contract = cleaned_data["contract"]
+            formset = self.get_responsible_formset(contract)
+            if formset and formset.is_bound:
+                has_data = any(
+                    form.has_changed()
+                    or (
+                        any(form.initial.values())
+                        if hasattr(form, "initial") and form.initial
+                        else form.has_changed()
+                    )
+                    for form in formset.forms
+                )
+                if has_data and not formset.is_valid():
+                    for form in formset.forms:
+                        if form.has_changed() and form.errors:
+                            for field, errors in form.errors.items():
+                                error_msg = (
+                                    f"Responsável: {field}: " f"{', '.join(errors)}"
+                                )
+                                self.add_error(None, error_msg)
 
         return cleaned_data

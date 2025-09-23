@@ -108,11 +108,13 @@ class ExpenseForm(forms.ModelForm):
 
         if value and item:
             # Verifica se o valor excede o orçamento do item
-            if item.expenses.filter(
-                deleted_at__isnull=True
-            ).aggregate(
-                total=Coalesce(Sum("value"), Decimal("0.00"))
-            )["total"] + value > item.anual_expense:
+            if (
+                item.expenses.filter(deleted_at__isnull=True).aggregate(
+                    total=Coalesce(Sum("value"), Decimal("0.00"))
+                )["total"]
+                + value
+                > item.anual_expense
+            ):
                 raise forms.ValidationError(
                     f"O valor excede o orçamento disponível do item "
                     f"({format_into_brazilian_currency(item.anual_expense)})"

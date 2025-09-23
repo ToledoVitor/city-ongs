@@ -4,29 +4,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0019_organizationdocument'),
-        ('bank', '0010_alter_bankaccount_unique_together_and_more'),
+        ("accounts", "0019_organizationdocument"),
+        ("bank", "0010_alter_bankaccount_unique_together_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='bankstatement',
-            name='unique_bank_statement_per_month_year',
+            model_name="bankstatement",
+            name="unique_bank_statement_per_month_year",
         ),
         migrations.AddField(
-            model_name='bankstatement',
-            name='reference_day',
-            field=models.IntegerField(blank=True, help_text='The day this statement refers to', null=True, verbose_name='Dia de Referência'),
+            model_name="bankstatement",
+            name="reference_day",
+            field=models.IntegerField(
+                blank=True,
+                help_text="The day this statement refers to",
+                null=True,
+                verbose_name="Dia de Referência",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalbankstatement',
-            name='reference_day',
-            field=models.IntegerField(blank=True, help_text='The day this statement refers to', null=True, verbose_name='Dia de Referência'),
+            model_name="historicalbankstatement",
+            name="reference_day",
+            field=models.IntegerField(
+                blank=True,
+                help_text="The day this statement refers to",
+                null=True,
+                verbose_name="Dia de Referência",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='bankstatement',
-            constraint=models.UniqueConstraint(condition=models.Q(('deleted_at__isnull', True)), fields=('bank_account', 'reference_month', 'reference_year', 'reference_day'), name='unique_bank_statement_per_month_year'),
+            model_name="bankstatement",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("deleted_at__isnull", True)),
+                fields=(
+                    "bank_account",
+                    "reference_month",
+                    "reference_year",
+                    "reference_day",
+                ),
+                name="unique_bank_statement_per_month_year",
+            ),
         ),
     ]
