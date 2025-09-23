@@ -67,7 +67,7 @@
 </nav>
 
 <!-- Error Alert -->
-<div id="error-alert" class="hidden mb-2 bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
+<div id="error-alert" class="max-w-7xl mx-auto hidden mb-2 bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
   <div class="flex items-start">
     <div class="flex-shrink-0">
       <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -613,8 +613,9 @@ window.generateReport = function() {
     generateIcon.classList.add("hidden");
     loadingIcon.classList.remove("hidden");
 
-    // Create FormData manually with the values we found
+    const form = document.querySelector('form');
     const formData = new FormData();
+    
     formData.append('csrfmiddlewaretoken', document.querySelector("[name=csrfmiddlewaretoken]").value);
     formData.append('contract', contract);
     formData.append('report_model', reportModel);
@@ -622,6 +623,39 @@ window.generateReport = function() {
     formData.append('start_year', startYear);
     formData.append('end_month', endMonth);
     formData.append('end_year', endYear);
+    
+    const totalFormsInput = document.querySelector("[name='responsibles-TOTAL_FORMS']");
+    const initialFormsInput = document.querySelector("[name='responsibles-INITIAL_FORMS']");
+    const minNumFormsInput = document.querySelector("[name='responsibles-MIN_NUM_FORMS']");
+    const maxNumFormsInput = document.querySelector("[name='responsibles-MAX_NUM_FORMS']");
+    
+    if (totalFormsInput) {
+        formData.append('responsibles-TOTAL_FORMS', totalFormsInput.value);
+        formData.append('responsibles-INITIAL_FORMS', initialFormsInput ? initialFormsInput.value : '0');
+        formData.append('responsibles-MIN_NUM_FORMS', minNumFormsInput ? minNumFormsInput.value : '0');
+        formData.append('responsibles-MAX_NUM_FORMS', maxNumFormsInput ? maxNumFormsInput.value : '1000');
+        
+        const totalForms = parseInt(totalFormsInput.value);
+        for (let i = 0; i < totalForms; i++) {
+            const userField = document.querySelector(`[name='responsibles-${i}-user']`);
+            const interestField = document.querySelector(`[name='responsibles-${i}-interest']`);
+            const deleteField = document.querySelector(`[name='responsibles-${i}-DELETE']`);
+            const idField = document.querySelector(`[name='responsibles-${i}-id']`);
+            
+            if (userField) {
+                formData.append(`responsibles-${i}-user`, userField.value || '');
+            }
+            if (interestField) {
+                formData.append(`responsibles-${i}-interest`, interestField.value || '');
+            }
+            if (deleteField) {
+                formData.append(`responsibles-${i}-DELETE`, deleteField.checked ? 'on' : '');
+            }
+            if (idField) {
+                formData.append(`responsibles-${i}-id`, idField.value || '');
+            }
+        }
+    }
     
     fetch("{% url 'reports:reports-generate-api' %}", {
         method: "POST",

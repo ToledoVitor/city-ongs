@@ -4,50 +4,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0034_alter_contractmonthtransfer_source'),
+        ("contracts", "0034_alter_contractmonthtransfer_source"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contractgoal',
-            name='methodology',
-            field=models.CharField(max_length=512, verbose_name='Metodologia'),
+            model_name="contractgoal",
+            name="methodology",
+            field=models.CharField(max_length=512, verbose_name="Metodologia"),
         ),
         migrations.AlterField(
-            model_name='contractgoal',
-            name='objective',
-            field=models.CharField(max_length=512, verbose_name='Objetivo'),
+            model_name="contractgoal",
+            name="objective",
+            field=models.CharField(max_length=512, verbose_name="Objetivo"),
         ),
         migrations.AlterField(
-            model_name='contractgoal',
-            name='observations',
-            field=models.CharField(blank=True, max_length=512, null=True, verbose_name='Observações'),
+            model_name="contractgoal",
+            name="observations",
+            field=models.CharField(
+                blank=True, max_length=512, null=True, verbose_name="Observações"
+            ),
         ),
         migrations.AlterField(
-            model_name='contractstep',
-            name='resources',
-            field=models.CharField(max_length=512, verbose_name='Recursos'),
+            model_name="contractstep",
+            name="resources",
+            field=models.CharField(max_length=512, verbose_name="Recursos"),
         ),
         migrations.AlterField(
-            model_name='historicalcontractgoal',
-            name='methodology',
-            field=models.CharField(max_length=512, verbose_name='Metodologia'),
+            model_name="historicalcontractgoal",
+            name="methodology",
+            field=models.CharField(max_length=512, verbose_name="Metodologia"),
         ),
         migrations.AlterField(
-            model_name='historicalcontractgoal',
-            name='objective',
-            field=models.CharField(max_length=512, verbose_name='Objetivo'),
+            model_name="historicalcontractgoal",
+            name="objective",
+            field=models.CharField(max_length=512, verbose_name="Objetivo"),
         ),
         migrations.AlterField(
-            model_name='historicalcontractgoal',
-            name='observations',
-            field=models.CharField(blank=True, max_length=512, null=True, verbose_name='Observações'),
+            model_name="historicalcontractgoal",
+            name="observations",
+            field=models.CharField(
+                blank=True, max_length=512, null=True, verbose_name="Observações"
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalcontractstep',
-            name='resources',
-            field=models.CharField(max_length=512, verbose_name='Recursos'),
+            model_name="historicalcontractstep",
+            name="resources",
+            field=models.CharField(max_length=512, verbose_name="Recursos"),
         ),
     ]

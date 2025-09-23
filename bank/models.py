@@ -195,7 +195,12 @@ class BankStatement(BaseOrganizationTenantModel):
         constraints = [
             models.UniqueConstraint(
                 condition=models.Q(deleted_at__isnull=True),
-                fields=("bank_account", "reference_month", "reference_year", "reference_day"),
+                fields=(
+                    "bank_account",
+                    "reference_month",
+                    "reference_year",
+                    "reference_day",
+                ),
                 name="unique_bank_statement_per_month_year",
             ),
         ]

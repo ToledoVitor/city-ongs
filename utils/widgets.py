@@ -79,9 +79,7 @@ class BaseNumberFormWidget(forms.NumberInput):
 
 
 class BaseTextAreaFormWidget(forms.Textarea):
-    def __init__(
-        self, *args, placeholder=None, required=True, rows=3, **kwargs
-    ):
+    def __init__(self, *args, placeholder=None, required=True, rows=3, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
                 "class": " ".join(

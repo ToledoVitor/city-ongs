@@ -1,8 +1,7 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.contrib.auth.models import UserManager
 from django.utils import timezone
 from easy_tenants import get_current_tenant, tenant_context
 from easy_tenants.models import TenantAwareAbstract, TenantManager

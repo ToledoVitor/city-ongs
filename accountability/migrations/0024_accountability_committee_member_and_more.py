@@ -6,21 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0023_alter_accountability_pendencies_and_more'),
+        ("accountability", "0023_alter_accountability_pendencies_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accountability',
-            name='committee_member',
-            field=models.ForeignKey(blank=True, help_text='Membro do comitê que será notificado quando a prestação for aprovada', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='accountability_notifications', to=settings.AUTH_USER_MODEL, verbose_name='Membro do Comitê para Notificação'),
+            model_name="accountability",
+            name="committee_member",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Membro do comitê que será notificado quando a prestação for aprovada",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="accountability_notifications",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Membro do Comitê para Notificação",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalaccountability',
-            name='committee_member',
-            field=models.ForeignKey(blank=True, db_constraint=False, help_text='Membro do comitê que será notificado quando a prestação for aprovada', null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='Membro do Comitê para Notificação'),
+            model_name="historicalaccountability",
+            name="committee_member",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                help_text="Membro do comitê que será notificado quando a prestação for aprovada",
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Membro do Comitê para Notificação",
+            ),
         ),
     ]

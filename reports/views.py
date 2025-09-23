@@ -17,9 +17,7 @@ class ReportsView(TemplateView):
     def get_form(self):
         return ReportForm(request=self.request)
 
-    def get_context_data(
-        self, **kwargs: Any
-    ) -> dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         form = self.get_form()
         context["form"] = form
@@ -45,10 +43,7 @@ class ReportsView(TemplateView):
             start_date = form.cleaned_data["start_date"]
             end_date = form.cleaned_data["end_date"]
 
-            if (
-                not contract.checking_account
-                and not contract.investing_account
-            ):
+            if not contract.checking_account and not contract.investing_account:
                 return self.render_to_response(
                     self.get_context_data(
                         form=form,
@@ -66,9 +61,7 @@ class ReportsView(TemplateView):
                                 "user": responsible_form.cleaned_data["user"],
                                 "interest_label": (
                                     ContractInterestedPart.InterestLevel(
-                                        responsible_form.cleaned_data[
-                                            "interest"
-                                        ]
+                                        responsible_form.cleaned_data["interest"]
                                     ).label
                                 ),
                             }
@@ -108,20 +101,20 @@ class ReportGenerateAPIView(TemplateView):
         try:
             form = ReportForm(request.POST, request=request)
             if not form.is_valid():
-                return JsonResponse({
-                    "success": False,
-                    "errors": form.errors,
-                    "message": "Dados do formulário inválidos"
-                }, status=400)
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "errors": form.errors,
+                        "message": "Dados do formulário inválidos",
+                    },
+                    status=400,
+                )
 
             contract: Contract = form.cleaned_data["contract"]
             start_date = form.cleaned_data["start_date"]
             end_date = form.cleaned_data["end_date"]
 
-            if (
-                not contract.checking_account
-                and not contract.investing_account
-            ):
+            if not contract.checking_account and not contract.investing_account:
                 return JsonResponse(
                     {
                         "success": False,
@@ -136,15 +129,20 @@ class ReportGenerateAPIView(TemplateView):
             responsibles = []
             if responsible_formset and responsible_formset.is_valid():
                 for responsible_form in responsible_formset.forms:
-                    if responsible_form.cleaned_data:
-                        responsibles.append({
-                            "user": responsible_form.cleaned_data["user"],
-                            "interest_label": (
-                                ContractInterestedPart.InterestLevel(
-                                    responsible_form.cleaned_data["interest"]
-                                ).label
-                            ),
-                        })
+                    if (
+                        responsible_form.cleaned_data
+                        and responsible_form.cleaned_data.get("user")
+                    ):
+                        responsibles.append(
+                            {
+                                "user": responsible_form.cleaned_data["user"],
+                                "interest_label": (
+                                    ContractInterestedPart.InterestLevel(
+                                        responsible_form.cleaned_data["interest"]
+                                    ).label
+                                ),
+                            }
+                        )
 
             buffer = BytesIO()
             report_model = form.cleaned_data["report_model"]
@@ -160,7 +158,7 @@ class ReportGenerateAPIView(TemplateView):
             buffer.seek(0)
 
             pdf_data = buffer.read()
-            pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+            pdf_base64 = base64.b64encode(pdf_data).decode("utf-8")
 
             filename = (
                 f"{report_model}_{contract.name}_"
@@ -168,27 +166,28 @@ class ReportGenerateAPIView(TemplateView):
             )
 
             # Check if it's an AJAX request expecting JSON
-            is_ajax = (
-                request.headers.get("X-Requested-With") == "XMLHttpRequest"
-                and "application/json" in request.headers.get("Accept", "")
+            is_ajax = request.headers.get(
+                "X-Requested-With"
+            ) == "XMLHttpRequest" and "application/json" in request.headers.get(
+                "Accept", ""
             )
 
             if is_ajax:
-                return JsonResponse({
-                    "success": True,
-                    "pdf_data": pdf_base64,
-                    "filename": filename,
-                    "contract_name": contract.name,
-                    "report_model": report_model,
-                    "start_date": start_date.strftime("%d/%m/%Y"),
-                    "end_date": end_date.strftime("%d/%m/%Y"),
-                })
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "pdf_data": pdf_base64,
+                        "filename": filename,
+                        "contract_name": contract.name,
+                        "report_model": report_model,
+                        "start_date": start_date.strftime("%d/%m/%Y"),
+                        "end_date": end_date.strftime("%d/%m/%Y"),
+                    }
+                )
             else:
                 # Return PDF directly (for new tab opening or download)
                 pdf_bytes = base64.b64decode(pdf_base64)
-                response = HttpResponse(
-                    pdf_bytes, content_type="application/pdf"
-                )
+                response = HttpResponse(pdf_bytes, content_type="application/pdf")
 
                 # Check if download is forced
                 if request.POST.get("download") == "1":
@@ -196,14 +195,11 @@ class ReportGenerateAPIView(TemplateView):
                         f'attachment; filename="{filename}"'
                     )
                 else:
-                    response["Content-Disposition"] = (
-                        f'inline; filename="{filename}"'
-                    )
+                    response["Content-Disposition"] = f'inline; filename="{filename}"'
 
                 return response
 
         except (ValueError, AttributeError) as e:
-            return JsonResponse({
-                "success": False,
-                "message": f"Erro interno: {str(e)}"
-            }, status=500)
+            return JsonResponse(
+                {"success": False, "message": f"Erro interno: {str(e)}"}, status=500
+            )

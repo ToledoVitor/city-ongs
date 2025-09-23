@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0033_alter_contract_bidding_alter_contract_objective_and_more'),
+        ("contracts", "0033_alter_contract_bidding_alter_contract_objective_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contractmonthtransfer',
-            name='source',
-            field=models.CharField(choices=[('CITY_HALL', 'Prefeitura'), ('COUNTERPART', 'Contrapartida')], default='CITY_HALL', max_length=255, verbose_name='Fonte do Repasse'),
+            model_name="contractmonthtransfer",
+            name="source",
+            field=models.CharField(
+                choices=[("CITY_HALL", "Prefeitura"), ("COUNTERPART", "Contrapartida")],
+                default="CITY_HALL",
+                max_length=255,
+                verbose_name="Fonte do Repasse",
+            ),
         ),
     ]

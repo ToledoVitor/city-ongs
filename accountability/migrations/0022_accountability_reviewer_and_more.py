@@ -6,21 +6,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0021_alter_favored_document_and_more'),
+        ("accountability", "0021_alter_favored_document_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accountability',
-            name='reviewer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='accountability_reviews', to=settings.AUTH_USER_MODEL, verbose_name='Responsável pela Análise'),
+            model_name="accountability",
+            name="reviewer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="accountability_reviews",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Responsável pela Análise",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalaccountability',
-            name='reviewer',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='Responsável pela Análise'),
+            model_name="historicalaccountability",
+            name="reviewer",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Responsável pela Análise",
+            ),
         ),
     ]

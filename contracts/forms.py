@@ -8,6 +8,8 @@ from accounts.models import User
 from contracts.models import (
     Company,
     Contract,
+    ContractAddendum,
+    ContractDocument,
     ContractExecution,
     ContractExecutionActivity,
     ContractExecutionFile,
@@ -17,8 +19,6 @@ from contracts.models import (
     ContractItemNewValueRequest,
     ContractItemSupplement,
     ContractStep,
-    ContractAddendum,
-    ContractDocument,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (

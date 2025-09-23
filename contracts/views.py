@@ -23,7 +23,10 @@ from contracts.choices import NatureCategories
 from contracts.forms import (
     CompanyCreateForm,
     CompanyUpdateForm,
+    ContractAddendumForm,
     ContractCreateUpdateForm,
+    ContractDocumentForm,
+    ContractDocumentUpdateForm,
     ContractExecutionActivityForm,
     ContractExecutionCreateForm,
     ContractExecutionFileForm,
@@ -38,13 +41,12 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
-    ContractAddendumForm,
-    ContractDocumentForm,
-    ContractDocumentUpdateForm,
 )
 from contracts.models import (
     Company,
     Contract,
+    ContractAddendum,
+    ContractDocument,
     ContractExecution,
     ContractExecutionActivity,
     ContractExecutionFile,
@@ -57,8 +59,6 @@ from contracts.models import (
     ContractItemReview,
     ContractItemSupplement,
     ContractMonthTransfer,
-    ContractAddendum,
-    ContractDocument,
 )
 from utils.choices import StatusChoices
 from utils.logging import log_database_operation, log_view_access
@@ -329,7 +329,8 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
                     & Q(deleted_at__isnull=True),
                     distinct=True,
                 ),
-            ).order_by("-year", "-month")[:12]
+            )
+            .order_by("-year", "-month")[:12]
         )
         context["accountabilities"] = accountabilities
 

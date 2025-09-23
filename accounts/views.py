@@ -683,7 +683,7 @@ def get_committee_members(request):
         committee_members = User.objects.filter(
             areas__in=request.user.areas.all(),
             access_level=User.AccessChoices.COMMITTEE_MEMBER,
-            is_active=True
+            is_active=True,
         ).values("id", "first_name", "last_name", "email")
 
         members_data = []
@@ -692,16 +692,11 @@ def get_committee_members(request):
             if not full_name:
                 full_name = member["email"]
 
-            members_data.append({
-                "id": member["id"],
-                "name": full_name,
-                "email": member["email"]
-            })
+            members_data.append(
+                {"id": member["id"], "name": full_name, "email": member["email"]}
+            )
 
-        return JsonResponse({
-            "members": members_data,
-            "count": len(members_data)
-        })
+        return JsonResponse({"members": members_data, "count": len(members_data)})
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
