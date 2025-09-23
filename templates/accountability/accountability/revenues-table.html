@@ -810,159 +810,74 @@
   </div>
 {% endif %}
 
-<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between p-4 bg-gray-200" aria-label="Table navigation">
-  <span class="text-base font-normal text-black mb-4 ml-4 md:mb-0 block w-full md:inline md:w-auto">
-    Página
-    <span class="font-bold text-black">{{ revenues_page.number }}</span>
-    de
-    <span class="font-bold text-black">{{ revenues_page.paginator.num_pages }}</span>
-  </span>
+<nav class="flex items-center justify-between p-3" aria-label="Navegação de páginas">
+  <div class="text-sm text-gray-500">
+    Página <span class="font-medium text-gray-900">{{ revenues_page.number }}</span> de <span class="font-medium text-gray-900">{{ revenues_page.paginator.num_pages }}</span>
+  </div>
 
-  <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
+  <div class="flex items-center space-x-2">
     {% if revenues_page.has_previous %}
-      <li>
-        <a
-          href="?revenues_page=1&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="
-            flex
-            items-center
-            justify-center
-            px-3
-            h-8
-            ms-0
-            leading-tight
-            text-black
-            border
-            rounded-s-lg
-            bg-gray-200
-            border-gray-700
-            hover:bg-gray-800
-            hover:text-white
-          "
-        >
-          Primeira
-        </a>
-      </li>
-
-      <li>
-        <a
-          href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="
-            flex
-            items-center
-            justify-center
-            px-3
-            h-8
-            ms-0
-            leading-tight
-            text-black
-            border
-            bg-gray-200
-            border-gray-700
-            hover:bg-gray-800
-            hover:text-white
-          "
-        >
-          Anterior
-        </a>
-      </li>
+      <a
+        href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
+        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
+      >
+        Anterior
+      </a>
+    {% else %}
+      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
+        Anterior
+      </span>
     {% endif %}
 
     {% for num in revenues_page.paginator.page_range %}
-      {% if num == revenues_page.number %}
-        <li>
+      {% if num == 1 or num == revenues_page.paginator.num_pages %}
+        {% if num == revenues_page.number %}
+          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
+            {{ num }}
+          </span>
+        {% else %}
           <a
             href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-            aria-current="page"
-            class="
-              flex
-              items-center
-              justify-center
-              px-3
-              h-8
-              text-white
-              border
-              hover:bg-blue-100
-              hover:text-white
-              border-gray-700
-              bg-gray-800
-            "
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
           >
             {{ num }}
           </a>
-        </li>
-      {% else %}
-        <li>
+        {% endif %}
+
+      {% elif num >= revenues_page.number|add:'-1' and num <= revenues_page.number|add:'1' %}
+        {% if num == revenues_page.number %}
+          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
+            {{ num }}
+          </span>
+        {% else %}
           <a
             href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-            class="
-              flex
-              items-center
-              justify-center
-              px-3
-              h-8
-              leading-tight
-              text-black
-              border
-              bg-gray-200
-              border-gray-700
-              hover:bg-gray-800
-              hover:text-white
-            "
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
           >
             {{ num }}
           </a>
-        </li>
+        {% endif %}
+
+      {% elif num == 2 or num == revenues_page.paginator.num_pages|add:'-1' %}
+        <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg">
+          ...
+        </span>
       {% endif %}
     {% endfor %}
 
     {% if revenues_page.has_next %}
-      <li>
-        <a
-          href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="
-            flex
-            items-center
-            justify-center
-            px-3
-            h-8
-            leading-tight
-            text-black
-            border
-            bg-gray-200
-            border-gray-700
-            hover:bg-gray-800
-            hover:text-white
-          "
-        >
-          Próxima
-        </a>
-      </li>
-
-      <li>
-        <a
-          href="?revenues_page={{ revenues_page.paginator.num_pages }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-          class="
-            flex
-            items-center
-            justify-center
-            px-3
-            h-8
-            leading-tight
-            text-black
-            border
-            rounded-e-lg
-            bg-gray-200
-            border-gray-700
-            hover:bg-gray-800
-            hover:text-white
-          "
-        >
-          Última
-        </a>
-      </li>
+      <a
+        href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
+        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
+      >
+        Próximo
+      </a>
+    {% else %}
+      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
+        Próximo
+      </span>
     {% endif %}
-  </ul>
+  </div>
 </nav>
 
 <script>

@@ -290,7 +290,7 @@
   </div>
 
   {% if user.has_admin_access %}
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200">
       <a
         href="{% url 'contracts:contracts-create' %}"
         class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
@@ -303,7 +303,9 @@
     </div>
   {% endif %}
 
-  {% include 'commons/paginator.html' with page_obje=page_obj %}
+  <div class="py-2 bg-gray-200">
+    {% include 'commons/paginator.html' with page_obje=page_obj %}
+  </div>
 </div>
 
 <script>

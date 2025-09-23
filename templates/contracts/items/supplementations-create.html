@@ -40,85 +40,88 @@
   </ol>
 </nav>
 
+<div class="max-w-7xl mx-auto">
+    <form method="post">
+      {% csrf_token %}
 
-<form method="post" class="max-w-lg mx-auto">
-  {% csrf_token %}
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Nova Suplementação</h2>
+          <p class="text-sm text-gray-600">Preencha as informações para cadastrar uma nova suplementação</p>
+        </div>
 
-  <div class="my-3">
-    <label for="id_item" class="block mb-2 text-base font-medium text-black">Item</label>
-    {{ form.item }}
-  </div>
+        <div class="space-y-2 mb-2">
+          <label for="id_item" class="block text-sm font-semibold text-gray-700">
+            Item
+            <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            {{ form.item }}
+          </div>
+        </div>
 
-  <div class="my-3">
-    <label for="id_supplement_value" class="block mb-2 text-base font-medium text-black">Valor da Suplementação</label>
-    <div class="relative w-full">
-      <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-        <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-        </svg>
+        <div class="space-y-2 mb-2">
+          <label for="id_supplement_value" class="block text-sm font-semibold text-gray-700">
+            Valor da Suplementação
+            <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <span class="text-gray-500 text-sm font-medium">R$</span>
+            </div>
+            <input
+              type="text"
+              id="id_supplement_value"
+              name="supplement_value"
+              placeholder="0,00"
+              oninput="formatMoney(this)"
+              class="block w-full pl-10 pr-4 py-3 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              required
+            />
+          </div>
+          <div class="flex items-start space-x-2 mt-2">
+            <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-xs text-gray-500">
+              Digite apenas os números, sem o R$. Use vírgula para separar centavos (ex: 1500,00)
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2 mb-2">
+          <label for="id_observations" class="block text-sm font-semibold text-gray-700">
+            Observações
+          </label>
+          <div class="relative">
+            {{ form.observations }}
+          </div>
+          <p class="text-xs text-gray-500">Informações adicionais sobre a suplementação (opcional)</p>
+        </div>
       </div>
-      <input
-        type="text"
-        id="id_supplement_value"
-        name="supplement_value"
-        placeholder="000,00"
-        oninput="formatMoney(this)"
-        class="
-          block
-          p-2.5
-          w-full
-          z-20
-          ps-10
-          text-sm
-          rounded-s-lg
-          border-e-2
-          border
-          focus:ring-blue-500
-          bg-gray-300
-          border-e-gray-700
-          border-gray-600
-          placeholder-gray-800
-          text-black
-          focus:border-blue-500
-        "
-        required
-      />  
-    </div>  
-    <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">
-      Escreva somente os números, sem o R$, seperados por vírgula
-    </p>
+
+      {% include 'commons/form-errors.html' with form=form %}
+
+      <div class="py-2">
+        <div class="flex justify-end items-center gap-4">
+          <a href="{% url 'contracts:item-supplementations' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
+            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+            </svg>
+            Voltar
+          </a>
+          <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
+            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+            </svg>
+            Cadastrar Suplementação
+          </button>
+        </div>
+      </div>
+
+    </form>
   </div>
-
-  <div class="mb-3">
-    <label for="id_observations" class="block mb-2 text-base font-medium text-black">Observações</label>
-    {{ form.observations }}
-  </div>
-
-  {% include 'commons/form-errors.html' with form=form %}
-
-  <button
-    type="submit"
-    class="
-      px-3
-      py-2
-      text-sm
-      font-medium
-      text-center
-      inline-flex
-      items-center
-      text-white
-      rounded-lg
-      focus:outline-none
-      bg-blue-600
-      hover:bg-blue-700
-      focus:ring-blue-800
-    "
-    style="display: flex; justify-self: center;"
-  >
-    Cadastrar
-  </button>
-
-</form>
+</div>
 
 <script>
     function formatMoney(input) {
