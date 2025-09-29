@@ -1626,7 +1626,7 @@ def contract_item_supplementations_create_view(request, pk):
         if form.is_valid():
             with transaction.atomic():
                 supplement = form.save(commit=False)
-                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.suplement_value = form.cleaned_data["supplement_value"]
                 supplement.save()
 
                 _ = ActivityLog.objects.create(
