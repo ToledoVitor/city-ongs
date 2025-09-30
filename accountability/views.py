@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db import transaction as db_transaction
 from django.db.models import Count, Q, Sum
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -44,26 +44,30 @@ from activity.models import ActivityLog
 from bank.models import Transaction
 from contracts.models import Contract
 from utils.logging import log_database_operation, log_view_access
-from utils.mixins import CommitteeMemberCreateMixin, CommitteeMemberUpdateMixin
+from utils.mixins import (
+    CommitteeMemberCreateMixin,
+    CommitteeMemberUpdateMixin,
+    UserAccessViewMixin,
+)
 
 logger = logging.getLogger(__name__)
 
 
 @method_decorator(log_view_access, name="dispatch")
-class AccountabilityListView(LoginRequiredMixin, ListView):
+class AccountabilityListView(UserAccessViewMixin, LoginRequiredMixin, ListView):
     model = Accountability
     context_object_name = "accountabilities"
     paginate_by = 10
     ordering = "month"
+    contract_field_prefix = "contract__"
 
     template_name = "accountability/accountability/list.html"
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
         query = self.request.GET.get("q", "")
-        queryset = self.model.objects.select_related("contract").filter(
-            contract__area__in=self.request.user.areas.all()
-        )
+        queryset = self.model.objects.select_related("contract")
+        queryset = self.get_user_filtered_queryset(queryset)
 
         if query:
             queryset = queryset.filter(Q(contract__name__icontains=query))
@@ -153,7 +157,6 @@ class ResourceSourceCreateView(
 
 @login_required
 def update_accountability_revenue_view(request, pk):
-    """Update an accountability revenue."""
     revenue = get_object_or_404(Revenue, pk=pk)
     accountability = revenue.accountability
 
@@ -163,7 +166,9 @@ def update_accountability_revenue_view(request, pk):
         )
         if form.is_valid():
             with db_transaction.atomic():
-                revenue = form.save()
+                revenue = form.save(commit=False)
+                revenue.status = Revenue.ReviewStatus.UPDATED
+                revenue.save()
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -190,7 +195,6 @@ def update_accountability_revenue_view(request, pk):
 
 @login_required
 def update_accountability_expense_view(request, pk):
-    """Update an accountability expense."""
     expense = get_object_or_404(Expense, pk=pk)
     accountability = expense.accountability
 
@@ -203,7 +207,9 @@ def update_accountability_expense_view(request, pk):
         )
         if form.is_valid():
             with db_transaction.atomic():
-                expense = form.save()
+                expense = form.save(commit=False)
+                expense.status = Expense.ReviewStatus.UPDATED
+                expense.save()
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
@@ -958,6 +964,12 @@ def send_accountability_to_analisys_view(request, pk):
             accountability.status = Accountability.ReviewStatus.SENT
             accountability.reviewer = selected_reviewer
             accountability.save()
+            Expense.objects.filter(
+                accountability=accountability, status=Expense.ReviewStatus.UPDATED
+            ).update(status=Expense.ReviewStatus.IN_ANALISIS)
+            Revenue.objects.filter(
+                accountability=accountability, status=Revenue.ReviewStatus.UPDATED
+            ).update(status=Revenue.ReviewStatus.IN_ANALISIS)
             return redirect(
                 "accountability:accountability-detail", pk=accountability.id
             )
@@ -965,9 +977,6 @@ def send_accountability_to_analisys_view(request, pk):
 
 @login_required
 def get_available_reviewers_view(request, pk):
-    """API endpoint to get available reviewers for accountability analysis"""
-    from django.http import JsonResponse
-
     accountability = get_object_or_404(Accountability, id=pk)
     user_org = request.user.organization
 
@@ -1698,7 +1707,7 @@ class BeneficiariesDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
-class AdvancedSearchView(LoginRequiredMixin, TemplateView):
+class AdvancedSearchView(UserAccessViewMixin, LoginRequiredMixin, TemplateView):
     template_name = "accountability/search/advanced_search.html"
     login_url = "/auth/login"
 
@@ -1727,7 +1736,10 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
                 "accountability__contract", "item", "favored"
             ).filter(
                 deleted_at__isnull=True,
-                accountability__contract__area__in=self.request.user.areas.all(),
+            )
+
+            expenses_qs = self.get_user_filtered_queryset(
+                expenses_qs, contract_field_prefix="accountability__contract__"
             )
 
             if search_query:
@@ -1767,7 +1779,9 @@ class AdvancedSearchView(LoginRequiredMixin, TemplateView):
                 "accountability__contract", "bank_account"
             ).filter(
                 deleted_at__isnull=True,
-                accountability__contract__area__in=self.request.user.areas.all(),
+            )
+            revenues_qs = self.get_user_filtered_queryset(
+                revenues_qs, contract_field_prefix="accountability__contract__"
             )
 
             if search_query:

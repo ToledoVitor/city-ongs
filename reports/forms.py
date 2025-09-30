@@ -6,6 +6,7 @@ from django.forms import formset_factory
 
 from accounts.models import User
 from contracts.models import Contract, ContractInterestedPart
+from utils.mixins import UserAccessFormMixin
 from utils.widgets import BaseSelectFormWidget
 
 REPORTS_OPTIONS = [
@@ -93,7 +94,7 @@ class AdditionalResponsibleFormSetWrapper(AdditionalResponsibleFormSet):
         return kwargs
 
 
-class ReportForm(forms.Form):
+class ReportForm(UserAccessFormMixin, forms.Form):
     MONTH_CHOICES = [
         (1, "Janeiro"),
         (2, "Fevereiro"),
@@ -151,9 +152,9 @@ class ReportForm(forms.Form):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["contract"].queryset = Contract.objects.filter(
-            area__in=self.request.user.areas.all()
-        ).order_by("code")
+        self.fields["contract"].queryset = (
+            self.get_user_filtered_contract_queryset(self.request.user)
+        ).order_by("-internal_code")
 
         self.responsible_formset = None
 

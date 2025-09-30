@@ -39,7 +39,7 @@ class Accountability(
     )
     pendencies = models.CharField(
         verbose_name="Pendências",
-        max_length=512,
+        max_length=1024,
         null=True,
         blank=True,
     )
@@ -360,6 +360,7 @@ class ResourceSource(BaseOrganizationTenantModel):
 class Expense(BaseOrganizationTenantModel):
     class ReviewStatus(models.TextChoices):
         IN_ANALISIS = "IN_ANALISIS", "Em Análise"
+        UPDATED = "UPDATED", "Atualizada"
         REJECTED = "REJECTED", "Rejeitada"
         APPROVED = "APPROVED", "Aprovada"
 
@@ -412,7 +413,7 @@ class Expense(BaseOrganizationTenantModel):
     )
     pendencies = models.CharField(
         verbose_name="Pendências",
-        max_length=255,
+        max_length=1024,
         null=True,
         blank=True,
     )
@@ -556,6 +557,7 @@ class Revenue(BaseOrganizationTenantModel):
 
     class ReviewStatus(models.TextChoices):
         IN_ANALISIS = "IN_ANALISIS", "Em Análise"
+        UPDATED = "UPDATED", "Atualizada"
         REJECTED = "REJECTED", "Rejeitada"
         APPROVED = "APPROVED", "Aprovada"
 
