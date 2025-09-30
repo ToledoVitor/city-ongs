@@ -1785,11 +1785,7 @@ class AdvancedSearchView(UserAccessViewMixin, LoginRequiredMixin, TemplateView):
             )
 
             if search_query:
-                revenues_qs = revenues_qs.filter(
-                    Q(bank_account__name__icontains=search_query)
-                    | Q(source__icontains=search_query)
-                    | Q(accountability__contract__name__icontains=search_query)
-                )
+                revenues_qs = revenues_qs.filter(identification__icontains=search_query)
 
             if start_date and end_date:
                 revenues_qs = revenues_qs.filter(
