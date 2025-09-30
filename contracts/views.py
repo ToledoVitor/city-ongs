@@ -66,36 +66,32 @@ from utils.mixins import (
     AdminRequiredMixin,
     CommitteeMemberCreateMixin,
     CommitteeMemberUpdateMixin,
+    UserAccessViewMixin,
 )
 
 logger = logging.getLogger(__name__)
 
 
 @method_decorator(log_view_access, name="dispatch")
-class ContractsListView(LoginRequiredMixin, ListView):
+class ContractsListView(UserAccessViewMixin, LoginRequiredMixin, ListView):
     model = Contract
     context_object_name = "contracts_list"
     paginate_by = 10
+    apply_distinct = True
 
     template_name = "contracts/list.html"
     login_url = "/auth/login"
 
     def get_queryset(self) -> QuerySet[Any]:
-        queryset = (
-            super()
-            .get_queryset()
-            .filter(
-                area__in=self.request.user.areas.all(),
-            )
-            .select_related(
-                "contractor_manager",
-                "hired_manager",
-                "area",
-                "committee",
-                "accountability_autority",
-                "supervision_autority",
-            )
+        queryset = Contract.objects.select_related(
+            "contractor_manager",
+            "hired_manager",
+            "area",
+            "committee",
+            "accountability_autority",
+            "supervision_autority",
         )
+        queryset = self.get_user_filtered_queryset(queryset)
 
         # Basic search
         query = self.request.GET.get("q")
@@ -248,7 +244,7 @@ class ContractUpdateView(CommitteeMemberUpdateMixin, AdminRequiredMixin, Templat
 
 
 @method_decorator(log_view_access, name="dispatch")
-class ContractsDetailView(LoginRequiredMixin, DetailView):
+class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
     model = Contract
     template_name = "contracts/detail.html"
     context_object_name = "contract"
@@ -284,9 +280,9 @@ class ContractsDetailView(LoginRequiredMixin, DetailView):
         )
 
     def get_object(self, queryset=None):
-        return self.model.objects.filter(
-            area__in=self.request.user.areas.all(),
-        ).get(id=self.kwargs["pk"])
+        base_queryset = self.model.objects.all()
+        filtered_queryset = self.get_user_filtered_queryset(base_queryset)
+        return filtered_queryset.get(id=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)

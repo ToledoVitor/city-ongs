@@ -6,9 +6,10 @@ from django.views.generic import TemplateView
 
 from accountability.models import Accountability, Expense, Revenue
 from contracts.models import Contract, ContractMonthTransfer
+from utils.mixins import UserAccessViewMixin
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(UserAccessViewMixin, LoginRequiredMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
     login_url = "/auth/login"
 
@@ -51,10 +52,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         start_date = None
 
-        contracts = Contract.objects.filter(area__in=self.request.user.areas.all())
+        contracts = self.get_user_filtered_queryset(Contract.objects.all())
 
-        accountabilities = Accountability.objects.filter(
-            contract__area__in=self.request.user.areas.all()
+        accountabilities = self.get_user_filtered_queryset(
+            Accountability.objects.all(), contract_field_prefix="contract__"
         )
 
         today = timezone.now().date()
