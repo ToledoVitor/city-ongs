@@ -1012,7 +1012,7 @@ def send_accountability_review_analisys(request, pk):
     if not accountability.is_sent:
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
-    if not request.user or not request.user.can_change_statuses:
+    if not request.user or not request.user.can_review_accountability:
         return redirect("accountability:accountability-detail", pk=accountability.id)
 
     with db_transaction.atomic():
@@ -1058,6 +1058,9 @@ def send_accountability_review_analisys(request, pk):
 @log_database_operation("review_expense")
 @log_view_access
 def review_accountability_single_expense(request, pk, expense_pk):
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("accountability:accountability-detail", pk=pk)
+
     expense = get_object_or_404(
         Expense.objects.select_related(
             "accountability",
@@ -1097,6 +1100,9 @@ def review_accountability_single_expense(request, pk, expense_pk):
 @log_database_operation("review_expenses")
 @log_view_access
 def review_accountability_expenses(request, pk, index):
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("accountability:accountability-detail", pk=pk)
+
     accountability = get_object_or_404(
         Accountability.objects.select_related("contract"), id=pk
     )
@@ -1173,6 +1179,9 @@ def review_accountability_expenses(request, pk, index):
 @log_database_operation("review_revenue")
 @log_view_access
 def review_accountability_single_revenue(request, pk, revenue_pk):
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("accountability:accountability-detail", pk=pk)
+
     revenue = get_object_or_404(
         Revenue.objects.select_related(
             "accountability",
@@ -1210,6 +1219,9 @@ def review_accountability_single_revenue(request, pk, revenue_pk):
 @log_database_operation("review_revenues")
 @log_view_access
 def review_accountability_revenues(request, pk, index):
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("accountability:accountability-detail", pk=pk)
+
     accountability = get_object_or_404(
         Accountability.objects.select_related("contract"), id=pk
     )
@@ -1894,6 +1906,9 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
 @login_required
 def batch_reconcile_expenses_view(request, pk):
     """Batch reconciliation view for expenses."""
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("accountability:accountability-detail", pk=pk)
+
     accountability = get_object_or_404(Accountability, id=pk)
 
     if not accountability.is_on_execution:

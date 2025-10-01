@@ -442,6 +442,17 @@ class User(AbstractUser):
         )
 
     @property
+    def can_review_accountability(self) -> bool:
+        """Check if user can review accountability."""
+        return not self.is_committee_member and (
+            self.is_superuser
+            or self.access_level
+            in {
+                self.AccessChoices.FOLDER_MANAGER,
+            }
+        )
+
+    @property
     def unread_notifications(self):
         return self.notifications.filter(read_at__isnull=True).count()
 

@@ -295,7 +295,7 @@
           </button>
         </a>
         
-      {% elif accountability.is_sent and user.can_change_statuses %}
+      {% elif accountability.is_sent and user.can_review_accountability %}
         <a href="{% url 'accountability:expenses-review' accountability.id 0 %}">
           <button
             type="button"
@@ -452,7 +452,7 @@
     </div>
   </div>
 </div>
-{% elif accountability.is_sent and user.can_change_statuses %}
+{% elif accountability.is_sent and user.can_review_accountability %}
 <div
   id="send-review-analisys"
   tabindex="-1"
