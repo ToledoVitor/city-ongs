@@ -1400,6 +1400,9 @@ def send_execution_to_analisys_view(request, pk):
     if execution.is_finished:
         return redirect("home")
 
+    if not request.user or not request.user.can_review_accountability:
+        return redirect("contracts:executions-detail", pk=execution.id)
+
     with transaction.atomic():
         _ = ActivityLog.objects.create(
             user=request.user,
@@ -1418,7 +1421,7 @@ def send_accountability_review_analisys(request, pk):
     if not execution.is_sent:
         return redirect("contracts:executions-detail", pk=execution.id)
 
-    if not request.user or not request.user.can_change_statuses:
+    if not request.user or not request.user.can_review_accountability:
         return redirect("contracts:executions-detail", pk=execution.id)
 
     with transaction.atomic():
