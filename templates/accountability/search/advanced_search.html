@@ -435,13 +435,137 @@
             {% endif %}
         </div>
     {% elif request.GET %}
-        <div class="bg-white shadow-md rounded-lg border border-gray-200 p-5">
-            <div class="text-center py-8">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <h3 class="mt-3 text-base font-semibold text-gray-900">Nenhum resultado encontrado</h3>
-                <p class="mt-1 text-sm text-gray-500">Tente ajustar seus critérios de pesquisa.</p>
+        <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
+            <div class="text-center py-16 px-6">
+                <div class="relative inline-block">
+                    <svg class="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <div class="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-2">
+                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h3 class="mt-6 text-2xl font-bold text-gray-900">Nenhum resultado encontrado</h3>
+                <p class="mt-3 text-base text-gray-600 max-w-md mx-auto">
+                    Não encontramos prestações que correspondam aos seus critérios de pesquisa.
+                </p>
+                
+                <div class="mt-8 bg-gray-50 rounded-lg p-6 max-w-2xl mx-auto border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-700 mb-4">Sugestões para refinar sua busca:</p>
+                    <ul class="text-left space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Verifique a ortografia dos termos pesquisados</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Tente usar termos mais genéricos ou diferentes palavras-chave</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Remova alguns filtros para ampliar os resultados</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Ajuste o período de datas para um intervalo maior</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mt-8 flex justify-center gap-4">
+                    <a 
+                        href="{% url 'accountability:advanced-search' %}"
+                        class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Limpar tudo e tentar novamente
+                    </a>
+                    <button 
+                        type="button"
+                        onclick="window.history.back()"
+                        class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md rounded-lg border border-blue-100 overflow-hidden">
+            <div class="text-center py-20 px-6">
+                <div class="relative inline-block">
+                    <svg class="mx-auto h-28 w-28 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <div class="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-2 animate-pulse">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h3 class="mt-8 text-3xl font-bold text-gray-900">Pronto para começar?</h3>
+                <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">
+                    Use a barra de pesquisa acima para encontrar prestações de contas por identificação, favorecido, contrato ou qualquer termo relacionado.
+                </p>
+                
+                <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-100 rounded-full p-3">
+                                <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-base font-semibold text-gray-900 mb-2">Pesquisa Rápida</h4>
+                        <p class="text-sm text-gray-600">Digite qualquer termo na barra de pesquisa para encontrar prestações rapidamente</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-green-100 rounded-full p-3">
+                                <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-base font-semibold text-gray-900 mb-2">Filtros Avançados</h4>
+                        <p class="text-sm text-gray-600">Clique em "Filtros" para refinar sua busca por tipo, status, contrato e período</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-purple-100 rounded-full p-3">
+                                <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-base font-semibold text-gray-900 mb-2">Resultados Detalhados</h4>
+                        <p class="text-sm text-gray-600">Visualize despesas e receitas com informações completas de conciliação e pagamento</p>
+                    </div>
+                </div>
+                
+                <div class="mt-12">
+                    <p class="text-sm text-gray-500 mb-3">Dica: Use <kbd class="px-2 py-1 text-xs font-semibold text-gray-800 bg-white border border-gray-300 rounded shadow-sm">/</kbd> para focar na busca rapidamente</p>
+                </div>
             </div>
         </div>
     {% endif %}

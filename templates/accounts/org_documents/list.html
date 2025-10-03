@@ -45,71 +45,83 @@
         </tr>
       </thead>
       <tbody>
-        {% if documents %}
-          {% for document in documents %}
-          <tr class="bg-gray-50 border-b hover:bg-gray-200">
-            <td class="px-6 py-4 text-sm text-gray-900">
-              {{ document.get_document_type_display }}
-            </td>
-            <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate max-w-[200px]">
-              {{ document.title }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-              {{ document.uploaded_at|date:"d/m/Y H:i" }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-              {% if document.is_public %}
-              <span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Público</span>
-              {% else %}
-              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Privado</span>
-              {% endif %}
-            </td>
-            <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-              <div class="flex gap-2">
-                <a href="{{ document.file.url }}" target="_blank" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
+        {% for document in documents %}
+        <tr class="bg-gray-50 border-b hover:bg-gray-200">
+          <td class="px-6 py-4 text-sm text-gray-900">
+            {{ document.get_document_type_display }}
+          </td>
+          <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate max-w-[200px]">
+            {{ document.title }}
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+            {{ document.uploaded_at|date:"d/m/Y H:i" }}
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            {% if document.is_public %}
+            <span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Público</span>
+            {% else %}
+            <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Privado</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+            <div class="flex gap-2">
+              <a href="{{ document.file.url }}" target="_blank" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
+                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-4c0-.6-.4-1-1-1h-2m-1-5-4 5-4-5"/>
+                </svg>
+                Download
+              </a>
+              <a href="{% url 'accounts:documents-edit' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800">
+                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                </svg>
+                Editar
+              </a>
+              <form method="post" action="{% url 'accounts:documents-toggle-visibility' document.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none {% if document.is_public %}bg-gray-600 hover:bg-gray-700 focus:ring-gray-800{% else %}bg-green-600 hover:bg-green-700 focus:ring-green-800{% endif %}">
                   <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-4c0-.6-.4-1-1-1h-2m-1-5-4 5-4-5"/>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
                   </svg>
-                  Download
-                </a>
-                <a href="{% url 'accounts:documents-edit' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800">
-                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-                  </svg>
-                  Editar
-                </a>
-                <form method="post" action="{% url 'accounts:documents-toggle-visibility' document.id %}" class="inline">
-                  {% csrf_token %}
-                  <button type="submit" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none {% if document.is_public %}bg-gray-600 hover:bg-gray-700 focus:ring-gray-800{% else %}bg-green-600 hover:bg-green-700 focus:ring-green-800{% endif %}">
-                    <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                    </svg>
-                    {% if document.is_public %}Tornar Privado{% else %}Tornar Público{% endif %}
-                  </button>
-                </form>
-                <a href="{% url 'accounts:documents-delete' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-red-800">
-                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                  </svg>
-                  Excluir
-                </a>
+                  {% if document.is_public %}Tornar Privado{% else %}Tornar Público{% endif %}
+                </button>
+              </form>
+              <a href="{% url 'accounts:documents-delete' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-red-800">
+                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                </svg>
+                Excluir
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr class="bg-white border-b hover:bg-gray-50">
+          <td class="px-6 py-4 text-center py-16" colspan="5">
+            <div class="text-center">
+              <div class="relative inline-block">
+                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
               </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr class="bg-white border-b hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm font-medium text-gray-900" colspan="5">
-              Nenhum documento cadastrado
-            </td>
-          </tr>
-          {% endfor %}
-        {% endif %}
+              <h3 class="mt-4 text-lg font-bold text-gray-900">Nenhum documento encontrado</h3>
+              <p class="mt-2 text-sm text-gray-600">
+                {% if request.GET.q %}
+                  Não encontramos documentos que correspondam à sua pesquisa.
+                {% else %}
+                  Nenhum documento cadastrado ainda.
+                {% endif %}
+              </p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200 rounded-b-lg">
     <a href="{% url 'accounts:documents-add' %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
       Adicionar novo
       <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
