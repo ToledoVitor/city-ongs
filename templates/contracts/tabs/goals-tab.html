@@ -156,21 +156,37 @@
                     </button>
                   </td>
                 </tr>
-                <tr id="details-{{ goal.id }}" class="hidden bg-gray-100">
-                  <td colspan="6" class="px-6 py-4 ml-4 text-sm text-black text-left">
+                <tr id="details-{{ goal.id }}" class="hidden bg-gray-50">
+                  <td colspan="5" class="px-8 py-6">
                     {% if goal.steps.count %}
-                      {% for step in goal.steps.all %}
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 pb-3">
-                          <p><strong>Etapa:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.name }}">{{ step.name }}</span></p>
-                          <p><strong>Objetivo:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.objective }}">{{ step.objective }}</span></p>
-                          <p><strong>Metodologia:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.methodology }}">{{ step.methodology }}</span></p>
-                          <p><strong>Recursos:</strong> <span class="truncate max-w-xs inline-block" title="{{ step.resources|default:'n/a' }}">{{ step.resources|default:"n/a" }}</span></p>
-                        </div>
-
-                        <hr class="h-px mb-3 border-0 bg-gray-500">
-                      {% endfor%}
+                      <div class="space-y-4">
+                        {% for step in goal.steps.all %}
+                          <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div class="space-y-1">
+                                <p class="text-xs font-bold text-black uppercase">Etapa</p>
+                                <p class="text-sm text-gray-700">{{ step.name }}</p>
+                              </div>
+                              <div class="space-y-1">
+                                <p class="text-xs font-bold text-black uppercase">Objetivo</p>
+                                <p class="text-sm text-gray-700">{{ step.objective }}</p>
+                              </div>
+                              <div class="space-y-1">
+                                <p class="text-xs font-bold text-black uppercase">Metodologia</p>
+                                <p class="text-sm text-gray-700">{{ step.methodology }}</p>
+                              </div>
+                              <div class="space-y-1">
+                                <p class="text-xs font-bold text-black uppercase">Recursos</p>
+                                <p class="text-sm text-gray-700">{{ step.resources|default:"n/a" }}</p>
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
                     {% else %}
-                      Sem etapas cadastradas
+                      <div class="text-center py-4 text-gray-500">
+                        Sem etapas cadastradas
+                      </div>
                     {% endif %}
                   </td>
                 </tr>

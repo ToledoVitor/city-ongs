@@ -6,9 +6,9 @@
 
 {% load humanize %}
 
-<h1 class="text-2xl font-bold">Favorecidos</h1>
+<h1 class="text-3xl font-bold">Favorecidos</h1>
 
-<div class="flex justify-between items-center my-6">
+<div class="flex justify-between items-center pt-3">
   <nav class="flex py-3 text-black" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
@@ -59,6 +59,7 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome do favorecido ou documento..." %}
 
+{% if favoreds_list %}
 <div class="relative">
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
@@ -77,7 +78,6 @@
         </tr>
       </thead>
       <tbody>
-        {% if favoreds_list %}
           {% for favored in favoreds_list %}
           <tr class="bg-gray-50 border-b hover:bg-gray-200">
             <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
@@ -119,28 +119,12 @@
               </td>
             </tr>
           {% endfor %}
-        {% else %}
-          <tr class="border-b bg-gray-200 border-gray-700 hover:bg-gray-400">
-            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-black">
-              Nenhum resultado encontrado
-            </th>
-            <td class="px-6 py-4">
-              -
-            </td>
-            <td class="px-6 py-4">
-              -
-            </td>
-            <td class="px-6 py-4">
-              -
-            </td>
-          </tr>
-        {% endif %}
       </tbody>
     </table>
   </div>
 
   {% if not user.is_committee_member %}
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200 rounded-b-lg">
       <a
         href="{% url 'accountability:favoreds-create' %}"
         class="
@@ -171,5 +155,71 @@
   {% include 'commons/paginator.html' with page_obje=page_obj %}
 
 </div>
+{% else %}
+  <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
+    <div class="text-center py-16 px-6">
+      <div class="relative inline-block">
+        <svg class="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </div>
+      
+      <h3 class="mt-6 text-2xl font-bold text-gray-900">Nenhum favorecido encontrado</h3>
+      <p class="mt-3 text-base text-gray-600 max-w-md mx-auto">
+        {% if request.GET.q %}
+          Não encontramos favorecidos que correspondam à sua pesquisa "<strong>{{ request.GET.q }}</strong>".
+        {% else %}
+          Não há favorecidos cadastrados no momento.
+        {% endif %}
+      </p>
+      
+      {% if request.GET.q %}
+        <div class="mt-8 bg-gray-50 rounded-lg p-6 max-w-xl mx-auto border border-gray-200">
+          <p class="text-sm font-semibold text-gray-700 mb-3">Sugestões:</p>
+          <ul class="text-left space-y-2 text-sm text-gray-600">
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Verifique a ortografia do nome ou documento</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Tente usar termos mais genéricos</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="mt-6">
+          <a 
+            href="{% url 'accountability:favoreds-list' %}"
+            class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Limpar pesquisa
+          </a>
+        </div>
+      {% else %}
+        {% if not user.is_committee_member %}
+          <div class="mt-8">
+            <a 
+              href="{% url 'accountability:favoreds-create' %}"
+              class="inline-flex items-center px-8 py-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Adicionar primeiro favorecido
+            </a>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
   
 {% endblock %}

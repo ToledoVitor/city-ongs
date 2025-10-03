@@ -33,6 +33,7 @@
 
 {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome da fonte..." %}
 
+{% if sources %}
 <div class="relative">
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
     <table class="w-full text-sm text-left rtl:text-right text-gray-400">
@@ -57,67 +58,44 @@
         </tr>
       </thead>
       <tbody>
-        {% if sources %}
-          {% for source in sources %}
-            <tr class="bg-white border-b hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
-                {{ source.name }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                {{ source.document }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900">
-                {{ source.origin_label }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900">
-                {{ source.category_label }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                {{ source.updated_at.date }}
-              </td>
-              <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-                {% if not user.is_committee_member %}
-                  <a
-                    href="{% url 'accountability:sources-update' source.id %}"
-                    class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
-                  >
-                    <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-                    </svg>
-                    Editar
-                  </a>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        {% else %}
+        {% for source in sources %}
           <tr class="bg-white border-b hover:bg-gray-50">
-            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900">
-              Nenhum resultado encontrado
-            </th>
-            <td class="px-6 py-4 text-gray-900">
-              -
+            <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
+              {{ source.name }}
             </td>
-            <td class="px-6 py-4 text-gray-900">
-              -
+            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+              {{ source.document }}
             </td>
-            <td class="px-6 py-4 text-gray-900">
-              -
+            <td class="px-6 py-4 text-sm text-gray-900">
+              {{ source.origin_label }}
             </td>
-            <td class="px-6 py-4 text-gray-900">
-              -
+            <td class="px-6 py-4 text-sm text-gray-900">
+              {{ source.category_label }}
             </td>
-            <td class="px-6 py-4 text-gray-900">
-              -
+            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+              {{ source.updated_at.date }}
+            </td>
+            <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
+              {% if not user.is_committee_member %}
+                <a
+                  href="{% url 'accountability:sources-update' source.id %}"
+                  class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800"
+                >
+                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
+                  </svg>
+                  Editar
+                </a>
+              {% endif %}
             </td>
           </tr>
-        {% endif %}
+        {% endfor %}
       </tbody>
     </table>
   </div>
 
   {% if not user.is_committee_member %}
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200">
       <a
         href="{% url 'accountability:sources-create' %}"
         class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
@@ -129,8 +107,75 @@
       </a>
     </div>
   {% endif %}
-
+  
   {% include 'commons/paginator.html' with page_obje=page_obj %}
+
 </div>
+{% else %}
+  <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
+    <div class="text-center py-16 px-6">
+      <div class="relative inline-block">
+        <svg class="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+      </div>
+      
+      <h3 class="mt-6 text-2xl font-bold text-gray-900">Nenhuma fonte de recurso encontrada</h3>
+      <p class="mt-3 text-base text-gray-600 max-w-md mx-auto">
+        {% if request.GET.q %}
+          Não encontramos fontes de recurso que correspondam à sua pesquisa "<strong>{{ request.GET.q }}</strong>".
+        {% else %}
+          Não há fontes de recurso cadastradas no momento.
+        {% endif %}
+      </p>
+      
+      {% if request.GET.q %}
+        <div class="mt-8 bg-gray-50 rounded-lg p-6 max-w-xl mx-auto border border-gray-200">
+          <p class="text-sm font-semibold text-gray-700 mb-3">Sugestões:</p>
+          <ul class="text-left space-y-2 text-sm text-gray-600">
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Verifique a ortografia do nome da fonte</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Tente usar termos mais genéricos</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="mt-6">
+          <a 
+            href="{% url 'accountability:sources-list' %}"
+            class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Limpar pesquisa
+          </a>
+        </div>
+      {% else %}
+        {% if not user.is_committee_member %}
+          <div class="mt-8">
+            <a 
+              href="{% url 'accountability:sources-create' %}"
+              class="inline-flex items-center px-8 py-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Adicionar primeira fonte de recurso
+            </a>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
 
 {% endblock %}
