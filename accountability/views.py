@@ -42,7 +42,7 @@ from accountability.services import export_xlsx_model, import_xlsx_model
 from accounts.models import Area, User
 from activity.models import ActivityLog
 from bank.models import Transaction
-from contracts.models import Contract
+from contracts.models import Contract, ContractInterestedPart
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import (
     CommitteeMemberCreateMixin,
@@ -927,7 +927,14 @@ def revenue_delete_view(request, pk):
 
 @login_required
 def send_accountability_to_analisys_view(request, pk):
-    accountability = get_object_or_404(Accountability, id=pk)
+    accountability = get_object_or_404(
+        Accountability.objects.select_related(
+            "contract",
+            "contract__supervision_autority",
+            "contract__accountability_autority",
+        ),
+        id=pk,
+    )
     if accountability.is_finished:
         return redirect("home")
 
@@ -970,6 +977,23 @@ def send_accountability_to_analisys_view(request, pk):
             Revenue.objects.filter(
                 accountability=accountability, status=Revenue.ReviewStatus.UPDATED
             ).update(status=Revenue.ReviewStatus.IN_ANALISIS)
+
+            if all(
+                [
+                    accountability.contract.accountability_autority
+                    != selected_reviewer,
+                    accountability.contract.supervision_autority != selected_reviewer,
+                    not accountability.contract.interested_parts.filter(
+                        user=selected_reviewer
+                    ).exists(),
+                ]
+            ):
+                ContractInterestedPart.objects.create(
+                    contract=accountability.contract,
+                    user=selected_reviewer,
+                    interest=ContractInterestedPart.InterestLevel.FISCAL_COUNCIL,
+                )
+
             return redirect(
                 "accountability:accountability-detail", pk=accountability.id
             )

@@ -210,9 +210,7 @@ class ReportForm(UserAccessFormMixin, forms.Form):
                     for form in formset.forms:
                         if form.has_changed() and form.errors:
                             for field, errors in form.errors.items():
-                                error_msg = (
-                                    f"Responsável: {field}: " f"{', '.join(errors)}"
-                                )
+                                error_msg = f"Responsável: {field}: {', '.join(errors)}"
                                 self.add_error(None, error_msg)
 
         return cleaned_data
