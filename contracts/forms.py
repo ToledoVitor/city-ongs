@@ -103,6 +103,12 @@ class ContractCreateUpdateForm(forms.ModelForm):
             access_level=User.AccessChoices.FOLDER_MANAGER,
         )
 
+        allowed_companies = Company.objects.all()
+        self.fields["contractor_company"].queryset = allowed_companies
+        self.fields["contractor_manager"].queryset = allowed_companies
+        self.fields["hired_company"].queryset = allowed_companies
+        self.fields["hired_manager"].queryset = allowed_companies
+
     def clean_file(self):
         file = self.cleaned_data.get("file")
 
