@@ -688,7 +688,7 @@ def get_committee_members(request):
 
         members_data = []
         for member in committee_members:
-            full_name = f"{member["first_name"]} {member["last_name"]}".strip()
+            full_name = f"{member['first_name']} {member['last_name']}".strip()
             if not full_name:
                 full_name = member["email"]
 
