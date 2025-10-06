@@ -109,9 +109,9 @@ class Contract(BaseOrganizationTenantModel):
     """
 
     class ContractStatusChoices(models.TextChoices):
-        PLANNING = "PLANNING", "planejamento"
-        EXECUTION = "EXECUTION", "em execução"
-        FINISHED = "FINISHED", "finalizado"
+        PLANNING = "PLANNING", "Planejamento"
+        EXECUTION = "EXECUTION", "Em Execução"
+        FINISHED = "FINISHED", "Finalizado"
 
     class ConcessionChoices(models.TextChoices):
         MANAGEMENT = "MANAGEMENT", "Contrato de Gestão"

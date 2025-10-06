@@ -66,8 +66,8 @@ class ContractCreateUpdateForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(placeholder="Contrato xxxxx"),
             "concession_type": BaseSelectFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
-            "law_num": BaseCharFieldFormWidget(),
-            "agreement_num": BaseCharFieldFormWidget(),
+            "law_num": BaseCharFieldFormWidget(required=False),
+            "agreement_num": BaseCharFieldFormWidget(required=False),
             "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
             "contractor_company": BaseSelectFormWidget(
                 placeholder="Empresa Contratante"
@@ -84,7 +84,7 @@ class ContractCreateUpdateForm(forms.ModelForm):
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
-            "file": BaseFileFormWidget(),
+            "file": BaseFileFormWidget(required=False),
         }
 
     def __init__(self, *args, **kwargs):
