@@ -66,8 +66,8 @@ class ContractCreateUpdateForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(placeholder="Contrato xxxxx"),
             "concession_type": BaseSelectFormWidget(),
             "bidding": BaseCharFieldFormWidget(),
-            "law_num": BaseCharFieldFormWidget(),
-            "agreement_num": BaseCharFieldFormWidget(),
+            "law_num": BaseCharFieldFormWidget(required=False),
+            "agreement_num": BaseCharFieldFormWidget(required=False),
             "objective": BaseTextAreaFormWidget(placeholder="Objetivo xxxx"),
             "contractor_company": BaseSelectFormWidget(
                 placeholder="Empresa Contratante"
@@ -84,7 +84,7 @@ class ContractCreateUpdateForm(forms.ModelForm):
             "hired_company": BaseSelectFormWidget(placeholder="Empresa Contratada"),
             "hired_manager": BaseSelectFormWidget(placeholder="Gestor da Contratada"),
             "area": BaseSelectFormWidget(placeholder="Area de Atuação"),
-            "file": BaseFileFormWidget(),
+            "file": BaseFileFormWidget(required=False),
         }
 
     def __init__(self, *args, **kwargs):
@@ -102,6 +102,12 @@ class ContractCreateUpdateForm(forms.ModelForm):
             organization=user_org,
             access_level=User.AccessChoices.FOLDER_MANAGER,
         )
+
+        allowed_companies = Company.objects.all()
+        self.fields["contractor_company"].queryset = allowed_companies
+        self.fields["contractor_manager"].queryset = allowed_companies
+        self.fields["hired_company"].queryset = allowed_companies
+        self.fields["hired_manager"].queryset = allowed_companies
 
     def clean_file(self):
         file = self.cleaned_data.get("file")

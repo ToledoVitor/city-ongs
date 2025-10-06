@@ -274,7 +274,6 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
                 "goals",
                 "goals__goals_reviews",
                 "goals__goals_reviews__reviewer",
-                "goals",
                 "goals__steps",
             )
         )
@@ -333,7 +332,7 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
         interested_parts = (
             self.object.interested_parts.filter(deleted_at__isnull=True)
             .select_related("user")
-            .order_by("-created_at")[:12]
+            .order_by("user__first_name")[:12]
         )
         context["interested_parts"] = interested_parts
 
