@@ -4,20 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0038_alter_contractgoal_methodology_and_more'),
+        ("contracts", "0038_alter_contractgoal_methodology_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contract',
-            name='status',
-            field=models.CharField(choices=[('PLANNING', 'Planejamento'), ('EXECUTION', 'Em Execução'), ('FINISHED', 'Finalizado')], default='PLANNING', max_length=13, verbose_name='Status'),
+            model_name="contract",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PLANNING", "Planejamento"),
+                    ("EXECUTION", "Em Execução"),
+                    ("FINISHED", "Finalizado"),
+                ],
+                default="PLANNING",
+                max_length=13,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalcontract',
-            name='status',
-            field=models.CharField(choices=[('PLANNING', 'Planejamento'), ('EXECUTION', 'Em Execução'), ('FINISHED', 'Finalizado')], default='PLANNING', max_length=13, verbose_name='Status'),
+            model_name="historicalcontract",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PLANNING", "Planejamento"),
+                    ("EXECUTION", "Em Execução"),
+                    ("FINISHED", "Finalizado"),
+                ],
+                default="PLANNING",
+                max_length=13,
+                verbose_name="Status",
+            ),
         ),
     ]

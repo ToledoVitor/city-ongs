@@ -157,6 +157,12 @@ class ResourceSourceCreateView(
 
 @login_required
 def update_accountability_revenue_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     revenue = get_object_or_404(Revenue, pk=pk)
     accountability = revenue.accountability
 
@@ -195,6 +201,12 @@ def update_accountability_revenue_view(request, pk):
 
 @login_required
 def update_accountability_expense_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     expense = get_object_or_404(Expense, pk=pk)
     accountability = expense.accountability
 
@@ -488,6 +500,12 @@ def accountability_detail_view(request, pk):
 
 @login_required
 def create_accountability_file_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
         return redirect("accountability:accountability-detail", pk=accountability.id)
@@ -532,6 +550,12 @@ def create_accountability_file_view(request, pk):
 @login_required
 @require_POST
 def accountability_file_delete_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     file = get_object_or_404(
         AccountabilityFile.objects.select_related("accountability"), id=pk
     )
@@ -557,6 +581,11 @@ def create_accountability_revenue_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
         return redirect(
@@ -599,6 +628,12 @@ def create_accountability_revenue_view(request, pk):
 
 @login_required
 def duplicate_accountability_revenue_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
@@ -622,6 +657,12 @@ def duplicate_accountability_revenue_view(request, pk):
 def create_accountability_expense_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
 
     accountability = get_object_or_404(Accountability, id=pk)
     if not accountability.is_on_execution:
@@ -662,6 +703,12 @@ def create_accountability_expense_view(request, pk):
 
 @login_required
 def duplicate_accountability_expense_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
@@ -685,6 +732,12 @@ def duplicate_accountability_expense_view(request, pk):
 
 @login_required
 def gloss_accountability_expense_view(request, pk):
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
@@ -792,6 +845,12 @@ def import_accountability_view(request, pk):
     if not request.user:
         return redirect("/accounts-login/")
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
+
     if request.method == "POST":
         accountability = (
             Accountability.objects.select_related(
@@ -889,6 +948,12 @@ def expense_delete_view(request, pk):
             pk=expense.accountability.id,
         )
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
     next_url = request.POST.get("next", "accountability:accountability-detail")
     with db_transaction.atomic():
         _ = ActivityLog.objects.create(
@@ -907,6 +972,12 @@ def expense_delete_view(request, pk):
 def revenue_delete_view(request, pk):
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
     if not revenue.accountability.is_on_execution:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
+    if not request.user.can_update_accountability:
         return redirect(
             "accountability:accountability-detail",
             pk=revenue.accountability.id,
@@ -1331,6 +1402,12 @@ def reconcile_expense_view(request, pk):
         ),
         id=pk,
     )
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
     contract = expense.accountability.contract
 
     total_expenses = Expense.objects.filter(
@@ -1467,6 +1544,12 @@ def reconcile_revenue_view(request, pk):
         ),
         id=pk,
     )
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
+
     contract = revenue.accountability.contract
 
     total_revenues = Revenue.objects.filter(
@@ -1586,6 +1669,12 @@ def upload_expense_file_view(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     accountability = expense.accountability
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
+
     files = request.FILES.getlist("files")
     with db_transaction.atomic():
         for file in files:
@@ -1615,6 +1704,12 @@ def upload_revenue_file_view(request, pk):
     """Upload files for a revenue."""
     revenue = get_object_or_404(Revenue, pk=pk)
     accountability = revenue.accountability
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
 
     files = request.FILES.getlist("files")
     with db_transaction.atomic():
@@ -1646,6 +1741,12 @@ def delete_expense_file_view(request, pk):
     file = get_object_or_404(ExpenseFile, pk=pk)
     accountability = file.expense.accountability
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
+
     with db_transaction.atomic():
         file.delete()
         _ = ActivityLog.objects.create(
@@ -1668,6 +1769,12 @@ def delete_revenue_file_view(request, pk):
     """Delete a revenue file."""
     file = get_object_or_404(RevenueFile, pk=pk)
     accountability = file.revenue.accountability
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=accountability.id,
+        )
 
     with db_transaction.atomic():
         file.delete()
@@ -1930,7 +2037,7 @@ class BeneficiaryDetailView(LoginRequiredMixin, DetailView):
 @login_required
 def batch_reconcile_expenses_view(request, pk):
     """Batch reconciliation view for expenses."""
-    if not request.user or not request.user.can_review_accountability:
+    if not request.user or not request.user.can_update_accountability:
         return redirect("accountability:accountability-detail", pk=pk)
 
     accountability = get_object_or_404(Accountability, id=pk)
@@ -2077,6 +2184,12 @@ def unreconcile_expense_view(request, pk):
         id=pk,
     )
 
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=expense.accountability.id,
+        )
+
     if not expense.accountability.is_on_execution:
         return redirect(
             "accountability:accountability-detail",
@@ -2127,6 +2240,12 @@ def unreconcile_revenue_view(request, pk):
         ),
         id=pk,
     )
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
 
     if not revenue.accountability.is_on_execution:
         return redirect(

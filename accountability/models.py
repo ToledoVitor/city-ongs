@@ -529,6 +529,10 @@ class Expense(BaseOrganizationTenantModel):
         return Expense.ReviewStatus(self.status).label
 
     @property
+    def is_approved(self) -> str:
+        return self.status == Expense.ReviewStatus.APPROVED
+
+    @property
     def is_rejected(self) -> str:
         return self.status == Expense.ReviewStatus.REJECTED
 
@@ -671,6 +675,10 @@ class Revenue(BaseOrganizationTenantModel):
     @property
     def status_label(self) -> str:
         return Revenue.ReviewStatus(self.status).label
+
+    @property
+    def is_approved(self) -> str:
+        return self.status == Revenue.ReviewStatus.APPROVED
 
     @property
     def is_rejected(self) -> str:

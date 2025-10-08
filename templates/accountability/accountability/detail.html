@@ -184,9 +184,9 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">Por Revisão</label>
         <div class="flex flex-wrap gap-1 rounded-md shadow-xs w-full" role="group">
           <button type="button" data-flag="all" class="flex-1 min-w-[70px] status-btn bg-blue-600 text-white hover:bg-blue-700 px-2 py-2 text-xs font-medium border border-gray-300 rounded-s-lg">Todos</button>
-          <button type="button" data-flag="pending" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border-t border-b border-gray-300">Em análise</button>
-          <button type="button" data-flag="rejected" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border border-gray-300">Rejeitados</button>
-          <button type="button" data-flag="approved" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border border-gray-300 rounded-e-lg">Aprovados</button>
+          <button type="button" data-flag="IN_ANALISIS" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border-t border-b border-gray-300">Em análise</button>
+          <button type="button" data-flag="REJECTED" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border border-gray-300">Rejeitados</button>
+          <button type="button" data-flag="APPROVED" class="flex-1 min-w-[70px] status-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-2 py-2 text-xs font-medium border border-gray-300 rounded-e-lg">Aprovados</button>
         </div>
       </div>
 
@@ -283,6 +283,7 @@
           Enviar para Análise
         </button>
         
+        {% if user.can_update_accountability %}
         <a href="{% url 'accountability:accountability-import' accountability.id %}">
           <button
             type="button"
@@ -294,7 +295,8 @@
             Importar Dados
           </button>
         </a>
-        
+        {% endif %}
+      
       {% elif accountability.is_sent and user.can_review_accountability %}
         <a href="{% url 'accountability:expenses-review' accountability.id 0 %}">
           <button
@@ -1022,7 +1024,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
   <h2 class="text-xl font-bold text-gray-900">Despesas Cadastradas</h2>
-  {% if accountability.is_on_execution %}
+  {% if accountability.is_on_execution and user.can_update_accountability %}
     <a href="{% url 'accountability:batch-reconcile' accountability.id %}">
       <button
         type="button"

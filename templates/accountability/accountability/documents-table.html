@@ -203,7 +203,7 @@
   </div>
 </div>
 
-{% if accountability.is_on_execution %}
+{% if accountability.is_on_execution and user.can_update_accountability %}
   <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-4 px-4 bg-gray-200">
     <a
       href="{% url 'accountability:accountability-file-create' accountability.id %}"
