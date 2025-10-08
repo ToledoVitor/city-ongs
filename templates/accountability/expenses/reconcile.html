@@ -134,25 +134,29 @@
                 </div>
                 
                 <div class="space-y-2">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Identificação:</span>
                         <a href="{% url 'accountability:expenses-update' expense.id %}" class="sm:text-right flex-1 hover:underline text-sm font-medium text-blue-800">
                             {{ expense.identification }}
                         </a>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Número do Documento:</span>
+                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.document|default:"Sem Documento" }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Favorecido:</span>
                         <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.favored.name|default:"N/A" }}</span>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Observações:</span>
                         <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Valor:</span>
                         <span class="sm:text-right flex-1 text-sm font-semibold text-green-600">R${{ expense.value|intcomma }}</span>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1.5 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
                         <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Data:</span>
                         <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.due_date|date:"d/m/Y" }}</span>
                     </div>

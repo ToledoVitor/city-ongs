@@ -32,6 +32,8 @@
                 <tr class="bg-white border-b hover:bg-gray-50">
                     <th scope="row" class="px-6 py-4 text-sm text-gray-900">
                       <div class="truncate max-w-[300px] font-medium">{{ revenue.identification }}</div>
+
+                      {% if user.can_update_accountability %}
                       {% if accountability.is_on_execution and not revenue.conciled %}
                         <a href="{% url 'accountability:revenue-reconcile' revenue.id %}">
                           <button
@@ -58,6 +60,7 @@
                           </svg>
                           Desconciliar
                         </button>
+                      {% endif %}
                       {% endif %}
                     </th>
                     <td class="px-6 py-4 text-sm text-gray-900">
@@ -249,6 +252,7 @@
                           Visualizar
                         </a>
 
+                        {% if user.can_update_accountability %}
                         <button
                           type="button"
                           data-modal-target="revenues-duplicate-{{ revenue.id}}"
@@ -271,6 +275,8 @@
                             <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
                           </svg>
                         </button>
+                        {% endif %}
+
                       </div>
                       {% elif accountability.is_sent and user.can_review_accountability %}
                       <a
@@ -404,7 +410,7 @@
                             </div>
                             
                             <div class="space-y-4">
-                              {% if not accountability.is_sent %}
+                              {% if accountability.is_on_execution and user.can_update_accountability %}
                               <h4 class="text-lg font-semibold text-gray-900 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -450,14 +456,14 @@
                                 </div>
                               </form>
                               {% else %}
-                              <div class="text-center py-8">
+                              <div class="text-center mt-8 py-8">
                                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                                   <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                   </svg>
                                 </div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Prestação em Análise</h4>
-                                <p class="text-gray-600 text-sm">Não é possível adicionar novos documentos durante a análise</p>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Upload Não Disponível</h4>
+                                <p class="text-gray-600 text-sm">Não é possível adicionar novos documentos neste momento</p>
                               </div>
                               {% endif %}
                             </div>
@@ -782,7 +788,7 @@
 </div>
 
 {% if accountability.is_on_execution %}
-  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end pt-4 px-4 bg-gray-200">
+  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200">
     <a
       href="{% url 'accountability:revenues-create' accountability.id %}"
       class="
