@@ -17,7 +17,9 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
+font_bold_path = os.path.join(
+    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
+)
 
 
 @dataclass
@@ -49,9 +51,11 @@ class PassOn1PDFExporter:
             area__city_hall=self.contract.area.city_hall,
             checking_account__isnull=False,
         ).order_by("start_of_vigency")
-        self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
-            Sum("total_value")
-        )["total_value__sum"] or Decimal("0.00")
+        self.all_values_in_contracts = (
+            self.contracts_queryset.filter()
+            .aggregate(Sum("total_value"))["total_value__sum"]
+            or Decimal("0.00")
+        )
 
     def handle(self):
         self.__database_queries()
@@ -65,10 +69,16 @@ class PassOn1PDFExporter:
 
     def _draw_header(self):
         self.__set_font(font_size=9, bold=True)
+        header_text = (
+            "ANEXO RP-01 REPASSES A ÓRGÃOS PÚBLICOS \n"
+            " RELAÇÃO DOS VALORES TRANSFERIDOS DE \n"
+            " CORRENTES DE CONVÊNIO OU CARACTERIZADOS COMO"
+            " AUXÍLIOS, SUBVENÇÕES OU \n CONTRIBUIÇÕES"
+        )
         self.pdf.multi_cell(
             0,
             4,
-            "ANEXO RP-01 REPASSES A ÓRGÃOS PÚBLICOS \n RELAÇÃO DOS VALORES TRANSFERIDOS DE \n CORRENTES DE CONVÊNIO OU CARACTERIZADOS COMO AUXÍLIOS, SUBVENÇÕES OU \n CONTRIBUIÇÕES",
+            header_text,
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -81,20 +91,25 @@ class PassOn1PDFExporter:
         self.__set_font(font_size=8, bold=False)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
+        exercicio_text = (
+            f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a "
+            f"{end.day}/{end.month}/{end.year}"
+        )
         self.pdf.cell(
             0,
             7,
-            text=f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=exercicio_text,
             markdown=True,
             align="L",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
         self.default_cell_height
+        city_hall_name = self.contract.organization.city_hall.name
         self.pdf.cell(
             0,
             0,
-            f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
+            f"**ÓRGÃO CONCESSOR:** {city_hall_name}",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
@@ -122,19 +137,41 @@ class PassOn1PDFExporter:
         date_law = self.contract.law_date
         date_agreement = self.contract.agreement_date
         for contract in self.contracts_queryset:
+            hired_company_text = (
+                f"{hired_company.city}/{hired_company.uf} | "
+                f"{hired_company.street}, nº {hired_company.number} - "
+                f"{hired_company.district}"
+                if hired_company
+                else ""
+            )
+            if date_law:
+                month_label = MonthChoices(date_law.month).label.capitalize()
+                law_date_text = (
+                    f"De {date_law.day} de {month_label} de {date_law.year}"
+                )
+            else:
+                law_date_text = ""
             data_body.append(
                 [
-                    f"{contract.get_concession_type_display()}",  # Tipo de Concessão
-                    f"{contract.organization.name}",  # BENEFICIARIO
-                    f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",  # ENDEREÇO
-                    f"Lei nº {contract.law_num}",  # N° da Lei
-                    f"De {date_law.day} de {MonthChoices(date_law.month).label.capitalize()} de {date_law.year}",  # DATA da Lei
-                    f"{contract.agreement_num}/{date_agreement.year}",  # N° do Convênio
-                    f"{format_into_brazilian_date(contract.agreement_date)}",  # DATA do Convênio
-                    f"{contract.objective}",  # FINALIDADE
-                    f"{contract.end_of_vigency}",  # DATA DO PAGAMENTO
-                    f"{contract.checking_account.origin}",  # FONTE
-                    f"{format_into_brazilian_currency(contract.total_value)}",  # VALOR EM REAIS
+                    f"{contract.get_concession_type_display()}",
+                    f"{contract.organization.name}",
+                    hired_company_text,
+                    f"Lei nº {contract.law_num}",
+                    law_date_text,
+                    (
+                        f"{contract.agreement_num}/{date_agreement.year}"
+                        if date_agreement
+                        else ""
+                    ),
+                    (
+                        format_into_brazilian_date(contract.agreement_date)
+                        if date_agreement
+                        else ""
+                    ),
+                    f"{contract.objective}",
+                    f"{format_into_brazilian_date(contract.end_of_vigency)}",
+                    f"{contract.checking_account.origin}",
+                    f"{format_into_brazilian_currency(contract.total_value)}",
                 ]
             )
         data_footer = [
@@ -198,10 +235,15 @@ class PassOn1PDFExporter:
     def _draw_down_informations(self):
         self.__set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
+        local_text = (
+            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | "
+            f"{contractor_company.street}, nº {contractor_company.number} - "
+            f"{contractor_company.district}"
+        )
         self.pdf.cell(
             0,
             0,
-            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | {contractor_company.street}, nº {contractor_company.number} - {contractor_company.district}",  # ENDEREÇO
+            local_text,
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
