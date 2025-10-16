@@ -36,7 +36,7 @@ class BankAccountAdmin(BaseModelAdmin):
         "origin",
     )
     list_filter = ("organization", "account_type", "origin", "bank_name")
-    search_fields = ("bank_name", "account", "agency")
+    search_fields = ("id", "bank_name", "account", "agency")
     readonly_fields = ("balance",)
     inlines = [BankStatementInline, TransactionInline]
     fieldsets = (
@@ -73,7 +73,7 @@ class BankStatementAdmin(BaseModelAdmin):
         "reference_year",
         "bank_account",
     )
-    search_fields = ("bank_account__bank_name", "bank_account__account")
+    search_fields = ("id", "bank_account__bank_name", "bank_account__account")
     readonly_fields = ("opening_balance", "closing_balance")
     fieldsets = (
         (_("Conta Bancária"), {"fields": ("organization", "bank_account")}),
@@ -99,6 +99,7 @@ class TransactionAdmin(BaseModelAdmin):
         "bank_account",
     )
     search_fields = (
+        "id",
         "name",
         "memo",
         "bank_account__bank_name",

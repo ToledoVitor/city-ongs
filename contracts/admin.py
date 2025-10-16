@@ -83,7 +83,7 @@ class ContractItemNewValueRequestInline(admin.TabularInline):
 class CompanyAdmin(BaseModelAdmin):
     list_display = ("organization", "name", "cnpj", "created_at")
     list_filter = ("organization",)
-    search_fields = ("name", "cnpj")
+    search_fields = ("id", "name", "cnpj")
 
 
 @admin.register(Contract)
@@ -99,7 +99,7 @@ class ContractAdmin(BaseModelAdmin):
         "status",
         "created_at",
     )
-    search_fields = ("name", "objective", "code", "internal_code")
+    search_fields = ("id", "name", "objective", "code", "internal_code")
     inlines = [
         ContractGoalInline,
         ContractItemInline,
@@ -216,7 +216,7 @@ class ContractExecutionAdmin(BaseModelAdmin):
         "contract",
         "created_at",
     )
-    search_fields = ("contract__name", "description")
+    search_fields = ("id", "contract__name", "description")
     inlines = [ContractExecutionActivityInline, ContractExecutionFileInline]
 
 
@@ -235,7 +235,7 @@ class ContractGoalAdmin(BaseModelAdmin):
         "created_at",
     )
     list_filter = ("organization", "status", "contract")
-    search_fields = ("name", "contract__name")
+    search_fields = ("id", "name", "contract__name")
     inlines = [ContractGoalReviewInline]
 
 
@@ -266,7 +266,7 @@ class ContractItemAdmin(BaseModelAdmin):
         "created_at",
     )
     list_filter = ("organization", "contract")
-    search_fields = ("name", "contract__name")
+    search_fields = ("id", "name", "contract__name")
     inlines = [
         ContractItemReviewInline,
         ContractItemNewValueRequestInline,
@@ -279,18 +279,18 @@ class ContractItemAdmin(BaseModelAdmin):
 class ContractItemPurchaseProcessDocumentAdmin(BaseModelAdmin):
     list_display = ("organization", "file", "created_at")
     list_filter = ("organization",)
-    search_fields = ("file",)
+    search_fields = ("id", "file",)
 
 
 @admin.register(ContractItemSupplement)
 class ContractItemSupplementAdmin(BaseModelAdmin):
     list_display = ("organization", "item", "suplement_value", "status")
     list_filter = ("organization", "item", "status")
-    search_fields = ("item__name",)
+    search_fields = ("id", "item__name",)
 
 
 @admin.register(ContractInterestedPart)
 class ContractInterestedPartAdmin(BaseModelAdmin):
     list_display = ("organization", "contract", "user", "interest")
     list_filter = ("organization", "contract", "user", "interest")
-    search_fields = ("contract__name", "user__name")
+    search_fields = ("id", "contract__name", "user__name")

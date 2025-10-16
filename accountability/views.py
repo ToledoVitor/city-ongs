@@ -157,16 +157,16 @@ class ResourceSourceCreateView(
 
 @login_required
 def update_accountability_revenue_view(request, pk):
-    if not request.user.can_update_accountability:
-        return redirect(
-            "accountability:accountability-detail",
-            pk=pk,
-        )
-
     revenue = get_object_or_404(Revenue, pk=pk)
     accountability = revenue.accountability
 
     if request.method == "POST":
+        if not request.user.can_update_accountability:
+            return redirect(
+                "accountability:accountability-detail",
+                pk=accountability.id,
+            )
+
         form = RevenueForm(
             request.POST, instance=revenue, accountability=accountability
         )
@@ -201,16 +201,16 @@ def update_accountability_revenue_view(request, pk):
 
 @login_required
 def update_accountability_expense_view(request, pk):
-    if not request.user.can_update_accountability:
-        return redirect(
-            "accountability:accountability-detail",
-            pk=pk,
-        )
-
     expense = get_object_or_404(Expense, pk=pk)
     accountability = expense.accountability
 
     if request.method == "POST":
+        if not request.user.can_update_accountability:
+            return redirect(
+                "accountability:accountability-detail",
+                pk=accountability.id,
+            )
+
         form = ExpenseForm(
             request.POST,
             request=request,
@@ -550,12 +550,6 @@ def create_accountability_file_view(request, pk):
 @login_required
 @require_POST
 def accountability_file_delete_view(request, pk):
-    if not request.user.can_update_accountability:
-        return redirect(
-            "accountability:accountability-detail",
-            pk=pk,
-        )
-
     file = get_object_or_404(
         AccountabilityFile.objects.select_related("accountability"), id=pk
     )
@@ -563,6 +557,12 @@ def accountability_file_delete_view(request, pk):
 
     if not file.accountability.is_on_execution:
         return redirect(next_url, pk=file.accountability.id)
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=file.accountability.id,
+        )
 
     with db_transaction.atomic():
         _ = ActivityLog.objects.create(
@@ -628,17 +628,17 @@ def create_accountability_revenue_view(request, pk):
 
 @login_required
 def duplicate_accountability_revenue_view(request, pk):
-    if not request.user.can_update_accountability:
-        return redirect(
-            "accountability:accountability-detail",
-            pk=pk,
-        )
-
     revenue = get_object_or_404(Revenue.objects.select_related("accountability"), id=pk)
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
     if not revenue.accountability.is_on_execution:
         return redirect(next_url, pk=revenue.accountability.id)
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=revenue.accountability.id,
+        )
 
     with db_transaction.atomic():
         revenue.id = None
@@ -703,14 +703,14 @@ def create_accountability_expense_view(request, pk):
 
 @login_required
 def duplicate_accountability_expense_view(request, pk):
+    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
+    next_url = request.POST.get("next", "accountability:accountability-detail")
+
     if not request.user.can_update_accountability:
         return redirect(
             "accountability:accountability-detail",
-            pk=pk,
+            pk=expense.accountability.id,
         )
-
-    expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
-    next_url = request.POST.get("next", "accountability:accountability-detail")
 
     if not expense.accountability.is_on_execution:
         return redirect(next_url, pk=expense.accountability.id)
@@ -732,17 +732,17 @@ def duplicate_accountability_expense_view(request, pk):
 
 @login_required
 def gloss_accountability_expense_view(request, pk):
-    if not request.user.can_update_accountability:
-        return redirect(
-            "accountability:accountability-detail",
-            pk=pk,
-        )
-
     expense = get_object_or_404(Expense.objects.select_related("accountability"), id=pk)
     next_url = request.POST.get("next", "accountability:accountability-detail")
 
     if not expense.accountability.is_on_execution:
         return redirect(next_url, pk=expense.accountability.id)
+
+    if not request.user.can_update_accountability:
+        return redirect(
+            "accountability:accountability-detail",
+            pk=pk,
+        )
 
     with db_transaction.atomic():
         expense.planned = False
