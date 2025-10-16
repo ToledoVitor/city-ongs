@@ -14,7 +14,7 @@ class ActivityLogAdmin(BaseModelAdmin):
         "created_at",
     )
     list_filter = ("organization", "action", "created_at")
-    search_fields = ("user__email", "user__first_name", "user__last_name")
+    search_fields = ("id", "user__email", "user__first_name", "user__last_name")
     readonly_fields = ("created_at",)
     fieldsets = (
         (
@@ -60,6 +60,7 @@ class NotificationAdmin(BaseModelAdmin):
     )
     list_filter = ("organization", "category", "read_at", "created_at")
     search_fields = (
+        "id",
         "text",
         "recipient__email",
         "recipient__first_name",

@@ -37,7 +37,7 @@ class AccountabilityAdmin(BaseModelAdmin):
         "month",
         "year",
     )
-    search_fields = ("contract__name", "month", "year")
+    search_fields = ("id", "contract__name", "month", "year")
     inlines = [AccountabilityFileInline]
     fieldsets = (
         (
@@ -97,6 +97,7 @@ class ExpenseAdmin(BaseModelAdmin):
         "nature",
     )
     search_fields = (
+        "id",
         "identification",
         "favored__name",
         "favored__document",
@@ -193,6 +194,7 @@ class RevenueAdmin(BaseModelAdmin):
         "receive_date",
     )
     search_fields = (
+        "id",
         "identification",
         "accountability__contract__name",
         "observations",
@@ -229,7 +231,7 @@ class FavoredAdmin(BaseModelAdmin):
         "created_at",
     )
     list_filter = ("organization",)
-    search_fields = ("name", "document")
+    search_fields = ("id", "name", "document")
 
 
 @admin.register(ResourceSource)
@@ -247,4 +249,4 @@ class ResourceSourceAdmin(BaseModelAdmin):
         "origin",
         "category",
     )
-    search_fields = ("name", "document", "contract_number")
+    search_fields = ("id", "name", "document", "contract_number")
