@@ -445,7 +445,7 @@ class User(AbstractUser):
     def can_update_accountability(self) -> bool:
         """Check if user can update accountability."""
         return not self.is_committee_member and (
-            not self.is_superuser
+            self.is_superuser
             or self.access_level
             in {
                 self.AccessChoices.CIVIL_SERVANT,
