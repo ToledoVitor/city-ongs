@@ -34,9 +34,9 @@ class PassOn7PDFExporter:
         self.start_date = start_date
         self.end_date = end_date
         self.responsibles = responsibles or []
-        self.government_link = (
-            "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
-        )
+        default_link = ""
+        contract_link = getattr(contract, 'official_government_link', None)
+        self.government_link = contract_link if contract_link else default_link
 
     def __set_font(self, font_size=7, bold=False):
         if bold:
@@ -87,19 +87,19 @@ class PassOn7PDFExporter:
     def _draw_informations(self):
         self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
-            text=f"**ÓRGÃO PÚBLICO PARCEIRO:** {self.contract.organization.city_hall.name}",
+            text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ENTIDADE PARCEIRA:** {self.contract.hired_company} ({self.contract.area.name})",
+            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.contract.hired_company} ({self.contract.area.name})",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**TERMO DE PARCERIA N° (DE ORIGEM):** {self.contract.name}",
+            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -125,7 +125,7 @@ class PassOn7PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="**ADVOGADO(S) / Nº OAB / E-MAIL(4): ** ",  # TODO Criar campo "advogados"
+            text="**ADVOGADO(S) / Nº OAB / E-MAIL: (2)**",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -275,6 +275,19 @@ class PassOn7PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
+        manager = self.contract.contractor_manager
+        
+        # 1. Obter Nome e Documento de forma segura
+        manager_name = manager.name if manager else 'Não Informado'
+        manager_cnpj = document_mask(str(manager.cnpj) if manager and manager.cnpj else '')
+        
+        # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
+        # Se organization ou position for None, retorna 'Não Informado'
+        org = getattr(self.contract, 'organization', None)
+        position_value = getattr(org, 'position', None) if org else None
+        cargo_text = position_value if position_value else 'Não Informado'
+        
+
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO PARCEIRO:",
@@ -283,19 +296,18 @@ class PassOn7PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.contractor_manager.name}",
+            text=f"Nome: {manager_name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.contractor_manager.name}",
+            text=f"Cargo: {cargo_text}", 
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.contractor_manager.cnpj)),
+            text=manager_cnpj,
             h=self.default_cell_height,
         )
         self.pdf.ln(5)
@@ -305,7 +317,7 @@ class PassOn7PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-
+        
     def _draw_beneficiary_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
@@ -327,7 +339,7 @@ class PassOn7PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document)),  # TODO
+            text=document_mask(str(self.contract.organization.document)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -340,7 +352,7 @@ class PassOn7PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="Pelo ÓRGÃO PÚBLICO PARCEIRO:",
+            text="PELO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -371,7 +383,7 @@ class PassOn7PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="Pela ENTIDADE PARCEIRA:",
+            text="PELA ENTIDADE PARCEIRA:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -483,7 +495,7 @@ class PassOn7PDFExporter:
     def _draw_footnote(self):
         self.__set_font(font_size=6)
         self.pdf.multi_cell(
-            text="(1) Quando for o caso.",
+            text="Valor repassado e exercício, quando se tratar de processo de prestação de contas.",
             w=190,
             h=4,
             markdown=True,

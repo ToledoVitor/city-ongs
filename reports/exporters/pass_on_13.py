@@ -34,9 +34,9 @@ class PassOn13PDFExporter:
         self.start_date = start_date
         self.end_date = end_date
         self.responsibles = responsibles or []
-        self.government_link = (
-            "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
-        )
+        default_link = ""
+        contract_link = getattr(contract, 'official_government_link', None)
+        self.government_link = contract_link if contract_link else default_link
 
     def __set_font(self, font_size=7, bold=False):
         if bold:
@@ -73,21 +73,10 @@ class PassOn13PDFExporter:
             new_y=YPos.NEXT,
         )
         self.__set_font(font_size=7, bold=True)
-        self.pdf.ln(self.default_cell_height)
         self.pdf.cell(
             0,
-            0,
+            10,
             "(REPASSES AO TERCEIRO SETOR - AUXÍLIOS/SUBVENÇÕES/CONTRIBUIÇÕES)",
-            align="C",
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(self.default_cell_height)
-        self.__set_font(font_size=6, bold=False)
-        self.pdf.cell(
-            0,
-            0,
-            "(utilização apenas para os repasses anteriores à edição da LF 13019/2014 atualizada)",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -96,6 +85,7 @@ class PassOn13PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
+        self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
             text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.contract.organization.city_hall.name}",
             markdown=True,
@@ -103,19 +93,13 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ENTIDADE BENEFICIÁRIA:** {self.contract.hired_company} ({self.contract.area.name})",
+            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.contract.hired_company} ({self.contract.area.name})",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**AUXÍLIO/SUBVENÇÃO/CONTRIBUIÇÃO:** {self.contract.name}",
-            markdown=True,
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(4)
-        self.pdf.cell(
-            text=f"**N° DA LEI AUTORIZADORA: {self.contract.law_num}**",
+            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -127,7 +111,7 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**VALOR REPASSADO (1):** {format_into_brazilian_currency(self.contract.total_value)}",
+            text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** {format_into_brazilian_currency(self.contract.total_value)}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -135,7 +119,7 @@ class PassOn13PDFExporter:
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**EXERCÍCIO:** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -235,9 +219,10 @@ class PassOn13PDFExporter:
         self.pdf.ln(1)
         self.__set_font(font_size=8)
         self.pdf.multi_cell(
-            text=f"d) A notificação pessoal só ocorrerá caso a defesa apresentada seja rejeitad{self.contract.organization.name}",
+            text="d) A notificação pessoal só ocorrerá caso a defesa apresentada seja rejeitada, mantida a determinação de recolhimento, conforme §1º do artigo 30 da citada Lei.",
             w=190,
             h=4,
+            markdown=True,
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
@@ -266,7 +251,7 @@ class PassOn13PDFExporter:
     def _draw_public_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO CONCESSOR:",
+            text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -290,27 +275,39 @@ class PassOn13PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
+        manager = self.contract.contractor_manager
+        
+        # 1. Obter Nome e Documento de forma segura
+        manager_name = manager.name if manager else 'Não Informado'
+        manager_cnpj = document_mask(str(manager.cnpj) if manager and manager.cnpj else '')
+        
+        # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
+        # Se organization ou position for None, retorna 'Não Informado'
+        org = getattr(self.contract, 'organization', None)
+        position_value = getattr(org, 'position', None) if org else None
+        cargo_text = position_value if position_value else 'Não Informado'
+        
+
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO CONCESSOR:",
+            text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.contractor_manager.name}",
+            text=f"Nome: {manager_name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.contractor_manager.name}",
+            text=f"Cargo: {cargo_text}", 
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.contractor_manager.cnpj)),
+            text=manager_cnpj,
             h=self.default_cell_height,
         )
         self.pdf.ln(5)
@@ -320,11 +317,11 @@ class PassOn13PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-
+        
     def _draw_beneficiary_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ENTIDADE BENEFICIÁRIA:",
+            text="AUTORIDADE MÁXIMA DO ENTIDADE BENEFICIÁRIO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -342,7 +339,7 @@ class PassOn13PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document)),  # TODO
+            text=document_mask(str(self.contract.organization.document)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -355,7 +352,7 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELO ÓRGÃO PÚBLICO CONCESSOR:",
+            text="PELO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -386,7 +383,7 @@ class PassOn13PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELA ENTIDADE BENEFICIÁRIA:",
+            text="PELA ENTIDADE PARCEIRA:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -499,6 +496,15 @@ class PassOn13PDFExporter:
         self.__set_font(font_size=6)
         self.pdf.multi_cell(
             text="Valor repassado e exercício, quando se tratar de processo de prestação de contas.",
+            w=190,
+            h=4,
+            markdown=True,
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+        )
+        self.pdf.ln(1)
+        self.pdf.multi_cell(
+            text="(2) Facultativo. Indicar quando já constituído.",
             w=190,
             h=4,
             markdown=True,
