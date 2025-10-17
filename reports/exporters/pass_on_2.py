@@ -299,7 +299,7 @@ class PassOn2PDFExporter:
             [
                 "REPASSADOS NO EXERCÍCIO (DATA)",
                 "",
-            ],  # TODO perguntar ao Felipe/Ronaldo como receberia sem ser no exercício?
+            ],
             ["__(INDICAR AS FONTES DO RECURSO)__", "R$"],
         ]
 
@@ -320,7 +320,7 @@ class PassOn2PDFExporter:
         )
         table_data.append(
             ["TOTAL", format_into_brazilian_currency(closing_balance)]
-        )  # adicionar tupla a cima
+        )
         table_data.append(
             [
                 "RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO",

@@ -597,7 +597,7 @@ class ConsolidatedPDFExporter:
 
     def _draw_reimbursement_interest_table(self):
         reimbursement_interest_queryset = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST  # TODO não sei se tá certo
+            revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST 
         )
         total_reimbursement = Decimal("0.00")
         body_data = [
@@ -614,7 +614,7 @@ class ConsolidatedPDFExporter:
                     format_into_brazilian_date(reimbursement.receive_date),
                     str(
                         reimbursement.bank_account.revenue.revenue_nature_label
-                    ),  # TODO, receio de criar a label
+                    ),
                     format_into_brazilian_currency(reimbursement.value),
                 ]
             )
@@ -663,7 +663,7 @@ class ConsolidatedPDFExporter:
 
     def _draw_public_pass_on_table(self):
         public_transfer_queryset = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER  # TODO não sei se tá certo
+            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER
         )
         total_public_transfer = Decimal("0.00")
         body_data = []
@@ -680,7 +680,7 @@ class ConsolidatedPDFExporter:
             body_data.append(
                 [
                     format_into_brazilian_date(public_transfer.receive_date),
-                    str(public_transfer.history),  # TODO, receio de criar a label
+                    str(public_transfer.history),
                     format_into_brazilian_currency(public_transfer.value),
                 ]
             )
@@ -764,7 +764,7 @@ class ConsolidatedPDFExporter:
             planned_data.append(
                 [
                     format_into_brazilian_date(planned.liquidation),
-                    str(planned.history),  # TODO, receio de criar a label
+                    str(planned.history),
                     format_into_brazilian_currency(planned.value),
                 ]
             )
@@ -779,7 +779,7 @@ class ConsolidatedPDFExporter:
             planned_data.append(
                 [
                     format_into_brazilian_date(unplanned.liquidation),
-                    str(unplanned.history),  # TODO, receio de criar a label
+                    str(unplanned.history),
                     format_into_brazilian_currency(unplanned.value),
                 ]
             )
@@ -906,7 +906,6 @@ class ConsolidatedPDFExporter:
             190,
             self.default_cell_height,
             "Lançamentos do extrato bancário não conciliados com o sistema",
-            # TODO necessário interação com o Usuário
             align="L",
             fill=True,
             border=0,
@@ -938,7 +937,6 @@ class ConsolidatedPDFExporter:
             190,
             self.default_cell_height,
             "Lançamentos do sistema não conciliados com o banco",
-            # TODO necessário interação com o Usuário
             align="L",
             fill=True,
             border=0,

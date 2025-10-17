@@ -73,12 +73,90 @@ class PassOn8PDFExporter:
             revenue_nature=Revenue.Nature.OWN_RESOURCES
         ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
+        self.other_revenues_value = (
+            self.revenue_queryset.filter(
+                revenue_nature=Revenue.Nature.OTHER_REVENUES
+            ).aggregate(Sum("value"))["value__sum"]
+            or Decimal("0.00")
+        )
+
+        self.latest_pass_on_info = (
+            self.revenue_queryset.filter(revenue_nature=Revenue.Nature.PUBLIC_TRANSFER)
+            .order_by("-receive_date")
+            .values("receive_date", "identification")
+            .first()
+        )
+
         # Queries para Despesas
         self.expense_queryset = Expense.objects.filter(
             accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
+
+        self.hr_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.HUMAN_RESOURCES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.other_hr_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.OTHER_HUMAN_RESOURCES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.services_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.OTHER_THIRD_PARTY
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.other_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.OTHER_EXPENSES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.goods_materials_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.PERMANENT_GOODS
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.consumables_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.OTHER_CONSUMABLES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.medical_and_hospital_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.MEDICAL_AND_HOSPITAL
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.medical_services_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.MEDICAL_SERVICES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.medicines_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.MEDICINES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.works_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.WORKS
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.public_utilities_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.PUBLIC_UTILITIES
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.financial_banking_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.FINANCIAL_AND_BANKING
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.fuel_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.FUEL
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.foodstuffs_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.FOODSTUFFS
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+        
+        self.real_state_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.REAL_STATE
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
+
+        self.miscellaneous_expenses = self.expense_queryset.filter(
+            nature__in=NatureCategories.MISCELLANEOUS
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
         self.all_expenses_value = self.expense_queryset.aggregate(Sum("value"))[
             "value__sum"
@@ -348,7 +426,7 @@ class PassOn8PDFExporter:
             [
                 "(D) OUTRAS RECEITAS DECORRENTES DA EXECUÇÃO DO AJUSTE (3)",
                 "",
-                "R$XX.XXX,YZ",  #  TODO Classe de adtamento
+                f"{format_into_brazilian_currency(self.other_revenues_value)}",
             ],
         ]
 
@@ -705,12 +783,15 @@ class PassOn8PDFExporter:
         )
 
         expenses_dict = self.__categorize_expenses()
-        j_value = (
-            expenses_dict["TOTAL"]["accounted_and_paid"]
-            + expenses_dict["TOTAL"]["paid_on"]
-        )
-        k_value = self.sum_items_a_to_d - (j_value - self.own_resources)
+        non_planned_paid_expenses_sum = self.expense_queryset.filter(
+            planned=False 
+        ).aggregate(sum=Sum("value"))["sum"] or Decimal("0.00")  
 
+        j_value = expenses_dict["TOTAL"]["paid_on"]
+        k_value = self.sum_items_a_to_d - (j_value - self.own_resources)
+        l_value = non_planned_paid_expenses_sum
+        m_value = k_value - l_value
+        
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
@@ -726,11 +807,11 @@ class PassOn8PDFExporter:
             ],
             [
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
-                "Não encontrei o campo",  # TODO
+                format_into_brazilian_currency(l_value),
             ],
             [
                 "(M) VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE (K - L)",
-                "Necessário valores anteriores",  # TODO
+                format_into_brazilian_currency(m_value),
             ],
         ]
 
@@ -927,10 +1008,10 @@ class PassOn8PDFExporter:
         if expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PERMANENT_GOODS"
 
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
+        if expense.nature in NatureCategories.OTHER_THIRD_PARTY:
             return "OTHER_THIRD_PARTY"
 
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
+        if expense.nature in NatureCategories.PUBLIC_UTILITIES:
             return "PUBLIC_UTILITIES"
 
         if expense.nature in NatureCategories.FUEL:
@@ -951,7 +1032,7 @@ class PassOn8PDFExporter:
         if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
             return "MEDICAL_AND_HOSPITAL"
 
-        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
+        if expense.nature in NatureCategories.MEDICAL_SERVICES:
             return "MEDICAL_SERVICES"
 
         if expense.nature in NatureCategories.MEDICINES:
@@ -967,6 +1048,7 @@ class PassOn8PDFExporter:
             return "OTHER_CONSUMABLES"
 
         return None
+    
 
     def __convert_decimal_to_brl(self, expenses_dict):
         for key, value in expenses_dict.items():

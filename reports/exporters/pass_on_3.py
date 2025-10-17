@@ -34,9 +34,9 @@ class PassOn3PDFExporter:
         self.start_date = start_date
         self.end_date = end_date
         self.responsibles = responsibles or []
-        self.government_link = (
-            "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
-        )
+        default_link = ""
+        contract_link = getattr(contract, 'official_government_link', None)
+        self.government_link = contract_link if contract_link else default_link
 
     def __set_font(self, font_size=7, bold=False):
         if bold:
@@ -49,12 +49,11 @@ class PassOn3PDFExporter:
         self._draw_informations()
         self._draw_notification()
         self._draw_notificated()
-        self._draw_grantor_authority()
+        self._draw_public_authority()
         self._draw_expenditure_orderer()
         self._draw_beneficiary_authority()
         self._draw_conclusion_signature_owner()
         self._draw_account_signature_owner()
-        self._draw_intervener()
         self._draw_black_line()
         self._draw_other_responsable()
         self._draw_line()
@@ -88,45 +87,45 @@ class PassOn3PDFExporter:
     def _draw_informations(self):
         self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
-            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
+            text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ÓRGÃO BENEFICIÁRIO:** {self.contract.hired_company} ({self.contract.area.name})",
+            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.contract.hired_company} ({self.contract.area.name})",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         self.pdf.cell(
-            text="**INTERVENIENTE (se houver):**",
+            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**Nº DO CONVÊNIO** {self.contract.name}",
+            text=f"**OBJETO:** {self.contract.objective}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         self.pdf.cell(
             text=f"**VALOR DO AJUSTE/VALOR REPASSADO (1):** {format_into_brazilian_currency(self.contract.total_value)}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         self.pdf.cell(
-            text=f"**EXERCÍCIO (3):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
+            text=f"**EXERCÍCIO (1):** {start.day}/{start.month}/{start.year} a {end.day}/{end.month}/{end.year}",
             markdown=True,
             h=self.default_cell_height,
         )
-        self.pdf.ln(self.default_cell_height)
+        self.pdf.ln(4)
         self.pdf.cell(
-            text="**ADVOGADO(S) / Nº OAB / E-MAIL(4): ** ",
+            text="**ADVOGADO(S) / Nº OAB / E-MAIL: (2)**",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -249,10 +248,10 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(10)
 
-    def _draw_grantor_authority(self):
+    def _draw_public_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO CONCESSOR:",
+            text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -276,41 +275,53 @@ class PassOn3PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
+        manager = self.contract.contractor_manager
+        
+        # 1. Obter Nome e Documento de forma segura
+        manager_name = manager.name if manager else 'Não Informado'
+        manager_cnpj = document_mask(str(manager.cnpj) if manager and manager.cnpj else '')
+        
+        # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
+        # Se organization ou position for None, retorna 'Não Informado'
+        org = getattr(self.contract, 'organization', None)
+        position_value = getattr(org, 'position', None) if org else None
+        cargo_text = position_value if position_value else 'Não Informado'
+        
+
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="ORDENADOR DE DESPESAS DO ÓRGÃO CONCESSOR:",
+            text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.contractor_manager.name}",
+            text=f"Nome: {manager_name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.contractor_manager.name}",
+            text=f"Cargo: {cargo_text}", 
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.contractor_manager.cnpj)),
+            text=manager_cnpj,
             h=self.default_cell_height,
         )
-        self.pdf.ln(8)
+        self.pdf.ln(5)
         self.__set_font(font_size=8)
         self.pdf.cell(
             text="Assinatura: ___________________________",
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-
+        
     def _draw_beneficiary_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO BENEFICIÁRIO:",
+            text="AUTORIDADE MÁXIMA DO ENTIDADE BENEFICIÁRIO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -341,7 +352,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELO ÓRGÃO CONTRATANTE:",
+            text="PELO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -372,7 +383,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELO ÓRGÃO BENEFICIÁRIO:",
+            text="PELA ENTIDADE PARCEIRA:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -394,38 +405,6 @@ class PassOn3PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(15)
-
-    def _draw_intervener(self):
-        self.__set_font(font_size=8, bold=True)
-        self.pdf.cell(
-            text="PELO INTERVENIENTE:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.__set_font(font_size=8, bold=False)
-        self.pdf.cell(
-            text="Nome:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.cell(
-            text="Cargo(se for o caso):",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.cell(
-            text="CPF:",
-            h=self.default_cell_height,
-        )
-        self.pdf.ln(6)
-        self.pdf.multi_cell(
-            text="Assinatura:______________________________________",
-            w=190,
-            h=self.default_cell_height,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(10)
 
     def _draw_black_line(self):
         self.pdf.set_draw_color(0, 0, 0)
@@ -516,7 +495,7 @@ class PassOn3PDFExporter:
     def _draw_footnote(self):
         self.__set_font(font_size=6)
         self.pdf.multi_cell(
-            text="(1) Quando for o caso.",
+            text="Valor repassado e exercício, quando se tratar de processo de prestação de contas.",
             w=190,
             h=4,
             markdown=True,
@@ -525,7 +504,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(1)
         self.pdf.multi_cell(
-            text="(2) Convênio, Auxílio, Subvenção ou Contribuição.",
+            text="(2) Facultativo. Indicar quando já constituído.",
             w=190,
             h=4,
             markdown=True,
@@ -534,25 +513,7 @@ class PassOn3PDFExporter:
         )
         self.pdf.ln(1)
         self.pdf.multi_cell(
-            text="(3) Valor repassado e exercício, quando se tratar de processo de prestação de contas.",
-            w=190,
-            h=4,
-            markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(1)
-        self.pdf.multi_cell(
-            text="(4) Facultativo. Indicar quando já constituído.",
-            w=190,
-            h=4,
-            markdown=True,
-            new_x=XPos.LMARGIN,
-            new_y=YPos.NEXT,
-        )
-        self.pdf.ln(1)
-        self.pdf.multi_cell(
-            text="      (*)  O Termo de Ciência e de Notificação deve identificar as pessoas físicas que tenham concorrido para a prática do ato jurídico,  na  condição  de  ordenador  da  despesa;  de  partes  contratantes; de responsáveis por ações de acompanhamento, monitoramento e avaliação; de responsáveis por processos licitatórios; de responsáveis por prestações de contas; de responsáveis com atribuições previstas em atos legais ou administrativos e de interessados relacionados a processos de competência deste Tribunal. Na hipótese de prestações de contas, caso o signatário do parecer conclusivo seja distinto daqueles já arrolados como subscritores do Termo de Ciência e de Notificação, será ele objeto de notificação específica. ",
+            text="      (*) - O Termo de Ciência e de Notificação deve identificar as pessoas físicas que tenham concorrido para a prática do ato jurídico,  na  condição  de  ordenador  da  despesa;  de  partes  contratantes; de responsáveis por ações de acompanhamento, monitoramento e avaliação; de responsáveis por processos licitatórios; de responsáveis por prestações de contas; de responsáveis com atribuições previstas em atos legais ou administrativos e de interessados relacionados a processos de competência deste Tribunal. Na hipótese de prestações de contas, caso o signatário do parecer conclusivo seja distinto daqueles já arrolados como subscritores do Termo de Ciência e de Notificação, será ele objeto de notificação específica.",
             w=190,
             h=4,
             markdown=True,

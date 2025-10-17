@@ -33,10 +33,10 @@ class PassOn11PDFExporter:
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
-        self.responsibles = responsibles
-        self.government_link = (
-            "https://doe.tce.sp.gov.br/"  # TODO criar variável em models de contrato
-        )
+        self.responsibles = responsibles or []
+        default_link = ""
+        contract_link = getattr(contract, 'official_government_link', None)
+        self.government_link = contract_link if contract_link else default_link
 
     def __set_font(self, font_size=7, bold=False):
         if bold:
@@ -87,19 +87,19 @@ class PassOn11PDFExporter:
     def _draw_informations(self):
         self.__set_font(font_size=7, bold=False)
         self.pdf.cell(
-            text=f"**ÓRGÃO PÚBLICO CONVENENTE:** {self.contract.organization.city_hall.name}",
+            text=f"**ÓRGÃO/ENTIDADE PÚBLICO(A):** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ENTIDADE CONVENIADA:** {self.contract.hired_company} ({self.contract.area.name})",
+            text=f"**ORGANIZAÇÃO DA SOCIEDADE CIVIL PARCEIRA:** {self.contract.hired_company} ({self.contract.area.name})",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**TERMO DE CONVÊNIO N°(DE ORIGEM):** {self.contract.name}",
+            text=f"**TERMO DE COLABORAÇÃO/FOMENTO N° (DE ORIGEM):** {self.contract.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -251,7 +251,7 @@ class PassOn11PDFExporter:
     def _draw_public_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO CONVENENTE:",
+            text="AUTORIDADE MÁXIMA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -275,27 +275,39 @@ class PassOn11PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
+        manager = self.contract.contractor_manager
+        
+        # 1. Obter Nome e Documento de forma segura
+        manager_name = manager.name if manager else 'Não Informado'
+        manager_cnpj = document_mask(str(manager.cnpj) if manager and manager.cnpj else '')
+        
+        # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
+        # Se organization ou position for None, retorna 'Não Informado'
+        org = getattr(self.contract, 'organization', None)
+        position_value = getattr(org, 'position', None) if org else None
+        cargo_text = position_value if position_value else 'Não Informado'
+        
+
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO CONVENENTE:",
+            text="ORDENADOR DE DESPESA DO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.contractor_manager.name}",
+            text=f"Nome: {manager_name}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.contractor_manager.name}",
+            text=f"Cargo: {cargo_text}", 
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
-        self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.contractor_manager.cnpj)),
+            text=manager_cnpj,
             h=self.default_cell_height,
         )
         self.pdf.ln(5)
@@ -305,11 +317,11 @@ class PassOn11PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-
+        
     def _draw_beneficiary_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
-            text="AUTORIDADE MÁXIMA DO ENTIDADE CONVENIADA:",
+            text="AUTORIDADE MÁXIMA DO ENTIDADE BENEFICIÁRIO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -327,7 +339,7 @@ class PassOn11PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document)),  # TODO
+            text=document_mask(str(self.contract.organization.document)),
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
@@ -340,7 +352,7 @@ class PassOn11PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELO ÓRGÃO PÚBLICO CONVENENTE:",
+            text="PELO ÓRGÃO PÚBLICO PARCEIRO:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -371,7 +383,7 @@ class PassOn11PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text="PELA ENTIDADE CONVENIADA:",
+            text="PELA ENTIDADE PARCEIRA:",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -436,7 +448,7 @@ class PassOn11PDFExporter:
                 )
                 self.pdf.ln(6)
                 self.pdf.multi_cell(
-                    text=("Assinatura: ______________________________________"),
+                    text=("Assinatura:______________________________________"),
                     w=190,
                     h=self.default_cell_height,
                     new_x=XPos.LMARGIN,
