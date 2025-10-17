@@ -23,7 +23,7 @@ font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
 
 
 @dataclass
-class PassOn12PDFExporter:
+class PassOn10PDFExporter:
     pdf = None
     default_cell_height = 5
 
@@ -190,7 +190,7 @@ class PassOn12PDFExporter:
         self.pdf.multi_cell(
             0,
             self.default_cell_height,
-            "ANEXO RP-12 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS TERMO DE CONVÊNIO",
+            "ANEXO RP-10 - REPASSES AO TERCEIRO SETOR \n DEMONSTRATIVO INTEGRAL DAS RECEITAS E DESPESAS TERMO DE COLABORAÇÃO/FOMENTO",
             align="C",
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
@@ -355,8 +355,10 @@ class PassOn12PDFExporter:
             align="C",
         )
         self.pdf.ln(self.default_cell_height)
+
         pass_on_date = self.latest_pass_on_info.get("receive_date") if self.latest_pass_on_info else None
-        
+        pass_on_doc_num = self.latest_pass_on_info.get("identification") if self.latest_pass_on_info else 'N/A'
+
         table_data = [
             [
                 "**DATA PREVISTA PARA O REPASSE (2)**",
@@ -802,11 +804,11 @@ class PassOn12PDFExporter:
                 "(K) RECURSO PÚBLICO NÃO APLICADO [E - (J - F)]",
                 format_into_brazilian_currency(k_value),
             ],
-            [
+[
                 "(L) VALOR DEVOLVIDO AO ÓRGÃO PÚBLICO",
                 format_into_brazilian_currency(l_value),
             ],
-            [
+ [
                 "(M) VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE (K - L)",
                 format_into_brazilian_currency(m_value),
             ],
@@ -1005,10 +1007,10 @@ class PassOn12PDFExporter:
         if expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PERMANENT_GOODS"
 
-        if expense.nature in NatureCategories.OTHER_THIRD_PARTY:
+        if expense.nature in NatureCategories.PERMANENT_GOODS:
             return "OTHER_THIRD_PARTY"
 
-        if expense.nature in NatureCategories.PUBLIC_UTILITIES:
+        if expense.nature in NatureCategories.PERMANENT_GOODS:
             return "PUBLIC_UTILITIES"
 
         if expense.nature in NatureCategories.FUEL:
