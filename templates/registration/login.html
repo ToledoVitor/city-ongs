@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
@@ -10,136 +10,119 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
 
-  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png" >
+  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png">
 
   <title>{% block title %}Portal SITTS{% endblock %}</title>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
 </head>
 
-<body class="flex justify-center inline-block items-center align-center bg-gray-200" style="height: 100vh;">
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
 
-  <div class="
-      w-full
-      max-w-sm
-      p-4
-      border
-      rounded-lg
-      shadow
-      sm:p-6
-      md:p-8
-      bg-gray-300
-      border-gray-400
-    "
-    >
-    <img
-      src="https://storage.googleapis.com/sitts-project-media-bucket/logos/banner-colored.png"
-      alt="Banner"
-      class="mb-6 max-w-60 flex justify-self-center"
-    >
-    <form method="post" class="space-y-6" action="#">
-        {% csrf_token %}
+  <div class="w-full max-w-md animate-fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="px-8 py-10 sm:px-10">
+        <div class="flex justify-center mb-8">
+          <img
+            src="https://storage.googleapis.com/sitts-project-media-bucket/logos/banner-colored.png"
+            alt="Portal SITTS"
+            class="h-16 w-auto"
+          >
+        </div>
 
-        <h5 class="text-xl font-medium text-black">
-          Bem vindo(a)! <br>
-          <span class="text-sm">Faça login antes de continuar</span>
-        </h5>
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Bem-vindo(a)!</h1>
+          <p class="text-gray-600">Faça login para continuar</p>
+        </div>
 
-        <div>
-            <label for="email" class="block mb-2 text-sm font-medium text-black">
+        <form method="post" class="space-y-6" action="#">
+          {% csrf_token %}
+
+          <div class="space-y-2">
+            <label for="email" class="block text-sm font-semibold text-gray-700">
               Email
             </label>
             <input
               type="email"
               name="username"
               id="email"
-              class="
-                border
-                text-sm
-                rounded-lg
-                focus:ring-blue-500
-                focus:border-blue-500
-                block
-                w-full
-                p-2.5
-                bg-gray-400
-                border-gray-300
-                placeholder-gray-600
-                text-black
-              "
-              placeholder="nome@email.com"
+              class="w-full px-4 py-3 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out hover:bg-white placeholder-gray-400"
+              placeholder="seu@email.com"
               required
+              autocomplete="email"
             />
-        </div>
+          </div>
 
-        <div class="mb-2 relative">
-            <label for="password" class="block mb-2 text-sm font-medium text-black">
+          <div class="space-y-2">
+            <label for="password" class="block text-sm font-semibold text-gray-700">
               Senha
             </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              placeholder="••••••••"
-              class="
-                border
-                text-sm
-                rounded-lg
-                focus:ring-blue-500
-                focus:border-blue-500
-                block
-                w-full
-                p-2.5
-                bg-gray-400
-                border-gray-300
-                placeholder-gray-600
-                text-black
-                pr-10
-              "
-              required
-          />
-          <button
-              type="button"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 mt-7 text-blue-600"
-              onclick="togglePassword()"
-          >
-              <svg
+            <div class="relative">
+              <input
+                type="password"
+                name="password"
+                id="password"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 pr-12 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out hover:bg-white placeholder-gray-400"
+                required
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                onclick="togglePassword()"
+                aria-label="Toggle password visibility"
+              >
+                <svg
                   id="eye-icon"
-                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor" 
+                  fill="none"
                   viewBox="0 0 24 24"
+                  stroke-width="2"
                   stroke="currentColor"
                   class="w-5 h-5"
-              >
-                <path fill-rule="evenodd" d="M4.998 7.78C6.729 6.345 9.198 5 12 5c2.802 0 5.27 1.345 7.002 2.78a12.713 12.713 0 0 1 2.096 2.183c.253.344.465.682.618.997.14.286.284.658.284 1.04s-.145.754-.284 1.04a6.6 6.6 0 0 1-.618.997 12.712 12.712 0 0 1-2.096 2.183C17.271 17.655 14.802 19 12 19c-2.802 0-5.27-1.345-7.002-2.78a12.712 12.712 0 0 1-2.096-2.183 6.6 6.6 0 0 1-.618-.997C2.144 12.754 2 12.382 2 12s.145-.754.284-1.04c.153-.315.365-.653.618-.997A12.714 12.714 0 0 1 4.998 7.78ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd"/>
-              </svg>
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end">
+            <a 
+              href="{% url 'password_reset' %}" 
+              class="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200"
+            >
+              Esqueci minha senha
+            </a>
+          </div>
+
+          {% include 'commons/form-errors.html' with form=form error_message="Erro ao fazer login"%}
+
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          >
+            Entrar
           </button>
+        </form>
       </div>
 
-        <div class="flex items-start">
-          <a href="{% url 'password_reset' %}" class="text-sm ms-auto hover:underline text-blue-800">Esqueci minha senha</a>
-        </div>
-
-        {% include 'commons/form-errors.html' with form=form error_message="Erro ao fazer login"%}
-
-        <button
-          type="submit"
-          class="
-            w-full
-            text-white
-            focus:ring-4
-            focus:outline-none
-            font-medium
-            rounded-lg
-            text-sm
-            px-5
-            py-2.5
-            text-center
-            bg-blue-600
-            hover:bg-blue-700
-            focus:ring-blue-800
-          "
-          >Entrar</button>
-    </form>
+      <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
+        <p class="text-center text-sm text-gray-600">
+          © 2025 Portal SITTS. Todos os direitos reservados.
+        </p>
+      </div>
+    </div>
   </div>
 
 </body>
@@ -154,14 +137,13 @@
       if (passwordInput.type === 'password') {
           passwordInput.type = 'text';
           eyeIcon.innerHTML = `
-            <path d="m4 15.6 3.055-3.056A4.913 4.913 0 0 1 7 12.012a5.006 5.006 0 0 1 5-5c.178.009.356.027.532.054l1.744-1.744A8.973 8.973 0 0 0 12 5.012c-5.388 0-10 5.336-10 7A6.49 6.49 0 0 0 4 15.6Z"/>
-            <path d="m14.7 10.726 4.995-5.007A.998.998 0 0 0 18.99 4a1 1 0 0 0-.71.305l-4.995 5.007a2.98 2.98 0 0 0-.588-.21l-.035-.01a2.981 2.981 0 0 0-3.584 3.583c0 .012.008.022.01.033.05.204.12.402.211.59l-4.995 4.983a1 1 0 1 0 1.414 1.414l4.995-4.983c.189.091.386.162.59.211.011 0 .021.007.033.01a2.982 2.982 0 0 0 3.584-3.584c0-.012-.008-.023-.011-.035a3.05 3.05 0 0 0-.21-.588Z"/>
-            <path d="m19.821 8.605-2.857 2.857a4.952 4.952 0 0 1-5.514 5.514l-1.785 1.785c.767.166 1.55.25 2.335.251 6.453 0 10-5.258 10-7 0-1.166-1.637-2.874-2.179-3.407Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
           `;
       } else {
           passwordInput.type = 'password';
           eyeIcon.innerHTML = `
-            <path fill-rule="evenodd" d="M4.998 7.78C6.729 6.345 9.198 5 12 5c2.802 0 5.27 1.345 7.002 2.78a12.713 12.713 0 0 1 2.096 2.183c.253.344.465.682.618.997.14.286.284.658.284 1.04s-.145.754-.284 1.04a6.6 6.6 0 0 1-.618.997 12.712 12.712 0 0 1-2.096 2.183C17.271 17.655 14.802 19 12 19c-2.802 0-5.27-1.345-7.002-2.78a12.712 12.712 0 0 1-2.096-2.183 6.6 6.6 0 0 1-.618-.997C2.144 12.754 2 12.382 2 12s.145-.754.284-1.04c.153-.315.365-.653.618-.997A12.714 12.714 0 0 1 4.998 7.78ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           `;
       }
   }
