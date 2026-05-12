@@ -61,7 +61,7 @@ jobs:
           --image=${{ env.IMAGE_NAME }} \
           --command="sh" \
           --args="-c" \
-          --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; poetry run python manage.py migrate && poetry run python manage.py collectstatic --noinput" \
+          --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; python manage.py migrate && python manage.py collectstatic --noinput" \
           --execute-now \
           --wait
 

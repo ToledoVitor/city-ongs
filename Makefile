@@ -1,23 +1,23 @@
 format:
-	@poetry run ruff check --select I --fix . && ruff format .
+	@uv run ruff check --select I --fix . && uv run ruff format .
 
 pre-commit:
-	@poetry run pre-commit install
+	@uv run pre-commit install
 
 shell:
-	@poetry run python manage.py shell -c "import utils.shell"
+	@uv run python manage.py shell -c "import utils.shell"
 
 makemigrations:
-	@poetry run python manage.py makemigrations
+	@uv run python manage.py makemigrations
 
 migrate:
-	@poetry run python manage.py migrate
+	@uv run python manage.py migrate
 
 collectstatic:
-	@poetry run python manage.py collectstatic
+	@uv run python manage.py collectstatic
 
 superuser:
-	@poetry run python manage.py shell -c "from accounts.models import User; \
+	@uv run python manage.py shell -c "from accounts.models import User; \
 	u, _ = User.objects.get_or_create(email='vitor@admin.com'); \
 	u.username = 'vitoradmin@admin.com'; \
 	u.set_password('admin@2024'); \
@@ -26,4 +26,10 @@ superuser:
 	print('Superuser: admin@admin.com / admin@2024');"
 
 run:
-	@poetry run python manage.py runserver
+	@uv run python manage.py runserver
+
+up:
+	@docker compose up --build
+
+down:
+	@docker compose down

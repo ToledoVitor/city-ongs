@@ -13,16 +13,19 @@ RUN mkdir -p /secrets
 
 WORKDIR /app
 
-RUN pip install --upgrade pip
+COPY --from=ghcr.io/astral-sh/uv:0.8 /uv /uvx /bin/
 
-RUN pip install --no-cache-dir poetry
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
+    PATH=/app/.venv/bin:$PATH
 
-COPY pyproject.toml poetry.lock /app/
+COPY pyproject.toml uv.lock /app/
 
-RUN poetry config virtualenvs.in-project false && poetry install --no-root
+RUN uv sync --frozen --no-dev
 
 COPY . /app/
 
 EXPOSE 8080
 
-CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "0", "core.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--timeout", "0", "core.wsgi"]
