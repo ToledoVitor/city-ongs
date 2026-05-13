@@ -13,6 +13,9 @@ makemigrations:
 migrate:
 	@uv run python manage.py migrate
 
+seed:
+	@uv run python manage.py seed_dev
+
 collectstatic:
 	@uv run python manage.py collectstatic
 
@@ -30,6 +33,9 @@ run:
 
 up:
 	@docker compose up --build
+
+up-daemon:
+	@docker compose up -d --build
 
 down:
 	@docker compose down

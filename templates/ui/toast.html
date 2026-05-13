@@ -1,0 +1,27 @@
+{% comment %}
+ui/toast.html — server-rendered toast trigger.
+
+Emits a JSON queue that the toast runtime (in ui/_scripts.html) consumes
+on DOMContentLoaded. Use this from a view to forward a flash message into
+the toast system, or for transient feedback embedded server-side.
+
+Client-side API (also in ui/_scripts.html):
+    window.UIToast.show({ message, variant, position, duration })
+
+Usage in templates:
+    {% include 'ui/toast.html' with message='Login realizado com sucesso.' variant='success' %}
+    {% include 'ui/toast.html' with message='Credenciais inválidas.' variant='error' duration=5000 %}
+
+Props:
+    message     (str)  toast text.                                      REQUIRED
+    variant     (str)  'default' | 'success' | 'error' | 'warning' | 'info'.
+    position    (str)  'bottom-center' (default) | 'bottom-right' | 'bottom-left'
+                       | 'top-center' | 'top-right' | 'top-left'.
+    duration    (int)  ms until auto-dismiss. Default 3000. Use 0 for sticky.
+{% endcomment %}
+
+{% with variant=variant|default:'default' position=position|default:'bottom-center' duration=duration|default:3000 %}
+<script type="application/json" data-ui-toast>
+{"message": "{{ message|escapejs }}", "variant": "{{ variant }}", "position": "{{ position }}", "duration": {{ duration }}}
+</script>
+{% endwith %}

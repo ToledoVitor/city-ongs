@@ -1,0 +1,23 @@
+{% comment %}
+ui/text_link.html — inline text link.
+
+Usage:
+    {% include 'ui/text_link.html' with href='/forgot' label='Esqueci minha senha' %}
+
+Props:
+    href         (str)  link href.                                     REQUIRED
+    label        (str)  visible text.                                  REQUIRED
+    variant      (str)  'default' (ink + underline) | 'muted' | 'mute-soft' | 'on-dark' | 'blue'.
+    size         (str)  'sm' | 'md' (default).
+    target       (str)  '_blank' to open in a new tab.
+    rel          (str)  rel attr (auto-set to 'noopener noreferrer' when target='_blank').
+{% endcomment %}
+
+{% with variant=variant|default:'default' size=size|default:'md' %}
+<a
+  href="{{ href }}"
+  class="ui-link{% if variant != 'default' %} ui-link--{{ variant }}{% endif %}{% if size == 'sm' %} ui-body-sm{% endif %}"
+  {% if target %}target="{{ target }}"{% endif %}
+  {% if target == '_blank' %}rel="{{ rel|default:'noopener noreferrer' }}"{% elif rel %}rel="{{ rel }}"{% endif %}
+>{{ label }}</a>
+{% endwith %}

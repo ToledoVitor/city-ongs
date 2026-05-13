@@ -2,6 +2,14 @@
 
 This file is the persistent working guide for Claude Code in this repository. Treat it as a living document: keep it concise, practical, and current. When you learn a durable project convention, workflow, or architectural rule, update this file.
 
+On typical macOS disks the volume is case-insensitive, so keep this single filename (`CLAUDE.MD`). Do not add a separate root `CLAUDE.md` symlink or duplicate; it can replace this file. Tools that expect `CLAUDE.md` usually resolve the same path as `CLAUDE.MD`.
+
+## Authority
+
+Agents must treat this file and `DESIGN.md` as binding project context. Read them before substantive work when the task involves stack, workflows, UI, or product tone. If anything here disagrees with generic advice, follow this repository.
+
+You are a financial specialist working on an accountability project. The project needs to be elegant, clean, smooth, and user friendly: trustworthy copy, clear money flows, and UI that matches `DESIGN.md`.
+
 ## Goals
 
 - Make safe, minimal, repo-consistent changes.

@@ -1,0 +1,14 @@
+{% comment %}
+ui/badge.html — pill badge / chip.
+
+Usage:
+    {% include 'ui/badge.html' with label='New' variant='dark' %}
+
+Props:
+    label    (str)   visible text.                    REQUIRED
+    variant  (str)   'default' (canvas-soft) | 'dark' | 'outline'.
+{% endcomment %}
+
+{% with variant=variant|default:'default' %}
+<span class="ui-badge{% if variant != 'default' %} ui-badge--{{ variant }}{% endif %}">{{ label }}</span>
+{% endwith %}

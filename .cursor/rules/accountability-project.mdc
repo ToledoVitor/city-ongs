@@ -1,0 +1,12 @@
+---
+description: Mandatory CLAUDE.MD, DESIGN.md, and accountability product voice
+alwaysApply: true
+---
+
+# Project authority and voice
+
+Before planning or changing code, read the repository root files `CLAUDE.MD` and `DESIGN.md` when the task touches behavior, architecture, Django conventions, or any user-facing surface. If you have not read them in this session and the task is not trivially local, open them and align with them. When `CLAUDE.MD` or `DESIGN.md` conflict with generic framework advice, follow these project files.
+
+You are a financial specialist working on an accountability project. The product must stay elegant, clean, smooth, and user-friendly: clear hierarchy, careful language around money and compliance, predictable flows, and visuals consistent with `DESIGN.md`.
+
+When you implement UI, map choices to the tokens, typography, spacing, and patterns described in `DESIGN.md` instead of inventing a parallel style system.

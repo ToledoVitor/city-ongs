@@ -1,0 +1,41 @@
+{% comment %}
+ui/wordmark.html — brand wordmark.
+
+Renders a compact ink-on-canvas "SITTS" wordmark with a small square mark.
+The mark stays monochromatic and shape-only — no third-colour accent.
+
+Usage:
+    {% include 'ui/wordmark.html' %}
+    {% include 'ui/wordmark.html' with name='SITTS' href='/' size='lg' %}
+
+Props:
+    name   (str)   brand name. Default 'SITTS'.
+    href   (str)   if set, wraps the wordmark in <a href>.
+    size   (str)   'sm' (18px) | 'md' (default 22px) | 'lg' (28px) | 'xl' (36px).
+    on_dark(bool)  invert to white-on-black.
+{% endcomment %}
+
+{% with name=name|default:'SITTS' size=size|default:'md' %}
+  {% if href %}<a href="{{ href }}" class="ui-wordmark"{% if on_dark %} style="color: var(--color-on-dark);"{% endif %}>{% else %}<span class="ui-wordmark"{% if on_dark %} style="color: var(--color-on-dark);"{% endif %}>{% endif %}
+    <span
+      class="ui-wordmark__mark"
+      aria-hidden="true"
+      style="
+        width: {% if size == 'sm' %}18px{% elif size == 'lg' %}28px{% elif size == 'xl' %}36px{% else %}22px{% endif %};
+        height: {% if size == 'sm' %}18px{% elif size == 'lg' %}28px{% elif size == 'xl' %}36px{% else %}22px{% endif %};
+        background-color: {% if on_dark %}var(--color-on-dark){% else %}var(--color-ink){% endif %};
+        color: {% if on_dark %}var(--color-ink){% else %}var(--color-on-dark){% endif %};
+        border-radius: 4px;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: {% if size == 'sm' %}11px{% elif size == 'lg' %}16px{% elif size == 'xl' %}20px{% else %}13px{% endif %};
+        line-height: 1;
+      "
+    >{{ name|slice:":1" }}</span>
+    <span
+      class="ui-wordmark__name"
+      style="{% if on_dark %}color: var(--color-on-dark);{% endif %}
+        font-size: {% if size == 'sm' %}18px{% elif size == 'lg' %}28px{% elif size == 'xl' %}36px{% else %}22px{% endif %};"
+    >{{ name }}</span>
+  {% if href %}</a>{% else %}</span>{% endif %}
+{% endwith %}

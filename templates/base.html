@@ -1,572 +1,945 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {# FOUC guard: apply collapsed state before render #}
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+          document.documentElement.classList.add('sidebar-collapsed');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
   <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
   <script src="https://unpkg.com/imask"></script>
   <script src="https://unpkg.com/flowbite-datepicker@latest/dist/datepicker.pt-BR.js"></script>
 
-  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png" >
+  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png">
 
   <title>{% block title %}Portal SITTS{% endblock %}</title>
-  {% block customcss %} {% endblock customcss %}
+
+  {% include 'ui/_styles.html' %}
+
+  <style>
+    :root {
+      --sidebar-width-expanded: 256px;
+      --sidebar-width-collapsed: 72px;
+    }
+
+    /* === Shell ============================================================ */
+    .shell {
+      min-height: 100vh;
+      background-color: var(--color-canvas-softer);
+      color: var(--color-ink);
+      font-family: var(--font-text);
+    }
+
+    .shell__main {
+      min-height: 100vh;
+      padding: 72px 16px 32px;
+      transition: margin-left 220ms ease;
+    }
+    @media (min-width: 640px) {
+      .shell__main {
+        margin-left: var(--sidebar-width-expanded);
+        padding: 32px 32px 48px;
+      }
+    }
+
+    /* Mobile hamburger — floating ink pill, top-left */
+    .shell__hamburger {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 30;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: var(--rounded-pill);
+      background-color: var(--color-ink);
+      color: var(--color-on-dark);
+      cursor: pointer;
+      box-shadow: var(--shadow-3);
+      transition: background-color 140ms ease;
+    }
+    .shell__hamburger:hover { background-color: var(--color-black-elevated); }
+    .shell__hamburger:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25), var(--shadow-3); }
+    @media (min-width: 640px) {
+      .shell__hamburger { display: none; }
+    }
+
+    /* === Sidebar ========================================================== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 40;
+      width: var(--sidebar-width-expanded);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-ink);
+      color: var(--color-on-dark);
+      padding: 24px 16px;
+      transition: transform 220ms ease, width 220ms ease;
+      overflow: hidden;
+    }
+
+    .sidebar__header {
+      padding: 0 8px;
+      margin-bottom: 24px;
+      min-height: 28px;
+    }
+
+    .sidebar__nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      margin: 0 -4px 0 0;
+    }
+    .sidebar__nav::-webkit-scrollbar { width: 6px; }
+    .sidebar__nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
+    .sidebar__nav::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
+
+    .sidebar__group { display: flex; flex-direction: column; gap: 2px; margin-top: 20px; }
+    .sidebar__group--first { margin-top: 0; }
+
+    .sidebar__eyebrow {
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 11px;
+      line-height: 16px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--color-mute);
+      padding: 0 12px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .nav-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--rounded-md);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--color-mute);
+      text-decoration: none;
+      transition: background-color 120ms ease, color 120ms ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .nav-link:hover {
+      background-color: var(--color-black-elevated);
+      color: var(--color-on-dark);
+    }
+    .nav-link:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-on-dark) inset;
+    }
+
+    .nav-link__icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-link__label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-link--active {
+      background-color: var(--color-black-elevated);
+      color: var(--color-on-dark);
+    }
+    .nav-link--active::before {
+      content: "";
+      position: absolute;
+      left: -16px;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background-color: var(--color-on-dark);
+    }
+
+    .sidebar__footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 16px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .sidebar__action {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: var(--rounded-pill);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 120ms ease;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .sidebar__action:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.32); }
+
+    .sidebar__action--primary {
+      background-color: var(--color-on-dark);
+      color: var(--color-ink);
+    }
+    .sidebar__action--primary:hover { background-color: var(--color-canvas-soft); }
+
+    .sidebar__action--ghost {
+      background-color: transparent;
+      color: var(--color-on-dark);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .sidebar__action--ghost:hover { background-color: var(--color-black-elevated); }
+
+    .sidebar__count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: var(--rounded-pill);
+      background-color: var(--color-ink);
+      color: var(--color-on-dark);
+      font-family: var(--font-text);
+      font-weight: 700;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .sidebar__version {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-mute);
+      margin: 4px 0 0;
+    }
+
+    /* === Sidebar collapse toggle (desktop only) ========================== */
+    .sidebar__toggle {
+      position: fixed;
+      top: 28px;
+      left: calc(var(--sidebar-width-expanded) - 14px);
+      z-index: 50;
+      display: none;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-canvas);
+      color: var(--color-ink);
+      border: 1px solid var(--color-canvas-soft);
+      border-radius: var(--rounded-full);
+      cursor: pointer;
+      box-shadow: var(--shadow-3);
+      transition: left 220ms ease, background-color 140ms ease;
+    }
+    .sidebar__toggle:hover { background-color: var(--color-canvas-soft); }
+    .sidebar__toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2), var(--shadow-3); }
+    .sidebar__toggle svg { transition: transform 220ms ease; }
+    @media (min-width: 640px) {
+      .sidebar__toggle { display: inline-flex; }
+    }
+
+    /* === Collapsed state (desktop only) ================================== */
+    @media (min-width: 640px) {
+      html.sidebar-collapsed .sidebar { width: var(--sidebar-width-collapsed); padding: 24px 12px; }
+      html.sidebar-collapsed .shell__main { margin-left: var(--sidebar-width-collapsed); }
+      html.sidebar-collapsed .sidebar__toggle { left: calc(var(--sidebar-width-collapsed) - 14px); }
+      html.sidebar-collapsed .sidebar__toggle svg { transform: rotate(180deg); }
+
+      html.sidebar-collapsed .sidebar__header { padding: 0; display: flex; justify-content: center; }
+      html.sidebar-collapsed .ui-wordmark__name { display: none; }
+
+      html.sidebar-collapsed .sidebar__eyebrow { display: none; }
+      html.sidebar-collapsed .sidebar__group { margin-top: 12px; }
+      html.sidebar-collapsed .sidebar__group--first { margin-top: 0; }
+
+      html.sidebar-collapsed .nav-link {
+        padding: 10px 0;
+        justify-content: center;
+        gap: 0;
+      }
+      html.sidebar-collapsed .nav-link__label { display: none; }
+      html.sidebar-collapsed .nav-link--active::before {
+        left: 0;
+        top: 6px;
+        bottom: 6px;
+        border-radius: 0 3px 3px 0;
+      }
+
+      html.sidebar-collapsed .sidebar__action {
+        padding: 10px 0;
+        gap: 0;
+      }
+      html.sidebar-collapsed .sidebar__action > span:not(.sidebar__count) { display: none; }
+      html.sidebar-collapsed .sidebar__action {
+        position: relative;
+      }
+      html.sidebar-collapsed .sidebar__count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        font-size: 10px;
+        background-color: var(--color-canvas);
+        color: var(--color-ink);
+        border: 2px solid var(--color-ink);
+      }
+      html.sidebar-collapsed .sidebar__version { display: none; }
+    }
+
+    /* === Loader overlay ================================================== */
+    .shell__loader-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+    }
+    .shell__loader-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      background-color: var(--color-canvas);
+      border-radius: var(--rounded-xl);
+      padding: 24px 32px;
+      box-shadow: var(--shadow-2);
+    }
+    .shell__loader-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-canvas-soft);
+      border-top-color: var(--color-ink);
+      border-radius: 50%;
+      animation: shellSpin 800ms linear infinite;
+    }
+    @keyframes shellSpin { to { transform: rotate(360deg); } }
+    .shell__loader-text {
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--color-ink);
+      margin: 0;
+    }
+
+    /* === Notifications modal ============================================= */
+    .notif-modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+    .notif-modal-shell {
+      background-color: var(--color-canvas);
+      border-radius: var(--rounded-xl);
+      box-shadow: var(--shadow-2);
+      overflow: hidden;
+    }
+
+    .notif-modal__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid var(--color-canvas-soft);
+    }
+    .notif-modal__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--color-canvas-soft);
+      border-radius: var(--rounded-pill);
+      padding: 6px 12px;
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--color-ink);
+    }
+    .notif-modal__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 28px;
+      color: var(--color-ink);
+      margin: 12px 0 4px;
+    }
+    .notif-modal__subtitle {
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--color-body);
+      margin: 0;
+    }
+    .notif-modal__close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: var(--rounded-full);
+      background-color: var(--color-canvas-soft);
+      color: var(--color-ink);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 120ms ease;
+    }
+    .notif-modal__close:hover { background-color: var(--color-surface-pressed); }
+    .notif-modal__close:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18); }
+
+    .notif-modal__body {
+      max-height: min(56vh, 440px);
+      overflow-y: auto;
+      padding: 16px;
+      background-color: var(--color-canvas-soft);
+    }
+    .notif-modal__footer {
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--color-canvas-soft);
+      background-color: var(--color-canvas);
+    }
+
+    .notif-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 48px 24px;
+      background-color: var(--color-canvas-soft);
+    }
+    .notif-loading__spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-canvas);
+      border-top-color: var(--color-ink);
+      border-radius: 50%;
+      animation: shellSpin 800ms linear infinite;
+    }
+    .notif-loading__text {
+      font-family: var(--font-text);
+      font-size: 13px;
+      color: var(--color-body);
+      margin: 0;
+    }
+
+    /* Notification card (rendered by JS) */
+    .notif-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 16px;
+      background-color: var(--color-canvas);
+      border: 1px solid transparent;
+      border-radius: var(--rounded-md);
+      text-decoration: none;
+      color: var(--color-ink);
+      transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+    .notif-card + .notif-card { margin-top: 8px; }
+    .notif-card:hover {
+      border-color: var(--color-surface-pressed);
+      transform: translateY(-1px);
+    }
+    .notif-card__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .notif-card__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--rounded-pill);
+      background-color: var(--color-canvas-soft);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 11px;
+      line-height: 14px;
+      color: var(--color-ink);
+    }
+    .notif-card__meta {
+      font-family: var(--font-text);
+      font-size: 11px;
+      color: var(--color-mute);
+      white-space: nowrap;
+    }
+    .notif-card__text {
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--color-body);
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .notif-card__arrow {
+      flex-shrink: 0;
+      color: var(--color-mute);
+      transition: transform 120ms ease, color 120ms ease;
+    }
+    .notif-card:hover .notif-card__arrow { color: var(--color-ink); transform: translateX(2px); }
+
+    .notif-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .notif-empty__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: var(--rounded-full);
+      background-color: var(--color-canvas);
+      color: var(--color-ink);
+      margin-bottom: 6px;
+    }
+    .notif-empty__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 24px;
+      color: var(--color-ink);
+      margin: 0;
+    }
+    .notif-empty__lede {
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--color-body);
+      margin: 0;
+      max-width: 32ch;
+    }
+  </style>
+
+  {% block customcss %}{% endblock customcss %}
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-  <div id="loader-overlay" class="hidden fixed inset-0 flex items-center justify-center p-8 bg-gray-800 rounded-lg bg-opacity-50 z-50">
-    <div class="text-black text-xl flex flex-row gap-2 bg-gray-300 p-8 rounded-lg">
-      <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce"></div>
-      <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.3s]"></div>
-      <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:-.5s]"></div>
+<body class="shell">
+
+  {# === Loader overlay (toggled via .hidden by form-submit JS) === #}
+  <div id="loader-overlay" class="hidden shell__loader-backdrop" role="status" aria-live="polite">
+    <div class="shell__loader-card">
+      <div class="shell__loader-spinner" aria-hidden="true"></div>
+      <p class="shell__loader-text">Carregando...</p>
     </div>
   </div>
-  
-  <!-- Iframe for download forms -->
-  <iframe id="download_iframe" name="download_iframe" style="display: none;"></iframe>
 
+  {# Hidden iframe for download forms #}
+  <iframe id="download_iframe" name="download_iframe" style="display: none;" aria-hidden="true" tabindex="-1"></iframe>
+
+  {# === Mobile hamburger === #}
   <button
     data-drawer-target="separator-sidebar"
     data-drawer-toggle="separator-sidebar"
     aria-controls="separator-sidebar"
     type="button"
-    class="
-      inline-flex
-      items-center
-      justify-center
-      p-3
-      mt-3
-      ml-3
-      text-sm
-      rounded-xl
-      sm:hidden
-      focus:outline-none
-      focus:ring-4
-      text-gray-400
-      bg-gray-800
-      hover:bg-gray-700
-      hover:text-white
-      focus:ring-gray-600
-      transition-all
-      duration-200
-      shadow-lg
-    "
+    class="shell__hamburger"
+    aria-label="Abrir menu"
   >
-    <span class="sr-only">Abrir menu</span>
-    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-    <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
     </svg>
   </button>
- 
-  <aside id="separator-sidebar" class="fixed top-0 left-0 z-40 w-56 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-xl" aria-label="Sidebar">
-    <div class="h-full px-3 py-4 overflow-y-auto bg-gray-800 flex flex-col justify-between">
-        <div class="space-y-1">
-          <div class="mb-6 px-2">
-            <h2 class="text-lg font-bold text-white mb-1">Portal SITTS</h2>
-            <div class="h-0.5 w-12 bg-blue-500 rounded-full"></div>
-          </div>
 
-          <nav class="space-y-1">
-            <a href="{% url 'home' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-                <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clip-rule="evenodd"/>
-                </svg>
-                <span class="group-hover:translate-x-1 transition-transform duration-200">Início</span>
-            </a>
+  {# === Sidebar collapse toggle (desktop only) === #}
+  <button
+    type="button"
+    id="sidebar-toggle"
+    class="sidebar__toggle"
+    aria-label="Recolher menu"
+    aria-expanded="true"
+  >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
 
-            <div class="my-4">
-              <div class="flex items-center px-2 mb-2">
-                <div class="flex-1 h-px bg-gray-600"></div>
-                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Gestão</span>
-                <div class="flex-1 h-px bg-gray-600"></div>
-              </div>
-            </div>
-
-            <a href="{% url 'contracts:contracts-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
-              </svg>                  
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Contratos</span>
-            </a>
-
-            <a href="{% url 'contracts:companies-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M4 4a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2v14a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2V5a1 1 0 0 1-1-1Zm5 2a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H9Zm5 0a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1Zm-5 4a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1H9Zm5 0a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1h-1Zm-3 4a2 2 0 0 0-2 2v3h2v-3h2v3h2v-3a2 2 0 0 0-2-2h-2Z" clip-rule="evenodd"/>
-              </svg>                              
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Empresas</span>
-            </a>
-
-            <a href="{% url 'reports:reports-page' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">    
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9h5a2 2 0 0 0 2-2Zm-1 9a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2Zm2-5a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Zm4 4a1 1 0 1 0-2 0v3a1 1 0 1 0 2 0v-3Z" clip-rule="evenodd"/>
-              </svg>             
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Relatórios</span>
-            </a>
-
-            <div class="my-4">
-              <div class="flex items-center px-2 mb-2">
-                <div class="flex-1 h-px bg-gray-600"></div>
-                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Prestações</span>
-                <div class="flex-1 h-px bg-gray-600"></div>
-              </div>
-            </div>
-
-            <a href="{% url 'accountability:accountabilities-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
-                <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Prestações</span>
-            </a>
-
-            <a href="{% url 'dashboard:index' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Inteligência</span>
-            </a>
-
-            <a href="{% url 'accountability:sources-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z" clip-rule="evenodd"/>
-                <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z" clip-rule="evenodd"/>
-              </svg>                          
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Recursos</span>
-            </a>
-
-            <a href="{% url 'accountability:advanced-search' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M10 2a8 8 0 1 0 5.293 14.293l4.854 4.853a1 1 0 0 0 1.414-1.414l-4.853-4.854A8 8 0 0 0 10 2Zm-6 8a6 6 0 1 1 12 0 6 6 0 0 1-12 0Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Consulta</span>
-            </a>
-
-            <a href="{% url 'accountability:favoreds-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clip-rule="evenodd"/>
-                <path fill-rule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clip-rule="evenodd"/>
-                <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Favorecidos</span>
-            </a>
-
-          {% if user.has_admin_access %}
-            <div class="my-4">
-              <div class="flex items-center px-2 mb-2">
-                <div class="flex-1 h-px bg-gray-600"></div>
-                <span class="px-2 text-xs font-medium text-gray-400 uppercase tracking-wider">Administração</span>
-                <div class="flex-1 h-px bg-gray-600"></div>
-              </div>
-            </div>
-
-            <a href="{% url 'accounts:folder-managers-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Gestores</span>
-            </a>
-
-            <a href="{% url 'accounts:organization-accountants-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>               
-              </svg>               
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Prestadores</span>
-            </a>
-
-            <a href="{% url 'accounts:organization-committees-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>               
-              </svg>               
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Comitê</span>
-            </a>
-
-            <a href="{% url 'accounts:documents-list' %}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200 ease-in-out">
-              <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-blue-400 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 0 1 2-2h4.586A2 2 0 0 1 12 2.586L15.414 6A2 2 0 0 1 16 7.414V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Zm2 6a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1Zm1 3a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H7Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="group-hover:translate-x-1 transition-transform duration-200">Documentos</span>
-            </a>
-          {% endif %}
-          </nav>
-        </div>
-
-        <div class="mt-auto pt-4 space-y-3">
-          <button
-            id="notifications-btn"
-            data-modal-target="notifications-modal"
-            data-modal-toggle="notifications-modal"
-            type="button"
-            class="
-              w-full
-              relative
-              flex
-              items-center
-              justify-center
-              px-3
-              py-2
-              text-sm
-              font-medium
-              text-white
-              bg-blue-600
-              rounded-lg
-              hover:bg-blue-700
-              focus:ring-4
-              focus:outline-none
-              focus:ring-blue-300/50
-              transition-all
-              duration-200
-            "
-          >
-            <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
-              <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
-              <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
-            </svg>
-            <span class="font-medium">Notificações</span>
-            {% if user.unread_notifications > 0 %}
-            <div
-              class="
-                absolute
-                inline-flex
-                items-center
-                justify-center
-                w-5
-                h-5
-                text-xs
-                font-bold
-                text-white
-                bg-red-500
-                border-2
-                border-gray-800
-                rounded-full
-                -top-1
-                -right-1
-                animate-pulse
-              "
-            >
-              {{ user.unread_notifications }}
-            </div>
-            {% endif %}
-          </button>
-
-          <div class="border-t border-gray-600 pt-3">
-            <form action="{% url 'logout' %}" method="post" class="space-y-2">
-              {% csrf_token %}
-              <button
-                type="submit"
-                class="
-                  w-full
-                  flex
-                  items-center
-                  justify-center
-                  px-3
-                  py-2
-                  text-sm
-                  font-medium
-                  text-white
-                  bg-red-600
-                  rounded-lg
-                  hover:bg-red-700
-                  focus:ring-4
-                  focus:outline-none
-                  focus:ring-red-300/50
-                  transition-all
-                  duration-200
-                "
-              >
-                <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
-                </svg>
-                <span class="font-medium">Sair</span>
-              </button>
-              <p class="text-xs text-gray-400 text-center font-mono">v0.0.1</p>
-            </form>
-          </div>
-        </div>
+  {# === Sidebar === #}
+  {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name|default:'' %}
+  <aside
+    id="separator-sidebar"
+    class="sidebar -translate-x-full sm:translate-x-0 transition-transform"
+    aria-label="Navegação lateral"
+  >
+    <div class="sidebar__header">
+      {% include 'ui/wordmark.html' with name='SITTS' href='/' size='md' on_dark=True %}
     </div>
 
-  </aside>
-  
-  <div class="py-4 px-2 mr-4 sm:ml-64">
-  {% block content %}
-  {% endblock %}
-  </div>
+    <nav class="sidebar__nav" aria-label="Navegação principal">
 
+      <div class="sidebar__group sidebar__group--first">
+        <a href="{% url 'home' %}" class="nav-link {% if un == 'home' %}nav-link--active{% endif %}" title="Início">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/></svg>
+          </span>
+          <span class="nav-link__label">Início</span>
+        </a>
+      </div>
+
+      <div class="sidebar__group">
+        <span class="sidebar__eyebrow">Gestão</span>
+
+        <a href="{% url 'contracts:contracts-list' %}" class="nav-link {% if ns == 'contracts' and 'companies' not in un %}nav-link--active{% endif %}" title="Contratos">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+          </span>
+          <span class="nav-link__label">Contratos</span>
+        </a>
+
+        <a href="{% url 'contracts:companies-list' %}" class="nav-link {% if ns == 'contracts' and 'companies' in un %}nav-link--active{% endif %}" title="Empresas">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="14" y1="9" x2="17" y2="9"/><line x1="14" y1="13" x2="17" y2="13"/></svg>
+          </span>
+          <span class="nav-link__label">Empresas</span>
+        </a>
+
+        <a href="{% url 'reports:reports-page' %}" class="nav-link {% if ns == 'reports' %}nav-link--active{% endif %}" title="Relatórios">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+          </span>
+          <span class="nav-link__label">Relatórios</span>
+        </a>
+      </div>
+
+      <div class="sidebar__group">
+        <span class="sidebar__eyebrow">Prestações</span>
+
+        <a href="{% url 'accountability:accountabilities-list' %}" class="nav-link {% if ns == 'accountability' and 'sources' not in un and 'favoreds' not in un and un != 'advanced-search' %}nav-link--active{% endif %}" title="Prestações">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </span>
+          <span class="nav-link__label">Prestações</span>
+        </a>
+
+        <a href="{% url 'dashboard:index' %}" class="nav-link {% if ns == 'dashboard' %}nav-link--active{% endif %}" title="Inteligência">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span class="nav-link__label">Inteligência</span>
+        </a>
+
+        <a href="{% url 'accountability:sources-list' %}" class="nav-link {% if ns == 'accountability' and 'sources' in un %}nav-link--active{% endif %}" title="Recursos">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          </span>
+          <span class="nav-link__label">Recursos</span>
+        </a>
+
+        <a href="{% url 'accountability:advanced-search' %}" class="nav-link {% if un == 'advanced-search' %}nav-link--active{% endif %}" title="Consulta">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <span class="nav-link__label">Consulta</span>
+        </a>
+
+        <a href="{% url 'accountability:favoreds-list' %}" class="nav-link {% if ns == 'accountability' and 'favoreds' in un %}nav-link--active{% endif %}" title="Favorecidos">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <span class="nav-link__label">Favorecidos</span>
+        </a>
+      </div>
+
+      {% if user.has_admin_access %}
+      <div class="sidebar__group">
+        <span class="sidebar__eyebrow">Administração</span>
+
+        <a href="{% url 'accounts:folder-managers-list' %}" class="nav-link {% if ns == 'accounts' and 'folder-managers' in un %}nav-link--active{% endif %}" title="Gestores">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="11" r="3"/></svg>
+          </span>
+          <span class="nav-link__label">Gestores</span>
+        </a>
+
+        <a href="{% url 'accounts:organization-accountants-list' %}" class="nav-link {% if ns == 'accounts' and 'organization-accountants' in un %}nav-link--active{% endif %}" title="Prestadores">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </span>
+          <span class="nav-link__label">Prestadores</span>
+        </a>
+
+        <a href="{% url 'accounts:organization-committees-list' %}" class="nav-link {% if ns == 'accounts' and 'organization-committees' in un %}nav-link--active{% endif %}" title="Comitê">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="nav-link__label">Comitê</span>
+        </a>
+
+        <a href="{% url 'accounts:documents-list' %}" class="nav-link {% if ns == 'accounts' and 'documents' in un %}nav-link--active{% endif %}" title="Documentos">
+          <span class="nav-link__icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </span>
+          <span class="nav-link__label">Documentos</span>
+        </a>
+      </div>
+      {% endif %}
+
+    </nav>
+
+    <div class="sidebar__footer">
+      <button
+        id="notifications-btn"
+        data-modal-target="notifications-modal"
+        data-modal-toggle="notifications-modal"
+        type="button"
+        class="sidebar__action sidebar__action--primary"
+        title="Notificações"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+        <span>Notificações</span>
+        {% if user.unread_notifications > 0 %}
+          <span class="sidebar__count">{{ user.unread_notifications }}</span>
+        {% endif %}
+      </button>
+
+      <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" class="sidebar__action sidebar__action--ghost" title="Sair">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>Sair</span>
+        </button>
+      </form>
+
+      <p class="sidebar__version">v0.0.1</p>
+    </div>
+  </aside>
+  {% endwith %}
+
+  <main class="shell__main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# === Notifications modal === #}
   <div
     id="notifications-modal"
     tabindex="-1"
     data-modal-backdrop="static"
     aria-hidden="true"
-    class="
-      hidden
-      overflow-y-auto
-      overflow-x-hidden
-      fixed
-      top-0
-      right-0
-      left-0
-      z-50
-      justify-center
-      items-center
-      w-full
-      md:inset-0
-      max-h-full
-      backdrop-blur-sm
-      bg-gray-900/50
-    "
-    >
-    <div class="relative p-4 w-full max-w-2xl mx-auto">
-      <div class="relative bg-white rounded-2xl shadow-2xl transform transition-all">
-        
-        <div class="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-blue-600 to-blue-700 px-6 py-5">
-          <div class="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,black)]"></div>
-          <div class="relative flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm">
-                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold text-white">Notificações</h3>
-                <p class="text-sm text-blue-100 mt-0.5">Mantenha-se atualizado</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              data-modal-hide="notifications-modal"
-              class="
-                relative
-                text-white/80
-                hover:text-white
-                hover:bg-white/10
-                bg-white/5
-                backdrop-blur-sm
-                rounded-lg
-                text-sm
-                w-9
-                h-9
-                inline-flex
-                justify-center
-                items-center
-                transition-all
-                duration-200
-                hover:rotate-90
-                group
-              "
-              aria-label="Fechar modal"
-            >
-              <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 max-h-full notif-modal-backdrop"
+  >
+    <div class="relative p-4 w-full max-w-xl mx-auto">
+      <div class="notif-modal-shell">
+
+        <div class="notif-modal__header">
+          <div>
+            <span class="notif-modal__eyebrow">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
               </svg>
-            </button>
+              <span>Atualizações</span>
+            </span>
+            <h2 class="notif-modal__title">Notificações</h2>
+            <p class="notif-modal__subtitle">Mantenha-se atualizado com o que precisa da sua atenção.</p>
           </div>
-        </div>
-
-        <div
-          id="notification-spinner"
-          class="flex flex-col items-center justify-center py-16 px-4"
-        >
-          <div class="relative">
-            <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-8 h-8 bg-blue-100 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-          <p class="mt-4 text-sm font-medium text-gray-600 animate-pulse">Carregando notificações...</p>
-        </div>
-
-        <div class="max-h-[28rem] overflow-y-auto overscroll-contain px-6 py-4 bg-gray-50">
-          <div id="notifications-content" class="space-y-3">
-          </div>
-        </div>
-
-        <div class="sticky bottom-0 bg-white border-t border-gray-200 px-6 pt-4 pb-6 rounded-b-2xl">
           <button
             type="button"
             data-modal-hide="notifications-modal"
-            class="
-              w-full
-              flex
-              items-center
-              justify-center
-              gap-2
-              text-white
-              bg-gradient-to-r
-              from-gray-700
-              to-gray-800
-              hover:from-gray-800
-              hover:to-gray-900
-              focus:ring-4
-              focus:outline-none
-              focus:ring-gray-300
-              font-medium
-              rounded-lg
-              text-sm
-              px-5
-              py-3
-              transition-all
-              duration-200
-              shadow-sm
-              hover:shadow-md
-              mb-1
-            "
+            class="notif-modal__close"
+            aria-label="Fechar"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 6 L18 18 M18 6 L6 18"/>
             </svg>
-            <span>Fechar</span>
           </button>
+        </div>
+
+        <div id="notification-spinner" class="notif-loading">
+          <div class="notif-loading__spinner" aria-hidden="true"></div>
+          <p class="notif-loading__text">Carregando notificações...</p>
+        </div>
+
+        <div class="notif-modal__body">
+          <div id="notifications-content"></div>
+        </div>
+
+        <div class="notif-modal__footer">
+          {% include 'ui/button.html' with label='Fechar' type='button' variant='subtle' size='md' full_width=True data_attrs='data-modal-hide="notifications-modal"' %}
         </div>
 
       </div>
     </div>
   </div>
+
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+{% include 'ui/_scripts.html' %}
+
+<script>
+  // === Sidebar collapse toggle ===========================================
+  (function() {
+    var toggle = document.getElementById('sidebar-toggle');
+    if (!toggle) return;
+    var html = document.documentElement;
+
+    function syncLabel() {
+      var collapsed = html.classList.contains('sidebar-collapsed');
+      toggle.setAttribute('aria-label', collapsed ? 'Expandir menu' : 'Recolher menu');
+      toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
+    syncLabel();
+
+    toggle.addEventListener('click', function() {
+      html.classList.toggle('sidebar-collapsed');
+      var collapsed = html.classList.contains('sidebar-collapsed');
+      try { localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false'); } catch (e) {}
+      syncLabel();
+    });
+  })();
+</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    // Phone number mask
-    const phoneInputs = document.querySelectorAll('input[data-mask="(00) 00000-0000"]');
-    phoneInputs.forEach(function(input) {
-      const phoneMask = IMask(input, {
+    // Phone mask
+    document.querySelectorAll('input[data-mask="(00) 00000-0000"]').forEach(function(input) {
+      IMask(input, {
         mask: '(00) 00000-0000',
         lazy: false,
         placeholderChar: '_',
-        prepare: function(str) {
-          return str.replace(/[^0-9]/g, '');
-        }
+        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
       });
-
-      // Remove HTML5 validation
-      input.addEventListener('invalid', function(e) {
-        e.preventDefault();
-      });
+      input.addEventListener('invalid', function(e) { e.preventDefault(); });
     });
 
     // CPF mask
-    const cpfInputs = document.querySelectorAll('input[data-mask="000.000.000-00"]');
-    cpfInputs.forEach(function(input) {
-      const cpfMask = IMask(input, {
+    document.querySelectorAll('input[data-mask="000.000.000-00"]').forEach(function(input) {
+      IMask(input, {
         mask: '000.000.000-00',
         lazy: false,
         placeholderChar: '_',
-        prepare: function(str) {
-          return str.replace(/[^0-9]/g, '');
-        }
+        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
       });
-
-      // Remove HTML5 validation
-      input.addEventListener('invalid', function(e) {
-        e.preventDefault();
-      });
+      input.addEventListener('invalid', function(e) { e.preventDefault(); });
     });
 
-    let notificationsLoaded = false;
-    let notificationsData = null;
-
-    document.getElementById("notifications-btn").addEventListener("click", function() {
-      if (!notificationsLoaded) {
-          fetch("/accounts/notifications/")
-              .then(response => response.json())
-              .then(data => {
-                  notificationsData = data.notifications;
-                  let htmlContent = "";
-                  if (notificationsData.length > 0) {
-                    notificationsData.forEach(notification => {
-                        htmlContent += `
-                        <a 
-                          href="${notification.read_url}"
-                          class="
-                            group
-                            block
-                            bg-white
-                            hover:bg-blue-50
-                            border
-                            border-gray-200
-                            hover:border-blue-300
-                            rounded-xl
-                            p-4
-                            transition-all
-                            duration-200
-                            hover:shadow-md
-                            cursor-pointer
-                          "
-                        >
-                          <div class="flex items-start justify-between gap-3 mb-2">
-                            <div class="flex items-center gap-2">
-                              <span class="
-                                inline-flex
-                                items-center
-                                gap-1.5
-                                px-2.5
-                                py-1
-                                text-xs
-                                font-semibold
-                                text-blue-700
-                                bg-blue-100
-                                rounded-lg
-                                group-hover:bg-blue-200
-                                transition-colors
-                              ">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-                                </svg>
-                                ${notification.category}
-                              </span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                              <span class="text-xs text-gray-500 font-medium whitespace-nowrap">${notification.created_at}</span>
-                              <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                              </svg>
-                            </div>
-                          </div>
-                          <p class="text-sm text-gray-700 leading-relaxed line-clamp-2">${notification.text}</p>
-                        </a>`;
-                    });
-                  } else {
-                    htmlContent = `
-                    <div class="flex flex-col items-center justify-center py-12 px-4">
-                      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                      </div>
-                      <h4 class="text-lg font-semibold text-gray-700 mb-1">Tudo certo!</h4>
-                      <p class="text-sm text-gray-500 text-center">Nenhuma notificação nova no momento.<br>Você está completamente atualizado.</p>
-                    </div>`;
-                  }
-
-                  document.getElementById("notifications-content").innerHTML = htmlContent;
-                  notificationsLoaded = true;
-                  document.getElementById("notification-spinner").style.display = "none";
-              })
-              .catch(error => console.error("Erro ao carregar notificações:", error));
-      }
+    // Notifications fetch + render with the new card chrome
+    var notificationsLoaded = false;
+    var notifBtn = document.getElementById("notifications-btn");
+    if (notifBtn) {
+      notifBtn.addEventListener("click", function() {
+        if (notificationsLoaded) return;
+        fetch("/accounts/notifications/")
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var items = data.notifications || [];
+            var target = document.getElementById("notifications-content");
+            if (items.length > 0) {
+              target.innerHTML = items.map(function(n) {
+                return '\
+                  <a href="' + n.read_url + '" class="notif-card">\
+                    <div class="notif-card__row">\
+                      <span class="notif-card__chip">\
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">\
+                          <circle cx="12" cy="12" r="4"/>\
+                        </svg>\
+                        <span>' + n.category + '</span>\
+                      </span>\
+                      <span class="notif-card__meta">' + n.created_at + '</span>\
+                    </div>\
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">\
+                      <p class="notif-card__text">' + n.text + '</p>\
+                      <svg class="notif-card__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">\
+                        <line x1="5" y1="12" x2="19" y2="12"/>\
+                        <polyline points="12 5 19 12 12 19"/>\
+                      </svg>\
+                    </div>\
+                  </a>';
+              }).join('');
+            } else {
+              target.innerHTML = '\
+                <div class="notif-empty">\
+                  <div class="notif-empty__icon" aria-hidden="true">\
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>\
+                  </div>\
+                  <h3 class="notif-empty__title">Tudo certo</h3>\
+                  <p class="notif-empty__lede">Nenhuma notificação nova no momento. Você está completamente atualizado.</p>\
+                </div>';
+            }
+            notificationsLoaded = true;
+            var spinner = document.getElementById("notification-spinner");
+            if (spinner) spinner.style.display = "none";
+          })
+          .catch(function(err) { console.error("Erro ao carregar notificações:", err); });
+      });
+    }
   });
-});
 </script>
 
 <script>
   function getCookie(name) {
-    const value = "; " + document.cookie;
-    const parts = value.split("; " + name + "=");
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
     if (parts.length === 2) return parts.pop().split(";").shift();
   }
 
   function pollForFileDownload() {
-    const maxAttempts = 10; // Tenta por 5 segundos (10 x 500ms)
-    let attempts = 0;
-    const interval = setInterval(function() {
+    var maxAttempts = 10;
+    var attempts = 0;
+    var interval = setInterval(function() {
       attempts++;
       if (getCookie("fileDownload") === "true" || attempts > maxAttempts) {
         document.getElementById("loader-overlay").classList.add("hidden");
@@ -577,46 +950,52 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll("form");
-    forms.forEach(form => {
-      form.addEventListener("submit", function(event) {
-        document.getElementById("loader-overlay").classList.remove("hidden");
+    document.querySelectorAll("form").forEach(function(form) {
+      form.addEventListener("submit", function() {
+        var loader = document.getElementById("loader-overlay");
+        if (loader) loader.classList.remove("hidden");
         if (form.getAttribute("target") === "download_iframe") {
           pollForFileDownload();
         } else {
-          form.querySelector('button[type="submit"]').disabled = true;
+          var btn = form.querySelector('button[type="submit"]');
+          if (btn) btn.disabled = true;
         }
       });
     });
   });
 
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-        let locales = {
-            pt: {
-                days: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
-                daysShort: ["Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb."],
-                daysMin: ["Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb."],
-                months: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
-                monthsShort: ["Jan.", "Fev.", "Mar.", "Abr.", "Mai", "Jun.", "Jul.", "Ago.", "Set.", "Out.", "Nov.", "Dez."],
-                today: "Hoje",
-                weekStart: 1,
-                clear: "Limpar",
-                format: "dd/mm/yyyy"
-            }
-        };
-        let flowbitePickers = Object.values(FlowbiteInstances.getInstances("Datepicker")).map((instance) => {
-            return instance.getDatepickerInstance();
-        });
-        for (const flowbitePicker of flowbitePickers) {
-            for (const picker of flowbitePicker.datepickers || [flowbitePicker]) {
-                Object.assign(picker.constructor.locales, locales);
-                picker.setOptions({ language: "pt" });
-            }
+  // Datepicker pt-BR localization (unchanged behavior)
+  window.addEventListener("load", function() {
+    setTimeout(function() {
+      if (typeof FlowbiteInstances === 'undefined') return;
+      var locales = {
+        pt: {
+          days: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
+          daysShort: ["Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb."],
+          daysMin: ["Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb."],
+          months: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+          monthsShort: ["Jan.", "Fev.", "Mar.", "Abr.", "Mai", "Jun.", "Jul.", "Ago.", "Set.", "Out.", "Nov.", "Dez."],
+          today: "Hoje",
+          weekStart: 1,
+          clear: "Limpar",
+          format: "dd/mm/yyyy"
         }
+      };
+      try {
+        var instances = FlowbiteInstances.getInstances("Datepicker") || {};
+        Object.values(instances).map(function(i) {
+          return i.getDatepickerInstance();
+        }).forEach(function(fp) {
+          (fp.datepickers || [fp]).forEach(function(picker) {
+            Object.assign(picker.constructor.locales, locales);
+            picker.setOptions({ language: "pt" });
+          });
+        });
+      } catch (e) {
+        // Datepicker not present on this page — nothing to localize.
+      }
     }, 100);
-});
-
+  });
 </script>
 
 </html>

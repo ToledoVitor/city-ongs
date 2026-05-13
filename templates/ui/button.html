@@ -1,0 +1,52 @@
+{% comment %}
+ui/button.html — base button component.
+
+Usage:
+    {% include 'ui/button.html' with label='Entrar' variant='primary' type='submit' full_width=True %}
+
+Props (all optional):
+    label       (str)   button label text. Defaults to 'Button'.
+    variant     (str)   'primary' | 'secondary' | 'subtle' | 'floating' | 'ghost'. Default 'primary'.
+    size        (str)   'sm' | 'md' (default) | 'lg' (the only black button rounded as 16 px rectangle).
+    type        (str)   button type attr: 'button' | 'submit' | 'reset'. Default 'button'.
+    full_width  (bool)  stretch to 100% width.
+    disabled    (bool)  disabled state.
+    name        (str)   HTML name attr.
+    value       (str)   HTML value attr.
+    id          (str)   HTML id attr.
+    href        (str)   if set, renders an <a> styled as a button.
+    icon_left   (str)   raw SVG markup for an icon on the left.
+    icon_right  (str)   raw SVG markup for an icon on the right.
+    extra_class (str)   extra CSS classes appended to the button.
+    data_attrs  (str)   raw extra HTML attributes (e.g., 'data-modal-toggle="x"').
+{% endcomment %}
+
+{% with variant=variant|default:'primary' size=size|default:'md' btype=type|default:'button' %}
+{% if href %}
+<a
+  href="{{ href }}"
+  {% if id %}id="{{ id }}"{% endif %}
+  class="ui-btn ui-btn--{{ variant }}{% if size != 'md' %} ui-btn--{{ size }}{% endif %}{% if full_width %} ui-btn--full{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+  {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}
+  {% if data_attrs %}{{ data_attrs|safe }}{% endif %}
+>
+  {% if icon_left %}{{ icon_left|safe }}{% endif %}
+  <span>{{ label|default:'Button' }}</span>
+  {% if icon_right %}{{ icon_right|safe }}{% endif %}
+</a>
+{% else %}
+<button
+  type="{{ btype }}"
+  {% if id %}id="{{ id }}"{% endif %}
+  {% if name %}name="{{ name }}"{% endif %}
+  {% if value %}value="{{ value }}"{% endif %}
+  class="ui-btn ui-btn--{{ variant }}{% if size != 'md' %} ui-btn--{{ size }}{% endif %}{% if full_width %} ui-btn--full{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+  {% if disabled %}disabled aria-disabled="true"{% endif %}
+  {% if data_attrs %}{{ data_attrs|safe }}{% endif %}
+>
+  {% if icon_left %}{{ icon_left|safe }}{% endif %}
+  <span>{{ label|default:'Button' }}</span>
+  {% if icon_right %}{{ icon_right|safe }}{% endif %}
+</button>
+{% endif %}
+{% endwith %}

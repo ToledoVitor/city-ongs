@@ -1,0 +1,26 @@
+{% comment %}
+ui/card.html — content card.
+
+Pass complex bodies via `body_html`, or compose the card markup directly
+using the `.ui-card` CSS classes:
+
+    <div class="ui-card ui-card--soft">
+      ...complex content...
+    </div>
+
+Usage:
+    {% include 'ui/card.html' with variant='soft' body_html='<p class="ui-body-md">Hello</p>' %}
+
+Props:
+    variant     (str)   'default' (white) | 'soft' | 'softer' | 'dark'.
+    size        (str)   'sm' | 'md' (default 24px padding) | 'lg' (32px) | 'flush' (no padding).
+    elevated    (bool)  apply Level 1 drop shadow.
+    body_html   (str)   raw HTML rendered inside the card.
+    extra_class (str)   extra CSS classes.
+{% endcomment %}
+
+{% with variant=variant|default:'default' size=size|default:'md' %}
+<div class="ui-card{% if variant != 'default' %} ui-card--{{ variant }}{% endif %}{% if size != 'md' %} ui-card--{{ size }}{% endif %}{% if elevated %} ui-card--elevated{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}">
+  {{ body_html|safe }}
+</div>
+{% endwith %}

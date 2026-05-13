@@ -2,151 +2,161 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+  <link rel="shortcut icon" type="image/png"
+        href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png">
 
-  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png">
+  <title>{% block title %}Entrar — Portal SITTS{% endblock %}</title>
 
-  <title>{% block title %}Portal SITTS{% endblock %}</title>
+  {% include 'ui/_styles.html' %}
 
   <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-canvas);
     }
-    .animate-fade-in {
-      animation: fadeIn 0.5s ease-out;
+
+    .login-page__nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px;
     }
+    @media (max-width: 600px) {
+      .login-page__nav { padding: 20px 16px; }
+    }
+
+    .login-page__main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-card__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 36px;
+      line-height: 44px;
+      letter-spacing: 0;
+      color: var(--color-ink);
+      margin: 0 0 8px;
+    }
+
+    .login-card__lede {
+      font-family: var(--font-text);
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--color-body);
+      margin: 0 0 28px;
+    }
+
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .login-form__row-end {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -4px;
+    }
+
+    .login-form__divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--color-mute);
+      font-size: 12px;
+      line-height: 20px;
+      margin: 8px 0;
+    }
+    .login-form__divider::before,
+    .login-form__divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background-color: var(--color-canvas-soft);
+    }
+
+    .login-page__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 32px 24px;
+      color: var(--color-mute);
+      font-size: 12px;
+      line-height: 20px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 600px) {
+      .login-page__footer { padding: 16px; }
+    }
+
+    .login-page__footer-links { display: flex; gap: 16px; }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+<body>
+  <main class="login-page">
 
-  <div class="w-full max-w-md animate-fade-in">
-    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-      <div class="px-8 py-10 sm:px-10">
-        <div class="flex justify-center mb-8">
-          <img
-            src="https://storage.googleapis.com/sitts-project-media-bucket/logos/banner-colored.png"
-            alt="Portal SITTS"
-            class="h-16 w-auto"
-          >
-        </div>
+    <header class="login-page__nav">
+      {% include 'ui/wordmark.html' with name='SITTS' href='/' size='md' %}
+      {% include 'ui/text_link.html' with href='https://google.com' label='Ajuda' variant='muted' size='sm' target='_blank' %}
+    </header>
 
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Bem-vindo(a)!</h1>
-          <p class="text-gray-600">Faça login para continuar</p>
-        </div>
+    <section class="login-page__main">
+      <div class="login-card">
+        <h1 class="login-card__title">Entrar</h1>
+        <p class="login-card__lede">Sistema Integrado de Transparência ao Terceiro Setor.</p>
 
-        <form method="post" class="space-y-6" action="#">
+        <form method="post" action="" class="login-form" novalidate>
           {% csrf_token %}
 
-          <div class="space-y-2">
-            <label for="email" class="block text-sm font-semibold text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              name="username"
-              id="email"
-              class="w-full px-4 py-3 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out hover:bg-white placeholder-gray-400"
-              placeholder="seu@email.com"
-              required
-              autocomplete="email"
-            />
+          {% include 'ui/text_input.html' with name='username' label='E-mail' type='email' placeholder='voce@organizacao.gov.br' required=True autocomplete='email' autofocus=True %}
+
+          {% include 'ui/password_input.html' with name='password' label='Senha' placeholder='Insira sua senha' required=True autocomplete='current-password' %}
+
+          {% url 'password_reset' as password_reset_url %}
+          <div class="login-form__row-end">
+            {% include 'ui/text_link.html' with href=password_reset_url label='Esqueci minha senha' variant='muted' size='sm' %}
           </div>
 
-          <div class="space-y-2">
-            <label for="password" class="block text-sm font-semibold text-gray-700">
-              Senha
-            </label>
-            <div class="relative">
-              <input
-                type="password"
-                name="password"
-                id="password"
-                placeholder="••••••••"
-                class="w-full px-4 py-3 pr-12 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out hover:bg-white placeholder-gray-400"
-                required
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
-                onclick="togglePassword()"
-                aria-label="Toggle password visibility"
-              >
-                <svg
-                  id="eye-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="w-5 h-5"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-              </button>
-            </div>
+          <div style="margin-top: 8px;">
+            {% include 'ui/button.html' with label='Continuar' type='submit' variant='primary' size='lg' full_width=True %}
           </div>
-
-          <div class="flex items-center justify-end">
-            <a 
-              href="{% url 'password_reset' %}" 
-              class="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200"
-            >
-              Esqueci minha senha
-            </a>
-          </div>
-
-          {% include 'commons/form-errors.html' with form=form error_message="Erro ao fazer login"%}
-
-          <button
-            type="submit"
-            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300"
-          >
-            Entrar
-          </button>
         </form>
       </div>
+    </section>
 
-      <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
-        <p class="text-center text-sm text-gray-600">
-          © 2025 Portal SITTS. Todos os direitos reservados.
-        </p>
+    <footer class="login-page__footer">
+      <span>© {% now "Y" %} Portal SITTS</span>
+      <div class="login-page__footer-links">
+        {% include 'ui/text_link.html' with href='#' label='Termos' variant='mute-soft' size='sm' %}
+        {% include 'ui/text_link.html' with href='#' label='Privacidade' variant='mute-soft' size='sm' %}
       </div>
-    </div>
-  </div>
+    </footer>
+  </main>
 
+  {# Server-rendered toasts — pushed into the toast runtime on load #}
+  {% if form.errors %}
+    {% include 'ui/toast.html' with message='Não foi possível entrar. Verifique seu e-mail e senha e tente novamente.' variant='error' duration=4500 %}
+  {% endif %}
+  {% if messages %}
+    {% for message in messages %}
+      {% include 'ui/toast.html' with message=message.message variant=message.tags|default:'info' %}
+    {% endfor %}
+  {% endif %}
+
+  {% include 'ui/_scripts.html' %}
 </body>
-
-<script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
-
-<script>
-  function togglePassword() {
-      const passwordInput = document.getElementById('password');
-      const eyeIcon = document.getElementById('eye-icon');
-      
-      if (passwordInput.type === 'password') {
-          passwordInput.type = 'text';
-          eyeIcon.innerHTML = `
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-          `;
-      } else {
-          passwordInput.type = 'password';
-          eyeIcon.innerHTML = `
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          `;
-      }
-  }
-</script>
-
 </html>

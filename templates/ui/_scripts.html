@@ -1,0 +1,201 @@
+{% comment %}
+ui/_scripts.html — JS behaviors for UI components.
+
+Include once near the bottom of any page that uses the UI components:
+    {% include 'ui/_scripts.html' %}
+
+Provides:
+  • Password show/hide toggle (data-ui-password-toggle="<input-id>")
+  • window.UIToast.show({ message, variant, position, duration })
+{% endcomment %}
+
+<script>
+(function () {
+  /* ------------------------------------------------------------------ *
+   * Password toggle                                                    *
+   * ------------------------------------------------------------------ */
+  var EYE_OPEN = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />';
+  var EYE_OFF  = '<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />';
+
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-ui-password-toggle]');
+    if (!btn) return;
+    var fieldId = btn.getAttribute('data-ui-password-toggle');
+    var input = document.getElementById(fieldId);
+    var eye = document.getElementById(fieldId + '-eye');
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (eye) eye.innerHTML = EYE_OFF;
+      btn.setAttribute('aria-label', 'Esconder senha');
+    } else {
+      input.type = 'password';
+      if (eye) eye.innerHTML = EYE_OPEN;
+      btn.setAttribute('aria-label', 'Mostrar senha');
+    }
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Toast runtime                                                      *
+   *                                                                    *
+   *   window.UIToast.show({ message, variant, position, duration })    *
+   *                                                                    *
+   *   • Multiple toasts stack at the requested position.               *
+   *   • Newer toasts appear nearest the screen edge and push older     *
+   *     ones away from it (default position = bottom-center).          *
+   *   • Hovering pauses the auto-dismiss timer; leaving resumes it     *
+   *     with the remaining time.                                       *
+   *   • Click the close button (or call returned dismiss()) to remove. *
+   *   • duration <= 0 → sticky (no auto-dismiss).                      *
+   * ------------------------------------------------------------------ */
+  var DEFAULT_DURATION = 3000;
+  var DEFAULT_POSITION = 'bottom-center';
+  var VALID_POSITIONS = {
+    'bottom-center': 1, 'bottom-right': 1, 'bottom-left': 1,
+    'top-center': 1,    'top-right': 1,    'top-left': 1
+  };
+  var VALID_VARIANTS = {
+    'default': 1, 'success': 1, 'error': 1, 'warning': 1, 'info': 1
+  };
+  var stacks = Object.create(null);
+
+  function ensureStack(position) {
+    if (stacks[position]) return stacks[position];
+    var el = document.createElement('div');
+    el.className = 'ui-toast-stack ui-toast-stack--' + position;
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Notificações');
+    document.body.appendChild(el);
+    stacks[position] = el;
+    return el;
+  }
+
+  function show(opts) {
+    opts = opts || {};
+    var message  = String(opts.message != null ? opts.message : '');
+    var variant  = VALID_VARIANTS[opts.variant]   ? opts.variant   : 'default';
+    var position = VALID_POSITIONS[opts.position] ? opts.position  : DEFAULT_POSITION;
+    var duration = (typeof opts.duration === 'number') ? opts.duration : DEFAULT_DURATION;
+
+    var stack = ensureStack(position);
+
+    var toast = document.createElement('div');
+    toast.className = 'ui-toast ui-toast--' + variant;
+    toast.setAttribute('role', variant === 'error' ? 'alert' : 'status');
+    // Expose duration to CSS so the progress bar animation matches.
+    if (duration > 0) toast.style.setProperty('--toast-duration', duration + 'ms');
+
+    var indicator = document.createElement('span');
+    indicator.className = 'ui-toast__indicator';
+    indicator.setAttribute('aria-hidden', 'true');
+    toast.appendChild(indicator);
+
+    var msg = document.createElement('span');
+    msg.className = 'ui-toast__message';
+    msg.textContent = message;
+    toast.appendChild(msg);
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'ui-toast__close';
+    closeBtn.setAttribute('aria-label', 'Fechar notificação');
+    closeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18"/></svg>';
+    toast.appendChild(closeBtn);
+
+    // Progress bar — only when the toast auto-dismisses.
+    var progressFill = null;
+    if (duration > 0) {
+      var progress = document.createElement('div');
+      progress.className = 'ui-toast__progress';
+      progressFill = document.createElement('div');
+      progressFill.className = 'ui-toast__progress-fill';
+      progress.appendChild(progressFill);
+      toast.appendChild(progress);
+    }
+
+    stack.appendChild(toast);
+
+    /* Hover-pausable timer ------------------------------------------ */
+    var remaining = duration;
+    var startedAt = 0;
+    var timerId   = null;
+    var dismissed = false;
+
+    function startTimer() {
+      if (duration <= 0 || dismissed) return;
+      if (timerId) return;
+      startedAt = Date.now();
+      timerId = window.setTimeout(dismiss, remaining);
+      toast.classList.remove('ui-toast--paused');
+    }
+
+    function pauseTimer() {
+      if (duration <= 0 || dismissed) return;
+      if (!timerId) {
+        // Still mark paused (covers fast hover-in before timer started).
+        toast.classList.add('ui-toast--paused');
+        return;
+      }
+      window.clearTimeout(timerId);
+      timerId = null;
+      remaining -= (Date.now() - startedAt);
+      if (remaining < 0) remaining = 0;
+      toast.classList.add('ui-toast--paused');
+    }
+
+    function dismiss() {
+      if (dismissed) return;
+      dismissed = true;
+      if (timerId) { window.clearTimeout(timerId); timerId = null; }
+      // Freeze the progress bar at its current state during exit.
+      if (progressFill) progressFill.style.animationPlayState = 'paused';
+      toast.classList.add('ui-toast--leaving');
+      var removed = false;
+      function finalize() {
+        if (removed) return;
+        removed = true;
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }
+      toast.addEventListener('animationend', function (e) {
+        // Only respond to the leave animation, not the progress drain.
+        if (e.target === toast) finalize();
+      });
+      // Safety net in case animationend never fires (e.g. tab inactive).
+      window.setTimeout(finalize, 400);
+    }
+
+    toast.addEventListener('mouseenter', pauseTimer);
+    toast.addEventListener('mouseleave', startTimer);
+    toast.addEventListener('focusin',  pauseTimer);
+    toast.addEventListener('focusout', startTimer);
+    closeBtn.addEventListener('click', dismiss);
+
+    startTimer();
+
+    return { dismiss: dismiss, element: toast };
+  }
+
+  function drainQueuedToasts() {
+    var nodes = document.querySelectorAll('script[data-ui-toast]');
+    nodes.forEach(function (node) {
+      var raw = (node.textContent || '').trim();
+      if (!raw) return;
+      try {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) parsed.forEach(show);
+        else show(parsed);
+      } catch (e) {
+        if (window.console) console.warn('[UIToast] invalid queued payload:', raw, e);
+      }
+    });
+  }
+
+  window.UIToast = { show: show };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', drainQueuedToasts);
+  } else {
+    drainQueuedToasts();
+  }
+})();
+</script>

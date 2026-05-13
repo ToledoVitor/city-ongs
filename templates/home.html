@@ -1,105 +1,315 @@
 {% extends "base.html" %}
 
-{% block title %}Inicio - Portal SITTS{% endblock %}
+{% block title %}Início — Portal SITTS{% endblock %}
+
+{% block customcss %}
+  <style>
+    .home {
+      max-width: 1120px;
+      margin: 0 auto;
+      font-family: var(--font-text);
+    }
+
+    .home__hero {
+      background-color: var(--color-canvas);
+      border-radius: var(--rounded-xl);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .home__hero { padding: 40px; margin-bottom: 32px; }
+    }
+
+    .home__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--color-canvas-soft);
+      color: var(--color-ink);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 16px;
+      border-radius: var(--rounded-pill);
+      padding: 8px 14px;
+      margin: 0 0 20px;
+    }
+
+    .home__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 32px;
+      line-height: 40px;
+      color: var(--color-ink);
+      margin: 0 0 12px;
+    }
+    @media (min-width: 768px) {
+      .home__title { font-size: 44px; line-height: 52px; }
+    }
+
+    .home__lede {
+      font-family: var(--font-text);
+      font-size: 17px;
+      line-height: 26px;
+      color: var(--color-body);
+      margin: 0;
+      max-width: 64ch;
+    }
+
+    .home__notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--color-ink);
+      color: var(--color-on-dark);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      border-radius: var(--rounded-pill);
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      text-decoration: none;
+      cursor: pointer;
+      border: 0;
+      transition: background-color 140ms ease;
+    }
+    .home__notice:hover { background-color: var(--color-black-elevated); }
+    .home__notice strong { font-weight: 700; }
+
+    .home__section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 32px;
+      color: var(--color-ink);
+      margin: 8px 0 6px;
+    }
+
+    .home__section-lede {
+      font-family: var(--font-text);
+      font-size: 15px;
+      line-height: 22px;
+      color: var(--color-body);
+      margin: 0 0 20px;
+    }
+
+    .home__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 768px) {
+      .home__grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    }
+
+    .access-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background-color: var(--color-canvas);
+      border-radius: var(--rounded-xl);
+      padding: 24px;
+      text-decoration: none;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+    @media (min-width: 768px) {
+      .access-card { padding: 28px; min-height: 232px; }
+    }
+    .access-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-1);
+    }
+
+    .access-card__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      background-color: var(--color-canvas-soft);
+      color: var(--color-ink);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 14px;
+      border-radius: var(--rounded-pill);
+      padding: 6px 12px;
+    }
+
+    .access-card__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 28px;
+      color: var(--color-ink);
+      margin: 0;
+    }
+    @media (min-width: 768px) {
+      .access-card__title { font-size: 24px; line-height: 32px; }
+    }
+
+    .access-card__lede {
+      font-family: var(--font-text);
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-body);
+      margin: 0;
+      flex: 1;
+    }
+
+    .access-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      background-color: var(--color-ink);
+      color: var(--color-on-dark);
+      font-family: var(--font-text);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 16px;
+      border-radius: var(--rounded-pill);
+      padding: 10px 16px;
+      transition: background-color 140ms ease;
+    }
+    .access-card:hover .access-card__cta { background-color: var(--color-black-elevated); }
+    .access-card__cta-arrow { transition: transform 140ms ease; }
+    .access-card:hover .access-card__cta-arrow { transform: translateX(2px); }
+
+    /* Polarity-flip variant — used on the dashboard tile */
+    .access-card--dark { background-color: var(--color-ink); }
+    .access-card--dark .access-card__chip {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: var(--color-on-dark);
+    }
+    .access-card--dark .access-card__title { color: var(--color-on-dark); }
+    .access-card--dark .access-card__lede { color: var(--color-mute); }
+    .access-card--dark .access-card__cta {
+      background-color: var(--color-canvas);
+      color: var(--color-ink);
+    }
+    .access-card--dark:hover .access-card__cta { background-color: var(--color-canvas-soft); }
+  </style>
+{% endblock customcss %}
 
 {% block content %}
+<section class="home">
 
+  <div class="home__hero">
+    <span class="home__eyebrow" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 L14.5 8.5 L21.5 9 L16 13.5 L17.5 20.5 L12 16.8 L6.5 20.5 L8 13.5 L2.5 9 L9.5 8.5 Z"/>
+      </svg>
+      <span>Portal SITTS</span>
+    </span>
 
-<section>
-  <div class="py-8 px-4 mx-auto max-w-screen-xl">
-    <div class="bg-white border border-gray-300 rounded-lg p-8 md:p-12 mb-8">
-        <h1 class="text-gray-900 text-3xl md:text-5xl font-extrabold mb-4">Olá <span class="text-blue-600">{{ user.get_full_name }}</span>. Bom te ver de volta!</h1>
-        <p class="text-lg font-normal text-gray-500">
-          Aqui você pode gerenciar contratos, acompanhar prestações de conta e manter tudo organizado em um só lugar. <br>
-          Veja as últimas atualizações, pendências e contratos em andamento para não perder nada importante.
-        </p>
-    </div>
-
-    <h1 class="text-gray-900 text-2xl md:text-2xl font-extrabold mb-2 underline">
-      Continue de onde você parou:
-    </h1>
-    {% if user.unread_notifications %}
-      <span class="text-lg font-medium bg-blue-50 inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-        <svg class="w-4 h-4 me-1.5 mr-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
-          <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
-          <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
-        </svg>
-        Você tem&nbsp;<b> {{ user.unread_notifications }} novas notificações</b>&nbsp;— não esqueça de conferi-las!
-      </span>
-    {% endif %}
-
-    <div class="mt-4 grid md:grid-cols-2 gap-8">
-      <div class="bg-white border border-gray-300 rounded-lg p-8 md:p-12">
-        <a href="{% url 'contracts:contracts-list' %}" class="bg-green-100 text-green-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
-          <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-            <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
-          </svg>
-          <b>Contratos</b>
-        </a>
-        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Contratos</h2>
-        <p class="text-lg font-normal text-gray-500 mb-4">Visualize, edite e gerencie todos os contratos em um só lugar.</p>
-        <a href="{% url 'contracts:contracts-list' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Contratos
-          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-          </svg>
-        </a>
-      </div>
-
-      <div class="bg-white border border-gray-300 rounded-lg p-8 md:p-12">
-        <a href="{% url 'accountability:accountabilities-list' %}" class="bg-purple-100 text-purple-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
-          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-            <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
-            <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
-          </svg>
-          <b>Contábil</b>
-        </a>
-        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Prestações de Conta</h2>
-        <p class="text-lg font-normal text-gray-500 mb-4">Acompanhe despesas, valide faturas e garanta transparência financeira.</p>
-        <a href="{% url 'accountability:accountabilities-list' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Prestações
-          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-          </svg>
-        </a>
-      </div>
-
-      <div class="bg-white border border-gray-300 rounded-lg p-8 md:p-12">
-        <a href="{% url 'reports:reports-page' %}" class="bg-purple-100 text-purple-800 text-xs font-normal inline-flex items-center px-2.5 py-1 rounded-md mb-2">
-          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-            <path fill="currentColor" d="M4 19v2c0 .5523.44772 1 1 1h14c.5523 0 1-.4477 1-1v-2H4Z"/>
-            <path fill="currentColor" fill-rule="evenodd" d="M9 3c0-.55228.44772-1 1-1h8c.5523 0 1 .44772 1 1v3c0 .55228-.4477 1-1 1h-2v1h2c.5096 0 .9376.38314.9939.88957L19.8951 17H4.10498l.90116-8.11043C5.06241 8.38314 5.49047 8 6.00002 8H12V7h-2c-.55228 0-1-.44772-1-1V3Zm1.01 8H8.00002v2.01H10.01V11Zm.99 0h2.01v2.01H11V11Zm5.01 0H14v2.01h2.01V11Zm-8.00998 3H10.01v2.01H8.00002V14ZM13.01 14H11v2.01h2.01V14Zm.99 0h2.01v2.01H14V14ZM11 4h6v1h-6V4Z" clip-rule="evenodd"/>
-          </svg>
-          <b>Contábil</b>
-        </a>
-        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Relatórios</h2>
-        <p class="text-lg font-normal text-gray-500 mb-4">Gere relatórios, confira o progresso, status, despesas, valores finais de maneira rápida.</p>
-        <a href="{% url 'reports:reports-page' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Relatórios
-          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-          </svg>
-        </a>
-      </div>
-
-      <div class="bg-white border border-gray-300 rounded-lg p-8 md:p-12">
-        <a href="{% url 'dashboard:index' %}" class="bg-pink-100 text-pink-800 text-xs font-medium inline-flex items-center justify-center px-2.5 py-1 rounded-md mb-2">
-          <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
-          </svg>          
-          <b>Métricas</b>
-        </a>
-        <h2 class="text-gray-900 text-3xl font-extrabold mb-2">Inteligência</h2>
-        <p class="text-lg font-normal text-gray-500 mb-4">
-          Confira o status dos contratos e das prestações de conta. Acompanhe os valores, status e progresso.
-        </p>
-        <a href="{% url 'dashboard:index' %}" class="text-blue-600 hover:underline font-medium text-lg inline-flex items-center">Acessar Dashboard
-          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-          </svg>
-        </a>
-      </div>
-
-    </div>
+    <h1 class="home__title">Olá, {{ user.first_name|default:user.get_full_name }}. Bom te ver de volta.</h1>
+    <p class="home__lede">
+      Gerencie contratos, acompanhe prestações de conta e mantenha tudo organizado em um só lugar.
+      Confira a seguir o que precisa da sua atenção.
+    </p>
   </div>
+
+  {% if user.unread_notifications %}
+    <button type="button"
+            id="notifications-shortcut"
+            class="home__notice"
+            data-modal-target="notifications-modal"
+            data-modal-toggle="notifications-modal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      <span>Você tem <strong>{{ user.unread_notifications }}</strong> novas notificações — confira agora.</span>
+    </button>
+  {% endif %}
+
+  <h2 class="home__section-title">Continue de onde parou</h2>
+  <p class="home__section-lede">Os atalhos mais usados, sempre à mão.</p>
+
+  <div class="home__grid">
+    <a href="{% url 'contracts:contracts-list' %}" class="access-card">
+      <span class="access-card__chip" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="13" x2="16" y2="13"/>
+          <line x1="8" y1="17" x2="16" y2="17"/>
+        </svg>
+        Contratos
+      </span>
+      <h3 class="access-card__title">Contratos</h3>
+      <p class="access-card__lede">Visualize, edite e gerencie todos os contratos em um só lugar.</p>
+      <span class="access-card__cta">
+        <span>Acessar contratos</span>
+        <svg class="access-card__cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </a>
+
+    <a href="{% url 'accountability:accountabilities-list' %}" class="access-card">
+      <span class="access-card__chip" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="9" y1="21" x2="9" y2="9"/>
+        </svg>
+        Prestações
+      </span>
+      <h3 class="access-card__title">Prestações de conta</h3>
+      <p class="access-card__lede">Acompanhe despesas, valide faturas e garanta transparência financeira.</p>
+      <span class="access-card__cta">
+        <span>Acessar prestações</span>
+        <svg class="access-card__cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </a>
+
+    <a href="{% url 'reports:reports-page' %}" class="access-card">
+      <span class="access-card__chip" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="14" x2="14" y2="14"/>
+          <line x1="8" y1="18" x2="12" y2="18"/>
+        </svg>
+        Relatórios
+      </span>
+      <h3 class="access-card__title">Relatórios</h3>
+      <p class="access-card__lede">Gere relatórios, confira progresso, status, despesas e valores finais com rapidez.</p>
+      <span class="access-card__cta">
+        <span>Acessar relatórios</span>
+        <svg class="access-card__cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </a>
+
+    <a href="{% url 'dashboard:index' %}" class="access-card access-card--dark">
+      <span class="access-card__chip" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Métricas
+      </span>
+      <h3 class="access-card__title">Inteligência</h3>
+      <p class="access-card__lede">Confira o status dos contratos e das prestações de conta — valores, status e progresso em um só painel.</p>
+      <span class="access-card__cta">
+        <span>Acessar dashboard</span>
+        <svg class="access-card__cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </a>
+  </div>
+
 </section>
-
-
 {% endblock %}
