@@ -21,7 +21,7 @@ from bank.forms import (
     UpdateBankStatementForm,
     UpdateOFXForm,
 )
-from bank.models import BankAccount, BankStatement
+from bank.models import BankAccount, BankStatement, Transaction
 from bank.services.ofx_exporter import OFXStatementExporter
 from bank.services.ofx_parser import OFXFileParser
 from contracts.models import Contract
@@ -44,11 +44,13 @@ class BankAccountDetailView(LoginRequiredMixin, DetailView):
             .prefetch_related(
                 Prefetch(
                     "statements",
-                    queryset=BankStatement.objects.order_by("-closing_date"),
+                    queryset=BankStatement.objects.order_by(
+                        "-reference_year", "-reference_month", "-reference_day"
+                    ),
                 ),
                 Prefetch(
                     "transactions",
-                    queryset=BankStatement.objects.order_by("-date"),
+                    queryset=Transaction.objects.order_by("-date"),
                 ),
             )
         )
@@ -122,9 +124,9 @@ def update_bank_account_ofx_view(request, pk):
         form = UpdateOFXForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                OFXFileParser(
-                    ofx_file=request.FILES["ofx_file"]
-                ).update_bank_account_balance(bank_account=bank_account)
+                OFXFileParser(ofx_file=request.FILES["ofx_file"]).import_statement(
+                    bank_account=bank_account
+                )
 
                 logger.info(f"{request.user.id} - Updated bank account")
                 _ = ActivityLog.objects.create(
@@ -321,7 +323,7 @@ def bank_statement_view(request, pk):
     daily_totals_dict = {item["date"]: item["total_day"] for item in daily_totals}
 
     statement_days = []
-    current_balance = account.balance
+    current_balance = account.current_balance
     sorted_dates_desc = sorted(daily_totals_dict.keys(), reverse=True)
     for day in sorted_dates_desc:
         total_day = daily_totals_dict[day]

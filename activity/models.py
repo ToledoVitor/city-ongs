@@ -335,7 +335,7 @@ class ActivityLog(BaseOrganizationTenantModel):
     target_content_object = GenericForeignKey("target_content_type", "target_object_id")
 
     def __str__(self) -> str:
-        return f"{self.user_email} - {'self.action'}"
+        return f"{self.user_email} - {self.action}"
 
     @property
     def action_label(self) -> str:
@@ -343,7 +343,7 @@ class ActivityLog(BaseOrganizationTenantModel):
 
     class Meta:
         verbose_name = "Registro de Atividade"
-        verbose_name = "Registro de Atividade"
+        verbose_name_plural = "Registros de Atividade"
 
         ordering = ("-created_at",)
         indexes = [

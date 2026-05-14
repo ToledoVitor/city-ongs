@@ -181,9 +181,6 @@ class ConsolidatedPDFExporter:
             self.closing_checking_account + self.closing_investing_account
         )
 
-        revenue_in_time = self.revenue_queryset.filter(
-            receive_date__gte=self.start_date, receive_date__lte=self.end_date
-        )
         body_data = [
             [
                 f"{self.checking_account.account_type_label}",
@@ -597,7 +594,7 @@ class ConsolidatedPDFExporter:
 
     def _draw_reimbursement_interest_table(self):
         reimbursement_interest_queryset = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST 
+            revenue_nature=Revenue.Nature.REIMBURSEMENT_INTEREST
         )
         total_reimbursement = Decimal("0.00")
         body_data = [
@@ -612,9 +609,7 @@ class ConsolidatedPDFExporter:
             body_data.append(
                 [
                     format_into_brazilian_date(reimbursement.receive_date),
-                    str(
-                        reimbursement.bank_account.revenue.revenue_nature_label
-                    ),
+                    str(reimbursement.bank_account.revenue.revenue_nature_label),
                     format_into_brazilian_currency(reimbursement.value),
                 ]
             )

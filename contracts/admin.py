@@ -279,14 +279,20 @@ class ContractItemAdmin(BaseModelAdmin):
 class ContractItemPurchaseProcessDocumentAdmin(BaseModelAdmin):
     list_display = ("organization", "file", "created_at")
     list_filter = ("organization",)
-    search_fields = ("id", "file",)
+    search_fields = (
+        "id",
+        "file",
+    )
 
 
 @admin.register(ContractItemSupplement)
 class ContractItemSupplementAdmin(BaseModelAdmin):
     list_display = ("organization", "item", "suplement_value", "status")
     list_filter = ("organization", "item", "status")
-    search_fields = ("id", "item__name",)
+    search_fields = (
+        "id",
+        "item__name",
+    )
 
 
 @admin.register(ContractInterestedPart)

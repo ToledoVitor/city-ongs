@@ -65,7 +65,7 @@ class OFXFileParser:
     def transactions_list(self) -> list:
         return self.ofx_data.statements[0].transactions
 
-    def update_bank_account_balance(self, bank_account: BankAccount) -> bool:
+    def import_statement(self, bank_account: BankAccount) -> None:
         if BankStatement.objects.filter(
             bank_account=bank_account,
             reference_day=self.balance_date.day,
@@ -78,9 +78,6 @@ class OFXFileParser:
             raise ValidationError("Extrato bancário já cadastrada.")
 
         with transaction.atomic():
-            bank_account.balance = self.closing_balance_amount
-            bank_account.save()
-
             BankStatement.objects.create(
                 bank_account=bank_account,
                 opening_balance=self.opening_balance_amount,

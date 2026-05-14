@@ -2,11 +2,41 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import OuterRef, Subquery, Sum
+from django.db.models.functions import Coalesce
 from simple_history.models import HistoricalRecords
 
 from accounts.models import BaseOrganizationTenantModel
 from activity.models import ActivityLog
 from utils.choices import MonthChoices
+from utils.managers import TenantManager, TenantManagerAllObjects
+from utils.query import SoftDeleteQueryset
+
+ZERO_AMOUNT = Decimal("0.00")
+
+
+class BankAccountQuerySet(SoftDeleteQueryset):
+    def with_current_balance(self):
+        transactions_sum = (
+            Transaction.objects.filter(bank_account=OuterRef("pk"))
+            .values("bank_account")
+            .annotate(total=Sum("amount"))
+            .values("total")
+        )
+        return self.annotate(
+            _current_balance_annotation=models.F("opening_balance")
+            + Coalesce(Subquery(transactions_sum), ZERO_AMOUNT),
+        )
+
+
+class BankAccountManager(TenantManager.from_queryset(BankAccountQuerySet)):
+    pass
+
+
+class BankAccountManagerAllObjects(
+    TenantManagerAllObjects.from_queryset(BankAccountQuerySet)
+):
+    pass
 
 
 class BankAccount(BaseOrganizationTenantModel):
@@ -53,12 +83,15 @@ class BankAccount(BaseOrganizationTenantModel):
         null=True,
         help_text="Bank branch/agency number",
     )
-    balance = models.DecimalField(
-        verbose_name="Saldo Atual",
+    opening_balance = models.DecimalField(
+        verbose_name="Saldo de Abertura",
         decimal_places=2,
         max_digits=12,
-        default=Decimal("0.00"),
-        help_text="Current account balance",
+        default=ZERO_AMOUNT,
+        help_text=(
+            "Balance at the moment the account was registered. The current "
+            "balance is derived from this anchor plus all transactions."
+        ),
     )
     origin = models.CharField(
         verbose_name="Origem da Fonte",
@@ -67,6 +100,9 @@ class BankAccount(BaseOrganizationTenantModel):
         max_length=19,
         help_text="Source of funds for this account",
     )
+
+    objects = BankAccountManager()
+    all_objects = BankAccountManagerAllObjects()
 
     history = HistoricalRecords()
 
@@ -96,10 +132,6 @@ class BankAccount(BaseOrganizationTenantModel):
 
     def clean(self):
         """Validate the bank account data."""
-        if self.balance < 0:
-            raise ValidationError("Account balance cannot be negative")
-
-        # Validate account number format
         if not self.account.isdigit():
             raise ValidationError("Account number must contain only digits")
 
@@ -107,6 +139,23 @@ class BankAccount(BaseOrganizationTenantModel):
         """Save the bank account after validation."""
         self.clean()
         super().save(*args, **kwargs)
+
+    @property
+    def current_balance(self) -> Decimal:
+        annotated = self.__dict__.get("_current_balance_annotation")
+        if annotated is not None:
+            return annotated
+        total = self.transactions.aggregate(total=Sum("amount"))["total"] or ZERO_AMOUNT
+        return (self.opening_balance or ZERO_AMOUNT) + total
+
+    def balance_at(self, date) -> Decimal:
+        total = (
+            self.transactions.filter(date__lte=date).aggregate(total=Sum("amount"))[
+                "total"
+            ]
+            or ZERO_AMOUNT
+        )
+        return (self.opening_balance or ZERO_AMOUNT) + total
 
     @property
     def recent_logs(self):
@@ -356,9 +405,9 @@ class Transaction(BaseOrganizationTenantModel):
     def clean(self):
         """Validate the transaction data."""
         if self.transaction_number:
-            # Check for duplicate transaction numbers
             existing = Transaction.objects.filter(
                 transaction_number=self.transaction_number,
+                memo=self.memo,
                 bank_account=self.bank_account,
             ).exclude(pk=self.pk)
             if existing.exists():
@@ -366,7 +415,6 @@ class Transaction(BaseOrganizationTenantModel):
                     "A transaction with this number already exists for this account"
                 )
 
-        # Validate that either expense or revenue is set, but not both
         if self.expense and self.revenue:
             raise ValidationError(
                 "A transaction cannot be associated with both an expense and revenue"

@@ -78,7 +78,7 @@ class OFXStatementExporter:
                     {stmttrn_items_str}
                 </BANKTRANLIST>
                 <LEDGERBAL>
-                    <BALAMT>{account.balance}</BALAMT>
+                    <BALAMT>{account.current_balance}</BALAMT>
                     <DTASOF>{dtnow}</DTASOF>
                 </LEDGERBAL>
                 </STMTRS>

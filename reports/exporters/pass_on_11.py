@@ -35,7 +35,7 @@ class PassOn11PDFExporter:
         self.end_date = end_date
         self.responsibles = responsibles or []
         default_link = ""
-        contract_link = getattr(contract, 'official_government_link', None)
+        contract_link = getattr(contract, "official_government_link", None)
         self.government_link = contract_link if contract_link else default_link
 
     def __set_font(self, font_size=7, bold=False):
@@ -276,17 +276,18 @@ class PassOn11PDFExporter:
 
     def _draw_expenditure_orderer(self):
         manager = self.contract.contractor_manager
-        
+
         # 1. Obter Nome e Documento de forma segura
-        manager_name = manager.name if manager else 'Não Informado'
-        manager_cnpj = document_mask(str(manager.cnpj) if manager and manager.cnpj else '')
-        
+        manager_name = manager.name if manager else "Não Informado"
+        manager_cnpj = document_mask(
+            str(manager.cnpj) if manager and manager.cnpj else ""
+        )
+
         # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
         # Se organization ou position for None, retorna 'Não Informado'
-        org = getattr(self.contract, 'organization', None)
-        position_value = getattr(org, 'position', None) if org else None
-        cargo_text = position_value if position_value else 'Não Informado'
-        
+        org = getattr(self.contract, "organization", None)
+        position_value = getattr(org, "position", None) if org else None
+        cargo_text = position_value if position_value else "Não Informado"
 
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
@@ -302,7 +303,7 @@ class PassOn11PDFExporter:
         self.pdf.ln(4)
         self.__set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {cargo_text}", 
+            text=f"Cargo: {cargo_text}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
@@ -317,7 +318,7 @@ class PassOn11PDFExporter:
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
-        
+
     def _draw_beneficiary_authority(self):
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(

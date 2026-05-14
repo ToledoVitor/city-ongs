@@ -15,7 +15,10 @@ from utils.admin import BaseModelAdmin
 @admin.register(Organization)
 class OrganizationAdmin(BaseModelAdmin):
     list_display = ("name", "created_at", "updated_at")
-    search_fields = ("id", "name",)
+    search_fields = (
+        "id",
+        "name",
+    )
 
 
 @admin.register(CityHall)
@@ -28,14 +31,20 @@ class CityHallAdmin(BaseModelAdmin):
 class AreaAdmin(BaseModelAdmin):
     list_display = ("organization", "name", "created_at", "updated_at")
     list_filter = ("organization",)
-    search_fields = ("id", "name",)
+    search_fields = (
+        "id",
+        "name",
+    )
 
 
 @admin.register(Committee)
 class CommitteeAdmin(BaseModelAdmin):
     list_display = ("organization", "name", "created_at", "updated_at")
     list_filter = ("organization",)
-    search_fields = ("id", "name",)
+    search_fields = (
+        "id",
+        "name",
+    )
     filter_horizontal = ("members",)
     fieldsets = (
         (
@@ -161,4 +170,7 @@ class CustomUserAdmin(BaseModelAdmin):
 class OrganizationDocumentAdmin(BaseModelAdmin):
     list_display = ("organization", "title", "created_at", "updated_at")
     list_filter = ("organization",)
-    search_fields = ("id", "title",)
+    search_fields = (
+        "id",
+        "title",
+    )

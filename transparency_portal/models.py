@@ -1,5 +1,6 @@
+from datetime import date
+
 from django.db import models
-from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
 from accountability.models import Accountability, Revenue
@@ -92,7 +93,7 @@ class PartnershipTransparency(BaseModel):
             next_month = 1
             next_year += 1
 
-        return timezone.datetime(next_year, next_month, 1).date()
+        return date(next_year, next_month, 1)
 
 
 class FinancialTransfer(BaseModel):

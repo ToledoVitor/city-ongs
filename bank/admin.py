@@ -32,12 +32,12 @@ class BankAccountAdmin(BaseModelAdmin):
         "account",
         "account_type",
         "agency",
-        "balance",
+        "current_balance_display",
         "origin",
     )
     list_filter = ("organization", "account_type", "origin", "bank_name")
     search_fields = ("id", "bank_name", "account", "agency")
-    readonly_fields = ("balance",)
+    readonly_fields = ("current_balance_display",)
     inlines = [BankStatementInline, TransactionInline]
     fieldsets = (
         (
@@ -53,8 +53,18 @@ class BankAccountAdmin(BaseModelAdmin):
                 )
             },
         ),
-        (_("Informações Financeiras"), {"fields": ("balance", "origin")}),
+        (
+            _("Informações Financeiras"),
+            {"fields": ("opening_balance", "current_balance_display", "origin")},
+        ),
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).with_current_balance()
+
+    @admin.display(description=_("Saldo Atual"))
+    def current_balance_display(self, obj):
+        return obj.current_balance
 
 
 @admin.register(BankStatement)

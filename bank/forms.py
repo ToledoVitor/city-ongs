@@ -11,6 +11,10 @@ from utils.widgets import (
 
 
 class BankAccountForm(forms.ModelForm):
+    opening_balance = DecimalMaskedField(
+        max_digits=12, decimal_places=2, required=False
+    )
+
     class Meta:
         model = BankAccount
         fields = [
@@ -20,6 +24,7 @@ class BankAccountForm(forms.ModelForm):
             "account_type",
             "agency",
             "origin",
+            "opening_balance",
         ]
 
         widgets = {
@@ -64,39 +69,6 @@ class UpdateOFXForm(forms.Form):
                 )
 
         return ofx_file
-
-
-class CreateBankAccountForm(forms.ModelForm):
-    closing_date = forms.DateField()
-    balance = DecimalMaskedField(max_digits=12, decimal_places=2)
-
-    class Meta:
-        model = BankAccount
-        fields = [
-            "bank_name",
-            "bank_id",
-            "account",
-            "account_type",
-            "origin",
-            "agency",
-            "balance",
-        ]
-
-        widgets = {
-            "bank_name": BaseCharFieldFormWidget(),
-            "bank_id": BaseNumberFormWidget(),
-            "account": BaseCharFieldFormWidget(),
-            "account_type": BaseSelectFormWidget(),
-            "agency": BaseCharFieldFormWidget(),
-            "origin": BaseSelectFormWidget(),
-            "closing_date": forms.DateInput(
-                attrs={"type": "closing_date"}, format="%d/%m/%Y"
-            ),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["closing_date"].input_formats = ["%d/%m/%Y"]
 
 
 class TransactionForm(forms.ModelForm):

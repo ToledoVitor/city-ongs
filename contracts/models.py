@@ -292,7 +292,7 @@ class Contract(BaseOrganizationTenantModel):
         null=True,
         blank=True,
     )
-    
+
     # TODO verificar se campo está criado corretamente
     official_government_link = models.URLField(
         verbose_name="Link Oficial do Governo",

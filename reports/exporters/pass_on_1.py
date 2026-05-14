@@ -17,9 +17,7 @@ from utils.formats import (
 )
 
 font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
-font_bold_path = os.path.join(
-    settings.BASE_DIR, "static/fonts/FreeSansBold.ttf"
-)
+font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
 @dataclass
@@ -51,11 +49,9 @@ class PassOn1PDFExporter:
             area__city_hall=self.contract.area.city_hall,
             checking_account__isnull=False,
         ).order_by("start_of_vigency")
-        self.all_values_in_contracts = (
-            self.contracts_queryset.filter()
-            .aggregate(Sum("total_value"))["total_value__sum"]
-            or Decimal("0.00")
-        )
+        self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
+            Sum("total_value")
+        )["total_value__sum"] or Decimal("0.00")
 
     def handle(self):
         self.__database_queries()
@@ -146,9 +142,7 @@ class PassOn1PDFExporter:
             )
             if date_law:
                 month_label = MonthChoices(date_law.month).label.capitalize()
-                law_date_text = (
-                    f"De {date_law.day} de {month_label} de {date_law.year}"
-                )
+                law_date_text = f"De {date_law.day} de {month_label} de {date_law.year}"
             else:
                 law_date_text = ""
             data_body.append(

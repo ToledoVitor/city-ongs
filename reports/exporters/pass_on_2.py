@@ -318,9 +318,7 @@ class PassOn2PDFExporter:
                 format_into_brazilian_currency(closing_investing_account),
             ]
         )
-        table_data.append(
-            ["TOTAL", format_into_brazilian_currency(closing_balance)]
-        )
+        table_data.append(["TOTAL", format_into_brazilian_currency(closing_balance)])
         table_data.append(
             [
                 "RECURSOS PRÓPRIOS APLICADOS PELO BENEFICIÁRIO",
