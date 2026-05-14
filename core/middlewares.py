@@ -23,11 +23,17 @@ class ErrorHandlingMiddleware:
     def process_response(
         self, request: HttpRequest, response: HttpResponse
     ) -> HttpResponse:
-        # Skip admin, auth, and error template responses
+        # Skip admin, auth, error templates, and JSON / AJAX responses (the
+        # caller wants to handle the error itself, e.g. via a toast).
+        content_type = response.headers.get("Content-Type", "")
+        is_json = content_type.startswith("application/json")
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         if (
             request.path.startswith("/__dev__/")
             or request.path.startswith("/__staff__/")
             or request.path.startswith("/auth/")
+            or is_json
+            or is_ajax
             or (
                 hasattr(response, "template_name")
                 and isinstance(response.template_name, str)

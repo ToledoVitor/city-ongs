@@ -1,5 +1,7 @@
 # CLAUDE.MD
 
+## Read CLAUDE.md and relevant architecture notes before coding
+
 This file is the persistent working guide for Claude Code in this repository. Treat it as a living document: keep it concise, practical, and current. When you learn a durable project convention, workflow, or architectural rule, update this file.
 
 On typical macOS disks the volume is case-insensitive, so keep this single filename (`CLAUDE.MD`). Do not add a separate root `CLAUDE.md` symlink or duplicate; it can replace this file. Tools that expect `CLAUDE.md` usually resolve the same path as `CLAUDE.MD`.

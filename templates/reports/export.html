@@ -4,124 +4,427 @@
 {% block title %}Exportar relatório — Portal SITTS{% endblock %}
 
 {% block content %}
-<section class="page ui-form">
+<section class="reports-page ui-form ui-form--compact">
 
-  <header class="page__header">
+  <header class="reports-page__header">
     <nav class="ui-breadcrumb" aria-label="Breadcrumb">
       <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
       <span class="ui-breadcrumb__sep">/</span>
       <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Relatórios</span>
     </nav>
-    <h1 class="ui-display-lg page__title">Exportar relatório</h1>
+    <div class="ui-row ui-row--between" style="align-items: baseline;">
+      <h1 class="ui-display-md" style="margin: 0;">Exportar relatório</h1>
+      <p class="ui-caption" style="margin: 0;">Configure os filtros e veja a pré-visualização ao lado.</p>
+    </div>
   </header>
 
-  <div id="error-alert" class="hidden form-errors" role="alert">
-    <div class="form-errors__indicator" aria-hidden="true"></div>
-    <div class="form-errors__body">
-      <p class="ui-body-md-strong form-errors__title">Erro ao gerar relatório</p>
-      <p class="form-errors__item" id="error-message">Ocorreu um erro inesperado.</p>
-    </div>
-    <button type="button" id="close-error" class="ui-btn ui-btn--ghost ui-btn--sm" aria-label="Fechar">×</button>
-  </div>
-
   <div class="reports-grid">
-    <form method="post" class="ui-card ui-stack ui-stack--lg">
+    {# ====================== Left: form ====================== #}
+    <form id="report-form" method="post" action="{% url 'reports:reports-generate-api' %}" class="ui-card reports-form">
       {% csrf_token %}
 
-      <section class="ui-stack ui-stack--md">
-        <h2 class="ui-display-sm" style="margin:0;">Informações básicas</h2>
-        <div class="ui-field">
-          <label class="ui-field__label">Contrato</label>
-          {{ form.contract }}
-          {% if form.contract.errors %}<p class="ui-field__error">{{ form.contract.errors.0 }}</p>{% endif %}
-        </div>
-        <div class="ui-field">
-          <label class="ui-field__label">Modelo de relatório</label>
-          {{ form.report_model }}
-          {% if form.report_model.errors %}<p class="ui-field__error">{{ form.report_model.errors.0 }}</p>{% endif %}
-        </div>
-      </section>
-
-      <section class="ui-stack ui-stack--md">
-        <h2 class="ui-display-sm" style="margin:0;">Período de análise</h2>
-        <div class="ui-card ui-card--soft" style="padding: 16px;">
-          <p class="ui-body-sm-strong" style="margin: 0 0 12px; color: var(--color-body);">Data de início</p>
-          <div class="ui-grid-2">
-            <div class="ui-field"><label class="ui-field__label">Mês</label>{{ form.start_month }}{% if form.start_month.errors %}<p class="ui-field__error">{{ form.start_month.errors.0 }}</p>{% endif %}</div>
-            <div class="ui-field"><label class="ui-field__label">Ano</label>{{ form.start_year }}{% if form.start_year.errors %}<p class="ui-field__error">{{ form.start_year.errors.0 }}</p>{% endif %}</div>
+      <div class="reports-form__scroll">
+        <section class="ui-stack ui-stack--sm">
+          <p class="ui-caption" style="margin: 0;">Informações básicas</p>
+          <div class="ui-field">
+            <label class="ui-field__label" for="id_contract">Contrato</label>
+            {{ form.contract }}
+            {% if form.contract.errors %}<p class="ui-field__error">{{ form.contract.errors.0 }}</p>{% endif %}
           </div>
-        </div>
-        <div class="ui-card ui-card--soft" style="padding: 16px;">
-          <p class="ui-body-sm-strong" style="margin: 0 0 12px; color: var(--color-body);">Data de término</p>
-          <div class="ui-grid-2">
-            <div class="ui-field"><label class="ui-field__label">Mês</label>{{ form.end_month }}{% if form.end_month.errors %}<p class="ui-field__error">{{ form.end_month.errors.0 }}</p>{% endif %}</div>
-            <div class="ui-field"><label class="ui-field__label">Ano</label>{{ form.end_year }}{% if form.end_year.errors %}<p class="ui-field__error">{{ form.end_year.errors.0 }}</p>{% endif %}</div>
+          <div class="ui-field">
+            <label class="ui-field__label" for="id_report_model">Modelo de relatório</label>
+            {{ form.report_model }}
+            {% if form.report_model.errors %}<p class="ui-field__error">{{ form.report_model.errors.0 }}</p>{% endif %}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="ui-stack ui-stack--md">
-        <button type="button" id="toggle-responsibles" onclick="toggleResponsibles()" class="ui-btn ui-btn--subtle" style="justify-content: space-between;">
-          <span>Demais responsáveis <span class="ui-text-mute">(opcional)</span></span>
-          <svg id="responsibles-icon" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div id="responsibles-content" class="hidden ui-stack ui-stack--md">
-          {% for field in form %}
-            {% if 'responsible' in field.name or 'autority' in field.name or 'manager' in field.name %}
-              <div class="ui-field">
-                <label class="ui-field__label">{{ field.label }}</label>
-                {{ field }}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </section>
+        <section class="ui-stack ui-stack--sm">
+          <p class="ui-caption" style="margin: 0;">Período de análise</p>
+          <div class="reports-period">
+            <p class="ui-field__label">Início</p>
+            <div class="ui-grid-2">
+              <div class="ui-field">{{ form.start_month }}{% if form.start_month.errors %}<p class="ui-field__error">{{ form.start_month.errors.0 }}</p>{% endif %}</div>
+              <div class="ui-field">{{ form.start_year }}{% if form.start_year.errors %}<p class="ui-field__error">{{ form.start_year.errors.0 }}</p>{% endif %}</div>
+            </div>
+          </div>
+          <div class="reports-period">
+            <p class="ui-field__label">Término</p>
+            <div class="ui-grid-2">
+              <div class="ui-field">{{ form.end_month }}{% if form.end_month.errors %}<p class="ui-field__error">{{ form.end_month.errors.0 }}</p>{% endif %}</div>
+              <div class="ui-field">{{ form.end_year }}{% if form.end_year.errors %}<p class="ui-field__error">{{ form.end_year.errors.0 }}</p>{% endif %}</div>
+            </div>
+          </div>
+        </section>
 
-      {% include 'commons/form-errors.html' with form=form %}
+        <section class="ui-stack ui-stack--xxs">
+          <button type="button" id="toggle-responsibles" class="ui-btn ui-btn--subtle ui-btn--sm" style="justify-content: space-between;">
+            <span>Demais responsáveis <span class="ui-text-mute">(opcional)</span></span>
+            <svg id="responsibles-icon" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="responsibles-content" class="hidden ui-stack ui-stack--sm" style="padding-top: 8px;">
+            {% for field in form %}
+              {% if 'responsible' in field.name or 'autority' in field.name or 'manager' in field.name %}
+                <div class="ui-field">
+                  <label class="ui-field__label">{{ field.label }}</label>
+                  {{ field }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+      </div>
 
-      <div class="ui-row ui-row--end" style="gap: 8px;">
-        <button type="submit" class="ui-btn ui-btn--primary">
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Gerar relatório
+      <div class="reports-form__footer">
+        <button type="reset" id="report-reset" class="ui-btn ui-btn--subtle ui-btn--sm">Limpar</button>
+        <button type="submit" id="report-submit" class="ui-btn ui-btn--primary ui-btn--sm">
+          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg>
+          <span id="report-submit-text">Gerar relatório</span>
         </button>
       </div>
     </form>
 
-    <aside class="ui-card ui-stack ui-stack--md">
-      <h2 class="ui-display-sm" style="margin:0;">Sobre os relatórios</h2>
-      <p class="ui-body-md ui-text-muted" style="margin:0;">Selecione um contrato e um modelo para gerar o relatório no período desejado. Os relatórios são exportados em formato compatível com a prefeitura.</p>
-      <div class="ui-card ui-card--soft" style="padding: 14px 16px;">
-        <p class="ui-body-sm-strong" style="margin:0 0 6px;">Dicas</p>
-        <ul style="margin:0; padding-left: 18px; color: var(--color-body); font-size: 13px;">
-          <li>Períodos curtos geram relatórios mais ágeis.</li>
-          <li>Os responsáveis adicionais só aparecem em modelos que os utilizam.</li>
-          <li>O resultado é exportado em PDF.</li>
-        </ul>
+    {# ====================== Right: preview ====================== #}
+    <aside class="ui-card reports-preview" aria-live="polite">
+      <header class="reports-preview__header">
+        <div class="ui-stack ui-stack--xxs" style="min-width: 0;">
+          <p class="ui-caption" style="margin: 0;">Pré-visualização</p>
+          <p id="preview-filename" class="ui-body-sm-strong" style="margin: 0; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Aguardando geração…</p>
+        </div>
+        <a id="preview-download" href="#" download class="ui-btn ui-btn--secondary ui-btn--sm" aria-disabled="true">
+          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+          Baixar PDF
+        </a>
+      </header>
+
+      <div class="reports-preview__surface">
+        <iframe id="preview-iframe" class="reports-preview__iframe hidden" title="Pré-visualização do relatório"></iframe>
+
+        <div id="preview-empty" class="reports-preview__state">
+          <div class="reports-preview__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 13h6m-6 4h4m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6l6 6v11a2 2 0 0 1-2 2Z"/></svg>
+          </div>
+          <p class="ui-body-md-strong" style="margin: 0;">Sem pré-visualização</p>
+          <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 320px; text-align: center;">Escolha um contrato e modelo à esquerda e clique em <strong style="color: var(--color-ink); font-weight: 600;">Gerar relatório</strong>.</p>
+        </div>
+
+        <div id="preview-loading" class="reports-preview__state hidden">
+          <div class="reports-preview__spinner" aria-hidden="true"></div>
+          <p class="ui-body-md-strong" style="margin: 0;">Gerando relatório…</p>
+          <p class="ui-body-sm ui-text-muted" style="margin: 0;">Isso pode levar alguns segundos.</p>
+        </div>
+
+        <div id="preview-error" class="reports-preview__state hidden">
+          <div class="reports-preview__icon reports-preview__icon--error" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 9v3m0 3h.01M5.062 19h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4a2 2 0 0 0-3.464 0L3.33 16.5c-.77.833.192 2.5 1.732 2.5Z"/></svg>
+          </div>
+          <p class="ui-body-md-strong" style="margin: 0;">Não foi possível gerar</p>
+          <p id="preview-error-message" class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 320px; text-align: center;">Tente novamente em alguns instantes.</p>
+        </div>
       </div>
+
+      <footer class="reports-preview__footer">
+        <p id="preview-meta" class="ui-caption" style="margin: 0;">Aguardando geração</p>
+      </footer>
     </aside>
   </div>
 </section>
 
 <style>
-  .reports-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-    gap: var(--space-lg);
+  /* Page fills the shell viewport so the preview never forces a page scroll. */
+  .reports-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    height: calc(100vh - 2 * var(--space-lg));
+    min-height: 560px;
   }
-  @media (max-width: 880px) { .reports-grid { grid-template-columns: 1fr; } }
+  .reports-page__header { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+
+  .reports-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr);
+    gap: var(--space-md);
+  }
+  @media (max-width: 1080px) {
+    .reports-page { height: auto; }
+    .reports-grid { grid-template-columns: 1fr; }
+    .reports-preview { min-height: 520px; }
+  }
+
+  /* === Left: form ============================================ */
+  .reports-form {
+    display: flex; flex-direction: column;
+    padding: 0;
+    min-height: 0;
+  }
+  .reports-form__scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-md) var(--space-lg);
+    display: flex; flex-direction: column;
+    gap: var(--space-md);
+  }
+  .reports-form__footer {
+    flex-shrink: 0;
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 12px var(--space-lg);
+    border-top: 1px solid var(--color-canvas-soft);
+    background-color: var(--color-canvas-softer);
+    border-bottom-left-radius: var(--rounded-xl);
+    border-bottom-right-radius: var(--rounded-xl);
+  }
+  .reports-period {
+    background-color: var(--color-canvas-softer);
+    border-radius: var(--rounded-md);
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .reports-period .ui-field__label { margin: 0; }
+
+  /* Compact form override — applies on top of the global `.ui-form` rules. */
+  .ui-form--compact select:not(.ui-select),
+  .ui-form--compact input[type="text"]:not(.ui-input),
+  .ui-form--compact input[type="number"]:not(.ui-input),
+  .ui-form--compact input[type="date"]:not(.ui-input),
+  .ui-form--compact input[type="email"]:not(.ui-input) {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .ui-form--compact select:not(.ui-select) {
+    padding-right: 32px;
+    background-position: right 10px center;
+    background-size: 14px;
+  }
+  .ui-form--compact .ui-field__label {
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--color-body);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  /* === Right: preview ======================================== */
+  .reports-preview {
+    display: flex; flex-direction: column;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .reports-preview__header {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 12px var(--space-lg);
+    border-bottom: 1px solid var(--color-canvas-soft);
+  }
+  .reports-preview__surface {
+    flex: 1;
+    position: relative;
+    background-color: var(--color-canvas-softer);
+    min-height: 0;
+  }
+  .reports-preview__iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: 0;
+    background-color: var(--color-canvas);
+  }
+  .reports-preview__state {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    padding: var(--space-lg);
+  }
+  .reports-preview__icon {
+    width: 56px; height: 56px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--rounded-pill);
+    background-color: var(--color-canvas-soft);
+    color: var(--color-body);
+  }
+  .reports-preview__icon--error { color: var(--color-toast-error); background-color: rgba(217, 33, 33, 0.10); }
+  .reports-preview__spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--color-canvas-soft);
+    border-top-color: var(--color-ink);
+    border-radius: 50%;
+    animation: reports-preview-spin 800ms linear infinite;
+  }
+  @keyframes reports-preview-spin {
+    to { transform: rotate(360deg); }
+  }
+  .reports-preview__footer {
+    flex-shrink: 0;
+    padding: 10px var(--space-lg);
+    border-top: 1px solid var(--color-canvas-soft);
+    background-color: var(--color-canvas-softer);
+    border-bottom-left-radius: var(--rounded-xl);
+    border-bottom-right-radius: var(--rounded-xl);
+  }
+
+  .ui-btn[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
 </style>
 
 <script>
-  function toggleResponsibles() {
-    var content = document.getElementById('responsibles-content');
-    var icon = document.getElementById('responsibles-icon');
-    if (!content) return;
-    content.classList.toggle('hidden');
-    icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-  }
-  document.addEventListener('DOMContentLoaded', function () {
-    var closeError = document.getElementById('close-error');
-    if (closeError) closeError.addEventListener('click', function () { document.getElementById('error-alert').classList.add('hidden'); });
-  });
+  (function () {
+    var currentBlobUrl = null;
+
+    function el(id) { return document.getElementById(id); }
+    function show(elm) { if (elm) elm.classList.remove('hidden'); }
+    function hide(elm) { if (elm) elm.classList.add('hidden'); }
+
+    function setState(state, opts) {
+      opts = opts || {};
+      var empty = el('preview-empty');
+      var loading = el('preview-loading');
+      var error = el('preview-error');
+      var iframe = el('preview-iframe');
+      var downloadBtn = el('preview-download');
+      var filenameEl = el('preview-filename');
+      var metaEl = el('preview-meta');
+      var submitBtn = el('report-submit');
+      var submitText = el('report-submit-text');
+
+      hide(empty); hide(loading); hide(error); hide(iframe);
+
+      if (state === 'empty') {
+        show(empty);
+        filenameEl.textContent = 'Aguardando geração…';
+        metaEl.textContent = 'Aguardando geração';
+        downloadBtn.setAttribute('aria-disabled', 'true');
+        downloadBtn.removeAttribute('href');
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Gerar relatório';
+      } else if (state === 'loading') {
+        show(loading);
+        downloadBtn.setAttribute('aria-disabled', 'true');
+        downloadBtn.removeAttribute('href');
+        if (submitBtn) submitBtn.disabled = true;
+        if (submitText) submitText.textContent = 'Gerando…';
+        metaEl.textContent = 'Gerando…';
+      } else if (state === 'ready') {
+        show(iframe);
+        iframe.src = opts.url;
+        filenameEl.textContent = opts.filename || 'relatorio.pdf';
+        downloadBtn.href = opts.url;
+        downloadBtn.setAttribute('download', opts.filename || 'relatorio.pdf');
+        downloadBtn.removeAttribute('aria-disabled');
+        metaEl.textContent = (opts.contract || '') + (opts.period ? ' · ' + opts.period : '') + (opts.modelName ? ' · ' + opts.modelName : '');
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Regenerar';
+      } else if (state === 'error') {
+        show(error);
+        var msg = el('preview-error-message');
+        if (msg) msg.textContent = opts.message || 'Tente novamente em alguns instantes.';
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Gerar novamente';
+        metaEl.textContent = 'Falha na geração';
+      }
+    }
+
+    function toast(variant, message) {
+      if (window.UIToast) {
+        window.UIToast.show({ variant: variant, message: message, duration: variant === 'error' ? 5000 : 3000 });
+      }
+    }
+
+    function pdfBlobFromBase64(b64) {
+      var bytes = atob(b64);
+      var buf = new Uint8Array(bytes.length);
+      for (var i = 0; i < bytes.length; i++) buf[i] = bytes.charCodeAt(i);
+      return new Blob([buf], { type: 'application/pdf' });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = el('report-form');
+      var toggleBtn = el('toggle-responsibles');
+      var responsiblesContent = el('responsibles-content');
+      var responsiblesIcon = el('responsibles-icon');
+      var resetBtn = el('report-reset');
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+          responsiblesContent.classList.toggle('hidden');
+          responsiblesIcon.style.transform = responsiblesContent.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+          // After native reset clears the form, snap preview back to empty
+          setTimeout(function () { setState('empty'); }, 0);
+        });
+      }
+
+      if (!form) return;
+
+      // Start empty
+      setState('empty');
+
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        // Defensive: the global form-submit handler in base.html shows a fullscreen
+        // loader for normal posts. We use the inline preview spinner instead.
+        var globalLoader = document.getElementById('loader-overlay');
+        if (globalLoader) globalLoader.classList.add('hidden');
+        setState('loading');
+
+        fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        }).then(function (res) {
+          return res.json().then(function (data) { return { status: res.status, data: data }; });
+        }).then(function (result) {
+          if (result.data && result.data.success) {
+            // Free the previous blob (if any) before creating a fresh one.
+            if (currentBlobUrl) {
+              try { URL.revokeObjectURL(currentBlobUrl); } catch (_) {}
+            }
+            var blob = pdfBlobFromBase64(result.data.pdf_data);
+            currentBlobUrl = URL.createObjectURL(blob);
+            setState('ready', {
+              url: currentBlobUrl,
+              filename: result.data.filename,
+              contract: result.data.contract_name,
+              modelName: result.data.report_model,
+              period: result.data.start_date && result.data.end_date
+                ? result.data.start_date + ' – ' + result.data.end_date
+                : ''
+            });
+            toast('success', 'Relatório gerado.');
+          } else {
+            var msg = (result.data && result.data.message) || 'Não foi possível gerar o relatório.';
+            if (result.data && result.data.errors) {
+              var firstField = Object.keys(result.data.errors)[0];
+              if (firstField) {
+                var firstErr = result.data.errors[firstField][0];
+                msg = (typeof firstErr === 'string') ? firstErr : (firstErr.message || msg);
+              }
+            }
+            setState('error', { message: msg });
+            toast('error', msg);
+          }
+        }).catch(function () {
+          setState('error', { message: 'Erro de rede ao gerar o relatório.' });
+          toast('error', 'Erro de rede ao gerar o relatório.');
+        });
+      });
+    });
+  })();
 </script>
 {% endblock %}

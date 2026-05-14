@@ -829,6 +829,17 @@
 <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
 {% include 'ui/_scripts.html' %}
 
+{% if messages %}
+  {# Django messages → UIToast queue. Drained on DOMContentLoaded by ui/_scripts.html. #}
+  <script data-ui-toast type="application/json">[
+    {% for m in messages %}{% with tag=m.tags %}{
+      "message": "{{ m.message|escapejs }}",
+      "variant": "{% if 'error' in tag %}error{% elif 'success' in tag %}success{% elif 'warning' in tag %}warning{% elif 'info' in tag %}info{% else %}default{% endif %}",
+      "duration": {% if 'error' in tag or 'warning' in tag %}5000{% else %}3500{% endif %}
+    }{% if not forloop.last %},{% endif %}{% endwith %}{% endfor %}
+  ]</script>
+{% endif %}
+
 <script>
   // === Sidebar collapse toggle ===========================================
   (function() {

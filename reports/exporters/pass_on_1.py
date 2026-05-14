@@ -230,9 +230,13 @@ class PassOn1PDFExporter:
         self.__set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
         local_text = (
-            f"LOCAL: {contractor_company.city}/{contractor_company.uf} | "
-            f"{contractor_company.street}, nº {contractor_company.number} - "
-            f"{contractor_company.district}"
+            (
+                f"LOCAL: {contractor_company.city}/{contractor_company.uf} | "
+                f"{contractor_company.street}, nº {contractor_company.number} - "
+                f"{contractor_company.district}"
+            )
+            if contractor_company
+            else "LOCAL: —"
         )
         self.pdf.cell(
             0,

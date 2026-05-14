@@ -1,183 +1,94 @@
 {% load humanize %}
 
-<div class="relative">
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-        <thead class="text-xs uppercase bg-gray-500 text-white">
+<div class="ui-table-shell">
+  <div class="ui-table-scroll">
+    <table class="ui-table">
+        <thead>
             <tr>
-                <th scope="col" class="px-6 py-3 w-[25%]">
-                    Identificação
-                </th>
-                <th scope="col" class="px-6 py-3 w-[15%]">
-                    Valor
-                </th>
-                <th scope="col" class="px-6 py-3 w-[15%]">
-                    Status
-                </th>
-                <th scope="col" class="px-6 py-3 w-[15%]">
-                    Planejada?
-                </th>
-                <th scope="col" class="px-6 py-3 w-[15%]">
-                    Análise
-                </th>
-                <th scope="col" class="px-6 py-3 w-[15%]">
-                    Favorecido
-                </th>
-                <th scope="col" class="px-6 py-3 sticky right-0 z-10 bg-gray-500" />
+                <th scope="col" style="width: 25%;">Identificação</th>
+                <th scope="col" style="width: 15%;">Valor</th>
+                <th scope="col" style="width: 15%;">Status</th>
+                <th scope="col" style="width: 15%;">Planejada</th>
+                <th scope="col" style="width: 15%;">Análise</th>
+                <th scope="col" style="width: 15%;">Favorecido</th>
+                <th scope="col" class="ui-table__col--actions"></th>
             </tr>
         </thead>
         <tbody>
             {% if expenses_page %}
               {% for expense in expenses_page %}
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <th scope="row" class="px-6 py-4 text-sm text-gray-900">
+                <tr>
+                    <th scope="row" class="ui-table__cell--head">
                       <div class="truncate max-w-[300px] font-medium">{{ expense.identification }}</div>
                       
                       {% if user.can_update_accountability %}
-                      {% if accountability.is_on_execution and not expense.conciled %}
-                        <a href="{% url 'accountability:expense-reconcile' expense.id %}">
-                          <button
-                            type="button"
-                            class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200"
-                            title="Conciliar despesa"
-                          >
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                        {% if accountability.is_on_execution and not expense.conciled %}
+                          <a href="{% url 'accountability:expense-reconcile' expense.id %}" class="ui-chip ui-chip--action" title="Conciliar despesa">
+                            <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
                             Conciliar
+                          </a>
+                        {% elif accountability.is_on_execution and expense.conciled %}
+                          <button type="button" data-modal-target="expenses-unreconcile-{{ expense.id}}" data-modal-toggle="expenses-unreconcile-{{ expense.id}}" class="ui-chip ui-chip--danger" title="Desfazer conciliação">
+                            <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                            Desconciliar
                           </button>
-                        </a>
-                      {% elif accountability.is_on_execution and expense.conciled %}
-                        <button
-                          type="button"
-                          data-modal-target="expenses-unreconcile-{{ expense.id}}"
-                          data-modal-toggle="expenses-unreconcile-{{ expense.id}}"
-                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors duration-200"
-                          title="Desfazer conciliação"
-                        >
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
-                          Desconciliar
-                        </button>
-                      {% endif %}
+                        {% endif %}
                       {% endif %}
 
                     </th>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <p class="font-medium">R$ {{ expense.value|intcomma }}</p>
-                      <button
-                        type="button"
-                        data-modal-target="exp-documents-modal-{{ expense.id}}"
-                        data-modal-toggle="exp-documents-modal-{{ expense.id}}"
-                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200 mt-1"
-                        title="Ver arquivos anexados"
-                      >
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                        </svg>
-                        {{ expense.count_files }}
-                        {% if expense.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
+                    <td class="ui-table__cell">
+                      <p class="ui-body-md-strong" style="margin: 0;">R$ {{ expense.value|intcomma }}</p>
+                      <button type="button" data-modal-target="exp-documents-modal-{{ expense.id}}" data-modal-toggle="exp-documents-modal-{{ expense.id}}" class="ui-chip ui-chip--action" style="margin-top: 6px;" title="Ver arquivos anexados">
+                        <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg>
+                        {{ expense.count_files }} {% if expense.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
                       </button>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <div class="flex flex-col gap-1">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                          {% if expense.paid %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                          {% if expense.paid %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Paga
-                          {% else %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Não Paga
-                          {% endif %}
-                        </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                          {% if expense.conciled %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                          {% if expense.conciled %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Conciliada
-                          {% else %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Pendente
-                          {% endif %}
-                        </span>
+                    <td class="ui-table__cell">
+                      <div class="ui-stack ui-stack--xxs">
+                        {% if expense.paid %}
+                          <span class="ui-status ui-status--success">Paga</span>
+                        {% else %}
+                          <span class="ui-status ui-status--error">Não paga</span>
+                        {% endif %}
+                        {% if expense.conciled %}
+                          <span class="ui-status ui-status--info">Conciliada</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
+                        {% endif %}
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <p class="text-sm">
-                        <span class="inline-flex items-center">
-                          {% if expense.planned %}
-                            <svg class="w-4 h-4 text-green-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                            </svg>
-                            Planejada
-                          {% else %}
-                            <svg class="w-4 h-4 text-red-500 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"/>
-                            </svg>
-                            Não Planejada
-                          {% endif %}
-                        </span>
-                      </p>
-                      {% if expense.planned and accountability.is_on_execution and user.can_update_accountability %}
-                        <button
-                          type="button"
-                          data-modal-target="expenses-gloss-{{ expense.id}}"
-                          data-modal-toggle="expenses-gloss-{{ expense.id}}"
-                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 hover:text-orange-800 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-colors duration-200 mt-2 w-fit"
-                          title="Adicionar glosa"
-                        >
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
-                          Glosar
-                        </button>
-                      {% endif %}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border w-fit
-                        {% if expense.is_approved %}bg-green-100 text-green-700 border-green-200
-                        {% elif expense.is_rejected %}bg-red-100 text-red-700 border-red-200
-                        {% else %}bg-orange-100 text-orange-700 border-orange-200{% endif %}
-                      ">
-                        {% if expense.is_approved %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        {% elif expense.is_rejected %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
+                    <td class="ui-table__cell">
+                      <div class="ui-stack ui-stack--xxs">
+                        {% if expense.planned %}
+                          <span class="ui-status ui-status--success">Planejada</span>
                         {% else %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
+                          <span class="ui-status">Não planejada</span>
                         {% endif %}
-                        {{ expense.status_label }}
-                      </span>
+                        {% if expense.planned and accountability.is_on_execution and user.can_update_accountability %}
+                          <button type="button" data-modal-target="expenses-gloss-{{ expense.id}}" data-modal-toggle="expenses-gloss-{{ expense.id}}" class="ui-chip ui-chip--warning" title="Adicionar glosa">
+                            <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                            Glosar
+                          </button>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td class="ui-table__cell">
+                      <div class="ui-stack ui-stack--xxs">
+                        {% if expense.is_approved %}
+                          <span class="ui-status ui-status--success">{{ expense.status_label }}</span>
+                        {% elif expense.is_rejected %}
+                          <span class="ui-status ui-status--error">{{ expense.status_label }}</span>
+                        {% else %}
+                          <span class="ui-status ui-status--warning">{{ expense.status_label }}</span>
+                        {% endif %}
+                        {% if expense.is_rejected %}
+                          <button type="button" data-modal-target="expenses-errors-{{ expense.id}}" data-modal-toggle="expenses-errors-{{ expense.id}}" class="ui-chip ui-chip--danger" title="Ver pendências">
+                            <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M5.062 19h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4a2 2 0 0 0-3.464 0L3.33 16.5c-.77.833.192 2.5 1.732 2.5Z"/></svg>
+                            Ver pendências
+                          </button>
+                        {% endif %}
+                      </div>
                       {% if expense.is_rejected %}
-                        <button
-                          type="button"
-                          data-modal-target="expenses-errors-{{ expense.id}}"
-                          data-modal-toggle="expenses-errors-{{ expense.id}}"
-                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors duration-200 mt-2 w-fit"
-                          title="Ver pendências"
-                        >
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                          </svg>
-                          Ver Pendências
-                        </button>
-
                         <div
                           id="expenses-errors-{{ expense.id}}"
                           tabindex="-1"
@@ -257,55 +168,27 @@
                         </div>
                       {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <div class="truncate max-w-[200px]">{{ expense.favored.name }}</div>
+                    <td class="ui-table__cell">
+                      <p class="ui-body-sm" style="margin: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ expense.favored.name }}</p>
                     </td>
-                    <td class="px-6 py-4 text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400">
+                    <td class="ui-table__cell ui-table__cell--actions">
                       {% if accountability.is_on_execution %}
-                      <div class="flex items-center justify-end gap-2">
-                        <a
-                          href="{% url 'accountability:expenses-update' expense.id %}"
-                          class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-3 py-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
-                          </svg>
-                          Visualizar
-                        </a>
-
-                        {% if user.can_update_accountability %}
-                        <button
-                          type="button"
-                          data-modal-target="expenses-duplicate-{{ expense.id}}"
-                          data-modal-toggle="expenses-duplicate-{{ expense.id}}"
-                          class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-full text-xs p-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
-                            <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          data-modal-target="expenses-delete-{{ expense.id}}"
-                          data-modal-toggle="expenses-delete-{{ expense.id}}"
-                          class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-full text-xs p-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
-                          </svg>
-                        </button>
-                        {% endif %}
-                      </div>
+                        <div class="ui-row" style="gap: 6px; justify-content: flex-end;">
+                          <a href="{% url 'accountability:expenses-update' expense.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
+                            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C3.8 7.9 7.6 5 12 5s8.2 2.9 9.5 7c-1.3 4.1-5.1 7-9.5 7s-8.2-2.9-9.5-7Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                            Visualizar
+                          </a>
+                          {% if user.can_update_accountability %}
+                            <button type="button" data-modal-target="expenses-duplicate-{{ expense.id}}" data-modal-toggle="expenses-duplicate-{{ expense.id}}" class="ui-icon-btn" title="Duplicar despesa" aria-label="Duplicar despesa">
+                              <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/></svg>
+                            </button>
+                            <button type="button" data-modal-target="expenses-delete-{{ expense.id}}" data-modal-toggle="expenses-delete-{{ expense.id}}" class="ui-icon-btn ui-icon-btn--danger" title="Excluir despesa" aria-label="Excluir despesa">
+                              <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7 5 7m14 0-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+                            </button>
+                          {% endif %}
+                        </div>
                       {% elif accountability.is_sent and user.can_review_accountability %}
-                      <a
-                        href="{% url 'accountability:expense-review' accountability.id expense.id %}"
-                        class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-3 py-2 inline-flex items-center"
-                      >
-                        Revisar
-                      </a>
+                        <a href="{% url 'accountability:expense-review' accountability.id expense.id %}" class="ui-btn ui-btn--secondary ui-btn--sm" style="float: right;">Revisar</a>
                       {% endif %}
                     </td>
                 </tr>
@@ -877,24 +760,25 @@
 
               {% endfor %}
             {% else %}
-              <tr class="bg-white border-b hover:bg-gray-50">
-                <th scope="row" colspan="7" class="px-6 py-4 text-sm text-center text-gray-900">
+              <tr>
+                <th scope="row" colspan="7" class="ui-table__cell" style="text-align: center; color: var(--color-body); padding: 28px 16px;">
                   Nenhum resultado encontrado
                 </th>
               </tr>
-            {% endif %}     
+            {% endif %}
         </tbody>
-        <tfoot class="bg-gray-500 text-white font-base">
-          <tr>
-              <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
-              <th scope="row" class="px-6 py-3 text-center">
-                <span class="text-sm font-normal">Cadastrado:</span> <br> R${{ expenses_total|intcomma }}
+        <tfoot>
+          <tr class="ui-table__foot">
+              <th scope="row" class="ui-table__cell" style="text-align: right; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; font-weight: 600; color: var(--color-body);">Total</th>
+              <th scope="row" class="ui-table__cell">
+                <p class="ui-caption" style="margin: 0;">Cadastrado</p>
+                <p class="ui-body-md-strong" style="margin: 0;">R$ {{ expenses_total|intcomma }}</p>
               </th>
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
           </tr>
         </tfoot>
     </table>
@@ -902,100 +786,47 @@
 </div>
 
 {% if accountability.is_on_execution %}
-  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200">
-    <a
-      href="{% url 'accountability:expenses-create' accountability.id %}"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        focus:outline-none
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-      "
-    >
+  <div class="ui-row ui-row--end" style="padding: 12px 16px; background-color: var(--color-canvas-soft); border-bottom-left-radius: var(--rounded-xl); border-bottom-right-radius: var(--rounded-xl);">
+    <a href="{% url 'accountability:expenses-create' accountability.id %}" class="ui-btn ui-btn--primary ui-btn--sm">
+      <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/></svg>
       Adicionar nova
-      <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-      </svg>
     </a>
   </div>
 {% endif %}
 
-<nav class="flex items-center justify-between p-3" aria-label="Navegação de páginas">
-  <div class="text-sm text-gray-500">
-    Página <span class="font-medium text-gray-900">{{ expenses_page.number }}</span> de <span class="font-medium text-gray-900">{{ expenses_page.paginator.num_pages }}</span>
-  </div>
-
-  <div class="flex items-center space-x-2">
+<nav class="paginator" aria-label="Navegação de páginas">
+  <p class="ui-body-sm ui-text-muted paginator__summary" style="margin: 0;">
+    Página <span class="paginator__summary-strong">{{ expenses_page.number }}</span> de <span class="paginator__summary-strong">{{ expenses_page.paginator.num_pages }}</span>
+  </p>
+  <div class="paginator__pages">
     {% if expenses_page.has_previous %}
-      <a
-        href="?revenues_page={{ revenue_page_number}}&expenses_page={{ expenses_page.previous_page_number }}&q={{ q }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Anterior
-      </a>
+      <a href="?revenues_page={{ revenue_page_number}}&expenses_page={{ expenses_page.previous_page_number }}&q={{ q }}" class="paginator__btn">Anterior</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Anterior
-      </span>
+      <span class="paginator__btn paginator__btn--disabled">Anterior</span>
     {% endif %}
 
     {% for num in expenses_page.paginator.page_range %}
       {% if num == 1 or num == expenses_page.paginator.num_pages %}
         {% if num == expenses_page.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current">{{ num }}</span>
         {% else %}
-          <a
-            href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}" class="paginator__page">{{ num }}</a>
         {% endif %}
-
       {% elif num >= expenses_page.number|add:'-1' and num <= expenses_page.number|add:'1' %}
         {% if num == expenses_page.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current">{{ num }}</span>
         {% else %}
-          <a
-            href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?revenues_page={{ revenue_page_number }}&expenses_page={{ num }}&q={{ q }}" class="paginator__page">{{ num }}</a>
         {% endif %}
-
       {% elif num == 2 or num == expenses_page.paginator.num_pages|add:'-1' %}
-        <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg">
-          ...
-        </span>
+        <span class="paginator__page paginator__page--ellipsis">…</span>
       {% endif %}
     {% endfor %}
 
     {% if expenses_page.has_next %}
-      <a
-        href="?revenues_page={{ revenue_page_number }}&expenses_page={{ expenses_page.next_page_number }}&q={{ q }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Próximo
-      </a>
+      <a href="?revenues_page={{ revenue_page_number }}&expenses_page={{ expenses_page.next_page_number }}&q={{ q }}" class="paginator__btn">Próximo</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Próximo
-      </span>
+      <span class="paginator__btn paginator__btn--disabled">Próximo</span>
     {% endif %}
   </div>
 </nav>

@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 from typing import Any
 
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
@@ -21,7 +22,6 @@ class ReportsView(TemplateView):
         context = super().get_context_data(**kwargs)
         form = self.get_form()
         context["form"] = form
-        context["missing_banks"] = kwargs.get("missing_banks", False)
 
         if form.is_bound and "contract" in form.data:
             try:
@@ -44,12 +44,12 @@ class ReportsView(TemplateView):
             end_date = form.cleaned_data["end_date"]
 
             if not contract.checking_account and not contract.investing_account:
-                return self.render_to_response(
-                    self.get_context_data(
-                        form=form,
-                        missing_banks=True,
-                    ),
+                messages.error(
+                    request,
+                    "O contrato escolhido ainda está em planejamento "
+                    "e/ou não tem contas bancárias cadastradas.",
                 )
+                return self.render_to_response(self.get_context_data(form=form))
 
             responsible_formset = form.get_responsible_formset(contract)
             responsibles = []
