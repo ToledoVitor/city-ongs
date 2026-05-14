@@ -1,225 +1,65 @@
 {% extends "base.html" %}
-
-{% block title %}Favorecidos - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<h1 class="text-3xl font-bold">Favorecidos</h1>
+{% block title %}Favorecidos — Portal SITTS{% endblock %}
 
-<div class="flex justify-between items-center pt-3">
-  <nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Favorecidos</span>
+{% block content %}
+<section class="page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Favorecidos</span>
+    </nav>
+    <div class="page__header-row">
+      <div class="ui-stack ui-stack--xs">
+        <h1 class="ui-display-lg page__title">Favorecidos</h1>
+        <p class="ui-body-md ui-text-muted page__subtitle">Pessoas e empresas favorecidas em despesas das prestações.</p>
+      </div>
+      {% if not user.is_committee_member %}
+        <div class="page__actions">
+          <a href="{% url 'accountability:favoreds-create' %}" class="ui-btn ui-btn--primary">
+            <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/></svg>
+            Adicionar favorecido
+          </a>
         </div>
-      </li>
-    </ol>
-  </nav>
-  <div class="flex gap-2">
-    <a
-      href="{% url 'accountability:beneficiaries-dashboard' %}"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        focus:outline-none
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-      "
-    >
-      <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3c.6 0 1 .4 1 1v15c0 .6-.4 1-1 1H6a1 1 0 0 1-1-1V5c0-.6.4-1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"/>
-      </svg>
-      Dashboard
-    </a>
-  </div>
-</div>
+      {% endif %}
+    </div>
+  </header>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por nome do favorecido ou documento..." %}
+  {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome…" %}
 
-{% if favoreds_list %}
-<div class="relative">
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-      <thead class="text-xs uppercase bg-gray-500 text-white">
-        <tr>
-          <th scope="col" class="px-6 py-3">
-            Nome
-          </th>
-          <th scope="col" class="px-6 py-3">
-            Documento
-          </th>
-          <th scope="col" class="px-6 py-3">
-            Atualizado em
-          </th>
-          <th scope="col" class="px-6 py-3" />
-        </tr>
-      </thead>
-      <tbody>
-          {% for favored in favoreds_list %}
-          <tr class="bg-gray-50 border-b hover:bg-gray-200">
-            <td class="px-6 py-4 text-sm text-gray-900 truncate max-w-[500px]">
-              {{ favored.name }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-              {{ favored.document }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-              {{ favored.updated_at.date }}
-            </td>
-            <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-              {% if not user.is_committee_member %}
-                <a
-                  href="{% url 'accountability:favoreds-update' favored.id %}"
-                  class="
-                    px-3
-                    py-2
-                    text-sm
-                    font-medium
-                    text-center
-                    inline-flex
-                    items-center
-                    text-white
-                    rounded-lg
-                    focus:ring-4
-                    focus:outline-none
-                    bg-gray-600
-                    hover:bg-gray-700
-                    focus:ring-gray-800
-                  "
-                >
-                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-                  </svg>
-                  Editar
-                </a>
-              {% endif %}
+  {% if favoreds %}
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <thead><tr><th>Nome</th><th>Documento</th><th>Tipo</th><th></th></tr></thead>
+        <tbody>
+          {% for favored in favoreds %}
+            <tr>
+              <td><span class="ui-body-md-strong">{{ favored.name }}</span></td>
+              <td>{{ favored.document }}</td>
+              <td>{{ favored.type_label|default:"—" }}</td>
+              <td class="ui-text-right">
+                {% if not user.is_committee_member %}
+                  <a href="{% url 'accountability:favoreds-update' favored.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if not user.is_committee_member %}
-    <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200 rounded-b-lg">
-      <a
-        href="{% url 'accountability:favoreds-create' %}"
-        class="
-          px-3
-          py-2
-          text-sm
-          font-medium
-          text-center
-          inline-flex
-          items-center
-          text-white
-          rounded-lg
-          focus:ring-4
-          focus:outline-none
-          bg-blue-600
-          hover:bg-blue-700
-          focus:ring-blue-800
-        "
-      >
-        Adicionar novo
-        <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-        </svg>
-      </a>
+        </tbody>
+      </table>
+    </div>
+    {% include 'commons/paginator.html' with page_obj=page_obj %}
+  {% else %}
+    <div class="ui-empty">
+      <p class="ui-display-md">Nenhum favorecido encontrado</p>
+      <p class="ui-body-md ui-text-muted">
+        {% if request.GET.q %}Não encontramos favorecidos para "<strong>{{ request.GET.q }}</strong>".{% else %}Não há favorecidos cadastrados.{% endif %}
+      </p>
+      {% if request.GET.q %}<a href="{% url 'accountability:favoreds-list' %}" class="ui-btn ui-btn--secondary">Limpar pesquisa</a>
+      {% elif not user.is_committee_member %}<a href="{% url 'accountability:favoreds-create' %}" class="ui-btn ui-btn--primary">Adicionar primeiro favorecido</a>{% endif %}
     </div>
   {% endif %}
-  
-  {% include 'commons/paginator.html' with page_obje=page_obj %}
-
-</div>
-{% else %}
-  <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
-    <div class="text-center py-16 px-6">
-      <div class="relative inline-block">
-        <svg class="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-      </div>
-      
-      <h3 class="mt-6 text-2xl font-bold text-gray-900">Nenhum favorecido encontrado</h3>
-      <p class="mt-3 text-base text-gray-600 max-w-md mx-auto">
-        {% if request.GET.q %}
-          Não encontramos favorecidos que correspondam à sua pesquisa "<strong>{{ request.GET.q }}</strong>".
-        {% else %}
-          Não há favorecidos cadastrados no momento.
-        {% endif %}
-      </p>
-      
-      {% if request.GET.q %}
-        <div class="mt-8 bg-gray-50 rounded-lg p-6 max-w-xl mx-auto border border-gray-200">
-          <p class="text-sm font-semibold text-gray-700 mb-3">Sugestões:</p>
-          <ul class="text-left space-y-2 text-sm text-gray-600">
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Verifique a ortografia do nome ou documento</span>
-            </li>
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Tente usar termos mais genéricos</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="mt-6">
-          <a 
-            href="{% url 'accountability:favoreds-list' %}"
-            class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Limpar pesquisa
-          </a>
-        </div>
-      {% else %}
-        {% if not user.is_committee_member %}
-          <div class="mt-8">
-            <a 
-              href="{% url 'accountability:favoreds-create' %}"
-              class="inline-flex items-center px-8 py-4 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-            >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Adicionar primeiro favorecido
-            </a>
-          </div>
-        {% endif %}
-      {% endif %}
-    </div>
-  </div>
-{% endif %}
-  
+</section>
 {% endblock %}

@@ -1,1009 +1,127 @@
 {% extends "base.html" %}
-
-{% block title %}Relatórios - Portal SITTS{% endblock %}
-
-{% block customcss %}
-<style>
-  /* Form field styling */
-  select, input[type="text"], input[type="number"], .form-control, .form-select {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm;
-    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
-    @apply bg-white text-gray-900 transition-colors duration-200;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-    background-position: right 0.75rem center;
-    background-repeat: no-repeat;
-    background-size: 1rem 1rem;
-    padding-right: 2.5rem;
-  }
-  
-  input[type="text"], input[type="number"] {
-    background-image: none !important;
-    padding-right: 0.75rem !important;
-  }
-  
-  select:hover, input:hover {
-    @apply border-gray-400;
-  }
-  
-  select:disabled, input:disabled {
-    @apply bg-gray-100 text-gray-500 cursor-not-allowed;
-  }
-  
-  .errorlist {
-    @apply text-red-600 text-sm mt-1;
-  }
-  
-  .errorlist li {
-    @apply flex items-center;
-  }
-  
-  .errorlist li:before {
-    content: "⚠";
-    @apply mr-1;
-  }
-</style>
-{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<div>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    
-    <!-- Header Section -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Exportar Relatório</h1>
-      
-      <!-- Breadcrumb -->
-      <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-2">
-          <li class="inline-flex items-center">
-            <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-              </svg>
-              Início
-            </a>
-          </li>
-          <li>
-            <div class="flex items-center">
-              <svg class="w-4 h-4 mx-1 text-gray-400" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-              </svg>
-              <span class="text-sm font-medium text-gray-900">Relatórios</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
+{% block title %}Exportar relatório — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Relatórios</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Exportar relatório</h1>
+  </header>
+
+  <div id="error-alert" class="hidden form-errors" role="alert">
+    <div class="form-errors__indicator" aria-hidden="true"></div>
+    <div class="form-errors__body">
+      <p class="ui-body-md-strong form-errors__title">Erro ao gerar relatório</p>
+      <p class="form-errors__item" id="error-message">Ocorreu um erro inesperado.</p>
     </div>
+    <button type="button" id="close-error" class="ui-btn ui-btn--ghost ui-btn--sm" aria-label="Fechar">×</button>
+  </div>
 
+  <div class="reports-grid">
+    <form method="post" class="ui-card ui-stack ui-stack--lg">
+      {% csrf_token %}
 
-    <!-- Error Alert -->
-    <div id="error-alert" class="hidden mb-6 bg-red-50 border-l-4 border-red-400 rounded-lg p-4 shadow-sm" role="alert">
-      <div class="flex items-start">
-        <div class="flex-shrink-0">
-          <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-          </svg>
+      <section class="ui-stack ui-stack--md">
+        <h2 class="ui-display-sm" style="margin:0;">Informações básicas</h2>
+        <div class="ui-field">
+          <label class="ui-field__label">Contrato</label>
+          {{ form.contract }}
+          {% if form.contract.errors %}<p class="ui-field__error">{{ form.contract.errors.0 }}</p>{% endif %}
         </div>
-        <div class="ml-3 flex-1">
-          <h3 class="text-sm font-semibold text-red-800">Erro ao gerar relatório</h3>
-          <div class="mt-2 text-sm text-red-700">
-            <p id="error-message">Ocorreu um erro inesperado.</p>
+        <div class="ui-field">
+          <label class="ui-field__label">Modelo de relatório</label>
+          {{ form.report_model }}
+          {% if form.report_model.errors %}<p class="ui-field__error">{{ form.report_model.errors.0 }}</p>{% endif %}
+        </div>
+      </section>
+
+      <section class="ui-stack ui-stack--md">
+        <h2 class="ui-display-sm" style="margin:0;">Período de análise</h2>
+        <div class="ui-card ui-card--soft" style="padding: 16px;">
+          <p class="ui-body-sm-strong" style="margin: 0 0 12px; color: var(--color-body);">Data de início</p>
+          <div class="ui-grid-2">
+            <div class="ui-field"><label class="ui-field__label">Mês</label>{{ form.start_month }}{% if form.start_month.errors %}<p class="ui-field__error">{{ form.start_month.errors.0 }}</p>{% endif %}</div>
+            <div class="ui-field"><label class="ui-field__label">Ano</label>{{ form.start_year }}{% if form.start_year.errors %}<p class="ui-field__error">{{ form.start_year.errors.0 }}</p>{% endif %}</div>
           </div>
         </div>
-        <div class="ml-auto pl-3">
-          <button
-            type="button"
-            id="close-error"
-            class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
-          >
-            <span class="sr-only">Fechar</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-      
-      <!-- Left Column - Form -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 h-fit">
-        <form method="post" class="px-4 py-2 space-y-2">
-        {% csrf_token %}
-    
-        <div class="space-y-2">
-          <h3 class="text-lg font-medium text-gray-900 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Informações Básicas
-          </h3>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Escolher Contrato <span class="text-red-500">*</span>
-              </label>
-              <div class="relative">
-                {{ form.contract }}
-              </div>
-              {% if form.contract.errors %}
-                <div class="mt-2 text-sm text-red-600">
-                  {% for error in form.contract.errors %}
-                    <p class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                      </svg>
-                      {{ error }}
-                    </p>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Modelo de Relatório <span class="text-red-500">*</span>
-              </label>
-              <div class="relative">
-                {{ form.report_model }}
-              </div>
-              {% if form.report_model.errors %}
-                <div class="mt-2 text-sm text-red-600">
-                  {% for error in form.report_model.errors %}
-                    <p class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                      </svg>
-                      {{ error }}
-                    </p>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </div>
+        <div class="ui-card ui-card--soft" style="padding: 16px;">
+          <p class="ui-body-sm-strong" style="margin: 0 0 12px; color: var(--color-body);">Data de término</p>
+          <div class="ui-grid-2">
+            <div class="ui-field"><label class="ui-field__label">Mês</label>{{ form.end_month }}{% if form.end_month.errors %}<p class="ui-field__error">{{ form.end_month.errors.0 }}</p>{% endif %}</div>
+            <div class="ui-field"><label class="ui-field__label">Ano</label>{{ form.end_year }}{% if form.end_year.errors %}<p class="ui-field__error">{{ form.end_year.errors.0 }}</p>{% endif %}</div>
           </div>
         </div>
+      </section>
 
-        <div class="space-y-4 pt-6 border-t border-gray-100">
-          <h3 class="text-lg font-medium text-gray-900 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path>
-            </svg>
-            Período de Análise
-          </h3>
-          
-          <div class="space-y-4">
-            <!-- Start Date -->
-            <div class="bg-gray-50 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Data de Início
-              </h4>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Mês</label>
-                  {{ form.start_month }}
-                  {% if form.start_month.errors %}
-                    <div class="mt-1 text-xs text-red-600">
-                      {% for error in form.start_month.errors %}
-                        <p class="flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                          </svg>
-                          {{ error }}
-                        </p>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Ano</label>
-                  {{ form.start_year }}
-                  {% if form.start_year.errors %}
-                    <div class="mt-1 text-xs text-red-600">
-                      {% for error in form.start_year.errors %}
-                        <p class="flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                          </svg>
-                          {{ error }}
-                        </p>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-            
-            <!-- End Date -->
-            <div class="bg-gray-50 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                Data de Término
-              </h4>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Mês</label>
-                  {{ form.end_month }}
-                  {% if form.end_month.errors %}
-                    <div class="mt-1 text-xs text-red-600">
-                      {% for error in form.end_month.errors %}
-                        <p class="flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                          </svg>
-                          {{ error }}
-                        </p>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Ano</label>
-                  {{ form.end_year }}
-                  {% if form.end_year.errors %}
-                    <div class="mt-1 text-xs text-red-600">
-                      {% for error in form.end_year.errors %}
-                        <p class="flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                          </svg>
-                          {{ error }}
-                        </p>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="space-y-4 pt-4 border-t border-gray-200">
-          <button type="button" id="toggle-responsibles" class="flex items-center justify-between w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200" onclick="toggleResponsibles()">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
-              </svg>
-              <span class="font-medium text-gray-900">Demais Responsáveis</span>
-              <span class="ml-2 text-sm text-gray-500">(Opcional)</span>
-            </div>
-            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" id="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          <div id="responsibles-container" class="hidden space-y-4">
-            {% if form.responsible_formset %}
-              {{ form.responsible_formset.management_form }}
-              
-              {% if form.responsible_formset.non_form_errors %}
-                <div class="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
-                  <div class="text-sm font-medium text-red-800">Erro nos responsáveis:</div>
-                  {% for error in form.responsible_formset.non_form_errors %}
-                    <div class="text-sm text-red-700">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              {% endif %}
-              
-              {% for responsible_form in form.responsible_formset %}
-                <div class="responsible-form bg-gray-50 border border-gray-200 rounded-lg p-4 {% if responsible_form.errors %}border-red-300 bg-red-50{% endif %}">
-                  {% if responsible_form.errors %}
-                    <div class="mb-3 p-2 bg-red-100 border border-red-200 rounded text-sm text-red-700">
-                      <strong>Erros neste responsável:</strong>
-                      {% for field, errors in responsible_form.errors.items %}
-                        <div>{{ field }}: {% for error in errors %}{{ error }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                  
-                  <div class="space-y-3">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-                      {{ responsible_form.user }}
-                      {% if responsible_form.user.errors %}
-                        <div class="mt-1 text-xs text-red-600">
-                          {% for error in responsible_form.user.errors %}
-                            <p>{{ error }}</p>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Responsabilidade</label>
-                      {{ responsible_form.interest }}
-                      {% if responsible_form.interest.errors %}
-                        <div class="mt-1 text-xs text-red-600">
-                          {% for error in responsible_form.interest.errors %}
-                            <p>{{ error }}</p>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    </div>
-                    <!-- Hidden fields for formset -->
-                    {% for hidden in responsible_form.hidden_fields %}
-                      {{ hidden }}
-                    {% endfor %}
-                  </div>
-                  {% if forloop.counter > 1 %}
-                    <button type="button" class="remove-responsible mt-3 inline-flex items-center px-2 py-1 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                      Remover
-                    </button>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            {% else %}
-              <div class="responsible-form bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <div class="space-y-3">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-                    <select name="responsibles-0-user" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                      <option value="">Selecione um usuário</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Responsabilidade</label>
-                    <select name="responsibles-0-interest" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                      <option value="">Selecione o tipo de responsabilidade</option>
-                    </select>
-                  </div>
-                </div>
+      <section class="ui-stack ui-stack--md">
+        <button type="button" id="toggle-responsibles" onclick="toggleResponsibles()" class="ui-btn ui-btn--subtle" style="justify-content: space-between;">
+          <span>Demais responsáveis <span class="ui-text-mute">(opcional)</span></span>
+          <svg id="responsibles-icon" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="responsibles-content" class="hidden ui-stack ui-stack--md">
+          {% for field in form %}
+            {% if 'responsible' in field.name or 'autority' in field.name or 'manager' in field.name %}
+              <div class="ui-field">
+                <label class="ui-field__label">{{ field.label }}</label>
+                {{ field }}
               </div>
             {% endif %}
-            <button type="button" id="add-responsible" class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Adicionar Responsável
-            </button>
-          </div>
+          {% endfor %}
         </div>
+      </section>
 
-        <div class="pt-6 border-t border-gray-100">
-          <button
-            type="button"
-            id="generate-button"
-            onclick="generateReport()"
-            class="w-full inline-flex items-center justify-center px-6 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            <svg id="generate-icon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            <svg id="loading-icon" class="w-5 h-5 mr-2 animate-spin hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span id="generate-text">Gerar Relatório</span>
-          </button>
-        </div>
+      {% include 'commons/form-errors.html' with form=form %}
 
-        {% if form.errors %}
-          <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4" role="alert">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-              <div class="ml-3 flex-1">
-                <h3 class="text-sm font-semibold text-red-800">Erro de validação</h3>
-                <div class="mt-2 text-sm text-red-700">
-                  {% if form.non_field_errors %}
-                    {% for error in form.non_field_errors %}
-                      <p>{{ error }}</p>
-                    {% endfor %}
-                  {% endif %}
-                  {% for field, errors in form.errors.items %}
-                    {% if field != '__all__' %}
-                      <p><strong>{{ field }}:</strong> 
-                      {% for error in errors %}
-                        {{ error }}{% if not forloop.last %}, {% endif %}
-                      {% endfor %}
-                      </p>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-
-        {% if missing_banks %}
-          <div id="alert-bank" class="bg-red-50 border border-red-200 rounded-lg p-4" role="alert">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-              <div class="ml-3 flex-1">
-                <h3 class="text-sm font-semibold text-red-800">Erro ao gerar relatório</h3>
-                <div class="mt-2 text-sm text-red-700">
-                  <p>O contrato escolhido ainda está em planejamento e/ou não tem contas bancárias cadastradas.</p>
-                </div>
-              </div>
-              <div class="ml-auto pl-3">
-                <div class="-mx-1.5 -my-1.5">
-                  <button
-                    type="button"
-                    class="inline-flex rounded-md bg-red-50 p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50"
-                    data-dismiss-target="#alert-bank"
-                    aria-label="Fechar"
-                  >
-                    <span class="sr-only">Fechar</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-      </form>
-  </div>
-
-      <!-- Right Column - Relatório Pronto -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col">
-        <!-- Header -->
-        <div class="p-6 border-b border-gray-100 flex-shrink-0">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="p-2 bg-gradient-to-br from-green-100 to-green-200 rounded-lg">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">Relatório Pronto</h3>
-                <p id="report-info" class="text-sm text-gray-600">Aguardando geração...</p>
-              </div>
-            </div>
-            <div id="preview-actions" class="hidden flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                type="button"
-                id="download-button"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-700 border border-transparent rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-sm"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                </svg>
-                Baixar
-              </button>
-              <button
-                type="button"
-                id="regenerate-button"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
-                title="Voltar ao formulário com os mesmos dados"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Editar
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="flex-1 p-4 sm:p-6">
-          <div id="preview-container" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300 h-full min-h-[400px] sm:min-h-[600px] flex items-center justify-center overflow-hidden">
-            
-            <!-- Empty State -->
-            <div id="empty-state" class="text-center py-8 sm:py-16 px-4 sm:px-6">
-              <div class="mx-auto w-20 sm:w-24 h-20 sm:h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
-                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Pronto para Visualizar</h3>
-              <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto leading-relaxed">Preencha o formulário ao lado e clique em <span class="font-semibold text-blue-600">"Gerar Relatório"</span> para visualizar seu documento aqui.</p>
-              <div class="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full text-sm text-blue-700 border border-blue-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Visualização em tempo real</span>
-              </div>
-            </div>
-
-            <!-- Loading State -->
-            <div id="loading-state" class="hidden text-center py-16 px-6">
-              <div class="mx-auto w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                <svg class="animate-spin w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-3">Gerando Relatório</h3>
-              <p class="text-gray-600 mb-6">Processando dados e criando documento...</p>
-              <div class="w-full bg-gray-200 rounded-full h-3 max-w-xs mx-auto">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full animate-pulse" style="width: 70%"></div>
-              </div>
-            </div>
-
-            <!-- Success State with PDF Preview -->
-            <div id="success-state" class="hidden w-full h-full">
-              <!-- PDF Preview -->
-              <div class="w-full h-full bg-white rounded-lg shadow-inner border border-gray-200 overflow-hidden">
-                <iframe 
-                  id="pdfPreview" 
-                  class="w-full h-full min-h-[500px]" 
-                  frameborder="0"
-                  title="Visualização do Relatório PDF"
-                ></iframe>
-              </div>
-            </div>
-
-          </div>
-        </div>
+      <div class="ui-row ui-row--end" style="gap: 8px;">
+        <button type="submit" class="ui-btn ui-btn--primary">
+          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Gerar relatório
+        </button>
       </div>
+    </form>
 
-    </div>
-  </div>
-</div>
-
-<!-- Loading Modal -->
-<div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 hidden flex items-center justify-center">
-  <div class="relative mx-auto p-6 border border-gray-200 w-96 shadow-2xl rounded-2xl bg-white">
-    <div class="text-center">
-      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mb-6 shadow-lg">
-        <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+    <aside class="ui-card ui-stack ui-stack--md">
+      <h2 class="ui-display-sm" style="margin:0;">Sobre os relatórios</h2>
+      <p class="ui-body-md ui-text-muted" style="margin:0;">Selecione um contrato e um modelo para gerar o relatório no período desejado. Os relatórios são exportados em formato compatível com a prefeitura.</p>
+      <div class="ui-card ui-card--soft" style="padding: 14px 16px;">
+        <p class="ui-body-sm-strong" style="margin:0 0 6px;">Dicas</p>
+        <ul style="margin:0; padding-left: 18px; color: var(--color-body); font-size: 13px;">
+          <li>Períodos curtos geram relatórios mais ágeis.</li>
+          <li>Os responsáveis adicionais só aparecem em modelos que os utilizam.</li>
+          <li>O resultado é exportado em PDF.</li>
+        </ul>
       </div>
-      <h3 class="text-xl font-semibold text-gray-900 mb-3">Gerando Relatório</h3>
-      <p class="text-gray-600 mb-4">Processando dados e criando documento...</p>
-      <div class="w-full bg-gray-200 rounded-full h-2">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
-      </div>
-    </div>
+    </aside>
   </div>
-</div>
+</section>
 
+<style>
+  .reports-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+    gap: var(--space-lg);
+  }
+  @media (max-width: 880px) { .reports-grid { grid-template-columns: 1fr; } }
+</style>
 
-{% block extra_js %}
 <script>
-let currentPdfData = null;
-let currentFilename = null;
-
-function showError(message) {
-    const errorAlert = document.getElementById("error-alert");
-    const errorMessage = document.getElementById("error-message");
-    
-    if (message.includes('\n')) {
-        errorMessage.innerHTML = message.replace(/\n/g, '<br>');
-    } else {
-        errorMessage.textContent = message;
-    }
-    errorAlert.classList.remove("hidden");
-    showEmptyState();
-    errorAlert.scrollIntoView({ behavior: "smooth" });
-}
-
-function hideErrorAlert() {
-    const errorAlert = document.getElementById("error-alert");
-    errorAlert.classList.add("hidden");
-}
-
-function showEmptyState() {
-    const emptyState = document.getElementById("empty-state");
-    const loadingState = document.getElementById("loading-state");
-    const successState = document.getElementById("success-state");
-    const previewActions = document.getElementById("preview-actions");
-    const reportInfo = document.getElementById("report-info");
-    
-    if (emptyState) emptyState.classList.remove("hidden");
-    if (loadingState) loadingState.classList.add("hidden");
-    if (successState) successState.classList.add("hidden");
-    if (previewActions) previewActions.classList.add("hidden");
-    if (reportInfo) reportInfo.textContent = "Aguardando geração...";
-}
-
-window.generateReport = function() {
-    
-    const contractSelect = document.querySelector('#id_contract');
-    const reportModelSelect = document.querySelector('#id_report_model');
-    const startMonthSelect = document.querySelector('#id_start_month');
-    const startYearSelect = document.querySelector('#id_start_year');
-    const endMonthSelect = document.querySelector('#id_end_month');
-    const endYearSelect = document.querySelector('#id_end_year');
-    
-    const contract = contractSelect ? contractSelect.value : '';
-    const reportModel = reportModelSelect ? reportModelSelect.value : '';
-    const startMonth = startMonthSelect ? startMonthSelect.value : '';
-    const startYear = startYearSelect ? startYearSelect.value : '';
-    const endMonth = endMonthSelect ? endMonthSelect.value : '';
-    const endYear = endYearSelect ? endYearSelect.value : '';
-    
-    if (!contract || !reportModel || !startMonth || !startYear || !endMonth || !endYear) {
-        showError("Por favor, preencha todos os campos obrigatórios.");
-        return;
-    }
-    
-    const generateButton = document.getElementById("generate-button");
-    const generateText = document.getElementById("generate-text");
-    const generateIcon = document.getElementById("generate-icon");
-    const loadingIcon = document.getElementById("loading-icon");
-    
-    const loadingModal = document.getElementById('loading-modal');
-    loadingModal.classList.remove('hidden');
-    generateButton.disabled = true;
-    generateText.textContent = "Gerando...";
-    generateIcon.classList.add("hidden");
-    loadingIcon.classList.remove("hidden");
-
-    const form = document.querySelector('form');
-    const formData = new FormData();
-    
-    formData.append('csrfmiddlewaretoken', document.querySelector("[name=csrfmiddlewaretoken]").value);
-    formData.append('contract', contract);
-    formData.append('report_model', reportModel);
-    formData.append('start_month', startMonth);
-    formData.append('start_year', startYear);
-    formData.append('end_month', endMonth);
-    formData.append('end_year', endYear);
-    
-    const totalFormsInput = document.querySelector("[name='responsibles-TOTAL_FORMS']");
-    const initialFormsInput = document.querySelector("[name='responsibles-INITIAL_FORMS']");
-    const minNumFormsInput = document.querySelector("[name='responsibles-MIN_NUM_FORMS']");
-    const maxNumFormsInput = document.querySelector("[name='responsibles-MAX_NUM_FORMS']");
-    
-    if (totalFormsInput) {
-        formData.append('responsibles-TOTAL_FORMS', totalFormsInput.value);
-        formData.append('responsibles-INITIAL_FORMS', initialFormsInput ? initialFormsInput.value : '0');
-        formData.append('responsibles-MIN_NUM_FORMS', minNumFormsInput ? minNumFormsInput.value : '0');
-        formData.append('responsibles-MAX_NUM_FORMS', maxNumFormsInput ? maxNumFormsInput.value : '1000');
-        
-        const totalForms = parseInt(totalFormsInput.value);
-        for (let i = 0; i < totalForms; i++) {
-            const userField = document.querySelector(`[name='responsibles-${i}-user']`);
-            const interestField = document.querySelector(`[name='responsibles-${i}-interest']`);
-            const deleteField = document.querySelector(`[name='responsibles-${i}-DELETE']`);
-            const idField = document.querySelector(`[name='responsibles-${i}-id']`);
-            
-            if (userField) {
-                formData.append(`responsibles-${i}-user`, userField.value || '');
-            }
-            if (interestField) {
-                formData.append(`responsibles-${i}-interest`, interestField.value || '');
-            }
-            if (deleteField) {
-                formData.append(`responsibles-${i}-DELETE`, deleteField.checked ? 'on' : '');
-            }
-            if (idField) {
-                formData.append(`responsibles-${i}-id`, idField.value || '');
-            }
-        }
-    }
-    
-    fetch("{% url 'reports:reports-generate-api' %}", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-            "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
-        }
-    })
-    .then(async response => {
-        loadingModal.classList.add('hidden');
-        
-        generateButton.disabled = false;
-        generateText.textContent = "Gerar Relatório";
-        generateIcon.classList.remove("hidden");
-        loadingIcon.classList.add("hidden");
-        
-        const contentType = response.headers.get("content-type");
-        
-        if (!response.ok) {
-            if (contentType && contentType.includes("application/json")) {
-                const data = await response.json();
-                let errorMessage = data.message || "Erro ao gerar relatório";
-                
-                if (data.errors) {
-                    const errorDetails = [];
-                    for (const [field, errors] of Object.entries(data.errors)) {
-                        if (Array.isArray(errors)) {
-                            errorDetails.push(`${field}: ${errors.join(', ')}`);
-                        } else {
-                            errorDetails.push(`${field}: ${errors}`);
-                        }
-                    }
-                    if (errorDetails.length > 0) {
-                        errorMessage += "\n\nDetalhes:\n" + errorDetails.join('\n');
-                    }
-                }
-                
-                showError(errorMessage);
-            } else {
-                showError("Erro: " + response.status + " - " + response.statusText);
-            }
-            return;
-        }
-        
-        if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            
-            if (data.success) {
-                showSuccessPreview(data);
-            } else {
-                showError(data.message || "Erro ao gerar relatório");
-            }
-        } else {
-            showError("Formato de resposta inesperado");
-        }
-    })
-    .catch(error => {
-        loadingModal.classList.add('hidden');
-        
-        generateButton.disabled = false;
-        generateText.textContent = "Gerar Relatório";
-        generateIcon.classList.remove("hidden");
-        loadingIcon.classList.add("hidden");
-        
-        showError("Erro de conexão. Tente novamente.");
-    });
-};
-
-function showSuccessPreview(data) {
-    const emptyState = document.getElementById("empty-state");
-    const loadingState = document.getElementById("loading-state");
-    const successState = document.getElementById("success-state");
-    const previewActions = document.getElementById("preview-actions");
-    const reportInfo = document.getElementById("report-info");
-    const successDetails = document.getElementById("success-details");
-    const fileNameDisplay = document.getElementById("file-name-display");
-    
-    if (emptyState) emptyState.classList.add("hidden");
-    if (loadingState) loadingState.classList.add("hidden");
-    if (successState) successState.classList.remove("hidden");
-    if (previewActions) previewActions.classList.remove("hidden");
-    
-    if (reportInfo) reportInfo.textContent = `${data.contract_name} - ${data.start_date} a ${data.end_date}`;
-    
-    // Store PDF data for download (global variables for existing event handlers)
-    window.currentPdfData = data.pdf_data;
-    window.currentFilename = data.filename;
-    
-    currentPdfData = data.pdf_data;
-    currentFilename = data.filename;
-
-    const base64PDF = data.pdf_data;
-    const pdfDataUrl = "data:application/pdf;base64," + base64PDF;
-    document.getElementById("pdfPreview").src = pdfDataUrl;
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    const container = document.getElementById("responsibles-container");
-    const addButton = document.getElementById("add-responsible");
-    const totalFormsInput = document.querySelector("#id_responsibles-TOTAL_FORMS");
-    let formCount = parseInt(totalFormsInput.value, 10);
-
-    addButton.addEventListener("click", function () {
-        const newForm = container.querySelector(".responsible-form").cloneNode(true);
-        const formRegex = RegExp(`responsibles-(\\d+)-`, "g");
-
-        formCount++;
-        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `responsibles-${formCount-1}-`);
-        
-        newForm.querySelectorAll("input, select").forEach(input => {
-            if (input.type !== "hidden") {
-                input.value = "";
-            }
-        });
-
-        if (!newForm.querySelector(".remove-responsible")) {
-            const removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.className = "remove-responsible mt-2 text-red-600 hover:text-red-800";
-            removeButton.textContent = "Remover Responsável";
-            newForm.appendChild(removeButton);
-        }
-
-        container.appendChild(newForm);
-        totalFormsInput.value = formCount;
-    });
-
-    container.addEventListener("click", function (e) {
-        if (e.target.classList.contains("remove-responsible")) {
-            e.target.closest(".responsible-form").remove();
-            formCount--;
-            totalFormsInput.value = formCount;
-            
-            container.querySelectorAll(".responsible-form").forEach((form, index) => {
-                form.innerHTML = form.innerHTML.replace(
-                    /responsibles-\d+-/g,
-                    `responsibles-${index}-`
-                );
-            });
-        }
-    });
-
-    // Main elements
-    const form = document.querySelector("form");
-    const generateButton = document.getElementById("generate-button");
-    const generateText = document.getElementById("generate-text");
-    const generateIcon = document.getElementById("generate-icon");
-    const loadingIcon = document.getElementById("loading-icon");
-    const errorAlert = document.getElementById("error-alert");
-    const errorMessage = document.getElementById("error-message");
-    const closeError = document.getElementById("close-error");
-
-    // Preview elements
-    const reportInfo = document.getElementById("report-info");
-    const previewActions = document.getElementById("preview-actions");
-    const downloadButton = document.getElementById("download-button");
-    const regenerateButton = document.getElementById("regenerate-button");
-
-    // State elements
-    const emptyState = document.getElementById("empty-state");
-    const loadingState = document.getElementById("loading-state");
-    const successState = document.getElementById("success-state");
-
-    // State variables
-    let currentReportUrl = null;
-    let formState = null;
-
-    function saveFormState() {
-        const formData = new FormData(form);
-        formState = {};
-        for (let [key, value] of formData.entries()) {
-            formState[key] = value;
-        }
-    }
-
-    function restoreFormState() {
-        if (formState) {
-            for (let [key, value] of Object.entries(formState)) {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = value === 'on' || value === input.value;
-                    } else {
-                        input.value = value;
-                    }
-                }
-            }
-        }
-    }
-
-
-    function showLoadingState() {
-        emptyState.classList.add("hidden");
-        loadingState.classList.remove("hidden");
-        successState.classList.add("hidden");
-        previewActions.classList.add("hidden");
-        reportInfo.textContent = "Gerando relatório...";
-    }
-
-    function showSuccessState(data) {
-        emptyState.classList.add("hidden");
-        loadingState.classList.add("hidden");
-        successState.classList.remove("hidden");
-        previewActions.classList.remove("hidden");
-        
-        reportInfo.textContent = `${data.contract_name} - ${data.start_date} a ${data.end_date}`;
-        
-    }
-
-    function setButtonLoadingState(isLoading) {
-        generateButton.disabled = isLoading;
-        generateText.textContent = isLoading ? "Gerando..." : "Gerar Relatório";
-        generateIcon.classList.toggle("hidden", isLoading);
-        loadingIcon.classList.toggle("hidden", !isLoading);
-    }
-
-    downloadButton.addEventListener("click", function() {
-        if (currentPdfData && currentFilename) {
-            try {
-                const blob = base64ToBlob(currentPdfData, "application/pdf");
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = currentFilename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch (error) {
-                showError("Erro ao baixar o arquivo");
-            }
-        } else {
-            showError("Nenhum relatório disponível para download");
-        }
-    });
-
-    function submitFormToNewWindow(forceDownload = false) {
-        const form2 = document.createElement("form");
-        form2.method = "POST";
-        form2.action = currentReportUrl || "{% url 'reports:reports-generate-api' %}";
-        form2.target = "_blank";
-        form2.style.display = "none";
-        
-        const formData = new FormData(form);
-        for (let [key, value] of formData.entries()) {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = key;
-            input.value = value;
-            form2.appendChild(input);
-        }
-        
-        if (forceDownload) {
-            const downloadInput = document.createElement("input");
-            downloadInput.type = "hidden";
-            downloadInput.name = "download";
-            downloadInput.value = "1";
-            form2.appendChild(downloadInput);
-        }
-        
-        document.body.appendChild(form2);
-        form2.submit();
-        document.body.removeChild(form2);
-    }
-
-    regenerateButton.addEventListener("click", function() {
-        showEmptyState();
-        hideErrorAlert();
-        currentPdfData = null;
-        currentFilename = null;
-        currentReportUrl = null;
-        restoreFormState();
-        form.scrollIntoView({ behavior: "smooth" });
-    });
-
-    closeError.addEventListener("click", function() {
-        hideErrorAlert();
-    });
-
-    function formatFileSize(bytes) {
-        if (bytes === 0) return "0 Bytes";
-        const k = 1024;
-        const sizes = ["Bytes", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-    }
-
-    function base64ToBlob(base64, contentType) {
-        const byteCharacters = atob(base64);
-        const byteArrays = [];
-        
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-        
-        return new Blob(byteArrays, {type: contentType});
-    }
-});
-
-function toggleResponsibles() {
-  const container = document.getElementById("responsibles-container");
-  const icon = document.getElementById("toggle-icon");
-  const isHidden = container.classList.contains("hidden");
-  
-  container.classList.toggle("hidden");
-  icon.style.transform = isHidden ? "rotate(180deg)" : "";
-}
+  function toggleResponsibles() {
+    var content = document.getElementById('responsibles-content');
+    var icon = document.getElementById('responsibles-icon');
+    if (!content) return;
+    content.classList.toggle('hidden');
+    icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    var closeError = document.getElementById('close-error');
+    if (closeError) closeError.addEventListener('click', function () { document.getElementById('error-alert').classList.add('hidden'); });
+  });
 </script>
-{% endblock %}
-
 {% endblock %}

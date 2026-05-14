@@ -1,171 +1,79 @@
 {% extends "base.html" %}
-
-{% block title %}Empresas - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-  Cadastrar Nova Empresa
-</p>
+{% block title %}Cadastrar nova empresa — Portal SITTS{% endblock %}
 
-<nav class="flex mb-6" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-    </li>
-    <li class="inline-flex items-center">
-      <a href="{% url 'contracts:companies-list' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        Empresas
-      </a>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Cadastrar Empresa</span>
-      </div>
-    </li>
-  </ol>
-</nav>
+{% block content %}
+<section class="page ui-form">
 
-<form method="post" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
-  {% csrf_token %}
-  <div class="space-y-6">
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Dados da Empresa</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="id_name" class="block mb-2 text-base font-medium text-black">Nome</label>
-          {{ form.name }}
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:companies-list' %}" class="ui-breadcrumb__item">Empresas</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Cadastrar empresa</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Cadastrar nova empresa</h1>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Dados da empresa</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_name" class="ui-field__label">Nome</label>{{ form.name }}</div>
+        <div class="ui-field">
+          <label for="cnpj" class="ui-field__label">CNPJ</label>
+          <input type="text" name="cnpj" id="cnpj" pattern="[0-9]{2}.[0-9]{3}.[0-9]{3}/[0-9]{4}-[0-9]{2}" placeholder="00.000.000/0000-00" class="ui-input" required/>
+          <p class="ui-field__hint">Apenas números — a máscara é aplicada automaticamente.</p>
         </div>
-
-        <div>
-          <label for="id_cnpj" class="block mb-2 text-base font-medium text-black">CNPJ</label>
-          <input
-            type="text"
-            name="cnpj"
-            id="cnpj"
-            pattern="[0-9]{2}.[0-9]{3}.[0-9]{3}/[0-9]{4}-[0-9]{2}"
-            placeholder="00.000.000/0000-00"
-            class="block w-full text-sm rounded-lg border focus:ring-blue-500 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-            required
-          />
-          <p class="mt-2 text-sm text-gray-400">
-            Escreva somente os números do cnpj, sem pontuação.
-          </p>
-        </div>
-
-        <div>
-          <label for="id_phone_number" class="block mb-2 text-base font-medium text-black">Telefone</label>
-          <input
-            type="tel"
-            name="phone_number"
-            id="phone_number"
-            value=""
-            required
-            class="block w-full text-sm rounded-lg border focus:ring-blue-500 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-            pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
-            placeholder="(00) 00000-0000"
-          >
+        <div class="ui-field">
+          <label for="phone_number" class="ui-field__label">Telefone</label>
+          <input type="tel" name="phone_number" id="phone_number" value="" required class="ui-input" pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}" placeholder="(00) 00000-0000">
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Endereço</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="id_street" class="block mb-2 text-base font-medium text-black">Rua</label>
-          {{ form.street }}
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Endereço</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_street" class="ui-field__label">Rua</label>{{ form.street }}</div>
+        <div class="ui-grid-2">
+          <div class="ui-field"><label class="ui-field__label">Número</label>{{ form.number }}</div>
+          <div class="ui-field"><label class="ui-field__label">CEP</label>{{ form.postal_code }}</div>
         </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Número</label>
-            {{ form.number }}
-          </div>
-
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Código Postal (CEP)</label>
-            {{ form.postal_code }}
-          </div>
+        <div class="ui-grid-2">
+          <div class="ui-field"><label class="ui-field__label">Complemento <span class="ui-text-mute">(opcional)</span></label>{{ form.complement }}</div>
+          <div class="ui-field"><label class="ui-field__label">Bairro</label>{{ form.district }}</div>
         </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">
-              Complemento <span class="text-gray-400">(opcional)</span>
-            </label>
-            {{ form.complement }}
-          </div>
-
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Bairro</label>
-            {{ form.district }}
-          </div>
-        </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Cidade</label>
-            {{ form.city }}
-          </div>
-
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Estado</label>
-            {{ form.uf }}
-          </div>
+        <div class="ui-grid-2">
+          <div class="ui-field"><label class="ui-field__label">Cidade</label>{{ form.city }}</div>
+          <div class="ui-field"><label class="ui-field__label">Estado</label>{{ form.uf }}</div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  {% include 'commons/form-errors.html' with form=form %}
+    {% include 'commons/form-errors.html' with form=form %}
 
-  <div class="py-6">
-    <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'contracts:companies-list' %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-        </svg>
-        Voltar
-      </a>
-      <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-        </svg>
-        Cadastrar Empresa
-      </button>
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:companies-list' %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Cadastrar empresa</button>
     </div>
-  </div>
-</form>
+  </form>
+</section>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-
 <script>
-  $(document).ready(function() {
-    $('[data-mask]').mask('(00) 00000-0000');
-  });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const cnpjInput = document.getElementById('cnpj');
-    const phoneInput = document.getElementById('phone_number');
+  document.addEventListener('DOMContentLoaded', function () {
+    var cnpjInput = document.getElementById('cnpj');
+    var phoneInput = document.getElementById('phone_number');
     phoneInput.value = phoneInput.value.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
 
-    phoneInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
+    phoneInput.addEventListener('input', function (e) {
+      var value = e.target.value.replace(/\D/g, '');
       if (value.length > 11) value = value.slice(0, 11);
       value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
       value = value.replace(/(\d)(\d{4})$/, '$1-$2');
@@ -182,11 +90,7 @@
       value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
       return value;
     }
-
-    cnpjInput.addEventListener('input', function(e) {
-      e.target.value = formatCNPJ(e.target.value);
-    });
+    cnpjInput.addEventListener('input', function (e) { e.target.value = formatCNPJ(e.target.value); });
   });
 </script>
-
 {% endblock %}

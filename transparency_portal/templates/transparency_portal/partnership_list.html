@@ -1,144 +1,118 @@
 {% extends "transparency_portal/base.html" %}
 
-{% block title %}Parcerias{% endblock %}
+{% block title %}— Parcerias{% endblock %}
 
 {% block content %}
-<div class="search-box mb-4">
-    <form method="get" class="row g-3">
-        <div class="col-md-4">
-            <label for="search" class="form-label">Buscar</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0">
-                    <i class="fas fa-search text-muted"></i>
-                </span>
-                <input type="text" class="form-control border-start-0" id="search" name="search" 
-                       value="{{ request.GET.search }}" placeholder="Nome da parceria ou organização">
-            </div>
-        </div>
-        <div class="col-md-3">
-            <label for="year" class="form-label">Ano</label>
-            <select class="form-select" id="year" name="year">
-                <option value="">Todos os anos</option>
-                {% for year in years %}
-                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>
-                    {{ year }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="organization" class="form-label">Organização</label>
-            <select class="form-select" id="organization" name="organization">
-                <option value="">Todas as organizações</option>
-                {% for org in organizations %}
-                <option value="{{ org.organization }}" {% if request.GET.organization == org.organization|stringformat:"s" %}selected{% endif %}>
-                    {{ org.organization__name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">
-                Buscar
-            </button>
-        </div>
-    </form>
-</div>
+<section class="ui-stack ui-stack--2xl">
 
-<div class="row row-cols-1 row-cols-md-2 g-4">
+  <header class="ui-stack ui-stack--xs">
+    <h1 class="ui-display-xl">Parcerias publicadas</h1>
+    <p class="ui-body-md ui-text-muted">Contratos e termos com organizações do terceiro setor.</p>
+  </header>
+
+  <form method="get" class="ui-card" style="padding: var(--space-md) var(--space-lg);">
+    <div class="filter-row">
+      <div class="filter-field" style="max-width: 360px; flex: 2 1 240px;">
+        <label for="search" class="filter-field__label">Buscar</label>
+        <input type="text" id="search" name="search" value="{{ request.GET.search }}" placeholder="Nome ou organização" class="filter-field__control">
+      </div>
+      <div class="filter-field">
+        <label for="year" class="filter-field__label">Ano</label>
+        <select id="year" name="year" class="filter-field__control">
+          <option value="">Todos</option>
+          {% for year in years %}<option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="organization" class="filter-field__label">Organização</label>
+        <select id="organization" name="organization" class="filter-field__control">
+          <option value="">Todas</option>
+          {% for org in organizations %}<option value="{{ org.organization }}" {% if request.GET.organization == org.organization|stringformat:"s" %}selected{% endif %}>{{ org.organization__name }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm" style="align-self: flex-end;">Buscar</button>
+    </div>
+  </form>
+
+  <div class="partnership-grid">
     {% for partnership in partnerships %}
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <h5 class="card-title mb-1">{{ partnership.contract.name }}</h5>
-                        <h6 class="card-subtitle text-muted">
-                            {{ partnership.organization.name }}
-                        </h6>
-                    </div>
-                    <span class="status-badge ms-2 {% if partnership.contract.is_on_execution %}status-active{% elif partnership.contract.is_finished %}status-finished{% else %}status-pending{% endif %}">
-                        {{ partnership.contract.status_label }}
-                    </span>
-                </div>
+      <article class="ui-card ui-card--elevated partnership-card">
+        <header class="ui-row ui-row--between" style="gap: 8px; align-items: flex-start;">
+          <div class="ui-stack ui-stack--xxs" style="min-width:0;">
+            <p class="ui-body-md-strong" style="margin:0;">{{ partnership.contract.name }}</p>
+            <p class="ui-caption" style="margin:0;">{{ partnership.organization.name }}</p>
+          </div>
+          {% if partnership.contract.is_on_execution %}<span class="ui-status ui-status--success">{{ partnership.contract.status_label }}</span>
+          {% elif partnership.contract.is_finished %}<span class="ui-status">{{ partnership.contract.status_label }}</span>
+          {% else %}<span class="ui-status ui-status--warning">{{ partnership.contract.status_label }}</span>{% endif %}
+        </header>
 
-                <p class="card-text text-muted small mb-3">
-                    <strong>Objeto:</strong> {{ partnership.contract.objective|truncatechars:150 }}
-                </p>
+        <p class="ui-body-sm ui-text-muted" style="margin: 12px 0;"><strong>Objeto:</strong> {{ partnership.contract.objective|truncatechars:150 }}</p>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-sm-4">
-                        <div class="value-box">
-                            <small class="text-muted d-block">Valor Total</small>
-                            <strong>R$ {{ partnership.total_value|floatformat:2 }}</strong>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="value-box">
-                            <small class="text-muted d-block">Liberado</small>
-                            <strong>R$ {{ partnership.released_value|floatformat:2 }}</strong>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="value-box">
-                            <small class="text-muted d-block">Status PC</small>
-                            <strong>{{ partnership.accountability_status }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-auto d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>
-                        {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}
-                    </small>
-                    <a href="{% url 'transparency:partnership_detail' partnership.pk %}" 
-                       class="btn btn-sm btn-outline-primary">
-                        Ver Detalhes
-                    </a>
-                </div>
-            </div>
+        <div class="partnership-values">
+          <div><p class="ui-caption" style="margin:0;">Valor total</p><p class="ui-body-md-strong" style="margin:0;">R$ {{ partnership.total_value|floatformat:2 }}</p></div>
+          <div><p class="ui-caption" style="margin:0;">Liberado</p><p class="ui-body-md-strong" style="margin:0;">R$ {{ partnership.released_value|floatformat:2 }}</p></div>
+          <div><p class="ui-caption" style="margin:0;">Status PC</p><p class="ui-body-md-strong" style="margin:0;">{{ partnership.accountability_status }}</p></div>
         </div>
-    </div>
+
+        <footer class="ui-row ui-row--between" style="margin-top: 12px; gap: 8px;">
+          <p class="ui-caption" style="margin:0;">Vigência desde {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}</p>
+          <a href="{% url 'transparency:partnership_detail' partnership.pk %}" class="ui-btn ui-btn--secondary ui-btn--sm">Ver detalhes</a>
+        </footer>
+      </article>
     {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info d-flex align-items-center">
-            <i class="fas fa-info-circle me-3 fs-4"></i>
-            <div>
-                Nenhuma parceria encontrada com os filtros selecionados.
-            </div>
-        </div>
-    </div>
+      <div class="ui-empty">
+        <p class="ui-display-md">Nenhuma parceria encontrada</p>
+        <p class="ui-body-md ui-text-muted">Tente ajustar os filtros.</p>
+      </div>
     {% endfor %}
-</div>
+  </div>
 
-{% if is_paginated %}
-<nav aria-label="Navegação de páginas" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        </li>
-        {% endif %}
-        
+  {% if is_paginated %}
+    <nav class="paginator" aria-label="Navegação de páginas">
+      <p class="ui-body-sm ui-text-muted paginator__summary">
+        Página <span class="paginator__summary-strong">{{ page_obj.number }}</span> de <span class="paginator__summary-strong">{{ page_obj.paginator.num_pages }}</span>
+      </p>
+      <div class="paginator__pages">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="paginator__btn">Anterior</a>{% endif %}
         {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
-                {{ num }}
-            </a>
-        </li>
+          {% if num == page_obj.number %}<span class="paginator__page paginator__page--current">{{ num }}</span>
+          {% else %}<a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="paginator__page">{{ num }}</a>{% endif %}
         {% endfor %}
-        
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-{% endblock %} 
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="paginator__btn">Próximo</a>{% endif %}
+      </div>
+    </nav>
+  {% endif %}
+</section>
+
+<style>
+  .partnership-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+  .partnership-card { display: flex; flex-direction: column; }
+  .partnership-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 12px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-md);
+  }
+
+  .paginator { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; flex-wrap: wrap; }
+  .paginator__summary { margin: 0; }
+  .paginator__summary-strong { color: var(--color-ink); font-weight: 600; }
+  .paginator__pages { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .paginator__btn, .paginator__page {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px; padding: 0 12px;
+    border-radius: var(--rounded-pill);
+    background-color: var(--color-canvas); color: var(--color-ink);
+    border: 1px solid var(--color-canvas-soft);
+    text-decoration: none; font-family: var(--font-text); font-weight: 500; font-size: 14px;
+  }
+  .paginator__page--current { background-color: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
+</style>
+{% endblock %}

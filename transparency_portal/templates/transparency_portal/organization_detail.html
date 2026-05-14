@@ -1,8 +1,10 @@
-<div class="card mb-4">
-    <div class="card-body">
-        <h2 class="h4 mb-4">Documentos</h2>
-        <a href="{% url 'transparency_portal:organization_documents' organization.id %}" class="btn btn-primary">
-            <i class="fas fa-file-alt"></i> Ver Documentos
-        </a>
-    </div>
-</div> 
+<section class="ui-card ui-stack ui-stack--md">
+  <h2 class="ui-display-sm" style="margin:0;">Documentos</h2>
+  <p class="ui-body-md ui-text-muted" style="margin:0;">Documentos públicos da organização.</p>
+  <div class="ui-row">
+    <a href="{% url 'transparency_portal:organization_documents' organization.id %}" class="ui-btn ui-btn--primary">
+      <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Ver documentos
+    </a>
+  </div>
+</section>

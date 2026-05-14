@@ -1,105 +1,41 @@
 {% extends "base.html" %}
-
-{% block title %}Recursos - Fontes de recurso{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-  Criar Nova Fonte de Recurso
-</p>
+{% block title %}Fonte de recurso — Portal SITTS{% endblock %}
 
-<nav class="flex mb-6" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-    </li>
-    <li>
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <a href="{% url 'accountability:sources-list' %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Fonte de Recurso</a>
+{% block content %}
+<section class="page ui-form" style="max-width: 720px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:sources-list' %}" class="ui-breadcrumb__item">Fontes de recurso</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">{% if source %}Atualizar{% else %}Nova fonte{% endif %}</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">{% if source %}Atualizar fonte{% else %}Criar nova fonte de recurso{% endif %}</h1>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Dados da fonte</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_name" class="ui-field__label">Nome</label>{{ form.name }}</div>
+        <div class="ui-field"><label for="id_document" class="ui-field__label">CPF ou CNPJ</label>{{ form.document }}<p class="ui-field__hint">Apenas números, sem pontuação.</p></div>
+        <div class="ui-field"><label for="id_origin" class="ui-field__label">Origem</label>{{ form.origin }}</div>
+        <div class="ui-field"><label for="id_category" class="ui-field__label">Categoria</label>{{ form.category }}</div>
       </div>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">
-          {% if source %}
-          Atualizar fonte
-          {% else %}
-          Criar nova fonte
-          {% endif %}
-        </span>
-      </div>
-    </li>
-  </ol>
-</nav>
+    </section>
 
-<form method="post" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
-  {% csrf_token %}
+    {% include 'commons/form-errors.html' with form=form %}
 
-  <div class="space-y-6">
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Dados da Fonte</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="id_name" class="block mb-2 text-base font-medium text-black">Nome da Fonte</label>
-          {{ form.name }}
-        </div>
-
-        <div>
-          <label for="id_document" class="block mb-2 text-base font-medium text-black">CPF ou CNPJ da fonte</label>
-          {{ form.document }}
-          <p class="mt-2 text-sm text-gray-400">
-            Escreva somente os números do documento, sem pontuação.
-          </p>
-        </div>
-
-        <div>
-          <label for="id_origin" class="block mb-2 text-base font-medium text-black">Origem</label>
-          {{ form.origin }}
-        </div>
-
-        <div>
-          <label for="id_category" class="block mb-2 text-base font-medium text-black">Categoria</label>
-          {{ form.category }}
-        </div>
-      </div>
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accountability:sources-list' %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">{% if source %}Atualizar fonte{% else %}Criar fonte{% endif %}</button>
     </div>
-  </div>
-
-  {% include 'commons/form-errors.html' with form=form %}
-
-  <div class="py-6">
-    <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'accountability:sources-list' %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-        </svg>
-        Voltar
-      </a>
-      <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-        </svg>
-        {% if source %}
-        Atualizar fonte
-        {% else %}
-        Criar fonte
-        {% endif %}
-      </button>
-    </div>
-  </div>
-</form>
-
+  </form>
+</section>
 {% endblock %}

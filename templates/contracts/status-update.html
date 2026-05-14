@@ -1,92 +1,44 @@
 {% extends "base.html" %}
 
-{% block title %}Contratos - Portal SITTS{% endblock %}
+{% block title %}Atualizar status — Portal SITTS{% endblock %}
 
 {% block content %}
+<section class="page ui-form" style="max-width: 720px;">
 
-{% load humanize %}
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Atualizar status</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Atualizar status</h1>
+  </header>
 
-<p class="text-3xl mb-4 font-bold">
-  Atualizar Status
-</p>
-
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Inicio
-      </a>
-    </li>
-    <li class="inline-flex items-center">
-      <a href="{% url 'contracts:contracts-list' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        Contratos
-      </a>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2">Atualizar Status</span>
-      </div>
-    </li>
-  </ol>
-</nav>
-
-<form method="post" id="status-form" class="p-8 max-w-2xl mx-auto">
-  <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+  <form method="post" id="status-form" class="ui-stack ui-stack--lg">
     {% csrf_token %}
 
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 m-4 border border-blue-200">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-sm">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-blue-800 mb-1">Status Atual do Contrato</p>
-          <p class="text-lg font-bold text-blue-900">{{ contract.status_label }}</p>
-        </div>
-      </div>
+    <div class="ui-card ui-card--soft">
+      <p class="ui-caption" style="margin:0 0 4px;">Status atual</p>
+      <p class="ui-display-sm" style="margin:0;">{{ contract.status_label }}</p>
     </div>
 
-    <div class="bg-white px-4 mb-6">
-      <div class="flex items-center gap-2 mb-4">
-        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-        </svg>
-        <label for="id_status" class="text-lg font-semibold text-gray-900">Alterar Status para:</label>
-      </div>
-      
-      <div class="relative">
+    <div class="ui-card ui-stack ui-stack--md">
+      <div class="ui-field">
+        <label for="id_status" class="ui-field__label">Alterar status para</label>
         {{ form.status }}
       </div>
-    </div>    
-  </div>
-
-  <div class="py-6">
-    <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-        </svg>
-        Voltar
-      </a>
-      <button type="submit" form="status-form" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-        </svg>
-        Atualizar Status
-      </button>
     </div>
-  </div>
-</form>
 
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Atualizar status</button>
+    </div>
+  </form>
+</section>
 {% endblock %}

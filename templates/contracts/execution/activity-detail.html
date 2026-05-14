@@ -1,153 +1,76 @@
 {% extends "base.html" %}
-
-{% block title %}Prestação - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-    Atividade Executada
-</p>
+{% block title %}Atividade — Portal SITTS{% endblock %}
 
-<!-- Breadcrumb -->
-<nav class="flex mb-6" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Contratos</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-detail' activity.execution.contract.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">{{ activity.execution.contract.trailing_code }}</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:executions-detail' activity.execution.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Execução {{ activity.execution.month }}/{{ activity.execution.year }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Atividade</span>
-        </div>
-      </li>
-    </ol>
-</nav>
+{% block content %}
+<section class="page ui-form">
 
-<form method="post" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' activity.execution.contract.id %}" class="ui-breadcrumb__item">{{ activity.execution.contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:executions-detail' activity.execution.id %}" class="ui-breadcrumb__item">Execução {{ activity.execution.month }}/{{ activity.execution.year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Atividade</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Atividade executada</h1>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
     {% csrf_token %}
 
-    <div class="space-y-6">
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4">Detalhes da Atividade Desenvolvida</h2>
-            <div class="space-y-4">
-                <div>
-                    <label for="id_step" class="block mb-2 text-base font-medium text-black">Etapa Relacionada</label>
-                    {{ form.step }}
-                    <p class="mt-2 text-sm text-gray-500">A atividade desenvolvida deve estar relacionada à uma etapa do projeto</p>
-                </div>
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Detalhes da atividade</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_step" class="ui-field__label">Etapa relacionada</label>{{ form.step }}</div>
+        <div class="ui-field"><label for="id_name" class="ui-field__label">Atividade</label>{{ form.name }}</div>
+        <div class="ui-field"><label for="id_description" class="ui-field__label">Descrição</label>{{ form.description }}</div>
+      </div>
+    </section>
 
-                <div>
-                    <label for="id_name" class="block mb-2 text-base font-medium text-black">Atividade</label>
-                    {{ form.name }}
-                </div>
-
-                <div>
-                    <label for="id_description" class="block mb-2 text-base font-medium text-black">Descrição</label>
-                    {{ form.description }}
-                </div>
-            </div>
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Porcentagem executada</h2>
+      <div class="ui-row" style="gap: 16px;">
+        <input id="percentage-range" type="range" name="percentage" min="0" max="100" value="{{ activity.percentage }}" class="execution-range" oninput="updateSlider(this)">
+        <div style="position: relative;">
+          <input id="percentage-input" type="number" min="0" max="100" value="{{ activity.percentage }}" class="ui-input" style="width: 96px; padding-right: 32px; text-align: center;" oninput="updateInput(this)">
+          <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--color-body); pointer-events: none;">%</span>
         </div>
-
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4">Porcentagem Executada</h2>
-            <div class="flex items-center space-x-4">
-                <input
-                    id="percentage-range" 
-                    type="range" 
-                    name="percentage"
-                    min="0" 
-                    max="100" 
-                    value="{{ activity.percentage }}" 
-                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    style="background: linear-gradient(to right, #3b82f6 {{ activity.percentage }}%, #e5e7eb {{ activity.percentage }}%);"
-                    oninput="updateSlider(this)"
-                >
-                
-                <div class="relative">
-                    <input 
-                        id="percentage-input" 
-                        type="number" 
-                        min="0" 
-                        max="100" 
-                        value="{{ activity.percentage }}"
-                        class="w-20 border border-gray-300 rounded-lg p-1 text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        oninput="updateInput(this)"
-                    >
-                    <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
-                </div>
-            </div>
-        </div>
-    </div>
+      </div>
+    </section>
 
     {% include 'commons/form-errors.html' with form=form %}
 
-    <div class="py-6">
-        <div class="flex justify-end items-center gap-4">
-            <a href="{% url 'contracts:executions-detail' activity.execution.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
-                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-                </svg>
-                Voltar
-            </a>
-            <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
-                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-                </svg>
-                Atualizar Atividade
-            </button>
-        </div>
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:executions-detail' activity.execution.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Atualizar atividade</button>
     </div>
-</form>
+  </form>
+</section>
+
+<style>
+  .execution-range { flex: 1; height: 6px; appearance: none; border-radius: var(--rounded-pill); background: var(--color-canvas-soft); cursor: pointer; }
+  .execution-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--color-ink); cursor: pointer; }
+  .execution-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--color-ink); cursor: pointer; border: 0; }
+</style>
 
 <script>
-    function updateSlider(range) {
-      const value = range.value;
-      const percentage = value + "%";
-      range.style.background = `linear-gradient(to right, #3b82f6 ${percentage}, #e5e7eb ${percentage})`;
-      document.getElementById("percentage-input").value = value;
-    }
-  
-    function updateInput(input) {
-      let value = input.value;
-      if (value > 100) value = 100;
-      if (value < 0) value = 0;
-      input.value = value;
-      document.getElementById("percentage-range").value = value;
-      updateSlider(document.getElementById("percentage-range"));
-    }
-  </script>
-  
+  function updateSlider(range) {
+    var value = range.value;
+    range.style.background = `linear-gradient(to right, var(--color-ink) ${value}%, var(--color-canvas-soft) ${value}%)`;
+    document.getElementById('percentage-input').value = value;
+  }
+  function updateInput(input) {
+    var v = Math.max(0, Math.min(100, parseInt(input.value || 0, 10)));
+    input.value = v;
+    document.getElementById('percentage-range').value = v;
+    updateSlider(document.getElementById('percentage-range'));
+  }
+  document.addEventListener('DOMContentLoaded', function () { updateSlider(document.getElementById('percentage-range')); });
+</script>
 {% endblock %}

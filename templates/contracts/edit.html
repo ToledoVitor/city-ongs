@@ -1,543 +1,203 @@
 {% extends "base.html" %}
-
-{% block title %}Contratos - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-  Editar Contrato
-</p>
+{% block title %}Editar contrato — Portal SITTS{% endblock %}
 
-<nav class="flex mb-6" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-    </li>
-    <li class="inline-flex items-center">
-      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        Contratos
-      </a>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Editar Contrato</span>
+{% block content %}
+<section class="page ui-form">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">Contrato</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Editar</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Editar contrato</h1>
+  </header>
+
+  <form method="post" enctype="multipart/form-data" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Detalhes do contrato</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_name" class="ui-field__label">Nome do contrato</label>{{ form.name }}</div>
+        <div class="ui-field"><label for="id_concession_type" class="ui-field__label">Tipo de concessão</label>{{ form.concession_type }}</div>
+        <div class="ui-grid-2">
+          <div class="ui-field">
+            <label for="id_start_of_vigency" class="ui-field__label">Início da vigência</label>
+            <input id="id_start_of_vigency" name="start_of_vigency" type="text" class="ui-input" placeholder="dd/mm/aaaa" required datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt" value="{{ form.start_of_vigency.value|date:'d/m/Y' }}">
+          </div>
+          <div class="ui-field">
+            <label for="id_end_of_vigency" class="ui-field__label">Fim da vigência</label>
+            <input id="id_end_of_vigency" name="end_of_vigency" type="text" class="ui-input" placeholder="dd/mm/aaaa" required datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt" value="{{ form.end_of_vigency.value|date:'d/m/Y' }}">
+          </div>
+        </div>
+        <div class="ui-field"><label for="id_objective" class="ui-field__label">Objetivo do contrato</label>{{ form.objective }}</div>
       </div>
-    </li>
-  </ol>
-</nav>
+    </section>
 
-<form method="post" enctype="multipart/form-data" class="w-full max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
-  {% csrf_token %}
-  <div class="space-y-6">
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Detalhes do Contrato</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="id_name" class="block mb-2 text-base font-medium text-black">Nome do Contrato</label>
-          {{ form.name }}
-        </div>
-
-        <div>
-          <label for="id_concession_type" class="block mb-2 text-base font-medium text-black">Tipo de Concessão</label>
-          {{ form.concession_type }}
-        </div>
-
-        <div>
-          <label for="id_start_of_vigency" class="block mb-2 text-base font-medium text-black">Período de Vigência</label>
-          <div class="grid gap-6 mb-6 md:grid-cols-2">
-            <div class="relative">
-              <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                </svg>
-              </div>
-              <input
-                id="id_start_of_vigency"
-                name="start_of_vigency"
-                type="text"
-                class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
-                placeholder="Início da Vigência"
-                required
-                datepicker
-                datepicker-autohide
-                datepicker-format="dd/mm/yyyy"
-                datepicker-language="pt"
-                value="{{ form.start_of_vigency.value|date:'d/m/Y' }}"
-              >
-            </div>
-
-            <div class="relative">
-              <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                </svg>
-              </div>
-              <input
-                id="id_end_of_vigency"
-                name="end_of_vigency"
-                type="text"
-                class="border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
-                placeholder="Fim da Vigência"
-                required
-                datepicker
-                datepicker-autohide
-                datepicker-format="dd/mm/yyyy"
-                datepicker-language="pt"
-                value="{{ form.end_of_vigency.value|date:'d/m/Y' }}"
-              >
-            </div>
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Convênios e leis</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_bidding" class="ui-field__label">Licitação</label>{{ form.bidding }}</div>
+        <div class="ui-grid-2">
+          <div class="ui-field"><label for="id_law_num" class="ui-field__label">Número da lei</label>{{ form.law_num }}</div>
+          <div class="ui-field">
+            <label for="id_law_date" class="ui-field__label">Data da lei</label>
+            <input id="id_law_date" name="law_date" type="text" class="ui-input" placeholder="dd/mm/aaaa" datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" value="{{ form.law_date.value|date:'d/m/Y' }}">
           </div>
         </div>
-
-        <div>
-          <label for="id_objective" class="block mb-2 text-base font-medium text-black">Objetivo do Contrato</label>
-          {{ form.objective }}
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Convênios e Leis</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="id_bidding" class="block mb-2 text-base font-medium text-black">Licitação</label>
-          {{ form.bidding }}
-        </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Número da Lei</label>
-            {{ form.law_num }}
-          </div>
-
-          <div class="relative">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-              <svg class="mt-8 w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-              </svg>
-            </div>
-            <input
-              id="id_law_date"
-              name="law_date"
-              type="text"
-              class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
-              placeholder="Data da Lei"
-              datepicker
-              datepicker-autohide
-              datepicker-format="dd/mm/yyyy"
-              value="{{ form.law_date.value|date:'d/m/Y' }}"
-            >
-          </div>
-        </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Número do Convênio</label>
-            {{ form.agreement_num }}
-          </div>
-
-          <div class="relative">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-              <svg class="mt-8 w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-              </svg>
-            </div>
-            <input
-              id="id_agreement_date"
-              name="agreement_date"
-              type="text"
-              class="mt-8 border bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:ring-blue-500 focus:border-blue-500 text-sm rounded-lg block w-full ps-10 p-2.5"
-              placeholder="Data do Convênio"
-              datepicker
-              datepicker-autohide
-              datepicker-format="dd/mm/yyyy"
-              datepicker-language="pt"
-              value="{{ form.agreement_date.value|date:'d/m/Y' }}"
-            >
+        <div class="ui-grid-2">
+          <div class="ui-field"><label for="id_agreement_num" class="ui-field__label">Número do convênio</label>{{ form.agreement_num }}</div>
+          <div class="ui-field">
+            <label for="id_agreement_date" class="ui-field__label">Data do convênio</label>
+            <input id="id_agreement_date" name="agreement_date" type="text" class="ui-input" placeholder="dd/mm/aaaa" datepicker datepicker-autohide datepicker-format="dd/mm/yyyy" datepicker-language="pt" value="{{ form.agreement_date.value|date:'d/m/Y' }}">
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Partes Interessadas</h2>
-      <div class="space-y-4">
-        <div class="flex items-start">
-          <a href="{% url 'contracts:companies-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Não achou a parte? Cadastre uma empresa</a>
+    <section class="ui-card ui-stack ui-stack--lg">
+      <header class="ui-row ui-row--between" style="gap: 8px; flex-wrap: wrap;">
+        <h2 class="ui-display-sm" style="margin:0;">Partes interessadas</h2>
+        <a href="{% url 'contracts:companies-create' %}" target="_blank" rel="noopener" class="ui-link ui-link--muted">Cadastrar nova empresa →</a>
+      </header>
+      <div class="ui-grid-2">
+        <div class="ui-field"><label class="ui-field__label">Empresa contratante</label>{{ form.contractor_company }}</div>
+        <div class="ui-field"><label class="ui-field__label">Gestora da contratante</label>{{ form.contractor_manager }}</div>
+        <div class="ui-field"><label class="ui-field__label">Empresa contratada</label>{{ form.hired_company }}</div>
+        <div class="ui-field"><label class="ui-field__label">Gestora da contratada</label>{{ form.hired_manager }}</div>
+      </div>
+    </section>
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Valores</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field">
+          <label for="id_total_value" class="ui-field__label">Valor do contrato (R$)</label>
+          <input type="text" id="id_total_value" name="total_value" placeholder="0,00" oninput="formatMoney(this)" class="ui-input" required value="{{ form.total_value.value }}" />
         </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Empresa Contratante</label>
-            {{ form.contractor_company }}
-          </div>
-
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Gestora da Contratante</label>
-            {{ form.contractor_manager }}
-          </div>
+        <div class="ui-field">
+          <label for="id_municipal_value" class="ui-field__label">Valor repassado pelo município (R$)</label>
+          <input type="text" id="id_municipal_value" name="municipal_value" placeholder="0,00" oninput="formatMoney(this)" class="ui-input" required value="{{ form.municipal_value.value }}" />
         </div>
-
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Empresa Contratada</label>
-            {{ form.hired_company }}
-          </div>
-
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Gestora da Contratada</label>
-            {{ form.hired_manager }}
-          </div>
+        <div class="ui-field">
+          <label for="id_counterpart_value" class="ui-field__label">Contrapartida da contratada (R$)</label>
+          <input type="text" id="id_counterpart_value" name="counterpart_value" placeholder="0,00" oninput="formatMoney(this)" class="ui-input" required value="{{ form.counterpart_value.value }}" />
+          <p class="ui-field__hint">Apenas números — separe centavos por vírgula.</p>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Valores</h2>
-      <div class="space-y-4">
-
-        <div>
-          <label for="id_total_value" class="block mb-2 text-base font-medium text-black">Valor do Contrato</label>
-          <div class="relative w-full">
-            <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              id="id_total_value"
-              name="total_value"
-              placeholder="000,00"
-              oninput="formatMoney(this)"
-              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-              required
-              value="{{ form.total_value.value }}"
-            />
-          </div>
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Responsáveis</h2>
+      <div class="ui-grid-2">
+        <div class="ui-field">
+          <label class="ui-field__label">Responsável contábil</label>
+          {{ form.accountability_autority }}
+          <a href="{% url 'accounts:organization-accountants-create' %}" target="_blank" rel="noopener" class="ui-link ui-link--muted" style="font-size: 13px;">Cadastrar contador →</a>
         </div>
-
-        <div>
-          <label for="id_municipal_value" class="block mb-2 text-base font-medium text-black">Valor Repassado pelo Município</label>
-          <div class="relative w-full">
-            <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              id="id_municipal_value"
-              name="municipal_value"
-              placeholder="000,00"
-              oninput="formatMoney(this)"
-              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-              required
-              value="{{ form.municipal_value.value }}"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label for="id_counterpart_value" class="block mb-2 text-base font-medium text-black">Valor Repassado por Contrapartida da Contratada</label>
-          <div class="relative w-full">
-            <div class="absolute inset-y-0 start-0 top-0 flex items-center ps-3.5 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              id="id_counterpart_value"
-              name="counterpart_value"
-              placeholder="000,00"
-              oninput="formatMoney(this)"
-              class="block p-2.5 w-full z-20 ps-10 text-sm rounded-s-lg border-e-2 border focus:ring-blue-500 bg-gray-300 border-e-gray-700 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-              required
-              value="{{ form.counterpart_value.value }}"
-            />
-          </div>
-          <p id="helper-text-explanation" class="mt-2 text-sm text-gray-400">Escreva somente os números, sem o R$, separados por vírgula</p>
+        <div class="ui-field">
+          <label class="ui-field__label">Responsável fiscal</label>
+          {{ form.supervision_autority }}
+          <a href="{% url 'accounts:folder-managers-create' %}" target="_blank" rel="noopener" class="ui-link ui-link--muted" style="font-size: 13px;">Cadastrar fiscal →</a>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Responsáveis</h2>
-      <div class="space-y-4">
-        <div class="grid gap-6 mb-6 md:grid-cols-2">
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Responsável Contábil</label>
-            {{ form.accountability_autority }}
-            <a href="{% url 'accounts:organization-accountants-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar Contador</a>
-          </div>
+    <section class="ui-card ui-stack ui-stack--md">
+      <h2 class="ui-display-sm" style="margin:0;">Pasta gestora</h2>
+      <div class="ui-field">{{ form.area }}</div>
+    </section>
 
-          <div class="relative">
-            <label class="block mb-2 text-base font-medium text-black">Responsável Fiscal</label>
-            {{ form.supervision_autority }}
-            <a href="{% url 'accounts:folder-managers-create' %}" class="text-sm hover:underline text-blue-500" target="_blank">Cadastrar Fiscal</a>
+    <section class="ui-card ui-stack ui-stack--md">
+      <h2 class="ui-display-sm" style="margin:0;">Arquivo</h2>
+      {% if contract.file %}
+        <div class="ui-card ui-card--soft" style="display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap:wrap; padding: 14px 16px;">
+          <div>
+            <p class="ui-body-md-strong" style="margin:0;">Arquivo atual</p>
+            <p class="ui-caption" style="margin:0;">{{ contract.file.name|slice:"50:" }}</p>
           </div>
+          <a href="{{ contract.file.url }}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--sm">Visualizar</a>
+        </div>
+        <p class="ui-caption" style="margin:0;">Selecione um novo arquivo abaixo para substituir.</p>
+      {% endif %}
+      <div id="file-drop-zone" class="file-drop-zone">
+        <input type="file" id="id_file" name="file" accept=".pdf" class="file-drop-zone__input" />
+        <div id="file-drop-content" class="file-drop-zone__content">
+          <svg class="file-drop-zone__icon" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="ui-body-md-strong" style="margin: 8px 0 0;">Arraste o PDF aqui</p>
+          <p class="ui-caption" style="margin: 4px 0 0;">ou clique para selecionar · PDF até 10 MB</p>
+        </div>
+        <div id="file-preview" class="file-drop-zone__preview hidden">
+          <svg class="file-drop-zone__icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+          </svg>
+          <p class="ui-body-md-strong" style="margin: 8px 0 0;" id="file-name"></p>
+          <p class="ui-caption" style="margin: 4px 0 0;" id="file-size"></p>
+          <button type="button" id="remove-file" class="ui-btn ui-btn--subtle ui-btn--sm" style="margin-top: 12px;">Remover arquivo</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Pasta Gestora</h2>
-      <div class="space-y-4">
-        <div>
-          {{ form.area }}
-        </div>
-      </div>
-    </div>
+    {% include 'commons/form-errors.html' with form=form %}
 
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-xl font-semibold mb-4">Arquivo</h2>
-      <div class="space-y-4">
-        {% if contract.file %}
-        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="h-8 w-8 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <p class="text-sm font-medium text-gray-900">Arquivo atual</p>
-                <p class="text-xs text-gray-500">{{ contract.file.name|slice:"50:" }}</p>
-              </div>
-            </div>
-            <a href="{{ contract.file.url }}" target="_blank" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Visualizar
-            </a>
-          </div>
-          <p class="mt-2 text-xs text-gray-600">Selecione um novo arquivo abaixo para substituir</p>
-        </div>
-        {% endif %}
-        <div>
-          <div id="file-drop-zone" class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors duration-200 cursor-pointer bg-gray-50 hover:bg-blue-50">
-            <input type="file" id="id_file" name="file" accept=".pdf" class="hidden" />
-            <div id="file-drop-content">
-              <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <div class="mt-4">
-                <label for="id_file" class="cursor-pointer">
-                  <span class="mt-2 block text-sm font-medium text-gray-900">
-                    Arraste e solte o arquivo PDF aqui
-                  </span>
-                  <span class="mt-1 block text-xs text-gray-500">
-                    ou clique para selecionar
-                  </span>
-                </label>
-              </div>
-              <p class="mt-2 text-xs text-gray-500">PDF até 10MB</p>
-            </div>
-            <div id="file-preview" class="hidden">
-              <svg class="mx-auto h-12 w-12 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-              </svg>
-              <p class="mt-2 text-sm font-medium text-gray-900" id="file-name"></p>
-              <p class="mt-1 text-xs text-gray-500" id="file-size"></p>
-              <button type="button" id="remove-file" class="mt-3 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Remover arquivo
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="ui-row ui-row--end" style="gap: 8px; flex-wrap: wrap;">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Salvar alterações</button>
     </div>
-  </div>
-
-  {% include 'commons/form-errors.html' with form=form %}
-
-  <div class="py-6">
-    <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-        </svg>
-        Voltar
-      </a>
-      <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors duration-200">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-        </svg>
-        Salvar Alterações
-      </button>
-    </div>
-  </div>
-</form>
+  </form>
+</section>
 
 <script>
   function formatMoney(input) {
-    let value = input.value.replace(/\D/g, "");
-
-    if (!value) {
-      input.value = "0"
-      return
-    }
-
-    value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
+    var value = input.value.replace(/\D/g, '');
+    if (!value) { input.value = '0,00'; return; }
+    value = (parseFloat(value) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     input.value = value;
   }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const startOfVigencyInput = document.getElementById('id_start_of_vigency');
-    const endOfVigencyInput = document.getElementById('id_end_of_vigency');
-    const lawDateInput = document.getElementById('id_law_date');
-    const agreementDateInput = document.getElementById('id_agreement_date');
-
-    startOfVigencyInput.addEventListener('input', (e) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 8) value = value.slice(0, 8);
-
-      if (value.length > 4) {
-        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-      } else if (value.length > 2) {
-        value = `${value.slice(0, 2)}/${value.slice(2)}`;
-      }
-
-      e.target.value = value;
+  document.addEventListener('DOMContentLoaded', function () {
+    ['id_total_value', 'id_municipal_value', 'id_counterpart_value'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.value) formatMoney(el);
     });
 
-    endOfVigencyInput.addEventListener('input', (e) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 8) value = value.slice(0, 8);
-
-      if (value.length > 4) {
-        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-      } else if (value.length > 2) {
-        value = `${value.slice(0, 2)}/${value.slice(2)}`;
-      }
-
-      e.target.value = value;
-    });
-
-    lawDateInput.addEventListener('input', (e) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 8) value = value.slice(0, 8);
-
-      if (value.length > 4) {
-        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-      } else if (value.length > 2) {
-        value = `${value.slice(0, 2)}/${value.slice(2)}`;
-      }
-
-      e.target.value = value;
-    });
-
-    agreementDateInput.addEventListener('input', (e) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 8) value = value.slice(0, 8);
-
-      if (value.length > 4) {
-        value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
-      } else if (value.length > 2) {
-        value = `${value.slice(0, 2)}/${value.slice(2)}`;
-      }
-
-      e.target.value = value;
-    });
-
-    const counterpartValueInput = document.getElementById('id_counterpart_value');
-    const municipalValueInput = document.getElementById('id_municipal_value');
-    const totalValueInput = document.getElementById('id_total_value');
-
-    formatMoney(counterpartValueInput);
-    formatMoney(municipalValueInput);
-    formatMoney(totalValueInput);
-
-    const dropZone = document.getElementById('file-drop-zone');
-    const fileInput = document.getElementById('id_file');
-    const fileDropContent = document.getElementById('file-drop-content');
-    const filePreview = document.getElementById('file-preview');
-    const fileName = document.getElementById('file-name');
-    const fileSize = document.getElementById('file-size');
-    const removeFileBtn = document.getElementById('remove-file');
-
-    function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    function maskDate(el) {
+      el.addEventListener('input', function (e) {
+        var value = e.target.value.replace(/\D/g, '');
+        if (value.length > 8) value = value.slice(0, 8);
+        if (value.length > 4) value = value.slice(0,2) + '/' + value.slice(2,4) + '/' + value.slice(4);
+        else if (value.length > 2) value = value.slice(0,2) + '/' + value.slice(2);
+        e.target.value = value;
+      });
     }
-
-    function handleFile(file) {
-      if (file && file.type === 'application/pdf') {
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-        fileDropContent.classList.add('hidden');
-        filePreview.classList.remove('hidden');
-      }
-    }
-
-    dropZone.addEventListener('click', function(e) {
-      if (e.target !== removeFileBtn && !removeFileBtn.contains(e.target)) {
-        fileInput.click();
-      }
+    ['id_start_of_vigency','id_end_of_vigency','id_law_date','id_agreement_date'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) maskDate(el);
     });
 
-    fileInput.addEventListener('change', function(e) {
-      if (e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
-      }
-    });
+    var dropZone = document.getElementById('file-drop-zone');
+    var fileInput = document.getElementById('id_file');
+    var fileDropContent = document.getElementById('file-drop-content');
+    var filePreview = document.getElementById('file-preview');
+    var fileName = document.getElementById('file-name');
+    var fileSize = document.getElementById('file-size');
+    var removeFileBtn = document.getElementById('remove-file');
+    if (!dropZone || !fileInput) return;
 
-    dropZone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.classList.add('border-blue-500', 'bg-blue-50');
-    });
+    function formatFileSize(b){ if(b===0) return '0 Bytes'; var k=1024, s=['Bytes','KB','MB','GB']; var i=Math.floor(Math.log(b)/Math.log(k)); return Math.round(b/Math.pow(k,i)*100)/100+' '+s[i]; }
+    function handleFile(f){ if(f && f.type==='application/pdf'){ fileName.textContent=f.name; fileSize.textContent=formatFileSize(f.size); fileDropContent.classList.add('hidden'); filePreview.classList.remove('hidden'); } }
 
-    dropZone.addEventListener('dragleave', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        fileInput.files = files;
-        handleFile(files[0]);
-      }
-    });
-
-    removeFileBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      fileInput.value = '';
-      fileDropContent.classList.remove('hidden');
-      filePreview.classList.add('hidden');
-    });
+    dropZone.addEventListener('click', function (e) { if (e.target !== removeFileBtn && !(removeFileBtn && removeFileBtn.contains(e.target))) fileInput.click(); });
+    fileInput.addEventListener('change', function (e) { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
+    dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('file-drop-zone--active'); });
+    dropZone.addEventListener('dragleave', function (e) { e.preventDefault(); dropZone.classList.remove('file-drop-zone--active'); });
+    dropZone.addEventListener('drop', function (e) { e.preventDefault(); dropZone.classList.remove('file-drop-zone--active'); var f=e.dataTransfer.files; if(f.length){fileInput.files=f; handleFile(f[0]);} });
+    if (removeFileBtn) removeFileBtn.addEventListener('click', function (e) { e.stopPropagation(); fileInput.value=''; fileDropContent.classList.remove('hidden'); filePreview.classList.add('hidden'); });
   });
 </script>
-
 {% endblock %}

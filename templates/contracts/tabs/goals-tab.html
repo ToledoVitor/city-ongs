@@ -1,432 +1,189 @@
 {% load humanize %}
 
-<div class="space-y-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-4">
-    <div class="flex items-center gap-2">
-      <div class="p-1.5 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg">
-        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-xl font-bold text-gray-900">Metas do Contrato</h2>
-        <p class="text-xs text-gray-600">Objetivos e metas estabelecidas para o projeto</p>
-      </div>
+<div class="ui-stack ui-stack--lg">
+  <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+    <div class="ui-stack ui-stack--xxs">
+      <h2 class="ui-display-sm" style="margin:0;">Metas do contrato</h2>
+      <p class="ui-body-sm ui-text-muted" style="margin:0;">Objetivos e metas estabelecidas para o projeto.</p>
     </div>
-    
     {% if contract.is_on_planning %}
-      <a
-        href="{% url 'contracts:contracts-goals-create' contract.id %}"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      <a href="{% url 'contracts:contracts-goals-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">
+        <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
-        Adicionar Meta
+        Adicionar meta
       </a>
     {% endif %}
-  </div>
+  </header>
 
-  <!-- Goals List -->
-  <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-    <div class="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-500 text-white sticky top-0 z-30">
+  {% if contract.goals.count %}
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <thead>
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[180px]">
-              Ações
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[30%]">
-              Meta
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[40%]">
-              Objetivo
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[120px]">
-              Status
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-[140px]">
-              Etapas
-            </th>
+            <th style="width: 30%">Meta</th>
+            <th style="width: 38%">Objetivo</th>
+            <th style="width: 14%">Status</th>
+            <th style="width: 250px"></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-            {% if contract.goals.count %}
-              {% for goal in contract.goals.all %}
-                <tr class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-2">
-                      {% if contract.is_on_planning and not user.is_committee_member %}
-                        <a href="{% url 'contracts:contracts-goals-update' contract.id goal.id %}"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-                          </svg>
-                          Editar
-                        </a>
-                      {% endif %}
-
-                      {% if user.can_change_statuses and contract.is_on_planning %}
-                        <button
-                          data-modal-target="goals-modal-{{ goal.id}}"
-                          data-modal-toggle="goals-modal-{{ goal.id}}"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
-                          type="button"
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-width="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4"/>
-                          </svg>
-                          Avaliar
-                        </button>
-                      {% else %}
-                        <button
-                          data-modal-target="goals-modal-{{ goal.id}}"
-                          data-modal-toggle="goals-modal-{{ goal.id}}"
-                          type="button"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                          </svg>
-                          Detalhes
-                        </button>
-                      {% endif %}
-                    </div>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <div class="text-sm font-semibold text-gray-900 truncate max-w-xs" title="{{ goal.name }}">{{ goal.name }}</div>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <div class="text-sm text-gray-700 truncate max-w-md" title="{{ goal.objective }}">{{ goal.objective }}</div>
-                  </td>
-
-                  <td class="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
-                    {% if goal.status == "ANALYZING" %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-300 text-blue-800 text-xs font-bold uppercase tracking-wide shadow-sm">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                        </svg>
-                        Em análise
-                      </span>
-                    {% elif goal.status == "CORRECTING" %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wide shadow-sm">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
-                        </svg>
-                        Em correção
-                      </span>
-                    {% elif goal.status == "APPROVED" %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 text-green-800 text-xs font-bold uppercase tracking-wide shadow-sm">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        Aprovado
-                      </span>
-                    {% elif goal.status == "APPROVED_WITH_PENDENCE" %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-100 to-amber-100 border border-yellow-300 text-yellow-800 text-xs font-bold uppercase tracking-wide shadow-sm">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        Pendências
-                      </span>
-                    {% elif goal.status == "REJECTED" %}
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-100 to-pink-100 border border-red-300 text-red-800 text-xs font-bold uppercase tracking-wide shadow-sm">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                        Rejeitado
-                      </span>
-                    {% endif %}
-                  </td>
-                  
-                  <td class="px-4 py-4 w-[140px]">
-                    <button 
-                      class="expand-btn text-blue-600 hover:underline flex items-center" 
-                      data-target="#details-{{ goal.id }}"
-                    >
-                      Ver Etapas
-                      <svg data-accordion-icon class="ml-1 w-4 h-4 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr id="details-{{ goal.id }}" class="hidden bg-gray-50">
-                  <td colspan="5" class="px-8 py-6">
-                    {% if goal.steps.count %}
-                      <div class="space-y-4">
-                        {% for step in goal.steps.all %}
-                          <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div class="space-y-1">
-                                <p class="text-xs font-bold text-black uppercase">Etapa</p>
-                                <p class="text-sm text-gray-700">{{ step.name }}</p>
-                              </div>
-                              <div class="space-y-1">
-                                <p class="text-xs font-bold text-black uppercase">Objetivo</p>
-                                <p class="text-sm text-gray-700">{{ step.objective }}</p>
-                              </div>
-                              <div class="space-y-1">
-                                <p class="text-xs font-bold text-black uppercase">Metodologia</p>
-                                <p class="text-sm text-gray-700">{{ step.methodology }}</p>
-                              </div>
-                              <div class="space-y-1">
-                                <p class="text-xs font-bold text-black uppercase">Recursos</p>
-                                <p class="text-sm text-gray-700">{{ step.resources|default:"n/a" }}</p>
-                              </div>
-                            </div>
-                          </div>
-                        {% endfor %}
-                      </div>
-                    {% else %}
-                      <div class="text-center py-4 text-gray-500">
-                        Sem etapas cadastradas
-                      </div>
-                    {% endif %}
-                  </td>
-                </tr>
-
-                {% if user.can_change_statuses and contract.is_on_planning %}
-                <!-- goals approve modal -->
-                <div
-                    id="goals-modal-{{ goal.id }}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="
-                      hidden
-                      overflow-y-auto
-                      overflow-x-hidden
-                      fixed
-                      top-0
-                      right-0
-                      left-0
-                      z-50
-                      justify-center
-                      items-center
-                      w-full
-                      md:inset-0
-                      h-[calc(100%-1rem)]
-                      max-h-full
-                    "
-                >
-                  <div class="relative p-4 w-full max-w-md max-h-full">
-                      <!-- Modal content -->
-                      <div class="relative rounded-lg shadow bg-gray-300">
-                        <!-- Modal header -->
-                          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-600">
-                              <h3 class="text-xl font-semibold text-black">
-                                  Selecione uma opção
-                              </h3>
-                              <button
-                                type="button"
-                                class="
-                                  end-2.5
-                                  text-gray-400
-                                  bg-transparent
-                                  rounded-lg
-                                  text-sm
-                                  w-6
-                                  h-6
-                                  ms-auto
-                                  inline-flex
-                                  justify-center
-                                  items-center
-                                  hover:bg-gray-600
-                                  hover:text-black
-                                "
-                                data-modal-hide="goals-modal-{{ goal.id }}"
-                              >
-                                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
-                          </div>
-                          <!-- Modal body -->
-                          <div class="p-4 md:p-5">
-                              <form class="space-y-4"  method="post">
-
-                                  <div>
-                                      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                                      <input type="hidden" name="form_type" value="goals_modal">
-                                      <input type="hidden" name="goal_id" value="{{ goal.id }}">
-
-                                      <label for="status" class="block mb-2 text-sm font-medium text-black">Escolha uma opção</label>
-                                      <select
-                                          id="goal-status-select"
-                                          name="status"
-                                          class="
-                                            border
-                                            text-sm
-                                            rounded-lg
-                                            block
-                                            w-full
-                                            p-2.5
-                                            bg-gray-50
-                                            border-gray-600
-                                            placeholder-gray-400
-                                            text-black
-                                            focus:ring-blue-500
-                                            focus:border-blue-500
-                                          "
-                                          {% if not user.can_change_statuses %}
-                                          disabled
-                                          {% endif %}
-                                      >
-                                        <option value="ANALYZING">Em análise</option>
-                                        <option value="APPROVED">Aprovado</option>
-                                        <option value="APPROVED_WITH_PENDENCE">Pendências</option>
-                                        <option value="CORRECTING">Corrigir</option>
-                                        <option value="REJECTED">Rejeitado</option>
-                                      </select>
-                                  </div>
-
-                                  <hr class="h-px my-4 border-0 bg-gray-500">
-
-                                  <b class="mt-2 inline-flex text-center">HISTÓRICO DE COMENTÁRIOS</b>
-
-                                  <div class="h-64 w-full overflow-y-scroll rounded-lg p-4">
-                                    {% if not goal.last_reviews %}
-                                      <div class="flex items-start gap-2.5 mb-4">
-                                        <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                          <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                          <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                                              <span class="text-sm font-semibold text-black">----</span>
-                                              <span class="text-sm font-normal text-gray-600">00:00</span>
-                                          </div>
-                                          <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                            <p class="text-sm font-normal text-black">Sem nenhum comentário...</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    {% endif %}
-
-                                    {% for review in goal.last_reviews %}
-                                      {% if review.reviewer.id == user.id%}
-                                        <div class="flex items-start gap-2.5 mb-4 flex-row-reverse">
-                                          <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                          </svg>
-                                          <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                            <div class="flex items-center justify-end space-x-2 rtl:space-x-reverse">
-                                              <span class="text-sm font-normal text-gray-600">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
-                                              <span class="text-sm font-semibold text-black">{{ review.reviewer.get_full_name }}</span>
-                                            </div>
-                                            <div class="flex flex-col leading-1.5 p-4 border border-gray-200 bg-blue-100 rounded-b-xl rounded-tl-xl">
-                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      {% else %}
-                                        <div class="flex items-start gap-2.5 mb-4">
-                                          <svg class="w-6 h-6 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
-                                          </svg>
-                                          <div class="flex flex-col gap-1 w-full max-w-[320px]">
-                                            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                                                <span class="text-sm font-semibold text-black">{{ review.created_at|time:"H:i" }} - {{ review.created_at|date:"d/m/Y" }}</span>
-                                                <span class="text-sm font-normal text-gray-600">{{ review.reviewer.get_full_name }}</span>
-                                            </div>
-                                            <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl">
-                                              <p class="text-sm font-normal text-black break-words">{{ review.comment }}</p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      {% endif %}
-                                    {% endfor %}
-                                  </div>
-
-                                  <div>
-                                      <label for="comment" class="block mb-2 text-sm font-medium text-black">Comentários</label>
-                                      <textarea
-                                          id="comment"
-                                          name="comment"
-                                          rows="4"
-                                          maxlength="254"
-                                          class="
-                                            block
-                                            p-2.5
-                                            w-full
-                                            text-sm
-                                            rounded-lg
-                                            border
-                                            border-gray-600
-                                            placeholder-gray-400
-                                            text-black
-                                            focus:ring-blue-500
-                                            focus:border-blue-500
-                                          "
-                                          placeholder="....."
-                                      ></textarea>
-                                      <p id="helper-text-explanation" class="my-2 text-sm text-gray-800">
-                                        Adicionar um novo comentário
-                                      </p>
-                                  </div>
-                                  <button
-                                      type="submit"
-                                      class="
-                                        w-full
-                                        text-white
-                                        focus:ring-4
-                                        focus:outline-none
-                                        font-medium
-                                        rounded-lg
-                                        text-sm
-                                        px-5
-                                        py-2.5
-                                        text-center
-                                        bg-blue-600
-                                        hover:bg-blue-700
-                                        focus:ring-blue-800
-                                      "
-                                  >
-                                      Atualizar
-                                  </button>
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-                </div>
+        <tbody>
+          {% for goal in contract.goals.all %}
+            <tr>
+              <td><span class="ui-body-md-strong">{{ goal.name }}</span></td>
+              <td><span class="ui-body-sm">{{ goal.objective }}</span></td>
+              <td>
+                {% if goal.status == "ANALYZING" %}<span class="ui-status ui-status--info">Em análise</span>
+                {% elif goal.status == "CORRECTING" %}<span class="ui-status ui-status--warning">Em correção</span>
+                {% elif goal.status == "APPROVED" %}<span class="ui-status ui-status--success">Aprovado</span>
+                {% elif goal.status == "APPROVED_WITH_PENDENCE" %}<span class="ui-status ui-status--warning">Pendências</span>
+                {% elif goal.status == "REJECTED" %}<span class="ui-status ui-status--error">Rejeitado</span>
                 {% endif %}
-
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="5" class="px-6 py-12 text-center">
-                  <div class="flex flex-col items-center justify-center space-y-3">
-                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-sm font-medium text-gray-900">Nenhuma meta cadastrada</p>
-                      <p class="text-xs text-gray-500">Defina metas e objetivos para este contrato</p>
-                    </div>
+              </td>
+              <td>
+                <div class="ui-row" style="gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                  <button class="expand-btn ui-btn ui-btn--ghost ui-btn--sm" data-target="#details-{{ goal.id }}">
+                    Etapas
+                    <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/>
+                    </svg>
+                  </button>
+                  {% if contract.is_on_planning and not user.is_committee_member %}
+                    <a href="{% url 'contracts:contracts-goals-update' contract.id goal.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a>
+                  {% endif %}
+                  <button data-modal-target="goals-modal-{{ goal.id }}" data-modal-toggle="goals-modal-{{ goal.id }}" type="button" class="ui-btn ui-btn--secondary ui-btn--sm">
+                    {% if user.can_change_statuses and contract.is_on_planning %}Avaliar{% else %}Detalhes{% endif %}
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr id="details-{{ goal.id }}" class="hidden">
+              <td colspan="4" style="background-color: var(--color-canvas-softer); padding: 20px;">
+                {% if goal.steps.count %}
+                  <div class="ui-stack ui-stack--md">
+                    {% for step in goal.steps.all %}
+                      <div class="ui-card" style="padding: 16px;">
+                        <dl class="ui-dl">
+                          <dt>Etapa</dt><dd>{{ step.name }}</dd>
+                          <dt>Objetivo</dt><dd>{{ step.objective }}</dd>
+                          <dt>Metodologia</dt><dd>{{ step.methodology }}</dd>
+                          <dt>Recursos</dt><dd>{{ step.resources|default:"—" }}</dd>
+                        </dl>
+                      </div>
+                    {% endfor %}
                   </div>
-                </td>
-              </tr>
-            {% endif %}     
+                {% else %}
+                  <p class="ui-body-sm ui-text-muted ui-text-center" style="margin:0; padding: 12px 0;">Sem etapas cadastradas.</p>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
-  </div>
+
+    {# Avaliação modais #}
+    {% for goal in contract.goals.all %}
+      <div id="goals-modal-{{ goal.id }}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+          <div class="ui-card ui-card--elevated">
+            <div class="ui-row ui-row--between" style="margin-bottom: 16px;">
+              <h3 class="ui-display-sm" style="margin:0;">{% if user.can_change_statuses and contract.is_on_planning %}Avaliar meta{% else %}Detalhes da meta{% endif %}</h3>
+              <button type="button" data-modal-hide="goals-modal-{{ goal.id }}" class="ui-btn ui-btn--ghost" style="padding: 6px; min-height: auto; border-radius: var(--rounded-full);" aria-label="Fechar">
+                <svg width="14" height="14" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+              </button>
+            </div>
+            <form method="post" class="ui-stack ui-stack--lg">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="goals_modal">
+              <input type="hidden" name="goal_id" value="{{ goal.id }}">
+
+              <div class="ui-field">
+                <label for="goal-status-select-{{ goal.id }}" class="ui-field__label">Status</label>
+                <select id="goal-status-select-{{ goal.id }}" name="status" class="ui-select" {% if not user.can_change_statuses %}disabled{% endif %}>
+                  <option value="ANALYZING">Em análise</option>
+                  <option value="APPROVED">Aprovado</option>
+                  <option value="APPROVED_WITH_PENDENCE">Pendências</option>
+                  <option value="CORRECTING">Corrigir</option>
+                  <option value="REJECTED">Rejeitado</option>
+                </select>
+              </div>
+
+              <div class="ui-stack ui-stack--xs">
+                <p class="ui-body-sm-strong" style="margin:0; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-body);">Histórico de comentários</p>
+                <div class="goal-history">
+                  {% if not goal.last_reviews %}
+                    <p class="ui-body-sm ui-text-muted ui-text-center" style="margin:0;">Sem nenhum comentário…</p>
+                  {% endif %}
+                  {% for review in goal.last_reviews %}
+                    <div class="goal-history__item {% if review.reviewer.id == user.id %}goal-history__item--mine{% endif %}">
+                      <p class="ui-caption" style="margin:0 0 4px;"><strong>{{ review.reviewer.get_full_name }}</strong> · {{ review.created_at|date:"d/m/Y H:i" }}</p>
+                      <p class="ui-body-sm" style="margin:0; white-space: pre-wrap;">{{ review.comment }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="ui-field">
+                <label for="goal-comment-{{ goal.id }}" class="ui-field__label">Novo comentário</label>
+                <textarea id="goal-comment-{{ goal.id }}" name="comment" rows="3" maxlength="254" class="ui-textarea" placeholder="Adicione um comentário…"></textarea>
+              </div>
+
+              <div class="ui-row" style="gap: 8px; justify-content: flex-end;">
+                <button type="button" data-modal-hide="goals-modal-{{ goal.id }}" class="ui-btn ui-btn--subtle">Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn--primary">Atualizar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="ui-empty">
+      <div class="ui-empty__icon" aria-hidden="true">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <p class="ui-display-sm">Nenhuma meta cadastrada</p>
+      <p class="ui-body-sm ui-text-muted">Defina metas e objetivos para este contrato.</p>
+    </div>
+  {% endif %}
 </div>
 
+<style>
+  .goal-history {
+    max-height: 240px;
+    overflow-y: auto;
+    background-color: var(--color-canvas-softer);
+    border-radius: var(--rounded-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .goal-history__item {
+    background-color: var(--color-canvas);
+    padding: 10px 12px;
+    border-radius: var(--rounded-md);
+  }
+  .goal-history__item--mine {
+    background-color: var(--color-ink);
+    color: var(--color-on-dark);
+  }
+  .goal-history__item--mine .ui-caption,
+  .goal-history__item--mine .ui-body-sm { color: var(--color-on-dark); }
+</style>
 
 <script>
-  document.querySelectorAll('.expand-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      const target = document.querySelector(button.dataset.target);
-      target.classList.toggle('hidden');
+  document.querySelectorAll('.expand-btn').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var target = document.querySelector(button.dataset.target);
+      if (target) target.classList.toggle('hidden');
     });
   });
 </script>

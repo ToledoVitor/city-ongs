@@ -1,34 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}Excluir Documento - {{ organization.name }}{% endblock %}
+{% block title %}Excluir documento — {{ organization.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title h4 mb-4">Excluir Documento</h2>
+<section class="page ui-form" style="max-width: 560px;">
 
-                    <div class="alert alert-danger">
-                        <h4 class="alert-heading">Atenção!</h4>
-                        <p>Você está prestes a excluir o documento "{{ object.title }}". Esta ação não pode ser desfeita.</p>
-                    </div>
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accounts:documents-list' %}" class="ui-breadcrumb__item">Documentos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Excluir</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Excluir documento</h1>
+  </header>
 
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'accounts:documents-list' organization.id %}" class="btn btn-outline-secondary">
-                                Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                Confirmar Exclusão
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+  <div class="form-errors" role="alert">
+    <div class="form-errors__indicator" aria-hidden="true"></div>
+    <div class="form-errors__body">
+      <p class="ui-body-md-strong form-errors__title">Atenção</p>
+      <p class="form-errors__item">Você está prestes a excluir o documento <strong>{{ object.title }}</strong>. Esta ação não pode ser desfeita.</p>
     </div>
-</div>
-{% endblock %} 
+  </div>
+
+  <form method="post" class="ui-stack ui-stack--lg">
+    {% csrf_token %}
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accounts:documents-list' organization.id %}" class="ui-btn ui-btn--secondary">Cancelar</a>
+      <button type="submit" class="ui-btn ui-btn--primary" style="background-color: #842029;">Confirmar exclusão</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

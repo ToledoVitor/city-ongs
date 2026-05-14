@@ -1,118 +1,51 @@
 {% extends "transparency_portal/base.html" %}
 
-{% block title %}Parcerias - {{ organization.organization__name }}{% endblock %}
+{% block title %}— Parcerias · {{ organization.organization__name }}{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'transparency:partnership_list' %}">
-                        <i class="fas fa-list me-1"></i>
-                        Parcerias
-                    </a>
-                </li>
-                <li class="breadcrumb-item active">{{ organization.organization__name }}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
+<section class="ui-stack ui-stack--2xl">
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">{{ organization.organization__name }}</h4>
-                <p class="card-text">
-                    Esta página apresenta todas as parcerias celebradas com esta organização.
-                    As informações são atualizadas automaticamente conforme os registros no sistema.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+  <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'transparency:partnership_list' %}" class="ui-breadcrumb__item">Parcerias</a>
+    <span class="ui-breadcrumb__sep">/</span>
+    <span class="ui-breadcrumb__item ui-breadcrumb__item--current">{{ organization.organization__name }}</span>
+  </nav>
 
-<div class="row">
+  <section class="ui-card ui-stack ui-stack--xs">
+    <h1 class="ui-display-xl">{{ organization.organization__name }}</h1>
+    <p class="ui-body-md ui-text-muted">Parcerias celebradas com esta organização. As informações são atualizadas automaticamente conforme os registros no sistema.</p>
+  </section>
+
+  <div class="partnership-grid">
     {% for partnership in partnerships %}
-    <div class="col-md-6">
-        <div class="card partnership-card">
-            <div class="card-body">
-                <h5 class="card-title">{{ partnership.contract.name }}</h5>
-                <p class="card-text">
-                    <strong>Objeto:</strong> {{ partnership.contract.objective }}
-                </p>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="status-badge {% if partnership.contract.is_on_execution %}status-active{% elif partnership.contract.is_finished %}status-finished{% else %}status-pending{% endif %}">
-                        {{ partnership.contract.status_label }}
-                    </span>
-                    <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>
-                        {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}
-                    </small>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small class="text-muted">Valor Total:</small>
-                        <br>
-                        <strong>R$ {{ partnership.total_value|floatformat:2 }}</strong>
-                    </div>
-                    <div>
-                        <small class="text-muted">Valor Liberado:</small>
-                        <br>
-                        <strong>R$ {{ partnership.released_value|floatformat:2 }}</strong>
-                    </div>
-                    <div>
-                        <small class="text-muted">Status PC:</small>
-                        <br>
-                        <strong>{{ partnership.accountability_status }}</strong>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <a href="{% url 'transparency:partnership_detail' partnership.pk %}" 
-                       class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-eye me-1"></i>
-                        Ver Detalhes
-                    </a>
-                </div>
-            </div>
+      <article class="ui-card ui-card--elevated">
+        <header class="ui-row ui-row--between" style="gap: 8px; align-items: flex-start; margin-bottom: 10px;">
+          <p class="ui-body-md-strong" style="margin:0;">{{ partnership.contract.name }}</p>
+          {% if partnership.contract.is_on_execution %}<span class="ui-status ui-status--success">{{ partnership.contract.status_label }}</span>
+          {% elif partnership.contract.is_finished %}<span class="ui-status">{{ partnership.contract.status_label }}</span>
+          {% else %}<span class="ui-status ui-status--warning">{{ partnership.contract.status_label }}</span>{% endif %}
+        </header>
+        <p class="ui-body-sm ui-text-muted" style="margin: 0 0 12px;"><strong>Objeto:</strong> {{ partnership.contract.objective|truncatechars:140 }}</p>
+        <div class="partnership-values" style="padding: 12px; background-color: var(--color-canvas-soft); border-radius: var(--rounded-md); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <div><p class="ui-caption" style="margin:0;">Valor total</p><p class="ui-body-md-strong" style="margin:0;">R$ {{ partnership.total_value|floatformat:2 }}</p></div>
+          <div><p class="ui-caption" style="margin:0;">Liberado</p><p class="ui-body-md-strong" style="margin:0;">R$ {{ partnership.released_value|floatformat:2 }}</p></div>
+          <div><p class="ui-caption" style="margin:0;">Status PC</p><p class="ui-body-md-strong" style="margin:0;">{{ partnership.accountability_status }}</p></div>
         </div>
-    </div>
+        <footer class="ui-row ui-row--between" style="margin-top: 12px;">
+          <p class="ui-caption" style="margin:0;">Desde {{ partnership.contract.start_of_vigency|date:"d/m/Y" }}</p>
+          <a href="{% url 'transparency:partnership_detail' partnership.pk %}" class="ui-btn ui-btn--secondary ui-btn--sm">Ver detalhes</a>
+        </footer>
+      </article>
     {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Nenhuma parceria encontrada para esta organização.
-        </div>
-    </div>
+      <div class="ui-empty">
+        <p class="ui-display-md">Nenhuma parceria</p>
+        <p class="ui-body-md ui-text-muted">Não foram encontradas parcerias para esta organização.</p>
+      </div>
     {% endfor %}
-</div>
+  </div>
+</section>
 
-{% if is_paginated %}
-<nav aria-label="Navegação de páginas" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        </li>
-        {% endif %}
-        
-        {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-        </li>
-        {% endfor %}
-        
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-{% endblock %} 
+<style>
+  .partnership-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); }
+</style>
+{% endblock %}

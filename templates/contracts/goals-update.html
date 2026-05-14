@@ -1,289 +1,118 @@
 {% extends "base.html" %}
 
-{% block title %}Contratos - Metas{% endblock %}
+{% block title %}Atualizar meta — {{ contract.name }}{% endblock %}
 
 {% block content %}
+<section class="page ui-form">
 
-<p class="text-3xl mb-4 font-bold">
-  Atualizar Meta
-</p>
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Atualizar meta</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Atualizar meta</h1>
+  </header>
 
-<nav class="flex mb-6" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-    </li>
-    <li>
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">Contratos</a>
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Dados da meta</h2>
+      <div class="ui-stack ui-stack--md">
+        <div class="ui-field"><label for="id_name" class="ui-field__label">Nome</label>{{ form.name }}</div>
+        <div class="ui-field"><label for="id_objective" class="ui-field__label">Objetivo</label>{{ form.objective }}</div>
+        <div class="ui-field"><label for="id_methodology" class="ui-field__label">Metodologia</label>{{ form.methodology }}</div>
+        <div class="ui-field"><label for="id_observations" class="ui-field__label">Observações</label>{{ form.observations }}</div>
       </div>
-    </li>
-    <li>
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2">{{ contract.trailing_code }}</a>
-      </div>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Atualizar Meta</span>
-      </div>
-    </li>
-  </ol>
-</nav>
-  
+    </section>
 
-<form method="post" class="max-w-6xl mx-auto">
-  {% csrf_token %}
+    <section class="ui-card ui-stack ui-stack--lg">
+      <header class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Etapas da meta</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Divida a meta em etapas menores.</p>
+      </header>
 
-  <div class="space-y-8">
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-blue-100 rounded-lg">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-lg font-semibold text-gray-900">Dados da Meta</h2>
-            <p class="text-sm text-gray-600">Defina as informações principais da meta</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-6">
-        <div class="grid grid-cols-1 gap-6">
-          <div class="space-y-2">
-            <label for="id_name" class="block text-sm font-medium text-gray-700">
-              Nome <span class="text-red-500">*</span>
-            </label>
-            {{ form.name }}
-            <p class="text-xs text-gray-500">Nome identificador da meta</p>
-          </div>
-
-          <div class="space-y-2">
-            <label for="id_objective" class="block text-sm font-medium text-gray-700">
-              Objetivo <span class="text-red-500">*</span>
-            </label>
-            {{ form.objective }}
-            <p class="text-xs text-gray-500">Descreva o objetivo principal que esta meta pretende alcançar</p>
-          </div>
-
-          <div class="space-y-2">
-            <label for="id_methodology" class="block text-sm font-medium text-gray-700">
-              Metodologia <span class="text-red-500">*</span>
-            </label>
-            {{ form.methodology }}
-            <p class="text-xs text-gray-500">Explique como esta meta será executada e mensurada</p>
-          </div>
-
-          <div class="space-y-2">
-            <label for="id_observations" class="block text-sm font-medium text-gray-700">
-              Observações
-            </label>
-            {{ form.observations }}
-            <p class="text-xs text-gray-500">Informações adicionais ou observações importantes</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-lg font-semibold text-gray-900">Etapas da Meta</h2>
-            <p class="text-sm text-gray-600">Divida a meta em etapas menores para melhor acompanhamento</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-6">
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p class="text-sm text-blue-800">
-              As etapas são uma maneira de dividir a meta principal em menores metas, a fim de acompanhar seu progresso de forma mais detalhada e organizada.
-            </p>
-          </div>
-        </div>
-        
-        <div id="steps-formset" class="space-y-6">
-          {{ steps_formset.management_form }}
-          
-          {% for form in steps_formset %}
-            {{ form.id }}
-            
-            <div class="steps-form bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-              <div class="bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <span class="text-white text-sm font-semibold step-number">1</span>
-                  </div>
-                  <h3 class="text-base font-semibold text-gray-900 step-title">Etapa 1</h3>
-                </div>
-                <button
-                  type="button"
-                  class="remove-form inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 border border-red-200 rounded-lg hover:bg-red-200 focus:ring-4 focus:ring-red-100 focus:outline-none transition-colors duration-200"
-                  {% if forloop.first %}style="display: none;"{% endif %}
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  Remover
-                </button>
+      <div id="steps-formset" class="ui-stack ui-stack--lg">
+        {{ steps_formset.management_form }}
+        {% for form in steps_formset %}
+          {{ form.id }}
+          <div class="steps-form ui-card ui-card--soft">
+            <div class="ui-row ui-row--between" style="margin-bottom: 12px;">
+              <div class="ui-row" style="gap: 10px;">
+                <span class="step-number" style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background-color:var(--color-ink); color:var(--color-on-dark); font-weight:600; font-size:13px;">1</span>
+                <span class="ui-body-md-strong step-title">Etapa 1</span>
               </div>
-              
-              <div class="p-4">
-                <div class="space-y-4">
-                  <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Nome <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.name }}
-                    <p class="text-xs text-gray-500">Nome identificador da etapa</p>
-                  </div>
-                  
-                  <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Objetivo <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.objective }}
-                    <p class="text-xs text-gray-500">Objetivo específico desta etapa</p>
-                  </div>
-                  
-                  <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Metodologia <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.methodology }}
-                    <p class="text-xs text-gray-500">Como esta etapa será executada</p>
-                  </div>
-                                    
-                  <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Recursos Necessários
-                    </label>
-                    {{ form.resources }}
-                    <p class="text-xs text-gray-500">Recursos necessários para esta etapa</p>
-                  </div>
-                </div>
-              </div>
+              <button type="button" class="remove-form ui-btn ui-btn--ghost ui-btn--sm" style="color:#842029;" {% if forloop.first %}style="display:none;"{% endif %}>
+                Remover
+              </button>
             </div>
-          {% endfor %}
-        </div>
-  
-        <div class="mt-6 pt-4 border-t border-gray-200">
-          <button
-            type="button"
-            id="add-step"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-200 transform hover:scale-105"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Adicionar Outra Etapa
-          </button>
-        </div>
+            <div class="ui-stack ui-stack--md">
+              <div class="ui-field"><label class="ui-field__label">Nome</label>{{ form.name }}</div>
+              <div class="ui-field"><label class="ui-field__label">Objetivo</label>{{ form.objective }}</div>
+              <div class="ui-field"><label class="ui-field__label">Metodologia</label>{{ form.methodology }}</div>
+              <div class="ui-field"><label class="ui-field__label">Recursos necessários</label>{{ form.resources }}</div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-    </div>
-  </div>
 
-  {% include 'commons/form-errors.html' with form=form subform=steps_formset %}
-
-  <div class="mt-8 py-6 border-t border-gray-200">
-    <div class="flex justify-end items-center gap-4">
-      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 focus:outline-none transition-all duration-200">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      <button type="button" id="add-step" class="ui-btn ui-btn--subtle" style="align-self: flex-start;">
+        <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
-        Voltar
-      </a>
-      <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all duration-200 transform hover:scale-105">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        Atualizar Meta
+        Adicionar outra etapa
       </button>
-    </div>
-  </div>
-  
-</form>
+    </section>
 
+    {% include 'commons/form-errors.html' with form=form subform=steps_formset %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Atualizar meta</button>
+    </div>
+  </form>
+</section>
 
 <script>
   const addStepButton = document.getElementById('add-step');
   const formsetDiv = document.getElementById('steps-formset');
   const totalFormsInput = document.querySelector('#id_steps-TOTAL_FORMS');
-  
+
   addStepButton.addEventListener('click', () => {
-      const formCount = parseInt(totalFormsInput.value, 10);
-      const newForm = formsetDiv.querySelector('.steps-form').cloneNode(true);
-  
-      newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
-      newForm.innerHTML = newForm.innerHTML.replace(/_0_/g, `_${formCount}_`);
-      
-      const inputs = newForm.querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-          if (input.type !== 'hidden') {
-              input.value = '';
-          }
-      });
-      
-      newForm.querySelector('.step-title').textContent = `Etapa ${formCount + 1}`;
-      newForm.querySelector('.step-number').textContent = `${formCount + 1}`;
-  
-      const removeButton = newForm.querySelector('.remove-form');
-      if (removeButton) {
-          removeButton.style.display = '';
-      }
-  
-      formsetDiv.appendChild(newForm);
-      totalFormsInput.value = formCount + 1;
-      updateStepNumbers();
+    const formCount = parseInt(totalFormsInput.value, 10);
+    const newForm = formsetDiv.querySelector('.steps-form').cloneNode(true);
+    newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
+    newForm.innerHTML = newForm.innerHTML.replace(/_0_/g, `_${formCount}_`);
+    newForm.querySelectorAll('input, textarea').forEach(input => { if (input.type !== 'hidden') input.value = ''; });
+    newForm.querySelector('.step-title').textContent = `Etapa ${formCount + 1}`;
+    newForm.querySelector('.step-number').textContent = `${formCount + 1}`;
+    const removeButton = newForm.querySelector('.remove-form');
+    if (removeButton) removeButton.style.display = '';
+    formsetDiv.appendChild(newForm);
+    totalFormsInput.value = formCount + 1;
+    updateStepNumbers();
   });
-  
+
   formsetDiv.addEventListener('click', (e) => {
-      if (e.target.classList.contains('remove-form')) {
-          e.target.closest('.steps-form').remove();
-          totalFormsInput.value -= 1;
-          updateStepNumbers();
-      }
+    if (e.target.closest('.remove-form')) {
+      e.target.closest('.steps-form').remove();
+      totalFormsInput.value -= 1;
+      updateStepNumbers();
+    }
   });
-  
+
   function updateStepNumbers() {
-    const steps = formsetDiv.querySelectorAll('.steps-form');
-    steps.forEach((step, index) => {
+    formsetDiv.querySelectorAll('.steps-form').forEach((step, index) => {
       step.querySelector('.step-title').textContent = `Etapa ${index + 1}`;
       step.querySelector('.step-number').textContent = `${index + 1}`;
     });
   }
-  
-  // Initialize step numbers on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    updateStepNumbers();
-  });
-</script>
 
+  document.addEventListener('DOMContentLoaded', updateStepNumbers);
+</script>
 {% endblock %}

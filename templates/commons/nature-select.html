@@ -1,23 +1,7 @@
 <select
     id="{{ id|default_if_none:'id_nature' }}"
     name="{{ name|default_if_none:'nature' }}"
-    class="
-    block
-    w-full
-    px-3
-    py-2.5
-    text-sm
-    text-gray-900
-    bg-gray-200
-    border
-    border-gray-300
-    rounded-lg
-    focus:ring-2
-    focus:ring-blue-500
-    focus:border-blue-500
-    transition-colors
-    duration-200
-    "
+    class="ui-select"
     required
 >
     <option value="" {% if not selected_value %}selected{% endif %}>----</option>

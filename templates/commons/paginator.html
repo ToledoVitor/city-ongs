@@ -1,69 +1,101 @@
-<nav class="flex items-center justify-between p-3" aria-label="Navegação de páginas">
-  <div class="text-sm text-gray-500">
-    Página <span class="font-medium text-gray-900">{{ page_obj.number }}</span> de <span class="font-medium text-gray-900">{{ page_obj.paginator.num_pages }}</span>
-  </div>
+<nav class="paginator" aria-label="Navegação de páginas">
+  <p class="ui-body-sm ui-text-muted paginator__summary">
+    Página <span class="paginator__summary-strong">{{ page_obj.number }}</span>
+    de <span class="paginator__summary-strong">{{ page_obj.paginator.num_pages }}</span>
+  </p>
 
-  <div class="flex items-center space-x-2">
+  <div class="paginator__pages">
     {% if page_obj.has_previous %}
-      <a
-        href="?page={{ page_obj.previous_page_number }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Anterior
-      </a>
+      <a href="?page={{ page_obj.previous_page_number }}" class="paginator__btn">Anterior</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Anterior
-      </span>
+      <span class="paginator__btn paginator__btn--disabled" aria-disabled="true">Anterior</span>
     {% endif %}
 
     {% for num in page_obj.paginator.page_range %}
       {% if num == 1 or num == page_obj.paginator.num_pages %}
         {% if num == page_obj.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current" aria-current="page">{{ num }}</span>
         {% else %}
-          <a
-            href="?page={{ num }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?page={{ num }}" class="paginator__page">{{ num }}</a>
         {% endif %}
 
       {% elif num >= page_obj.number|add:'-1' and num <= page_obj.number|add:'1' %}
         {% if num == page_obj.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current" aria-current="page">{{ num }}</span>
         {% else %}
-          <a
-            href="?page={{ num }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?page={{ num }}" class="paginator__page">{{ num }}</a>
         {% endif %}
 
       {% elif num == 2 or num == page_obj.paginator.num_pages|add:'-1' %}
-        <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg">
-          ...
-        </span>
+        <span class="paginator__page paginator__page--ellipsis" aria-hidden="true">…</span>
       {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next %}
-      <a
-        href="?page={{ page_obj.next_page_number }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Próximo
-      </a>
+      <a href="?page={{ page_obj.next_page_number }}" class="paginator__btn">Próximo</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Próximo
-      </span>
+      <span class="paginator__btn paginator__btn--disabled" aria-disabled="true">Próximo</span>
     {% endif %}
   </div>
 </nav>
+
+<style>
+  .paginator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    flex-wrap: wrap;
+  }
+  .paginator__summary { margin: 0; }
+  .paginator__summary-strong { color: var(--color-ink); font-weight: 600; }
+  .paginator__pages { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .paginator__btn,
+  .paginator__page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--rounded-pill);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    border: 1px solid var(--color-canvas-soft);
+    text-decoration: none;
+    font-family: var(--font-text);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .paginator__btn:hover,
+  .paginator__page:hover {
+    background-color: var(--color-canvas-soft);
+    border-color: var(--color-canvas-soft);
+  }
+  .paginator__page--current {
+    background-color: var(--color-ink);
+    color: var(--color-on-dark);
+    border-color: var(--color-ink);
+  }
+  .paginator__page--ellipsis {
+    border: 0;
+    background: transparent;
+    color: var(--color-mute);
+    padding: 0 4px;
+    min-width: auto;
+  }
+  .paginator__btn--disabled {
+    color: var(--color-mute);
+    background-color: var(--color-canvas-softer);
+    border-color: var(--color-canvas-soft);
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    .paginator { justify-content: center; }
+    .paginator__summary { width: 100%; text-align: center; }
+  }
+</style>

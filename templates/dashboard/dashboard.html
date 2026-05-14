@@ -1,877 +1,353 @@
 {% extends "base.html" %}
+{% load humanize dashboard_filters %}
 
-{% block title %}Dashboard - Portal SITTS{% endblock %}
-
-{% block extra_head %}
-<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-{% endblock %}
+{% block title %}Dashboard — Portal SITTS{% endblock %}
 
 {% block content %}
-{% load humanize %}
-{% load dashboard_filters %}
+<section class="page">
 
-<style>
-  @media print {
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    body * {
-      visibility: hidden;
-    }
-    #printable, #printable * {
-      visibility: visible;
-    }
-    #printable {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-    .no-print, #printButton {
-      display: none !important;
-    }
-    table {
-      table-layout: fixed;
-      width: 100%;
-      font-size: 8pt;
-    }
-    th, td {
-      white-space: normal !important;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-      line-height: 1.2;
-    }
-  }
-</style>
+  <header class="page__header">
+    <div class="ui-stack ui-stack--xs">
+      <h1 class="ui-display-lg page__title">Dashboard</h1>
+      <p class="ui-body-md ui-text-muted page__subtitle">Visão geral dos contratos e prestações de contas.</p>
+    </div>
+  </header>
 
-<div id="printable" class="container mx-auto p-4 print:bg-white">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
-    <p class="text-gray-600 mt-2">Visão geral dos contratos e prestações de contas</p>
+  <form method="GET" id="filterForm" class="ui-card dashboard-filters">
+    <div class="filter-row">
+      <div class="filter-field">
+        <label for="period-select" class="filter-field__label">Período</label>
+        <select id="period-select" name="period" class="filter-field__control">
+          <option value="current_month" {% if period == 'current_month' %}selected{% endif %}>Mês atual</option>
+          <option value="last_3_months" {% if period == 'last_3_months' %}selected{% endif %}>Últimos 3 meses</option>
+          <option value="last_6_months" {% if period == 'last_6_months' %}selected{% endif %}>Últimos 6 meses</option>
+          <option value="last_year" {% if period == 'last_year' %}selected{% endif %}>Último ano</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="status-select" class="filter-field__label">Status</label>
+        <select id="status-select" name="status[]" class="filter-field__control">
+          <option value="">Todos</option>
+          <option value="WIP" {% if 'WIP' in selected_status %}selected{% endif %}>Em andamento</option>
+          <option value="SENT" {% if 'SENT' in selected_status %}selected{% endif %}>Enviada</option>
+          <option value="CORRECTING" {% if 'CORRECTING' in selected_status %}selected{% endif %}>Corrigindo</option>
+          <option value="FINISHED" {% if 'FINISHED' in selected_status %}selected{% endif %}>Finalizada</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="contract-select" class="filter-field__label">Contrato</label>
+        <select id="contract-select" name="contract[]" class="filter-field__control">
+          <option value="">Todos</option>
+          {% for contract in contracts %}
+            <option value="{{ contract.id }}" {% if contract.id|stringformat:"s" in selected_contracts %}selected{% endif %}>{{ contract.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm dashboard-filters__submit">Filtrar</button>
+    </div>
+  </form>
+
+  <div class="dashboard-stats">
+    <article class="ui-card dashboard-stat">
+      <p class="ui-caption" style="margin:0;">Total de contratos</p>
+      <p class="ui-display-md" style="margin:0;">{{ total_contracts }}</p>
+    </article>
+    <article class="ui-card dashboard-stat">
+      <p class="ui-caption" style="margin:0;">Prestações ativas</p>
+      <p class="ui-display-md" style="margin:0;">{{ active_accountabilities }}</p>
+    </article>
+    <article class="ui-card dashboard-stat">
+      <p class="ui-caption" style="margin:0;">Total em receitas</p>
+      <p class="ui-display-md" style="margin:0;">R$ {{ total_revenue|intcomma }}</p>
+    </article>
+    <article class="ui-card dashboard-stat">
+      <p class="ui-caption" style="margin:0;">Total em despesas</p>
+      <p class="ui-display-md" style="margin:0;">R$ {{ total_expenses|intcomma }}</p>
+    </article>
   </div>
 
-  <div class="bg-white rounded-lg shadow p-6 mb-8">
-    <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="filterForm">
-      <div class="relative w-full">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
-        <button id="periodDropdownButton" data-dropdown-toggle="periodDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
-          <span id="periodSelectedText">
-            {% if period == 'current_month' %}Mês Atual
-            {% elif period == 'last_3_months' %}Últimos 3 meses
-            {% elif period == 'last_6_months' %}Últimos 6 meses
-            {% elif period == 'last_year' %}Último ano
-            {% else %}Selecione o período{% endif %}
-          </span>
-          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-          </svg>
-        </button>
-        <div id="periodDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
-          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="periodDropdownButton">
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="period-current" type="radio" name="period" value="current_month" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'current_month' %}checked{% endif %}>
-                <label for="period-current" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Mês Atual</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="period-3months" type="radio" name="period" value="last_3_months" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_3_months' %}checked{% endif %}>
-                <label for="period-3months" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Últimos 3 meses</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="period-6months" type="radio" name="period" value="last_6_months" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_6_months' %}checked{% endif %}>
-                <label for="period-6months" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Últimos 6 meses</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="period-year" type="radio" name="period" value="last_year" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" {% if period == 'last_year' %}checked{% endif %}>
-                <label for="period-year" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Último ano</label>
-              </div>
-            </li>
-          </ul>
-        </div>
+  {% if not recent_accountabilities %}
+    <section class="dashboard-empty">
+      <div class="dashboard-empty__body">
+        {% if total_contracts == 0 %}
+          <p class="ui-caption dashboard-empty__eyebrow">Tudo pronto pra começar</p>
+          <h2 class="ui-display-xl dashboard-empty__title">Sua jornada de transparência começa aqui.</h2>
+          <p class="ui-body-lg dashboard-empty__copy">Nenhum contrato cadastrado ainda. Quando você adicionar o primeiro, este painel vai ganhar vida com receitas, despesas e o ritmo mensal das prestações.</p>
+          <div class="dashboard-empty__actions">
+            <a href="{% url 'contracts:contracts-create' %}" class="ui-btn ui-btn--primary dashboard-empty__cta">
+              <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/></svg>
+              Adicionar primeiro contrato
+            </a>
+            <a href="{% url 'contracts:contracts-list' %}" class="ui-link ui-link--on-dark dashboard-empty__link">Ver contratos →</a>
+          </div>
+        {% else %}
+          <p class="ui-caption dashboard-empty__eyebrow">Sem atividade no período</p>
+          <h2 class="ui-display-xl dashboard-empty__title">Tudo silencioso por aqui.</h2>
+          <p class="ui-body-lg dashboard-empty__copy">Nenhuma prestação se encaixa nos filtros que você escolheu. Tente um período maior, limpe o que está aplicado, ou explore os contratos diretamente.</p>
+          <div class="dashboard-empty__actions">
+            <a href="{% url 'dashboard:index' %}" class="ui-btn ui-btn--primary dashboard-empty__cta">
+              <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Limpar filtros
+            </a>
+            <a href="{% url 'contracts:contracts-list' %}" class="ui-link ui-link--on-dark dashboard-empty__link">Ver contratos →</a>
+          </div>
+        {% endif %}
       </div>
-      <div class="relative w-full">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-        <button id="statusDropdownButton" data-dropdown-toggle="statusDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
-          <span id="statusSelectedText">Selecione os status</span>
-          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-          </svg>
-        </button>
-        <div id="statusDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
-          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="statusDropdownButton">
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="status-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="status-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Selecionar Todos</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="status-wip" type="checkbox" value="WIP" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="status-wip" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Em Andamento</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="status-sent" type="checkbox" value="SENT" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="status-sent" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Enviada</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="status-correcting" type="checkbox" value="CORRECTING" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="status-correcting" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Corrigindo</label>
-              </div>
-            </li>
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="status-finished" type="checkbox" value="FINISHED" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="status-finished" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Finalizada</label>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <input type="hidden" name="status[]" id="statusValues">
+      <div class="dashboard-empty__art" aria-hidden="true">
+        <svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <defs>
+            <pattern id="dot-grid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.12)"/>
+            </pattern>
+          </defs>
+          <rect width="320" height="240" fill="url(#dot-grid)" rx="16"/>
+          <line x1="40" y1="200" x2="288" y2="200" stroke="rgba(255,255,255,0.32)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="40" y1="200" x2="40" y2="40" stroke="rgba(255,255,255,0.32)" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="64" y="140" width="32" height="60" rx="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <rect x="112" y="100" width="32" height="100" rx="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <rect x="160" y="120" width="32" height="80" rx="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <rect x="208" y="80" width="32" height="120" rx="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <circle cx="220" cy="56" r="20" fill="#ffffff"/>
+          <path d="M214 56 l4 4 l8 -8" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="80" cy="64" r="3" fill="#ffffff"/>
+          <circle cx="280" cy="160" r="2" fill="#ffffff" opacity="0.8"/>
+          <circle cx="60" cy="180" r="2" fill="#ffffff" opacity="0.6"/>
+        </svg>
       </div>
-      <div class="relative w-full">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Contrato</label>
-        <button id="contractDropdownButton" data-dropdown-toggle="contractDropdown" class="w-full text-gray-700 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between" type="button">
-          <span id="contractSelectedText">Selecione os contratos</span>
-          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-          </svg>
-        </button>
-        <div id="contractDropdown" class="z-50 hidden absolute left-0 right-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-lg">
-          <ul class="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="contractDropdownButton">
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="contract-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="contract-all" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">Selecionar Todos</label>
-              </div>
-            </li>
-            {% for contract in contracts %}
-            <li>
-              <div class="flex items-center p-2 rounded hover:bg-gray-100">
-                <input id="contract-{{ contract.id }}" type="checkbox" value="{{ contract.id }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                <label for="contract-{{ contract.id }}" class="w-full ms-2 text-sm font-medium text-gray-900 rounded">{{ contract.name }}</label>
-              </div>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-        <input type="hidden" name="contract[]" id="contractValues">
-      </div>
-      <div class="flex items-end w-full">
-        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-          Filtrar
-        </button>
-      </div>
-    </form>
+    </section>
+  {% else %}
+
+  <div class="dashboard-charts">
+    <section class="ui-card ui-stack ui-stack--md">
+      <h2 class="ui-display-sm" style="margin:0;">Progresso mensal</h2>
+      <div id="monthlyProgressChart" style="height: 280px;"></div>
+    </section>
+    <section class="ui-card ui-stack ui-stack--md">
+      <h2 class="ui-display-sm" style="margin:0;">Receitas vs despesas</h2>
+      <div id="revenueExpensesChart" style="height: 280px;"></div>
+    </section>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-blue-100">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-gray-600 text-sm">Total de Contratos</h2>
-          <p class="text-2xl font-semibold text-gray-800">{{ total_contracts }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-yellow-100">
-          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-gray-600 text-sm">Prestações Ativas</h2>
-          <p class="text-2xl font-semibold text-gray-800">{{ active_accountabilities }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-green-100">
-          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-gray-600 text-sm">Total em Receitas</h2>
-          <p class="text-2xl font-semibold text-gray-800">R$ {{ total_revenue|intcomma }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center">
-        <div class="p-3 rounded-full bg-red-100">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-gray-600 text-sm">Total em Despesas</h2>
-          <p class="text-2xl font-semibold text-gray-800">R$ {{ total_expenses|intcomma }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <div class="bg-white rounded-lg shadow p-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Progresso Mensal</h3>
-      <div class="h-64" id="monthlyProgressChart"></div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Receitas vs Despesas</h3>
-      <div class="h-64" id="revenueExpensesChart"></div>
-    </div>
-  </div>
-
-  <div class="bg-white rounded-lg shadow mb-8">
-    <div class="p-6 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-800">Atividades Recentes</h3>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+  <section class="ui-card">
+    <header class="ui-row ui-row--between" style="margin-bottom: 16px; gap: var(--space-md); flex-wrap: wrap;">
+      <h2 class="ui-display-sm" style="margin:0;">Atividades recentes</h2>
+    </header>
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contrato</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receitas</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Despesas</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+            <th>Contrato</th>
+            <th>Período</th>
+            <th>Status</th>
+            <th>Receitas</th>
+            <th>Despesas</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
           {% for accountability in recent_accountabilities %}
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ accountability.contract.name }}
+              <td>{{ accountability.contract.name }}</td>
+              <td>{{ accountability.month_label }} {{ accountability.year }}</td>
+              <td>
+                {% if accountability.status == 'WIP' %}<span class="ui-status ui-status--info">{{ accountability.status_label }}</span>
+                {% elif accountability.status == 'SENT' %}<span class="ui-status ui-status--warning">{{ accountability.status_label }}</span>
+                {% elif accountability.status == 'CORRECTING' %}<span class="ui-status ui-status--warning">{{ accountability.status_label }}</span>
+                {% else %}<span class="ui-status ui-status--success">{{ accountability.status_label }}</span>{% endif %}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ accountability.month_label }} {{ accountability.year }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                  {% if accountability.status == 'WIP' %}bg-yellow-100 text-yellow-800
-                  {% elif accountability.status == 'SENT' %}bg-blue-100 text-blue-800
-                  {% elif accountability.status == 'CORRECTING' %}bg-red-100 text-red-800
-                  {% else %}bg-green-100 text-green-800{% endif %}">
-                  {{ accountability.status_label }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ accountability.count_revenues }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ accountability.count_expenses }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="text-blue-600 hover:text-blue-900">Detalhes</a>
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="6" class="px-6 py-12">
-                <div class="flex flex-col items-center justify-center space-y-4">
-                  <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div class="text-center max-w-sm">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Nenhuma atividade recente</h3>
-                    <p class="text-sm text-gray-500 mb-4">Não há prestações de contas para o período e filtros selecionados. Tente ajustar os filtros ou selecionar outro período.</p>
-                  </div>
-                  <div class="flex gap-3">
-                    <button onclick="document.getElementById('periodDropdownButton').click()" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Alterar Período
-                    </button>
-                    <button onclick="window.location.reload()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Limpar Filtros
-                    </button>
-                  </div>
-                </div>
+              <td>{{ accountability.count_revenues }}</td>
+              <td>{{ accountability.count_expenses }}</td>
+              <td class="ui-text-right">
+                <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Detalhes</a>
               </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 
-  <div class="bg-white rounded-lg shadow p-6 mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-      <h3 class="text-lg font-semibold text-gray-800">Uso do Repasse Mensal</h3>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
-          <span class="text-xs text-gray-600">Transferência</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-green-600"></div>
-          <span class="text-xs text-gray-600">Receitas</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-red-600"></div>
-          <span class="text-xs text-gray-600">Despesas</span>
-        </div>
+  <section class="ui-card ui-stack ui-stack--lg">
+    <header class="ui-row" style="gap: 24px; flex-wrap: wrap;">
+      <h2 class="ui-display-sm" style="margin:0;">Uso do repasse mensal</h2>
+      <div class="ui-row" style="gap: 16px; flex-wrap: wrap;">
+        <span class="ui-row" style="gap: 6px;"><span style="width:10px; height:10px; border-radius:50%; background:var(--color-ink);"></span><span class="ui-caption">Transferência</span></span>
+        <span class="ui-row" style="gap: 6px;"><span style="width:10px; height:10px; border-radius:50%; background:var(--color-toast-success);"></span><span class="ui-caption">Receitas</span></span>
+        <span class="ui-row" style="gap: 6px;"><span style="width:10px; height:10px; border-radius:50%; background:var(--color-toast-error);"></span><span class="ui-caption">Despesas</span></span>
       </div>
-    </div>
-    <div class="space-y-6">
-      {% if monthly_progress_data %}
+    </header>
+
+    {% if monthly_progress_data %}
+      <div class="ui-stack ui-stack--md">
         {% for month, revenue, expense, transfer in monthly_progress_data %}
-        <div class="p-3 sm:p-4 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-          <div class="flex flex-col gap-4">
-            <!-- Header with month and values -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span class="text-xs sm:text-sm font-semibold text-blue-600">{{ month|brazilian_month|slice:":3" }}</span>
-                </div>
-                <div>
-                  <h4 class="text-sm sm:text-base font-medium text-gray-900">{{ month|brazilian_month }}</h4>
-                  <p class="text-xs sm:text-sm text-gray-500">Transferência Mensal</p>
+          <div class="ui-card ui-card--soft monthly-progress">
+            <div class="monthly-progress__head">
+              <div class="ui-row" style="gap: 12px;">
+                <div class="monthly-progress__chip">{{ month|brazilian_month|slice:":3" }}</div>
+                <div class="ui-stack ui-stack--xxs">
+                  <p class="ui-body-md-strong" style="margin:0;">{{ month|brazilian_month }}</p>
+                  <p class="ui-caption" style="margin:0;">Transferência mensal</p>
                 </div>
               </div>
-              <div class="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto">
-                <div class="px-2 sm:px-3 py-1.5 sm:py-2 bg-white rounded-lg shadow-sm">
-                  <p class="text-gray-500 text-xs mb-0.5">Transferência</p>
-                  <p class="font-semibold text-gray-900 text-xs sm:text-sm truncate">R$ {{ transfer|intcomma }}</p>
+              <div class="monthly-progress__values">
+                <div class="monthly-progress__value">
+                  <p class="ui-caption" style="margin:0;">Transferência</p>
+                  <p class="ui-body-sm-strong" style="margin:0;">R$ {{ transfer|intcomma }}</p>
                 </div>
-                <div class="px-2 sm:px-3 py-1.5 sm:py-2 bg-white rounded-lg shadow-sm">
-                  <p class="text-gray-500 text-xs mb-0.5">Receitas</p>
-                  <p class="font-semibold text-green-600 text-xs sm:text-sm truncate">R$ {{ revenue|intcomma }}</p>
+                <div class="monthly-progress__value">
+                  <p class="ui-caption" style="margin:0;">Receitas</p>
+                  <p class="ui-body-sm-strong" style="margin:0; color: var(--color-toast-success);">R$ {{ revenue|intcomma }}</p>
                 </div>
-                <div class="px-2 sm:px-3 py-1.5 sm:py-2 bg-white rounded-lg shadow-sm">
-                  <p class="text-gray-500 text-xs mb-0.5">Despesas</p>
-                  <p class="font-semibold text-red-600 text-xs sm:text-sm truncate">R$ {{ expense|intcomma }}</p>
+                <div class="monthly-progress__value">
+                  <p class="ui-caption" style="margin:0;">Despesas</p>
+                  <p class="ui-body-sm-strong" style="margin:0; color: var(--color-toast-error);">R$ {{ expense|intcomma }}</p>
                 </div>
               </div>
             </div>
-
-            <!-- Progress bars -->
-            <div class="space-y-2 sm:space-y-3">
+            <div class="ui-stack ui-stack--sm">
               <div>
-                <div class="flex justify-between items-center mb-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-700">Transferência</span>
-                    <span class="px-1.5 sm:px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      {% if transfer %}100{% else %}0,0{% endif %}%
-                    </span>
-                  </div>
+                <div class="ui-row ui-row--between" style="margin-bottom: 4px;">
+                  <span class="ui-caption">Transferência</span>
+                  <span class="ui-badge">{% if transfer %}100{% else %}0{% endif %}%</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    class="h-2 rounded-full bg-blue-600 transition-all duration-500"
-                    style="width: {% if transfer %}100{% else %}0{% endif %}%"
-                  ></div>
-                </div>
+                <div class="monthly-progress__bar"><div class="monthly-progress__fill" style="width: {% if transfer %}100{% else %}0{% endif %}%; background-color: var(--color-ink);"></div></div>
               </div>
               <div>
-                <div class="flex justify-between items-center mb-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-700">Receitas</span>
-                    <span class="px-2 py-0.5 text-xs font-medium {% if revenue|div:transfer|mul:100 >= 100 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %} rounded-full">
-                      {{ revenue|div:transfer|mul:100|floatformat:1 }}%
-                    </span>
-                  </div>
+                <div class="ui-row ui-row--between" style="margin-bottom: 4px;">
+                  <span class="ui-caption">Receitas</span>
+                  <span class="ui-badge">{{ revenue|div:transfer|mul:100|floatformat:1 }}%</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="h-2 rounded-full bg-green-600 transition-all duration-500" 
-                    style="width: {% if revenue|div:transfer|mul:100 > 100 %}100{% else %}{{ revenue|div:transfer|mul:100|floatformat:1|replace_comma }}{% endif %}%">
-                  </div>
-                </div>
+                <div class="monthly-progress__bar"><div class="monthly-progress__fill" style="width: {% if revenue|div:transfer|mul:100 > 100 %}100{% else %}{{ revenue|div:transfer|mul:100|floatformat:1|replace_comma }}{% endif %}%; background-color: var(--color-toast-success);"></div></div>
               </div>
               <div>
-                <div class="flex justify-between items-center mb-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-700">Despesas</span>
-                    <span class="px-2 py-0.5 text-xs font-medium {% if expense|div:transfer|mul:100 >= 100 %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %} rounded-full">
-                      {{ expense|div:transfer|mul:100|floatformat:1 }}%
-                    </span>
-                  </div>
+                <div class="ui-row ui-row--between" style="margin-bottom: 4px;">
+                  <span class="ui-caption">Despesas</span>
+                  <span class="ui-badge">{{ expense|div:transfer|mul:100|floatformat:1 }}%</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="h-2 rounded-full bg-red-600 transition-all duration-500" 
-                    style="width: {% if expense|div:transfer|mul:100 > 100 %}100{% else %}{{ expense|div:transfer|mul:100|floatformat:1|replace_comma }}{% endif %}%">
-                  </div>
-                </div>
+                <div class="monthly-progress__bar"><div class="monthly-progress__fill" style="width: {% if expense|div:transfer|mul:100 > 100 %}100{% else %}{{ expense|div:transfer|mul:100|floatformat:1|replace_comma }}{% endif %}%; background-color: var(--color-toast-error);"></div></div>
               </div>
             </div>
           </div>
-        </div>
         {% endfor %}
-      {% else %}
-        <div class="text-center py-8 bg-gray-50 rounded-lg">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h4 class="text-lg font-medium text-gray-900 mb-2">Nenhum dado disponível</h4>
-          <p class="text-gray-500">Não há dados de contabilidade e repasse mensal para o período selecionado.</p>
-          <button onclick="document.getElementById('periodDropdownButton').click()" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            Alterar período
-          </button>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
-    <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
-      <button
-        type="button"
-        data-tooltip-target="tooltip-share"
-        data-tooltip-placement="left"
-        onclick="navigator.clipboard.writeText(window.location.href)"
-        class="
-          flex
-          justify-center
-          items-center
-          w-[52px]
-          h-[52px]
-          text-gray-500
-          hover:text-gray-900
-          bg-white
-          rounded-full
-          border
-          border-gray-200
-          shadow-xs
-          hover:bg-gray-50
-          focus:ring-4
-          focus:ring-gray-300
-          focus:outline-none
-        "
-      >
-        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-          <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
-        </svg>
-        <span class="sr-only">Compartilhar</span>
-      </button>
-      <div
-        id="tooltip-share"
-        role="tooltip"
-        class="
-          absolute
-          z-10
-          invisible
-          inline-block
-          w-auto
-          px-3
-          py-2
-          text-sm
-          font-medium
-          text-white
-          transition-opacity
-          duration-300
-          bg-gray-900
-          rounded-lg
-          shadow-xs
-          opacity-0
-          tooltip
-        "
-      >
-        Compartilhar
-        <div class="tooltip-arrow" data-popper-arrow></div>
       </div>
-  
-      <button
-        type="button"
-        data-tooltip-target="tooltip-print"
-        data-tooltip-placement="left"
-        onclick="window.print()"
-        class="
-          flex
-          justify-center
-          items-center
-          w-[52px]
-          h-[52px]
-          text-gray-500
-          hover:text-gray-900
-          bg-white
-          rounded-full
-          border
-          border-gray-200
-          shadow-xs
-          hover:bg-gray-50
-          focus:ring-4
-          focus:ring-gray-300
-          focus:outline-none
-        "
-      >
-        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
-            <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
-        </svg>
-        <span class="sr-only">Imprimir</span>
-      </button>
-      <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
-        Imprimir
-        <div class="tooltip-arrow" data-popper-arrow></div>
+    {% else %}
+      <div class="ui-empty">
+        <p class="ui-body-md-strong" style="margin:0;">Nenhum dado disponível</p>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Não há dados de contabilidade e repasse mensal para o período selecionado.</p>
       </div>
-    </div>
-  
-    <button
-      type="button"
-      data-dial-toggle="speed-dial-menu-default"
-      aria-controls="speed-dial-menu-default"
-      aria-expanded="false"
-      class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
-    >
-        <svg
-          class="w-5 h-5 transition-transform group-hover:rotate-45"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 18 18"
-        >
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-        </svg>
-        <span class="sr-only">Ações</span>
-    </button>
-  </div>
+    {% endif %}
+  </section>
+  {% endif %}
+</section>
 
-</div>
+<style>
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+  }
+  .dashboard-stat { display: flex; flex-direction: column; gap: 8px; }
+  .dashboard-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+  .monthly-progress { display: flex; flex-direction: column; gap: 16px; }
+  .monthly-progress__head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .monthly-progress__chip {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--color-canvas); display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-text); font-weight: 700; font-size: 12px; text-transform: uppercase; color: var(--color-ink);
+  }
+  .monthly-progress__values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .monthly-progress__value { padding: 8px 12px; background-color: var(--color-canvas); border-radius: var(--rounded-md); }
+  .monthly-progress__bar { width: 100%; height: 6px; background-color: var(--color-canvas); border-radius: var(--rounded-pill); overflow: hidden; }
+  .monthly-progress__fill { height: 100%; border-radius: var(--rounded-pill); transition: width 220ms ease; }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  .dashboard-filters { padding: var(--space-md) var(--space-lg); }
+  .dashboard-filters__submit { align-self: flex-end; }
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const periodDropdown = document.getElementById('periodDropdown');
-    const periodButton = document.getElementById('periodDropdownButton');
-    const periodSelectedText = document.getElementById('periodSelectedText');
-    const periodRadios = periodDropdown.querySelectorAll('input[type="radio"]');
+  .dashboard-empty {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--space-3xl);
+    align-items: center;
+    background-color: var(--color-ink);
+    color: var(--color-on-dark);
+    border-radius: var(--rounded-xl);
+    padding: var(--space-3xl);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .dashboard-empty::before {
+    content: "";
+    position: absolute;
+    inset: -40% -10% auto auto;
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.08), transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .dashboard-empty__body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .dashboard-empty__eyebrow {
+    color: rgba(255,255,255,0.6);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .dashboard-empty__title {
+    color: var(--color-on-dark);
+    margin: 0;
+    max-width: 14ch;
+  }
+  .dashboard-empty__copy {
+    color: rgba(255,255,255,0.78);
+    margin: 0;
+    max-width: 52ch;
+  }
+  .dashboard-empty__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-top: var(--space-sm);
+  }
+  .dashboard-empty__cta {
+    background-color: var(--color-on-dark) !important;
+    color: var(--color-ink) !important;
+  }
+  .dashboard-empty__cta:hover { background-color: var(--color-canvas-soft) !important; }
+  .dashboard-empty__link {
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .dashboard-empty__art {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-width: 360px;
+    justify-self: end;
+  }
+  .dashboard-empty__art svg { width: 100%; height: 100%; display: block; }
 
-    periodRadios.forEach(radio => {
-      radio.addEventListener('change', function() {
-        const label = this.nextElementSibling;
-        periodSelectedText.textContent = label.textContent;
-        const dropdown = document.getElementById('periodDropdown');
-        dropdown.classList.add('hidden');
-      });
-    });
-
-    const statusDropdown = document.getElementById('statusDropdown');
-    const statusButton = document.getElementById('statusDropdownButton');
-    const statusSelectedText = document.getElementById('statusSelectedText');
-    const statusValues = document.getElementById('statusValues');
-    const statusAllCheckbox = document.getElementById('status-all');
-    const statusCheckboxes = statusDropdown.querySelectorAll('input[type="checkbox"]:not(#status-all)');
-
-    const contractDropdown = document.getElementById('contractDropdown');
-    const contractButton = document.getElementById('contractDropdownButton');
-    const contractSelectedText = document.getElementById('contractSelectedText');
-    const contractValues = document.getElementById('contractValues');
-    const contractAllCheckbox = document.getElementById('contract-all');
-    const contractCheckboxes = contractDropdown.querySelectorAll('input[type="checkbox"]:not(#contract-all)');
-
-    function updateDropdownPosition(dropdown) {
-      dropdown.style.position = 'absolute';
-      dropdown.style.top = '100%';
-      dropdown.style.left = '0';
-      dropdown.style.right = '0';
-      dropdown.style.bottom = 'auto';
-      dropdown.style.marginTop = '0.25rem';
-      dropdown.style.marginBottom = '0';
-      dropdown.style.width = '100%';
-      
-      dropdown.style.maxHeight = '240px';
-      dropdown.style.overflowY = 'auto';
+  @media (max-width: 880px) {
+    .dashboard-empty {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+      padding: var(--space-2xl);
     }
-
-    document.querySelectorAll('[data-dropdown-toggle]').forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const dropdownId = this.getAttribute('data-dropdown-toggle');
-        const dropdown = document.getElementById(dropdownId);
-        
-        document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
-          if (d.id !== dropdownId) {
-            d.classList.add('hidden');
-          }
-        });
-
-        if (dropdown) {
-          dropdown.classList.toggle('hidden');
-          updateDropdownPosition(dropdown);
-        }
-      });
-    });
-
-    document.addEventListener('click', function(e) {
-      const dropdowns = document.querySelectorAll('[id$="Dropdown"]');
-      dropdowns.forEach(dropdown => {
-        if (!dropdown.contains(e.target) && !e.target.hasAttribute('data-dropdown-toggle')) {
-          dropdown.classList.add('hidden');
-        }
-      });
-    });
-
-    function updateStatusDropdown() {
-      const selectedStatuses = Array.from(statusCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-      
-      const hiddenInputs = selectedStatuses.map(status => 
-        `<input type="hidden" name="status[]" value="${status}">`
-      ).join('');
-      statusValues.innerHTML = hiddenInputs;
-      
-      const allChecked = selectedStatuses.length === statusCheckboxes.length;
-      statusAllCheckbox.checked = allChecked;
-      
-      if (selectedStatuses.length === 0) {
-        statusSelectedText.textContent = 'Selecione os status';
-      } else if (allChecked) {
-        statusSelectedText.textContent = 'Todos os status';
-      } else {
-        statusSelectedText.textContent = `${selectedStatuses.length} status selecionados`;
-      }
-    }
-
-    function updateContractDropdown() {
-      const selectedContracts = Array.from(contractCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-      
-      const hiddenInputs = selectedContracts.map(contract => 
-        `<input type="hidden" name="contract[]" value="${contract}">`
-      ).join('');
-      contractValues.innerHTML = hiddenInputs;
-      
-      const allChecked = selectedContracts.length === contractCheckboxes.length;
-      contractAllCheckbox.checked = allChecked;
-      
-      if (selectedContracts.length === 0) {
-        contractSelectedText.textContent = 'Selecione os contratos';
-      } else if (allChecked) {
-        contractSelectedText.textContent = 'Todos os contratos';
-      } else {
-        contractSelectedText.textContent = `${selectedContracts.length} contratos selecionados`;
-      }
-    }
-
-    statusAllCheckbox.addEventListener('change', function() {
-      const isChecked = this.checked;
-      statusCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-        cb.disabled = isChecked;
-      });
-      updateStatusDropdown();
-    });
-
-    statusCheckboxes.forEach(cb => {
-      cb.addEventListener('change', function() {
-        if (!this.checked) {
-          statusCheckboxes.forEach(checkbox => {
-            checkbox.disabled = false;
-          });
-        }
-        updateStatusDropdown();
-      });
-    });
-
-    contractAllCheckbox.addEventListener('change', function() {
-      const isChecked = this.checked;
-      contractCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-        cb.disabled = isChecked;
-      });
-      updateContractDropdown();
-    });
-
-    contractCheckboxes.forEach(cb => {
-      cb.addEventListener('change', function() {
-        if (!this.checked) {
-          contractCheckboxes.forEach(checkbox => {
-            checkbox.disabled = false;
-          });
-        }
-        updateContractDropdown();
-      });
-    });
-
-    const selectedStatuses = '{{ selected_status|join:"," }}'.split(',').filter(Boolean);
-    const selectedContracts = '{{ selected_contracts|join:"," }}'.split(',').filter(Boolean);
-
-    if (selectedStatuses.length > 0) {
-      selectedStatuses.forEach(status => {
-        const checkbox = document.getElementById(`status-${status.toLowerCase()}`);
-        if (checkbox) checkbox.checked = true;
-      });
-      updateStatusDropdown();
-    }
-
-    if (selectedContracts.length > 0) {
-      selectedContracts.forEach(contract => {
-        const checkbox = document.getElementById(`contract-${contract}`);
-        if (checkbox) checkbox.checked = true;
-      });
-      updateContractDropdown();
-    }
-
-    updateStatusDropdown();
-    updateContractDropdown();
-  });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    try {
-      function translateMonth(englishMonth) {
-        const monthTranslations = {
-          'January': 'Janeiro',
-          'February': 'Fevereiro',
-          'March': 'Março',
-          'April': 'Abril',
-          'May': 'Maio',
-          'June': 'Junho',
-          'July': 'Julho',
-          'August': 'Agosto',
-          'September': 'Setembro',
-          'October': 'Outubro',
-          'November': 'Novembro',
-          'December': 'Dezembro'
-        };
-        return monthTranslations[englishMonth] || englishMonth;
-      }
-
-      const monthlyProgressCtx = document.getElementById('monthlyProgressChart');
-      if (!monthlyProgressCtx) {
-        console.error('Monthly progress chart element not found');
-        return;
-      }
-
-      const monthlyCanvas = document.createElement('canvas');
-      monthlyProgressCtx.appendChild(monthlyCanvas);
-      const monthlyContext = monthlyCanvas.getContext('2d');
-
-      const translatedMonthLabels = {{ monthly_labels|safe }}.map(translateMonth);
-
-      new Chart(monthlyContext, {
-        type: 'line',
-        data: {
-          labels: translatedMonthLabels,
-          datasets: [{
-            label: 'Prestações Concluídas',
-            data: {{ monthly_data|safe }},
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.1,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              min: 0,
-            }
-          }
-        }
-      });
-
-      const revenueExpensesCtx = document.getElementById('revenueExpensesChart');
-      if (!revenueExpensesCtx) {
-        console.error('Revenue vs expenses chart element not found');
-        return;
-      }
-
-      const revenueCanvas = document.createElement('canvas');
-      revenueExpensesCtx.appendChild(revenueCanvas);
-      const revenueContext = revenueCanvas.getContext('2d');
-
-      new Chart(revenueContext, {
-        type: 'bar',
-        data: {
-          labels: {{ months_labels|safe }}.map(translateMonth),
-          datasets: [
-            {
-              label: 'Receitas',
-              data: {{ revenue_data|safe }},
-              backgroundColor: 'rgba(16, 185, 129, 0.5)',
-              borderColor: 'rgb(16, 185, 129)',
-              borderWidth: 1
-            },
-            {
-              label: 'Despesas',
-              data: {{ expenses_data|safe }},
-              backgroundColor: 'rgba(239, 68, 68, 0.5)',
-              borderColor: 'rgb(239, 68, 68)',
-              borderWidth: 1
-            },
-            {
-              label: 'Programado',
-              data: {{ transfer_data|safe }},
-              backgroundColor: 'rgba(59, 130, 246, 0.5)',
-              borderColor: 'rgb(59, 130, 246)',
-              borderWidth: 1,
-              type: 'line',
-              order: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                }
-              }
-            }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  return context.dataset.label + ': ' + value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                }
-              }
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Error initializing charts:', error);
-    }
-  });
-</script>
+    .dashboard-empty__title { font-size: 32px; line-height: 40px; }
+    .dashboard-empty__art { max-width: 280px; justify-self: center; }
+  }
+</style>
 {% endblock %}

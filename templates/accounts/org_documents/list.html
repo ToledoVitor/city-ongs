@@ -1,135 +1,66 @@
 {% extends "base.html" %}
 
-{% block title %}Documentos - {{ organization.name }}{% endblock %}
+{% block title %}Documentos — {{ organization.name }}{% endblock %}
 
 {% block content %}
-<p class="text-3xl mb-4 font-bold">
-  Documentos da Organização
-</p>
+<section class="page">
 
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Inicio
-      </a>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Documentos</span>
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Documentos</span>
+    </nav>
+    <div class="page__header-row">
+      <div class="ui-stack ui-stack--xs">
+        <h1 class="ui-display-lg page__title">Documentos da organização</h1>
+        <p class="ui-body-md ui-text-muted page__subtitle">Estatuto, atas, demonstrações e demais documentos institucionais.</p>
       </div>
-    </li>
-  </ol>
-</nav>
+      <div class="page__actions">
+        <a href="{% url 'accounts:documents-add' %}" class="ui-btn ui-btn--primary">
+          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/></svg>
+          Adicionar documento
+        </a>
+      </div>
+    </div>
+  </header>
 
-{% include 'commons/search-bar.html' with placeholder="Pesquisar por título do documento..." %}
+  {% include 'commons/search-bar.html' with placeholder="Pesquisar por título do documento…" %}
 
-<div class="relative">
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-400">
-      <thead class="text-xs uppercase bg-gray-500 text-white">
-        <tr>
-          <th scope="col" class="px-6 py-4 font-medium">Tipo</th>
-          <th scope="col" class="px-6 py-4 font-medium">Título</th>
-          <th scope="col" class="px-6 py-4 font-medium">Data de Upload</th>
-          <th scope="col" class="px-6 py-4 font-medium">Status</th>
-          <th scope="col" class="px-6 py-4 font-medium">
-            <span class="sr-only">Ações</span>
-          </th>
-        </tr>
-      </thead>
+  <div class="ui-table-wrap">
+    <table class="ui-table">
+      <thead><tr><th>Tipo</th><th>Título</th><th>Upload</th><th>Visibilidade</th><th></th></tr></thead>
       <tbody>
         {% for document in documents %}
-        <tr class="bg-gray-50 border-b hover:bg-gray-200">
-          <td class="px-6 py-4 text-sm text-gray-900">
-            {{ document.get_document_type_display }}
-          </td>
-          <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate max-w-[200px]">
-            {{ document.title }}
-          </td>
-          <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-            {{ document.uploaded_at|date:"d/m/Y H:i" }}
-          </td>
-          <td class="px-6 py-4 text-sm text-gray-900">
-            {% if document.is_public %}
-            <span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Público</span>
-            {% else %}
-            <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">Privado</span>
-            {% endif %}
-          </td>
-          <td class="px-6 py-4 text-base text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400 border-l border-gray-300">
-            <div class="flex gap-2">
-              <a href="{{ document.file.url }}" target="_blank" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
-                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4c0 .6.4 1 1 1h14c.6 0 1-.4 1-1v-4c0-.6-.4-1-1-1h-2m-1-5-4 5-4-5"/>
-                </svg>
-                Download
-              </a>
-              <a href="{% url 'accounts:documents-edit' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-gray-600 hover:bg-gray-700 focus:ring-gray-800">
-                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-                </svg>
-                Editar
-              </a>
-              <form method="post" action="{% url 'accounts:documents-toggle-visibility' document.id %}" class="inline">
-                {% csrf_token %}
-                <button type="submit" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none {% if document.is_public %}bg-gray-600 hover:bg-gray-700 focus:ring-gray-800{% else %}bg-green-600 hover:bg-green-700 focus:ring-green-800{% endif %}">
-                  <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12c0 1.2-4 6-9 6s-9-4.8-9-6c0-1.2 4-6 9-6s9 4.8 9 6Z"/>
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-                  </svg>
-                  {% if document.is_public %}Tornar Privado{% else %}Tornar Público{% endif %}
-                </button>
-              </form>
-              <a href="{% url 'accounts:documents-delete' document.id %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-red-800">
-                <svg class="w-5 h-5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                </svg>
-                Excluir
-              </a>
-            </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr class="bg-white border-b hover:bg-gray-50">
-          <td class="px-6 py-4 text-center py-16" colspan="5">
-            <div class="text-center">
-              <div class="relative inline-block">
-                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
+          <tr>
+            <td>{{ document.get_document_type_display }}</td>
+            <td><span class="ui-body-md-strong">{{ document.title }}</span></td>
+            <td>{{ document.uploaded_at|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if document.is_public %}<span class="ui-status ui-status--success">Público</span>
+              {% else %}<span class="ui-status">Privado</span>{% endif %}
+            </td>
+            <td class="ui-text-right">
+              <div class="ui-row" style="gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                <a href="{{ document.file.url }}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--sm">Baixar</a>
+                <a href="{% url 'accounts:documents-edit' document.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a>
+                <form method="post" action="{% url 'accounts:documents-toggle-visibility' document.id %}" style="margin:0;">
+                  {% csrf_token %}
+                  <button type="submit" class="ui-btn ui-btn--subtle ui-btn--sm">{% if document.is_public %}Tornar privado{% else %}Tornar público{% endif %}</button>
+                </form>
+                <a href="{% url 'accounts:documents-delete' document.id %}" class="ui-btn ui-btn--subtle ui-btn--sm" style="color:#842029;">Excluir</a>
               </div>
-              <h3 class="mt-4 text-lg font-bold text-gray-900">Nenhum documento encontrado</h3>
-              <p class="mt-2 text-sm text-gray-600">
-                {% if request.GET.q %}
-                  Não encontramos documentos que correspondam à sua pesquisa.
-                {% else %}
-                  Nenhum documento cadastrado ainda.
-                {% endif %}
-              </p>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="ui-table__empty">
+            {% if request.GET.q %}Não encontramos documentos para "<strong>{{ request.GET.q }}</strong>".{% else %}Nenhum documento cadastrado.{% endif %}
+          </td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200 rounded-b-lg">
-    <a href="{% url 'accounts:documents-add' %}" class="px-3 py-2 text-sm font-medium text-center inline-flex items-center text-white rounded-lg focus:ring-4 focus:outline-none bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
-      Adicionar novo
-      <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-      </svg>
-    </a>
-  </div>
-
   {% include 'commons/paginator.html' with page_obj=page_obj %}
-</div>
-{% endblock %} 
+</section>
+{% endblock %}

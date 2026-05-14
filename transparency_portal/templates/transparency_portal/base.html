@@ -1,272 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-100">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITTS - Portal da Transparência - {% block title %}{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #37404a;
-            --secondary-color: #0d6efd;
-            --background-color: #f3f4f6;
-            --text-color: #333;
-            --card-background: #ffffff;
-            --border-color: #e5e7eb;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --gray-color: #6b7280;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--background-color);
-        }
-        
-        .navbar {
-            background-color: var(--primary-color);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            padding: 0.5rem 0;
-        }
-        
-        .navbar-brand {
-            color: white !important;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        .nav-link {
-            color: rgba(255,255,255,0.8) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        
-        .nav-link:hover {
-            color: white !important;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 8px;
-            background-color: var(--card-background);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-        }
-        
-        .card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SITTS — Portal da Transparência {% block title %}{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="https://storage.googleapis.com/sitts-project-media-bucket/logos/blue-favicon-32x32.png">
+  {% include 'ui/_styles.html' %}
+  <style>
+    body { background-color: var(--color-canvas-softer); min-height: 100vh; display: flex; flex-direction: column; }
+    .portal-nav {
+      background-color: var(--color-ink); color: var(--color-on-dark);
+      padding: 16px 24px;
+    }
+    .portal-nav__inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .portal-nav__brand {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--color-on-dark); text-decoration: none;
+      font-family: var(--font-display); font-weight: 700; font-size: 18px;
+    }
+    .portal-nav__links { display: flex; align-items: center; gap: 16px; }
+    .portal-nav__link {
+      color: var(--color-on-dark); text-decoration: none;
+      padding: 8px 14px; border-radius: var(--rounded-pill);
+      font-family: var(--font-text); font-weight: 500; font-size: 14px;
+      transition: background-color 140ms ease;
+    }
+    .portal-nav__link:hover { background-color: var(--color-black-elevated); }
 
-        .card-title {
-            color: var(--primary-color);
-            font-weight: 600;
-            font-size: 1.1rem;
-            line-height: 1.4;
-        }
+    .portal-main { flex: 1; padding: 32px 16px 48px; }
+    .portal-main__inner { max-width: 1200px; margin: 0 auto; }
 
-        .card-subtitle {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .btn {
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background-color: var(--secondary-color);
-            border: none;
-        }
-        
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px);
-        }
-
-        .btn-outline-primary {
-            border-color: var(--secondary-color);
-            color: var(--secondary-color);
-        }
-
-        .btn-outline-primary:hover {
-            background-color: var(--secondary-color);
-            color: white;
-            transform: translateY(-1px);
-        }
-        
-        .main-content {
-            flex: 1 0 auto;
-            padding: 1.5rem 0;
-        }
-        
-        .footer {
-            background-color: var(--primary-color);
-            color: rgba(255,255,255,0.9);
-            padding: 1.5rem 0;
-            flex-shrink: 0;
-            font-size: 0.9rem;
-        }
-        
-        .search-box {
-            background-color: var(--card-background);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .form-label {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--gray-color);
-            margin-bottom: 0.5rem;
-        }
-        
-        .status-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-        
-        .status-active {
-            background-color: var(--success-color);
-            color: white;
-        }
-        
-        .status-pending {
-            background-color: var(--warning-color);
-            color: white;
-        }
-        
-        .status-finished {
-            background-color: var(--gray-color);
-            color: white;
-        }
-
-        .value-box {
-            padding: 0.75rem;
-            background-color: rgba(243,244,246,0.5);
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .value-box strong {
-            color: var(--primary-color);
-            font-size: 0.95rem;
-        }
-
-        input.form-control,
-        select.form-select {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.95rem;
-            box-shadow: none;
-        }
-
-        .input-group-text {
-            border-color: var(--border-color);
-            color: var(--gray-color);
-        }
-
-        input.form-control:focus,
-        select.form-select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
-        }
-
-        .alert {
-            border: none;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-
-        .alert-info {
-            background-color: rgba(13,110,253,0.1);
-            color: #0c63e4;
-        }
-
-        .pagination {
-            gap: 0.25rem;
-        }
-
-        .page-link {
-            border: none;
-            padding: 0.5rem 0.75rem;
-            color: var(--primary-color);
-            border-radius: 6px;
-        }
-
-        .page-item.active .page-link {
-            background-color: var(--secondary-color);
-        }
-
-        .page-link:hover {
-            background-color: var(--background-color);
-            color: var(--secondary-color);
-        }
-
-        .page-item.active .page-link:hover {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-    </style>
+    .portal-footer {
+      background-color: var(--color-ink); color: var(--color-on-dark);
+      padding: 24px 16px;
+    }
+    .portal-footer__inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    }
+    .portal-footer__about { display: flex; flex-direction: column; gap: 4px; }
+    .portal-footer__about-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+    .portal-footer__copy { color: var(--color-mute); font-size: 14px; }
+  </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'transparency:partnership_list' %}">
-                <i class="fas fa-balance-scale me-2"></i>
-                SITTS - Portal da Transparência
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'transparency:partnership_list' %}">
-                            <i class="fas fa-list me-1"></i>
-                            Parcerias
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav__inner">
+      <a class="portal-nav__brand" href="{% url 'transparency:partnership_list' %}">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+        SITTS · Portal da Transparência
+      </a>
+      <div class="portal-nav__links">
+        <a class="portal-nav__link" href="{% url 'transparency:partnership_list' %}">Parcerias</a>
+      </div>
+    </div>
+  </nav>
 
-    <main class="main-content flex-shrink-0">
-        <div class="container">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+  <main class="portal-main">
+    <div class="portal-main__inner">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
 
-    <footer class="footer mt-auto">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5 class="mb-2 fw-semibold">Portal da Transparência</h5>
-                    <p class="mb-0">Informações sobre parcerias com organizações do terceiro setor.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; {% now "Y" %} Todos os direitos reservados</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <footer class="portal-footer">
+    <div class="portal-footer__inner">
+      <div class="portal-footer__about">
+        <p class="portal-footer__about-title">Portal da Transparência</p>
+        <p class="portal-footer__copy">Informações sobre parcerias com organizações do terceiro setor.</p>
+      </div>
+      <p class="portal-footer__copy">© {% now "Y" %} Todos os direitos reservados.</p>
+    </div>
+  </footer>
 </body>
-</html> 
+</html>

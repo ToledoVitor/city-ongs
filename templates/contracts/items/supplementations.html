@@ -1,274 +1,62 @@
 {% extends "base.html" %}
-
-{% block title %}Suplementações - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<style>
-  @media print {
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    body * {
-      visibility: hidden;
-    }
-    #printable, #printable * {
-      visibility: visible;
-    }
-    #printable {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-    .no-print, #printButton {
-      display: none !important;
-    }
-    table {
-      table-layout: fixed;
-      width: 100%;
-      font-size: 8pt;
-    }
-    th, td {
-      white-space: normal !important;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-      line-height: 1.2;
-    }
-  }
-</style>
+{% block title %}Suplementações — Portal SITTS{% endblock %}
 
-<div id="printable" class="container">
-  <h1 class="text-3xl font-bold mb-4">Suplementações</h1>
+{% block content %}
+<section class="page">
 
-  <!-- Breadcrumb -->
-  <nav class="flex py-3 text-black print:hidden" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">Contratos</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2">{{ contract.trailing_code }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium text-black md:ms-2">Suplementações</span>
-        </div>
-      </li>
-    </ol>
-  </nav>
-
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden my-5">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-gray-900">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th scope="col" class="px-6 py-3 font-semibold">
-              Status
-            </th>
-            <th scope="col" class="px-6 py-3 font-semibold">
-              Item
-            </th>
-            <th scope="col" class="px-6 py-3 font-semibold">
-              Valor de Suplementação
-            </th>
-            <th scope="col" class="px-6 py-3 font-semibold">
-              Ações
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          {% for supplement in supplementations %}
-            <tr class="hover:bg-gray-50 transition-colors duration-150">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  {{ supplement.status_label }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900">
-                {{ supplement.item.name }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                R$ {{ supplement.suplement_value|intcomma }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <a href="{% url 'contracts:item-supplementations-update' supplement.id %}" 
-                   class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  Editar
-                </a>
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
-                <div class="flex flex-col items-center">
-                  <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                  <p class="text-gray-500">Nenhuma suplementação encontrada</p>
-                </div>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    {% if not user.is_committee_member %}
-      <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
-        <div class="flex justify-end">
-          <a href="{% url 'contracts:item-supplementations-create' contract.id %}"
-             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Adicionar nova
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Suplementações</span>
+    </nav>
+    <div class="page__header-row">
+      <h1 class="ui-display-lg page__title">Suplementações</h1>
+      {% if not user.is_committee_member %}
+        <div class="page__actions">
+          <a href="{% url 'contracts:item-supplementations-create' contract.id %}" class="ui-btn ui-btn--primary">
+            <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Adicionar suplementação
           </a>
         </div>
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-<div data-dial-init class="fixed end-6 bottom-6 group print:hidden">
-  <div id="speed-dial-menu-default" class="flex flex-col items-center hidden mb-4 space-y-2">
-    <button
-      type="button"
-      data-tooltip-target="tooltip-share"
-      data-tooltip-placement="left"
-      onclick="navigator.clipboard.writeText(window.location.href)"
-      class="
-        flex
-        justify-center
-        items-center
-        w-[52px]
-        h-[52px]
-        text-gray-500
-        hover:text-gray-900
-        bg-white
-        rounded-full
-        border
-        border-gray-200
-        shadow-xs
-        hover:bg-gray-50
-        focus:ring-4
-        focus:ring-gray-300
-        focus:outline-none
-      "
-    >
-      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-        <path d="M14.419 10.581a3.564 3.564 0 0 0-2.574 1.1l-4.756-2.49a3.54 3.54 0 0 0 .072-.71 3.55 3.55 0 0 0-.043-.428L11.67 6.1a3.56 3.56 0 1 0-.831-2.265c.006.143.02.286.043.428L6.33 6.218a3.573 3.573 0 1 0-.175 4.743l4.756 2.491a3.58 3.58 0 1 0 3.508-2.871Z"/>
-      </svg>
-      <span class="sr-only">Compartilhar</span>
-    </button>
-    <div
-      id="tooltip-share"
-      role="tooltip"
-      class="
-        absolute
-        z-10
-        invisible
-        inline-block
-        w-auto
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-white
-        transition-opacity
-        duration-300
-        bg-gray-900
-        rounded-lg
-        shadow-xs
-        opacity-0
-        tooltip
-      "
-    >
-      Compartilhar
-      <div class="tooltip-arrow" data-popper-arrow></div>
+      {% endif %}
     </div>
+  </header>
 
-    <button
-      type="button"
-      data-tooltip-target="tooltip-print"
-      data-tooltip-placement="left"
-      onclick="window.print()"
-      class="
-        flex
-        justify-center
-        items-center
-        w-[52px]
-        h-[52px]
-        text-gray-500
-        hover:text-gray-900
-        bg-white
-        rounded-full
-        border
-        border-gray-200
-        shadow-xs
-        hover:bg-gray-50
-        focus:ring-4
-        focus:ring-gray-300
-        focus:outline-none
-      "
-    >
-      <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M5 20h10a1 1 0 0 0 1-1v-5H4v5a1 1 0 0 0 1 1Z"/>
-          <path d="M18 7H2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-1-2V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3h14Z"/>
-      </svg>
-      <span class="sr-only">Imprimir</span>
-    </button>
-    <div id="tooltip-print" role="tooltip" class="absolute z-10 invisible inline-block w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip">
-      Imprimir
-      <div class="tooltip-arrow" data-popper-arrow></div>
-    </div>
+  <div class="ui-table-wrap">
+    <table class="ui-table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Item</th>
+          <th>Valor</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for supplement in supplementations %}
+          <tr>
+            <td><span class="ui-status ui-status--success">{{ supplement.status_label }}</span></td>
+            <td>{{ supplement.item.name }}</td>
+            <td><span class="ui-body-md-strong">R$ {{ supplement.suplement_value|intcomma }}</span></td>
+            <td class="ui-text-right">
+              <a href="{% url 'contracts:item-supplementations-update' supplement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
+                <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Editar
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="ui-table__empty">Nenhuma suplementação encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-
-  <button
-    type="button"
-    data-dial-toggle="speed-dial-menu-default"
-    aria-controls="speed-dial-menu-default"
-    aria-expanded="false"
-    class="flex items-center justify-center text-white bg-blue-700 rounded-full w-14 h-14 hover:bg-blue-800 focus:ring-4 focus:ring-blue-700 focus:outline-none"
-  >
-      <svg
-        class="w-5 h-5 transition-transform group-hover:rotate-45"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 18 18"
-      >
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-      </svg>
-      <span class="sr-only">Ações</span>
-  </button>
-</div>
-    
+</section>
 {% endblock %}

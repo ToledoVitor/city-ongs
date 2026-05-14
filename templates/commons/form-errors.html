@@ -1,63 +1,71 @@
 {% if form.errors %}
-  <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
-    <div class="flex items-start space-x-4">
-      <div class="flex-shrink-0">
-        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-      </div>
-      <div class="flex-1">
-        <h3 class="text-sm font-medium text-red-800 mb-2">
-          {{ error_message|default:"Erro ao processar operação" }}
-        </h3>
-        <div class="text-sm text-red-700 space-y-1">
-          {% for field, errors in form.errors.items %}
-            {% for error in errors %}
-              <div class="flex items-center space-x-2">
-                <div class="w-1 h-1 bg-red-400 rounded-full"></div>
-                <span>
-                  {% if field == "__all__" %}
-                    {{ error }}
-                  {% elif field.label is not none %}
-                    <span class="font-medium">{{ field.label }}:</span> {{ error }}
-                  {% else %}
-                    {{ error }}
-                  {% endif %}
-                </span>
-              </div>
-            {% endfor %}
+  <div class="form-errors" role="alert">
+    <div class="form-errors__indicator" aria-hidden="true"></div>
+    <div class="form-errors__body">
+      <p class="ui-body-md-strong form-errors__title">
+        {{ error_message|default:"Erro ao processar operação" }}
+      </p>
+      <ul class="form-errors__list">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li class="form-errors__item">
+              {% if field == "__all__" %}
+                {{ error }}
+              {% elif field.label is not none %}
+                <span class="form-errors__field">{{ field.label }}:</span> {{ error }}
+              {% else %}
+                {{ error }}
+              {% endif %}
+            </li>
           {% endfor %}
-        </div>
-      </div>
+        {% endfor %}
+      </ul>
     </div>
   </div>
 {% endif %}
 
 {% if subform and subform.errors %}
-  <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
-    <div class="flex items-start space-x-4">
-      <div class="flex-shrink-0">
-        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-      </div>
-      <div class="flex-1">
-        <h3 class="text-sm font-medium text-red-800 mb-2">Erro ao criar objeto</h3>
-        <div class="text-sm text-red-700 space-y-1">
-          {% for field in subform %}
-            {% if field.errors %}
-              <div class="flex items-center space-x-2">
-                <div class="w-1 h-1 bg-red-400 rounded-full"></div>
-                <span><span class="font-medium">{{ field.label }}:</span> {{ field.errors }}</span>
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
+  <div class="form-errors" role="alert">
+    <div class="form-errors__indicator" aria-hidden="true"></div>
+    <div class="form-errors__body">
+      <p class="ui-body-md-strong form-errors__title">Erro ao criar objeto</p>
+      <ul class="form-errors__list">
+        {% for field in subform %}
+          {% if field.errors %}
+            <li class="form-errors__item">
+              <span class="form-errors__field">{{ field.label }}:</span> {{ field.errors }}
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
   </div>
 {% endif %}
+
+<style>
+  .form-errors {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    background-color: #fde9e9;
+    border: 1px solid #f5c5c5;
+    border-radius: var(--rounded-xl);
+    color: #842029;
+  }
+  .form-errors__indicator {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background-color: var(--color-toast-error);
+    box-shadow: 0 0 0 3px rgba(217, 33, 33, 0.22);
+  }
+  .form-errors__body { flex: 1; min-width: 0; }
+  .form-errors__title { color: inherit; margin: 0 0 6px; }
+  .form-errors__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .form-errors__item { font-family: var(--font-text); font-size: 14px; line-height: 20px; color: inherit; }
+  .form-errors__field { font-weight: 500; }
+</style>

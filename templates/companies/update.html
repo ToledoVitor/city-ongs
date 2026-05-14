@@ -1,137 +1,73 @@
 {% extends "base.html" %}
-
-{% block title %}Editar {{ company.name }} - Portal SITTS{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-  Editar Empresa
-</p>
+{% block title %}Editar {{ company.name }} — Portal SITTS{% endblock %}
 
-<nav class="flex mb-6" aria-label="Breadcrumb">
-  <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-      <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-    </li>
-    <li class="inline-flex items-center">
-      <a href="{% url 'contracts:companies-list' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        Empresas
-      </a>
-    </li>
-    <li aria-current="page">
-      <div class="flex items-center">
-        <svg class="rtl:rotate-180 w-3 h-3 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2">Editar {{ company.name }}</span>
-      </div>
-    </li>
-  </ol>
-</nav>
+{% block content %}
+<section class="page ui-form">
 
-<form method="post" class="space-y-6">
-  {% csrf_token %}
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:companies-list' %}" class="ui-breadcrumb__item">Empresas</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Editar {{ company.name }}</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Editar empresa</h1>
+  </header>
 
-  <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-xl font-semibold mb-4">Informações da Empresa</h2>
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Nome da Empresa</label>
-        {{ form.name }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">CNPJ</label>
-        <div class="px-4 py-2.5 bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full">
-          {{ company.masked_cnpj }}
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Informações da empresa</h2>
+      <div class="ui-grid-2">
+        <div class="ui-field"><label class="ui-field__label">Nome da empresa</label>{{ form.name }}</div>
+        <div class="ui-field">
+          <label class="ui-field__label">CNPJ</label>
+          <div class="ui-input" style="background-color: var(--color-canvas-softer); cursor: not-allowed; color: var(--color-body);">{{ company.masked_cnpj }}</div>
+        </div>
+        <div class="ui-field" style="grid-column: 1 / -1;">
+          <label class="ui-field__label">Telefone</label>
+          <input type="tel" name="phone_number" id="phone_number" value="{{ company.phone_number.as_national }}" required class="ui-input" pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}" placeholder="(00) 00000-0000">
         </div>
       </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Telefone</label>
-        <input
-          type="tel"
-          name="phone_number"
-          id="phone_number"
-          value="{{ company.phone_number.as_national }}"
-          required
-          class="block w-full text-sm rounded-lg border focus:ring-blue-500 bg-gray-300 border-gray-600 placeholder-gray-800 text-black focus:border-blue-500"
-          pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
-          placeholder="(00) 00000-0000">
+    </section>
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Endereço</h2>
+      <div class="ui-grid-2">
+        <div class="ui-field"><label class="ui-field__label">Logradouro</label>{{ form.street }}</div>
+        <div class="ui-field"><label class="ui-field__label">Número</label>{{ form.number }}</div>
+        <div class="ui-field"><label class="ui-field__label">Complemento</label>{{ form.complement }}</div>
+        <div class="ui-field"><label class="ui-field__label">Bairro</label>{{ form.district }}</div>
+        <div class="ui-field"><label class="ui-field__label">Cidade</label>{{ form.city }}</div>
+        <div class="ui-field"><label class="ui-field__label">UF</label>{{ form.uf }}</div>
+        <div class="ui-field"><label class="ui-field__label">CEP</label>{{ form.postal_code }}</div>
       </div>
+    </section>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:companies-list' %}" class="ui-btn ui-btn--secondary">Cancelar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Salvar alterações</button>
     </div>
-  </div>
+  </form>
+</section>
 
-  <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-xl font-semibold mb-4">Endereço</h2>
-    <div class="grid gap-6 mb-6 md:grid-cols-2">
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Logradouro</label>
-        {{ form.street }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Número</label>
-        {{ form.number }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Complemento</label>
-        {{ form.complement }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Bairro</label>
-        {{ form.district }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">Cidade</label>
-        {{ form.city }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">UF</label>
-        {{ form.uf }}
-      </div>
-      <div class="relative">
-        <label class="block mb-2 text-base font-medium text-black">CEP</label>
-        {{ form.postal_code }}
-      </div>
-    </div>
-  </div>
-
-  {% include 'commons/form-errors.html' with form=form %}
-
-  <div class="flex justify-end space-x-4">
-    <a href="{% url 'contracts:companies-list' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-gray-200">
-      Cancelar
-    </a>
-    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-      Salvar alterações
-    </button>
-  </div>
-</form>
-
-{% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phone_number');
+  document.addEventListener('DOMContentLoaded', function () {
+    var phoneInput = document.getElementById('phone_number');
     phoneInput.value = phoneInput.value.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-    
-    phoneInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
+    phoneInput.addEventListener('input', function (e) {
+      var value = e.target.value.replace(/\D/g, '');
       if (value.length > 11) value = value.slice(0, 11);
       value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
       value = value.replace(/(\d)(\d{4})$/, '$1-$2');
       e.target.value = value;
     });
   });
-
 </script>
 {% endblock %}
-
-{% endblock %} 

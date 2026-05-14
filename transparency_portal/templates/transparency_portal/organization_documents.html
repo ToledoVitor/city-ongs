@@ -1,83 +1,54 @@
 {% extends "transparency_portal/base.html" %}
 
-{% block title %}Documentos - {{ organization.name }}{% endblock %}
+{% block title %}— Documentos · {{ organization.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'transparency_portal:organization_list' %}">Organizações</a></li>
-                    <li class="breadcrumb-item active">{{ organization.name }}</li>
-                </ol>
-            </nav>
+<section class="ui-stack ui-stack--2xl">
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h1 class="h3 mb-4">Documentos da {{ organization.name }}</h1>
+  <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'transparency:partnership_list' %}" class="ui-breadcrumb__item">Parcerias</a>
+    <span class="ui-breadcrumb__sep">/</span>
+    <span class="ui-breadcrumb__item ui-breadcrumb__item--current">{{ organization.name }}</span>
+  </nav>
 
-                    {% if documents %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Título</th>
-                                    <th>Descrição</th>
-                                    <th>Data de Upload</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for document in documents %}
-                                <tr>
-                                    <td>{{ document.get_document_type_display }}</td>
-                                    <td>{{ document.title }}</td>
-                                    <td>{{ document.description|truncatewords:30 }}</td>
-                                    <td>{{ document.uploaded_at|date:"d/m/Y" }}</td>
-                                    <td>
-                                        <a href="{{ document.file.url }}" class="btn btn-sm btn-primary" target="_blank">
-                                            <i class="fas fa-download"></i> Download
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+  <header class="ui-stack ui-stack--xs">
+    <h1 class="ui-display-xl">Documentos da {{ organization.name }}</h1>
+    <p class="ui-body-md ui-text-muted">Documentos institucionais públicos.</p>
+  </header>
 
-                    {% if is_paginated %}
-                    <nav aria-label="Navegação de páginas" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-                            </li>
-                            {% endif %}
-
-                            {% for num in page_obj.paginator.page_range %}
-                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                            {% endfor %}
-
-                            {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
-                    {% else %}
-                    <div class="alert alert-info">
-                        Nenhum documento público disponível.
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+  {% if documents %}
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <thead><tr><th>Tipo</th><th>Título</th><th>Descrição</th><th>Upload</th><th></th></tr></thead>
+        <tbody>
+          {% for document in documents %}
+            <tr>
+              <td>{{ document.get_document_type_display }}</td>
+              <td><span class="ui-body-md-strong">{{ document.title }}</span></td>
+              <td>{{ document.description|truncatewords:30 }}</td>
+              <td>{{ document.uploaded_at|date:"d/m/Y" }}</td>
+              <td class="ui-text-right"><a href="{{ document.file.url }}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--sm">Baixar</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-</div>
-{% endblock %} 
+
+    {% if is_paginated %}
+      <nav aria-label="Navegação de páginas" class="ui-row" style="justify-content: center; gap: 8px;">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="ui-btn ui-btn--subtle ui-btn--sm">Anterior</a>{% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}<span class="ui-btn ui-btn--primary ui-btn--sm">{{ num }}</span>
+          {% else %}<a href="?page={{ num }}" class="ui-btn ui-btn--subtle ui-btn--sm">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="ui-btn ui-btn--subtle ui-btn--sm">Próxima</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="ui-empty">
+      <p class="ui-display-md">Nenhum documento disponível</p>
+      <p class="ui-body-md ui-text-muted">Não há documentos públicos cadastrados para esta organização.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
