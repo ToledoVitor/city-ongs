@@ -2,16 +2,16 @@
 
 <div class="ui-table-shell">
   <div class="ui-table-scroll">
-    <table class="ui-table">
+    <table class="ui-table ui-table--auto">
         <thead>
             <tr>
-                <th scope="col" style="width: 25%;">Identificação</th>
-                <th scope="col" style="width: 15%;">Valor</th>
-                <th scope="col" style="width: 15%;">Status</th>
-                <th scope="col" style="width: 15%;">Análise</th>
-                <th scope="col" style="width: 15%;">Conta bancária</th>
-                <th scope="col" style="width: 15%;">Origem</th>
-                <th scope="col" class="ui-table__col--actions"></th>
+                <th scope="col">Identificação</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Status</th>
+                <th scope="col">Análise</th>
+                <th scope="col">Conta bancária</th>
+                <th scope="col">Origem</th>
+                <th scope="col" class="ui-table__col--actions">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -35,724 +35,371 @@
                         {% endif %}
                       {% endif %}
                     </th>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <p class="font-medium">R$ {{ revenue.value|intcomma }}</p>
-                      <button
-                        type="button"
-                        data-modal-target="rev-documents-modal-{{ revenue.id}}"
-                        data-modal-toggle="rev-documents-modal-{{ revenue.id}}"
-                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200 mt-1"
-                        title="Ver arquivos anexados"
-                      >
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                        </svg>
-                        {{ revenue.count_files }}
-                        {% if revenue.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
+                    <td class="ui-table__cell">
+                      <p class="ui-body-md-strong" style="margin: 0; white-space: nowrap;">R$&nbsp;{{ revenue.value|intcomma }}</p>
+                      <button type="button" data-modal-target="rev-documents-modal-{{ revenue.id}}" data-modal-toggle="rev-documents-modal-{{ revenue.id}}" class="ui-chip ui-chip--action" style="margin-top: 6px;" title="Ver arquivos anexados">
+                        <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg>
+                        {{ revenue.count_files }} {% if revenue.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
                       </button>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <div class="flex flex-col gap-1">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                          {% if revenue.paid %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                          {% if revenue.paid %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Paga
-                          {% else %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Não Paga
-                          {% endif %}
-                        </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                          {% if revenue.conciled %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                          {% if revenue.conciled %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Conciliada
-                          {% else %}
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Pendente
-                          {% endif %}
-                        </span>
+                    <td class="ui-table__cell">
+                      <div class="ui-stack ui-stack--xxs">
+                        {% if revenue.paid %}
+                          <span class="ui-status ui-status--success">Paga</span>
+                        {% else %}
+                          <span class="ui-status ui-status--error">Não paga</span>
+                        {% endif %}
+                        {% if revenue.conciled %}
+                          <span class="ui-status ui-status--info">Conciliada</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
+                        {% endif %}
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border w-fit
-                        {% if revenue.is_approved %}bg-green-100 text-green-700 border-green-200
-                        {% elif revenue.is_rejected %}bg-red-100 text-red-700 border-red-200
-                        {% else %}bg-orange-100 text-orange-700 border-orange-200{% endif %}
-                      ">
+                    <td class="ui-table__cell">
+                      <div class="ui-stack ui-stack--xxs">
                         {% if revenue.is_approved %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
+                          <span class="ui-status ui-status--success">{{ revenue.status_label }}</span>
                         {% elif revenue.is_rejected %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
+                          <span class="ui-status ui-status--error">{{ revenue.status_label }}</span>
                         {% else %}
-                          <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
+                          <span class="ui-status ui-status--warning">{{ revenue.status_label }}</span>
                         {% endif %}
-                        {{ revenue.status_label }}
-                      </span>
+                        {% if revenue.is_rejected %}
+                          <button type="button" data-modal-target="revenues-errors-{{ revenue.id}}" data-modal-toggle="revenues-errors-{{ revenue.id}}" class="ui-chip ui-chip--danger" title="Ver pendências">
+                            <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M5.062 19h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4a2 2 0 0 0-3.464 0L3.33 16.5c-.77.833.192 2.5 1.732 2.5Z"/></svg>
+                            Ver pendências
+                          </button>
+                        {% endif %}
+                      </div>
                       {% if revenue.is_rejected %}
-                        <button
-                          type="button"
-                          data-modal-target="revenues-errors-{{ revenue.id}}"
-                          data-modal-toggle="revenues-errors-{{ revenue.id}}"
-                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors duration-200 mt-2 w-fit"
-                          title="Ver pendências"
-                        >
-                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                          </svg>
-                          Ver Pendências
-                        </button>
-
-                        <div
-                          id="revenues-errors-{{ revenue.id}}"
-                          tabindex="-1"
-                          data-modal-backdrop="static"
-                          aria-hidden="true"
-                          class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                        >
-                          <div class="relative p-4 w-full max-w-2xl max-h-full">
-                            <div class="relative rounded-lg shadow bg-white">
-                              <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                                <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                  </svg>
-                                  Pendências da Receita
-                                </h3>
-                                <button
-                                  type="button"
-                                  data-modal-hide="revenues-errors-{{ revenue.id}}"
-                                  class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                                >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                                </button>
+                        <div id="revenues-errors-{{ revenue.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                          <div class="ui-modal__panel ui-modal__panel--lg">
+                            <header class="ui-modal__header ui-modal__header--dark">
+                              <div class="ui-stack ui-stack--xxs">
+                                <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Análise</p>
+                                <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Pendências da receita</h3>
                               </div>
-                              <div class="p-6">
-                                <div class="mb-6">
-                                    <div class="bg-gray-50 rounded-lg p-4">
-                                        <h5 class="font-medium text-gray-900 mb-2">Detalhes da Receita:</h5>
-                                        <div class="space-y-1 text-sm text-gray-600">
-                                            <p><span class="font-medium">Descrição:</span> {{ revenue.identification }}</p>
-                                            <p><span class="font-medium">Valor:</span> R$ {{ revenue.value|intcomma }}</p>
-                                            <p><span class="font-medium">Data de Recebimento:</span> {{ revenue.receive_date|date:"d/m/Y" }}</p>
-                                            <p><span class="font-medium">Fonte de Recurso:</span> {{ revenue.source_label }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-6">
-                                    <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                        <div class="flex-shrink-0">
-                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-semibold text-red-800 mb-3">Pendência Reportada pelo Avaliador</h4>
-                                            <div class="bg-white rounded-lg border border-red-200 p-4">
-                                                <textarea
-                                                  rows="6"
-                                                  disabled
-                                                  class="block w-full text-sm text-gray-900 bg-gray-50 border-0 resize-none focus:outline-none"
-                                                  placeholder="Nenhuma pendência reportada"
-                                                >{{ revenue.pendencies|default:"Nenhuma pendência reportada" }}</textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-end">
-                                    <button
-                                      type="button"
-                                      data-modal-hide="revenues-errors-{{ revenue.id}}"
-                                      class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                    >
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        Fechar
-                                    </button>
+                              <button type="button" data-modal-hide="revenues-errors-{{ revenue.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                                <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                              </button>
+                            </header>
+                            <div class="ui-modal__body ui-stack ui-stack--md">
+                              <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                                <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Detalhes</p>
+                                <dl class="ui-dl" style="margin: 0;">
+                                  <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ revenue.identification }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">R$ {{ revenue.value|intcomma }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Recebimento</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ revenue.receive_date|date:"d/m/Y" }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Fonte</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ revenue.source_label }}</dd>
+                                </dl>
+                              </div>
+                              <div class="ui-alert ui-alert--danger">
+                                <div class="ui-alert__indicator" aria-hidden="true"></div>
+                                <div class="ui-alert__body">
+                                  <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Pendência reportada pelo avaliador</p>
+                                  <p class="ui-body-sm" style="margin: 0; white-space: pre-wrap;">{{ revenue.pendencies|default:"Nenhuma pendência reportada" }}</p>
                                 </div>
                               </div>
                             </div>
+                            <footer class="ui-modal__footer">
+                              <button type="button" data-modal-hide="revenues-errors-{{ revenue.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Fechar</button>
+                            </footer>
                           </div>
                         </div>
                       {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <a
-                        href="{% url 'bank:bank-accounts-detail' revenue.bank_account.id %}"
-                        class="hover:underline text-blue-700"
-                        target="_blank"
-                      >
-                        <div class="truncate max-w-[200px]">{{ revenue.bank_account.account }} ({{revenue.bank_account.account_type_label}})</div>
-                        <span class="text-xs text-gray-500">{{ revenue.bank_account.bank_name }}</span>
+                    <td class="ui-table__cell">
+                      <a href="{% url 'bank:bank-accounts-detail' revenue.bank_account.id %}" class="ui-link" target="_blank" style="display: block; max-width: 220px;">
+                        <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ revenue.bank_account.account }} ({{ revenue.bank_account.account_type_label }})</span>
+                        <span class="ui-caption" style="display: block; margin-top: 2px;">{{ revenue.bank_account.bank_name }}</span>
                       </a>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">
-                      <div class="truncate max-w-[200px]">{{ revenue.source_label }}</div>
+                    <td class="ui-table__cell">
+                      <p class="ui-body-sm" style="margin: 0; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ revenue.source_label }}</p>
                     </td>
-                    <td class="px-6 py-4 text-sm sticky right-0 z-10 bg-gray-300 hover:bg-gray-400">
+                    <td class="ui-table__cell ui-table__cell--actions">
                       {% if accountability.is_on_execution %}
-                      <div class="flex items-center justify-end gap-2">
-                        <a
-                          href="{% url 'accountability:revenues-update' revenue.id %}"
-                          class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-3 py-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
-                          </svg>
-                          Visualizar
-                        </a>
-
-                        {% if user.can_update_accountability %}
-                        <button
-                          type="button"
-                          data-modal-target="revenues-duplicate-{{ revenue.id}}"
-                          data-modal-toggle="revenues-duplicate-{{ revenue.id}}"
-                          class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-full text-xs p-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
-                            <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          data-modal-target="revenues-delete-{{ revenue.id}}"
-                          data-modal-toggle="revenues-delete-{{ revenue.id}}"
-                          class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-full text-xs p-2 inline-flex items-center"
-                        >
-                          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
-                          </svg>
-                        </button>
-                        {% endif %}
-
-                      </div>
+                        <div class="ui-row" style="gap: 6px; justify-content: flex-end;">
+                          <a href="{% url 'accountability:revenues-update' revenue.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
+                            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C3.8 7.9 7.6 5 12 5s8.2 2.9 9.5 7c-1.3 4.1-5.1 7-9.5 7s-8.2-2.9-9.5-7Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                            Visualizar
+                          </a>
+                          {% if user.can_update_accountability %}
+                            <button type="button" data-modal-target="revenues-duplicate-{{ revenue.id}}" data-modal-toggle="revenues-duplicate-{{ revenue.id}}" class="ui-icon-btn" title="Duplicar receita" aria-label="Duplicar receita">
+                              <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/></svg>
+                            </button>
+                            <button type="button" data-modal-target="revenues-delete-{{ revenue.id}}" data-modal-toggle="revenues-delete-{{ revenue.id}}" class="ui-icon-btn ui-icon-btn--danger" title="Excluir receita" aria-label="Excluir receita">
+                              <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7 5 7m14 0-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+                            </button>
+                          {% endif %}
+                        </div>
                       {% elif accountability.is_sent and user.can_review_accountability %}
-                      <a
-                        href="{% url 'accountability:revenue-review' revenue.id revenue.accountability.id %}"
-                        class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-xs px-3 py-2 inline-flex items-center"
-                      >
-                        Revisar
-                      </a>
+                        <a href="{% url 'accountability:revenue-review' revenue.id revenue.accountability.id %}" class="ui-btn ui-btn--secondary ui-btn--sm" style="float: right;">Revisar</a>
                       {% endif %}
                     </td>
                 </tr>
 
-                <div
-                  id="rev-documents-modal-{{ revenue.id}}"
-                  tabindex="-1"
-                  data-modal-backdrop="static"
-                  aria-hidden="true"
-                  class="
-                    hidden
-                    overflow-y-auto
-                    overflow-x-hidden
-                    fixed
-                    top-0
-                    right-0
-                    left-0
-                    z-50
-                    justify-center
-                    items-center
-                    w-full
-                    md:inset-0
-                    h-[calc(100%-1rem)]
-                    max-h-full
-                  "
-                >
-                  <div class="relative p-4 w-full max-w-4xl max-h-full">
-                    <!-- Modal content -->
-                    <div class="relative rounded-lg shadow bg-white">
-                      <!-- Modal header -->
-                        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                              <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                              </svg>
-                              Documentos da Receita
-                            </h3>
-                            <button
-                              type="button"
-                              data-modal-hide="rev-documents-modal-{{ revenue.id}}"
-                              class="
-                                text-gray-400
-                                hover:bg-gray-200
-                                hover:text-gray-900
-                                bg-transparent
-                                rounded-lg
-                                text-sm
-                                w-8
-                                h-8
-                                inline-flex
-                                justify-center
-                                items-center
-                                transition-colors
-                                duration-200
-                              "
-                            >
-                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                </svg>
-                                <span class="sr-only">Fechar modal</span>
-                            </button>
-                        </div>
-                        <!-- Modal body -->
-                        <div class="p-6">
-                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Left Column: Existing Files -->
-                            <div class="space-y-4">
-                              <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Arquivos Anexados ({{ revenue.count_files }})
-                              </h4>
-                              <div class="bg-gray-50 rounded-lg p-4 max-h-80 overflow-y-auto">
-                                {% for file in revenue.files.all %}
-                                  <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-3 last:mb-0 hover:shadow-sm transition-shadow">
-                                    <div class="flex items-center space-x-3">
-                                      <div class="flex-shrink-0">
-                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                      </div>
-                                      <div class="flex-1 min-w-0">
-                                        <a
-                                          href="{{ file.file.url }}"
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          class="text-sm font-medium text-green-600 hover:text-green-800 hover:underline block truncate"
-                                        >
-                                          {{ file.name }}
-                                        </a>
-                                        <p class="text-xs text-gray-500 mt-1">
-                                          Anexado em: {{ file.created_at|date:"d/m/Y H:i" }}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    {% if not user.is_committee_member %}
-                                    <form method="post" action="{% url 'accountability:revenue-file-delete' file.id %}" class="inline">
-                                      {% csrf_token %}
-                                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                      <button
-                                        type="submit"
-                                        class="ml-2 text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-full transition-colors"
-                                        onclick="return confirm('Tem certeza que deseja excluir este arquivo?')"
-                                      >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                      </button>
-                                    </form>
-                                    {% endif %}
-                                  </div>
-                                {% empty %}
-                                  <div class="text-center py-8">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <p class="text-gray-500 text-sm">Nenhum arquivo anexado ainda</p>
-                                    <p class="text-gray-400 text-xs mt-1">Use a área de upload ao lado para adicionar arquivos</p>
-                                  </div>
-                                {% endfor %}
+                <div id="rev-documents-modal-{{ revenue.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                  <div class="ui-modal__panel ui-modal__panel--xl">
+                    <header class="ui-modal__header ui-modal__header--dark">
+                      <div class="ui-stack ui-stack--xxs">
+                        <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Anexos</p>
+                        <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Documentos da receita</h3>
+                      </div>
+                      <button type="button" data-modal-hide="rev-documents-modal-{{ revenue.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                        <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                      </button>
+                    </header>
+
+                    <div class="ui-modal__body">
+                      <div class="exp-docs-grid">
+                        <section class="ui-stack ui-stack--sm">
+                          <p class="ui-caption" style="margin: 0;">Anexados ({{ revenue.count_files }})</p>
+                          <div class="exp-docs-list">
+                            {% for file in revenue.files.all %}
+                              <div class="exp-docs-list__item">
+                                <div class="ui-stack ui-stack--xxs" style="min-width: 0; flex: 1;">
+                                  <a href="{{ file.file.url }}" target="_blank" rel="noopener noreferrer" class="ui-link" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ file.name }}</a>
+                                  <p class="ui-caption" style="margin: 0;">Anexado em {{ file.created_at|date:"d/m/Y H:i" }}</p>
+                                </div>
+                                {% if not user.is_committee_member %}
+                                  <form method="post" action="{% url 'accountability:revenue-file-delete' file.id %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="ui-icon-btn ui-icon-btn--danger" title="Excluir anexo" aria-label="Excluir anexo" onclick="return confirm('Excluir este anexo?')">
+                                      <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7 5 7m14 0-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+                                    </button>
+                                  </form>
+                                {% endif %}
                               </div>
-                            </div>
-                            
-                            <div class="space-y-4">
-                              {% if accountability.is_on_execution and user.can_update_accountability %}
-                              <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                                Adicionar Arquivos
-                              </h4>
-                              
-                              <form method="post" action="{% url 'accountability:revenue-file' revenue.id %}" enctype="multipart/form-data" id="revenueUploadForm-{{ revenue.id }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 bg-gray-50 hover:border-green-500 hover:bg-green-50" id="revenue-file-upload-area-{{ revenue.id }}">
-                                  <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                  </svg>
-                                  <p class="text-gray-600 text-sm mb-2">Arraste e solte os arquivos aqui ou</p>
-                                  <input
-                                    class="hidden"
-                                    id="revenue-files-{{ revenue.id }}"
-                                    name="files"
-                                    type="file"
-                                    multiple
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                  >
-                                  <label for="revenue-files-{{ revenue.id }}" class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-md cursor-pointer transition-colors duration-200">
-                                    Escolher Arquivos
-                                  </label>
-                                  <p class="text-xs text-gray-500 mt-3">PDF, JPG, PNG (máx. 10MB cada)</p>
-                                </div>
-                                
-                                <div id="revenue-file-list-{{ revenue.id }}" class="mt-4 space-y-2"></div>
-                                
-                                <div class="mt-4">
-                                  <button
-                                    type="submit"
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center justify-center"
-                                  >
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                    </svg>
-                                    Enviar Arquivos
-                                  </button>
-                                </div>
-                              </form>
-                              {% else %}
-                              <div class="text-center mt-8 py-8">
-                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                  <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                  </svg>
-                                </div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Upload Não Disponível</h4>
-                                <p class="text-gray-600 text-sm">Não é possível adicionar novos documentos neste momento</p>
+                            {% empty %}
+                              <div class="ui-empty" style="padding: 16px;">
+                                <p class="ui-body-sm-strong" style="margin: 0;">Nenhum anexo</p>
+                                <p class="ui-body-sm ui-text-muted" style="margin: 0;">Use a área ao lado para adicionar arquivos.</p>
                               </div>
-                              {% endif %}
-                            </div>
+                            {% endfor %}
                           </div>
-                        </div>
-                        <!-- Modal footer -->
-                        <div class="flex items-center justify-end p-6 border-t border-gray-200">
-                          <button
-                            type="button"
-                            data-modal-hide="rev-documents-modal-{{ revenue.id}}"
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                          >
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Fechar
-                          </button>
-                        </div>
+                        </section>
+
+                        <section class="ui-stack ui-stack--sm">
+                          {% if accountability.is_on_execution and user.can_update_accountability %}
+                            <p class="ui-caption" style="margin: 0;">Adicionar arquivos</p>
+                            <form method="post" action="{% url 'accountability:revenue-file' revenue.id %}" enctype="multipart/form-data" id="revenueUploadForm-{{ revenue.id }}" class="ui-stack ui-stack--sm">
+                              {% csrf_token %}
+                              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                              <div class="exp-docs-dropzone" id="revenue-file-upload-area-{{ revenue.id }}">
+                                <svg width="32" height="32" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+                                <p class="ui-body-sm ui-text-muted" style="margin: 0;">Arraste e solte arquivos aqui</p>
+                                <input class="hidden" id="revenue-files-{{ revenue.id }}" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <label for="revenue-files-{{ revenue.id }}" class="ui-btn ui-btn--secondary ui-btn--sm" style="cursor: pointer;">Escolher arquivos</label>
+                                <p class="ui-caption" style="margin: 0;">PDF, JPG, PNG (máx. 10MB cada)</p>
+                              </div>
+
+                              <div id="revenue-file-list-{{ revenue.id }}" class="ui-stack ui-stack--xxs"></div>
+
+                              <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm ui-btn--full">Enviar arquivos</button>
+                            </form>
+                          {% else %}
+                            <div class="ui-empty" style="padding: 24px 16px;">
+                              <p class="ui-body-md-strong" style="margin: 0;">Upload não disponível</p>
+                              <p class="ui-body-sm ui-text-muted" style="margin: 0;">Não é possível adicionar novos documentos neste momento.</p>
+                            </div>
+                          {% endif %}
+                        </section>
+                      </div>
                     </div>
+
+                    <footer class="ui-modal__footer">
+                      <button type="button" data-modal-hide="rev-documents-modal-{{ revenue.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Fechar</button>
+                    </footer>
                   </div>
                 </div>
 
 
                 {% if accountability.is_on_execution %}
-                <div
-                    id="revenues-duplicate-{{ revenue.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                  </svg>
-                                  Duplicar Receita
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="revenues-duplicate-{{ revenue.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="revenues-duplicate-{{ revenue.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Copiar dados</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Duplicar receita</h3>
+                        </div>
+                        <button type="button" data-modal-hide="revenues-duplicate-{{ revenue.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--info">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Sobre a duplicação</p>
+                            <p class="ui-body-sm" style="margin: 0;">Todos os dados serão copiados, exceto os arquivos anexados. Você poderá editar a nova receita após a criação.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:revenues-duplicate' revenue.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="form_type" value="revenues_duplicate">
-                                  <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-green-800 mb-2">Informações sobre a duplicação</h4>
-                                              <p class="text-green-700 text-sm leading-relaxed">
-                                                  Todos os dados da receita serão copiados, exceto os arquivos anexados. Você poderá editar os dados da nova receita após a criação.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Dados copiados</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ revenue.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Recebimento</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Fonte</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.source_label }}</dd>
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Dados que serão copiados:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ revenue.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ revenue.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data de Recebimento:</span> {{ revenue.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Fonte de Recurso:</span> {{ revenue.source_label }}</p>
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="revenues-duplicate-{{ revenue.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                          </svg>
-                                          Duplicar
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="revenue-duplicate-form-{{ revenue.id}}" method="post" action="{% url 'accountability:revenues-duplicate' revenue.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="revenues_duplicate">
+                          <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="revenues-duplicate-{{ revenue.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="revenue-duplicate-form-{{ revenue.id}}" class="ui-btn ui-btn--primary ui-btn--sm">Duplicar</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
 
-                <div
-                    id="revenues-delete-{{ revenue.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                  </svg>
-                                  Excluir Receita
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="revenues-delete-{{ revenue.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="revenues-delete-{{ revenue.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Ação irreversível</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Excluir receita</h3>
+                        </div>
+                        <button type="button" data-modal-hide="revenues-delete-{{ revenue.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--danger">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Não é possível reverter</p>
+                            <p class="ui-body-sm" style="margin: 0;">A receita e seus arquivos associados serão removidos permanentemente.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:revenue-delete' revenue.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="form_type" value="revenues_delete">
-                                  <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-red-800 mb-2">Ação Irreversível!</h4>
-                                              <p class="text-red-700 text-sm leading-relaxed">
-                                                  Esta ação irá excluir permanentemente a receita e todos os seus arquivos associados. Esta operação não pode ser desfeita.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Receita</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ revenue.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Recebimento</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Fonte</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.source_label }}</dd>
+                            {% if revenue.count_files > 0 %}
+                              <dt class="ui-caption" style="margin: 0;">Anexos</dt>
+                              <dd class="ui-body-sm" style="margin: 0; color: var(--color-toast-error);">{{ revenue.count_files }} arquivo{{ revenue.count_files|pluralize }} (serão excluídos)</dd>
+                            {% endif %}
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Receita a ser excluída:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ revenue.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ revenue.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data de Recebimento:</span> {{ revenue.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Fonte de Recurso:</span> {{ revenue.source_label }}</p>
-                                              {% if revenue.count_files > 0 %}
-                                              <p><span class="font-medium text-red-600">Arquivos anexados:</span> {{ revenue.count_files }} arquivo{{ revenue.count_files|pluralize }} (serão excluídos)</p>
-                                              {% endif %}
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="revenues-delete-{{ revenue.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                          </svg>
-                                          Excluir
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="revenue-delete-form-{{ revenue.id}}" method="post" action="{% url 'accountability:revenue-delete' revenue.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="revenues_delete">
+                          <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="revenues-delete-{{ revenue.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="revenue-delete-form-{{ revenue.id}}" class="ui-btn ui-btn--danger ui-btn--sm">Excluir</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
                 {% endif %}
 
                 {% if accountability.is_on_execution and revenue.conciled %}
-                <div
-                    id="revenues-unreconcile-{{ revenue.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                  </svg>
-                                  Desconciliar Receita
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="revenues-unreconcile-{{ revenue.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
+                  <div id="revenues-unreconcile-{{ revenue.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Ação irreversível</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Desconciliar receita</h3>
+                        </div>
+                        <button type="button" data-modal-hide="revenues-unreconcile-{{ revenue.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
 
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--danger">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Atenção</p>
+                            <p class="ui-body-sm" style="margin: 0;">O status de conciliação será revertido e as transações bancárias vinculadas serão removidas.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:revenue-unreconcile' revenue.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-red-800 mb-2">Atenção!</h4>
-                                              <p class="text-red-700 text-sm leading-relaxed">
-                                                  Esta ação irá reverter o status de conciliação da receita e remover todas as transações bancárias vinculadas. Esta operação não pode ser desfeita.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Receita</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ revenue.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Recebimento</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Fonte</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ revenue.source_label }}</dd>
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Detalhes da Receita:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ revenue.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ revenue.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data de Recebimento:</span> {{ revenue.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Fonte de Recurso:</span> {{ revenue.source_label }}</p>
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="revenues-unreconcile-{{ revenue.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                          </svg>
-                                          Desconciliar
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="revenue-unreconcile-form-{{ revenue.id}}" method="post" action="{% url 'accountability:revenue-unreconcile' revenue.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="revenue_id" value="{{ revenue.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="revenues-unreconcile-{{ revenue.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="revenue-unreconcile-form-{{ revenue.id}}" class="ui-btn ui-btn--danger ui-btn--sm">Desconciliar</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
                 {% endif %}
 
               {% endfor %}
             {% else %}
-              <tr class="bg-white border-b hover:bg-gray-50">
-                <th scope="row" colspan="7" class="px-6 py-4 text-sm text-center text-gray-900">
+              <tr>
+                <th scope="row" colspan="7" class="ui-table__cell" style="text-align: center; color: var(--color-body); padding: 28px 16px;">
                   Nenhum resultado encontrado
                 </th>
               </tr>
-            {% endif %}     
+            {% endif %}
         </tbody>
-        <tfoot class="bg-gray-500 text-white font-base">
-          <tr>
-              <th scope="row" class="px-6 py-3 text-center">TOTAL</th>
-              <th scope="row" class="px-6 py-3 text-center">
-                <span class="text-sm font-normal">Cadastrado:</span> <br> R${{ revenues_total|intcomma }}
+        <tfoot>
+          <tr class="ui-table__foot">
+              <th scope="row" class="ui-table__cell" style="text-align: right; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; font-weight: 600; color: var(--color-body); white-space: nowrap;">Total</th>
+              <th scope="row" class="ui-table__cell">
+                <p class="ui-caption" style="margin: 0;">Cadastrado</p>
+                <p class="ui-body-md-strong" style="margin: 0; white-space: nowrap;">R$&nbsp;{{ revenues_total|intcomma }}</p>
               </th>
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
-              <th scope="row" class="px-6 py-3" />
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
+              <th scope="row" class="ui-table__cell"></th>
           </tr>
         </tfoot>
     </table>
@@ -760,100 +407,47 @@
 </div>
 
 {% if accountability.is_on_execution %}
-  <div class="flex items-center flex-column flex-wrap md:flex-row justify-end py-2 px-4 bg-gray-200">
-    <a
-      href="{% url 'accountability:revenues-create' accountability.id %}"
-      class="
-        px-3
-        py-2
-        text-sm
-        font-medium
-        text-center
-        inline-flex
-        items-center
-        text-white
-        rounded-lg
-        focus:ring-4
-        focus:outline-none
-        bg-blue-600
-        hover:bg-blue-700
-        focus:ring-blue-800
-      "
-    >
+  <div class="ui-row ui-row--end" style="padding: 12px 16px; background-color: var(--color-canvas-soft); border-bottom-left-radius: var(--rounded-xl); border-bottom-right-radius: var(--rounded-xl);">
+    <a href="{% url 'accountability:revenues-create' accountability.id %}" class="ui-btn ui-btn--primary ui-btn--sm">
+      <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/></svg>
       Adicionar nova
-      <svg class="w-[16px] h-[16px] text-white ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-      </svg>
     </a>
   </div>
 {% endif %}
 
-<nav class="flex items-center justify-between p-3" aria-label="Navegação de páginas">
-  <div class="text-sm text-gray-500">
-    Página <span class="font-medium text-gray-900">{{ revenues_page.number }}</span> de <span class="font-medium text-gray-900">{{ revenues_page.paginator.num_pages }}</span>
-  </div>
-
-  <div class="flex items-center space-x-2">
+<nav class="paginator" aria-label="Navegação de páginas">
+  <p class="ui-body-sm ui-text-muted paginator__summary" style="margin: 0;">
+    Página <span class="paginator__summary-strong">{{ revenues_page.number }}</span> de <span class="paginator__summary-strong">{{ revenues_page.paginator.num_pages }}</span>
+  </p>
+  <div class="paginator__pages">
     {% if revenues_page.has_previous %}
-      <a
-        href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Anterior
-      </a>
+      <a href="?revenues_page={{ revenues_page.previous_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}" class="paginator__btn">Anterior</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Anterior
-      </span>
+      <span class="paginator__btn paginator__btn--disabled">Anterior</span>
     {% endif %}
 
     {% for num in revenues_page.paginator.page_range %}
       {% if num == 1 or num == revenues_page.paginator.num_pages %}
         {% if num == revenues_page.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current">{{ num }}</span>
         {% else %}
-          <a
-            href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}" class="paginator__page">{{ num }}</a>
         {% endif %}
-
       {% elif num >= revenues_page.number|add:'-1' and num <= revenues_page.number|add:'1' %}
         {% if num == revenues_page.number %}
-          <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
-            {{ num }}
-          </span>
+          <span class="paginator__page paginator__page--current">{{ num }}</span>
         {% else %}
-          <a
-            href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-          >
-            {{ num }}
-          </a>
+          <a href="?revenues_page={{ num }}&expenses_page={{ expenses_page_number }}&q={{ q }}" class="paginator__page">{{ num }}</a>
         {% endif %}
-
       {% elif num == 2 or num == revenues_page.paginator.num_pages|add:'-1' %}
-        <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg">
-          ...
-        </span>
+        <span class="paginator__page paginator__page--ellipsis">…</span>
       {% endif %}
     {% endfor %}
 
     {% if revenues_page.has_next %}
-      <a
-        href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}"
-        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200"
-      >
-        Próximo
-      </a>
+      <a href="?revenues_page={{ revenues_page.next_page_number }}&expenses_page={{ expenses_page_number }}&q={{ q }}" class="paginator__btn">Próximo</a>
     {% else %}
-      <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
-        Próximo
-      </span>
+      <span class="paginator__btn paginator__btn--disabled">Próximo</span>
     {% endif %}
   </div>
 </nav>
@@ -869,20 +463,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     fileUploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
-        fileUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
-        fileUploadArea.classList.add('border-green-500', 'bg-green-50');
+        fileUploadArea.classList.add('exp-docs-dropzone--active');
     });
     
     fileUploadArea.addEventListener('dragleave', (e) => {
         e.preventDefault();
-        fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
-        fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+        fileUploadArea.classList.remove('exp-docs-dropzone--active');
     });
     
     fileUploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
-        fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
-        fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+        fileUploadArea.classList.remove('exp-docs-dropzone--active');
         const files = e.dataTransfer.files;
         handleRevenueFiles(files, revenueId);
     });

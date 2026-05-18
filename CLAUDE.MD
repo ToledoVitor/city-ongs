@@ -80,6 +80,58 @@ If a command already exists in `Makefile`, use it first.
 - When changing templates, keep the current server-rendered approach and reuse base layout patterns.
 - Prefer existing service/helper modules when the app already separates business logic from views or models.
 
+## UI Density & Voice
+
+Binding rules for any UI work in this repo. These are the *defaults* — deviate only when a screen genuinely needs more breathing room and say why in the PR.
+
+### No scrolling on common desktop sizes
+
+- A standard page (list, detail, dashboard, form) should **fit a 1366×768 viewport without the document scrolling**. Test at that size before declaring done.
+- **Horizontal scroll is a bug, not a feature.** If a table is wider than the viewport: tighten columns, drop padding, truncate values with `text-overflow: ellipsis`, hide low-signal columns at narrower breakpoints — anything before `overflow-x: auto` on the page.
+- Long content goes in a *contained* scroll area (a card body, a modal body, an iframe), never on `<body>`. The user should always see the page chrome.
+- Pin primary actions (submit, save, cancel) to a footer inside the card, not floating at the bottom of an ever-growing form.
+
+### Compact controls
+
+- Form fields: 36–40px tall, 8–12px horizontal padding, 14px text. The 52px `.ui-form` default is for marketing/auth pages, not dense app forms — use `.ui-form--compact` (defined on `/reports`) or inline the override.
+- Labels: 11px, uppercase, 0.4px letter-spacing, `color: var(--color-body)`, weight 500. Above the control, 4px gap.
+- Buttons in dense areas use `.ui-btn--sm`. Reserve `.ui-btn` (default size) for hero calls-to-action.
+- Filters: use the shared `.filter-row` / `.filter-field` pattern from `templates/ui/_styles.html`. Don't reinvent.
+
+### Concise copy
+
+- **One screen, one job.** State it in the heading. No subhead unless the heading really can't carry it alone.
+- Sentence case for everything (headings, buttons, menu items). No ALL-CAPS labels except the 11px caption style.
+- Cut "Bem-vindo ao", "Por favor", "Aqui você pode", "Clique no botão abaixo". Trust the user.
+- Empty states are **one strong line + one small line**, not a paragraph. Pair with a clear action.
+- Errors say what's wrong + what to do, in that order, in fewer than 12 words when possible.
+
+### Preview-first when there's an output
+
+- When a form *produces* something (a PDF, a report, a generated message), the page should be **inputs on the left, live preview/result on the right**. Don't make the user submit blind.
+- Preview pane needs four states: empty (cta back to the form), loading (spinner + 1 line), success (the actual artifact), error (the real message + retry affordance).
+- Success state should also wire up download/share/copy on the same artifact — no second request to the server.
+
+### Visual fidelity to `DESIGN.md`
+
+The base palette is the ink/canvas duet, but **semantic color earns its keep where it communicates meaning**. The distinction is *chrome* (decorative) vs *signal* (meaningful).
+
+**Use ink/canvas only for:**
+
+- Buttons (primary = ink, secondary = canvas-soft, subtle = transparent). No blue/indigo/purple/green/red button chrome.
+- Card surfaces, page backgrounds, sidebar, navigation. No gradients, no decorative accents.
+- Hero CTAs, headings, body text.
+
+**Use semantic color (red / green / yellow / blue / orange) for:**
+
+- **Status pills** — `Paga` green, `Não paga` red, `Em análise` warning, `Conciliada` info. Use `.ui-status` + `.ui-status--success|warning|error|info` from `_styles.html`, never bespoke `bg-*` classes.
+- **Toasts and alerts** — variant follows severity (`success`, `error`, `warning`, `info`).
+- **Charts and KPIs** — series colors differentiate sources/categories. Money flows, multi-source dashboards, comparison views.
+- **Inline indicators** — red dot for unread, green check for verified, orange triangle for warning. Small and purposeful.
+- **Destructive confirmations** — soft red surface on the "Excluir" action in modals.
+
+**Geometry:** pill (`var(--rounded-pill)`) for buttons & chips; `var(--rounded-xl)` for cards. One accent at a time in dense areas — don't stack three competing colored buttons in the same row.
+
 ## Validation
 
 Always verify changes proportionally to the risk:

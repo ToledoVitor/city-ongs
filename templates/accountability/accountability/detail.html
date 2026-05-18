@@ -20,33 +20,31 @@
   </header>
 
   {# === Search + filters ================================================= #}
-  <form method="get" class="ui-card ui-stack ui-stack--sm" style="padding: var(--space-md) var(--space-lg);">
-    <div class="filter-row" style="align-items: flex-end;">
-      <div class="filter-field" style="max-width: 100%; flex: 3 1 280px;">
-        <label for="id-search-input" class="filter-field__label">Buscar</label>
+  <form method="get" class="ui-card ui-stack ui-stack--md" style="padding: var(--space-md);">
+    <div class="detail-search-row">
+      <div class="detail-search-row__input">
+        <svg class="detail-search-row__icon" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/></svg>
         <input
           type="search"
           id="id-search-input"
           name="q"
           value="{{ search_query }}"
           placeholder="Identificação, item, fonte, origem…"
-          class="filter-field__control"
+          class="ui-input detail-search-row__field"
           autocomplete="off"
           spellcheck="false"
         />
       </div>
-      <div class="filter-row__actions">
-        <button type="button" id="toggle-filters" class="ui-btn ui-btn--secondary ui-btn--sm">
-          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M6 12h12M10 18h4"/></svg>
-          Filtros
-          <svg id="filter-icon" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">Buscar</button>
-      </div>
+      <button type="button" id="toggle-filters" class="ui-btn ui-btn--secondary" aria-expanded="false">
+        <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M6 12h12M10 18h4"/></svg>
+        Filtros
+        <svg id="filter-icon" width="11" height="11" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button type="submit" class="ui-btn ui-btn--primary">Buscar</button>
     </div>
 
     {% if search_query %}
-      <p class="ui-caption" style="margin: 0;">Pesquisando por: <strong style="color: var(--color-ink); font-weight: 600;">“{{ search_query }}”</strong></p>
+      <p class="ui-body-sm ui-text-muted" style="margin: 0;">Pesquisando por <span style="color: var(--color-ink); font-weight: 600;">“{{ search_query }}”</span></p>
     {% endif %}
 
     <div id="advanced-filters" class="hidden ui-stack ui-stack--md" style="padding-top: var(--space-sm); border-top: 1px solid var(--color-canvas-soft);">
@@ -124,12 +122,12 @@
         {% elif accountability.is_correcting or accountability.is_sent %}
           <span class="ui-status ui-status--warning">{{ accountability.status_label }}</span>
         {% else %}
-          <span class="ui-status">{{ accountability.status_label }}</span>
+          <span class="ui-status ui-status--info">{{ accountability.status_label }}</span>
         {% endif %}
       </div>
-      <a href="{% url 'accountability:accountability-pendencies' accountability.id %}" class="ui-link">
-        <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align: -2px; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        Ver pendências
+      <a href="{% url 'accountability:accountability-pendencies' accountability.id %}" class="ui-link detail-statusbar__pendencies">
+        <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span>Ver pendências</span>
       </a>
     </div>
 
@@ -535,20 +533,47 @@
 </section>
 
 <style>
+  /* Compact search row in the filter card (mirrors advanced_search.html) */
+  .detail-search-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .detail-search-row__input { position: relative; }
+  .detail-search-row__icon {
+    position: absolute;
+    top: 50%; left: 12px;
+    transform: translateY(-50%);
+    color: var(--color-body);
+    pointer-events: none;
+  }
+  .detail-search-row__field { padding-left: 36px !important; }
+  @media (max-width: 720px) {
+    .detail-search-row { grid-template-columns: 1fr; }
+  }
+
   .detail-statusbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-md);
+    gap: var(--space-lg);
     flex-wrap: wrap;
     padding: var(--space-md) var(--space-lg);
   }
   .detail-statusbar__left {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
   .detail-statusbar__actions {
-    display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;
   }
+  .detail-statusbar__pendencies {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+  }
+  .detail-statusbar__pendencies svg { flex-shrink: 0; }
 
   .detail-table-wrap {
     border-radius: var(--rounded-xl);
@@ -590,74 +615,7 @@
     color: var(--color-body) !important;
   }
 
-  /* Modal — minimal shell, ink header for visual interest */
-  .ui-modal__backdrop {
-    position: fixed; inset: 0; z-index: 50;
-    background-color: rgba(15, 18, 24, 0.55);
-    display: flex; align-items: center; justify-content: center;
-    padding: 16px; overflow-y: auto;
-  }
-  .ui-modal__panel {
-    background-color: var(--color-canvas);
-    border-radius: var(--rounded-xl);
-    width: 100%; max-width: 560px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.18);
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    max-height: calc(100vh - 32px);
-  }
-  .ui-modal__header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px;
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--color-canvas-soft);
-  }
-  .ui-modal__header--dark {
-    background-color: var(--color-ink);
-    color: var(--color-on-dark);
-    border-bottom: 1px solid var(--color-ink);
-  }
-  .ui-modal__close {
-    appearance: none; border: 0;
-    width: 32px; height: 32px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: var(--rounded-pill);
-    background-color: rgba(255,255,255,0.10);
-    color: var(--color-on-dark);
-    cursor: pointer;
-    transition: background-color 150ms ease;
-  }
-  .ui-modal__close:hover { background-color: rgba(255,255,255,0.18); }
-  .ui-modal__body {
-    padding: var(--space-lg);
-    overflow-y: auto;
-  }
-  .ui-modal__footer {
-    display: flex; align-items: center; justify-content: flex-end;
-    gap: 8px;
-    padding: var(--space-md) var(--space-lg);
-    border-top: 1px solid var(--color-canvas-soft);
-    background-color: var(--color-canvas-softer);
-  }
-
-  /* Alerts (inline, used inside modals) */
-  .ui-alert {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 12px 16px;
-    border-radius: var(--rounded-md);
-    border: 1px solid var(--color-canvas-soft);
-    background-color: var(--color-canvas-softer);
-  }
-  .ui-alert__indicator {
-    flex-shrink: 0;
-    width: 8px; height: 8px;
-    margin-top: 7px;
-    border-radius: 50%;
-    background-color: var(--color-body);
-  }
-  .ui-alert__body { flex: 1; min-width: 0; color: var(--color-body); }
-  .ui-alert--warning .ui-alert__indicator { background-color: var(--color-toast-warning); box-shadow: 0 0 0 3px rgba(201, 138, 0, 0.18); }
-  .ui-alert--info .ui-alert__indicator { background-color: var(--color-toast-info); box-shadow: 0 0 0 3px rgba(42, 110, 245, 0.18); }
+  /* (.ui-modal__* and .ui-alert* are defined globally in templates/ui/_styles.html) */
 </style>
 
 <script>

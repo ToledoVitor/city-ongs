@@ -1,479 +1,312 @@
 {% extends "base.html" %}
-
-{% block title %}Despesas - Portal SITTS{% endblock %}
-
-{% block customcss %}
-<style>
-    .main-content {
-        min-height: calc(100vh - 200px);
-    }
-    
-    .review-container {
-        max-height: calc(100vh - 300px);
-        overflow-y: auto;
-    }
-    
-    .status-badge {
-        transition: all 0.2s ease;
-    }
-    
-    .status-badge:hover {
-        transform: scale(1.05);
-    }
-    
-</style>
-{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-    Revisar Despesa
-</p>
-  
-<!-- Breadcrumb -->
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-      <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-          <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-          </svg>
-          Inicio
-        </a>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-list' %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Contratos</a>
-        </div>
-      </li>
-      <li>
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'contracts:contracts-detail' expense.accountability.contract.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">{{ expense.accountability.contract.trailing_code }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ms-1 text-sm font-medium md:ms-2 text-black hover:text-gray-500">Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}</a>
-        </div>
-      </li>
-      <li aria-current="page">
-        <div class="flex items-center">
-          <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-          </svg>
-          <span class="ms-1 text-sm font-medium md:ms-2 text-black">Revisar Despesa</span>
-        </div>
-      </li>
-    </ol>
-  </nav>
+{% block title %}Revisar despesa — Portal SITTS{% endblock %}
 
-<form method="post" class="max-w-7xl mx-auto">
+{% block content %}
+<section class="page review-page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' expense.accountability.contract.id %}" class="ui-breadcrumb__item">{{ expense.accountability.contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ui-breadcrumb__item">Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Revisar despesa</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Revisar despesa</h1>
+    <p class="page__subtitle ui-body-sm">Avalie os dados, anexos e transações vinculadas e defina o status.</p>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--lg review-form">
     {% csrf_token %}
-    
-    <div class="main-content">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 review-container mb-4">
-            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-xl font-bold text-gray-900 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Dados da Despesa
-                    </h1>
-                    <button
-                        type="button"
-                        data-modal-target="documents-modal"
-                        data-modal-toggle="documents-modal"    
-                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center relative group"
-                        title="{% if expense.files.all %}{{ expense.files.all|length }} documento{{ expense.files.all|length|pluralize }} anexado{{ expense.files.all|length|pluralize }}{% else %}Nenhum documento anexado{% endif %}"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Documentos
-                        {% if expense.files.all %}
-                        <span class="ml-2 bg-blue-500 text-xs px-2 py-1 rounded-full">{{ expense.files.all|length }}</span>
-                        {% endif %}
-                    </button>
-                </div>
 
-                <div class="space-y-2 mb-3">
-                    <div class="border-t border-gray-200 pt-3">
-                        <h3 class="text-sm font-medium text-gray-900 mb-2">Informações Básicas</h3>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
-                            </svg>
-                            ID da Despesa
-                        </span>
-                        <span class="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-900">{{ expense.id }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            Identificação
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.identification }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Observações
-                        </span>
-                        <span class="text-sm font-medium text-gray-900 text-right max-w-xs truncate">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            Favorecido
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.favored.name }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            Valor
-                        </span>
-                        <span class="text-sm font-bold text-red-600">R$ {{ expense.value|intcomma }}</span>
-                    </div>
-                    
-                    <div class="border-t border-gray-200 pt-3">
-                        <h3 class="text-sm font-medium text-gray-900 mb-2">Detalhes da Despesa</h3>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
-                            Fonte
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.source.name|default:"-" }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                            Item de Aquisição
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.item.name|default:"-" }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            Natureza
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.nature_label }}</span>
-                    </div>
-                    
-                    <div class="border-t border-gray-200 pt-3">
-                        <h3 class="text-sm font-medium text-gray-900 mb-2">Datas e Liquidação</h3>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Vencimento
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.due_date }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Competência
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.competency }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1.5">
-                        <span class="text-sm text-gray-600 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Liquidação
-                        </span>
-                        <span class="text-sm font-medium text-gray-900">{{ expense.liquidation|default_if_none:"-" }}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full">
-                <div class="flex items-center mb-4">
-                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <h2 class="text-xl font-bold text-gray-900">Análise da Despesa</h2>
-                </div>
-                
-                <p class="text-sm text-gray-600 mb-6">
-                    Revise os dados da despesa e defina o status de aprovação. Adicione pendências se necessário.
-                </p>
+    <div class="review-grid">
 
-                <!-- Bank Transactions Section -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-3">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                        </svg>
-                        Transações Bancárias Relacionadas
-                    </h3>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[120px]">Forma de Liquidação:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.liquidation_form_label }}</span>
-                    </div>
-                    {% if expense.bank_transactions.all %}
-                        <div class="space-y-2 max-h-32 overflow-y-auto">
-                            {% for transaction in expense.bank_transactions.all %}
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="flex-1 min-w-0 mr-3">
-                                        <div class="text-sm font-medium text-gray-900 break-words leading-tight">
-                                            {{ transaction.memo }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            {{ transaction.date }}
-                                        </div>
-                                    </div>
-                                    <div class="text-right flex-shrink-0">
-                                        <span class="text-sm font-semibold {% if transaction.amount < 0 %}text-red-600{% else %}text-green-600{% endif %}">
-                                            R$ {{ transaction.amount|intcomma }}
-                                        </span>
-                                        <div class="text-xs text-gray-500">{{ transaction.transaction_type }}</div>
-                                    </div>
-                                </div>
-                                <div class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                    {{ transaction.bank_account.bank_name }} - {{ transaction.bank_account.account }}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="text-center py-4 text-gray-500">
-                            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                            </svg>
-                            <p class="text-sm">Nenhuma transação bancária relacionada</p>
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="flex flex-col h-full">
-                    <div class="space-y-4 mb-6">
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status da Análise</label>
-                            <select
-                                id="status"
-                                name="status"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                required
-                            >
-                                <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Em Análise</option>
-                                <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
-                                <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
-                            </select>
-                        </div>
-                        
-                        <div class="flex-1">
-                            <label for="pendencies" class="block text-sm font-medium text-gray-700 mb-2">Pendências e Observações</label>
-                            <textarea
-                                id="pendencies"
-                                name="pendencies"
-                                rows="8"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none flex-1"
-                                placeholder="Descreva as pendências, observações ou motivos da decisão..."
-                            >{{ expense.pendencies|default_if_none:"" }}</textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-auto">
-                        <div class="flex items-center justify-between mb-4 p-4 bg-gray-50 rounded-lg">
-                            <span class="text-sm font-medium text-gray-700">Status Atual:</span>
-                            <span class="status-badge px-3 py-1 rounded-full text-xs font-medium
-                                {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800
-                                {% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800
-                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                {% if expense.status == 'APPROVED' %}Aprovada
-                                {% elif expense.status == 'REJECTED' %}Rejeitada
-                                {% else %}Em Análise{% endif %}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Left column: data -->
+      <section class="ui-card ui-stack ui-stack--md review-col">
+        <div class="ui-row" style="justify-content: space-between; align-items: center; gap: 8px;">
+          <h2 class="ui-display-sm" style="margin: 0;">Dados da despesa</h2>
+          <button
+            type="button"
+            data-modal-target="documents-modal"
+            data-modal-toggle="documents-modal"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+          >
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Documentos
+            {% if expense.files.all %}<span class="ui-status ui-status--info" style="padding: 2px 8px; font-size: 11px;">{{ expense.files.all|length }}</span>{% endif %}
+          </button>
         </div>
+
+        <dl class="review-kv">
+          <div class="review-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Identificação</dt>
+            <dd class="ui-body-sm" style="font-weight: 500;">{{ expense.identification }}</dd>
+          </div>
+          <div class="review-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Observações</dt>
+            <dd class="ui-body-sm">{{ expense.observations|default_if_none:"—" }}</dd>
+          </div>
+          <div class="review-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Favorecido</dt>
+            <dd class="ui-body-sm">{{ expense.favored.name|default:"—" }}</dd>
+          </div>
+          <div class="review-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Valor</dt>
+            <dd><span class="ui-body-md-strong" style="color: var(--color-ink);">R$ {{ expense.value|intcomma }}</span></dd>
+          </div>
+        </dl>
+
+        <div class="review-section">
+          <h3 class="ui-body-md-strong" style="margin: 0 0 8px;">Detalhes adicionais</h3>
+          <dl class="review-kv">
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Fonte</dt>
+              <dd class="ui-body-sm">{{ expense.source.name|default:"—" }}</dd>
+            </div>
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Item de aquisição</dt>
+              <dd class="ui-body-sm">{{ expense.item.name|default:"—" }}</dd>
+            </div>
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Natureza</dt>
+              <dd class="ui-body-sm">{{ expense.nature_label }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="review-section">
+          <h3 class="ui-body-md-strong" style="margin: 0 0 8px;">Datas e liquidação</h3>
+          <dl class="review-kv">
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Vencimento</dt>
+              <dd class="ui-body-sm">{{ expense.due_date|date:"d/m/Y" }}</dd>
+            </div>
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Competência</dt>
+              <dd class="ui-body-sm">{{ expense.competency|date:"m/Y" }}</dd>
+            </div>
+            <div class="review-kv__row">
+              <dt class="ui-body-sm ui-text-muted">Liquidação</dt>
+              <dd class="ui-body-sm">{{ expense.liquidation|date:"d/m/Y"|default:"—" }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- Right column: analysis -->
+      <section class="ui-card ui-stack ui-stack--md review-col">
+        <div>
+          <h2 class="ui-display-sm" style="margin: 0;">Análise</h2>
+          <p class="ui-body-sm ui-text-muted" style="margin: 4px 0 0;">Avalie a despesa e defina seu status de aprovação.</p>
+        </div>
+
+        <div class="review-section" style="padding-top: 0; border-top: 0;">
+          <h3 class="ui-body-md-strong" style="margin: 0 0 8px;">Transações bancárias vinculadas</h3>
+          <div class="review-kv__row" style="margin-bottom: 8px;">
+            <dt class="ui-body-sm ui-text-muted">Forma de liquidação</dt>
+            <dd class="ui-body-sm">{{ expense.liquidation_form_label }}</dd>
+          </div>
+          {% if expense.bank_transactions.all %}
+            <div class="review-transactions">
+              {% for transaction in expense.bank_transactions.all %}
+                <div class="review-transactions__row">
+                  <div style="min-width: 0; flex: 1;">
+                    <p class="ui-body-sm" style="margin: 0; font-weight: 500;">{{ transaction.memo }}</p>
+                    <p class="ui-caption ui-text-muted" style="margin: 0;">{{ transaction.date }} · {{ transaction.bank_account.bank_name }} — {{ transaction.bank_account.account }}</p>
+                  </div>
+                  <div style="text-align: right; flex-shrink: 0;">
+                    <p class="ui-body-sm" style="margin: 0; font-weight: 600; color: {% if transaction.amount < 0 %}var(--color-toast-error){% else %}var(--color-toast-success){% endif %};">R$ {{ transaction.amount|intcomma }}</p>
+                    <p class="ui-caption ui-text-muted" style="margin: 0;">{{ transaction.transaction_type }}</p>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="ui-empty" style="padding: 16px;">
+              <p class="ui-body-sm ui-text-muted" style="margin: 0;">Nenhuma transação bancária vinculada.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="review-section">
+          <div class="ui-stack ui-stack--md">
+            <div class="ui-field">
+              <label for="status" class="ui-field__label">Status da análise</label>
+              <select id="status" name="status" class="ui-input" required>
+                <option value="" {% if expense.status == "IN_ANALISIS" %}selected{% endif %}>Em análise</option>
+                <option value="REJECTED" {% if expense.status == "REJECTED" %}selected{% endif %}>Rejeitada</option>
+                <option value="APPROVED" {% if expense.status == "APPROVED" %}selected{% endif %}>Aprovada</option>
+              </select>
+            </div>
+
+            <div class="ui-field">
+              <label for="pendencies" class="ui-field__label">Pendências e observações</label>
+              <textarea id="pendencies" name="pendencies" class="ui-input" rows="5" placeholder="Descreva pendências, observações ou motivos da decisão...">{{ expense.pendencies|default_if_none:"" }}</textarea>
+              <p class="ui-field__hint">Obrigatório quando a despesa for rejeitada.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-status">
+          <p class="ui-body-sm" style="margin: 0;">Status atual</p>
+          {% if expense.status == 'APPROVED' %}
+            <span class="ui-status ui-status--success">Aprovada</span>
+          {% elif expense.status == 'REJECTED' %}
+            <span class="ui-status ui-status--error">Rejeitada</span>
+          {% else %}
+            <span class="ui-status ui-status--warning">Em análise</span>
+          {% endif %}
+        </div>
+      </section>
+
     </div>
-    
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 z-10">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" 
-               class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Voltar
-            </a>
-            
-            <button type="submit" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors duration-200 flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Salvar Análise
-            </button>
-        </div>
+
+    <!-- Pinned footer -->
+    <div class="review-footer review-footer--simple">
+      <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ui-btn ui-btn--secondary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Voltar
+      </a>
+      <button type="submit" class="ui-btn ui-btn--primary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Salvar análise
+      </button>
     </div>
-</form>
+  </form>
 
-<div
-  id="documents-modal"
-  tabindex="-1"
-  data-modal-backdrop="static"
-  aria-hidden="true"
-  class="
-    hidden
-    overflow-y-auto
-    overflow-x-hidden
-    fixed
-    top-0
-    right-0
-    left-0
-    z-50
-    justify-center
-    items-center
-    w-full
-    md:inset-0
-    h-[calc(100%-1rem)]
-    max-h-full
-  "
->
-  <div class="relative p-4 w-full max-w-md max-h-full">
-    <!-- Modal content -->
-    <div class="relative rounded-lg shadow bg-gray-300">
-      <!-- Modal header -->
-        <div class="flex items-center justify-between p-2 mb-2 md:p-5 border-b border-gray-600">
-            <h3 class="text-xl font-semibold text-black">
-              Documentos Anexados
-            </h3>
-            <button
-              type="button"
-              data-modal-hide="documents-modal"
-              class="
-                end-2.5
-                text-black
-                hover:bg-gray-600
-                hover:text-black
-                bg-transparent
-                rounded-lg
-                text-sm
-                w-6
-                h-6
-                ms-auto
-                inline-flex
-                justify-center
-                items-center
-              "
-            >
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                </svg>
-                <span class="sr-only">Fechar modal</span>
-            </button>
-        </div>
-        <!-- Modal body -->
-        <div class="p-4 md:p-5">
-            <div class="space-y-3">
-              {% if expense.files.all %}
-                {% for file in expense.files.all %}
-                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                  <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <a
-                      href="{{ file.file.url }}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors block truncate"
-                    >
-                      {{ file.name }}
-                    </a>
-                    <p class="text-xs text-gray-500 mt-1">
-                      Anexado em {{ file.created_at|date:"d/m/Y" }}
-                    </p>
-                  </div>
-                  <div class="flex-shrink-0">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                    </svg>
-                  </div>
+  <!-- Documents modal -->
+  <div id="documents-modal" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="ui-modal__backdrop hidden">
+    <div class="ui-modal__panel">
+      <div class="ui-modal__header">
+        <h3 class="ui-display-sm" style="margin: 0;">Documentos anexados</h3>
+        <button type="button" class="ui-modal__close" data-modal-hide="documents-modal" aria-label="Fechar">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="ui-modal__body">
+        {% if expense.files.all %}
+          <ul class="review-files">
+            {% for file in expense.files.all %}
+              <li class="review-files__row">
+                <span class="review-files__icon">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </span>
+                <div style="flex: 1; min-width: 0;">
+                  <a href="{{ file.file.url }}" target="_blank" rel="noopener noreferrer" class="ui-link ui-body-sm" style="font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ file.name }}</a>
+                  <p class="ui-caption ui-text-muted" style="margin: 0;">Anexado em {{ file.created_at|date:"d/m/Y" }}</p>
                 </div>
-                {% endfor %}
-              {% else %}
-                <div class="text-center py-8">
-                  <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                  </div>
-                  <p class="text-sm text-gray-500">Nenhum arquivo anexado</p>
-                </div>
-              {% endif %}
-            </div>
-
-
-            <div class="my-6">
-              <button
-                type="button"
-                data-modal-hide="documents-modal"
-                class="
-                  w-full
-                  text-white
-                  bg-gray-700
-                  hover:bg-gray-800
-                  focus:ring-4
-                  focus:outline-none
-                  focus:ring-gray-300
-                  font-medium rounded-lg
-                  text-sm
-                  px-5
-                  py-2.5
-                  text-center
-                "
-              >
-                Fechar
-              </button>
-            </div>
-        </div>
+                <a href="{{ file.file.url }}" target="_blank" rel="noopener noreferrer" class="ui-icon-btn" aria-label="Abrir em nova aba">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="ui-empty" style="padding: 24px;">
+            <p class="ui-body-md-strong" style="margin: 0;">Nenhum arquivo anexado</p>
+          </div>
+        {% endif %}
+      </div>
+      <div class="ui-modal__footer">
+        <button type="button" class="ui-btn ui-btn--secondary" data-modal-hide="documents-modal">Fechar</button>
+      </div>
     </div>
   </div>
-</div>
 
+</section>
+
+<style>
+  .review-page { display: flex; flex-direction: column; min-height: 0; }
+  .review-form { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
+  .review-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+  }
+  @media (max-width: 960px) {
+    .review-grid { grid-template-columns: 1fr; }
+  }
+  .review-col { display: flex; flex-direction: column; min-height: 0; }
+
+  .review-kv { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .review-kv__row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .review-kv__row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .review-kv dt, .review-kv dd { margin: 0; }
+
+  .review-section {
+    padding-top: 12px;
+    border-top: 1px solid var(--color-divider);
+  }
+
+  .review-transactions {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 220px; overflow-y: auto;
+  }
+  .review-transactions__row {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    padding: 10px 12px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-md);
+  }
+
+  .review-status {
+    margin-top: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+  }
+
+  .review-footer {
+    position: sticky;
+    bottom: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--rounded-xl);
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.04);
+    z-index: 5;
+  }
+
+  .review-files {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .review-files__row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-md);
+  }
+  .review-files__icon {
+    width: 32px; height: 32px;
+    background-color: var(--color-canvas);
+    border-radius: var(--rounded-md);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--color-body);
+    flex-shrink: 0;
+  }
+</style>
 
 {% endblock %}

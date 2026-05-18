@@ -2,16 +2,16 @@
 
 <div class="ui-table-shell">
   <div class="ui-table-scroll">
-    <table class="ui-table">
+    <table class="ui-table ui-table--auto">
         <thead>
             <tr>
-                <th scope="col" style="width: 25%;">Identificação</th>
-                <th scope="col" style="width: 15%;">Valor</th>
-                <th scope="col" style="width: 15%;">Status</th>
-                <th scope="col" style="width: 15%;">Planejada</th>
-                <th scope="col" style="width: 15%;">Análise</th>
-                <th scope="col" style="width: 15%;">Favorecido</th>
-                <th scope="col" class="ui-table__col--actions"></th>
+                <th scope="col">Identificação</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Status</th>
+                <th scope="col">Planejada</th>
+                <th scope="col">Análise</th>
+                <th scope="col">Favorecido</th>
+                <th scope="col" class="ui-table__col--actions">Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -19,7 +19,7 @@
               {% for expense in expenses_page %}
                 <tr>
                     <th scope="row" class="ui-table__cell--head">
-                      <div class="truncate max-w-[300px] font-medium">{{ expense.identification }}</div>
+                      <div class="truncate font-medium" style="max-width: 220px;">{{ expense.identification }}</div>
                       
                       {% if user.can_update_accountability %}
                         {% if accountability.is_on_execution and not expense.conciled %}
@@ -37,7 +37,7 @@
 
                     </th>
                     <td class="ui-table__cell">
-                      <p class="ui-body-md-strong" style="margin: 0;">R$ {{ expense.value|intcomma }}</p>
+                      <p class="ui-body-md-strong" style="margin: 0; white-space: nowrap;">R$&nbsp;{{ expense.value|intcomma }}</p>
                       <button type="button" data-modal-target="exp-documents-modal-{{ expense.id}}" data-modal-toggle="exp-documents-modal-{{ expense.id}}" class="ui-chip ui-chip--action" style="margin-top: 6px;" title="Ver arquivos anexados">
                         <svg width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg>
                         {{ expense.count_files }} {% if expense.count_files == 1 %}arquivo{% else %}arquivos{% endif %}
@@ -89,87 +89,48 @@
                         {% endif %}
                       </div>
                       {% if expense.is_rejected %}
-                        <div
-                          id="expenses-errors-{{ expense.id}}"
-                          tabindex="-1"
-                          data-modal-backdrop="static"
-                          aria-hidden="true"
-                          class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                        >
-                          <div class="relative p-4 w-full max-w-2xl max-h-full">
-                            <div class="relative rounded-lg shadow bg-white">
-                              <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                                <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                  </svg>
-                                  Pendências da Despesa
-                                </h3>
-                                <button
-                                  type="button"
-                                  data-modal-hide="expenses-errors-{{ expense.id}}"
-                                  class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                                >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                                </button>
+                        <div id="expenses-errors-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                          <div class="ui-modal__panel ui-modal__panel--lg">
+                            <header class="ui-modal__header ui-modal__header--dark">
+                              <div class="ui-stack ui-stack--xxs">
+                                <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Análise</p>
+                                <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Pendências da despesa</h3>
                               </div>
-                              <div class="p-6">
-                                <div class="mb-6">
-                                    <div class="bg-gray-50 rounded-lg p-4">
-                                        <h5 class="font-medium text-gray-900 mb-2">Detalhes da Despesa:</h5>
-                                        <div class="space-y-1 text-sm text-gray-600">
-                                            <p><span class="font-medium">Descrição:</span> {{ expense.identification }}</p>
-                                            <p><span class="font-medium">Valor:</span> R$ {{ expense.value|intcomma }}</p>
-                                            <p><span class="font-medium">Data:</span> {{ expense.receive_date|date:"d/m/Y" }}</p>
-                                            <p><span class="font-medium">Favorecido:</span> {{ expense.favored.name }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-6">
-                                    <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                        <div class="flex-shrink-0">
-                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="text-lg font-semibold text-red-800 mb-3">Pendência Reportada pelo Avaliador</h4>
-                                            <div class="bg-white rounded-lg border border-red-200 p-4">
-                                                <textarea
-                                                  rows="6"
-                                                  disabled
-                                                  class="block w-full text-sm text-gray-900 bg-gray-50 border-0 resize-none focus:outline-none"
-                                                  placeholder="Nenhuma pendência reportada"
-                                                >{{ expense.pendencies|default:"Nenhuma pendência reportada" }}</textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-end">
-                                    <button
-                                      type="button"
-                                      data-modal-hide="expenses-errors-{{ expense.id}}"
-                                      class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                    >
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                        Fechar
-                                    </button>
+                              <button type="button" data-modal-hide="expenses-errors-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                                <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                              </button>
+                            </header>
+                            <div class="ui-modal__body ui-stack ui-stack--md">
+                              <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                                <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Detalhes</p>
+                                <dl class="ui-dl" style="margin: 0;">
+                                  <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ expense.identification }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">R$ {{ expense.value|intcomma }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Data</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ expense.receive_date|date:"d/m/Y" }}</dd>
+                                  <dt class="ui-caption" style="margin: 0;">Favorecido</dt>
+                                  <dd class="ui-body-sm" style="margin: 0;">{{ expense.favored.name }}</dd>
+                                </dl>
+                              </div>
+                              <div class="ui-alert ui-alert--danger">
+                                <div class="ui-alert__indicator" aria-hidden="true"></div>
+                                <div class="ui-alert__body">
+                                  <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Pendência reportada pelo avaliador</p>
+                                  <p class="ui-body-sm" style="margin: 0; white-space: pre-wrap;">{{ expense.pendencies|default:"Nenhuma pendência reportada" }}</p>
                                 </div>
                               </div>
                             </div>
+                            <footer class="ui-modal__footer">
+                              <button type="button" data-modal-hide="expenses-errors-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Fechar</button>
+                            </footer>
                           </div>
                         </div>
                       {% endif %}
                     </td>
                     <td class="ui-table__cell">
-                      <p class="ui-body-sm" style="margin: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ expense.favored.name }}</p>
+                      <p class="ui-body-sm" style="margin: 0; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ expense.favored.name }}</p>
                     </td>
                     <td class="ui-table__cell ui-table__cell--actions">
                       {% if accountability.is_on_execution %}
@@ -193,569 +154,297 @@
                     </td>
                 </tr>
 
-                <div
-                  id="exp-documents-modal-{{ expense.id}}"
-                  tabindex="-1"
-                  data-modal-backdrop="static"
-                  aria-hidden="true"
-                  class="
-                    hidden
-                    overflow-y-auto
-                    overflow-x-hidden
-                    fixed
-                    top-0
-                    right-0
-                    left-0
-                    z-50
-                    justify-center
-                    items-center
-                    w-full
-                    md:inset-0
-                    h-[calc(100%-1rem)]
-                    max-h-full
-                  "
-                >
-                  <div class="relative p-4 w-full max-w-4xl max-h-full">
-                    <!-- Modal content -->
-                    <div class="relative rounded-lg shadow bg-white">
-                      <!-- Modal header -->
-                        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                              <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                              </svg>
-                              Documentos da Despesa
-                            </h3>
-                            <button
-                              type="button"
-                              data-modal-hide="exp-documents-modal-{{ expense.id}}"
-                              class="
-                                text-gray-400
-                                hover:bg-gray-200
-                                hover:text-gray-900
-                                bg-transparent
-                                rounded-lg
-                                text-sm
-                                w-8
-                                h-8
-                                inline-flex
-                                justify-center
-                                items-center
-                                transition-colors
-                                duration-200
-                              "
-                            >
-                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                </svg>
-                                <span class="sr-only">Fechar modal</span>
-                            </button>
-                        </div>
-                        <!-- Modal body -->
-                        <div class="p-6">
-                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Left Column: Existing Files -->
-                            <div class="space-y-4">
-                              <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Arquivos Anexados ({{ expense.count_files }})
-                              </h4>
-                              <div class="bg-gray-50 rounded-lg p-4 max-h-80 overflow-y-auto">
-                                {% for file in expense.files.all %}
-                                  <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-3 last:mb-0 hover:shadow-sm transition-shadow">
-                                    <div class="flex items-center space-x-3">
-                                      <div class="flex-shrink-0">
-                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                      </div>
-                                      <div class="flex-1 min-w-0">
-                                        <a
-                                          href="{{ file.file.url }}"
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          class="text-sm font-medium text-green-600 hover:text-green-800 hover:underline block truncate"
-                                        >
-                                          {{ file.name }}
-                                        </a>
-                                        <p class="text-xs text-gray-500 mt-1">
-                                          Anexado em: {{ file.created_at|date:"d/m/Y H:i" }}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    {% if not user.is_committee_member %}
-                                    <form method="post" action="{% url 'accountability:expense-file-delete' file.id %}" class="inline">
-                                      {% csrf_token %}
-                                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                      <button
-                                        type="submit"
-                                        class="ml-2 text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-full transition-colors"
-                                        onclick="return confirm('Tem certeza que deseja excluir este arquivo?')"
-                                      >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                      </button>
-                                    </form>
-                                    {% endif %}
-                                  </div>
-                                {% empty %}
-                                  <div class="text-center py-8">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <p class="text-gray-500 text-sm">Nenhum arquivo anexado ainda</p>
-                                    <p class="text-gray-400 text-xs mt-1">Use a área de upload ao lado para adicionar arquivos</p>
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            </div>
-                            
-                            <div class="space-y-4">
-                              {% if accountability.is_on_execution and user.can_update_accountability %}
-                              <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                                Adicionar Arquivos
-                              </h4>
+                <div id="exp-documents-modal-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                  <div class="ui-modal__panel ui-modal__panel--xl">
+                    <header class="ui-modal__header ui-modal__header--dark">
+                      <div class="ui-stack ui-stack--xxs">
+                        <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Anexos</p>
+                        <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Documentos da despesa</h3>
+                      </div>
+                      <button type="button" data-modal-hide="exp-documents-modal-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                        <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                      </button>
+                    </header>
 
-                              <form method="post" action="{% url 'accountability:expense-file' expense.id %}" enctype="multipart/form-data" id="expenseUploadForm-{{ expense.id }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-200 bg-gray-50 hover:border-green-500 hover:bg-green-50" id="expense-file-upload-area-{{ expense.id }}">
-                                  <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                  </svg>
-                                  <p class="text-gray-600 text-sm mb-2">Arraste e solte os arquivos aqui ou</p>
-                                  <input
-                                    class="hidden"
-                                    id="expense-files-{{ expense.id }}"
-                                    name="files"
-                                    type="file"
-                                    multiple
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                  >
-                                  <label for="expense-files-{{ expense.id }}" class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-md cursor-pointer transition-colors duration-200">
-                                    Escolher Arquivos
-                                  </label>
-                                  <p class="text-xs text-gray-500 mt-3">PDF, JPG, PNG (máx. 10MB cada)</p>
+                    <div class="ui-modal__body">
+                      <div class="exp-docs-grid">
+                        <section class="ui-stack ui-stack--sm">
+                          <p class="ui-caption" style="margin: 0;">Anexados ({{ expense.count_files }})</p>
+                          <div class="exp-docs-list">
+                            {% for file in expense.files.all %}
+                              <div class="exp-docs-list__item">
+                                <div class="ui-stack ui-stack--xxs" style="min-width: 0; flex: 1;">
+                                  <a href="{{ file.file.url }}" target="_blank" rel="noopener noreferrer" class="ui-link" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ file.name }}</a>
+                                  <p class="ui-caption" style="margin: 0;">Anexado em {{ file.created_at|date:"d/m/Y H:i" }}</p>
                                 </div>
-                                
-                                <div id="expense-file-list-{{ expense.id }}" class="mt-4 space-y-2"></div>
-                                
-                                <div class="mt-4">
-                                  <button
-                                    type="submit"
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center justify-center"
-                                  >
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                    </svg>
-                                    Enviar Arquivos
-                                  </button>
-                                </div>
-                              </form>
-                              {% else %}
-                              <div class="text-center mt-8 py-8">
-                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                  <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                  </svg>
-                                </div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Upload Não Disponível</h4>
-                                <p class="text-gray-600 text-sm">Não é possível adicionar novos documentos neste momento</p>
+                                {% if not user.is_committee_member %}
+                                  <form method="post" action="{% url 'accountability:expense-file-delete' file.id %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="ui-icon-btn ui-icon-btn--danger" title="Excluir anexo" aria-label="Excluir anexo" onclick="return confirm('Excluir este anexo?')">
+                                      <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7 5 7m14 0-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+                                    </button>
+                                  </form>
+                                {% endif %}
                               </div>
-                              {% endif %}
-                            </div>
+                            {% empty %}
+                              <div class="ui-empty" style="padding: 16px;">
+                                <p class="ui-body-sm-strong" style="margin: 0;">Nenhum anexo</p>
+                                <p class="ui-body-sm ui-text-muted" style="margin: 0;">Use a área ao lado para adicionar arquivos.</p>
+                              </div>
+                            {% endfor %}
                           </div>
-                        </div>
-                        <!-- Modal footer -->
-                        <div class="flex items-center justify-end p-6 border-t border-gray-200">
-                          <button
-                            type="button"
-                            data-modal-hide="exp-documents-modal-{{ expense.id}}"
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                          >
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Fechar
-                          </button>
-                        </div>
+                        </section>
+
+                        <section class="ui-stack ui-stack--sm">
+                          {% if accountability.is_on_execution and user.can_update_accountability %}
+                            <p class="ui-caption" style="margin: 0;">Adicionar arquivos</p>
+                            <form method="post" action="{% url 'accountability:expense-file' expense.id %}" enctype="multipart/form-data" id="expenseUploadForm-{{ expense.id }}" class="ui-stack ui-stack--sm">
+                              {% csrf_token %}
+                              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                              <div class="exp-docs-dropzone" id="expense-file-upload-area-{{ expense.id }}">
+                                <svg width="32" height="32" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+                                <p class="ui-body-sm ui-text-muted" style="margin: 0;">Arraste e solte arquivos aqui</p>
+                                <input class="hidden" id="expense-files-{{ expense.id }}" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <label for="expense-files-{{ expense.id }}" class="ui-btn ui-btn--secondary ui-btn--sm" style="cursor: pointer;">Escolher arquivos</label>
+                                <p class="ui-caption" style="margin: 0;">PDF, JPG, PNG (máx. 10MB cada)</p>
+                              </div>
+
+                              <div id="expense-file-list-{{ expense.id }}" class="ui-stack ui-stack--xxs"></div>
+
+                              <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm ui-btn--full">Enviar arquivos</button>
+                            </form>
+                          {% else %}
+                            <div class="ui-empty" style="padding: 24px 16px;">
+                              <p class="ui-body-md-strong" style="margin: 0;">Upload não disponível</p>
+                              <p class="ui-body-sm ui-text-muted" style="margin: 0;">Não é possível adicionar novos documentos neste momento.</p>
+                            </div>
+                          {% endif %}
+                        </section>
+                      </div>
                     </div>
+
+                    <footer class="ui-modal__footer">
+                      <button type="button" data-modal-hide="exp-documents-modal-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Fechar</button>
+                    </footer>
                   </div>
                 </div>
 
                 {% if expense.planned and accountability.is_on_execution %}
-                <div
-                    id="expenses-gloss-{{ expense.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                  </svg>
-                                  Glosar Despesa
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="expenses-gloss-{{ expense.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="expenses-gloss-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Reversível</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Glosar despesa</h3>
+                        </div>
+                        <button type="button" data-modal-hide="expenses-gloss-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--warning">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Efeitos da glosa</p>
+                            <p class="ui-body-sm" style="margin: 0;">A despesa será marcada como não planejada e o item do contrato será desassociado. A ação pode ser revertida.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:expense-gloss' expense.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-orange-800 mb-2">Efeitos da Glosa</h4>
-                                              <p class="text-orange-700 text-sm leading-relaxed">
-                                                  A despesa será marcada como não planejada e o item do contrato será desassociado. Esta ação pode ser revertida posteriormente.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Despesa</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ expense.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Data</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Favorecido</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.favored.name }}</dd>
+                            {% if expense.contract_item %}
+                              <dt class="ui-caption" style="margin: 0;">Item do contrato</dt>
+                              <dd class="ui-body-sm" style="margin: 0;">{{ expense.contract_item }} <span class="ui-text-muted">(será desassociado)</span></dd>
+                            {% endif %}
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Despesa a ser glosada:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ expense.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ expense.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data:</span> {{ expense.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Favorecido:</span> {{ expense.favored.name }}</p>
-                                              {% if expense.contract_item %}
-                                              <p><span class="font-medium text-orange-600">Item do contrato:</span> {{ expense.contract_item }} (será desassociado)</p>
-                                              {% endif %}
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="expenses-gloss-{{ expense.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                          </svg>
-                                          Glosar
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="expense-gloss-form-{{ expense.id}}" method="post" action="{% url 'accountability:expense-gloss' expense.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="expenses-gloss-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="expense-gloss-form-{{ expense.id}}" class="ui-btn ui-btn--primary ui-btn--sm">Glosar</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
                 {% endif %}
 
                 {% if accountability.is_on_execution %}
-                <div
-                    id="expenses-duplicate-{{ expense.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                  </svg>
-                                  Duplicar Despesa
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="expenses-duplicate-{{ expense.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="expenses-duplicate-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Copiar dados</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Duplicar despesa</h3>
+                        </div>
+                        <button type="button" data-modal-hide="expenses-duplicate-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--info">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Sobre a duplicação</p>
+                            <p class="ui-body-sm" style="margin: 0;">Todos os dados serão copiados, exceto os arquivos anexados. Você poderá editar a nova despesa após a criação.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:expenses-duplicate' expense.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="form_type" value="expenses_duplicate">
-                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-blue-800 mb-2">Informações sobre a duplicação</h4>
-                                              <p class="text-blue-700 text-sm leading-relaxed">
-                                                  Todos os dados da despesa serão copiados, exceto os arquivos anexados. Você poderá editar os dados da nova despesa após a criação.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Dados copiados</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ expense.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Data</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Favorecido</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.favored.name }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Natureza</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.nature_label }}</dd>
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Dados que serão copiados:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ expense.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ expense.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data:</span> {{ expense.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Favorecido:</span> {{ expense.favored.name }}</p>
-                                              <p><span class="font-medium">Natureza de Recurso:</span> {{ expense.nature_label }}</p>
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="expenses-duplicate-{{ expense.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                          </svg>
-                                          Duplicar
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="expense-duplicate-form-{{ expense.id}}" method="post" action="{% url 'accountability:expenses-duplicate' expense.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="expenses_duplicate">
+                          <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="expenses-duplicate-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="expense-duplicate-form-{{ expense.id}}" class="ui-btn ui-btn--primary ui-btn--sm">Duplicar</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
 
-                <div
-                    id="expenses-delete-{{ expense.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                  </svg>
-                                  Excluir Despesa
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="expenses-delete-{{ expense.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="expenses-delete-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Ação irreversível</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Excluir despesa</h3>
+                        </div>
+                        <button type="button" data-modal-hide="expenses-delete-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--danger">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Não é possível reverter</p>
+                            <p class="ui-body-sm" style="margin: 0;">A despesa e seus arquivos associados serão removidos permanentemente.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:expense-delete' expense.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="form_type" value="expenses_delete">
-                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-red-800 mb-2">Ação Irreversível!</h4>
-                                              <p class="text-red-700 text-sm leading-relaxed">
-                                                  Esta ação irá excluir permanentemente a despesa e todos os seus arquivos associados. Esta operação não pode ser desfeita.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Despesa</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ expense.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Data</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Favorecido</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.favored.name }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Natureza</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.nature_label }}</dd>
+                            {% if expense.count_files > 0 %}
+                              <dt class="ui-caption" style="margin: 0;">Anexos</dt>
+                              <dd class="ui-body-sm" style="margin: 0; color: var(--color-toast-error);">{{ expense.count_files }} arquivo{{ expense.count_files|pluralize }} (serão excluídos)</dd>
+                            {% endif %}
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Despesa a ser excluída:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ expense.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ expense.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data:</span> {{ expense.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Favorecido:</span> {{ expense.favored.name }}</p>
-                                              <p><span class="font-medium">Natureza de Recurso:</span> {{ expense.nature_label }}</p>
-                                              {% if expense.count_files > 0 %}
-                                              <p><span class="font-medium text-red-600">Arquivos anexados:</span> {{ expense.count_files }} arquivo{{ expense.count_files|pluralize }} (serão excluídos)</p>
-                                              {% endif %}
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="expenses-delete-{{ expense.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                          </svg>
-                                          Excluir
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="expense-delete-form-{{ expense.id}}" method="post" action="{% url 'accountability:expense-delete' expense.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="expenses_delete">
+                          <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="expenses-delete-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="expense-delete-form-{{ expense.id}}" class="ui-btn ui-btn--danger ui-btn--sm">Excluir</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
                 {% endif %}
 
                 {% if accountability.is_on_execution and expense.conciled %}
-                <div
-                    id="expenses-unreconcile-{{ expense.id}}"
-                    tabindex="-1"
-                    data-modal-backdrop="static"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-                >
-                  <div class="relative p-4 w-full max-w-lg max-h-full">
-                      <div class="relative rounded-lg shadow bg-white">
-                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                              <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-                                  <svg class="w-6 h-6 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                  </svg>
-                                  Desconciliar Despesa
-                              </h3>
-                              <button
-                                type="button"
-                                data-modal-hide="expenses-unreconcile-{{ expense.id}}"
-                                class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
-                              >
-                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 14 14">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                                  </svg>
-                                  <span class="sr-only">Fechar modal</span>
-                              </button>
+                  <div id="expenses-unreconcile-{{ expense.id}}" tabindex="-1" data-modal-backdrop="static" aria-hidden="true" class="hidden ui-modal__backdrop">
+                    <div class="ui-modal__panel">
+                      <header class="ui-modal__header ui-modal__header--dark">
+                        <div class="ui-stack ui-stack--xxs">
+                          <p class="ui-caption" style="margin: 0; color: var(--color-on-dark-soft);">Ação irreversível</p>
+                          <h3 class="ui-display-sm" style="margin: 0; color: var(--color-on-dark);">Desconciliar despesa</h3>
+                        </div>
+                        <button type="button" data-modal-hide="expenses-unreconcile-{{ expense.id}}" class="ui-modal__close" aria-label="Fechar modal">
+                          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
+                      </header>
+
+                      <div class="ui-modal__body ui-stack ui-stack--md">
+                        <div class="ui-alert ui-alert--danger">
+                          <div class="ui-alert__indicator" aria-hidden="true"></div>
+                          <div class="ui-alert__body">
+                            <p class="ui-body-sm-strong" style="margin: 0 0 4px;">Atenção</p>
+                            <p class="ui-body-sm" style="margin: 0;">O status de conciliação será revertido e as transações bancárias vinculadas serão removidas.</p>
                           </div>
-                          <div class="p-6">
-                              <form method="post" action="{% url 'accountability:expense-unreconcile' expense.id %}">
-                                  {% csrf_token %}
-                                  <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="flex items-start space-x-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                          <div class="flex-shrink-0">
-                                              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                              </svg>
-                                          </div>
-                                          <div class="flex-1">
-                                              <h4 class="text-lg font-semibold text-red-800 mb-2">Atenção!</h4>
-                                              <p class="text-red-700 text-sm leading-relaxed">
-                                                  Esta ação irá reverter o status de conciliação da despesa e remover todas as transações bancárias vinculadas. Esta operação não pode ser desfeita.
-                                              </p>
-                                          </div>
-                                      </div>
-                                  </div>
+                        <div class="ui-card ui-card--soft" style="padding: 12px 16px;">
+                          <p class="ui-body-sm-strong" style="margin: 0 0 6px;">Despesa</p>
+                          <dl class="ui-dl" style="margin: 0;">
+                            <dt class="ui-caption" style="margin: 0;">Descrição</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.identification }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Valor</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">R$ {{ expense.value|intcomma }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Data</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.receive_date|date:"d/m/Y" }}</dd>
+                            <dt class="ui-caption" style="margin: 0;">Natureza</dt>
+                            <dd class="ui-body-sm" style="margin: 0;">{{ expense.nature_label }}</dd>
+                          </dl>
+                        </div>
 
-                                  <div class="mb-6">
-                                      <div class="bg-gray-50 rounded-lg p-4">
-                                          <h5 class="font-medium text-gray-900 mb-2">Detalhes da Despesa:</h5>
-                                          <div class="space-y-1 text-sm text-gray-600">
-                                              <p><span class="font-medium">Descrição:</span> {{ expense.identification }}</p>
-                                              <p><span class="font-medium">Valor:</span> R$ {{ expense.value|intcomma }}</p>
-                                              <p><span class="font-medium">Data:</span> {{ expense.receive_date|date:"d/m/Y" }}</p>
-                                              <p><span class="font-medium">Natureza de Recurso:</span> {{ expense.nature_label }}</p>
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="flex items-center justify-end space-x-3">
-                                      <button
-                                        type="button"
-                                        data-modal-hide="expenses-unreconcile-{{ expense.id}}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                          </svg>
-                                          Cancelar
-                                      </button>
-                                      <button
-                                          type="submit"
-                                          class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-                                      >
-                                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                          </svg>
-                                          Desconciliar
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                        <form id="expense-unreconcile-form-{{ expense.id}}" method="post" action="{% url 'accountability:expense-unreconcile' expense.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        </form>
                       </div>
+
+                      <footer class="ui-modal__footer">
+                        <button type="button" data-modal-hide="expenses-unreconcile-{{ expense.id}}" class="ui-btn ui-btn--subtle ui-btn--sm">Cancelar</button>
+                        <button type="submit" form="expense-unreconcile-form-{{ expense.id}}" class="ui-btn ui-btn--danger ui-btn--sm">Desconciliar</button>
+                      </footer>
+                    </div>
                   </div>
-                </div>
                 {% endif %}
 
               {% endfor %}
@@ -769,10 +458,10 @@
         </tbody>
         <tfoot>
           <tr class="ui-table__foot">
-              <th scope="row" class="ui-table__cell" style="text-align: right; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; font-weight: 600; color: var(--color-body);">Total</th>
+              <th scope="row" class="ui-table__cell" style="text-align: right; text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; font-weight: 600; color: var(--color-body); white-space: nowrap;">Total</th>
               <th scope="row" class="ui-table__cell">
                 <p class="ui-caption" style="margin: 0;">Cadastrado</p>
-                <p class="ui-body-md-strong" style="margin: 0;">R$ {{ expenses_total|intcomma }}</p>
+                <p class="ui-body-md-strong" style="margin: 0; white-space: nowrap;">R$&nbsp;{{ expenses_total|intcomma }}</p>
               </th>
               <th scope="row" class="ui-table__cell"></th>
               <th scope="row" class="ui-table__cell"></th>
@@ -842,20 +531,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   fileUploadArea.addEventListener('dragover', (e) => {
       e.preventDefault();
-      fileUploadArea.classList.remove('border-gray-300', 'bg-gray-50');
-      fileUploadArea.classList.add('border-green-500', 'bg-green-50');
+      fileUploadArea.classList.add('exp-docs-dropzone--active');
   });
   
   fileUploadArea.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
-      fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+      fileUploadArea.classList.remove('exp-docs-dropzone--active');
   });
   
   fileUploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      fileUploadArea.classList.remove('border-green-500', 'bg-green-50');
-      fileUploadArea.classList.add('border-gray-300', 'bg-gray-50');
+      fileUploadArea.classList.remove('exp-docs-dropzone--active');
       const files = e.dataTransfer.files;
       handleExpenseFiles(files, expenseId);
   });
