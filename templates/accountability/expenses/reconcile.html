@@ -1,577 +1,566 @@
 {% extends "base.html" %}
-
-{% block title %}Despesas - Portal SITTS{% endblock %}
-
-{% block customcss %}
-<style>
-    .transaction-item {
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .transaction-item:hover {
-        transform: translateY(-1px);
-    }
-    
-    .selected-transactions.empty {
-        display: none;
-    }
-    
-    .file-upload-area.dragover {
-        @apply border-blue-500 bg-blue-50;
-    }
-    
-    .main-content {
-        height: calc(100vh - 200px);
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .drawers-container {
-        flex: 1;
-        overflow-y: auto;
-        margin-bottom: 0;
-        min-height: 0;
-    }
-
-    .drawer-content {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .transactions-scroll {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 300px;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-
 {% load humanize %}
 
-<p class="text-3xl mb-4 font-bold">
-    Conciliar Despesa
-</p>
-  
-<!-- Breadcrumb -->
-<nav class="flex py-3 text-black" aria-label="Breadcrumb">
-    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
-    <li class="inline-flex items-center">
-        <a href="{% url 'home' %}" class="inline-flex items-center text-sm font-medium text-black hover:text-gray-500">
-        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Inicio
-        </a>
-    </li>
-    <li>
-        <div class="flex items-center">
-        <svg class="rtl:rotate-180 block w-3 h-3 mx-1 text-black " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <a
-            href="{% url 'accountability:accountability-detail' expense.accountability.id %}"
-            class="ms-1 text-sm font-medium text-black hover:text-gray-500 md:ms-2"
-        >
-            Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}
-        </a>
+{% block title %}Conciliar despesa — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page reconcile-page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ui-breadcrumb__item">Prestação {{ expense.accountability.month }}/{{ expense.accountability.year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Conciliar despesa</span>
+    </nav>
+    <div class="page__header-row">
+      <div>
+        <h1 class="ui-display-lg page__title">Conciliar despesa</h1>
+        <p class="page__subtitle ui-body-sm">Anexe os comprovantes e vincule as transações bancárias correspondentes.</p>
+      </div>
+      <div class="reconcile-progress">
+        <p class="ui-caption ui-text-muted" style="margin: 0;">Progresso</p>
+        <p class="ui-body-md-strong" style="margin: 0;">{{ conciled }}/{{ total }}</p>
+        <div class="reconcile-progress__bar">
+          <div class="reconcile-progress__fill" style="width: {% widthratio conciled total 100 %}%"></div>
         </div>
-    </li>
-    <li aria-current="page">
-        <div class="flex items-center">
-        <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-        </svg>
-        <span class="ms-1 text-sm font-medium text-black md:ms-2">Conciliar Despesa</span>
-        </div>
-    </li>
-    </ol>
-</nav>
-  
-<form method="post" enctype="multipart/form-data" class="max-w-7xl mx-auto">
+      </div>
+    </div>
+  </header>
+
+  <form method="post" enctype="multipart/form-data" class="ui-stack ui-stack--lg reconcile-form">
     {% csrf_token %}
-    
+
     {% if form.errors %}
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="text-sm font-medium text-red-800">Erro ao Conciliar Despesa</h3>
-            </div>
-            <div class="mt-2">
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <p class="text-sm text-red-700">{{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-            </div>
+      <div class="ui-alert ui-alert--error">
+        <span class="ui-alert__indicator"></span>
+        <div class="ui-alert__body">
+          <p class="ui-body-md-strong" style="margin: 0;">Erro ao conciliar despesa</p>
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <p class="ui-body-sm" style="margin: 4px 0 0;">{{ error }}</p>
+            {% endfor %}
+          {% endfor %}
         </div>
+      </div>
     {% endif %}
 
-    <div class="main-content">
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch drawers-container">
-            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
-                <div class="mb-3 flex justify-between items-center">
-                    <h1 class="text-xl font-bold text-gray-900">Conciliar Despesa</h1>
-                    <div class="text-right">
-                        <div class="text-xs text-gray-500">Progresso</div>
-                        <div class="text-sm font-semibold text-blue-600">{{conciled}}/{{total}}</div>
-                        <div class="w-20 bg-gray-200 rounded-full h-1.5 mt-1">
-                            <div class="bg-green-600 h-1.5 rounded-full transition-all duration-300" style="width: {% widthratio conciled total 100 %}%"></div>
-                        </div>
-                    </div>
-                </div>
+    <div class="reconcile-grid">
 
-                <div class="mb-4">
-                    <p class="text-gray-600 text-xs leading-relaxed">
-                        Anexe os arquivos comprovando o pagamento da despesa e vincule as transações bancárias relacionadas.
-                        A despesa será marcada como paga.
-                    </p>
-                </div>
-                
-                <div class="space-y-2">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Identificação:</span>
-                        <a href="{% url 'accountability:expenses-update' expense.id %}" class="sm:text-right flex-1 hover:underline text-sm font-medium text-blue-800">
-                            {{ expense.identification }}
-                        </a>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Número do Documento:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.document|default:"Sem Documento" }}</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Favorecido:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.favored.name|default:"N/A" }}</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Observações:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.observations|default_if_none:"Sem Observações" }}</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Valor:</span>
-                        <span class="sm:text-right flex-1 text-sm font-semibold text-green-600">R${{ expense.value|intcomma }}</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-1 border-b border-gray-100 last:border-b-0 gap-1 sm:gap-0">
-                        <span class="text-sm font-medium text-gray-600 sm:min-w-[100px]">Data:</span>
-                        <span class="sm:text-right flex-1 text-sm text-gray-900">{{ expense.due_date|date:"d/m/Y" }}</span>
-                    </div>
-                </div>
+      <!-- Left column: expense details + related + files -->
+      <section class="ui-card ui-stack ui-stack--md reconcile-col">
+        <header>
+          <h2 class="ui-display-sm" style="margin: 0;">Detalhes da despesa</h2>
+        </header>
 
-                <div class="mt-4 pt-3 border-t border-gray-200">
-                    <button
-                        type="button"
-                        data-modal-target="relatedExpensesModal"
-                        data-modal-toggle="relatedExpensesModal"
-                        id="openRelatedModal"
-                        class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
-                    >
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                        </svg>
-                        Vincular Despesa Relacionada
-                    </button>
-                    <div id="selectedCount" class="text-center text-xs text-gray-500 mt-1">0 despesas vinculadas</div>
-                </div>
+        <dl class="reconcile-kv">
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Identificação</dt>
+            <dd>
+              <a href="{% url 'accountability:expenses-update' expense.id %}" class="ui-link ui-body-sm" style="font-weight: 600;">{{ expense.identification }}</a>
+            </dd>
+          </div>
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Documento</dt>
+            <dd class="ui-body-sm">{{ expense.document|default:"—" }}</dd>
+          </div>
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Favorecido</dt>
+            <dd class="ui-body-sm">{{ expense.favored.name|default:"—" }}</dd>
+          </div>
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Observações</dt>
+            <dd class="ui-body-sm">{{ expense.observations|default_if_none:"—" }}</dd>
+          </div>
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Valor</dt>
+            <dd><span class="ui-body-md-strong" style="color: var(--color-ink);">R$ {{ expense.value|intcomma }}</span></dd>
+          </div>
+          <div class="reconcile-kv__row">
+            <dt class="ui-body-sm ui-text-muted">Vencimento</dt>
+            <dd class="ui-body-sm">{{ expense.due_date|date:"d/m/Y" }}</dd>
+          </div>
+        </dl>
 
-                <div class="mt-4 pt-3 border-t border-gray-200">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Arquivos de Comprovante
-                    </h3>
-                    
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center transition-all duration-200 bg-gray-50 hover:border-blue-500 hover:bg-blue-50" id="file-upload-area">
-                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <p class="text-gray-600 text-xs mb-2">Arraste e solte os arquivos aqui ou</p>
-                        <input
-                            class="hidden"
-                            id="files"
-                            name="files"
-                            type="file"
-                            multiple
-                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        >
-                        <label for="files" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded-md cursor-pointer transition-colors duration-200">
-                            Escolher Arquivos
-                        </label>
-                        <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG, DOC, DOCX (máx. 10MB cada)</p>
-                    </div>
-                    
-                    <div id="file-list" class="mt-2 space-y-1"></div>
-                </div>
-            </div>
-
-            <div class="hidden lg:block w-0.5 bg-gradient-to-b from-gray-200 via-gray-400 to-gray-200 min-h-[400px] mx-2"></div>
-
-            <div class="bg-white rounded-lg shadow-md p-4 drawer-content">
-                <div
-                    id="relatedExpensesModal"
-                    tabindex="-1"
-                    aria-hidden="true"
-                    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full"
-                >
-                <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
-                    <div class="relative bg-gray-200 rounded-lg shadow">
-                        <div class="flex justify-between items-start p-4 rounded-t border-gray-500">
-                            <h3 class="text-xl font-semibold text-gray-900">
-                                Despesas Não Pagas
-                            </h3>
-                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-500 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="relatedExpensesModal">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"  xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>  
-                            </button>
-                        </div>
-
-                        <div class="px-6">
-                            <p class="mb-4 text-base text-gray-500">Selecione as despesas não pagas relacionadas:</p>
-                            <div class="max-h-60 overflow-y-auto mb-4">
-                                {% for expense_item in unpaid_expenses %}
-                                    <div class="flex items-center mb-2 transaction-item" onclick="toggleModalCheckbox('expense-{{ expense_item.id }}', event)">
-                                        <input id="expense-{{ expense_item.id }}" name="related_expenses" type="checkbox" value="{{ expense_item.id }}" class="modal-checkbox transaction-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                        <label for="expense-{{ expense_item.id }}" class="ml-2 text-sm font-medium text-gray-900 cursor-pointer">
-                                            {{ expense_item.identification }} - {{ expense_item.favored.name }}R${{ expense_item.value|intcomma }}
-                                        </label>
-                                    </div>
-                                {% empty %}
-                                    <p class="text-sm text-gray-500">Nenhuma despesa não paga encontrada.</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="flex items-center p-4 space-x-2 rounded-b border-t border-gray-500">
-                            <button
-                                data-modal-hide="relatedExpensesModal"
-                                type="button"
-                                class="
-                                w-full
-                                text-white
-                                bg-gray-700
-                                hover:bg-gray-800
-                                focus:ring-4
-                                focus:outline-none
-                                focus:ring-gray-300
-                                font-medium rounded-lg
-                                text-sm
-                                px-5
-                                py-2.5
-                                text-center
-                                "
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                data-modal-hide="relatedExpensesModal"
-                                type="button"
-                                class="
-                                w-full
-                                text-white
-                                bg-blue-700
-                                hover:bg-blue-800
-                                focus:ring-4
-                                focus:outline-none
-                                focus:ring-blue-300
-                                font-medium rounded-lg
-                                text-sm
-                                px-5
-                                py-2.5
-                                text-center
-                            "
-                            >
-                                Salvar Seleção
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="flex flex-col h-full">
-                <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    <span class="text-xl font-semibold text-gray-900">Transações Bancárias</span>
-                </h3>
-                
-                <p class="text-xs text-gray-600 mb-3">
-                    A despesa pode corresponder a uma ou mais transações. Ao vincular com uma transação, a despesa será marcada como conciliada.
-                </p>
-                
-                <div id="selected-transactions" class="bg-green-50 border border-green-200 rounded-lg p-2 mb-3 empty">
-                    <h4 class="text-sm font-medium text-green-800 mb-1 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Transações Selecionadas:
-                    </h4>
-                    <div id="selected-list"></div>
-                </div>
-                
-                <div class="relative mb-3">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg class="w-3 h-3 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                        </svg>
-                    </div>
-                    <input
-                        type="text"
-                        id="checkbox-search"
-                        class="block w-full p-2 ps-8 text-xs text-gray-900 border border-gray-300 rounded-md bg-white focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Pesquisar transações..."
-                    />
-                </div>
-
-                <div class="transactions-scroll">
-                    <div class="h-full p-2 rounded-lg bg-gray-50 border border-gray-200 text-black overflow-y-auto" id="transactions-container">
-                        {{ form.transactions }}
-                    </div>
-                </div>
-            </div>
-            </div>
+        <div class="reconcile-section">
+          <button
+            type="button"
+            data-modal-target="relatedExpensesModal"
+            data-modal-toggle="relatedExpensesModal"
+            id="openRelatedModal"
+            class="ui-btn ui-btn--secondary"
+            style="width: 100%; justify-content: center;"
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            Vincular despesa relacionada
+          </button>
+          <p id="selectedCount" class="ui-caption ui-text-muted" style="margin: 6px 0 0; text-align: center;">0 despesas vinculadas</p>
         </div>
-            
+
+        <div class="reconcile-section">
+          <h3 class="ui-body-md-strong" style="margin: 0 0 8px;">Comprovantes</h3>
+          <div id="file-upload-area" class="reconcile-dropzone">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="reconcile-dropzone__icon">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p class="ui-body-sm" style="margin: 8px 0 6px;">Arraste arquivos aqui ou</p>
+            <input class="hidden" id="files" name="files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+            <label for="files" class="ui-btn ui-btn--primary ui-btn--sm" style="cursor: pointer;">Escolher arquivos</label>
+            <p class="ui-caption ui-text-muted" style="margin: 8px 0 0;">PDF, JPG, PNG, DOC, DOCX — até 10 MB cada</p>
+          </div>
+          <div id="file-list" class="ui-stack ui-stack--xxs" style="margin-top: 10px;"></div>
+        </div>
+      </section>
+
+      <!-- Right column: transactions -->
+      <section class="ui-card ui-stack ui-stack--md reconcile-col reconcile-col--transactions">
+        <header>
+          <h2 class="ui-display-sm" style="margin: 0;">Transações bancárias</h2>
+          <p class="ui-body-sm ui-text-muted" style="margin: 4px 0 0;">Vincule uma ou mais transações que correspondam à despesa. Ao salvar, a despesa será marcada como conciliada.</p>
+        </header>
+
+        <div id="selected-transactions" class="reconcile-selected empty">
+          <p class="ui-body-sm-strong" style="margin: 0 0 6px; color: var(--color-ink);">Transações selecionadas</p>
+          <div id="selected-list" class="ui-stack ui-stack--xxs"></div>
+        </div>
+
+        <div class="reconcile-search">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 20 20" aria-hidden="true" class="reconcile-search__icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+          </svg>
+          <input type="text" id="checkbox-search" class="ui-input reconcile-search__field" placeholder="Pesquisar transações..." />
+        </div>
+
+        <div class="reconcile-transactions" id="transactions-container">
+          {{ form.transactions }}
+        </div>
+      </section>
+
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
-        <div class="max-w-7xl mx-auto flex justify-between items-center lg:ml-64">
-            <a
-              href="{% url 'accountability:accountability-detail' expense.accountability.id %}"
-              class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-              Voltar
-            </a>
-
-            <div class="flex gap-3">
-              <button
-                type="submit"
-                name="action"
-                value="current"
-                class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Conciliar Este
-              </button>
-
-              <button
-                type="submit"
-                name="action"
-                value="next"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-                Conciliar Próximo
-              </button>
-            </div>
+    <!-- Related expenses modal -->
+    <div id="relatedExpensesModal" tabindex="-1" aria-hidden="true" class="ui-modal__backdrop hidden">
+      <div class="ui-modal__panel">
+        <div class="ui-modal__header">
+          <h3 class="ui-display-sm" style="margin: 0;">Despesas não pagas</h3>
+          <button type="button" class="ui-modal__close" data-modal-hide="relatedExpensesModal" aria-label="Fechar">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
+        <div class="ui-modal__body">
+          <p class="ui-body-sm ui-text-muted" style="margin: 0 0 12px;">Selecione as despesas não pagas relacionadas. Elas serão conciliadas juntas com esta.</p>
+          <div class="reconcile-modal-list">
+            {% for expense_item in unpaid_expenses %}
+              <label class="reconcile-modal-list__row" for="expense-{{ expense_item.id }}">
+                <input id="expense-{{ expense_item.id }}" name="related_expenses" type="checkbox" value="{{ expense_item.id }}" class="modal-checkbox">
+                <div class="reconcile-modal-list__body">
+                  <p class="ui-body-sm" style="margin: 0; font-weight: 500;">{{ expense_item.identification }}</p>
+                  <p class="ui-caption ui-text-muted" style="margin: 0;">{{ expense_item.favored.name|default:"—" }} · R$ {{ expense_item.value|intcomma }}</p>
+                </div>
+              </label>
+            {% empty %}
+              <p class="ui-body-sm ui-text-muted" style="margin: 0;">Nenhuma despesa não paga encontrada.</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="ui-modal__footer">
+          <button type="button" class="ui-btn ui-btn--secondary" data-modal-hide="relatedExpensesModal">Cancelar</button>
+          <button type="button" class="ui-btn ui-btn--primary" data-modal-hide="relatedExpensesModal">Confirmar seleção</button>
+        </div>
+      </div>
     </div>
-</form>
+
+    <!-- Pinned footer action bar -->
+    <div class="reconcile-footer">
+      <a href="{% url 'accountability:accountability-detail' expense.accountability.id %}" class="ui-btn ui-btn--secondary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Voltar
+      </a>
+      <div class="ui-row" style="gap: 8px;">
+        <button type="submit" name="action" value="current" class="ui-btn ui-btn--secondary">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Conciliar este
+        </button>
+        <button type="submit" name="action" value="next" class="ui-btn ui-btn--primary">
+          Conciliar e próximo
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</section>
+
+<style>
+  /* Page layout — fill vp height, footer pinned, internal scroll only */
+  .reconcile-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .reconcile-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+
+  /* Header progress chip */
+  .reconcile-progress {
+    text-align: right;
+    min-width: 130px;
+  }
+  .reconcile-progress__bar {
+    height: 4px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-pill);
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .reconcile-progress__fill {
+    height: 100%;
+    background-color: var(--color-toast-success);
+    border-radius: var(--rounded-pill);
+    transition: width 0.2s ease;
+  }
+
+  /* Two-column grid */
+  .reconcile-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: var(--space-md);
+    align-items: stretch;
+    min-height: 0;
+    flex: 1;
+  }
+  @media (max-width: 960px) {
+    .reconcile-grid { grid-template-columns: 1fr; }
+  }
+
+  .reconcile-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .reconcile-col--transactions { min-height: 480px; }
+
+  /* Key/value list */
+  .reconcile-kv { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .reconcile-kv__row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .reconcile-kv__row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .reconcile-kv dt, .reconcile-kv dd { margin: 0; }
+
+  .reconcile-section {
+    padding-top: 12px;
+    border-top: 1px solid var(--color-divider);
+  }
+
+  /* Dropzone */
+  .reconcile-dropzone {
+    border: 1.5px dashed var(--color-divider);
+    border-radius: var(--rounded-xl);
+    padding: 20px 16px;
+    text-align: center;
+    background-color: var(--color-canvas-soft);
+    transition: all 0.15s ease;
+  }
+  .reconcile-dropzone.dragover {
+    border-color: var(--color-ink);
+    background-color: var(--color-canvas-softer);
+  }
+  .reconcile-dropzone__icon { color: var(--color-body); }
+
+  /* Selected transactions card */
+  .reconcile-selected {
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+    padding: 10px 12px;
+  }
+  .reconcile-selected.empty { display: none; }
+  .reconcile-selected__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    background-color: var(--color-canvas);
+    border-radius: var(--rounded-md);
+    margin-top: 4px;
+  }
+
+  /* Search input over dropzone */
+  .reconcile-search { position: relative; }
+  .reconcile-search__icon {
+    position: absolute;
+    top: 50%; left: 10px;
+    transform: translateY(-50%);
+    color: var(--color-body);
+    pointer-events: none;
+  }
+  .reconcile-search__field { padding-left: 32px !important; font-size: 13px; }
+
+  /* Transactions list shell — scrollable */
+  .reconcile-transactions {
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+    padding: 6px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 220px;
+    max-height: 460px;
+  }
+  .reconcile-transactions #id_transactions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .reconcile-transactions #id_transactions > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--rounded-md);
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+    border: 1px solid transparent;
+  }
+  .reconcile-transactions #id_transactions > div:hover {
+    background-color: var(--color-canvas);
+    border-color: var(--color-divider);
+  }
+  .reconcile-transactions #id_transactions > div.is-selected {
+    background-color: rgba(46, 174, 86, 0.10);
+    border-color: rgba(46, 174, 86, 0.35);
+  }
+  .reconcile-transactions #id_transactions input[type="checkbox"] {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    accent-color: var(--color-ink);
+    margin: 0;
+  }
+  .reconcile-transactions #id_transactions label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--color-ink);
+    cursor: pointer;
+    flex: 1;
+    margin: 0;
+  }
+
+  /* Modal list */
+  .reconcile-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .reconcile-modal-list__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-md);
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+  }
+  .reconcile-modal-list__row:hover { background-color: var(--color-canvas-softer); }
+  .reconcile-modal-list__row input { width: 16px; height: 16px; accent-color: var(--color-ink); }
+
+  /* Pinned footer */
+  .reconcile-footer {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--rounded-xl);
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.04);
+    z-index: 5;
+  }
+</style>
 
 <script>
 function toggleModalCheckbox(checkboxId, event) {
-    if (event && event.target.type === 'checkbox') {
-        return;
-    }
-    const checkbox = document.getElementById(checkboxId);
-    checkbox.checked = !checkbox.checked;
-    updateSelectedCount();
+  if (event && event.target.type === 'checkbox') return;
+  var checkbox = document.getElementById(checkboxId);
+  checkbox.checked = !checkbox.checked;
+  updateSelectedCount();
 }
 
 function updateSelectedCount() {
-    const checkboxes = document.querySelectorAll('.modal-checkbox');
-    let count = 0;
-    checkboxes.forEach(cb => {
-        if (cb.checked) count++;
-    });
-    document.getElementById('selectedCount').innerText = count + " despesas selecionadas";
+  var checkboxes = document.querySelectorAll('.modal-checkbox');
+  var count = 0;
+  checkboxes.forEach(function (cb) { if (cb.checked) count++; });
+  var label = document.getElementById('selectedCount');
+  if (label) label.textContent = count + ' despesa(s) vinculada(s)';
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function txLabelText(checkbox) {
+  var label = checkbox.closest('label');
+  if (!label) return checkbox.value;
+  // The label contains the checkbox + a text node. Strip the input portion.
+  var text = '';
+  label.childNodes.forEach(function (node) {
+    if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
+  });
+  text = text.trim();
+  return text || label.textContent.trim() || checkbox.value;
 }
 
 function updateSelectedTransactions() {
-    const selectedContainer = document.getElementById('selected-transactions');
-    const selectedList = document.getElementById('selected-list');
-    const checkboxes = document.querySelectorAll('#id_transactions input[type="checkbox"]');
-    
-    selectedList.innerHTML = '';
-    let hasSelected = false;
-    
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            hasSelected = true;
-            const label = checkbox.parentElement.querySelector('label');
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-2 bg-white rounded border mb-2';
-            div.innerHTML = `
-                <span class="text-sm">${label.textContent.trim()}</span>
-                <button type="button" onclick="unselectTransaction('${checkbox.id}')" class="text-red-600 hover:text-red-800 text-sm">
-                    ✕
-                </button>
-            `;
-            selectedList.appendChild(div);
-        }
-    });
-    
-    if (hasSelected) {
-        selectedContainer.classList.remove('empty');
-    } else {
-        selectedContainer.classList.add('empty');
+  var selectedContainer = document.getElementById('selected-transactions');
+  var selectedList = document.getElementById('selected-list');
+  var checkboxes = document.querySelectorAll('#id_transactions input[type="checkbox"]');
+  selectedList.innerHTML = '';
+  var hasSelected = false;
+  checkboxes.forEach(function (checkbox) {
+    if (checkbox.checked) {
+      hasSelected = true;
+      var labelText = txLabelText(checkbox);
+      var item = document.createElement('div');
+      item.className = 'reconcile-selected__item';
+      item.innerHTML =
+        '<span class="ui-body-sm">' + escapeHtml(labelText) + '</span>' +
+        '<button type="button" class="ui-icon-btn ui-icon-btn--danger" onclick="unselectTransaction(\'' + checkbox.id + '\')" aria-label="Remover">' +
+        '<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+        '</button>';
+      selectedList.appendChild(item);
     }
+  });
+  if (hasSelected) selectedContainer.classList.remove('empty');
+  else selectedContainer.classList.add('empty');
 }
 
 function unselectTransaction(checkboxId) {
-    const checkbox = document.getElementById(checkboxId);
-    const div = checkbox.parentElement;
-    checkbox.checked = false;
-    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
-    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
-    updateSelectedTransactions();
+  var checkbox = document.getElementById(checkboxId);
+  if (!checkbox) return;
+  checkbox.checked = false;
+  var row = checkbox.closest('#id_transactions > div');
+  if (row) row.classList.remove('is-selected');
+  updateSelectedTransactions();
 }
 
 function setupTransactionInteractions() {
-    const transactionDivs = document.querySelectorAll('#id_transactions > div');
-    
-    transactionDivs.forEach(div => {
-        const checkbox = div.querySelector('input[type="checkbox"]');
-        const label = div.querySelector('label');
-        
-        if (checkbox && label) {
-            div.className += ' cursor-pointer p-2 rounded-md mb-1 transition-all duration-200 border border-transparent hover:bg-blue-50 hover:border-blue-200 hover:-translate-y-0.5 hover:shadow-sm';
-            checkbox.className += ' w-4 h-4 mr-2';
-            
-            div.addEventListener('click', function(e) {
-                if (e.target === checkbox) {
-                    return;
-                }
-                e.preventDefault();
-                e.stopPropagation();
-                checkbox.checked = !checkbox.checked;
-                if (checkbox.checked) {
-                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
-                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
-                } else {
-                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
-                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
-                }
-                updateSelectedTransactions();
-            });
-            
-            checkbox.addEventListener('change', function(e) {
-                if (checkbox.checked) {
-                    div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
-                    div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
-                } else {
-                    div.classList.remove('bg-green-50', 'border-green-300', 'shadow-sm');
-                    div.classList.add('hover:bg-blue-50', 'hover:border-blue-200');
-                }
-                updateSelectedTransactions();
-            });
-            
-            if (checkbox.checked) {
-                div.classList.remove('hover:bg-blue-50', 'hover:border-blue-200');
-                div.classList.add('bg-green-50', 'border-green-300', 'shadow-sm');
-            }
-        }
-    });
-    
-    updateSelectedTransactions();
-}
+  var rows = document.querySelectorAll('#id_transactions > div');
+  rows.forEach(function (row) {
+    var checkbox = row.querySelector('input[type="checkbox"]');
+    var label = row.querySelector('label');
+    if (!checkbox || !label) return;
 
-document.addEventListener('DOMContentLoaded', function() {
-    setupTransactionInteractions();
-    setupFileUpload();
-});
+    row.addEventListener('click', function (e) {
+      if (e.target === checkbox) return;
+      e.preventDefault();
+      e.stopPropagation();
+      checkbox.checked = !checkbox.checked;
+      row.classList.toggle('is-selected', checkbox.checked);
+      updateSelectedTransactions();
+    });
+    checkbox.addEventListener('change', function () {
+      row.classList.toggle('is-selected', checkbox.checked);
+      updateSelectedTransactions();
+    });
+    if (checkbox.checked) row.classList.add('is-selected');
+  });
+  updateSelectedTransactions();
+}
 
 function setupFileUpload() {
-    const fileInput = document.getElementById('files');
-    const fileUploadArea = document.getElementById('file-upload-area');
-    const fileList = document.getElementById('file-list');
-    
-    fileUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.add('dragover');
+  var fileInput = document.getElementById('files');
+  var dz = document.getElementById('file-upload-area');
+  var fileList = document.getElementById('file-list');
+
+  dz.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    dz.classList.add('dragover');
+  });
+  dz.addEventListener('dragleave', function (e) {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+  });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function (e) { handleFiles(e.target.files); });
+
+  function handleFiles(files) {
+    fileList.innerHTML = '';
+    Array.from(files).forEach(function (file) {
+      var item = document.createElement('div');
+      item.className = 'reconcile-selected__item';
+      item.innerHTML =
+        '<div style="display:flex; align-items:center; gap:10px; min-width:0;">' +
+          '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;color:var(--color-body)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>' +
+          '<div style="min-width:0;">' +
+            '<p class="ui-body-sm" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + file.name + '</p>' +
+            '<p class="ui-caption ui-text-muted" style="margin:0;">' + (file.size / 1024 / 1024).toFixed(2) + ' MB</p>' +
+          '</div>' +
+        '</div>' +
+        '<button type="button" class="ui-icon-btn ui-icon-btn--danger" onclick="removeFile(this)" aria-label="Remover">' +
+          '<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+        '</button>';
+      fileList.appendChild(item);
     });
-    
-    fileUploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('dragover');
-    });
-    
-    fileUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-    });
-    
-    function handleFiles(files) {
-        fileList.innerHTML = '';
-        Array.from(files).forEach(file => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
-            fileItem.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${file.name}</div>
-                        <div class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                    </div>
-                </div>
-                <button type="button" onclick="removeFile(this)" class="text-red-600 hover:text-red-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
-            fileList.appendChild(fileItem);
-        });
-    }
+  }
 }
 
-function removeFile(button) {
-    button.parentElement.remove();
-}
-    
-document.querySelectorAll('.modal-checkbox').forEach(cb => {
+function removeFile(button) { button.parentElement.remove(); }
+
+document.addEventListener('DOMContentLoaded', function () {
+  setupTransactionInteractions();
+  setupFileUpload();
+
+  document.querySelectorAll('.modal-checkbox').forEach(function (cb) {
     cb.addEventListener('change', updateSelectedCount);
-});
+  });
+  updateSelectedCount();
 
-const searchInput = document.getElementById('checkbox-search');
-if (searchInput) {
-    searchInput.addEventListener('keyup', function() {
-        var searchTerm = this.value.toLowerCase();
-        var optionDivs = document.querySelectorAll('#id_transactions > div');
-        
-        optionDivs.forEach((div) => {
-            var checkbox = div.querySelector('input[type="checkbox"]');
-            if (checkbox && checkbox.checked) {
-                div.style.display = '';
-            } else if (div.textContent.toLowerCase().includes(searchTerm)) {
-                div.style.display = '';
-            } else {
-                div.style.display = 'none';
-            }
-        });
+  var searchInput = document.getElementById('checkbox-search');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function () {
+      var term = this.value.toLowerCase();
+      var rows = document.querySelectorAll('#id_transactions > div');
+      rows.forEach(function (row) {
+        var checkbox = row.querySelector('input[type="checkbox"]');
+        if (checkbox && checkbox.checked) {
+          row.style.display = '';
+        } else if (row.textContent.toLowerCase().includes(term)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
     });
-}
+  }
+});
 </script>
 
 {% endblock %}

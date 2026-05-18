@@ -1,634 +1,438 @@
 {% extends "base.html" %}
 {% load humanize %}
 
-{% block title %}Consultar Prestações - Portal SITTS{% endblock %}
+{% block title %}Consultar prestações — Portal SITTS{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <p class="text-2xl mb-3 font-bold">
-        Consultar Prestações
-    </p>
+<section class="page">
 
-    <div class="my-4">
-        <form method="GET">
-            <div class="relative group">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                    </svg>
-                </div>
-                
-                <input
-                    type="text"
-                    id="id-search-input"
-                    name="q"
-                    value="{{ search_query }}"
-                    placeholder="Pesquisar por identificação, item, favorecido, ou contrato..."
-                    class="
-                        block
-                        w-full
-                        pl-12
-                        pr-72
-                        py-3
-                        text-sm
-                        text-gray-900
-                        bg-white
-                        border
-                        border-gray-300
-                        rounded-lg
-                        shadow-sm
-                        placeholder-gray-500
-                        transition-all
-                        duration-200
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-blue-500
-                        focus:border-blue-500
-                        focus:shadow-md
-                        hover:border-gray-400
-                        hover:shadow-sm
-                    "
-                    autocomplete="off"
-                    spellcheck="false"
-                />
-                
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-2">
-                    <button
-                        type="button"
-                        id="toggle-filters"
-                        class="
-                            inline-flex
-                            items-center
-                            justify-center
-                            px-5
-                            py-2.5
-                            text-sm
-                            font-medium
-                            text-gray-700
-                            bg-white
-                            border
-                            border-gray-300
-                            rounded-lg
-                            shadow-sm
-                            transition-all
-                            duration-200
-                            hover:bg-gray-100
-                            hover:shadow-md
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-offset-2
-                            focus:ring-gray-500
-                            active:bg-gray-100
-                        "
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                        </svg>
-                        Filtros
-                        <span id="filter-icon" class="ml-1.5 transition-transform duration-200">▼</span>
-                    </button>
-                    <button
-                        type="submit"
-                        class="
-                            inline-flex
-                            items-center
-                            justify-center
-                            px-6
-                            py-2.5
-                            text-sm
-                            font-medium
-                            text-white
-                            bg-blue-600
-                            border
-                            border-transparent
-                            rounded-lg
-                            shadow-sm
-                            transition-all
-                            duration-200
-                            hover:bg-blue-700
-                            hover:shadow-md
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-offset-2
-                            focus:ring-blue-500
-                            active:bg-blue-800
-                            disabled:opacity-50
-                            disabled:cursor-not-allowed
-                        "
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        Buscar
-                    </button>
-                </div>
-            </div>
-            
-            {% if search_query %}
-            <div class="mt-3 flex flex-wrap gap-2">
-                <div class="text-xs text-gray-500">
-                    Pesquisando por: <span class="font-medium text-gray-700">"{{ search_query }}"</span>
-                </div>
-            </div>
-            {% endif %}
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Consultar prestações</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Consultar prestações</h1>
+    <p class="page__subtitle ui-body-sm">Pesquise despesas e receitas por identificação, favorecido, contrato ou período.</p>
+  </header>
 
-            <div id="advanced-filters" class="hidden mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm transition-all duration-200">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <div>
-                        <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Registro</label>
-                        <select 
-                            id="type" 
-                            name="type"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="all" {% if record_type == "all" %}selected{% endif %}>Todos</option>
-                            <option value="expense" {% if record_type == "expense" %}selected{% endif %}>Apenas Despesas</option>
-                            <option value="revenue" {% if record_type == "revenue" %}selected{% endif %}>Apenas Receitas</option>
-                        </select>
-                    </div>
+  <form method="GET" id="search-form" class="ui-stack ui-stack--lg">
 
-                    <div>
-                        <label for="conciled" class="block text-sm font-medium text-gray-700 mb-2">Status de Conciliação</label>
-                        <select 
-                            id="conciled" 
-                            name="conciled"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="all" {% if conciled_status == "all" %}selected{% endif %}>Todos</option>
-                            <option value="conciled" {% if conciled_status == "conciled" %}selected{% endif %}>Conciliados</option>
-                            <option value="not_conciled" {% if conciled_status == "not_conciled" %}selected{% endif %}>Pendentes</option>
-                        </select>
-                    </div>
+    <section class="ui-card ui-stack ui-stack--md">
+      <div class="search-row">
+        <div class="search-row__input">
+          <svg class="search-row__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+          </svg>
+          <input
+            type="text"
+            id="id-search-input"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Identificação, item, favorecido ou contrato"
+            class="ui-input search-row__field"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <button type="button" id="toggle-filters" class="ui-btn ui-btn--secondary search-row__filters" aria-expanded="false">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 12h12M10 20h4"/>
+          </svg>
+          Filtros
+          <span id="filter-icon" class="search-row__caret">▾</span>
+        </button>
+        <button type="submit" class="ui-btn ui-btn--primary">Buscar</button>
+      </div>
 
-                    <div>
-                        <label for="contract" class="block text-sm font-medium text-gray-700 mb-2">Contrato</label>
-                        <select 
-                            id="contract" 
-                            name="contract"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="">Todos</option>
-                            {% for contract in contracts %}
-                                <option value="{{ contract.id }}" {% if contract_id == contract.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ contract.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+      {% if search_query %}
+        <p class="ui-body-sm ui-text-muted" style="margin: 0;">
+          Pesquisando por <span style="color: var(--color-ink); font-weight: 600;">"{{ search_query }}"</span>
+        </p>
+      {% endif %}
 
-                    <div>
-                        <label for="favored" class="block text-sm font-medium text-gray-700 mb-2">Favorecido</label>
-                        <select 
-                            id="favored" 
-                            name="favored"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="">Todos</option>
-                            {% for favored in favoreds %}
-                                <option value="{{ favored.id }}" {% if favored_id == favored.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ favored.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+      <div id="advanced-filters" class="hidden filter-panel">
+        <div class="ui-grid-4">
+          <div class="ui-field">
+            <label for="type" class="ui-field__label">Tipo de registro</label>
+            <select id="type" name="type" class="ui-input">
+              <option value="all" {% if record_type == "all" %}selected{% endif %}>Todos</option>
+              <option value="expense" {% if record_type == "expense" %}selected{% endif %}>Apenas despesas</option>
+              <option value="revenue" {% if record_type == "revenue" %}selected{% endif %}>Apenas receitas</option>
+            </select>
+          </div>
 
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status de Revisão</label>
-                        <select 
-                            id="status" 
-                            name="status"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="all" {% if status == "all" %}selected{% endif %}>Todos</option>
-                            <option value="PENDING" {% if status == "PENDING" %}selected{% endif %}>Pendente</option>
-                            <option value="APPROVED" {% if status == "APPROVED" %}selected{% endif %}>Aprovado</option>
-                            <option value="REJECTED" {% if status == "REJECTED" %}selected{% endif %}>Rejeitado</option>
-                        </select>
-                    </div>
+          <div class="ui-field">
+            <label for="conciled" class="ui-field__label">Conciliação</label>
+            <select id="conciled" name="conciled" class="ui-input">
+              <option value="all" {% if conciled_status == "all" %}selected{% endif %}>Todos</option>
+              <option value="conciled" {% if conciled_status == "conciled" %}selected{% endif %}>Conciliados</option>
+              <option value="not_conciled" {% if conciled_status == "not_conciled" %}selected{% endif %}>Pendentes</option>
+            </select>
+          </div>
 
-                    <div>
-                        <label for="paid" class="block text-sm font-medium text-gray-700 mb-2">Status de Pagamento</label>
-                        <select 
-                            id="paid" 
-                            name="paid"
-                            class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                        >
-                            <option value="all" {% if paid_status == "all" %}selected{% endif %}>Todos</option>
-                            <option value="paid" {% if paid_status == "paid" %}selected{% endif %}>Pago</option>
-                            <option value="unpaid" {% if paid_status == "unpaid" %}selected{% endif %}>Pendente</option>
-                        </select>
-                    </div>
+          <div class="ui-field">
+            <label for="status" class="ui-field__label">Revisão</label>
+            <select id="status" name="status" class="ui-input">
+              <option value="all" {% if status == "all" %}selected{% endif %}>Todos</option>
+              <option value="PENDING" {% if status == "PENDING" %}selected{% endif %}>Pendente</option>
+              <option value="APPROVED" {% if status == "APPROVED" %}selected{% endif %}>Aprovado</option>
+              <option value="REJECTED" {% if status == "REJECTED" %}selected{% endif %}>Rejeitado</option>
+            </select>
+          </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="w-full">
-                                <input 
-                                    type="date" 
-                                    id="start_date" 
-                                    name="start_date" 
-                                    value="{{ start_date }}"
-                                    class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                                    placeholder="Data inicial"
-                                />
-                            </div>
-                            <div class="w-full">
-                                <input 
-                                    type="date" 
-                                    id="end_date" 
-                                    name="end_date" 
-                                    value="{{ end_date }}"
-                                    class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 p-2.5"
-                                    placeholder="Data final"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-start pt-3 mt-3 border-t border-gray-200">
-                    <a 
-                        href="{% url 'accountability:advanced-search' %}"
-                        class="
-                            inline-flex
-                            items-center
-                            px-4
-                            py-1.5
-                            text-xs
-                            font-medium
-                            text-gray-600
-                            bg-gray-50
-                            border
-                            border-gray-200
-                            rounded-md
-                            transition-all
-                            duration-200
-                            hover:bg-gray-100
-                            hover:text-gray-700
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-gray-400
-                        "
-                    >
-                        <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Limpar Filtros
-                    </a>
-                </div>
-            </div>
-        </form>
-    </div>
+          <div class="ui-field">
+            <label for="paid" class="ui-field__label">Pagamento</label>
+            <select id="paid" name="paid" class="ui-input">
+              <option value="all" {% if paid_status == "all" %}selected{% endif %}>Todos</option>
+              <option value="paid" {% if paid_status == "paid" %}selected{% endif %}>Pago</option>
+              <option value="unpaid" {% if paid_status == "unpaid" %}selected{% endif %}>Pendente</option>
+            </select>
+          </div>
 
-    {% if expenses or revenues %}
-        <div class="bg-white shadow-md rounded-lg border border-gray-200 p-5">
-            <div class="flex items-center justify-between mb-5">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900">Resultados da Pesquisa</h2>
-                    <div class="flex gap-4 mt-2 text-sm">
-                        {% if expenses %}
-                            <span class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 rounded-lg font-medium text-xs">
-                                Despesas: {{ expenses|length }} (R$ {{ expenses_total|intcomma }})
-                            </span>
+          <div class="ui-field">
+            <label for="contract" class="ui-field__label">Contrato</label>
+            <select id="contract" name="contract" class="ui-input">
+              <option value="">Todos</option>
+              {% for contract in contracts %}
+                <option value="{{ contract.id }}" {% if contract_id == contract.id|stringformat:"s" %}selected{% endif %}>{{ contract.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="ui-field">
+            <label for="favored" class="ui-field__label">Favorecido</label>
+            <select id="favored" name="favored" class="ui-input">
+              <option value="">Todos</option>
+              {% for favored in favoreds %}
+                <option value="{{ favored.id }}" {% if favored_id == favored.id|stringformat:"s" %}selected{% endif %}>{{ favored.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="ui-field">
+            <label for="start_date" class="ui-field__label">Início</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="ui-input" />
+          </div>
+
+          <div class="ui-field">
+            <label for="end_date" class="ui-field__label">Fim</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="ui-input" />
+          </div>
+        </div>
+
+        <div class="ui-row" style="justify-content: flex-start; padding-top: 12px; border-top: 1px solid var(--color-divider); margin-top: 12px;">
+          <a href="{% url 'accountability:advanced-search' %}" class="ui-link ui-link--muted ui-body-sm">Limpar filtros</a>
+        </div>
+      </div>
+    </section>
+
+  </form>
+
+  {% if expenses or revenues %}
+    <section class="ui-stack ui-stack--lg">
+
+      <div class="ui-row" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h2 class="ui-display-sm" style="margin: 0;">Resultados</h2>
+        <div class="ui-row" style="gap: 8px; flex-wrap: wrap;">
+          {% if expenses %}
+            <span class="ui-status ui-status--error">Despesas: {{ expenses|length }} — R$ {{ expenses_total|intcomma }}</span>
+          {% endif %}
+          {% if revenues %}
+            <span class="ui-status ui-status--success">Receitas: {{ revenues|length }} — R$ {{ revenues_total|intcomma }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if expenses %}
+        <section class="ui-card ui-stack ui-stack--md">
+          <h3 class="ui-body-md-strong" style="margin: 0;">Despesas ({{ expenses|length }})</h3>
+          <div class="ui-table-shell">
+            <div class="ui-table-scroll">
+              <table class="ui-table">
+                <thead>
+                  <tr>
+                    <th class="ui-table__cell--head">Identificação</th>
+                    <th class="ui-table__cell--head">Valor</th>
+                    <th class="ui-table__cell--head">Competência</th>
+                    <th class="ui-table__cell--head">Contrato</th>
+                    <th class="ui-table__cell--head">Favorecido</th>
+                    <th class="ui-table__cell--head">Revisão</th>
+                    <th class="ui-table__cell--head">Conciliação</th>
+                    <th class="ui-table__cell--head">Pagamento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for expense in expenses %}
+                    <tr>
+                      <th scope="row" class="ui-table__cell--head" style="font-weight: 500;">
+                        <div class="truncate" style="max-width: 220px;" title="{{ expense.identification }}">{{ expense.identification }}</div>
+                      </th>
+                      <td class="ui-table__cell" style="white-space: nowrap;">R$ {{ expense.value|intcomma }}</td>
+                      <td class="ui-table__cell" style="white-space: nowrap;">{{ expense.competency|date:"d/m/Y" }}</td>
+                      <td class="ui-table__cell">
+                        <div class="truncate" style="max-width: 200px;" title="{{ expense.accountability.contract.name }}">{{ expense.accountability.contract.name }}</div>
+                      </td>
+                      <td class="ui-table__cell">
+                        <div class="truncate" style="max-width: 160px;" title="{{ expense.favored.name|default:'-' }}">{{ expense.favored.name|default:"—" }}</div>
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if expense.status == 'APPROVED' %}
+                          <span class="ui-status ui-status--success">{{ expense.get_status_display }}</span>
+                        {% elif expense.status == 'REJECTED' %}
+                          <span class="ui-status ui-status--error">{{ expense.get_status_display }}</span>
+                        {% else %}
+                          <span class="ui-status ui-status--warning">{{ expense.get_status_display }}</span>
                         {% endif %}
-                        {% if revenues %}
-                            <span class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-medium text-xs">
-                                Receitas: {{ revenues|length }} (R$ {{ revenues_total|intcomma }})
-                            </span>
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if expense.conciled %}
+                          <span class="ui-status ui-status--info">Conciliada</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
                         {% endif %}
-                    </div>
-                </div>
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if expense.paid %}
+                          <span class="ui-status ui-status--success">Paga</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
+          </div>
+        </section>
+      {% endif %}
 
-            {% if expenses %}
-                <div class="mb-6">
-                    <h3 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                        </svg>
-                        Despesas ({{ expenses|length }})
-                    </h3>
-                    <div class="overflow-hidden shadow-md rounded-lg border border-gray-200">
-                        <table class="min-w-full text-sm text-left text-gray-500 table-fixed">
-                            <thead class="text-xs text-white uppercase bg-gray-500">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 w-[15%]">Identificação</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Valor</th>
-                                    <th scope="col" class="px-4 py-3 w-[8%]">Data</th>
-                                    <th scope="col" class="px-4 py-3 w-[20%]">Contrato</th>
-                                    <th scope="col" class="px-4 py-3 w-[15%]">Favorecido</th>
-                                    <th scope="col" class="px-4 py-3 w-[12%]">Status</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Conciliado</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Pago</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for expense in expenses %}
-                                    <tr class="bg-white border-b hover:bg-gray-100">
-                                        <td class="px-4 py-3 font-medium text-gray-900">
-                                            <div class="truncate" title="{{ expense.identification }}">{{ expense.identification }}</div>
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap">R$ {{ expense.value|intcomma }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">{{ expense.competency|date:"d/m/Y" }}</td>
-                                        <td class="px-4 py-3 truncate max-w-[80px]" title="{{ expense.accountability.contract.name }}">
-                                            {{ expense.accountability.contract.name }}
-                                        </td>
-                                        <td class="px-4 py-3 truncate max-w-[80px]" title="{{ expense.favored.name|default:'-' }}">
-                                            {{ expense.favored.name|default:"-" }}
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap
-                                                {% if expense.status == 'APPROVED' %}bg-green-100 text-green-800
-                                                {% elif expense.status == 'REJECTED' %}bg-red-100 text-red-800
-                                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                                {{ expense.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            {% if expense.conciled %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">Sim</span>
-                                            {% else %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full whitespace-nowrap">Não</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            {% if expense.paid %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">Pago</span>
-                                            {% else %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full whitespace-nowrap">Pendente</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
+      {% if revenues %}
+        <section class="ui-card ui-stack ui-stack--md">
+          <h3 class="ui-body-md-strong" style="margin: 0;">Receitas ({{ revenues|length }})</h3>
+          <div class="ui-table-shell">
+            <div class="ui-table-scroll">
+              <table class="ui-table">
+                <thead>
+                  <tr>
+                    <th class="ui-table__cell--head">Conta bancária</th>
+                    <th class="ui-table__cell--head">Valor</th>
+                    <th class="ui-table__cell--head">Competência</th>
+                    <th class="ui-table__cell--head">Contrato</th>
+                    <th class="ui-table__cell--head">Fonte</th>
+                    <th class="ui-table__cell--head">Revisão</th>
+                    <th class="ui-table__cell--head">Conciliação</th>
+                    <th class="ui-table__cell--head">Pagamento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for revenue in revenues %}
+                    <tr>
+                      <th scope="row" class="ui-table__cell--head" style="font-weight: 500;">
+                        <p class="ui-body-sm" style="margin: 0;">{{ revenue.bank_account.account }} / {{ revenue.bank_account.agency }}</p>
+                        <p class="ui-caption ui-text-muted" style="margin: 0;">{{ revenue.bank_account.bank_name }}</p>
+                      </th>
+                      <td class="ui-table__cell" style="white-space: nowrap;">R$ {{ revenue.value|intcomma }}</td>
+                      <td class="ui-table__cell" style="white-space: nowrap;">{{ revenue.competency|date:"d/m/Y" }}</td>
+                      <td class="ui-table__cell">
+                        <div class="truncate" style="max-width: 200px;" title="{{ revenue.accountability.contract.name }}">{{ revenue.accountability.contract.name }}</div>
+                      </td>
+                      <td class="ui-table__cell">
+                        <div class="truncate" style="max-width: 160px;" title="{{ revenue.get_source_display|default:'-' }}">{{ revenue.get_source_display|default:"—" }}</div>
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if revenue.status == 'APPROVED' %}
+                          <span class="ui-status ui-status--success">{{ revenue.get_status_display }}</span>
+                        {% elif revenue.status == 'REJECTED' %}
+                          <span class="ui-status ui-status--error">{{ revenue.get_status_display }}</span>
+                        {% else %}
+                          <span class="ui-status ui-status--warning">{{ revenue.get_status_display }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if revenue.conciled %}
+                          <span class="ui-status ui-status--info">Conciliada</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
+                        {% endif %}
+                      </td>
+                      <td class="ui-table__cell">
+                        {% if revenue.paid %}
+                          <span class="ui-status ui-status--success">Recebida</span>
+                        {% else %}
+                          <span class="ui-status">Pendente</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      {% endif %}
 
-            {% if revenues %}
-                <div>
-                    <h3 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
-                        Receitas ({{ revenues|length }})
-                    </h3>
-                    <div class="overflow-hidden shadow-md rounded-lg border border-gray-200">
-                        <table class="min-w-full text-sm text-left text-gray-500 table-fixed">
-                            <thead class="text-xs text-white uppercase bg-gray-500">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 w-[15%]">Conta Bancária</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Valor</th>
-                                    <th scope="col" class="px-4 py-3 w-[8%]">Data</th>
-                                    <th scope="col" class="px-4 py-3 w-[20%]">Contrato</th>
-                                    <th scope="col" class="px-4 py-3 w-[15%]">Fonte</th>
-                                    <th scope="col" class="px-4 py-3 w-[12%]">Status</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Conciliado</th>
-                                    <th scope="col" class="px-4 py-3 w-[10%]">Pago</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for revenue in revenues %}
-                                    <tr class="bg-white border-b hover:bg-gray-100">
-                                        <td class="px-4 py-3 font-medium text-gray-900 text-center">
-                                            {{ revenue.bank_account.account }} / {{ revenue.bank_account.agency }}<br>
-                                            {{ revenue.bank_account.bank_name }}
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap">R$ {{ revenue.value|intcomma }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">{{ revenue.competency|date:"d/m/Y" }}</td>
-                                        <td class="px-4 py-3 truncate max-w-[80px]" title="{{ revenue.accountability.contract.name }}">
-                                            {{ revenue.accountability.contract.name }}
-                                        </td>
-                                        <td class="px-4 py-3 truncate max-w-[80px]" title="{{ revenue.get_source_display|default:'-' }}">
-                                            {{ revenue.get_source_display|default:"-" }}
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap
-                                                {% if revenue.status == 'APPROVED' %}bg-green-100 text-green-800
-                                                {% elif revenue.status == 'REJECTED' %}bg-red-100 text-red-800
-                                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                                {{ revenue.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            {% if revenue.conciled %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">Sim</span>
-                                            {% else %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full whitespace-nowrap">Não</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            {% if revenue.paid %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">Pago</span>
-                                            {% else %}
-                                                <span class="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full whitespace-nowrap">Pendente</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-    {% elif request.GET %}
-        <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
-            <div class="text-center py-16 px-6">
-                <div class="relative inline-block">
-                    <svg class="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <div class="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-2">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </div>
-                </div>
-                
-                <h3 class="mt-6 text-2xl font-bold text-gray-900">Nenhum resultado encontrado</h3>
-                <p class="mt-3 text-base text-gray-600 max-w-md mx-auto">
-                    Não encontramos prestações que correspondam aos seus critérios de pesquisa.
-                </p>
-                
-                <div class="mt-8 bg-gray-50 rounded-lg p-6 max-w-2xl mx-auto border border-gray-200">
-                    <p class="text-sm font-semibold text-gray-700 mb-4">Sugestões para refinar sua busca:</p>
-                    <ul class="text-left space-y-2 text-sm text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>Verifique a ortografia dos termos pesquisados</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>Tente usar termos mais genéricos ou diferentes palavras-chave</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>Remova alguns filtros para ampliar os resultados</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>Ajuste o período de datas para um intervalo maior</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="mt-8 flex justify-center gap-4">
-                    <a 
-                        href="{% url 'accountability:advanced-search' %}"
-                        class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        Limpar tudo e tentar novamente
-                    </a>
-                    <button 
-                        type="button"
-                        onclick="window.history.back()"
-                        class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Voltar
-                    </button>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md rounded-lg border border-blue-100 overflow-hidden">
-            <div class="text-center py-20 px-6">
-                <div class="relative inline-block">
-                    <svg class="mx-auto h-28 w-28 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <div class="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-2 animate-pulse">
-                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </div>
-                </div>
-                
-                <h3 class="mt-8 text-3xl font-bold text-gray-900">Pronto para começar?</h3>
-                <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">
-                    Use a barra de pesquisa acima para encontrar prestações de contas por identificação, favorecido, contrato ou qualquer termo relacionado.
-                </p>
-                
-                <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                        <div class="flex justify-center mb-4">
-                            <div class="bg-blue-100 rounded-full p-3">
-                                <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <h4 class="text-base font-semibold text-gray-900 mb-2">Pesquisa Rápida</h4>
-                        <p class="text-sm text-gray-600">Digite qualquer termo na barra de pesquisa para encontrar prestações rapidamente</p>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                        <div class="flex justify-center mb-4">
-                            <div class="bg-green-100 rounded-full p-3">
-                                <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <h4 class="text-base font-semibold text-gray-900 mb-2">Filtros Avançados</h4>
-                        <p class="text-sm text-gray-600">Clique em "Filtros" para refinar sua busca por tipo, status, contrato e período</p>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                        <div class="flex justify-center mb-4">
-                            <div class="bg-purple-100 rounded-full p-3">
-                                <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <h4 class="text-base font-semibold text-gray-900 mb-2">Resultados Detalhados</h4>
-                        <p class="text-sm text-gray-600">Visualize despesas e receitas com informações completas de conciliação e pagamento</p>
-                    </div>
-                </div>
-                
-                <div class="mt-12">
-                    <p class="text-sm text-gray-500 mb-3">Dica: Use <kbd class="px-2 py-1 text-xs font-semibold text-gray-800 bg-white border border-gray-300 rounded shadow-sm">/</kbd> para focar na busca rapidamente</p>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-</div>
+    </section>
+
+  {% elif request.GET %}
+    <section class="ui-empty">
+      <span class="ui-empty__icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </span>
+      <p class="ui-body-md-strong" style="margin: 0;">Nenhum resultado encontrado</p>
+      <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 440px;">
+        Tente termos mais genéricos, ajuste o período, ou remova algum filtro.
+      </p>
+      <a href="{% url 'accountability:advanced-search' %}" class="ui-btn ui-btn--secondary" style="margin-top: 6px;">Limpar e começar de novo</a>
+    </section>
+
+  {% else %}
+    <section class="ui-empty">
+      <span class="ui-empty__icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </span>
+      <p class="ui-body-md-strong" style="margin: 0;">Pesquise despesas e receitas</p>
+      <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 440px;">
+        Use a barra acima ou abra <span style="color: var(--color-ink); font-weight: 600;">Filtros</span> para refinar por contrato, período, status e mais.
+      </p>
+      <p class="ui-caption ui-text-muted" style="margin-top: 4px;">
+        Dica: pressione <kbd class="kbd-key">/</kbd> para focar a busca.
+      </p>
+    </section>
+  {% endif %}
+
+</section>
+
+<style>
+  /* Search row layout */
+  .search-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .search-row__input { position: relative; }
+  .search-row__icon {
+    position: absolute;
+    top: 50%; left: 12px;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    color: var(--color-body);
+    pointer-events: none;
+  }
+  .search-row__field { padding-left: 36px !important; }
+  .search-row__filters {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .search-row__caret {
+    display: inline-block;
+    font-size: 10px;
+    transition: transform 0.15s ease;
+  }
+  .search-row__filters[aria-expanded="true"] .search-row__caret { transform: rotate(180deg); }
+
+  @media (max-width: 720px) {
+    .search-row { grid-template-columns: 1fr; }
+  }
+
+  /* Filter panel */
+  .filter-panel {
+    border-top: 1px solid var(--color-divider);
+    padding-top: 16px;
+    margin-top: 4px;
+  }
+  .ui-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 1024px) {
+    .ui-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    .ui-grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* Keyboard key indicator */
+  .kbd-key {
+    display: inline-block;
+    padding: 2px 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    border: 1px solid var(--color-divider);
+    border-radius: 4px;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  /* Truncate helper */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('id-search-input');
-  const searchForm = searchInput.closest('form');
-  const toggleButton = document.getElementById('toggle-filters');
-  const filterIcon = document.getElementById('filter-icon');
-  const advancedFilters = document.getElementById('advanced-filters');
-  
-  toggleButton.addEventListener('click', function() {
-    advancedFilters.classList.toggle('hidden');
-    if (advancedFilters.classList.contains('hidden')) {
-      filterIcon.textContent = '▼';
-      filterIcon.style.transform = 'rotate(0deg)';
+document.addEventListener('DOMContentLoaded', function () {
+  var searchInput = document.getElementById('id-search-input');
+  if (!searchInput) return;
+  var searchForm = document.getElementById('search-form');
+  var toggleBtn = document.getElementById('toggle-filters');
+  var advancedFilters = document.getElementById('advanced-filters');
+
+  function setFiltersOpen(open) {
+    if (open) {
+      advancedFilters.classList.remove('hidden');
+      toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
-      filterIcon.textContent = '▲';
-      filterIcon.style.transform = 'rotate(180deg)';
+      advancedFilters.classList.add('hidden');
+      toggleBtn.setAttribute('aria-expanded', 'false');
     }
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    setFiltersOpen(advancedFilters.classList.contains('hidden'));
   });
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('start_date') || urlParams.has('end_date') || 
-      urlParams.has('type') || urlParams.has('conciled') || 
-      urlParams.has('contract') || urlParams.has('favored') || 
-      urlParams.has('status') || urlParams.has('paid')) {
-    advancedFilters.classList.remove('hidden');
-    filterIcon.textContent = '▲';
-    filterIcon.style.transform = 'rotate(180deg)';
-  }
-  
-  document.addEventListener('keydown', function(e) {
+  // Auto-open filters when any filter param is present in URL
+  var urlParams = new URLSearchParams(window.location.search);
+  var filterKeys = ['start_date', 'end_date', 'type', 'conciled', 'contract', 'favored', 'status', 'paid'];
+  var hasFilterParam = filterKeys.some(function (k) {
+    var v = urlParams.get(k);
+    return v && v !== 'all' && v !== '';
+  });
+  if (hasFilterParam) setFiltersOpen(true);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function (e) {
     if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
       e.preventDefault();
       searchInput.focus();
+      searchInput.select();
     }
-    
     if (e.key === 'Escape' && e.target === searchInput) {
       searchInput.value = '';
       searchInput.blur();
     }
   });
-  
-  searchForm.addEventListener('submit', function() {
-    const submitButton = searchForm.querySelector('button[type="submit"]');
-    const buttonText = submitButton.querySelector('span') || submitButton;
-    const originalText = buttonText.textContent || buttonText.innerText;
-    
-    submitButton.disabled = true;
-    buttonText.textContent = 'Buscando...';
-    
-    setTimeout(() => {
-      submitButton.disabled = false;
-      buttonText.textContent = originalText;
-    }, 3000);
+
+  searchForm.addEventListener('submit', function () {
+    var submitBtn = searchForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Buscando…';
+    }
   });
-  
-  searchInput.addEventListener('focus', function() {
-    this.select();
-  });
+
+  searchInput.addEventListener('focus', function () { this.select(); });
 });
 </script>
 

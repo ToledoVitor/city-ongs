@@ -48,22 +48,25 @@
           <div class="ui-field"><label class="ui-field__label">Favorecido</label>{{ form.favored }}</div>
         </div>
         <div class="ui-grid-2">
-          <div class="ui-field"><label class="ui-field__label">Conta bancária</label>{{ form.bank_account }}</div>
-          <div class="ui-field"><label class="ui-field__label">Tipo de pagamento</label>{{ form.payment_type }}</div>
+          <div class="ui-field"><label for="id_liquidation_form" class="ui-field__label">Forma de pagamento</label>{{ form.liquidation_form }}</div>
+          <div class="ui-field">
+            <label for="id_due_date" class="ui-field__label">Vencimento <span class="ui-text-mute">(opcional)</span></label>
+            <input datepicker datepicker-format="dd/mm/yyyy" datepicker-language="pt" id="id_due_date" name="due_date" type="text" class="ui-input" placeholder="dd/mm/aaaa" value="{{ form.due_date.value|date:'d/m/Y' }}">
+          </div>
         </div>
         <div class="ui-grid-2">
           <div class="ui-field">
             <label for="id_competency" class="ui-field__label">Competência</label>
-            <input datepicker datepicker-format="dd/mm/yyyy" datepicker-language="pt" id="id_competency" name="competency" type="text" class="ui-input" value="{{ form.competency.value|date:'d/m/Y' }}">
+            <input datepicker datepicker-format="dd/mm/yyyy" datepicker-language="pt" id="id_competency" name="competency" type="text" class="ui-input" placeholder="dd/mm/aaaa" value="{{ form.competency.value|date:'d/m/Y' }}">
           </div>
           <div class="ui-field">
-            <label for="id_payment_date" class="ui-field__label">Pagamento</label>
-            <input datepicker datepicker-format="dd/mm/yyyy" datepicker-language="pt" id="id_payment_date" name="payment_date" type="text" class="ui-input" value="{{ form.payment_date.value|date:'d/m/Y' }}">
+            <label for="id_liquidation" class="ui-field__label">Pagamento <span class="ui-text-mute">(opcional)</span></label>
+            <input datepicker datepicker-format="dd/mm/yyyy" datepicker-language="pt" id="id_liquidation" name="liquidation" type="text" class="ui-input" placeholder="dd/mm/aaaa" value="{{ form.liquidation.value|date:'d/m/Y' }}">
           </div>
         </div>
         <div class="ui-grid-2">
-          <div class="ui-field"><label class="ui-field__label">Número do documento</label>{{ form.document_number }}</div>
-          <div class="ui-field"><label class="ui-field__label">Tipo do documento</label>{{ form.document_type }}</div>
+          <div class="ui-field"><label for="id_document_number" class="ui-field__label">Número do documento</label>{{ form.document_number }}</div>
+          <div class="ui-field"><label for="id_document_type" class="ui-field__label">Tipo do documento</label>{{ form.document_type }}</div>
         </div>
       </div>
     </section>

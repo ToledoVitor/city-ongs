@@ -144,30 +144,30 @@ These are `include`-d by many pages. Refactor them early to lift several screens
 ### Accountability (prestações)
 
 - [x] `templates/accountability/accountability/list.html`
-- [~] `templates/accountability/accountability/detail.html` — extends new shell; inner cards/tables still legacy chrome (see TECH_DEBT)
+- [x] `templates/accountability/accountability/detail.html` — full rewrite of the 1210-line page: design-system breadcrumb, ink-bg `send-to-analysis` and `send-review-analisys` modals (using the now-global `.ui-modal__*` and `.ui-alert*` primitives), compact filter panel with the seg-group segmented control, sentence-case status bar with `.ui-status` pills. Per-row modals inside the three table partials are still legacy chrome (see TECH_DEBT).
 - [x] `templates/accountability/accountability/create.html`
 - [x] `templates/accountability/accountability/import.html`
 - [x] `templates/accountability/accountability/pendencies-list.html`
-- [~] `templates/accountability/accountability/documents-table.html` — inner-table partial still legacy (TECH_DEBT)
-- [~] `templates/accountability/accountability/expenses-table.html` — inner-table partial still legacy (TECH_DEBT)
-- [~] `templates/accountability/accountability/revenues-table.html` — inner-table partial still legacy (TECH_DEBT)
+- [x] `templates/accountability/accountability/documents-table.html` — full rewrite using `.ui-table`, `.ui-icon-btn--danger` row trigger, and the new `.ui-btn--danger` confirmation in the delete modal. Empty state inline in `<tbody>`. "Adicionar documento" pinned in a canvas-soft footer.
+- [x] `templates/accountability/accountability/expenses-table.html` — visible chrome refactored (header bar, `.ui-status` pills for Paga/Conciliada/Status, `.ui-icon-btn` row actions, totals row, paginator) **and** all six per-row modals (Glosar, Duplicar, Excluir, Desconciliar, Documentos, Pendências) migrated to the global `.ui-modal__*` + `.ui-alert*` + `.ui-btn--danger` primitives. The "Documentos" two-column modal uses the new `.exp-docs-grid` / `.exp-docs-list` / `.exp-docs-dropzone` set and the JS drag-drop handler was updated to toggle `.exp-docs-dropzone--active` instead of the legacy `bg-green-50` classes.
+- [x] `templates/accountability/accountability/revenues-table.html` — same pattern as expenses-table for both chrome and the five per-row modals (Pendências, Documentos, Duplicar, Excluir, Desconciliar). Receitas don't have a Glosar action; everything else mirrors despesas.
 
 ### Expenses
 
 - [x] `templates/accountability/expenses/create.html`
 - [x] `templates/accountability/expenses/update.html`
-- [~] `templates/accountability/expenses/reconcile.html` — TECH_DEBT
-- [~] `templates/accountability/expenses/batch-reconcile.html` — TECH_DEBT
-- [~] `templates/accountability/expenses/review.html` — TECH_DEBT
-- [~] `templates/accountability/expenses/review-single.html` — TECH_DEBT
+- [x] `templates/accountability/expenses/reconcile.html` — two-column reconcile-grid (details + dropzone | transactions list), `.ui-modal__*` related-expense modal, pinned action footer, drag-drop into `.reconcile-dropzone`. Verified in browser (select tx, modal open).
+- [x] `templates/accountability/expenses/batch-reconcile.html` — `.ui-card` summary + auto-match progress bar, design-system `.ui-table` with `<select class="ui-input">` per row, `.ui-status` pills for matched/manual, `.ui-alert--info` warning above table. Verified visually.
+- [x] `templates/accountability/expenses/review.html` — two-column `review-grid` (data KV list + analysis form), `.ui-status` status badge, pinned footer with prev/save/next + progress bar. Verified in browser.
+- [x] `templates/accountability/expenses/review-single.html` — same structure as review.html but with simple Voltar + Salvar footer.
 
 ### Revenues
 
 - [x] `templates/accountability/revenues/create.html`
 - [x] `templates/accountability/revenues/update.html`
-- [~] `templates/accountability/revenues/reconcile.html` — TECH_DEBT
-- [~] `templates/accountability/revenues/review.html` — TECH_DEBT
-- [~] `templates/accountability/revenues/review-single.html` — TECH_DEBT
+- [x] `templates/accountability/revenues/reconcile.html` — direct clone of expenses/reconcile.html with revenue fields (no related-expense modal). Same `.reconcile-grid` + dropzone + transactions list.
+- [x] `templates/accountability/revenues/review.html` — direct clone of expenses/review.html with revenue fields (Conta bancária row in details, `revenue_nature_label` in transactions section).
+- [x] `templates/accountability/revenues/review-single.html` — single-record review, same fields as multi-record version.
 
 ### Sources (recursos)
 
@@ -190,7 +190,7 @@ These are `include`-d by many pages. Refactor them early to lift several screens
 
 ### Search
 
-- [~] `templates/accountability/search/advanced_search.html` — TECH_DEBT
+- [x] `templates/accountability/search/advanced_search.html` — compact search row (input + Filtros toggle + Buscar), 4-col filter grid in `.ui-card`, design-system tables with `.ui-status` pills (color-coded by status), clean empty + landing states, `/` keyboard shortcut preserved
 
 ## Accounts app
 
