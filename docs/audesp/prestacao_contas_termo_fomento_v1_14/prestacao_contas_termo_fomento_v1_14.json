@@ -1,0 +1,592 @@
+{
+  "descritor": {
+    "tipo_documento": "Prestação de Contas de Termo de Fomento",
+    "municipio": 7107,
+    "entidade": 10048,
+    "ano": 2024,
+    "mes": 12
+  },
+  "codigo_ajuste": "2024000000000001",
+  "retificacao": false,
+  "relacao_empregados": [
+    {
+      "cpf": "00000000191",
+      "data_admissao": "2024-01-01",
+      "data_demissao": "2024-04-30",
+      "cbo": "123456",
+      "cns": "123456789012345",
+      "salario_contratual": 1320.00,
+      "periodos_remuneracao": [
+        {
+          "mes": 1,
+          "carga_horaria": 160.0,
+          "remuneracao_bruta": 1320.00
+        },
+        {
+          "mes": 2,
+          "carga_horaria": 160.0,
+          "remuneracao_bruta": 1320.00
+        },
+        {
+          "mes": 3,
+          "carga_horaria": 160.0,
+          "remuneracao_bruta": 1320.00
+        },
+        {
+          "mes": 4,
+          "carga_horaria": 160.0,
+          "remuneracao_bruta": 1320.00
+        }
+      ]
+    }
+  ],
+  "relacao_bens": {
+    "relacao_bens_moveis_adquiridos": [
+      {
+        "numero_patrimonio": "123",
+        "descricao": "Descrição do bem",
+        "data_aquisicao": "2024-01-01",
+        "valor_aquisicao": 100.00
+      }
+    ],
+    "relacao_bens_moveis_cedidos": [
+      {
+        "numero_patrimonio": "123",
+        "descricao": "Descrição do bem",
+        "data_cessao": "2024-01-01",
+        "valor_cessao": 100.00
+      }
+    ],
+    "relacao_bens_moveis_baixados_devolvidos": [
+      {
+        "numero_patrimonio": "123",
+        "data_baixa_devolucao": "2024-01-01"
+      }
+    ],
+    "relacao_bens_imoveis_adquiridos": [
+      {
+        "descricao": "Descrição do bem imóvel",
+        "data_aquisicao": "2024-01-01"
+      }
+    ],
+    "relacao_bens_imoveis_cedidos": [
+      {
+        "descricao": "Descrição do bem imóvel",
+        "data_cessao": "2024-01-01"
+      }
+    ],
+    "relacao_bens_imoveis_baixados_devolvidos": [
+      {
+        "descricao": "Descrição do bem imóvel",
+        "data_baixa_devolucao": "2024-01-01"
+      }
+    ]
+  },
+  "contratos": [
+    {
+      "numero": "1234657890",
+      "credor": {
+        "documento_tipo": 1,
+        "documento_numero": "00000000191",
+        "nome": "Nome/Razão Social do Credor"
+      },
+      "data_assinatura": "2024-01-01",
+      "vigencia_tipo": 1,
+      "vigencia_data_inicial": "2024-01-01",
+      "vigencia_data_final": "2025-07-31",
+      "objeto": "Objeto do contrato",
+      "natureza_contratacao": [
+        1,
+        2,
+        3
+      ],
+      "natureza_contratacao_outro": "Descrição de outros serviços",
+      "criterio_selecao": 1,
+      "criterio_selecao_outro": "Descrição de outros critérios de seleção",
+      "artigo_regulamento_compras": "Artigo 1 (opcional)",
+      "valor_montante": 1.23,
+      "valor_tipo": 1
+    }
+  ],
+  "documentos_fiscais": [
+    {
+      "numero": "0987654321",
+      "credor": {
+        "documento_tipo": 1,
+        "documento_numero": "00000000272",
+        "nome": "Nome/Razão Social do Credor"
+      },
+      "identificacao_contrato": {
+        "numero": "1234657890",
+        "data_assinatura": "2024-01-01",
+        "identificacao_credor": {
+          "documento_tipo": 1,
+          "documento_numero": "00000000191"
+        }
+      },
+      "descricao": "Descrição do Documento Fiscal",
+      "data_emissao": "2024-02-01",
+      "estado_emissor": 26,
+      "valor_bruto": 1.23,
+      "valor_encargos": 1.23,
+      "categoria_despesas_tipo": 1,
+      "rateio_proveniente_tipo": 1,
+      "rateio_percentual": 1.23
+    }
+  ],
+  "pagamentos": [
+    {
+      "identificacao_documento_fiscal": {
+        "numero": "0987654321",
+        "identificacao_credor": {
+          "documento_tipo": 1,
+          "documento_numero": "00000000272"
+        }
+      },
+      "pagamento_data": "2024-02-01",
+      "pagamento_valor": 1.23,
+      "fonte_recurso_tipo": 1,
+      "meio_pagamento_tipo": 1,
+      "banco": 1,
+      "agencia": 1234,
+      "conta_corrente": "5678X",
+      "numero_transacao": "001ABC"
+    },
+    {
+      "identificacao_documento_fiscal": {
+        "numero": "9999",
+        "identificacao_credor": {
+          "documento_tipo": 2,
+          "documento_numero": "12345678901234"
+        }
+      },
+      "pagamento_data": "2024-02-02",
+      "pagamento_valor": 1.23,
+      "fonte_recurso_tipo": 1,
+      "meio_pagamento_tipo": 1,
+      "banco": 1,
+      "agencia": 1234,
+      "conta_corrente": "5678X",
+      "numero_transacao": "001ABC"
+    }
+  ],
+  "disponibilidades": {
+    "saldos": [
+      {
+        "banco": 1,
+        "agencia": 1234,
+        "conta": "5678X",
+        "conta_tipo": 1,
+        "saldo_bancario": 1.23,
+        "saldo_contabil": 1.23
+      }
+    ],
+    "saldo_fundo_fixo": 1.23
+  },
+  "receitas": {
+    "receitas_aplic_financ_repasses_publicos_municipais": 1.23,
+    "receitas_aplic_financ_repasses_publicos_estaduais": 1.23,
+    "receitas_aplic_financ_repasses_publicos_federais": 1.23,
+    "repasses_recebidos": [
+      {
+        "data_prevista": "2024-01-01",
+        "data_repasse": "2024-01-01",
+        "valor": 1.23,
+        "fonte_recurso_tipo": 1
+      }
+    ],
+    "outras_receitas": [
+      {
+        "descricao": "Descrição",
+        "valor": 1.23
+      }
+    ],
+    "recursos_proprios": [
+      {
+        "descricao": "Descrição",
+        "valor": 1.23
+      }
+    ]
+  },
+  "ajustes_saldo": {
+    "retificacao_repasses": [
+      {
+        "data_prevista": "2024-01-01",
+        "data_repasse": "2024-01-01",
+        "valor_retificado": 4.56,
+        "fonte_recurso_tipo": 1
+      }
+    ],
+    "inclusao_repasses": [
+      {
+        "data_prevista": "2024-01-01",
+        "data_repasse": "2024-01-01",
+        "valor": 1.23,
+        "fonte_recurso_tipo": 1
+      }
+    ],
+    "retificacao_pagamentos": [
+      {
+        "identificacao_documento_fiscal": {
+          "numero": "0987654321",
+          "identificacao_credor": {
+            "documento_tipo": 1,
+            "documento_numero": "00000000272"
+          }
+        },
+        "pagamento_data": "2024-01-01",
+        "pagamento_valor": 1.23,
+        "fonte_recurso_tipo": 1,
+        "valor_retificado": 4.56
+      }
+    ],
+    "inclusao_pagamentos": [
+      {
+        "identificacao_documento_fiscal": {
+          "numero": "0987654321",
+          "identificacao_credor": {
+            "documento_tipo": 1,
+            "documento_numero": "00000000272"
+          }
+        },
+        "pagamento_data": "2024-01-01",
+        "pagamento_valor": 1.23,
+        "fonte_recurso_tipo": 1,
+        "meio_pagamento_tipo": 1,
+        "banco": 1,
+        "agencia": 1234,
+        "conta_corrente": "5678X",
+        "numero_transacao": "001ABC"
+      }
+    ]
+  },
+  "descontos": [
+    {
+      "data": "2024-12-01",
+      "descricao": "Descrição do Desconto",
+      "valor": 1.23
+    }
+  ],
+  "devolucoes": [
+    {
+      "data": "2024-12-01",
+      "natureza_devolucao_tipo": 1,
+      "valor": 1.23
+    }
+  ],
+  "glosas": [
+    {
+      "identificacao_documento_fiscal": {
+        "numero": "0987654321",
+        "identificacao_credor": {
+          "documento_tipo": 1,
+          "documento_numero": "00000000272"
+        }
+      },
+      "resultado_analise": 2,
+      "valor_glosa": 1.23
+    },
+    {
+      "identificacao_documento_fiscal": {
+        "numero": "9999",
+        "identificacao_credor": {
+          "documento_tipo": 2,
+          "documento_numero": "12345678901234"
+        }
+      },
+      "pagamento_data": "2024-02-02",
+      "resultado_analise": 2,
+      "valor_glosa": 1.23
+    }
+  ],
+  "empenhos": [
+    {
+      "numero": "1234567890",
+      "data_emissao": "2024-01-01",
+      "classificacao_economica_tipo": "12345678",
+      "fonte_recurso_tipo": 1,
+      "valor": 1.23,
+      "historico": "Histórico",
+      "cpf_ordenador_despesa": "00000000191"
+    }
+  ],
+  "repasses": [
+    {
+      "identificacao_empenho": {
+        "numero": "1234567890",
+        "data_emissao": "2024-01-01"
+      },
+      "data_prevista": "2024-01-01",
+      "data_repasse": "2024-01-01",
+      "valor_previsto": 1.23,
+      "valor_repasse": 4.56,
+      "justificativa_diferenca_valor": "Justificativa",
+      "tipo_documento_bancario": 3,
+      "descricao_outros": "Outro documento bancário",
+      "numero_documento": "ABC123",
+      "banco": 1,
+      "agencia": 1234,
+      "conta": "5678X"
+    }
+  ],
+  "relatorio_atividades" : {
+    "programas" : [
+      {
+        "nome_programa" : "Programa ABC",
+        "metas" : [
+          {
+            "codigo_meta" : "ABC0001",
+            "periodicidades" : [
+              {
+                "periodo" : 1,
+                "quantidade_realizada" : 100.00
+              },
+              {
+                "periodo" : 2,
+                "quantidade_realizada" : 50.00,
+                "justificativa" : "Justificativa da divergência entre a meta estimada e a meta executada no período"
+              }
+            ],
+            "meta_atendida" : true
+          },
+          {
+            "codigo_meta" : "ABC0002",
+            "periodicidades" : [
+              {
+                "periodo" : 6,
+                "resultado_meta" : 2,
+                "justificativa" : "Justificativa da meta Qualitativa não Quantificável não ter sido atingida no período"
+              },
+              {
+                "periodo" : 12,
+                "resultado_meta" : 3
+              }
+            ],
+            "meta_atendida" : false,
+            "justificativa" : "Justificativa para meta não atendida no exercício"
+          }
+        ]
+      }
+    ]
+  },
+  "dados_gerais_entidade_beneficiaria" : {
+    "identificacao_certidao_dados_gerais" : "0123456789",
+    "identificacao_certidao_corpo_diretivo" : "0123456789",
+    "identificacao_certidao_membros_conselho" : "0123456789"
+  },
+  "responsaveis_membros_orgao_concessor": {
+    "identificacao_certidao_responsaveis" : "0123456789",
+    "identificacao_certidao_membros_comissao_avaliacao" : "0123456789",
+    "identificacao_certidao_membros_controle_interno" : "0123456789",
+    "identificacao_certidao_responsaveis_fiscalizacao_execucao": "0123456789"
+  },
+  "declaracoes" : {
+    "houve_contratacao_empresas_pertencentes" : true,
+    "empresas_pertencentes" : [
+      {
+        "cnpj" : "12345678901234",
+        "cpf" : "00000000191"
+      }
+    ],
+    "houve_participacao_quadro_diretivo_administrativo" : true,
+    "participacoes_quadro_diretivo_administrativo" : [
+      {
+        "cpf_dirigente" : "00000000191",
+        "cpf_contratados": [
+          "00000000272",
+          "00000000383"
+        ]
+      }
+    ]
+  },
+  "relatorio_monitoramento_avaliacao" : {
+    "houve_emissao_relatorio_final" : true,
+    "conclusao_relatorio" : 1,
+    "justificativa" : "Justificativa para conclusão desfavorável"
+  },
+  "demonstracoes_contabeis" : {
+    "publicacoes" : [
+      {
+        "tipo_veiculo_publicacao" : 2,
+        "nome_veiculo" : "Nome se Outros",
+        "data_publicacao" : "2025-01-10",
+        "endereco_internet" : "https://doe.tce.sp.gov.br"
+      }
+    ],
+    "responsavel" : {
+      "numero_crc" : "1SP000001",
+      "cpf" : "00000000191",
+      "situacao_regular_crc" : true
+    }
+  },
+  "publicacoes_parecer_ata" : [
+    {
+      "tipo_parecer_ata" : 1,
+      "houve_publicacao" : true,
+      "publicacoes" : [
+        {
+          "tipo_veiculo_publicacao" : 2,
+          "nome_veiculo" : "Nome se Outros",
+          "data_publicacao" : "2025-01-10",
+          "endereco_internet" : "https://doe.tce.sp.gov.br"
+        }
+      ],
+      "conclusao_parecer" : 1
+    }
+  ],
+  "prestacao_contas_entidade_beneficiaria" : {
+    "data_prestacao" : "2025-01-15",
+    "periodo_referencia_data_inicial" : "2024-01-01",
+    "periodo_referencia_data_final" : "2024-12-31"
+  },
+  "parecer_conclusivo" : {
+    "identificacao_parecer" : "0009/2024",
+    "conclusao_parecer" : 1,
+    "consideracoes_parecer" : "Considerações do parecer conclusivo",
+    "declaracoes" : [
+      {
+        "tipo_declaracao" : 1,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve cumprimento das cláusulas"
+      },
+      {
+        "tipo_declaracao" : 2,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve regularidade dos gastos"
+      },
+      {
+        "tipo_declaracao" : 3,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve identificação dos comprovantes"
+      },
+      {
+        "tipo_declaracao" : 4,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve regularidade dos recolhimentos dos encargos trabalhistas"
+      },
+      {
+        "tipo_declaracao" : 5,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve atendimento aos princípios"
+      },
+      {
+        "tipo_declaracao" : 6,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve realização de visita"
+      },
+      {
+        "tipo_declaracao" : 7,
+        "declaracao" : 1,
+        "justificativa" : "Justificativa se não houve aplicação de sanções"
+      }
+    ]
+  },
+  "transparencia" : {
+    "entidade_beneficiaria_mantem_sitio_internet" : true,
+    "sitios_internet" : [
+      "https://transparencia.tce.sp.gov.br/"
+    ],
+    "requisitos_artigos_7o_8o_paragrafo_1o" : [
+      {
+        "requisito" : 1,
+        "atende" : true
+      },
+      {
+        "requisito" : 2,
+        "atende" : true
+      },
+      {
+        "requisito" : 3,
+        "atende" : true
+      },
+      {
+        "requisito" : 4,
+        "atende" : true
+      },
+      {
+        "requisito" : 5,
+        "atende" : true
+      },
+      {
+        "requisito" : 6,
+        "atende" : true
+      },
+      {
+        "requisito" : 7,
+        "atende" : true
+      },
+      {
+        "requisito" : 8,
+        "atende" : true
+      }
+    ],
+    "requisitos_sitio_artigo_8o_paragrafo_3o" : [
+      {
+        "requisito" : 1,
+        "atende" : true
+      },
+      {
+        "requisito" : 2,
+        "atende" : true
+      },
+      {
+        "requisito" : 3,
+        "atende" : true
+      },
+      {
+        "requisito" : 4,
+        "atende" : true
+      },
+      {
+        "requisito" : 5,
+        "atende" : true
+      },
+      {
+        "requisito" : 6,
+        "atende" : true
+      }
+    ],
+    "requisitos_divulgacao_informacoes" : [
+      {
+        "requisito" : 1,
+        "atende" : true
+      },
+      {
+        "requisito" : 2,
+        "atende" : true
+      },
+      {
+        "requisito" : 3,
+        "atende" : true
+      },
+      {
+        "requisito" : 4,
+        "atende" : true
+      },
+      {
+        "requisito" : 5,
+        "atende" : true
+      },
+      {
+        "requisito" : 6,
+        "atende" : true
+      },
+      {
+        "requisito" : 7,
+        "atende" : true
+      },
+      {
+        "requisito" : 8,
+        "atende" : true
+      },
+      {
+        "requisito" : 9,
+        "atende" : true
+      },
+      {
+        "requisito" : 10,
+        "atende" : true
+      }
+    ]
+  }
+}
