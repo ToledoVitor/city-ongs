@@ -540,6 +540,14 @@ class Expense(BaseOrganizationTenantModel):
         blank=True,
         help_text="Quando o documento tiver mais de uma categoria, informar a de maior valor",
     )
+    encumbrance_value = models.DecimalField(
+        verbose_name="Valor de Encargos Retidos",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+        help_text="Deve ser informado como zero quando não houver retenção",
+    )
     from_apportionment = models.BooleanField(
         verbose_name="Proveniente de Rateio?",
         default=False,

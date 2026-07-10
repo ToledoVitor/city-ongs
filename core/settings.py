@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     "accountability",
     "activity",
     "accounts",
+    "audesp",
     "bank",
     "contracts",
     "dashboard",

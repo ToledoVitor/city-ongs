@@ -188,6 +188,7 @@ class ExpenseAdmin(BaseModelAdmin):
                     "creditor_document_type",
                     "issuing_state",
                     "expense_category_type",
+                    "encumbrance_value",
                     "from_apportionment",
                     "apportionment_percentage",
                     "funding_source_type",
