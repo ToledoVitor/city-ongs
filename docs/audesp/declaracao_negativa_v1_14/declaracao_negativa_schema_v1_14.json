@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://audesp.tce.sp.gov.br/json/schema/fase5/declaracao_negativa_schema_v1_14.json",
+  "title": "Declaração Negativa",
+  "description": "JSON schema para o envio de declaração negativa.",
+  "type": "object",
+  "required": [
+    "descritor",
+    "codigo_ajuste"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "descritor": {
+      "$id": "#root/descritor",
+      "title": "Descritor",
+      "type": "object",
+      "required": [
+        "tipo_documento",
+        "municipio",
+        "entidade",
+        "ano",
+        "mes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo_documento": {
+          "$id": "#root/descritor/tipo_documento",
+          "title": "Tipo do Documento",
+          "type": "string",
+		  "enum" : [
+			"Prestação de Contas de Contrato de Gestão",
+			"Prestação de Contas de Convênio",
+			"Prestação de Contas de Termo de Colaboração",
+			"Prestação de Contas de Termo de Fomento",
+			"Prestação de Contas de Termo de Parceria"
+			],
+          "examples": [ 
+			"Prestação de Contas de Contrato de Gestão"
+		  ]
+        },
+        "municipio": {
+          "$id": "#root/descritor/municipio",
+          "title": "Código do Municipio",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "examples": [
+            7107
+          ]
+        },
+        "entidade": {
+          "$id": "#root/descritor/entidade",
+          "title": "Código da Entidade",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999,
+          "examples": [
+            10048
+          ]
+        },
+        "ano": {
+          "$id": "#root/descritor/ano",
+          "title": "Ano da Prestação",
+          "type": "integer",
+          "minimum": 2024,
+          "examples": [
+            2025
+          ]
+        },
+        "mes": {
+          "$id": "#root/descritor/mes",
+          "title": "Mês da Prestação",
+          "type": "integer",
+          "const": 12
+        }
+      }
+    },
+    "codigo_ajuste": {
+      "$id": "#root/codigo_ajuste",
+      "title": "Código do Ajuste",
+      "type": "string",
+      "pattern": "^[0-9]{15,19}$",
+      "examples": [
+        "2024000000000001"
+      ]
+    }
+  }
+}

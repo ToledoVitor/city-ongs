@@ -1,0 +1,4171 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://audesp.tce.sp.gov.br/json/schema/fase5/prestacao_contas_termo_parceria_schema_v1_14.json",
+  "title": "Prestação de Contas de Termo de Parceria",
+  "description": "JSON schema para o envio de prestações de contas de termos de parceria.",
+  "type": "object",
+  "required": [
+    "descritor",
+    "codigo_ajuste",
+    "relacao_empregados",
+    "relacao_bens",
+    "contratos",
+    "documentos_fiscais",
+    "pagamentos",
+    "disponibilidades",
+    "receitas",
+    "ajustes_saldo",
+    "servidores_cedidos",
+    "descontos",
+    "devolucoes",
+    "glosas",
+    "empenhos",
+    "repasses",
+    "relatorio_atividades",
+    "dados_gerais_entidade_beneficiaria",
+    "responsaveis_membros_orgao_concessor",
+    "publicacao_extrato_execucao_fisica_financeira",
+    "declaracoes",
+    "demonstracoes_contabeis",
+    "publicacoes_parecer_ata",
+    "prestacao_contas_entidade_beneficiaria",
+    "parecer_conclusivo",
+    "transparencia"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "descritor": {
+      "$id": "#root/descritor",
+      "title": "Descritor",
+      "type": "object",
+      "required": [
+        "tipo_documento",
+        "municipio",
+        "entidade",
+        "ano",
+        "mes"
+      ],
+      "additionalProperties": false,
+      "minProperties": 5,
+      "maxProperties": 5,
+      "properties": {
+        "tipo_documento": {
+          "$id": "#root/descritor/tipo_documento",
+          "title": "Tipo do Documento",
+          "type": "string",
+          "const": "Prestação de Contas de Termo de Parceria",
+          "examples": [
+            "Prestação de Contas de Termo de Parceria"
+          ]
+        },
+        "municipio": {
+          "$id": "#root/descritor/municipio",
+          "title": "Código do Municipio",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999,
+          "examples": [
+            7107
+          ]
+        },
+        "entidade": {
+          "$id": "#root/descritor/entidade",
+          "title": "Código da Entidade",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999,
+          "examples": [
+            10048
+          ]
+        },
+        "ano": {
+          "$id": "#root/descritor/ano",
+          "title": "Ano da Prestação",
+          "type": "integer",
+          "minimum": 2024,
+          "examples": [
+            2025
+          ]
+        },
+        "mes": {
+          "$id": "#root/descritor/mes",
+          "title": "Mês da Prestação",
+          "type": "integer",
+          "const": 12
+        }
+      }
+    },
+    "codigo_ajuste": {
+      "$id": "#root/codigo_ajuste",
+      "title": "Código do Ajuste",
+      "type": "string",
+      "pattern": "^[0-9]{15,19}$",
+      "examples": [
+        "2024000000000001"
+      ]
+    },
+    "retificacao": {
+      "$id": "#root/retificacao",
+      "title": "Retificação",
+      "type": "boolean",
+      "examples": [
+        true
+      ]
+    },
+    "relacao_empregados": {
+      "$id": "#root/relacao_empregados",
+      "title": "Relação de Empregados",
+      "type": "array",
+      "items": {
+        "$id": "#root/relacao_empregados/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "cpf",
+          "data_admissao",
+          "cbo",
+          "salario_contratual",
+          "periodos_remuneracao"
+        ],
+        "additionalProperties": false,
+        "minProperties": 5,
+        "maxProperties": 7,
+        "properties": {
+          "cpf": {
+            "$id": "#root/relacao_empregados/items/cpf",
+            "title": "CPF do empregado",
+            "$ref": "#/$defs/cpf"
+          },
+          "data_admissao": {
+            "$id": "#root/relacao_empregados/items/data_admissao",
+            "title": "Data de admissão do empregado",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "data_demissao": {
+            "$id": "#root/relacao_empregados/items/data_demissao",
+            "title": "Data de demissão do empregado",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-04-30"
+            ]
+          },
+          "cbo": {
+            "$id": "#root/relacao_empregados/items/cbo",
+            "title": "Código Brasileiro de Ocupação do empregado",
+            "type": "string",
+            "pattern": "^[0-9]{6}$",
+            "examples": [
+              "123456"
+            ]
+          },
+          "cns": {
+            "$id": "#root/relacao_empregados/items/cns",
+            "title": "Número do Cartão Nacional de Saúde do empregado",
+            "type": "string",
+            "pattern": "^[0-9]{15}$",
+            "examples": [
+              "123456789012345"
+            ]
+          },
+          "salario_contratual": {
+            "$id": "#root/relacao_empregados/items/salario_contratual",
+            "title": "Salário contratual do empregado",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1320.0
+            ]
+          },
+          "periodos_remuneracao": {
+            "$id": "#root/relacao_empregados/items/periodos_remuneracao",
+            "title": "Períodos de remuneração dos empregados",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "$id": "#root/relacao_empregados/items/periodos_remuneracao/items",
+              "title": "Items",
+              "type": "object",
+              "required": [
+                "mes",
+                "carga_horaria",
+                "remuneracao_bruta"
+              ],
+              "additionalProperties": false,
+              "minProperties": 3,
+              "maxProperties": 3,
+              "properties": {
+                "mes": {
+                  "$id": "#root/relacao_empregados/items/periodos_remuneracao/items/mes",
+                  "title": "Mês da remuneração",
+                  "type": "integer",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12
+                  ]
+                },
+                "carga_horaria": {
+                  "$id": "#root/relacao_empregados/items/periodos_remuneracao/items/carga_horaria",
+                  "title": "Carga horária trabalhada no mês",
+                  "minimum": 0.0,
+                  "maximum": 9999.5,
+                  "multipleOf": 0.5,
+                  "examples": [
+                    45.5
+                  ]
+                },
+                "remuneracao_bruta": {
+                  "$id": "#root/relacao_empregados/items/periodos_remuneracao/items/remuneracao_bruta",
+                  "title": "Remuneração do empregado",
+                  "type": "number",
+                  "minimum": 0.0,
+                  "maximum": 9999999999.99,
+                  "multipleOf": 0.01,
+                  "examples": [
+                    1320.0
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "relacao_bens": {
+      "$id": "#root/relacao_bens",
+      "title": "Relação de bens",
+      "type": "object",
+      "required": [
+        "relacao_bens_moveis_adquiridos",
+        "relacao_bens_moveis_cedidos",
+        "relacao_bens_moveis_baixados_devolvidos",
+        "relacao_bens_imoveis_adquiridos",
+        "relacao_bens_imoveis_cedidos",
+        "relacao_bens_imoveis_baixados_devolvidos"
+      ],
+      "additionalProperties": false,
+      "minProperties": 6,
+      "maxProperties": 6,
+      "properties": {
+        "relacao_bens_moveis_adquiridos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos",
+          "title": "Relação de bens móveis adquiridos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "numero_patrimonio",
+              "descricao",
+              "data_aquisicao",
+              "valor_aquisicao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 4,
+            "maxProperties": 4,
+            "properties": {
+              "numero_patrimonio": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos/items/numero_patrimonio",
+                "title": "Número do patrimônio",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "descricao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos/items/descricao",
+                "title": "Decrição do patrimônio",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+				"pattern": "\\S",
+                "examples": [
+                  "Descrição do bem"
+                ]
+              },
+              "data_aquisicao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos/items/data_aquisicao",
+                "title": "Data de aquisição do patrimônio",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              },
+              "valor_aquisicao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_adquiridos/items/valor_aquisicao",
+                "title": "Valor de aquisição do patrimônio",
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 9999999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  100.0
+                ]
+              }
+            }
+          }
+        },
+        "relacao_bens_moveis_cedidos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos",
+          "title": "Relação de bens móveis cedidos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "numero_patrimonio",
+              "descricao",
+              "data_cessao",
+			  "valor_cessao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 3,
+            "maxProperties": 4,
+            "properties": {
+              "numero_patrimonio": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos/items/numero_patrimonio",
+                "title": "Número do patrimônio",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "descricao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos/items/descricao",
+                "title": "Decrição do patrimônio",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+				"pattern": "\\S",
+                "examples": [
+                  "Descrição do bem"
+                ]
+              },
+              "data_cessao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos/items/data_aquisicao",
+                "title": "Data de cessão do patrimônio",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              },
+              "valor_cessao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_cedidos/items/valor_aquisicao",
+                "title": "Valor de cessão do patrimônio",
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 9999999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  100.0
+                ]
+              }
+            }
+          }
+        },
+        "relacao_bens_moveis_baixados_devolvidos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_moveis_baixados_devolvidos",
+          "title": "Relação de bens móveis baixados ou devolvidos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_moveis_baixados_devolvidos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "numero_patrimonio",
+              "data_baixa_devolucao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "numero_patrimonio": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_baixados_devolvidos/items/numero_patrimonio",
+                "title": "Número do patrimônio",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "data_baixa_devolucao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_moveis_baixados_devolvidos/items/data_aquisicao",
+                "title": "Data de baixa ou devolução do patrimônio",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              }
+            }
+          }
+        },
+        "relacao_bens_imoveis_adquiridos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_imoveis_adquiridos",
+          "title": "Relação de bens imóveis adquiridos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_imoveis_adquiridos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "descricao",
+              "data_aquisicao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "descricao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_adquiridos/items/descricao",
+                "title": "Descrição do bem",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "data_aquisicao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_adquiridos/items/data_aquisicao",
+                "title": "Data da aquisição",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              }
+            }
+          }
+        },
+        "relacao_bens_imoveis_cedidos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_imoveis_cedidos",
+          "title": "Relação de bens imóveis cedidos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_imoveis_cedidos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "descricao",
+              "data_cessao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "descricao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_cedidos/items/descricao",
+                "title": "Descrição do bem",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "data_cessao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_cedidos/items/data_aquisicao",
+                "title": "Data da cessão",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              }
+            }
+          }
+        },
+        "relacao_bens_imoveis_baixados_devolvidos": {
+          "$id": "#root/relacao_bens/items/relacao_bens_imoveis_baixados_devolvidos",
+          "title": "Relação de bens imóveis baixados ou devolvidos",
+          "type": "array",
+          "items": {
+            "$id": "#root/relacao_bens/items/relacao_bens_imoveis_baixados_devolvidos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "descricao",
+              "data_baixa_devolucao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "descricao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_baixados_devolvidos/items/descricao",
+                "title": "Descrição do bem",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+				"pattern": "\\S",
+                "examples": [
+                  "123"
+                ]
+              },
+              "data_baixa_devolucao": {
+                "$id": "#root/relacao_bens/items/relacao_bens_imoveis_baixados_devolvidos/items/data_aquisicao",
+                "title": "Data da baixa ou devolucao",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "contratos": {
+      "$id": "#root/contratos",
+      "title": "Contratos",
+      "type": "array",
+      "items": {
+        "$id": "#root/contratos/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "numero",
+          "credor",
+          "data_assinatura",
+          "vigencia_tipo",
+          "vigencia_data_inicial",
+          "objeto",
+          "natureza_contratacao",
+          "criterio_selecao",
+          "artigo_regulamento_compras",
+          "valor_montante",
+          "valor_tipo"
+        ],
+        "additionalProperties": false,
+        "minProperties": 11,
+        "maxProperties": 14,
+        "properties": {
+          "numero": {
+            "$id": "#root/contratos/items/numero",
+            "title": "Número do Contrato",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 35,
+			"pattern": "\\S",
+            "examples": [
+              "1234657890"
+            ]
+          },
+          "credor": {
+            "$id": "#root/contratos/items/credor",
+            "title": "Dados do Credor",
+            "type": "object",
+            "required": [
+              "documento_tipo",
+              "documento_numero"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 3,
+            "properties": {
+              "documento_tipo": {
+                "$id": "#root/contratos/items/credor/documento_tipo",
+                "title": "Tipo do Documento do Credor",
+                "type": "integer",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ],
+                "examples": [
+                  "1=CPF",
+                  "2=CNPJ",
+                  "3=RNE"
+                ]
+              },
+              "documento_numero": {
+                "$id": "#root/contratos/items/credor/documento_numero",
+                "title": "Número do Documento do Credor",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 14,
+				"pattern": "\\S",
+                "examples": [
+                  "00000000191"
+                ]
+              },
+              "nome": {
+                "$id": "#root/contratos/items/credor/nome",
+                "title": "Nome/Razão Social do Credor",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+				"pattern": "\\S",
+                "examples": [
+                  "Nome/Razão Social do Credor"
+                ]
+              }
+            }
+          },
+          "data_assinatura": {
+            "$id": "#root/contratos/items/data_assinatura",
+            "title": "Data da Assinatura do Contrato",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "vigencia_tipo": {
+            "$id": "#root/contratos/items/vigencia_tipo",
+            "title": "Tipo de Vigência do Contrato",
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "examples": [
+              "1=Pré-Estabelecida",
+              "2=Indeterminada"
+            ]
+          },
+          "vigencia_data_inicial": {
+            "$id": "#root/contratos/items/vigencia_data_inicial",
+            "title": "Data Inicial de Vigência do Contrato",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "vigencia_data_final": {
+            "$id": "#root/contratos/items/vigencia_data_final",
+            "title": "Data Final de Vigência do Contrato",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "objeto": {
+            "$id": "#root/contratos/items/objeto",
+            "title": "Objeto do Contrato",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Objeto do contrato"
+            ]
+          },
+          "natureza_contratacao": {
+            "$id": "#root/contratos/items/natureza_contratacao",
+            "title": "Natureza da Contratação do Contrato",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "title": "Items",
+              "type": "integer",
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+                35,
+                36
+              ],
+              "examples": [
+                "1 = Abastecimento de água",
+                "2 = Alimentação",
+                "3 = Aquisição de bens",
+                "4 = Assessoria/consultoria",
+                "5 = Bens e serviços de informática",
+                "6 = Coleta de lixo comum",
+                "7 = Coleta de lixo hospitalar",
+                "8 = Combustível",
+                "9 = Contabilidade",
+                "10 = Demais encargos sociais",
+                "11 = FGTS",
+                "12 = Gêneros alimentícios",
+                "13 = Impostos",
+                "14 = INSS - contribuição patronal",
+                "15 = INSS - empregado",
+                "16 = Licença de uso de software",
+                "17 = Limpeza e conservação",
+                "18 = Locação de Equipamentos",
+                "19 = Locação de Imóveis",
+                "20 = Material hospitalar",
+                "21 = Medicamentos",
+                "22 = Obras e reformas",
+                "23 = Outros Serviços",
+                "24 = Permissão de uso/serviço",
+                "25 = Prestação de serviços",
+                "26 = Publicidade/Propaganda",
+                "27 = Serviço de Arquivamento",
+                "28 = Serviço de engenharia",
+                "29 = Serviços clínicos-laboratoriais",
+                "30 = Serviços Jurídicos",
+                "31 = Serviços Médicos",
+                "32 = Telefone/Internet/Tv a Cabo",
+                "33 = Transporte",
+                "34 = Vale/Auxílio Alimentação",
+                "35 = Veículos e afins",
+                "36 = Vigilância"
+              ]
+            }
+          },
+          "natureza_contratacao_outro": {
+            "$id": "#root/contratos/items/natureza_contratacao_outro",
+            "title": "Descrição de Outros Serviços",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+			"pattern": "\\S",
+            "examples": [
+              "Descrição de outros serviços"
+            ]
+          },
+          "criterio_selecao": {
+            "$id": "#root/contratos/items/criterio_selecao",
+            "title": "Criterio de Seleção do Contrato",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "examples": [
+              "1 = Cotação de Preços",
+              "2 = Dispensa",
+              "3 = Inexigibilidade",
+              "4 = Outros"
+            ]
+          },
+          "criterio_selecao_outro": {
+            "$id": "#root/contratos/items/criterio_selecao_outro",
+            "title": "Descrição de Outro Critério de Seleção",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+			"pattern": "\\S",
+            "examples": [
+              "Descrição de outros critérios de seleção"
+            ]
+          },
+          "artigo_regulamento_compras": {
+            "$id": "#root/contratos/items/artigo_regulamento_compras",
+            "title": "Artigo do Regulamento de Compras do Contrato",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+			"pattern": "\\S",
+            "examples": [
+              "Artigo 1"
+            ]
+          },
+          "valor_montante": {
+            "$id": "#root/contratos/items/valor_montante",
+            "title": "Montante do Valor do Contrato",
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "valor_tipo": {
+            "$id": "#root/contratos/items/valor_tipo",
+            "title": "Tipo do Valor do Contrato",
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "examples": [
+              "1 = Global",
+              "2 = Mensal"
+            ]
+          }
+        }
+      }
+    },
+    "documentos_fiscais": {
+      "$id": "#root/documentos_fiscais",
+      "title": "Documentos Fiscais",
+      "type": "array",
+      "items": {
+        "$id": "#root/documentos_fiscais/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "numero",
+          "credor",
+          "descricao",
+          "data_emissao",
+          "estado_emissor",
+          "valor_bruto",
+          "valor_encargos",
+          "categoria_despesas_tipo",
+          "rateio_proveniente_tipo"
+        ],
+        "additionalProperties": false,
+        "minProperties": 9,
+        "maxProperties": 11,
+        "properties": {
+          "numero": {
+            "$id": "#root/documentos_fiscais/items/numero",
+            "title": "Número do Documento Fiscal",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 35,
+			"pattern": "\\S",
+            "examples": [
+              "1234567890"
+            ]
+          },
+          "credor": {
+            "$id": "#root/documentos_fiscais/items/credor",
+            "title": "Dados do Credor do Documento Fiscal",
+            "$ref": "#root/contratos/items/credor"
+          },
+          "identificacao_contrato": {
+            "$id": "#root/documentos_fiscais/items/identificacao_contrato",
+            "title": "Identificacao do Contrato do Documento Fiscal",
+            "type": "object",
+            "required": [
+              "numero",
+              "data_assinatura",
+              "identificacao_credor"
+            ],
+            "additionalProperties": false,
+            "minProperties": 3,
+            "maxProperties": 3,
+            "properties": {
+              "numero": {
+                "$id": "#root/documentos_fiscais/items/identificacao_contrato/numero",
+                "title": "Número do Contrato",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 35,
+				"pattern": "\\S",
+                "examples": [
+                  "1234657890"
+                ]
+              },
+              "data_assinatura": {
+                "$id": "#root/documentos_fiscais/items/identificacao_contrato/data_assinatura",
+                "title": "Data da Assinatura do Contrato",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              },
+              "identificacao_credor": {
+                "$id": "#root/documentos_fiscais/items/identificacao_contrato/identificacao_credor",
+                "title": "Identificação do Credor",
+                "type": "object",
+                "required": [
+                  "documento_tipo",
+                  "documento_numero"
+                ],
+                "additionalProperties": false,
+                "minProperties": 2,
+                "maxProperties": 2,
+                "properties": {
+                  "documento_tipo": {
+                    "$id": "#root/documentos_fiscais/items/identificacao_contrato/identificacao_credor/documento_tipo",
+                    "title": "Tipo do Documento do Credor",
+                    "$ref": "#root/contratos/items/credor/documento_tipo"
+                  },
+                  "documento_numero": {
+                    "$id": "#root/documentos_fiscais/items/identificacao_contrato/identificacao_credor/documento_numero",
+                    "title": "Número do Documento do Credor do Contrato",
+                    "$ref": "#root/contratos/items/credor/documento_numero"
+                  }
+                }
+              }
+            }
+          },
+          "descricao": {
+            "$id": "#root/documentos_fiscais/items/descricao",
+            "title": "Descrição do Documento Fiscal",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Doc Fiscal"
+            ]
+          },
+          "data_emissao": {
+            "$id": "#root/documentos_fiscais/items/data_emissao",
+            "title": "Data de Emissão do Documento Fiscal",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "estado_emissor": {
+            "$id": "#root/documentos_fiscais/items/estado_emissor",
+            "title": "Estado Emissor do Documento Fiscal",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27
+            ],
+            "examples": [
+              "1=AC",
+              "2=AL",
+              "3=AM",
+              "4=AP",
+              "5=BA",
+              "6=CE",
+              "7=DF",
+              "8=ES",
+              "9=GO",
+              "10=MA",
+              "11=MG",
+              "12=MS",
+              "13=MT",
+              "14=PA",
+              "15=PB",
+              "16=PE",
+              "17=PI",
+              "18=PR",
+              "19=RJ",
+              "20=RN",
+              "21=RO",
+              "22=RR",
+              "23=RS",
+              "24=SC",
+              "25=SE",
+              "26=SP",
+              "27=TO"
+            ]
+          },
+          "valor_bruto": {
+            "$id": "#root/documentos_fiscais/items/valor_bruto",
+            "title": "Valor Bruto do Documento Fiscal",
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "valor_encargos": {
+            "$id": "#root/documentos_fiscais/items/valor_encargos",
+            "title": "Valor dos Encargos do Documento Fiscal",
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "categoria_despesas_tipo": {
+            "$id": "#root/documentos_fiscais/items/categoria_despesas_tipo",
+            "title": "Tipo de Categoria de Despesas do Documento Fiscal",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89
+            ],
+            "examples": [
+              "1 = BENS E MATERIAIS PERMANENTES - BENS E EQUIPAMENTOS DE INFORMÁTICA",
+              "2 = BENS E MATERIAIS PERMANENTES - BENS E EQUIPAMENTOS HOSPITALARES",
+              "3 = BENS E MATERIAIS PERMANENTES - OUTROS BENS E MATERIAIS PERMANENTES",
+              "4 = DESPESAS FINANCEIRAS E BANCÁRIAS - DESPESAS BANCÁRIAS PAGAS",
+              "5 = DESPESAS FINANCEIRAS E BANCÁRIAS - IOF PAGO",
+              "6 = DESPESAS FINANCEIRAS E BANCÁRIAS - JUROS PAGOS",
+              "7 = DESPESAS FINANCEIRAS E BANCÁRIAS - OUTRAS DESPESAS FINANCEIRAS E BANCÁRIAS",
+              "8 = DIVERSOS - DIVERSOS",
+              "9 = GASTOS ADMINISTRATIVOS - COMBUSTÍVEL",
+              "10 = GASTOS ADMINISTRATIVOS - ESTACIONAMENTO/CONDUÇÃO/TÁXI",
+              "11 = GASTOS ADMINISTRATIVOS - MATERIAL DE EXPEDIENTE/CORREIO/FOTOCÓPIAS",
+              "12 = GASTOS ADMINISTRATIVOS - SEGUROS",
+              "13 = GASTOS ADMINISTRATIVOS - VIAGENS (HOTEL/PASSAGENS AÉREAS/PASS.RODOVIÁRIAS)",
+              "14 = GASTOS ADMINISTRATIVOS - OUTROS GASTOS ADMINISTRATIVOS",
+              "15 = GÊNEROS ALIMENTÍCIOS - GÊNEROS ALIMENTÍCIOS",
+              "16 = LOCAÇÃO - AMBULÂNCIAS",
+              "17 = LOCAÇÃO - DIVERSAS",
+              "18 = LOCAÇÃO - EQUIPAMENTO DE INFORMÁTICA",
+              "19 = LOCAÇÃO - EQUIPAMENTO MÉDICO HOSPITALAR",
+              "20 = LOCAÇÃO - IMÓVEL",
+              "21 = LOCAÇÃO - LAVANDERIA E ENXOVAL",
+              "22 = LOCAÇÃO - SISTEMA DE SOFTWARE",
+              "23 = LOCAÇÃO - VEÍCULOS",
+              "24 = MANUTENÇÃO - EQUIPAMENTO DE INFORMÁTICA",
+              "25 = MANUTENÇÃO - EQUIPAMENTO MÉDICO HOSPITALAR",
+              "26 = MANUTENÇÃO - PREDIAL E IMOBILIÁRIO",
+              "27 = MANUTENÇÃO - VEÍCULOS",
+              "28 = MANUTENÇÃO - OUTRAS MANUTENÇÕES",
+              "29 = MATERIAIS - MATERIAL DE HIGIENIZAÇÃO E LIMPEZA/UNIFORMES",
+              "30 = MATERIAIS - MATERIAL DIDÁTICO",
+              "31 = MATERIAIS - MATERIAL ESPORTIVO",
+              "32 = MATERIAIS - OUTROS MATERIAIS",
+              "33 = MATERIAL MÉDICO E HOSPITALAR - MATERIAL MÉDICO E HOSPITALAR",
+              "34 = MEDICAMENTOS - MEDICAMENTOS",
+              "35 = RECURSOS HUMANOS - 13º SALÁRIO",
+              "36 = RECURSOS HUMANOS - APRENDIZES",
+              "37 = RECURSOS HUMANOS - ASSISTÊNCIA MÉDICA",
+              "38 = RECURSOS HUMANOS - AVISO PRÉVIO",
+              "39 = RECURSOS HUMANOS - CONTRIBUIÇÃO AO INSS - COTA PATRONAL",
+              "40 = RECURSOS HUMANOS - CONTRIBUIÇÃO AO PIS",
+              "41 = RECURSOS HUMANOS - CURSOS/TREINAMENTO/RECICLAGEM",
+              "42 = RECURSOS HUMANOS - DIRETORIA (Salários e Ordenados)",
+              "43 = RECURSOS HUMANOS - ESTAGIÁRIOS",
+              "44 = RECURSOS HUMANOS - FÉRIAS",
+              "45 = RECURSOS HUMANOS - FGTS",
+              "46 = RECURSOS HUMANOS - GRATIFICAÇÕES",
+              "47 = RECURSOS HUMANOS - INDENIZAÇÕES",
+              "48 = RECURSOS HUMANOS - INSS",
+              "49 = RECURSOS HUMANOS - IRRF",
+              "50 = RECURSOS HUMANOS - MULTA RESCISÓRIA FGTS",
+              "51 = RECURSOS HUMANOS - SALÁRIOS E ORDENADOS (Exceto Diretoria)",
+              "52 = RECURSOS HUMANOS - VALE ALIMENTAÇÃO",
+              "53 = RECURSOS HUMANOS - VALE REFEIÇÃO",
+              "54 = RECURSOS HUMANOS - VALE TRANSPORTE",
+              "55 = RECURSOS HUMANOS - OUTRAS DESPESAS DE RECURSOS HUMANOS",
+              "56 = SERVIÇOS DE TERCEIROS - COLETA DE LIXO COMUM",
+              "57 = SERVIÇOS DE TERCEIROS - COLETA DE LIXO HOSPITALAR",
+              "58 = SERVIÇOS DE TERCEIROS - CONSULTORIA/ASSESSORIA CONTÁBIL",
+              "59 = SERVIÇOS DE TERCEIROS - CONSULTORIA/ASSESSORIA JURÍDICA",
+              "60 = SERVIÇOS DE TERCEIROS - LIMPEZA E CONSERVAÇÃO",
+              "61 = SERVIÇOS DE TERCEIROS - OBRAS/REFORMAS",
+              "62 = SERVIÇOS DE TERCEIROS - OUTROS SERVIÇOS DE TERCEIROS PESSOA FÍSICA",
+              "63 = SERVIÇOS DE TERCEIROS - OUTROS SERVIÇOS DE TERCEIROS PESSOA JURÍDICA",
+              "64 = SERVIÇOS DE TERCEIROS - PUBLICIDADE E PROPAGANDA",
+              "65 = SERVIÇOS DE TERCEIROS - SERVIÇO DE APOIO DIAGNÓSTICO TERAPÊUTICO (SADT)",
+              "66 = SERVIÇOS DE TERCEIROS - SERVIÇOS DE AUDITORIA",
+              "67 = SERVIÇOS DE TERCEIROS - SERVIÇOS DE TECNOLOGIA DA INFORMAÇÃO (TI)",
+              "68 = SERVIÇOS DE TERCEIROS - VIGILÂNCIA",
+              "69 = SERVIÇOS MÉDICOS - SERVIÇOS MÉDICOS PESSOA FÍSICA",
+              "70 = SERVIÇOS MÉDICOS - SERVIÇOS MÉDICOS PESSOA JURÍDICA",
+              "71 = UTILIDADES PÚBLICAS - ÁGUA E ESGOTO",
+              "72 = UTILIDADES PÚBLICAS - FORÇA E LUZ",
+              "73 = UTILIDADES PÚBLICAS - INTERNET/TV A CABO",
+              "74 = UTILIDADES PÚBLICAS - TELEFONES",
+              "76 = UTILIDADES PÚBLICAS - OUTRAS UTILIDADES PÚBLICAS",
+              "77 = DESPESAS DE CONVÊNIOS - CONTRATUALIZAÇÃO DE SERVIÇOS DOS SUS - DESPESAS DE CONVÊNIOS - CONTRATUALIZAÇÃO DE SERVIÇOS DOS SUS",
+              "78 = MANUTENÇÃO - MANUTENÇÃO DE MOBILIÁRIO E EQUIPAMENTOS",
+              "79 = MATERIAIS - MATERIAL DE HIGIENIZAÇÃO E LIMPEZA",
+              "80 = MATERIAIS - UNIFORMES",
+              "81 = MATERIAIS - EQUIPAMENTOS DE SEGURANÇA DO TRABALHO (EPI)",
+              "82 = MATERIAIS - ENXOVAL",
+              "83 = RECURSOS HUMANOS - ASSISTÊNCIA ODONTOLÓGICA",
+              "84 = RECURSOS HUMANOS - SEGUROS",
+              "85 = UTILIDADES PÚBLICAS - GÁS DE COZINHA",
+              "86 = MATERIAIS DE CONSUMO - BRINQUEDOS",
+              "87 = TRIBUTOS - ESTADUAIS (ICMS/IPVA/ITCMD/TAXAS E OUTROS)",
+              "88 = TRIBUTOS - FEDERAIS (IRRF/PIS/COFINS/CSLL/ITR/IOF/TAXAS E OUTROS)",
+              "89 = TRIBUTOS - MUNICIPAIS (IPTU/ISS/ITBI/TAXAS E OUTROS)"
+            ]
+          },
+          "rateio_proveniente_tipo": {
+            "$id": "#root/documentos_fiscais/items/rateio_proveniente_tipo",
+            "title": "Documento Fiscal Proveniente de Rateio",
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "examples": [
+              "1=Sim",
+              "2=Não"
+            ]
+          },
+          "rateio_percentual": {
+            "$id": "#root/documentos_fiscais/items/rateio_percentual ",
+            "title": "Percentual de Rateio do Documento Fiscal",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 99.99
+          }
+        }
+      }
+    },
+    "pagamentos": {
+      "$id": "#root/pagamentos",
+      "title": "Pagamentos",
+      "type": "array",
+      "items": {
+        "$id": "#root/pagamentos/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "identificacao_documento_fiscal",
+          "pagamento_data",
+          "pagamento_valor",
+          "fonte_recurso_tipo",
+          "meio_pagamento_tipo"
+        ],
+        "additionalProperties": false,
+        "minProperties": 5,
+        "maxProperties": 9,
+        "properties": {
+          "identificacao_documento_fiscal": {
+            "$id": "#root/pagamentos/items/identificacao_documento_fiscal",
+            "title": "Identificação do Documento Fiscal do Pagamento",
+            "type": "object",
+            "required": [
+              "numero",
+              "identificacao_credor"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "numero": {
+                "$id": "#root/pagamentos/items/identificacao_documento_fiscal/numero",
+                "title": "Número do Documento Fiscal do Pagamento",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 35,
+				"pattern": "\\S",
+                "examples": [
+                  "1234657890"
+                ]
+              },
+              "identificacao_credor": {
+                "$id": "#root/pagamentos/items/identificacao_documento_fiscal/identificacao_credor",
+                "title": "Identificação do Credor do Documento Fiscal",
+                "$ref": "#root/documentos_fiscais/items/identificacao_contrato/identificacao_credor"
+              }
+            }
+          },
+          "pagamento_data": {
+            "$id": "#root/pagamentos/items/pagamento_data",
+            "title": "Data do Pagamento",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "pagamento_valor": {
+            "$id": "#root/pagamentos/items/pagamento_valor",
+            "title": "Valor do Pagamento",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "fonte_recurso_tipo": {
+            "$id": "#root/pagamentos/items/fonte_recurso_tipo",
+            "title": "Tipo da Fonte de Recurso",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+			  8,
+			  91,
+			  92,
+			  93,
+			  94,
+			  95,
+			  96,
+			  97,
+			  98
+            ],
+            "examples": [
+              "1=RECURSOS DO TESOURO",
+              "2=TRANSFERÊNCIAS E CONVÊNIOS ESTADUAIS - VINCULADOS",
+              "3=RECURSOS PRÓPRIOS DE FUNDOS ESPECIAIS DE DESPESA - VINCULADOS",
+              "4=RECURSOS PRÓPRIOS DA ADMINISTRAÇÃO INDIRETA",
+              "5=TRANSFERÊNCIAS E CONVÊNIOS FEDERAIS - VINCULADOS",
+              "6=OUTRAS FONTES DE RECURSOS",
+              "7=OPERAÇÕES DE CRÉDITO",
+              "8=EMENDAS PARLAMENTARES INDIVIDUAIS - LEGISLATIVO MUNICIPAL",
+			  "91=TESOURO - EXERCÍCIOS ANTERIORES",
+			  "92=TRANSFERÊNCIAS E CONVÊNIOS ESTADUAIS - VINCULADOS - EXERCÍCIOS ANTERIORES",
+			  "93=RECURSOS PRÓPRIOS DE FUNDOS ESPECIAIS DE DESPESA - VINCULADOS - EXERCÍCIOS ANTERIORES",
+			  "94=RECURSOS PRÓPRIOS DA ADMINISTRAÇÃO INDIRETA - EXERCÍCIOS ANTERIORES",
+			  "95=TRANSFERÊNCIAS E CONVÊNIOS FEDERAIS - VINCULADOS - EXERCÍCIOS ANTERIORES",
+			  "96=OUTRAS FONTES DE RECURSOS - EXERCÍCIOS ANTERIORES",
+			  "97=OPERAÇÕES DE CRÉDITO - EXERCÍCIOS ANTERIORES",
+			  "98=EMENDAS PARLAMENTARES INDIVIDUAIS - EXERCÍCIOS ANTERIORES"
+            ]
+          },
+          "meio_pagamento_tipo": {
+            "$id": "#root/pagamentos/items/meio_pagamento_tipo",
+            "title": "Tipo do Meio de Pagamento",
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "examples": [
+              "1=BANCO",
+              "2=FUNDO FIXO"
+            ]
+          },
+          "banco": {
+            "$id": "#root/pagamentos/items/banco",
+            "title": "Banco do Pagamento",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              7,
+              8,
+              10,
+              11,
+              12,
+              14,
+              15,
+              16,
+              17,
+              18,
+              21,
+              24,
+              25,
+              27,
+              29,
+              31,
+              33,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              44,
+              45,
+              47,
+              60,
+              62,
+              63,
+              64,
+              65,
+              66,
+              69,
+              70,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              87,
+              88,
+              89,
+              90,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              104,
+              105,
+              107,
+              108,
+              111,
+              113,
+              114,
+              116,
+              117,
+              119,
+              120,
+              121,
+              122,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              138,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              149,
+              151,
+              157,
+              159,
+              163,
+              173,
+              174,
+              175,
+              177,
+              180,
+              183,
+              184,
+              188,
+              189,
+              190,
+              191,
+              194,
+              195,
+              196,
+              197,
+              204,
+              208,
+              210,
+              212,
+              213,
+              214,
+              215,
+              217,
+              218,
+              222,
+              224,
+              225,
+              229,
+              230,
+              233,
+              237,
+              241,
+              243,
+              244,
+              246,
+              247,
+              248,
+              249,
+              250,
+              252,
+              253,
+              254,
+              259,
+              260,
+              263,
+              265,
+              266,
+              268,
+              269,
+              270,
+              271,
+              272,
+              273,
+              274,
+              276,
+              278,
+              279,
+              280,
+              281,
+              283,
+              285,
+              286,
+              288,
+              289,
+              290,
+              291,
+              292,
+              293,
+              296,
+              298,
+              299,
+              300,
+              301,
+              306,
+              307,
+              309,
+              310,
+              311,
+              312,
+              313,
+              318,
+              319,
+              320,
+              321,
+              322,
+              323,
+              324,
+              325,
+              326,
+              328,
+              329,
+              330,
+              331,
+              332,
+              334,
+              335,
+              336,
+              340,
+              341,
+              342,
+              343,
+              347,
+              348,
+              349,
+              350,
+              351,
+              352,
+              353,
+              354,
+              355,
+              356,
+              358,
+              359,
+              360,
+              362,
+              363,
+              364,
+              365,
+              366,
+              367,
+              368,
+              370,
+              371,
+              373,
+              374,
+              376,
+              377,
+              378,
+              379,
+              380,
+              381,
+              382,
+              383,
+              384,
+              385,
+              386,
+              387,
+              389,
+              390,
+              391,
+              392,
+              393,
+              394,
+              395,
+              396,
+              397,
+              398,
+              399,
+              400,
+              401,
+              402,
+              403,
+              404,
+              406,
+              407,
+              408,
+              409,
+              410,
+              411,
+              412,
+              413,
+              414,
+              416,
+              418,
+              419,
+              421,
+              422,
+              423,
+              425,
+              426,
+              427,
+              428,
+              429,
+              430,
+              433,
+              435,
+              438,
+              439,
+              440,
+              442,
+              443,
+              444,
+              445,
+              447,
+              448,
+              449,
+              450,
+              451,
+              452,
+              453,
+              454,
+              456,
+              457,
+              458,
+              459,
+              460,
+              461,
+              462,
+              463,
+              464,
+              465,
+              467,
+              468,
+              469,
+              470,
+              471,
+              473,
+              475,
+              477,
+              478,
+              479,
+              481,
+              484,
+              487,
+              488,
+              492,
+              494,
+              495,
+              505,
+              506,
+              508,
+              509,
+              511,
+              512,
+              518,
+              521,
+              522,
+              523,
+              524,
+              526,
+              527,
+              528,
+              529,
+              530,
+              532,
+              534,
+              535,
+              536,
+              537,
+              539,
+              541,
+              542,
+              545,
+              546,
+              547,
+              600,
+              604,
+              610,
+              611,
+              612,
+              613,
+              623,
+              626,
+              630,
+              633,
+              634,
+              637,
+              638,
+              641,
+              643,
+              650,
+              652,
+              653,
+              654,
+              655,
+              707,
+              712,
+              719,
+              720,
+              721,
+              724,
+              734,
+              735,
+              738,
+              739,
+              740,
+              741,
+              743,
+              744,
+              745,
+              746,
+              747,
+              748,
+              749,
+              751,
+              752,
+              753,
+              754,
+              755,
+              756,
+              757,
+              999
+            ],
+            "examples": [
+              "1=BANCO DO BRASIL S.A.",
+              "2=BANCO CENTRAL DO BRASIL SA",
+              "3=BANCO DA AMAZONIA S.A.",
+              "4=BANCO DO NORDESTE DO BRASIL S.A.",
+              "7=BNDES",
+              "8=BANCO SANTANDER MERIDIONAL S.A.",
+              "10=CREDICOAMO",
+              "11=C.SUISSE HEDGING-GRIFFO CV S/A",
+              "12=BANCO INBURSA",
+              "14=STATE STREET BR S.A. BANCO COMERCIAL",
+              "15=UBS BRASIL CCTVM S.A.",
+              "16=CCM DESP TRÂNS SC E RS",
+              "17=BNY MELLON BANCO S.A.",
+              "18=BANCO TRICURY S.A.",
+              "21=BANCO BANESTES S.A.",
+              "24=BANCO BANDEPE S.A.",
+              "25=BANCO ALFA S.A.",
+              "27=BANCO DO ESTADO DE SANTA CATARINA SA",
+              "29=BANCO ITAÚ CONSIGNADO S.A.",
+              "31=BANCO BEG S.A.",
+              "33=BANCO SANTANDER (BRASIL) S.A.",
+              "35=BANCO BEC S/A.",
+              "36=BANCO BBI S.A.",
+              "37=BANCO DO ESTADO DO PARA S.A.",
+              "38=BANCO BANESTADO S.A.",
+              "39=BANCO DO ESTADO DO PIAUI SA",
+              "40=BANCO CARGILL S.A.",
+              "41=BANCO DO ESTADO DO RIO GRANDE DO SUL S.A.",
+              "44=BANCO BVA S/A",
+              "45=BANCO OPPORTUNITY S.A.",
+              "47=BANCO DO ESTADO DE SERGIPE S.A.",
+              "60=CONFIDENCE CC S.A.",
+              "62=HIPERCARD BM S.A.",
+              "63=BANCO BRADESCARD",
+              "64=GOLDMAN SACHS DO BRASIL BM S.A",
+              "65=BANCO ANDBANK S.A.",
+              "66=BANCO MORGAN STANLEY S.A.",
+              "69=BANCO CREFISA S.A.",
+              "70=BRB - BANCO DE BRASILIA S.A.",
+              "72=BANCO RURAL MAIS S.A.",
+              "73=BB BANCO POPULAR DO BRASIL S.A",
+              "74=BANCO J.SAFRA S.A.",
+              "75=BANCO ABN AMRO S.A.",
+              "76=BANCO KDB BRASIL S.A.",
+              "77=BANCO INTER",
+              "78=HAITONG BI DO BRASIL S.A.",
+              "79=PICPAY BANK - BANCO MÚLTIPLO S.A",
+              "80=B&T CC LTDA.",
+              "81=BANCOSEGURO S.A.",
+              "82=BANCO TOPÁZIO S.A.",
+              "83=BANCO DA CHINA BRASIL S.A.",
+              "84=UNIPRIME DO BRASIL - COOP",
+              "85=COOPCENTRAL AILOS",
+              "87=Cooperativa Central de Economia e Crédito Mútuo das Unicreds de Santa Catarina e Paraná",
+              "88=BANCO RANDON S.A.",
+              "89=CREDISAN CC",
+              "90=Cooperativa Central de Economia e Crédito Mutuo das Unicreds",
+              "92=BRK S.A. CFI",
+              "93=POLOCRED SCMEPP LTDA.",
+              "94=BANCO FINAXIS",
+              "95=TRAVELEX BANCO DE CÂMBIO S.A.",
+              "96=BANCO B3 S.A.",
+              "97=CREDISIS CENTRAL DE COOPERATIVAS DE CRÉDITO LTDA.",
+              "98=CREDIALIANÇA CCR",
+              "99=UNIPRIME COOPCENTRAL LTDA.",
+              "100=PLANNER CV S.A.",
+              "101=RENASCENCA DTVM LTDA",
+              "102=XP INVESTIMENTOS CCTVM S/A",
+              "104=CAIXA ECONOMICA FEDERAL",
+              "105=LECCA CFI S.A.",
+              "107=BANCO BOCOM BBM S.A.",
+              "108=PORTOCRED S.A. - CFI",
+              "111=OLIVEIRA TRUST DTVM S.A.",
+              "113=NEON CTVM S.A.",
+              "114=CENTRAL COOPERATIVA DE CRÉDITO NO ESTADO DO ESPÍRITO SANTO",
+              "116=BANCO UNICO S.A.",
+              "117=ADVANCED CC LTDA",
+              "119=BANCO WESTERN UNION",
+              "120=BANCO RODOBENS S.A.",
+              "121=BANCO AGIBANK S.A.",
+              "122=BANCO BRADESCO BERJ S.A.",
+              "124=BANCO WOORI BANK DO BRASIL S.A.",
+              "125=BANCO GENIAL",
+              "126=BR PARTNERS BI",
+              "127=CODEPE CVC S.A.",
+              "128=MS BANK S.A. BANCO DE CÂMBIO",
+              "129=UBS BRASIL BI S.A.",
+              "130=CARUANA SCFI",
+              "131=TULLETT PREBON BRASIL CVC LTDA",
+              "132=ICBC DO BRASIL BM S.A.",
+              "133=CRESOL CONFEDERAÇÃO",
+              "134=BGC LIQUIDEZ DTVM LTDA",
+              "135=GRADUAL CORRETORA",
+              "136=CONF NAC COOP CENTRAIS UNICRED",
+              "138=GET MONEY CC LTDA",
+              "139=INTESA SANPAOLO BRASIL S.A. BM",
+              "140=NU INVEST CORRETORA DE VALORES S.A.",
+              "141=BANCO MASTER DE INVESTIMENTO S.A.",
+              "142=BROKER BRASIL CC LTDA.",
+              "143=TREVISO CC S.A.",
+              "144=BEXS BANCO DE CAMBIO S.A.",
+              "145=LEVYCAM CCV LTDA",
+              "146=GUITTA CC LTDA",
+              "149=FACTA S.A. CFI",
+              "151=BANCO NOSSA CAIXA",
+              "157=ICAP DO BRASIL CTVM LTDA.",
+              "159=CASA CREDITO S.A. SCM",
+              "163=COMMERZBANK BRASIL S.A. - BANCO MÚLTIPLO",
+              "173=BRL TRUST DTVM SA",
+              "174=PEFISA S.A. - C.F.I.",
+              "175=BANCO FINASA S/A",
+              "177=GUIDE",
+              "180=CM CAPITAL MARKETS CCTVM LTDA",
+              "183=SOCRED SA - SCMEPP",
+              "184=BANCO ITAÚ BBA S.A.",
+              "188=ATIVA S.A. INVESTIMENTOS CCTVM",
+              "189=HS FINANCEIRA",
+              "190=SERVICOOP",
+              "191=NOVA FUTURA CTVM LTDA.",
+              "194=PARMETAL DTVM LTDA",
+              "195=VALOR SCD S.A.",
+              "196=FAIR CC S.A.",
+              "197=STONE IP S.A.",
+              "204=AMERICAN EXPRESS BANK(BR) BANCO MULTIPLO",
+              "208=BANCO BTG PACTUAL S.A.",
+              "210=DRESDNER BANK LATEINAMERIKA S.A",
+              "212=BANCO ORIGINAL",
+              "213=BANCO ARBI S.A.",
+              "214=BANCO DIBENS SA",
+              "215=BANCO COML INV SUDAMERIS SA",
+              "217=BANCO JOHN DEERE S.A.",
+              "218=BANCO BS2 S.A.",
+              "222=BANCO CRÉDIT AGRICOLE BR S.A.",
+              "224=BANCO FIBRA S.A.",
+              "225=BANCO BRASCAN SA.",
+              "229=BANCO CRUZEIRO S.A.",
+              "230=UNICARD BANCO MULTIPLO",
+              "233=BANCO CIFRA",
+              "237=BANCO BRADESCO S.A.",
+              "241=BANCO CLASSICO S.A.",
+              "243=BANCO MASTER",
+              "244=BANCO CIDADE SA",
+              "246=BANCO ABC BRASIL S.A.",
+              "247=BANCO UBS WARBURG S/A",
+              "248=BANCO BOAVISTA INTERATLANTICO SA",
+              "249=BANCO INVESTCRED UNIBANCO S.A.",
+              "250=BCV - BCO, CRÉDITO E VAREJO S.A.",
+              "252=BANCO FININVEST SA",
+              "253=BEXS CC S.A.",
+              "254=PARANA BANCO S.A.",
+              "259=MONEYCORP BANCO DE CÂMBIO S.A.",
+              "260=NU PAGAMENTOS - IP",
+              "263=BANCO CACIQUE SA",
+              "265=BANCO FATOR S.A.",
+              "266=BANCO CEDULA S.A.",
+              "268=BARI CIA HIPOTECÁRIA",
+              "269=BANCO HSBC S.A.",
+              "270=SAGITUR CC",
+              "271=IB CCTVM S.A.",
+              "272=AGK CC S.A.",
+              "273=CCR DE SÃO MIGUEL DO OESTE",
+              "274=MONEY PLUS SCMEPP LTDA",
+              "276=BANCO SENFF S.A.",
+              "278=GENIAL INVESTIMENTOS CVM S.A.",
+              "279=CCR DE PRIMAVERA DO LESTE",
+              "280=WILL FINANCEIRA S.A.CFI",
+              "281=CCR COOPAVEL",
+              "283=RB INVESTIMENTOS DTVM LTDA.",
+              "285=FRENTE CC LTDA.",
+              "286=CCR DE OURO",
+              "288=CAROL DTVM LTDA.",
+              "289=EFX CC LTDA.",
+              "290=PAGSEGURO INTERNET IP S.A.",
+              "291=BANCO BCN S.A.",
+              "292=BS2 DTVM S.A.",
+              "293=LASTRO RDV DTVM LTDA",
+              "296=OZ CORRETORA DE CÂMBIO S.A.",
+              "298=VIPS CC LTDA.",
+              "299=BANCO SOROCRED S.A. - BM",
+              "300=BANCO LA NACION ARGENTINA",
+              "301=BPP IP S.A.",
+              "306=PORTOPAR DTVM LTDA",
+              "307=TERRA INVESTIMENTOS DTVM",
+              "309=CAMBIONET CC LTDA",
+              "310=VORTX DTVM LTDA.",
+              "311=DOURADA CORRETORA",
+              "312=HSCM SCMEPP LTDA.",
+              "313=AMAZÔNIA CC LTDA.",
+              "318=BANCO BMG S.A.",
+              "319=OM DTVM LTDA",
+              "320=BANCO CCB BRASIL S.A.",
+              "321=CREFAZ SCMEPP LTDA",
+              "322=CCR DE ABELARDO LUZ",
+              "323=MERCADO PAGO IP LTDA.",
+              "324=CARTOS SCD S.A.",
+              "325=ÓRAMA DTVM S.A.",
+              "326=PARATI - CFI S.A.",
+              "328=CECM FABRIC CALÇADOS SAPIRANGA",
+              "329=QI SCD S.A.",
+              "330=BANCO BARI S.A.",
+              "331=FRAM CAPITAL DTVM S.A.",
+              "332=ACESSO SOLUCOES PAGAMENTO SA",
+              "334=BANCO BESA S.A.",
+              "335=BANCO DIGIO",
+              "336=BANCO C6 S.A.",
+              "340=SUPERDIGITAL I.P. S.A.",
+              "341=ITAÚ UNIBANCO S.A.",
+              "342=CREDITAS SCD",
+              "343=FFA SCMEPP LTDA.",
+              "347=BANCO SUDAMERIS BRASIL SA",
+              "348=BANCO XP S.A.",
+              "349=AL5 S.A. CFI",
+              "350=CREHNOR LARANJEIRAS",
+              "351=BANCO SANTANDER S/A",
+              "352=TORO CTVM S.A.",
+              "353=BANCO SANTANDER BRASIL S.A.",
+              "354=NECTON INVESTIMENTOS S.A CVM",
+              "355=ÓTIMO SCD S.A.",
+              "356=BANCO ABN AMRO REAL S.A.",
+              "358=MIDWAY S.A. - SCFI",
+              "359=ZEMA CFI S/A",
+              "360=TRINUS CAPITAL DTVM",
+              "362=CIELO S.A.",
+              "363=SINGULARE CTVM S.A.",
+              "364=GERENCIANET",
+              "365=SIMPAUL",
+              "366=BANCO SOCIETE GENERALE BRASIL",
+              "367=VITREO DTVM S.A.",
+              "368=BANCO CSF S.A.",
+              "370=BANCO MIZUHO S.A.",
+              "371=WARREN CVMC LTDA",
+              "373=UP.P SEP S.A.",
+              "374=REALIZE CFI S.A.",
+              "376=BANCO J.P. MORGAN S.A.",
+              "377=BMS SCD S.A.",
+              "378=BANCO BRASILEIRO DE CRÉDITO S.A.",
+              "379=CECM COOPERFORTE",
+              "380=PICPAY",
+              "381=BANCO MERCEDES-BENZ S.A.",
+              "382=FIDUCIA SCMEPP LTDA",
+              "383=EBANX IP LTDA.",
+              "384=GLOBAL SCM LTDA",
+              "385=CECM DOS TRAB.PORT. DA G.VITOR",
+              "386=NU FINANCEIRA S.A. CFI",
+              "387=BANCO TOYOTA DO BRASIL S.A.",
+              "389=BANCO MERCANTIL DO BRASIL S.A.",
+              "390=BANCO GM S.A.",
+              "391=CCR DE IBIAM",
+              "392=BANCO MERCANTIL DE SÃO PAULO S.A.",
+              "393=BANCO VOLKSWAGEN S.A",
+              "394=BANCO BRADESCO FINANC. S.A.",
+              "395=F D GOLD DTVM LTDA",
+              "396=HUB PAGAMENTOS",
+              "397=LISTO SCD S.A.",
+              "398=IDEAL CTVM S.A.",
+              "399=KIRTON BANK",
+              "400=COOP CREDITAG",
+              "401=IUGU IP S.A.",
+              "402=COBUCCIO SCD S.A.",
+              "403=CORA SCD S.A.",
+              "404=SUMUP SCD S.A.",
+              "406=ACCREDITO SCD S.A.",
+              "407=ÍNDIGO INVESTIMENTOS DTVM LTDA.",
+              "408=BONUSPAGO SCD S.A.",
+              "409=BANCO UNIBANCO SA",
+              "410=PLANNER SCM S.A.",
+              "411=VIA CERTA FINANCIADORA S.A. - CFI",
+              "412=SOCIAL BANK S/A",
+              "413=BANCO BV S.A.",
+              "414=WORK SCD S.A.",
+              "416=LAMARA SCD S.A.",
+              "418=ZIPDIN SCD S.A.",
+              "419=NUMBRS SCD S.A.",
+              "421=CC LAR CREDI",
+              "422=BANCO SAFRA S.A.",
+              "423=COLUNA S.A. DTVM",
+              "425=SOCINAL S.A. CFI",
+              "426=BIORC FINANCEIRA - CFI S.A.",
+              "427=CRED-UFES",
+              "428=CREDSYSTEM SCD S.A.",
+              "429=CREDIARE CFI S.A.",
+              "430=CCR SEARA",
+              "433=BR-CAPITAL DTVM S.A.",
+              "435=DELCRED SCD S.A.",
+              "438=TRUSTEE DTVM LTDA.",
+              "439=ID CTVM",
+              "440=CREDIBRF COOP",
+              "442=MAGNETIS - DTVM",
+              "443=CREDIHOME SCD",
+              "444=TRINUS SCD S.A.",
+              "445=PLANTAE CFI",
+              "447=MIRAE ASSET CCTVM LTDA",
+              "448=HEMERA DTVM LTDA.",
+              "449=DMCARD SCD S.A.",
+              "450=FITBANK PAGAMENTOS ELETRONICOS S.A.",
+              "451=J17 - SCD S/A",
+              "452=CREDIFIT SCD S.A.",
+              "453=BANCO RURAL SA",
+              "454=MÉRITO DTVM LTDA.",
+              "456=BANCO MUFG BRASIL S.A.",
+              "457=UY3 SCD S/A",
+              "458=HEDGE INVESTMENTS DTVM LTDA.",
+              "459=CCM SERV. PÚBLICOS SP",
+              "460=UNAVANTI SCD S/A",
+              "461=ASAAS IP S.A.",
+              "462=STARK SCD S.A.",
+              "463=AZUMI DTVM",
+              "464=BANCO SUMITOMO MITSUI BRASIL S.A.",
+              "465=CAPITAL CONSIG SCD S.A.",
+              "467=MASTER S/A CCTVM",
+              "468=PORTOSEG S.A. CFI",
+              "469=LIGA INVEST DTVM LTDA.",
+              "470=CDC SOCIEDADE DE CRÉDITO",
+              "471=CECM SERV PUBL PINHÃO",
+              "473=BANCO CAIXA GERAL BRASIL S.A.",
+              "475=BANCO YAMAHA MOTOR S.A.",
+              "477=CITIBANK N.A.",
+              "478=GAZINCRED S.A. SCFI",
+              "479=BANCO ITAUBANK S.A.",
+              "481=SUPERLÓGICA SCD S.A.",
+              "484=MAF DTVM SA",
+              "487=DEUTSCHE BANK S.A.BANCO ALEMAO",
+              "488=JPMORGAN CHASE BANK",
+              "492=ING BANK N.V.",
+              "494=BANCO LA REPUBL.ORIENTAL DEL URUGUAY SA",
+              "495=BANCO LA PROVINCIA B AIRES BCE",
+              "505=BANCO CREDIT SUISSE S.A.",
+              "506=RJI",
+              "508=AVENUE SECURITIES DTVM LTDA.",
+              "509=CELCOIN INSTITUICAO DE PAGAMENTO S.A.",
+              "511=MAGNUM SCD",
+              "512=CAPTALYS DTVM LTDA.",
+              "518=MERCADO CRÉDITO SOCIEDADE DE CRÉDITO, FINANCIAMENTO E INVESTIMENTO S.A.",
+              "521=PEAK SOCIEDADE DE EMPRÉSTIMO ENTRE PESSOAS S.A.",
+              "522=RED SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "523=HR DIGITAL - SOCIEDADE DE CRÉDITO DIRETO S/A",
+              "524=WNT CAPITAL DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
+              "526=MONETARIE SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "527=ATICCA - SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "528=REAG DISTRIBUIDORA DE TÍTULOS E VALORES MOBILIÁRIOS S.A.",
+              "529=PINBANK",
+              "530=SER FINANCE SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "532=EAGLE SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "534=EWALLY INSTITUIÇÃO DE PAGAMENTO S.A.",
+              "535=MARÚ SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "536=NEON PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO",
+              "537=MICROCASH SOCIEDADE DE CRÉDITO AO MICROEMPREENDEDOR E À EMPRESA DE PEQUENO PORTE",
+              "539=SANTINVEST S.A. - CREDITO, FINANCIAMENTO E INVESTIMENTOS",
+              "541=FUNDO GARANTIDOR DE CREDITOS - FGC",
+              "542=CLOUDWALK INSTITUIÇÃO DE PAGAMENTO E SERVICOS LTDA",
+              "545=SENSO CCVM S.A.",
+              "546=U4C INSTITUIÇÃO DE PAGAMENTO S.A.",
+              "547=BNK DIGITAL SOCIEDADE DE CRÉDITO DIRETO S.A.",
+              "600=BANCO LUSO BRASILEIRO S.A.",
+              "604=BANCO INDUSTRIAL DO BRASIL S.A.",
+              "610=BANCO VR S.A.",
+              "611=BANCO PAULISTA S.A.",
+              "612=BANCO GUANABARA S.A.",
+              "613=OMNI BANCO S.A.",
+              "623=BANCO PAN",
+              "626=BANCO C6 CONSIG",
+              "630=BANCO LETSBANK S.A.",
+              "633=BANCO RENDIMENTO S.A.",
+              "634=BANCO TRIANGULO S.A.",
+              "637=BANCO SOFISA S.A.",
+              "638=BANCO PROSPER SA",
+              "641=BANCO ALVORADA S.A.",
+              "643=BANCO PINE S.A.",
+              "650=BANCO PEBB S.A.",
+              "652=ITAÚ UNIBANCO HOLDING S.A.",
+              "653=BANCO VOITER",
+              "654=BANCO DIGIMAIS S.A.",
+              "655=BANCO VOTORANTIM S.A.",
+              "707=BANCO DAYCOVAL S.A",
+              "712=BANCO OURINVEST S.A.",
+              "719=BANIF-BANCO INTERNACIONAL DO FUNCHAL(BR) S.A",
+              "720=BANCO RNX S.A.",
+              "721=BANCO CREDIBEL S.A.",
+              "724=BANCO PORTO SEGURO S.A.",
+              "734=BANCO GERDAU SA",
+              "735=BANCO POTTENCIAL S.A.",
+              "738=BANCO MORADA SA",
+              "739=BANCO CETELEM S.A.",
+              "740=BANCO BARCLAYS  S.A.",
+              "741=BANCO RIBEIRAO PRETO S.A.",
+              "743=BANCO SEMEAR",
+              "744=BANKBOSTON N.A.",
+              "745=BANCO CITIBANK S.A.",
+              "746=BANCO MODAL S.A.",
+              "747=BANCO RABOBANK INTL BRASIL S.A.",
+              "748=BANCO COOPERATIVO SICREDI S.A.",
+              "749=BANCO SIMPLES S.A.",
+              "751=SCOTIABANK BRASIL",
+              "752=BANCO BNP PARIBAS BRASIL S A",
+              "753=NOVO BANCO CONTINENTAL S.A. - BM",
+              "754=BANCO SISTEMA",
+              "755=BOFA MERRILL LYNCH BM S.A.",
+              "756=BANCO SICOOB S.A.",
+              "757=BANCO KEB HANA DO BRASIL S.A.",
+              "999=Instituição Financeira (não bancária)"
+            ]
+          },
+          "agencia": {
+            "$id": "#root/pagamentos/items/agencia",
+            "title": "Agência do Pagamento",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9999,
+            "examples": [
+              "0001"
+            ]
+          },
+          "conta_corrente": {
+            "$id": "#root/pagamentos/items/conta_corrente",
+            "title": "Conta Corrente do Pagamento",
+            "type": "string",
+            "pattern": "^[0-9]*[1-9]{1}[0-9]*[xXpP]{0,1}$",
+            "maxLength": 20,
+            "examples": [
+              "1234X"
+            ]
+          },
+          "numero_transacao": {
+            "$id": "#root/pagamentos/items/numero_transacao",
+            "title": "Número da Transação do Pagamento",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+			"pattern": "\\S",
+            "examples": [
+              "001"
+            ]
+          }
+        }
+      }
+    },
+    "disponibilidades": {
+      "$id": "#root/disponibilidades",
+      "title": "Disponibilidades",
+      "type": "object",
+      "required": [
+        "saldos",
+        "saldo_fundo_fixo"
+      ],
+      "additionalProperties": false,
+      "minProperties": 2,
+      "maxProperties": 2,
+      "properties": {
+        "saldos": {
+          "$id": "#root/disponibilidades/saldos",
+          "title": "Saldos",
+          "type": "array",
+          "items": {
+            "$id": "#root/disponibilidades/saldos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "banco",
+              "agencia",
+              "conta",
+              "conta_tipo",
+              "saldo_bancario",
+              "saldo_contabil"
+            ],
+            "additionalProperties": false,
+            "minProperties": 6,
+            "maxProperties": 6,
+            "properties": {
+              "banco": {
+                "$id": "#root/disponibilidades/saldos/items/banco",
+                "title": "Banco",
+                "$ref": "#root/pagamentos/items/banco"
+              },
+              "agencia": {
+                "$id": "#root/disponibilidades/saldos/items/agencia",
+                "title": "Agência",
+                "$ref": "#root/pagamentos/items/agencia"
+              },
+              "conta": {
+                "$id": "#root/disponibilidades/saldos/items/conta",
+                "title": "Conta",
+                "$ref": "#root/pagamentos/items/conta_corrente"
+              },
+              "conta_tipo": {
+                "$id": "#root/disponibilidades/saldos/items/conta_tipo",
+                "title": "Tipo da Conta",
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ],
+                "examples": [
+                  "1=Conta Corrente",
+                  "2=Investimento"
+                ]
+              },
+              "saldo_bancario": {
+                "$id": "#root/disponibilidades/saldos/items/saldo_bancario",
+                "title": "Saldo Bancário",
+                "type": "number",
+                "minimum": -9999999999.99,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              },
+              "saldo_contabil": {
+                "$id": "#root/disponibilidades/saldos/items/saldo_contabil",
+                "title": "Saldo Contábil",
+                "type": "number",
+                "minimum": -9999999999.99,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              }
+            }
+          }
+        },
+        "saldo_fundo_fixo": {
+          "$id": "#root/disponibilidades/saldo_fundo_fixo",
+          "title": "Saldo do Fundo Fixo",
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 9999999999.99,
+          "multipleOf": 0.01,
+          "examples": [
+            1.23
+          ]
+        }
+      }
+    },
+    "receitas": {
+      "$id": "#root/receitas",
+      "title": "Receitas",
+      "type": "object",
+      "required": [
+        "receitas_aplic_financ_repasses_publicos_estaduais",
+        "receitas_aplic_financ_repasses_publicos_federais",
+        "repasses_recebidos",
+        "outras_receitas",
+        "recursos_proprios"
+      ],
+      "additionalProperties": false,
+      "minProperties": 5,
+      "maxProperties": 6,
+      "properties": {
+        "receitas_aplic_financ_repasses_publicos_municipais": {
+          "$id": "#root/receitas/receitas_aplic_financ_repasses_publicos_municipais",
+          "title": "Receitas com Aplicações Financeiras dos Repasses Públicos Municipais",
+          "type": "number",
+          "minimum": -9999999999.99,
+          "maximum": 9999999999.99,
+          "multipleOf": 0.01,
+          "examples": [
+            1.23
+          ]
+        },
+        "receitas_aplic_financ_repasses_publicos_estaduais": {
+          "$id": "#root/receitas/receitas_aplic_financ_repasses_publicos_estaduais",
+          "title": "Receitas com Aplicações Financeiras dos Repasses Públicos Estaduais",
+          "type": "number",
+          "minimum": -9999999999.99,
+          "maximum": 9999999999.99,
+          "multipleOf": 0.01,
+          "examples": [
+            1.23
+          ]
+        },
+        "receitas_aplic_financ_repasses_publicos_federais": {
+          "$id": "#root/receitas/receitas_aplic_financ_repasses_publicos_federais",
+          "title": "Receitas com Aplicações Financeiras dos Repasses Públicos Federais",
+          "type": "number",
+          "minimum": -9999999999.99,
+          "maximum": 9999999999.99,
+          "multipleOf": 0.01,
+          "examples": [
+            1.23
+          ]
+        },
+        "repasses_recebidos": {
+          "$id": "#root/receitas/repasses_recebidos",
+          "title": "Repasses Recebidos no Período",
+          "type": "array",
+          "items": {
+            "$id": "#root/receitas/repasses_recebidos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "data_prevista",
+              "data_repasse",
+              "valor",
+              "fonte_recurso_tipo"
+            ],
+            "additionalProperties": false,
+            "minProperties": 4,
+            "maxProperties": 4,
+            "properties": {
+              "data_prevista": {
+                "$id": "#root/receitas/repasses_recebidos/items/data_prevista",
+                "title": "Data Prevista do Repasse",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              },
+              "data_repasse": {
+                "$id": "#root/receitas/repasses_recebidos/items/data_repasse",
+                "title": "Data do Repasse",
+                "type": "string",
+                "format": "date",
+                "examples": [
+                  "2024-01-01"
+                ]
+              },
+              "valor": {
+                "$id": "#root/receitas/repasses_recebidos/items/valor",
+                "title": "Valor",
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              },
+              "fonte_recurso_tipo": {
+                "$id": "#root/receitas/repasses_recebidos/items/fonte_recurso_tipo",
+                "title": "Tipo da Fonte de Recurso",
+                "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+              }
+            }
+          }
+        },
+        "outras_receitas": {
+          "$id": "#root/receitas/outras_receitas",
+          "title": "Outras Receitas Decorrentes da Execução do Ajuste",
+          "type": "array",
+          "items": {
+            "$id": "#root/receitas/outras_receitas/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "descricao",
+              "valor"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "descricao": {
+                "$id": "#root/receitas/outras_receitas/items/descricao",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+				"pattern": "\\S",
+                "examples": [
+                  "Descrição"
+                ]
+              },
+              "valor": {
+                "$id": "#root/receitas/outras_receitas/items/valor",
+                "title": "Valor",
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              }
+            }
+          }
+        },
+        "recursos_proprios": {
+          "$id": "#root/receitas/recursos_proprios",
+          "title": "Recursos Próprios da Entidade Beneficiária",
+          "type": "array",
+          "items": {
+            "$id": "#root/receitas/recursos_proprios/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "descricao",
+              "valor"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "descricao": {
+                "$id": "#root/receitas/recursos_proprios/items/descricao",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+				"pattern": "\\S",
+                "examples": [
+                  "Descrição"
+                ]
+              },
+              "valor": {
+                "$id": "#root/receitas/recursos_proprios/items/valor",
+                "title": "Valor",
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "ajustes_saldo": {
+      "$id": "#root/ajustes_saldo",
+      "title": "Ajustes de Saldo",
+      "type": "object",
+      "required": [
+        "retificacao_repasses",
+        "inclusao_repasses",
+        "retificacao_pagamentos",
+        "inclusao_pagamentos"
+      ],
+      "additionalProperties": false,
+      "minProperties": 4,
+      "maxProperties": 4,
+      "properties": {
+        "retificacao_repasses": {
+          "$id": "#root/ajustes_saldo/retificacao_repasses",
+          "title": "Retificação de Repasses Informados em Prestações Anteriores",
+          "type": "array",
+          "items": {
+            "$id": "#root/ajustes_saldo/retificacao_repasses/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "data_prevista",
+              "data_repasse",
+              "valor_retificado",
+              "fonte_recurso_tipo"
+            ],
+            "additionalProperties": false,
+            "minProperties": 4,
+            "maxProperties": 4,
+            "properties": {
+              "data_prevista": {
+                "$id": "#root/ajustes_saldo/retificacao_repasses/items/data_prevista",
+                "title": "Data Prevista do Repasse",
+                "$ref": "#root/receitas/repasses_recebidos/items/data_prevista"
+              },
+              "data_repasse": {
+                "$id": "#root/ajustes_saldo/retificacao_repasses/items/data_repasse",
+                "title": "Data do Repasse",
+                "$ref": "#root/receitas/repasses_recebidos/items/data_repasse"
+              },
+              "valor_retificado": {
+                "$id": "#root/ajustes_saldo/retificacao_repasses/items/valor_retificado",
+                "title": "Valor do Repasse Retificado",
+                "type": "number",
+                "minimum": 0.00,
+                "maximum": 9999999999.99,
+                "multipleOf": 0.01,
+                "examples": [
+                  1.23
+                ]
+              },
+              "fonte_recurso_tipo": {
+                "$id": "#root/ajustes_saldo/repasses_recebidos/items/fonte_recurso_tipo",
+                "title": "Tipo da Fonte de Recurso",
+                "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+              }
+            }
+          }
+        },
+        "inclusao_repasses": {
+          "$id": "#root/ajustes_saldo/inclusao_repasses",
+          "title": "Inclusão de Repasses de Períodos Anteriores",
+          "type": "array",
+          "items": {
+            "$id": "#root/ajustes_saldo/inclusao_repasses/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "data_prevista",
+              "data_repasse",
+              "valor",
+              "fonte_recurso_tipo"
+            ],
+            "additionalProperties": false,
+            "minProperties": 4,
+            "maxProperties": 4,
+            "properties": {
+              "data_prevista": {
+                "$id": "#root/ajustes_saldo/inclusao_repasses/items/data_prevista",
+                "title": "Data Prevista do Repasse",
+                "$ref": "#root/receitas/repasses_recebidos/items/data_prevista"
+              },
+              "data_repasse": {
+                "$id": "#root/ajustes_saldo/inclusao_repasses/items/data_repasse",
+                "title": "Data do Repasse",
+                "$ref": "#root/receitas/repasses_recebidos/items/data_repasse"
+              },
+              "valor": {
+                "$id": "#root/ajustes_saldo/inclusao_repasses/items/valor",
+                "title": "Valor",
+                "$ref": "#root/receitas/repasses_recebidos/items/valor"
+              },
+              "fonte_recurso_tipo": {
+                "$id": "#root/ajustes_saldo/inclusao_repasses/items/fonte_recurso_tipo",
+                "title": "Tipo da Fonte de Recurso",
+                "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+              }
+            }
+          }
+        },
+        "retificacao_pagamentos": {
+          "$id": "#root/ajustes_saldo/retificacao_pagamentos",
+          "title": "Retificação de pagamentos informados em prestações anteriores",
+          "type": "array",
+          "items": {
+            "$id": "#root/ajustes_saldo/retificacao_pagamentos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "identificacao_documento_fiscal",
+              "pagamento_data",
+              "pagamento_valor",
+              "fonte_recurso_tipo",
+              "valor_retificado"
+            ],
+            "additionalProperties": false,
+            "minProperties": 5,
+            "maxProperties": 5,
+            "properties": {
+              "identificacao_documento_fiscal": {
+                "$id": "#root/ajustes_saldo/retificacao_pagamentos/items/identificacao_documento_fiscal",
+                "title": "Identificação do Documento Fiscal do Pagamento",
+                "$ref": "#root/pagamentos/items/identificacao_documento_fiscal"
+              },
+              "pagamento_data": {
+                "$id": "#root/ajustes_saldo/retificacao_pagamentos/items/pagamento_data",
+                "title": "Data do Pagamento",
+                "$ref": "#root/pagamentos/items/pagamento_data"
+              },
+              "pagamento_valor": {
+                "$id": "#root/ajustes_saldo/retificacao_pagamentos/items/pagamento_valor",
+                "title": "Valor do Pagamento",
+                "$ref": "#root/pagamentos/items/pagamento_valor"
+              },
+              "fonte_recurso_tipo": {
+                "$id": "#root/ajustes_saldo/retificacao_pagamentos/items/fonte_recurso_tipo",
+                "title": "Tipo da Fonte de Recurso",
+                "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+              },
+              "valor_retificado": {
+                "$id": "#root/ajustes_saldo/retificacao_pagamentos/items/valor_retificado",
+                "title": "Valor do Pagamento Retificado",
+                "$ref": "#root/ajustes_saldo/retificacao_repasses/items/valor_retificado"
+              }
+            }
+          }
+        },
+        "inclusao_pagamentos": {
+          "$id": "#root/ajustes_saldo/inclusao_pagamentos",
+          "title": "Inclusão de pagamentos de períodos anteriores",
+          "type": "array",
+          "items": {
+            "$id": "#root/ajustes_saldo/inclusao_pagamentos/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "identificacao_documento_fiscal",
+              "pagamento_data",
+              "pagamento_valor",
+              "fonte_recurso_tipo",
+              "meio_pagamento_tipo"
+            ],
+            "additionalProperties": false,
+            "minProperties": 5,
+            "maxProperties": 9,
+            "properties": {
+              "identificacao_documento_fiscal": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/identificacao_documento_fiscal",
+                "title": "Identificação do Documento Fiscal do Pagamento",
+                "$ref": "#root/pagamentos/items/identificacao_documento_fiscal"
+              },
+              "pagamento_data": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/pagamento_data",
+                "title": "Data do Pagamento",
+                "$ref": "#root/pagamentos/items/pagamento_data"
+              },
+              "pagamento_valor": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/pagamento_valor",
+                "title": "Valor do Pagamento",
+                "$ref": "#root/pagamentos/items/pagamento_valor"
+              },
+              "fonte_recurso_tipo": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/fonte_recurso_tipo",
+                "title": "Tipo da Fonte de Recurso",
+                "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+              },
+              "meio_pagamento_tipo": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/meio_pagamento_tipo",
+                "title": "Tipo do Meio de Pagamento",
+                "$ref": "#root/pagamentos/items/meio_pagamento_tipo"
+              },
+              "banco": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/banco",
+                "title": "Banco do Pagamento",
+                "$ref": "#root/pagamentos/items/banco"
+              },
+              "agencia": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/agencia",
+                "title": "Agência do Pagamento",
+                "$ref": "#root/pagamentos/items/agencia"
+              },
+              "conta_corrente": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/conta_corrente",
+                "title": "Conta Corrente do Pagamento",
+                "$ref": "#root/pagamentos/items/conta_corrente"
+              },
+              "numero_transacao": {
+                "$id": "#root/ajustes_saldo/inclusao_pagamentos/items/numero_transacao",
+                "title": "Número da Transação do Pagamento",
+                "$ref": "#root/pagamentos/items/numero_transacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    "servidores_cedidos": {
+      "$id": "#root/servidores_cedidos",
+      "title": "Relação de servidores cedidos",
+      "type": "array",
+      "items": {
+        "$id": "#root/servidores_cedidos/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "cpf",
+          "data_inicial_cessao",
+          "cargo_publico_ocupado",
+          "funcao_desempenhada_entidade_beneficiaria",
+          "onus_pagamento",
+          "periodos_cessao"
+        ],
+        "additionalProperties": false,
+        "minProperties": 6,
+        "maxProperties": 7,
+        "properties": {
+          "cpf": {
+            "$id": "#root/servidores_cedidos/items/cpf",
+            "title": "CPF do servidor",
+            "$ref": "#/$defs/cpf"
+          },
+          "data_inicial_cessao": {
+            "$id": "#root/servidores_cedidos/items/data_inicial_cessao",
+            "title": "Data inicial de cessão do servidor",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "data_final_cessao": {
+            "$id": "#root/servidores_cedidos/items/data_final_cessao",
+            "title": "Data final de cessão do servidor",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "cargo_publico_ocupado": {
+            "$id": "#root/servidores_cedidos/items/cargo_publico_ocupado",
+            "title": "Cargo público ocupado pelo servidor",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+			"pattern": "\\S",
+            "examples": [
+              "Cargo"
+            ]
+          },
+          "funcao_desempenhada_entidade_beneficiaria": {
+            "$id": "#root/servidores_cedidos/items/funcao_desempenhada_entidade_beneficiaria",
+            "title": "Função desempenhada pelo servidor",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+			"pattern": "\\S",
+            "examples": [
+              "Função"
+            ]
+          },
+          "onus_pagamento": {
+            "$id": "#root/servidores_cedidos/items/onus_pagamento",
+            "title": "Ônus do pagamento do servidor",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "examples": [
+              "1=Órgão Concessor",
+              "2=Entidade Beneficiada",
+              "3=Ambos"
+            ]
+          },
+          "periodos_cessao": {
+            "$id": "#root/servidores_cedidos/items/periodos_cessao",
+            "title": "Períodos de cessão dos servidores",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "$id": "#root/servidores_cedidos/items/periodos_cessao/items",
+              "title": "Items",
+              "type": "object",
+              "required": [
+                "mes",
+                "carga_horaria",
+                "remuneracao_bruta"
+              ],
+              "additionalProperties": false,
+              "minProperties": 3,
+              "maxProperties": 3,
+              "properties": {
+                "mes": {
+                  "$id": "#root/servidores_cedidos/items/periodos_cessao/items/mes",
+                  "title": "Mês da remuneração",
+                  "type": "integer",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12
+                  ]
+                },
+                "carga_horaria": {
+                  "$id": "#root/servidores_cedidos/items/periodos_cessao/items/carga_horaria",
+                  "title": "Carga horária trabalhada no mês",
+                  "minimum": 0.0,
+                  "maximum": 9999.5,
+                  "multipleOf": 0.5,
+                  "examples": [
+                    45.5
+                  ]
+                },
+                "remuneracao_bruta": {
+                  "$id": "#root/servidores_cedidos/items/periodos_cessao/items/remuneracao_bruta",
+                  "title": "Remuneração do empregado",
+                  "type": "number",
+                  "minimum": 0.0,
+                  "maximum": 9999999999.99,
+                  "multipleOf": 0.01,
+                  "examples": [
+                    1320.0
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "descontos": {
+      "$id": "#root/descontos",
+      "title": "Descontos",
+      "type": "array",
+      "items": {
+        "$id": "#root/descontos/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "data",
+          "descricao",
+          "valor"
+        ],
+        "additionalProperties": false,
+        "minProperties": 3,
+        "maxProperties": 3,
+        "properties": {
+          "data": {
+            "$id": "#root/descontos/items/data",
+            "title": "Data da Aplicação do Desconto",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "descricao": {
+            "$id": "#root/descontos/items/descricao",
+            "title": "Descrição do Desconto",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Descrição do Desconto"
+            ]
+          },
+          "valor": {
+            "$id": "#root/descontos/items/valor",
+            "title": "Valor do Desconto",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          }
+        }
+      }
+    },
+    "devolucoes": {
+      "$id": "#root/devolucoes",
+      "title": "Devoluções",
+      "type": "array",
+      "items": {
+        "$id": "#root/devolucoes/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "data",
+          "natureza_devolucao_tipo",
+          "valor"
+        ],
+        "additionalProperties": false,
+        "minProperties": 3,
+        "maxProperties": 3,
+        "properties": {
+          "data": {
+            "$id": "#root/devolucoes/items/data",
+            "title": "Data da Aplicação da Devolução",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "natureza_devolucao_tipo": {
+            "$id": "#root/devolucoes/items/natureza_devolucao_tipo",
+            "title": "Natureza da Devolução",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "examples": [
+              "1 = Glosa devolvida à conta bancária específica do repasse público",
+              "2 = Glosa devolvida à conta bancária do órgão público",
+              "3 = Valor não aplicado"
+            ]
+          },
+          "valor": {
+            "$id": "#root/devolucoes/items/valor",
+            "title": "Valor da Devolução",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          }
+        }
+      }
+    },
+    "glosas": {
+      "$id": "#root/glosas",
+      "title": "Glosas",
+      "type": "array",
+      "items": {
+        "$id": "#root/glosas/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "identificacao_documento_fiscal",
+          "resultado_analise"
+        ],
+        "additionalProperties": false,
+        "minProperties": 2,
+        "maxProperties": 4,
+        "properties": {
+          "identificacao_documento_fiscal": {
+            "$id": "#root/glosas/items/identificacao_documento_fiscal",
+            "title": "Identificação do Documento Fiscal",
+            "$ref": "#root/pagamentos/items/identificacao_documento_fiscal"
+          },
+          "pagamento_data": {
+            "$id": "#root/glosas/items/pagamento_data",
+            "title": "Data do Pagamento",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "resultado_analise": {
+            "$id": "#root/glosas/items/situacao_analise",
+            "title": "Situação da Análise",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "examples": [
+              "1 = Aprovado",
+              "2 = Aprovado parcialmente",
+              "3 = Reprovado"
+            ]
+          },
+          "valor_glosa": {
+            "$id": "#root/glosas/items/valor_glosa",
+            "title": "Valor da Glosa",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          }
+        }
+      }
+    },
+    "empenhos": {
+      "$id": "#root/empenhos",
+      "title": "Empenhos",
+      "type": "array",
+      "items": {
+        "$id": "#root/empenhos/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "numero",
+          "data_emissao",
+          "classificacao_economica_tipo",
+          "fonte_recurso_tipo",
+          "valor",
+          "historico",
+          "cpf_ordenador_despesa"
+        ],
+        "additionalProperties": false,
+        "minProperties": 7,
+        "maxProperties": 7,
+        "properties": {
+          "numero": {
+            "$id": "#root/empenhos/items/numero",
+            "title": "Número do Empenho",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 35,
+			"pattern": "\\S",
+            "examples": [
+              "1234657890"
+            ]
+          },
+          "data_emissao": {
+            "$id": "#root/empenhos/items/data_emissao",
+            "title": "Data da Emissão do Empenho",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "classificacao_economica_tipo": {
+            "$id": "#root/empenhos/items/classificacao_economica_tipo",
+            "title": "Classificação Econômica de Despesa",
+            "type": "string",
+            "pattern": "^[0-9]{8}$",
+            "examples": [
+              "12345678"
+            ]
+          },
+          "fonte_recurso_tipo": {
+            "$id": "#root/empenhos/items/fonte_recurso_tipo",
+            "title": "Tipo da Fonte de Recurso",
+            "$ref": "#root/pagamentos/items/fonte_recurso_tipo"
+          },
+          "valor": {
+            "$id": "#root/empenhos/items/valor",
+            "title": "Valor do Empenho",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "historico": {
+            "$id": "#root/empenhos/items/historico",
+            "title": "Histórico",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Empenho"
+            ]
+          },
+          "cpf_ordenador_despesa": {
+            "$id": "#root/empenhos/items/cpf_ordenador_despesa",
+            "title": "CPF do Ordenador de Despesas",
+            "$ref": "#/$defs/cpf"
+          }
+        }
+      }
+    },
+    "repasses": {
+      "$id": "#root/repasses",
+      "title": "Repasses",
+      "type": "array",
+      "items": {
+        "$id": "#root/repasses/items",
+        "title": "Items",
+        "type": "object",
+        "required": [
+          "identificacao_empenho",
+          "data_prevista",
+          "data_repasse",
+          "valor_previsto",
+          "valor_repasse",
+          "tipo_documento_bancario",
+          "numero_documento",
+          "banco",
+          "agencia",
+          "conta"
+        ],
+        "additionalProperties": false,
+        "minProperties": 10,
+        "maxProperties": 12,
+        "properties": {
+          "identificacao_empenho": {
+            "type": "object",
+            "required": [
+              "numero",
+              "data_emissao"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "numero": {
+                "$id": "#root/repasses/items/identificacao_empenho/numero",
+                "title": "Número do Empenho",
+                "$ref": "#root/empenhos/items/numero"
+              },
+              "data_emissao": {
+                "$id": "#root/repasses/items/identificacao_empenho/data_emissao",
+                "title": "Data da Emissão do Empenho",
+                "$ref": "#root/empenhos/items/data_emissao"
+              }
+            }
+          },
+          "data_prevista": {
+            "$id": "#root/repasses/items/data_prevista",
+            "title": "Data Prevista do Repasse",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "data_repasse": {
+            "$id": "#root/repasses/items/data_repasse",
+            "title": "Data do Repasse",
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2024-01-01"
+            ]
+          },
+          "valor_previsto": {
+            "$id": "#root/repasses/items/valor_previsto",
+            "title": "Valor Previsto do Repasse",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "valor_repasse": {
+            "$id": "#root/repasses/items/valor_repasse",
+            "title": "Valor  do Repasse",
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01,
+            "examples": [
+              1.23
+            ]
+          },
+          "justificativa_diferenca_valor": {
+            "$id": "#root/repasses/items/justificativa_diferenca_valor",
+            "title": "Justificativa para a Diferença de Valor",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Justiticativa"
+            ]
+          },
+          "tipo_documento_bancario": {
+            "$id": "#root/repasses/items/tipo_documento_bancario",
+            "title": "Tipo do Documento Bancário",
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+			  3
+            ],
+            "examples": [
+              "1 = Ordem bancária",
+              "2 = Outros",
+			  "3 = Cheque"
+            ]
+          },
+          "descricao_outros": {
+            "$id": "#root/repasses/items/descricao_outros",
+            "title": "Descrição de Outros Documentos Bancários",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+			"pattern": "\\S",
+            "examples": [
+              "Outro documento bancário"
+            ]
+          },
+          "numero_documento": {
+            "$id": "#root/repasses/items/numero_documento",
+            "title": "Número do Documento Bancário",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+			"pattern": "\\S",
+            "examples": [
+              "ABC123"
+            ]
+          },
+          "banco": {
+            "$id": "#root/repasses/items/banco",
+            "title": "Banco",
+            "$ref": "#root/pagamentos/items/banco"
+          },
+          "agencia": {
+            "$id": "#root/repasses/items/agencia",
+            "title": "Agência",
+            "$ref": "#root/pagamentos/items/agencia"
+          },
+          "conta": {
+            "$id": "#root/repasses/items/conta",
+            "title": "Conta",
+            "$ref": "#root/pagamentos/items/conta_corrente"
+          }
+        }
+      }
+    },
+    "relatorio_atividades": {
+      "$id": "#root/relatorio_atividades",
+      "title": "Relatorio de Atividades",
+      "type": "object",
+      "required": [
+        "programas"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "programas": {
+          "$id": "#root/relatorio_atividades/programas",
+          "title": "Programas de metas",
+          "type": "array",
+          "items": {
+            "$id": "#root/relatorio_atividades/programas/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "nome_programa",
+              "metas"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "nome_programa": {
+                "$id": "#root/relatorio_atividades/programas/items/nome_programa",
+                "title": "Nome do programa de metas",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 250,
+				"pattern": "\\S",
+                "examples": [
+                  "Programa ABC"
+                ]
+              },
+              "metas": {
+                "$id": "#root/relatorio_atividades/programas/items/metas",
+                "title": "Relação das metas",
+                "type": "array",
+                "items": {
+                  "$id": "#root/relatorio_atividades/programas/items/metas/items",
+                  "title": "Items",
+                  "type": "object",
+                  "required": [
+                    "codigo_meta",
+                    "periodicidades",
+                    "meta_atendida"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "codigo_meta": {
+                      "$id": "#root/relatorio_atividades/programas/items/metas/items/codigo_meta",
+                      "title": "Código da meta",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+					  "pattern": "\\S",
+                      "examples": [
+                        "ABC001"
+                      ]
+                    },
+                    "periodicidades": {
+                      "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades",
+                      "title": "Relação das metas",
+                      "type": "array",
+                      "items": {
+                        "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades/items",
+                        "title": "Items",
+                        "type": "object",
+                        "required": [
+                          "periodo"
+                        ],
+                        "additionalProperties": false,
+                        "minProperties": 2,
+                        "maxProperties": 4,
+                        "properties": {
+                          "periodo": {
+                            "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades/items/periodo",
+                            "title": "Período da meta",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 12
+                          },
+                          "quantidade_realizada": {
+                            "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades/items/quantidade_realizada",
+                            "title": "Quantidade realizada da meta Quantitativa ou meta Qualitativa Quantificável",
+                            "type": "number"
+                          },
+                          "resultado_meta": {
+                            "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades/items/resultado_meta",
+                            "title": "Resultado da meta Qualitativa não Quantificável",
+                            "type": "integer",
+                            "enum": [
+                              1,
+                              2,
+                              3
+                            ],
+                            "examples": [
+                              "1 = Cumprida",
+                              "2 = Não Cumprida",
+                              "3 = Cumprida Parcialmente"
+                            ]                            
+                          },
+                          "justificativa": {
+                            "$id": "#root/relatorio_atividades/programas/items/metas/items/periodicidades/items/justificativa",
+                            "title": "Motivo do não atingimento da meta",
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1000,
+							"pattern": "\\S",
+                            "examples": [
+                              "Meta não cumprida devido a..."
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "meta_atendida" : {
+                      "$id": "#root/relatorio_atividades/programas/items/metas/items/meta_atendida",
+                      "title": "indica se a atividade desenvolvida com os recursos próprios e as verbas públicas repassadas se compatibiliza com a meta proposta",
+                      "type": "boolean"
+                    },
+                    "justificativa": {
+                      "$id": "#root/relatorio_atividades/programas/items/metas/items/justificativa",
+                      "title": "Justificativa da meta não atendida",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000,
+					  "pattern": "\\S",
+                      "examples": [
+                        "Meta não atendida devido a..."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dados_gerais_entidade_beneficiaria": {
+      "$id": "#root/dados_gerais_entidade_beneficiaria",
+      "title": "Dados gerais da entidade beneficiaria",
+      "type": "object",
+      "required": [
+        "identificacao_certidao_dados_gerais",
+        "identificacao_certidao_corpo_diretivo",
+        "identificacao_certidao_membros_conselho"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identificacao_certidao_dados_gerais": {
+          "$id": "#root/dados_gerais_entidade_beneficiaria/identificacao_certidao_dados_gerais",
+          "title": "Identificação da certidão de dados gerais da entidade beneficiária",
+          "$ref": "#/$defs/identificacao_certidao"
+        },
+        "identificacao_certidao_corpo_diretivo": {
+          "$id": "#root/dados_gerais_entidade_beneficiaria/identificacao_certidao_corpo_diretivo",
+          "title": "Identificação da certidão do corpo diretivo da prestação de contas da entidade beneficiária",
+          "$ref": "#/$defs/identificacao_certidao"
+        },
+        "identificacao_certidao_membros_conselho": {
+          "$id": "#root/dados_gerais_entidade_beneficiaria/identificacao_certidao_membros_conselho",
+          "title": "Identificação da certidão dos membros do conselho da prestação de contas da entidade beneficiária",
+          "$ref": "#/$defs/identificacao_certidao"
+        }
+      }
+    },
+    "responsaveis_membros_orgao_concessor": {
+      "$id": "#root/responsaveis_membros_orgao_concessor",
+      "title": "Responsáveis e membros do órgão concessor",
+      "type": "object",
+      "required": [
+        "identificacao_certidao_responsaveis",
+        "identificacao_certidao_membros_comissao_avaliacao",
+        "identificacao_certidao_membros_controle_interno"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identificacao_certidao_responsaveis": {
+          "$id": "#root/responsaveis_membros_orgao_concessor/identificacao_certidao_responsaveis",
+          "title": "Identificação da certidão dos responsáveis pelo órgão concessor",
+          "$ref": "#/$defs/identificacao_certidao"
+        },
+        "identificacao_certidao_membros_comissao_avaliacao": {
+          "$id": "#root/responsaveis_membros_orgao_concessor/identificacao_certidao_membros_comissao_avaliacao",
+          "title": "Identificação da certidão dos membros da comissão de avaliação",
+          "$ref": "#/$defs/identificacao_certidao"
+        },
+        "identificacao_certidao_membros_controle_interno": {
+          "$id": "#root/responsaveis_membros_orgao_concessor/identificacao_certidao_membros_controle_interno",
+          "title": "Identificação da certidão dos membros do controle interno",
+          "$ref": "#/$defs/identificacao_certidao"
+        },
+        "identificacao_certidao_responsaveis_fiscalizacao_execucao": {
+          "$id": "#root/responsaveis_membros_orgao_concessor/identificacao_certidao_responsaveis_fiscalizacao_execucao",
+          "title": "Identificação da certidão dos responsáveis pela fiscalização da execução",
+          "$ref": "#/$defs/identificacao_certidao"
+        }
+      }
+    },
+    "publicacao_extrato_execucao_fisica_financeira" : {
+      "$id": "#root/publicacao_extrato_execucao_fisica_financeira",
+      "title": "Publicação do Extrato de Execução Física e Financeira",
+      "type": "object",
+      "required": [
+        "ha_extrato_execucao_fisica_financeira"
+      ],
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 3,
+      "properties": {
+        "ha_extrato_execucao_fisica_financeira": {
+          "$id": "#root/publicacao_extrato_execucao_fisica_financeira/ha_extrato_execucao_fisica_financeira",
+          "title": "Informa se há extrato de execução Física e Financeira",
+          "type": "boolean"
+        },
+        "extrato_elaborado_conforme_modelo": {
+          "$id": "#root/publicacao_extrato_execucao_fisica_financeira/extrato_elaborado_conforme_modelo",
+          "title": "Informa se o extrato foi elaborado conforme modelo",
+          "type": "boolean"
+        },
+        "publicacoes": {
+          "$id": "#root/publicacao_extrato_execucao_fisica_financeira/publicacoes",
+          "title": "Relação de publicações do extrato de execução física e financeira",
+          "$ref": "#/$defs/publicacoes"
+        }
+      }
+    },
+    "declaracoes" : {
+      "$id": "#root/declaracoes",
+      "title": "Declarações",
+      "type": "object",
+      "required": [
+        "houve_contratacao_empresas_pertencentes",
+        "houve_participacao_quadro_diretivo_administrativo",
+        "compras_contratacoes_adequados_regulamento_proprio"
+      ],
+      "additionalProperties": false,
+      "minProperties": 3,
+      "maxProperties": 5,
+      "properties": {
+        "houve_contratacao_empresas_pertencentes": {
+          "$id": "#root/declaracoes/houve_contratacao_empresas_pertencentes",
+          "title": "Informa se houve contratação de empresa(s) pertencente(s) ",
+          "type": "boolean"
+        },
+        "empresas_pertencentes": {
+          "$id": "#root/declaracoes/empresas_pertencentes",
+          "title": "Relação de empresas cadastradas",
+          "type": "array",
+          "items": {
+            "$id": "#root/declaracoes/empresas_pertencentes/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "cnpj",
+              "cpf"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "cnpj": {
+                "$id": "#root/declaracoes/empresas_pertencentes/items/cnpj",
+                "title": "CNPJ da empresa contratada",
+                "$ref" : "#/$defs/cnpj"
+              },
+              "cpf": {
+                "$id": "#root/declaracoes/empresas_pertencentes/items/cpf",
+                "title": "CPF do dirigente da entidade ou de Agente Políticos/Dirigentes do poder público contratante",
+                "$ref": "#/$defs/cpf"
+              }
+            }
+          }
+        },
+        "houve_participacao_quadro_diretivo_administrativo": {
+          "$id": "#root/declaracoes/houve_participacao_quadro_diretivo_administrativo",
+          "title": "Informa se houve participação no quadro diretivo",
+          "type": "boolean"
+        },
+        "participacoes_quadro_diretivo_administrativo": {
+          "$id": "#root/declaracoes/participacoes_quadro_diretivo_administrativo",
+          "title": "Relação de participações",
+          "type": "array",
+          "items": {
+            "$id": "#root/declaracoes/participacoes_quadro_diretivo_administrativo/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "cpf_dirigente",
+              "cpf_contratados"
+            ],
+            "additionalProperties": false,
+            "minProperties": 2,
+            "maxProperties": 2,
+            "properties": {
+              "cpf_dirigente": {
+                "$id": "#root/declaracoes/participacoes_quadro_diretivo_administrativo/items/cpf_dirigente",
+                "title": "CPF do dirigente da entidade ou de Agente Político/Dirigente do poder público contratante",
+                "$ref": "#/$defs/cpf"
+              },
+              "cpf_contratados" :{
+                "$id": "#root/declaracoes/participacoes_quadro_diretivo_administrativo/items/cpf_contratados",
+                "title": "Relação de CPFs dos contratados pelo dirigente",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/cpf"
+                }
+              }
+            }
+          }
+        },
+        "compras_contratacoes_adequados_regulamento_proprio": {
+          "$id": "#root/declaracoes/compras_contratacoes_adequados_regulamento_proprio",
+          "title": "Informa se as compras e contratações estão adequadas ao regulamento próprio do órgão concessor",
+          "type": "boolean"
+        }
+      }
+    },
+    "demonstracoes_contabeis" : {
+      "$id": "#root/demonstracoes_contabeis",
+      "title": "Demonstrações contábeis",
+      "type": "object",
+      "required": [
+        "publicacoes",
+        "responsavel"
+      ],
+      "additionalProperties": false,
+      "minProperties": 2,
+      "maxProperties": 2,
+      "properties": {
+        "publicacoes": {
+          "$id": "#root/demonstracoes_contabeis/publicacoes",
+          "title": "Relação de publicações das demonstrações contábeis da entidade beneficiária",
+          "$ref": "#/$defs/publicacoes"
+        },
+        "responsavel" : {
+          "$id": "#root/demonstracoes_contabeis/responsavel",
+          "title": "Identificação do responsável que assinou as demonstrações contábeis",
+          "type": "object",
+          "required": [
+            "numero_crc",
+            "cpf",
+            "situacao_regular_crc"
+          ],
+          "additionalProperties": false,
+          "minProperties": 3,
+          "maxProperties": 3,
+          "properties": {
+            "numero_crc": {
+              "$id": "#root/demonstracoes_contabeis/responsavel/numero_crc",
+              "title": "Número do CRC (Conselho Regional de Contabilidade) do responsável",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+			  "pattern": "\\S",
+              "examples": [
+                "1SP000001"
+              ]
+            },
+            "cpf": {
+              "$id": "#root/demonstracoes_contabeis/responsavel/cpf",
+              "title": "CPF do responsável",
+              "$ref": "#/$defs/cpf"
+            },
+            "situacao_regular_crc": {
+              "$id": "#ot/demonstracoes_contabeis/responsavel/situacao_regular_crc",
+              "title": "Informa se o profissional que assinou as demonstrações contábeis encontrava-se em situação regular junto ao CRC na data da sua elaboração",
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "publicacoes_parecer_ata" : {
+       "$id": "#root/publicacoes_parecer_ata",
+       "title": "Publicações de Parecer ou Ata",
+       "type": "array",
+       "items": {
+         "$id": "#root/publicacoes_parecer_ata/items",
+         "title": "Items",
+         "type": "object",
+         "required": [
+           "tipo_parecer_ata",
+           "houve_publicacao",
+           "conclusao_parecer"
+         ],
+         "additionalProperties": false,
+         "properties": {
+           "tipo_parecer_ata" : {
+             "$id": "#root/publicacoes_parecer_ata/items/tipo_parecer_ata",
+             "title": "Tipo da ata ou parecer emitido",
+             "enum": [
+               1,
+               2,
+               3,
+               4
+             ],
+             "examples": [
+               "1=Parecer ou Ata do Conselho Fiscal",
+               "2=Parecer ou Ata do Conselho de Administração",
+               "3=Parecer da Auditoria Independente",
+               "4=Parecer do Conselho de Políticas Públicas"
+             ]          
+            },
+           "houve_publicacao": {
+             "$id": "#root/publicacoes_parecer_ata/items/houve_publicacao",
+             "title": "Informa se houve publicação da ata ou parecer",
+             "type": "boolean"
+           },
+           "publicacoes": {
+             "$id": "#root/publicacoes_parecer_ata/items/publicacoes",
+             "title": "Relação de publicações da ata ou parecer",
+             "$ref": "#/$defs/publicacoes"
+           },
+           "conclusao_parecer" : {
+             "$id": "#root/publicacoes_parecer_ata/items/conclusao_parecer",
+             "title": "Informa a conclusão do parecer",
+             "enum": [
+               1,
+               2,
+               3,
+               4,
+               5
+             ],
+             "examples": [
+               "1=Favorável sem Ressalvas",
+               "2=Favorável com Ressalvas",
+               "3=Desfavorável",
+               "4=Adverso",
+               "5=Com abstenção de opinião"
+             ]          
+           }
+         }
+       }
+     },
+    "prestacao_contas_entidade_beneficiaria" : {
+      "$id": "#root/prestacao_contas_entidade_beneficiaria",
+      "title": "Prestação de Contas da Entidade Beneficiária",
+      "type": "object",
+      "required": [
+        "data_prestacao",
+        "periodo_referencia_data_inicial",
+        "periodo_referencia_data_final"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "data_prestacao": {
+          "$id": "#root/prestacao_contas_entidade_beneficiaria/data_prestacao",
+          "title": "Data da conclusão das prestações de contas do exercício pela entidade beneficiária",
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2024-01-01"
+          ]
+        },
+        "periodo_referencia_data_inicial": {
+          "$id": "#root/prestacao_contas_entidade_beneficiaria/periodo_referencia_data_inicial",
+          "title": "Data inicial do período de referência da prestação de contas",
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2024-01-01"
+          ]
+        },          
+        "periodo_referencia_data_final": {
+          "$id": "#root/prestacao_contas_entidade_beneficiaria/periodo_referencia_data_final",
+          "title": "Data final do período de referência da prestação de contas",
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2024-01-01"
+          ]
+        }
+      }
+    },
+    "parecer_conclusivo" : {
+      "$id": "#root/parecer_conclusivo",
+      "title": "Parecer conclusivo",
+      "type": "object",
+      "required": [
+        "conclusao_parecer",
+        "declaracoes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identificacao_parecer": {
+          "$id": "#root/parecer_conclusivo/identificacao_parecer",
+          "title": "Identificação do parecer conclusivo",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+		  "pattern": "\\S",
+          "examples": [
+             "0009/2024"
+          ]
+        },
+        "conclusao_parecer" : {
+          "$id": "#root/parecer_conclusivo/conclusao_parecer",
+          "title": "Informa a conclusão do parecer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "examples": [
+            "1=Favorável",
+            "2=Favorável com Ressalvas",
+            "3=Desfavorável"
+          ]          
+        },
+        "consideracoes_parecer": {
+          "$id": "#root/parecer_conclusivo/consideracoes_parecer",
+          "title": "Considerações do parecer conclusivo",
+           "type": "string",
+           "minLength": 1,
+           "maxLength": 1000,
+		   "pattern": "\\S",
+           "examples": [
+            "Considerações do parecer conclusivo"
+           ]
+        },
+        "declaracoes": {
+          "$id": "#root/parecer_conclusivo/declaracoes",
+          "title": "Declarações",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$id": "#root/parecer_conclusivo/declaracoes/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "tipo_declaracao",
+              "declaracao"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tipo_declaracao": {
+                "$id": "#root/parecer_conclusivo/declaracoes/items/tipo_declaracao",
+                "title": "Identificação do questionamento da declaração",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ],
+                "examples": [
+                  "1=Cumprimento das cláusulas",
+                  "2=Regularidade dos gastos",
+                  "3=Identificação nos comprovantes",
+                  "4=Regularidade dos recolhimentos dos encargos trabalhistas",
+                  "5=Atendimento aos princípios",
+                  "6=Realização de visita",
+                  "7=Aplicação de sanções"
+                ]
+              },
+              "declaracao": {
+                "$id": "#root/parecer_conclusivo/declaracoes/items/declaracao",
+                "title": "Posicionamento quanto ao questionamento",
+                "enum": [
+                  1,
+                  2,
+                  3
+                ],
+                "examples": [
+                  "1=Sim",
+                  "2=Não",
+                  "3=Prejudicado"
+                ]
+              },
+              "justificativa": {
+                "$id": "#root/parecer_conclusivo/declaracoes/items/justificativa",
+                "title": "Justificativa da declaração",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+				"pattern": "\\S",
+                "examples": [
+                  "Justificativa do não cumprimento das cláusulas pactuadas."
+                ]
+              }
+            }                
+          }
+        }
+      }
+    },
+    "transparencia" : {
+      "$id": "#root/transparencia",
+      "title": "Transaparência",
+      "type": "object",
+      "required": [
+        "entidade_beneficiaria_mantem_sitio_internet"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "entidade_beneficiaria_mantem_sitio_internet": {
+          "$id": "#root/transparencia/entidade_beneficiaria_mantem_sitio_internet",
+          "title": "Informa se a Entidade Beneficiária mantém sítio na Internet para divulgar as informações",
+          "type": "boolean"
+        },
+        "sitios_internet": {
+          "$id": "#root/transparencia/sitios_internet",
+          "title": "Relação de sítios na Internet mantidos pela Entidade Beneficiária",
+          "type": "array",
+          "items": {
+            "$id": "#root/transparencia/sitios_internet/items",
+            "title": "Items",
+            "type": "string",
+            "format": "uri",
+            "minLength": 1,
+            "maxLength": 600,
+			"pattern": "\\S",
+            "examples": [
+              "https://doe.tce.sp.gov.br"
+            ]
+          }
+        },
+        "requisitos_artigos_7o_8o_paragrafo_1o": {
+          "$id": "#root/transparencia/requisitos_artigos_7o_8o_paragrafo_1o",
+          "title": "Relação de requisitos na divulgação das informações constantes do Arts. 7º e 8º § 1º",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$id": "#root/transparencia/requisitos_artigos_7o_8o_paragrafo_1o/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "requisito",
+              "atende"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "requisito": {
+                "$id": "#root/transparencia/requisitos_artigos_7o_8o_paragrafo_1o/items/requisito",
+                "title": "Identificação do requisito",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8
+                ],
+                "examples": [
+                  "1=Competência e Estrutura Organizacional",
+                  "2=Endereço, email, telefones e horários de atendimento das principais unidades",
+                  "3=Registro de quaisquer repasses ou transferências de recursos financeiros",
+                  "4=Registros de despesas realizadas com recursos públicos",
+                  "5=Informações referentes às contratações de bens e serviços, incluindo editais, resultados e contratos celebrados",
+                  "6=Informações para subsidiar acompanhamento e resultados de programas, ações, projetos e obras de órgãos e entidades, bem como metas e indicadores propostos",
+                  "7=Respostas a perguntas mais frequentes da sociedade",
+                  "8=Resultado de inspeções, auditorias, prestações e tomadas de contas"
+                ]
+              },
+              "atende": {
+                "$id": "#root/transparencia/requisitos_artigos_7o_8o_paragrafo_1o/items/requisito/atende",
+                "title": "Informa se o requisito é atendido pela Entidade Beneficiária",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "requisitos_sitio_artigo_8o_paragrafo_3o": {
+          "$id": "#root/transparencia/requisitos_sitio_artigo_8o_paragrafo_3o",
+          "title": "Relação de requisitos de sítio do Art. 8º, § 3º",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$id": "#root/transparencia/requisitos_sitio_artigo_8o_paragrafo_3o/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "requisito",
+              "atende"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "requisito": {
+                "$id": "#root/transparencia/requisitos_sitio_artigo_8o_paragrafo_3o/items/requisito",
+                "title": "Identificação do requisito",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "examples": [
+                  "1=Ferramenta de pesquisa de conteúdo",
+                  "2=Geração de relatórios em diversos formatos eletrônicos abertos",
+                  "3=Possibilitar acesso automatizado por sistemas externos em formatos abertos",
+                  "4=Divulga em detalhes os formatos utilizados na estruturação da informação",
+                  "5=Garante a autenticidade e integridade das informações divulgadas",
+                  "6=Atualização periódica"
+                ]
+              },
+              "atende": {
+                "$id": "#root/transparencia/requisitos_sitio_artigo_8o_paragrafo_3o/items/requisito/atende",
+                "title": "Informa se o requisito é atendido pela Entidade Beneficiária",
+                "type": "boolean"
+              }
+            }
+          }
+        },        
+        "requisitos_divulgacao_informacoes": {
+          "$id": "#root/transparencia/requisitos_divulgacao_informacoes",
+          "title": "Relação de requisitos de divulgação das informações",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$id": "#root/transparencia/requisitos_divulgacao_informacoes/items",
+            "title": "Items",
+            "type": "object",
+            "required": [
+              "requisito",
+              "atende"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "requisito": {
+                "$id": "#root/transparencia/requisitos_divulgacao_informacoes/items/requisito",
+                "title": "Identificação do requisito",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10
+                ],
+                "examples": [
+                  "1=Estatuto Social atualizado",
+                  "2=Ajustes (Termo de Parceria, Convênio, etc.)",
+                  "3=Plano de Trabalho",
+                  "4=Relação Nominal dos Dirigentes",
+                  "5=Lista de prestadores de serviços e valores pagos",
+                  "6=Remuneração individualizada dos dirigentes e empregados com identificação de nomes e cargos",
+                  "7=Balanços e Demonstrações Contábeis",
+                  "8=Regulamento de Compras",
+                  "9=Regulamento de Contratação de Pessoal",
+                  "10=Relatório estatístico de atendimento realizado pelo SIC"
+                ]
+              },
+              "atende": {
+                "$id": "#root/transparencia/requisitos_divulgacao_informacoes/items/requisito/atende",
+                "title": "Informa se o requisito é atendido pela Entidade Beneficiária",
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identificacao_certidao": {
+      "type": "string",
+      "pattern": "^[0-9]{10}$",
+      "examples": [
+        "1234567890"
+      ]
+    },
+    "publicacao": {
+      "type": "object",
+      "required": [
+        "tipo_veiculo_publicacao",
+        "data_publicacao"
+      ],
+      "additionalProperties": false,
+      "minProperties": 2,
+      "maxProperties": 4,
+      "properties": {
+        "tipo_veiculo_publicacao": {
+          "type": "integer",
+          "title": "Tipo de veículo de comunicação onde a publicação foi realizada",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "examples": [
+            "1=Diário Oficial do Município",
+            "2=Diário Oficial do Estado",
+            "3=Diário Oficial da União",
+            "4=Diário da Justiça Eletrônico",
+            "5=Portal Nacional de Compras Públicas",
+            "6=Jornal de grande circulação nacional",
+            "7=Jornal de grande circulação regional/municipal",
+            "8=Quadro ou mural de acesso público",
+            "9=Site da administração direta na Internet",
+            "10=Outros"
+          ]
+        },
+        "nome_veiculo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+		  "pattern": "\\S",
+          "examples": [
+            "Identificação do veículo de tipo Outros"
+          ]
+        },
+        "data_publicacao": {
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2024-01-01"
+          ]
+        },
+        "endereco_internet": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1,
+          "maxLength": 600,
+		  "pattern": "\\S",
+          "examples": [
+            "https://doe.tce.sp.gov.br"
+          ]
+        }
+      }
+    },
+    "publicacoes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/publicacao"
+      }
+    },
+    "relatorio": {
+      "type": "object",
+      "required": [
+        "houve_emissao_relatorio_final"
+      ],
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 3,
+      "properties": {
+        "houve_emissao_relatorio_final": {
+          "title": "informa se houve emissão do relatório final",
+          "type": "boolean"
+        },
+        "conclusao_relatorio": {
+          "title": "Conclusão do relatório",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "examples": [
+            "1 = Favorável sem Ressalvas",
+            "2 = Favorável com Ressalvas",
+            "3 = Desfavorável"
+          ]
+        },
+        "justificativa": {
+          "type": "string",
+		  "minLength": 1,
+          "maxLength": 1000,
+		  "pattern": "\\S",
+          "examples": [
+            "Justificativa da conclusão do relatório"
+          ]
+        }
+      }
+    },
+    "cpf": {
+      "type": "string",
+      "pattern": "^[0-9]{11}$",
+      "examples": [
+        "00000000191"
+      ]
+    },
+    "cnpj": {
+      "type": "string",
+      "pattern": "^[0-9]{14}$",
+      "examples": [
+        "12345678901234"
+      ]
+    }
+  }
+}
