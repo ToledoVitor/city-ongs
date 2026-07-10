@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from contracts.models import (
+    Asset,
+    CertificateReference,
     Company,
     Contract,
     ContractAddendum,
@@ -9,6 +11,8 @@ from contracts.models import (
     ContractExecutionActivity,
     ContractExecutionFile,
     ContractGoal,
+    ContractGoalAnnualResult,
+    ContractGoalPeriodResult,
     ContractGoalReview,
     ContractInterestedPart,
     ContractItem,
@@ -17,6 +21,7 @@ from contracts.models import (
     ContractItemReview,
     ContractItemSupplement,
     ContractStep,
+    SupplierContract,
 )
 from utils.admin import BaseModelAdmin
 
@@ -112,6 +117,7 @@ class ContractAdmin(BaseModelAdmin):
                     "organization",
                     "name",
                     "code",
+                    "audesp_agreement_code",
                     "internal_code",
                     "concession_type",
                     "status",
@@ -226,16 +232,32 @@ class ContractGoalReviewInline(admin.TabularInline):
     fields = ("reviewer", "comment")
 
 
+class ContractGoalPeriodResultInline(admin.TabularInline):
+    model = ContractGoalPeriodResult
+    extra = 0
+    fields = ("period", "achieved_quantity", "goal_result", "justification")
+
+
+@admin.register(ContractGoalAnnualResult)
+class ContractGoalAnnualResultAdmin(BaseModelAdmin):
+    list_display = ("organization", "goal", "fiscal_year", "goal_met")
+    list_filter = ("organization", "fiscal_year", "goal_met")
+    search_fields = ("id", "goal__name")
+    inlines = [ContractGoalPeriodResultInline]
+
+
 @admin.register(ContractGoal)
 class ContractGoalAdmin(BaseModelAdmin):
     list_display = (
         "organization",
         "contract",
         "name",
+        "goal_code",
+        "periodicity_type",
         "created_at",
     )
-    list_filter = ("organization", "status", "contract")
-    search_fields = ("id", "name", "contract__name")
+    list_filter = ("organization", "status", "contract", "periodicity_type")
+    search_fields = ("id", "name", "contract__name", "goal_code")
     inlines = [ContractGoalReviewInline]
 
 
@@ -300,3 +322,45 @@ class ContractInterestedPartAdmin(BaseModelAdmin):
     list_display = ("organization", "contract", "user", "interest")
     list_filter = ("organization", "contract", "user", "interest")
     search_fields = ("id", "contract__name", "user__name")
+
+
+@admin.register(SupplierContract)
+class SupplierContractAdmin(BaseModelAdmin):
+    list_display = (
+        "organization",
+        "contract",
+        "number",
+        "creditor_name",
+        "signature_date",
+        "amount",
+    )
+    list_filter = ("organization", "contract", "validity_type", "selection_criteria")
+    search_fields = (
+        "id",
+        "number",
+        "creditor_name",
+        "creditor_document_number",
+        "contract__name",
+    )
+
+
+@admin.register(Asset)
+class AssetAdmin(BaseModelAdmin):
+    list_display = (
+        "organization",
+        "contract",
+        "category",
+        "event",
+        "description",
+        "date",
+        "value",
+    )
+    list_filter = ("organization", "contract", "category", "event")
+    search_fields = ("id", "description", "asset_number", "contract__name")
+
+
+@admin.register(CertificateReference)
+class CertificateReferenceAdmin(BaseModelAdmin):
+    list_display = ("organization", "contract", "type", "identification")
+    list_filter = ("organization", "contract", "type")
+    search_fields = ("id", "identification", "contract__name")

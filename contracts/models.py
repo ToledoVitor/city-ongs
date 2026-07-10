@@ -11,8 +11,9 @@ from simple_history.models import HistoricalRecords
 from accounts.models import Area, BaseOrganizationTenantModel, Committee, User
 from activity.models import ActivityLog
 from bank.models import BankAccount
-from contracts.choices import NatureChoices
+from contracts.choices import AudespDocumentTypeChoices, NatureChoices
 from utils.choices import MonthChoices, StatesChoices, StatusChoices
+from utils.validators import validate_cpf_cnpj
 
 
 class Company(BaseOrganizationTenantModel):
@@ -134,6 +135,13 @@ class Contract(BaseOrganizationTenantModel):
         max_length=16,
         null=True,
         blank=True,
+    )
+    audesp_agreement_code = models.CharField(
+        verbose_name="Código do Ajuste (AUDESP)",
+        max_length=32,
+        null=True,
+        blank=True,
+        help_text="Código do ajuste no Sistema Audesp Fase V (campo codigo_ajuste do descritor)",
     )
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
@@ -547,6 +555,15 @@ class ContractGoal(
 ):
     """Model representing a goal within a contract with its specifications."""
 
+    class PeriodicityChoices(models.TextChoices):
+        MONTHLY = "MONTHLY", "Mensal"
+        BIMONTHLY = "BIMONTHLY", "Bimestral"
+        QUARTERLY = "QUARTERLY", "Trimestral"
+        FOUR_MONTHLY = "FOUR_MONTHLY", "Quadrimestral"
+        SEMIANNUAL = "SEMIANNUAL", "Semestral"
+        PER_FISCAL_YEAR = "PER_FISCAL_YEAR", "No Exercício"
+        SINGLE = "SINGLE", "Única"
+
     contract = models.ForeignKey(
         Contract,
         verbose_name="Contrato",
@@ -581,6 +598,21 @@ class ContractGoal(
         default=StatusChoices.ANALYZING,
     )
 
+    # AUDESP - Relatório de Atividades (manual §19)
+    goal_code = models.CharField(
+        verbose_name="Código da Meta (AUDESP)",
+        max_length=16,
+        null=True,
+        blank=True,
+    )
+    periodicity_type = models.CharField(
+        verbose_name="Periodicidade da Meta",
+        max_length=15,
+        choices=PeriodicityChoices,
+        null=True,
+        blank=True,
+    )
+
     history = HistoricalRecords()
 
     def __str__(self) -> str:
@@ -589,6 +621,12 @@ class ContractGoal(
     @property
     def status_label(self) -> str:
         return StatusChoices(self.status).label
+
+    @property
+    def periodicity_label(self) -> str:
+        if self.periodicity_type:
+            return ContractGoal.PeriodicityChoices(self.periodicity_type).label
+        return "-"
 
     @property
     def last_reviews(self) -> str:
@@ -1183,3 +1221,350 @@ class ContractItemSupplement(BaseOrganizationTenantModel):
         ordering = ("-suplement_value",)
         verbose_name = "Suplemento de Item"
         verbose_name_plural = "Suplementos de Itens"
+
+
+class ContractGoalAnnualResult(BaseOrganizationTenantModel):
+    """AUDESP manual §19 - result of a goal for one fiscal year (goal_met/justification)."""
+
+    goal = models.ForeignKey(
+        ContractGoal,
+        verbose_name="Meta",
+        related_name="annual_results",
+        on_delete=models.CASCADE,
+    )
+    fiscal_year = models.IntegerField(verbose_name="Exercício")
+    goal_met = models.BooleanField(
+        verbose_name="Meta Atendida?",
+        null=True,
+        blank=True,
+    )
+    justification = models.TextField(
+        verbose_name="Justificativa para Meta Não Atendida",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Resultado Anual de Meta"
+        verbose_name_plural = "Resultados Anuais de Metas"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("goal", "fiscal_year"),
+                name="unique_goal_annual_result_per_fiscal_year",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.goal.name} - {self.fiscal_year}"
+
+
+class ContractGoalPeriodResult(BaseOrganizationTenantModel):
+    """AUDESP manual §19 - "periodicidades" entries within a goal's annual result."""
+
+    class GoalResultChoices(models.IntegerChoices):
+        MET = 1, "Cumprida"
+        NOT_MET = 2, "Não Cumprida"
+        PARTIALLY_MET = 3, "Cumprida Parcialmente"
+
+    annual_result = models.ForeignKey(
+        ContractGoalAnnualResult,
+        verbose_name="Resultado Anual",
+        related_name="period_results",
+        on_delete=models.CASCADE,
+    )
+    period = models.PositiveSmallIntegerField(
+        verbose_name="Período",
+        help_text="Ordinal do período dentro da periodicidade da meta (ver manual §19.1)",
+    )
+    achieved_quantity = models.DecimalField(
+        verbose_name="Quantidade Realizada",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+    )
+    goal_result = models.PositiveSmallIntegerField(
+        verbose_name="Resultado da Meta Qualitativa Não Quantificável",
+        choices=GoalResultChoices,
+        null=True,
+        blank=True,
+    )
+    justification = models.TextField(
+        verbose_name="Justificativa da Divergência",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Resultado de Período de Meta"
+        verbose_name_plural = "Resultados de Períodos de Metas"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("annual_result", "period"),
+                name="unique_goal_period_result",
+            ),
+        ]
+
+    @property
+    def goal_result_label(self) -> str:
+        if self.goal_result:
+            return ContractGoalPeriodResult.GoalResultChoices(self.goal_result).label
+        return "-"
+
+
+class SupplierContract(BaseOrganizationTenantModel):
+    """AUDESP manual §7 "Contratos" - contracts the beneficiary signs with suppliers
+    using ajuste funds. Distinct from `Contract`, which is the ajuste itself."""
+
+    class ValidityTypeChoices(models.IntegerChoices):
+        PRE_ESTABLISHED = 1, "Pré-Estabelecida"
+        INDETERMINATE = 2, "Indeterminada"
+
+    class SelectionCriteriaChoices(models.IntegerChoices):
+        PRICE_QUOTATION = 1, "Cotação de Preços"
+        WAIVER = 2, "Dispensa"
+        UNENFORCEABILITY = 3, "Inexigibilidade"
+        OTHER = 4, "Outros"
+
+    class ValueTypeChoices(models.IntegerChoices):
+        GLOBAL = 1, "Global"
+        MONTHLY = 2, "Mensal"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Ajuste",
+        related_name="supplier_contracts",
+        on_delete=models.CASCADE,
+    )
+    number = models.CharField(verbose_name="Número do Contrato", max_length=64)
+
+    creditor_document_type = models.PositiveSmallIntegerField(
+        verbose_name="Tipo do Documento do Credor",
+        choices=AudespDocumentTypeChoices,
+    )
+    creditor_document_number = models.CharField(
+        verbose_name="Documento do Credor",
+        max_length=32,
+        validators=[validate_cpf_cnpj],
+    )
+    creditor_name = models.CharField(
+        verbose_name="Nome/Razão Social do Credor",
+        max_length=256,
+        null=True,
+        blank=True,
+        help_text="Obrigatório quando o credor é do tipo RNE",
+    )
+
+    signature_date = models.DateField(verbose_name="Data de Assinatura")
+    validity_type = models.PositiveSmallIntegerField(
+        verbose_name="Tipo de Vigência",
+        choices=ValidityTypeChoices,
+    )
+    validity_start_date = models.DateField(verbose_name="Início da Vigência")
+    validity_end_date = models.DateField(
+        verbose_name="Fim da Vigência",
+        null=True,
+        blank=True,
+        help_text="Obrigatório quando validity_type é Pré-Estabelecida",
+    )
+
+    purpose = models.CharField(verbose_name="Objeto", max_length=1024)
+    contracting_nature = models.JSONField(
+        verbose_name="Natureza da Contratação",
+        default=list,
+        blank=True,
+        help_text="Lista de códigos AUDESP (1-36, ver manual §7.1)",
+    )
+    contracting_nature_other = models.CharField(
+        verbose_name="Descrição de Outros Serviços",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    selection_criteria = models.PositiveSmallIntegerField(
+        verbose_name="Critério de Seleção",
+        choices=SelectionCriteriaChoices,
+    )
+    selection_criteria_other = models.CharField(
+        verbose_name="Descrição de Outros Critérios",
+        max_length=256,
+        null=True,
+        blank=True,
+    )
+    purchase_regulation_article = models.CharField(
+        verbose_name="Artigo do Regulamento de Compras",
+        max_length=64,
+        null=True,
+        blank=True,
+        help_text="Obrigatório para prestações de Contrato de Gestão e Termo de Parceria",
+    )
+
+    amount = models.DecimalField(
+        verbose_name="Valor do Contrato",
+        decimal_places=2,
+        max_digits=12,
+    )
+    value_type = models.PositiveSmallIntegerField(
+        verbose_name="Tipo do Valor",
+        choices=ValueTypeChoices,
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Contrato com Fornecedor"
+        verbose_name_plural = "Contratos com Fornecedores"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=(
+                    "contract",
+                    "number",
+                    "signature_date",
+                    "creditor_document_type",
+                    "creditor_document_number",
+                ),
+                name="unique_supplier_contract_per_agreement",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.number} - {self.creditor_name or self.creditor_document_number}"
+
+    @property
+    def validity_type_label(self) -> str:
+        return SupplierContract.ValidityTypeChoices(self.validity_type).label
+
+    @property
+    def selection_criteria_label(self) -> str:
+        return SupplierContract.SelectionCriteriaChoices(self.selection_criteria).label
+
+    @property
+    def value_type_label(self) -> str:
+        return SupplierContract.ValueTypeChoices(self.value_type).label
+
+
+class Asset(BaseOrganizationTenantModel):
+    """AUDESP manual §6 "Relação de Bens da Entidade Beneficiária".
+
+    Event-based: one row per reported lifecycle event (aquisição/cessão/baixa),
+    matching how the JSON document itself reports these as separate array entries.
+    """
+
+    class CategoryChoices(models.TextChoices):
+        MOVABLE = "MOVABLE", "Móvel"
+        IMMOVABLE = "IMMOVABLE", "Imóvel"
+
+    class EventChoices(models.TextChoices):
+        ACQUIRED = "ACQUIRED", "Adquirido"
+        CEDED = "CEDED", "Cedido"
+        WRITTEN_OFF = "WRITTEN_OFF", "Baixado/Devolvido"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Ajuste",
+        related_name="assets",
+        on_delete=models.CASCADE,
+    )
+    category = models.CharField(
+        verbose_name="Categoria",
+        max_length=9,
+        choices=CategoryChoices,
+    )
+    event = models.CharField(
+        verbose_name="Evento",
+        max_length=11,
+        choices=EventChoices,
+    )
+    asset_number = models.CharField(
+        verbose_name="Número de Patrimônio",
+        max_length=32,
+        null=True,
+        blank=True,
+        help_text="Aplicável apenas a bens móveis",
+    )
+    description = models.CharField(verbose_name="Descrição", max_length=512)
+    date = models.DateField(
+        verbose_name="Data do Evento",
+        help_text="Data de aquisição, cessão ou baixa/devolução, conforme o evento",
+    )
+    value = models.DecimalField(
+        verbose_name="Valor",
+        decimal_places=2,
+        max_digits=12,
+        null=True,
+        blank=True,
+        help_text="Valor de aquisição ou de cessão; não se aplica à baixa/devolução",
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Bem"
+        verbose_name_plural = "Bens"
+
+    def __str__(self) -> str:
+        return f"{self.get_event_display()} - {self.description}"
+
+
+class CertificateReference(BaseOrganizationTenantModel):
+    """AUDESP manual §20/§21 - references to certidões already issued/concluded in
+    Audesp Fase V. We only store the reference id, not issue the certidão itself."""
+
+    class TypeChoices(models.TextChoices):
+        GENERAL_DATA = "GENERAL_DATA", "Dados Gerais"
+        GOVERNING_BODY = "GOVERNING_BODY", "Corpo Diretivo (Prestação de Contas)"
+        COUNCIL_MEMBERS = "COUNCIL_MEMBERS", "Conselho (Prestação de Contas)"
+        ENTITY_RESPONSIBLE_PARTIES = (
+            "ENTITY_RESPONSIBLE_PARTIES",
+            "Entidade Gerenciada - Responsáveis",
+        )
+        GRANTOR_RESPONSIBLE_PARTIES = (
+            "GRANTOR_RESPONSIBLE_PARTIES",
+            "Responsáveis do Órgão Concessor",
+        )
+        EVALUATION_COMMITTEE_MEMBERS = (
+            "EVALUATION_COMMITTEE_MEMBERS",
+            "Membros da Comissão de Avaliação",
+        )
+        INTERNAL_CONTROL_MEMBERS = (
+            "INTERNAL_CONTROL_MEMBERS",
+            "Membros do Controle Interno",
+        )
+        EXECUTION_OVERSIGHT_RESPONSIBLE_PARTIES = (
+            "EXECUTION_OVERSIGHT_RESPONSIBLE_PARTIES",
+            "Responsáveis pela Fiscalização da Execução",
+        )
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Ajuste",
+        related_name="certificate_references",
+        on_delete=models.CASCADE,
+    )
+    type = models.CharField(
+        verbose_name="Tipo de Certidão",
+        max_length=41,
+        choices=TypeChoices,
+    )
+    identification = models.CharField(
+        verbose_name="Identificação da Certidão",
+        max_length=32,
+        help_text="Identificador da certidão emitida no Sistema Audesp Fase V",
+    )
+
+    class Meta:
+        verbose_name = "Referência de Certidão"
+        verbose_name_plural = "Referências de Certidões"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("contract", "type"),
+                name="unique_certificate_reference_per_type",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_type_display()} - {self.identification}"

@@ -160,46 +160,52 @@ New infra needed: `requests` as a direct dependency (already transitive), `jsons
 
 ## 7. Concrete model/schema changes, by app
 
+Code is English-only throughout (class/field/choice names) — only `verbose_name`/`help_text`/labels are Portuguese. See [CLAUDE.MD](CLAUDE.MD) § Django Conventions. Names below are the actual English names landed in Phase 0, not the Portuguese working names from the original plan.
+
 **accounts**
-- Add `codigo_entidade_audesp` (int) and `codigo_municipio_audesp` (int, IBGE) to `CityHall`/`Organization`.
-- New `Employee`/`Servidor` model: cpf, cbo, cns (nullable), salario_contratual, data_admissao, data_demissao, tipo (empregado da entidade | servidor cedido), cargo_publico_ocupado, funcao_desempenhada, onus_pagamento, monthly `RemuneracaoPeriodo` child rows (mes, carga_horaria, remuneracao_bruta). Independent from `User` (login) — an org can have employees who never log in.
-- Normalize CPF/CNPJ fields to `django_cpf_cnpj`'s typed fields everywhere (currently only `Company.cnpj` is typed; `User.cnpj`, `Organization.document`, `CityHall.document`, `Favored.document`, `ResourceSource.document` are plain CharField+validator).
+- Added `audesp_entity_code` (int) and `audesp_municipality_code` (int, IBGE) to `Organization`/`CityHall`.
+- New `Employee` model: cpf, cbo, cns (nullable), contractual_salary, admission_date, termination_date, monthly `EmployeeRemunerationPeriod` child rows (year, month, hours_worked, gross_remuneration). New `CededServant` model (cession_start_date/end_date, public_position_held, role_performed, payment_burden) + `CededServantRemunerationPeriod`. Both independent from `User` (login) — an org can have employees/ceded servants who never log in.
+- CPF/CNPJ field-type normalization (`Company.cnpj` typed vs. everywhere else plain CharField+validator) explicitly NOT done — logged in [DEBTS.md](DEBTS.md) as out-of-scope tech debt.
 
 **contracts**
-- Add `codigo_ajuste_audesp` to `Contract`, plus `vigencia_tipo`, `criterio_selecao`(+outro), `natureza_contratacao` (multi-select) — or model these on a new `ContratoAudesp` line-item since §7 "Contratos" is actually a sub-ledger of contracts-with-third-parties inside the ajuste, not the ajuste itself. Worth clarifying: AUDESP's §7 "Contratos" = contracts the *beneficiary entity* signs with suppliers, using ajuste money — distinct from `contracts.Contract` (the ajuste/repasse instrument itself). Recommend a new `SupplierContract` model rather than overloading `Contract`.
-- New `Bem` (asset) model: numero_patrimonio, tipo (móvel/imóvel), descricao, data_aquisicao/valor_aquisicao, data_cessao/valor_cessao, data_baixa_devolucao.
-- New `CertidaoReferencia` model (or simple FK fields) storing the AUDESP certidão IDs referenced in §20/21, scoped to ajuste + tipo de certidão.
+- Added `audesp_agreement_code` to `Contract`.
+- New `SupplierContract` model (§7 "Contratos" — contracts the *beneficiary entity* signs with suppliers using ajuste money, distinct from `contracts.Contract` which is the ajuste/repasse instrument itself): number, creditor_document_type/number/name, signature_date, validity_type, validity_start/end_date, purpose, contracting_nature (+other), selection_criteria (+other), purchase_regulation_article, amount, value_type.
+- New `Asset` model (event-based — one row per lifecycle event, matching the JSON array shape): category (movable/immovable), event (acquired/ceded/written off), asset_number, description, date, value.
+- New `CertificateReference` model storing the AUDESP certidão IDs referenced in §20/21, scoped to (contract, type).
+- Extended `ContractGoal` with `goal_code`, `periodicity_type` + new `ContractGoalAnnualResult`/`ContractGoalPeriodResult` child models (§19 relatório de atividades).
 
 **accountability**
-- New `Empenho` model (numero, data_emissao, classificacao_economica, fonte_recurso_tipo, valor, historico, cpf_ordenador_despesa).
-- Rebuild `ContractMonthTransfer` into a `Repasse` model linked to `Empenho` (identificacao_empenho, data_prevista/data_repasse, valor_previsto/valor_repasse, justificativa_diferenca_valor, bank-document fields).
-- New `Glosa` model (documento fiscal ref or Folha Ordinária pagamento_data, resultado_analise, valor_glosa) — enforce "every documento fiscal needs a glosa analysis" at the builder/validation layer.
-- New `Desconto` / `Devolucao` models (data, descricao/natureza_devolucao_tipo, valor) replacing the current boolean-flag-only glosa side effect.
-- New `AjusteSaldo` (retificação/inclusão de repasses e pagamentos) for prior-period corrections.
-- New `Disponibilidade` snapshot model (saldo_bancario vs saldo_contabil per conta, saldo_fundo_fixo) taken at exercício close.
-- Extend `Revenue`/`ResourceSource` to carry `fonte_recurso_tipo` explicitly instead of relying on the loosely-parallel `origin` enum.
-- New `Publicacao` generic model (tipo_veiculo_publicacao, nome_veiculo, data_publicacao, endereco_internet) with a `context` FK/tag reused for regulamento de compras, demonstrações contábeis, parecer/ata, extrato execução, relatório atividades.
-- New `RelatorioAvaliacao` model (houve_emissao, conclusao, justificativa) parametrized by which of §25/26/27 applies (derived from ajuste type, not stored separately).
-- New `Declaracao` (§24 conflict-of-interest) and `ParecerConclusivo` (§33, 7 fixed declarações) models.
-
-**activity**
-- Extend `ContractGoal`/`ContractStep` (or the AUDESP builder layer) with `codigo_meta`, `periodicidade` type, `quantidade_realizada`/`resultado_meta` — likely additive fields, not a rebuild, since the goal/step/execution skeleton already fits reasonably well.
+- New `AnnualStatement` model — the (contract, fiscal_year) anchor matching AUDESP's own unit of submission (one JSON document per descritor.ano). Everything below that's inherently annual (not date-driven like the ledger) hangs off it.
+- New `BudgetCommitment` model (number, issue_date, economic_classification, funding_source_type, value, description, spending_authority_cpf) — the "empenho" concept.
+- New `FundTransfer` model linked to `BudgetCommitment` (planned_date/transfer_date, planned_value/transferred_value, value_difference_justification, bank-document fields) — the "repasse" concept. Does NOT touch `contracts.ContractMonthTransfer` (see note in §8).
+- New `ExpenseRejection` model (expense ref or Folha Ordinária payment_date, analysis_result, rejected_value) — the "glosa" concept; enforce "every documento fiscal needs an analysis" at the builder/validation layer.
+- New `Deduction` / `Refund` models (date, description/nature, value) — "desconto"/"devolução", replacing the current boolean-flag-only side effect.
+- New `BalanceAdjustment` model (type-discriminated: transfer/payment correction/inclusion) for prior-period corrections — "ajuste de saldo".
+- New `AvailableFunds` snapshot model + `BankBalance` children (bank_balance vs accounting_balance per account, petty_cash_balance) taken at fiscal-year close — "disponibilidade".
+- Extended `Revenue`/`Expense` to carry `funding_source_type` explicitly instead of relying on the loosely-parallel `origin` enum.
+- New `PublicationBase` abstract model (publication_vehicle_type, vehicle_name, publication_date, website_url) with one concrete child per publication context: `PurchasingRegulationPublication`, `PhysicalFinancialExecutionStatementPublication`, `FinancialStatementsPublication`, `ActivityReportPublication`, `OpinionOrMinutesPublication`.
+- New `EvaluationReport` model (final_report_issued, conclusion, justification) parametrized by which of §25/26/27 applies (derived from ajuste type, not stored separately).
+- New `ConflictOfInterestDeclaration` (§24, + `RelatedCompany`/`BoardParticipation` children) and `ConclusiveOpinion` (§33, + `ConclusiveOpinionDeclaration` — 7 fixed declarations) models.
 
 **transparency_portal**
-- New `TransparenciaChecklist` model mirroring §34 exactly: `mantem_sitio` bool + the 8 art.7º/8º§1º items + 6 art.8º§3º items + 10 divulgação items, each a bool `atende`. This app is *named* for this requirement and currently has nothing that maps to it — highest-visibility gap.
+- New `TransparencyChecklist` model mirroring §34 exactly: `has_website` bool + the 8 art.7º/8º§1º items + 6 art.8º§3º items + 10 divulgação items, each a bool. This app is *named* for this requirement and had nothing that mapped to it — highest-visibility gap, now closed.
 
 ---
 
 ## 8. Phased roadmap
 
-0. **Foundational data model rebuild** — since nothing's deployed, do the schema surgery in one pass rather than incrementally patching: add/rebuild the models in §7 above across `accounts`/`contracts`/`accountability`.
-1. **Reference data** — seed the AUDESP domain tables we now depend on as choices/lookups: fonte_recurso_tipo (16 values, confirmed), categoria_despesas_tipo (89 values), tipo_veiculo_publicacao (10 values), banco (large BACEN list), estado_emissor (27 values), CBO — decide seed-once vs. periodic sync.
-2. **Financial ledger completion** — Empenho, linked Repasse, Glosa, Desconto, Devolução, AjusteSaldo, Disponibilidade, Receita restructure.
-3. **Reporting layer** — Relatório de Atividades periodicidade fields, Declarações, Parecer Conclusivo, generic Publicação model + its five call sites.
-4. **JSON builder + local schema validation** — one builder per ajuste type assembling all applicable blocks per the §3 matrix, validated locally against the downloaded JSON Schema files before ever calling the API.
-5. **AUDESP API client** — `/login` token handling, submit, `/f5/consulta`, retificação flow, declaração negativa, inconformidade surfacing in an ops UI, Cloud Scheduler-triggered management command for the submission window.
-6. **Transparência alignment** — the §34 checklist inside `transparency_portal`.
-7. **Cutover** — decide whether the legacy Anexo RP-01..14 PDF exporters retire once AUDESP submission is live, or stay as an internal/historical artifact.
+0. ✅ **Foundational data model rebuild** — done. Models, migrations, and Django admin registration landed across `accounts` (Employee/CededServant registries + remuneration periods, entity/municipality AUDESP codes), `contracts` (SupplierContract, Asset, CertificateReference, ContractGoal annual/period results, audesp_agreement_code), and `accountability` (AnnualStatement anchor + all annual-only blocks: PurchasingRegulation, PhysicalFinancialExecutionStatement, FinancialStatements, ActivityReportPublicationStatus, OpinionOrMinutes, EvaluationReport, ConflictOfInterestDeclaration, ConclusiveOpinion, AvailableFunds — plus the contract-scoped ledger: BudgetCommitment, FundTransfer, ExpenseRejection, Deduction, Refund, BalanceAdjustment, and AUDESP fields added to Expense/Revenue). `transparency_portal.TransparencyChecklist` (§34) also landed. All class/field/choice names are English (only `verbose_name`/`help_text`/labels are Portuguese) — see [CLAUDE.MD](CLAUDE.MD) § Django Conventions. `python manage.py check` and `makemigrations --check` both pass. Not done: forms/custom UI for any of this (admin is the only data-entry surface right now) — see note below.
+1. ⚠️ **Reference data** — partially done as a side effect of building the models: `AudespFundingSourceTypeChoices` (16 values), `AudespExpenseCategoryTypeChoices` (89 values), `AudespPublicationVehicleChoices` (10 values), and every other small enum are real `IntegerChoices`/`TextChoices` with confirmed labels from the JSON Schema. Still open: `bank` (~400 BACEN codes) and `issuing_state` (27 codes) have no confirmed label text anywhere in the source material, so they're stored as raw integers for now — logged in [DEBTS.md](DEBTS.md).
+2. ✅ **Financial ledger completion** — done (folded into Phase 0 above, since the models turned out too interdependent to sequence separately). `Revenue`/`ResourceSource` got an additive `funding_source_type` field rather than a restructure — see the note on `ContractMonthTransfer` below.
+3. ✅ **Reporting layer** — done (also folded into Phase 0): activity-report periodicity fields on `ContractGoal` + `ContractGoalAnnualResult`/`ContractGoalPeriodResult`, `ConflictOfInterestDeclaration`, `ConclusiveOpinion`, and the shared `PublicationBase` abstract model reused across all five publication call sites.
+4. **JSON builder + local schema validation** — not started. One builder per ajuste type assembling all applicable blocks per the §3 matrix, validated locally against the downloaded JSON Schema files (now in `docs/audesp/`) before ever calling the API.
+5. **AUDESP API client** — not started. `/login` token handling, submit, `/f5/consulta`, retificação flow, declaração negativa, inconformidade surfacing in an ops UI, Cloud Scheduler-triggered management command for the submission window.
+6. ✅ **Transparência alignment** — done (folded into Phase 0): `TransparencyChecklist` in `transparency_portal`.
+7. **Cutover** — not started. Decide whether the legacy Anexo RP-01..14 PDF exporters retire once AUDESP submission is live, or stay as an internal/historical artifact.
+
+**Note on `contracts.ContractMonthTransfer`**: the original plan said "rebuild into a repasse model." On closer reading of `contracts/views.py`, `ContractMonthTransfer` is the upfront planning/budget-split entered via the contract timeline UI (`contract_timeline_update_view`) — a different concept from AUDESP's repasse (the actual transfer execution, linked to a budget commitment). Left it untouched and added `accountability.FundTransfer` as a new, separate model instead — lower blast radius, no ambiguity between "planned" and "actual."
+
+**What Phase 0 does *not* include**: forms, templates, or custom views for any of the ~30 new models — Django admin is the only way to enter this data today. That's a deliberate scope cut (matches the project's "no half-finished implementations" rule better than a rushed, non-compliant-with-`DESIGN.md` custom UI) but it's real remaining work, not a rounding error, before any of this is usable outside `/admin`.
 
 ---
 
@@ -208,11 +214,11 @@ New infra needed: `requests` as a direct dependency (already transitive), `jsons
 - **Cascading retificação exclusion**: retifying an exercício older than the latest submitted one flips all subsequent exercícios to `Excluído`, requiring a full resend of every year after it. A bad correction touching an early year is expensive to undo — the ops UI must warn before submission, not after.
 - **CPF/CNS/salário data is sensitive (LGPD)**: the new Employee/Servidor registry stores personal data (health-card number, salary) for people who may never log into the system. Needs the same access-control discipline as existing personal data, arguably tighter (CNS ties to health records).
 - **Certidão dependency on an external subsystem**: §20/§21 assume certidões already exist, concluded, in AUDESP itself (likely issued via a separate flow/portal, not Fase V). If an org hasn't obtained these certidões, no amount of correct modeling on our side unblocks submission — this is a process dependency outside our codebase.
-- **Reference-data staleness**: fonte_recurso_tipo, categoria_despesas_tipo, banco, and similar enums are versioned by TCESP (already saw several corrected across manual revisions 1.9–1.18). Hardcoding them risks drift; needs an owner and a recheck cadence tied to manual version bumps.
-- **categoria_despesas_tipo (89 values) vs. our NatureChoices (~90 values) are different taxonomies**, not a renaming exercise — building the mapping table is a real modeling task with room for misclassification, not a mechanical find-replace.
+- **Reference-data staleness**: `AudespFundingSourceTypeChoices`, `AudespExpenseCategoryTypeChoices`, `bank`, and similar enums are versioned by TCESP (already saw several corrected across manual revisions 1.9–1.18). Hardcoding them risks drift; needs an owner and a recheck cadence tied to manual version bumps.
+- **`AudespExpenseCategoryTypeChoices` (89 values) vs. our `NatureChoices` (~90 values) are different taxonomies**, not a renaming exercise — building the mapping table is a real modeling task with room for misclassification, not a mechanical find-replace.
 - **Annual deadline compliance is now a hard external constraint**: unlike internal accountability (flexible), AUDESP submissions are subject to TCESP deadlines with penalties for lateness — this changes the "nothing deployed yet" freedom for whichever exercício we go live with; confirm target exercício (2024 piloto vs 2025 produção) before scoping Phase 0's timeline.
 - **No async infra today**: if a submission or retificação needs to run outside a request/response cycle (e.g., scheduled monthly attempt, batch resubmission after fixing several inconformidades), the Cloud Scheduler + management-command approach is the cheapest fit, but it's new operational surface (need alerting on failed scheduled runs, not just visibility in the ops UI).
-- **Scope creep risk on this doc's own recommendations**: several proposed models (Empenho, Bem, Publicacao, Glosa, AjusteSaldo, etc.) are all "high severity, missing entirely" — this is a genuinely large schema surface for one project; sequencing (§8) matters more than trying to land it all in one PR.
+- **Scope creep risk on this doc's own recommendations**: several proposed models (BudgetCommitment, Asset, PublicationBase, ExpenseRejection, BalanceAdjustment, etc.) are all "high severity, missing entirely" — this is a genuinely large schema surface for one project; sequencing (§8) matters more than trying to land it all in one PR.
 
 ---
 
