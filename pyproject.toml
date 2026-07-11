@@ -28,6 +28,7 @@ dependencies = [
     "django-phonenumber-field[phonenumberslite]>=8.0.0,<9.0.0",
     "phonenumbers>=8.13.30,<9.0.0",
     "jsonschema>=4.26.0",
+    "requests>=2.34.0",
 ]
 
 [dependency-groups]

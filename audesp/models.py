@@ -1,7 +1,9 @@
 from django.db import models
 
-from accounts.models import BaseOrganizationTenantModel
+from accounts.models import BaseOrganizationTenantModel, CityHall
+from audesp import secrets as audesp_secrets
 from contracts.models import Contract
+from utils.models import BaseModel
 
 
 class AudespSubmission(BaseOrganizationTenantModel):
@@ -74,3 +76,54 @@ class AudespSubmission(BaseOrganizationTenantModel):
         return (
             f"{self.contract.name} - {self.fiscal_year} ({self.get_status_display()})"
         )
+
+
+class AudespCredential(BaseModel):
+    """Registers that a TCESP AUDESP login exists for (city_hall, environment)
+    — manual §1.2.6: separate credential + "Transmissão Pacotes - Fase V"
+    permission per environment (piloto vs produção). The login belongs to
+    the órgão concessor (city hall), not the beneficiary entity — a single
+    município reports on every organization under it through one AUDESP
+    account.
+
+    The actual username/password are never stored here (or anywhere in this
+    database) — `get_credentials()` resolves them via `audesp.secrets`,
+    which reads `.env` locally or GCP Secret Manager otherwise. This row is
+    only a registry of which (city_hall, environment) pairs are configured
+    and active.
+    """
+
+    class EnvironmentChoices(models.TextChoices):
+        PILOTO = "PILOTO", "Piloto"
+        PRODUCAO = "PRODUCAO", "Produção"
+
+    city_hall = models.ForeignKey(
+        CityHall,
+        verbose_name="Prefeitura",
+        related_name="audesp_credentials",
+        on_delete=models.CASCADE,
+    )
+    environment = models.CharField(
+        verbose_name="Ambiente",
+        max_length=8,
+        choices=EnvironmentChoices,
+    )
+    is_active = models.BooleanField(verbose_name="Ativo", default=True)
+
+    class Meta:
+        verbose_name = "Credencial AUDESP"
+        verbose_name_plural = "Credenciais AUDESP"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("city_hall", "environment"),
+                name="unique_audesp_credential_per_city_hall_environment",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.city_hall} - {self.get_environment_display()}"
+
+    def get_credentials(self):
+        """Returns (username, password), resolved through `audesp.secrets`."""
+        return audesp_secrets.get_credentials(self.city_hall, self.environment)

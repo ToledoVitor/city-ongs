@@ -30,6 +30,7 @@ from accountability.models import (
     ActivityReportPublicationStatus,
     AvailableFunds,
     BalanceAdjustment,
+    ConclusiveOpinion,
     ConflictOfInterestDeclaration,
     Deduction,
     EvaluationReport,
@@ -718,7 +719,15 @@ def build_prestacao_entidade(annual_statement):
 
 
 def build_parecer_conclusivo(annual_statement):
-    opinion = annual_statement.conclusive_opinion
+    """Like every other satellite block, missing data means an empty dict —
+    letting the schema's `required` check flag it — rather than raising,
+    so a build with incomplete data still produces an INVALID (not crashed)
+    submission for the caller to act on.
+    """
+    try:
+        opinion = annual_statement.conclusive_opinion
+    except ConclusiveOpinion.DoesNotExist:
+        return {}
     data = {
         "conclusao_parecer": opinion.conclusion,
         "declaracoes": [
