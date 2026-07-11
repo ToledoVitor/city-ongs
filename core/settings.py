@@ -235,6 +235,27 @@ WEBSITE_URL = env("WEBSITE_URL", default="localhost")
 SENDGRID_API_KEY = env("SENDGRID_API_KEY", default="")
 SENDGRID_ACCOUNT_SENDER = env("SENDGRID_ACCOUNT_SENDER", default="")
 
+# AUDESP Fase V webservice (see AUDESP_FASE_V_AUDIT.md §1.2/§6)
+AUDESP_BASE_URLS = {
+    "PILOTO": "https://audesp-piloto.tce.sp.gov.br",
+    "PRODUCAO": "https://audesp.tce.sp.gov.br",
+}
+# Local-dev-only AUDESP credentials (see audesp/secrets.py) — non-dev
+# environments resolve credentials from GCP Secret Manager instead, one
+# secret per (city_hall, environment), never from settings/env.
+AUDESP_DEV_CREDENTIALS = {
+    "PILOTO": {
+        "username": env("AUDESP_PILOTO_USERNAME", default=""),
+        "password": env("AUDESP_PILOTO_PASSWORD", default=""),
+    },
+    "PRODUCAO": {
+        "username": env("AUDESP_PRODUCAO_USERNAME", default=""),
+        "password": env("AUDESP_PRODUCAO_PASSWORD", default=""),
+    },
+}
+# Placeholder TTL until a real login response lets us read the JWT's own exp claim.
+AUDESP_TOKEN_TTL_SECONDS = env.int("AUDESP_TOKEN_TTL_SECONDS", default=600)
+
 # Easy tenants configuration
 EASY_TENANTS_TENANT_MODEL = "accounts.Organization"
 EASY_TENANTS_TENANT_FIELD = "organization"
