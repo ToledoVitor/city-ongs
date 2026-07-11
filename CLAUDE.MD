@@ -79,6 +79,7 @@ If a command already exists in `Makefile`, use it first.
 - When changing views, check related templates, urls, forms, and permissions.
 - When changing templates, keep the current server-rendered approach and reuse base layout patterns.
 - Prefer existing service/helper modules when the app already separates business logic from views or models.
+- **Code is English-only.** Model/class names, field names, choice member names, method names, variable names — all English, even when modeling a Brazilian-Portuguese domain (e.g. AUDESP/TCE compliance terms). Only `verbose_name`, `help_text`, choice *labels* (the human-facing string in a `Choices` tuple), docstrings/comments, and frontend-rendered text (templates, UI copy) may be in Portuguese. Established domain acronyms with no English equivalent in use elsewhere in the codebase (`cpf`, `cnpj`, `cns`, `cbo`) are the only exception — keep those as-is rather than inventing a translation.
 
 ## UI Density & Voice
 

@@ -5,6 +5,7 @@ from .models import (
     FinancialTransfer,
     IrregularityReport,
     PartnershipTransparency,
+    TransparencyChecklist,
 )
 
 
@@ -50,3 +51,10 @@ class IrregularityReportAdmin(admin.ModelAdmin):
     list_filter = ("status", "report_date")
     search_fields = ("partnership__contract__name", "description")
     ordering = ("-report_date",)
+
+
+@admin.register(TransparencyChecklist)
+class TransparencyChecklistAdmin(admin.ModelAdmin):
+    list_display = ("annual_statement", "has_website")
+    list_filter = ("has_website",)
+    search_fields = ("annual_statement__contract__name",)

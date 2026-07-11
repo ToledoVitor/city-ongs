@@ -1,4 +1,270 @@
-from django.db.models import TextChoices
+from django.db.models import IntegerChoices, TextChoices
+
+
+class AudespDocumentTypeChoices(IntegerChoices):
+    """Creditor document type, per AUDESP Fase V manual §7/§8/§9/§12/§16 ("credor" triple)."""
+
+    CPF = 1, "CPF"
+    CNPJ = 2, "CNPJ"
+    RNE = 3, "RNE"
+
+
+class AudespFundingSourceTypeChoices(IntegerChoices):
+    """Manual §9/§11/§12/§17 "fonte_recurso_tipo" — full list per JSON Schema v1.14."""
+
+    TREASURY = 1, "Recursos do Tesouro"
+    STATE_TRANSFERS_EARMARKED = 2, "Transferências e Convênios Estaduais - Vinculados"
+    SPECIAL_FUNDS_OWN_RESOURCES_EARMARKED = (
+        3,
+        "Recursos Próprios de Fundos Especiais de Despesa - Vinculados",
+    )
+    INDIRECT_ADMINISTRATION_OWN_RESOURCES = (
+        4,
+        "Recursos Próprios da Administração Indireta",
+    )
+    FEDERAL_TRANSFERS_EARMARKED = 5, "Transferências e Convênios Federais - Vinculados"
+    OTHER_FUNDING_SOURCES = 6, "Outras Fontes de Recursos"
+    CREDIT_OPERATIONS = 7, "Operações de Crédito"
+    INDIVIDUAL_PARLIAMENTARY_AMENDMENTS = (
+        8,
+        "Emendas Parlamentares Individuais - Legislativo Municipal",
+    )
+    TREASURY_PRIOR_YEARS = 91, "Tesouro - Exercícios Anteriores"
+    STATE_TRANSFERS_EARMARKED_PRIOR_YEARS = (
+        92,
+        "Transferências e Convênios Estaduais - Vinculados - Exercícios Anteriores",
+    )
+    SPECIAL_FUNDS_OWN_RESOURCES_EARMARKED_PRIOR_YEARS = (
+        93,
+        "Recursos Próprios de Fundos Especiais de Despesa - Vinculados - Exercícios Anteriores",
+    )
+    INDIRECT_ADMINISTRATION_OWN_RESOURCES_PRIOR_YEARS = (
+        94,
+        "Recursos Próprios da Administração Indireta - Exercícios Anteriores",
+    )
+    FEDERAL_TRANSFERS_EARMARKED_PRIOR_YEARS = (
+        95,
+        "Transferências e Convênios Federais - Vinculados - Exercícios Anteriores",
+    )
+    OTHER_FUNDING_SOURCES_PRIOR_YEARS = (
+        96,
+        "Outras Fontes de Recursos - Exercícios Anteriores",
+    )
+    CREDIT_OPERATIONS_PRIOR_YEARS = (
+        97,
+        "Operações de Crédito - Exercícios Anteriores",
+    )
+    INDIVIDUAL_PARLIAMENTARY_AMENDMENTS_PRIOR_YEARS = (
+        98,
+        "Emendas Parlamentares Individuais - Exercícios Anteriores",
+    )
+
+
+class AudespExpenseCategoryTypeChoices(IntegerChoices):
+    """Manual §8 "categoria_despesas_tipo" — full list per JSON Schema v1.14.
+
+    No value 75 (removed in schema v1.9 — was "Utilidades Públicas - Gás").
+    """
+
+    PERMANENT_GOODS_COMPUTER_EQUIPMENT = (
+        1,
+        "Bens e Materiais Permanentes - Bens e Equipamentos de Informática",
+    )
+    PERMANENT_GOODS_HOSPITAL_EQUIPMENT = (
+        2,
+        "Bens e Materiais Permanentes - Bens e Equipamentos Hospitalares",
+    )
+    PERMANENT_GOODS_OTHER = (
+        3,
+        "Bens e Materiais Permanentes - Outros Bens e Materiais Permanentes",
+    )
+    FINANCIAL_BANKING_FEES_PAID = (
+        4,
+        "Despesas Financeiras e Bancárias - Despesas Bancárias Pagas",
+    )
+    FINANCIAL_BANKING_IOF_PAID = 5, "Despesas Financeiras e Bancárias - IOF Pago"
+    FINANCIAL_BANKING_INTEREST_PAID = (
+        6,
+        "Despesas Financeiras e Bancárias - Juros Pagos",
+    )
+    FINANCIAL_BANKING_OTHER = (
+        7,
+        "Despesas Financeiras e Bancárias - Outras Despesas Financeiras e Bancárias",
+    )
+    MISCELLANEOUS = 8, "Diversos - Diversos"
+    ADMINISTRATIVE_FUEL = 9, "Gastos Administrativos - Combustível"
+    ADMINISTRATIVE_PARKING_TRANSPORT_TAXI = (
+        10,
+        "Gastos Administrativos - Estacionamento/Condução/Táxi",
+    )
+    ADMINISTRATIVE_OFFICE_SUPPLIES_MAIL_COPIES = (
+        11,
+        "Gastos Administrativos - Material de Expediente/Correio/Fotocópias",
+    )
+    ADMINISTRATIVE_INSURANCE = 12, "Gastos Administrativos - Seguros"
+    ADMINISTRATIVE_TRAVEL = (
+        13,
+        "Gastos Administrativos - Viagens (Hotel/Passagens Aéreas/Pass.Rodoviárias)",
+    )
+    ADMINISTRATIVE_OTHER = (
+        14,
+        "Gastos Administrativos - Outros Gastos Administrativos",
+    )
+    FOODSTUFFS = 15, "Gêneros Alimentícios - Gêneros Alimentícios"
+    LEASE_AMBULANCES = 16, "Locação - Ambulâncias"
+    LEASE_MISCELLANEOUS = 17, "Locação - Diversas"
+    LEASE_COMPUTER_EQUIPMENT = 18, "Locação - Equipamento de Informática"
+    LEASE_HOSPITAL_EQUIPMENT = 19, "Locação - Equipamento Médico Hospitalar"
+    LEASE_REAL_ESTATE = 20, "Locação - Imóvel"
+    LEASE_LAUNDRY_LINEN = 21, "Locação - Lavanderia e Enxoval"
+    LEASE_SOFTWARE_SYSTEM = 22, "Locação - Sistema de Software"
+    LEASE_VEHICLES = 23, "Locação - Veículos"
+    MAINTENANCE_COMPUTER_EQUIPMENT = 24, "Manutenção - Equipamento de Informática"
+    MAINTENANCE_HOSPITAL_EQUIPMENT = (
+        25,
+        "Manutenção - Equipamento Médico Hospitalar",
+    )
+    MAINTENANCE_BUILDING = 26, "Manutenção - Predial e Imobiliário"
+    MAINTENANCE_VEHICLES = 27, "Manutenção - Veículos"
+    MAINTENANCE_OTHER = 28, "Manutenção - Outras Manutenções"
+    MATERIALS_HYGIENE_CLEANING_UNIFORMS = (
+        29,
+        "Materiais - Material de Higienização e Limpeza/Uniformes",
+    )
+    MATERIALS_EDUCATIONAL = 30, "Materiais - Material Didático"
+    MATERIALS_SPORTS = 31, "Materiais - Material Esportivo"
+    MATERIALS_OTHER = 32, "Materiais - Outros Materiais"
+    MEDICAL_HOSPITAL_SUPPLIES = (
+        33,
+        "Material Médico e Hospitalar - Material Médico e Hospitalar",
+    )
+    MEDICINES = 34, "Medicamentos - Medicamentos"
+    HR_THIRTEENTH_SALARY = 35, "Recursos Humanos - 13º Salário"
+    HR_APPRENTICES = 36, "Recursos Humanos - Aprendizes"
+    HR_MEDICAL_ASSISTANCE = 37, "Recursos Humanos - Assistência Médica"
+    HR_ADVANCE_NOTICE = 38, "Recursos Humanos - Aviso Prévio"
+    HR_INSS_EMPLOYER_SHARE = (
+        39,
+        "Recursos Humanos - Contribuição ao INSS - Cota Patronal",
+    )
+    HR_PIS_CONTRIBUTION = 40, "Recursos Humanos - Contribuição ao PIS"
+    HR_TRAINING_COURSES = 41, "Recursos Humanos - Cursos/Treinamento/Reciclagem"
+    HR_MANAGEMENT_SALARY = 42, "Recursos Humanos - Diretoria (Salários e Ordenados)"
+    HR_INTERNS = 43, "Recursos Humanos - Estagiários"
+    HR_VACATIONS = 44, "Recursos Humanos - Férias"
+    HR_FGTS = 45, "Recursos Humanos - FGTS"
+    HR_BONUSES = 46, "Recursos Humanos - Gratificações"
+    HR_SEVERANCE = 47, "Recursos Humanos - Indenizações"
+    HR_INSS = 48, "Recursos Humanos - INSS"
+    HR_IRRF = 49, "Recursos Humanos - IRRF"
+    HR_FGTS_TERMINATION_FINE = 50, "Recursos Humanos - Multa Rescisória FGTS"
+    HR_SALARIES_AND_WAGES = (
+        51,
+        "Recursos Humanos - Salários e Ordenados (Exceto Diretoria)",
+    )
+    HR_FOOD_VOUCHER = 52, "Recursos Humanos - Vale Alimentação"
+    HR_MEAL_VOUCHER = 53, "Recursos Humanos - Vale Refeição"
+    HR_TRANSPORTATION_VOUCHER = 54, "Recursos Humanos - Vale Transporte"
+    HR_OTHER = 55, "Recursos Humanos - Outras Despesas de Recursos Humanos"
+    THIRD_PARTY_COMMON_WASTE_COLLECTION = (
+        56,
+        "Serviços de Terceiros - Coleta de Lixo Comum",
+    )
+    THIRD_PARTY_HOSPITAL_WASTE_COLLECTION = (
+        57,
+        "Serviços de Terceiros - Coleta de Lixo Hospitalar",
+    )
+    THIRD_PARTY_ACCOUNTING_CONSULTING = (
+        58,
+        "Serviços de Terceiros - Consultoria/Assessoria Contábil",
+    )
+    THIRD_PARTY_LEGAL_CONSULTING = (
+        59,
+        "Serviços de Terceiros - Consultoria/Assessoria Jurídica",
+    )
+    THIRD_PARTY_CLEANING_MAINTENANCE = (
+        60,
+        "Serviços de Terceiros - Limpeza e Conservação",
+    )
+    THIRD_PARTY_CONSTRUCTION_RENOVATION = 61, "Serviços de Terceiros - Obras/Reformas"
+    THIRD_PARTY_OTHER_INDIVIDUAL = (
+        62,
+        "Serviços de Terceiros - Outros Serviços de Terceiros Pessoa Física",
+    )
+    THIRD_PARTY_OTHER_LEGAL_ENTITY = (
+        63,
+        "Serviços de Terceiros - Outros Serviços de Terceiros Pessoa Jurídica",
+    )
+    THIRD_PARTY_ADVERTISING = (
+        64,
+        "Serviços de Terceiros - Publicidade e Propaganda",
+    )
+    THIRD_PARTY_DIAGNOSTIC_SUPPORT = (
+        65,
+        "Serviços de Terceiros - Serviço de Apoio Diagnóstico Terapêutico (SADT)",
+    )
+    THIRD_PARTY_AUDIT_SERVICES = 66, "Serviços de Terceiros - Serviços de Auditoria"
+    THIRD_PARTY_IT_SERVICES = (
+        67,
+        "Serviços de Terceiros - Serviços de Tecnologia da Informação (TI)",
+    )
+    THIRD_PARTY_SECURITY = 68, "Serviços de Terceiros - Vigilância"
+    MEDICAL_SERVICES_INDIVIDUAL = (
+        69,
+        "Serviços Médicos - Serviços Médicos Pessoa Física",
+    )
+    MEDICAL_SERVICES_LEGAL_ENTITY = (
+        70,
+        "Serviços Médicos - Serviços Médicos Pessoa Jurídica",
+    )
+    UTILITIES_WATER_SEWAGE = 71, "Utilidades Públicas - Água e Esgoto"
+    UTILITIES_ELECTRICITY = 72, "Utilidades Públicas - Força e Luz"
+    UTILITIES_INTERNET_CABLE_TV = 73, "Utilidades Públicas - Internet/TV a Cabo"
+    UTILITIES_TELEPHONE = 74, "Utilidades Públicas - Telefones"
+    UTILITIES_OTHER = 76, "Utilidades Públicas - Outras Utilidades Públicas"
+    AGREEMENTS_SUS_SERVICES = (
+        77,
+        "Despesas de Convênios - Contratualização de Serviços do SUS",
+    )
+    MAINTENANCE_FURNITURE_EQUIPMENT = (
+        78,
+        "Manutenção - Manutenção de Mobiliário e Equipamentos",
+    )
+    MATERIALS_HYGIENE_CLEANING = 79, "Materiais - Material de Higienização e Limpeza"
+    MATERIALS_UNIFORMS = 80, "Materiais - Uniformes"
+    MATERIALS_SAFETY_EQUIPMENT = (
+        81,
+        "Materiais - Equipamentos de Segurança do Trabalho (EPI)",
+    )
+    MATERIALS_LINEN = 82, "Materiais - Enxoval"
+    HR_DENTAL_ASSISTANCE = 83, "Recursos Humanos - Assistência Odontológica"
+    HR_INSURANCE = 84, "Recursos Humanos - Seguros"
+    UTILITIES_COOKING_GAS = 85, "Utilidades Públicas - Gás de Cozinha"
+    CONSUMABLE_MATERIALS_TOYS = 86, "Materiais de Consumo - Brinquedos"
+    TAXES_STATE = (
+        87,
+        "Tributos - Estaduais (ICMS/IPVA/ITCMD/Taxas e Outros)",
+    )
+    TAXES_FEDERAL = (
+        88,
+        "Tributos - Federais (IRRF/PIS/COFINS/CSLL/ITR/IOF/Taxas e Outros)",
+    )
+    TAXES_MUNICIPAL = 89, "Tributos - Municipais (IPTU/ISS/ITBI/Taxas e Outros)"
+
+
+class AudespPublicationVehicleChoices(IntegerChoices):
+    """Manual §22.1 "tipo_veiculo_publicacao" — shared across §22/23/28/29/30."""
+
+    MUNICIPAL_OFFICIAL_GAZETTE = 1, "Diário Oficial do Município"
+    STATE_OFFICIAL_GAZETTE = 2, "Diário Oficial do Estado"
+    FEDERAL_OFFICIAL_GAZETTE = 3, "Diário Oficial da União"
+    ELECTRONIC_COURT_GAZETTE = 4, "Diário da Justiça Eletrônico"
+    NATIONAL_PUBLIC_PROCUREMENT_PORTAL = 5, "Portal Nacional de Compras Públicas"
+    NATIONAL_CIRCULATION_NEWSPAPER = 6, "Jornal de grande circulação nacional"
+    REGIONAL_CIRCULATION_NEWSPAPER = 7, "Jornal de grande circulação regional/municipal"
+    PUBLIC_BULLETIN_BOARD = 8, "Quadro ou mural de acesso público"
+    DIRECT_ADMINISTRATION_WEBSITE = 9, "Site da administração direta na Internet"
+    OTHER = 10, "Outros"
 
 
 class NatureChoices(TextChoices):

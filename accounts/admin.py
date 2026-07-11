@@ -3,8 +3,12 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import (
     Area,
+    CededServant,
+    CededServantRemunerationPeriod,
     CityHall,
     Committee,
+    Employee,
+    EmployeeRemunerationPeriod,
     Organization,
     OrganizationDocument,
     User,
@@ -14,7 +18,7 @@ from utils.admin import BaseModelAdmin
 
 @admin.register(Organization)
 class OrganizationAdmin(BaseModelAdmin):
-    list_display = ("name", "created_at", "updated_at")
+    list_display = ("name", "audesp_entity_code", "created_at", "updated_at")
     search_fields = (
         "id",
         "name",
@@ -23,7 +27,14 @@ class OrganizationAdmin(BaseModelAdmin):
 
 @admin.register(CityHall)
 class CityHallAdmin(BaseModelAdmin):
-    list_display = ("name", "mayor", "document", "created_at", "updated_at")
+    list_display = (
+        "name",
+        "mayor",
+        "document",
+        "audesp_municipality_code",
+        "created_at",
+        "updated_at",
+    )
     search_fields = ("id", "name", "mayor")
 
 
@@ -174,3 +185,45 @@ class OrganizationDocumentAdmin(BaseModelAdmin):
         "id",
         "title",
     )
+
+
+class EmployeeRemunerationPeriodInline(admin.TabularInline):
+    model = EmployeeRemunerationPeriod
+    extra = 0
+    fields = ("year", "month", "hours_worked", "gross_remuneration")
+
+
+@admin.register(Employee)
+class EmployeeAdmin(BaseModelAdmin):
+    list_display = (
+        "organization",
+        "cpf",
+        "cbo",
+        "admission_date",
+        "termination_date",
+        "contractual_salary",
+    )
+    list_filter = ("organization",)
+    search_fields = ("id", "cpf", "cbo")
+    inlines = [EmployeeRemunerationPeriodInline]
+
+
+class CededServantRemunerationPeriodInline(admin.TabularInline):
+    model = CededServantRemunerationPeriod
+    extra = 0
+    fields = ("year", "month", "hours_worked", "gross_remuneration")
+
+
+@admin.register(CededServant)
+class CededServantAdmin(BaseModelAdmin):
+    list_display = (
+        "organization",
+        "cpf",
+        "public_position_held",
+        "cession_start_date",
+        "cession_end_date",
+        "payment_burden",
+    )
+    list_filter = ("organization", "payment_burden")
+    search_fields = ("id", "cpf", "public_position_held")
+    inlines = [CededServantRemunerationPeriodInline]

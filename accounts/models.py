@@ -8,6 +8,7 @@ from easy_tenants.models import TenantAwareAbstract, TenantManager
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
+from utils.choices import MonthChoices
 from utils.fields import LowerCaseEmailField
 from utils.managers import TenantManagerAllObjects
 from utils.models import BaseModel
@@ -34,6 +35,12 @@ class CityHall(BaseModel):
         max_length=150,
         null=True,
         blank=True,
+    )
+    audesp_municipality_code = models.PositiveIntegerField(
+        verbose_name="Código do Município (AUDESP)",
+        null=True,
+        blank=True,
+        help_text="Código do município no Sistema Audesp, conforme planilha em tce.sp.gov.br/audesp/coletor",
     )
 
     history = HistoricalRecords()
@@ -102,6 +109,12 @@ class Organization(BaseModel):
         max_length=150,
         null=True,
         blank=True,
+    )
+    audesp_entity_code = models.PositiveIntegerField(
+        verbose_name="Código da Entidade (AUDESP)",
+        null=True,
+        blank=True,
+        help_text="Código da entidade no Sistema Audesp — identifica o órgão responsável pela prestação de contas ao TCESP",
     )
 
     history = HistoricalRecords()
@@ -545,3 +558,185 @@ class OrganizationDocument(OrganizationTenantBaseClass):
 
     def __str__(self):
         return f"{self.get_document_type_display()} - {self.organization.name}"
+
+
+class Employee(BaseOrganizationTenantModel):
+    """AUDESP manual §5 "Relação de Empregados da Entidade Beneficiária".
+
+    Scoped to the organization (not to a single Contract/ajuste): an employee's
+    admissão/demissão/salário aren't tied to one ajuste, and the same employee may
+    be reported across several ajustes' prestações de contas.
+    """
+
+    cpf = models.CharField(
+        verbose_name="CPF",
+        max_length=16,
+        validators=[validate_cpf],
+    )
+    admission_date = models.DateField(verbose_name="Data de Admissão")
+    termination_date = models.DateField(
+        verbose_name="Data de Demissão",
+        null=True,
+        blank=True,
+    )
+    cbo = models.CharField(
+        verbose_name="CBO",
+        max_length=16,
+        help_text="Código Brasileiro de Ocupação. Para estagiários, usar o código equivalente à função exercida.",
+    )
+    cns = models.CharField(
+        verbose_name="CNS",
+        max_length=15,
+        null=True,
+        blank=True,
+        help_text="Cartão Nacional de Saúde — obrigatório quando o CBO corresponde a médico (subgrupo 225)",
+    )
+    contractual_salary = models.DecimalField(
+        verbose_name="Salário Contratual",
+        decimal_places=2,
+        max_digits=12,
+        help_text="Situação no início do exercício",
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Empregado"
+        verbose_name_plural = "Empregados"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("organization", "cpf", "admission_date"),
+                name="unique_employee_per_organization",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.cpf} - {self.organization.name}"
+
+
+class EmployeeRemunerationPeriod(BaseOrganizationTenantModel):
+    employee = models.ForeignKey(
+        Employee,
+        verbose_name="Empregado",
+        related_name="remuneration_periods",
+        on_delete=models.CASCADE,
+    )
+    year = models.IntegerField(verbose_name="Ano")
+    month = models.IntegerField(verbose_name="Mês", choices=MonthChoices)
+    hours_worked = models.DecimalField(
+        verbose_name="Carga Horária",
+        decimal_places=2,
+        max_digits=6,
+    )
+    gross_remuneration = models.DecimalField(
+        verbose_name="Remuneração Bruta",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    class Meta:
+        verbose_name = "Remuneração Mensal de Empregado"
+        verbose_name_plural = "Remunerações Mensais de Empregados"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("employee", "year", "month"),
+                name="unique_employee_remuneration_period",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.employee.cpf} - {self.month}/{self.year}"
+
+
+class CededServant(BaseOrganizationTenantModel):
+    """AUDESP manual §13 "Relação de Servidores Cedidos pelo Órgão Concessor".
+
+    Does not apply to prestações de contas of Termo de Colaboração / Termo de Fomento
+    (enforced by the AUDESP JSON builder, not at the DB level).
+    """
+
+    class PaymentBurdenChoices(models.IntegerChoices):
+        GRANTING_AGENCY = 1, "Órgão Concessor"
+        BENEFICIARY_ENTITY = 2, "Entidade Beneficiada"
+        BOTH = 3, "Ambos"
+
+    cpf = models.CharField(
+        verbose_name="CPF",
+        max_length=16,
+        validators=[validate_cpf],
+    )
+    cession_start_date = models.DateField(verbose_name="Data Inicial da Cessão")
+    cession_end_date = models.DateField(
+        verbose_name="Data Final da Cessão",
+        null=True,
+        blank=True,
+    )
+    public_position_held = models.CharField(
+        verbose_name="Cargo Público Ocupado",
+        max_length=128,
+    )
+    role_performed = models.CharField(
+        verbose_name="Função Desempenhada na Entidade Beneficiária",
+        max_length=128,
+    )
+    payment_burden = models.PositiveSmallIntegerField(
+        verbose_name="Ônus do Pagamento",
+        choices=PaymentBurdenChoices,
+    )
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Servidor Cedido"
+        verbose_name_plural = "Servidores Cedidos"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("organization", "cpf", "cession_start_date"),
+                name="unique_ceded_servant_per_organization",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.cpf} - {self.organization.name}"
+
+    @property
+    def payment_burden_label(self) -> str:
+        return CededServant.PaymentBurdenChoices(self.payment_burden).label
+
+
+class CededServantRemunerationPeriod(BaseOrganizationTenantModel):
+    servant = models.ForeignKey(
+        CededServant,
+        verbose_name="Servidor Cedido",
+        related_name="remuneration_periods",
+        on_delete=models.CASCADE,
+    )
+    year = models.IntegerField(verbose_name="Ano")
+    month = models.IntegerField(verbose_name="Mês", choices=MonthChoices)
+    hours_worked = models.DecimalField(
+        verbose_name="Carga Horária",
+        decimal_places=2,
+        max_digits=6,
+    )
+    gross_remuneration = models.DecimalField(
+        verbose_name="Remuneração Bruta",
+        decimal_places=2,
+        max_digits=12,
+    )
+
+    class Meta:
+        verbose_name = "Remuneração Mensal de Servidor Cedido"
+        verbose_name_plural = "Remunerações Mensais de Servidores Cedidos"
+        constraints = [
+            models.UniqueConstraint(
+                condition=models.Q(deleted_at__isnull=True),
+                fields=("servant", "year", "month"),
+                name="unique_ceded_servant_remuneration_period",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.servant.cpf} - {self.month}/{self.year}"
