@@ -1,9 +1,15 @@
-"""Builds the Fase V JSON payload for a Convênio ajuste's annual statement.
+"""Builds the Fase V JSON payload for a Contrato de Gestão ajuste's annual
+statement.
 
-Convênio requires the 21 blocks in `audesp/builders/common.py` plus
-`servidores_cedidos` and `relatorio_governamental_analise_execucao` (see
-AUDESP_FASE_V_AUDIT.md §3). The other 4 ajuste types differ only in which
-blocks apply and reuse the same common.py helpers.
+Contrato de Gestão requires the 21 blocks in `audesp/builders/common.py`
+plus `servidores_cedidos`, `publicacao_regulamento_compras`,
+`relatorio_comissao_avaliacao` and `publicacao_relatorio_atividades` — the
+richest of the 5 ajuste types (see AUDESP_FASE_V_AUDIT.md §3). It also adds
+one extra key to 3 otherwise-common blocks: `dados_gerais_entidade_
+beneficiaria.identificacao_certidao_responsaveis`, `declaracoes.compras_
+contratacoes_adequados_regulamento_proprio`, and it's the only type whose
+`responsaveis_membros_orgao_concessor` does NOT allow `identificacao_
+certidao_responsaveis_fiscalizacao_execucao` at all.
 """
 
 from easy_tenants import tenant_context
@@ -13,16 +19,8 @@ from audesp.builders import common
 
 
 def build_payload(contract, fiscal_year):
-    """Assemble the full Fase V JSON document for `contract` (a Convênio
-    ajuste) in `fiscal_year`. Raises `AnnualStatement.DoesNotExist` if no
-    annual statement has been created for that (contract, fiscal_year).
-
-    Runs under `tenant_context(contract.organization)` since every model
-    queried here goes through `easy_tenants`' `TenantManager`, which filters
-    by the *current* tenant — outside a request (no `TenantMiddleware`) or
-    outside this wrapper, those queries would silently return empty
-    querysets instead of raising, rather than the data actually there.
-    """
+    """See `audesp.builders.convenio.build_payload` for the `tenant_context`
+    rationale — identical here."""
     with tenant_context(contract.organization):
         return _build_payload(contract, fiscal_year)
 
@@ -32,7 +30,7 @@ def _build_payload(contract, fiscal_year):
 
     return {
         "descritor": common.build_descritor(
-            contract, fiscal_year, "Prestação de Contas de Convênio"
+            contract, fiscal_year, "Prestação de Contas de Contrato de Gestão"
         ),
         "codigo_ajuste": contract.audesp_agreement_code,
         "relacao_empregados": common.build_relacao_empregados(contract, fiscal_year),
@@ -52,18 +50,28 @@ def _build_payload(contract, fiscal_year):
         "relatorio_atividades": common.build_relatorio_atividades(
             contract, fiscal_year
         ),
-        "dados_gerais_entidade_beneficiaria": common.build_dados_gerais(contract),
-        "responsaveis_membros_orgao_concessor": common.build_responsaveis_orgao(
-            contract
+        "dados_gerais_entidade_beneficiaria": common.build_dados_gerais(
+            contract, include_entity_responsible_parties=True
         ),
-        "declaracoes": common.build_declaracoes(annual_statement),
-        "relatorio_governamental_analise_execucao": common.build_relatorio(
-            annual_statement, EvaluationReport.TypeChoices.GOVERNMENT_EXECUTION_ANALYSIS
+        "responsaveis_membros_orgao_concessor": common.build_responsaveis_orgao(
+            contract, include_execution_oversight=False
+        ),
+        "publicacao_regulamento_compras": common.build_publicacao_regulamento_compras(
+            annual_statement
+        ),
+        "declaracoes": common.build_declaracoes(
+            annual_statement, include_purchasing_regulation_compliance=True
+        ),
+        "relatorio_comissao_avaliacao": common.build_relatorio(
+            annual_statement, EvaluationReport.TypeChoices.EVALUATION_COMMITTEE
         ),
         "demonstracoes_contabeis": common.build_demonstracoes_contabeis(
             annual_statement
         ),
         "publicacoes_parecer_ata": common.build_publicacoes_parecer_ata(
+            annual_statement
+        ),
+        "publicacao_relatorio_atividades": common.build_publicacao_relatorio_atividades(
             annual_statement
         ),
         "prestacao_contas_entidade_beneficiaria": common.build_prestacao_entidade(

@@ -1,28 +1,22 @@
-"""Builds the Fase V JSON payload for a Convênio ajuste's annual statement.
+"""Builds the Fase V JSON payload for a Termo de Parceria ajuste's annual
+statement.
 
-Convênio requires the 21 blocks in `audesp/builders/common.py` plus
-`servidores_cedidos` and `relatorio_governamental_analise_execucao` (see
-AUDESP_FASE_V_AUDIT.md §3). The other 4 ajuste types differ only in which
-blocks apply and reuse the same common.py helpers.
+Termo de Parceria requires the 21 blocks in `audesp/builders/common.py` plus
+`servidores_cedidos` and `publicacao_extrato_execucao_fisica_financeira` (see
+AUDESP_FASE_V_AUDIT.md §3). Like Contrato de Gestão, its `declaracoes` block
+also gains `compras_contratacoes_adequados_regulamento_proprio` — but unlike
+Contrato de Gestão, `dados_gerais_entidade_beneficiaria` and
+`responsaveis_membros_orgao_concessor` use common.py's defaults unchanged.
 """
 
 from easy_tenants import tenant_context
 
-from accountability.models import EvaluationReport
 from audesp.builders import common
 
 
 def build_payload(contract, fiscal_year):
-    """Assemble the full Fase V JSON document for `contract` (a Convênio
-    ajuste) in `fiscal_year`. Raises `AnnualStatement.DoesNotExist` if no
-    annual statement has been created for that (contract, fiscal_year).
-
-    Runs under `tenant_context(contract.organization)` since every model
-    queried here goes through `easy_tenants`' `TenantManager`, which filters
-    by the *current* tenant — outside a request (no `TenantMiddleware`) or
-    outside this wrapper, those queries would silently return empty
-    querysets instead of raising, rather than the data actually there.
-    """
+    """See `audesp.builders.convenio.build_payload` for the `tenant_context`
+    rationale — identical here."""
     with tenant_context(contract.organization):
         return _build_payload(contract, fiscal_year)
 
@@ -32,7 +26,7 @@ def _build_payload(contract, fiscal_year):
 
     return {
         "descritor": common.build_descritor(
-            contract, fiscal_year, "Prestação de Contas de Convênio"
+            contract, fiscal_year, "Prestação de Contas de Termo de Parceria"
         ),
         "codigo_ajuste": contract.audesp_agreement_code,
         "relacao_empregados": common.build_relacao_empregados(contract, fiscal_year),
@@ -56,9 +50,11 @@ def _build_payload(contract, fiscal_year):
         "responsaveis_membros_orgao_concessor": common.build_responsaveis_orgao(
             contract
         ),
-        "declaracoes": common.build_declaracoes(annual_statement),
-        "relatorio_governamental_analise_execucao": common.build_relatorio(
-            annual_statement, EvaluationReport.TypeChoices.GOVERNMENT_EXECUTION_ANALYSIS
+        "publicacao_extrato_execucao_fisica_financeira": common.build_publicacao_extrato_execucao(
+            annual_statement
+        ),
+        "declaracoes": common.build_declaracoes(
+            annual_statement, include_purchasing_regulation_compliance=True
         ),
         "demonstracoes_contabeis": common.build_demonstracoes_contabeis(
             annual_statement

@@ -27,5 +27,13 @@ Not resolved here because building an accurate label table means sourcing the of
 
 **Suggested fix**: source the official lists (BACEN's public bank-code table for `banco`; a TCESP support ticket or the Fase IV cadastro for `estado_emissor`) and convert both to proper `IntegerChoices` before the JSON builder (Phase 4) starts relying on them for display purposes — the raw values are already correct for the wire format either way.
 
+## `Contract.ConcessionChoices` doesn't map 1:1 onto AUDESP's 5 ajuste types
+
+`contracts/models.py:117-123` (pre-existing, predates AUDESP work): `DEVELOPMENTO = "Contrato de Fomento"` has a typo in the member name (should be `DEVELOPMENT`) and its label doesn't match AUDESP's official term ("Termo de Fomento", not "Contrato de Fomento"). There's also a 6th value, `GRANT = "Concessão"`, with no corresponding Fase V ajuste type at all. Not fixed here — `concession_type` is a live field referenced elsewhere in the codebase (reports, dashboard), and renaming/relabeling it is an unrelated mechanical change with its own blast radius (stored values, any code doing string comparisons against `"DEVELOPMENTO"`).
+
+Practical effect on the AUDESP builders: `audesp/builders/declaracao_negativa.py`'s `build_payload(contract, fiscal_year, ajuste_type)` deliberately takes `ajuste_type` as an explicit parameter instead of inferring it from `contract.concession_type`, to avoid depending on this lossy/typo'd mapping. The other 5 builders (`convenio.py`, `contrato_gestao.py`, etc.) don't read `concession_type` either — the caller picks which builder module to call directly.
+
+**Suggested fix**: rename `DEVELOPMENTO` → `DEVELOPMENT` (with a data migration for existing rows), relabel to "Termo de Fomento", and decide whether `GRANT`/"Concessão" contracts are legitimately out of AUDESP scope or were meant to be one of the 5 (likely Contrato de Gestão or Convênio, given typical concessão-adjacent legal structures) — needs a domain-knowledge call, not just a code fix.
+
 ---
 
