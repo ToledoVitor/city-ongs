@@ -63,7 +63,7 @@ Full field/rule extraction (all 37 sections) is preserved in this session's hist
 - **Folha Ordinária special case**: payroll payments use sentinel `9999` for documento-fiscal número and numero_transacao, have no linked documento fiscal, and glosa analysis for them is optional and keyed by `pagamento_data` instead.
 - **Composite uniqueness keys are precise and change between schema versions** (e.g. repasses' key gained `fonte_recurso_tipo` in v1.12) — don't hardcode assumptions, mirror the schema's actual key each time we bump versions.
 - **Date-window rule**: virtually everything must fall within the `ano` given in descritor, with explicit named exceptions (first prestação's documento fiscal emissão, §12 inclusão entries predate the period, glosa análise dates may be current-or-earlier).
-- **Certidão references** (§20/§21): these are NOT free text — they're IDs of certidão records that must already exist, concluded, in AUDESP itself (a separate subsystem, likely Fase IV / cadastro). We only need to **store and validate the reference id**, not build a certidão issuance system.
+- **Certidão references** (§20/§21): these are NOT free text — they're IDs of certidão records that must already exist, concluded, in AUDESP itself (a separate subsystem — confirmed to be Fase IV, see [AUDESP_FASE_IV_AUDIT.md](AUDESP_FASE_IV_AUDIT.md); its own `codigoEdital` field has the identical "must already be registered elsewhere" shape). We only need to **store and validate the reference id**, not build a certidão issuance system.
 
 ---
 
@@ -102,6 +102,8 @@ Key models today:
 ---
 
 ## 5. Gap matrix
+
+This table is the **pre-implementation snapshot** (state at first audit) — it is not re-edited as gaps close. §7/§8 record what was actually built; most "High" rows here (Descritor, Código do ajuste, Relação de Empregados/Servidores Cedidos/Bens, Empenhos, Repasses) were resolved during Phase 0 (§8) — check §7/§8 or the current models before treating any row below as still open.
 
 | AUDESP block | Current model | Gap | Severity |
 |---|---|---|---|

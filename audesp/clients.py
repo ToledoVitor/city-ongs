@@ -1,10 +1,17 @@
-"""HTTP client for the TCESP AUDESP Fase V webservice.
+"""HTTP client for the TCESP AUDESP webservice — Fase V and Fase IV share
+one base URL, one login/token mechanism, and one client class; only the
+submission paths and payload shapes differ (confirmed from the same
+OpenAPI spec, `audesp.tce.sp.gov.br/api/audesp.yaml`, for both phases).
 
-Endpoint paths, auth header format, multipart field name, and status values
-below come straight from the manual (v1.18) and the downloaded JSON
-Schemas — see AUDESP_FASE_V_AUDIT.md §1.2 for the workflow this mirrors
-(login -> submit -> consulta -> retificação) and §6 for why this lives in
-its own module rather than inside a builder or model.
+Fase V endpoint paths, auth header format, multipart field name, and
+status values below come straight from the manual (v1.18) and the
+downloaded JSON Schemas — see AUDESP_FASE_V_AUDIT.md §1.2 for the workflow
+this mirrors (login -> submit -> consulta -> retificação) and §6 for why
+this lives in its own module rather than inside a builder or model.
+
+Fase IV endpoint paths (`/recepcao-fase-4/f4/enviar-ajuste`,
+`/f4/consulta/{protocolo}`) come from the same OpenAPI spec — see
+AUDESP_FASE_IV_AUDIT.md.
 
 Not yet exercised against a live server — no TCESP piloto credentials are
 provisioned yet. Verified so far only against a mocked HTTP layer (request
@@ -67,6 +74,7 @@ class AudespClient:
         "TERMO_PARCERIA": "/f5/enviar-prestacao-contas-termo-parceria",
     }
     _DECLARACAO_NEGATIVA_PATH = "/f5/declaracao-negativa"
+    _FASE_IV_AJUSTE_PATH = "/recepcao-fase-4/f4/enviar-ajuste"
 
     def __init__(self, credential):
         self.credential = credential
@@ -120,6 +128,14 @@ class AudespClient:
     def submit_declaracao_negativa(self, payload):
         return self._submit_to(self._DECLARACAO_NEGATIVA_PATH, payload)
 
+    def enviar_ajuste(self, payload):
+        """POST a Fase IV payload — either an "ajuste" or an "empenho"
+        shape (see audesp.builders.fase_iv), both accepted at this same
+        endpoint per the manual's "Empenho is a sub-módulo of Ajuste" note.
+        Returns `{"protocolo": str, "mensagem": str}`.
+        """
+        return self._submit_to(self._FASE_IV_AJUSTE_PATH, payload)
+
     def _submit_to(self, path, payload):
         response = self._request_with_retry(
             "POST",
@@ -153,6 +169,19 @@ class AudespClient:
         response = self._request_with_retry(
             "GET",
             f"{self._base_url}/f5/consulta/{protocolo}",
+            headers=self._auth_headers(),
+        )
+        self._raise_for_status(response)
+        return response.json()
+
+    def consulta_fase_iv(self, protocolo):
+        """`GET /f4/consulta/{protocolo}` -> same shape as `consulta`
+        (Fase V's own status query); status vocabulary not yet confirmed
+        against a live Fase IV response — see AUDESP_FASE_IV_AUDIT.md.
+        """
+        response = self._request_with_retry(
+            "GET",
+            f"{self._base_url}/f4/consulta/{protocolo}",
             headers=self._auth_headers(),
         )
         self._raise_for_status(response)
