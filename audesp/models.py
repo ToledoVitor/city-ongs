@@ -1,6 +1,7 @@
 from django.db import models
 
 from accounts.models import BaseOrganizationTenantModel, CityHall
+from accountability.models import BudgetCommitment
 from audesp import secrets as audesp_secrets
 from contracts.models import Contract
 from utils.models import BaseModel
@@ -127,3 +128,97 @@ class AudespCredential(BaseModel):
     def get_credentials(self):
         """Returns (username, password), resolved through `audesp.secrets`."""
         return audesp_secrets.get_credentials(self.city_hall, self.environment)
+
+
+class AudespFaseIVSubmission(BaseOrganizationTenantModel):
+    """Tracks one built (and optionally submitted) Fase IV JSON payload —
+    either an "ajuste" (contract/instrument registration) or an "empenho"
+    (budget commitment note linked to an already-registered ajuste). Both
+    document types are sent through the same `/f4/enviar-ajuste` endpoint
+    (per the official manual, Empenho is a "sub-módulo" of Ajuste, not a
+    separate submission path) and share this table's shape/lifecycle, which
+    mirrors `AudespSubmission`'s (Fase V) for consistency.
+
+    See AUDESP_FASE_IV_AUDIT.md for what this can and can't do yet — in
+    particular, `descritor.codigoEdital` (required on every ajuste payload)
+    references a Licitação/Dispensa record this codebase does not register;
+    that remains an external prerequisite, same as Fase V's own certidão
+    references.
+    """
+
+    class DocumentTypeChoices(models.TextChoices):
+        AJUSTE = "AJUSTE", "Ajuste"
+        EMPENHO = "EMPENHO", "Empenho"
+
+    class StatusChoices(models.TextChoices):
+        DRAFT = "DRAFT", "Rascunho"
+        VALID = "VALID", "Válido"
+        INVALID = "INVALID", "Inválido"
+        SUBMITTED = "SUBMITTED", "Enviado"
+        ACCEPTED = "ACCEPTED", "Aceito"
+        REJECTED = "REJECTED", "Rejeitado"
+
+    contract = models.ForeignKey(
+        Contract,
+        verbose_name="Ajuste",
+        related_name="audesp_fase_iv_submissions",
+        on_delete=models.CASCADE,
+    )
+    budget_commitment = models.ForeignKey(
+        BudgetCommitment,
+        verbose_name="Empenho",
+        related_name="audesp_fase_iv_submissions",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Preenchido apenas quando document_type = EMPENHO",
+    )
+    document_type = models.CharField(
+        verbose_name="Tipo de Documento",
+        max_length=7,
+        choices=DocumentTypeChoices,
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=10,
+        choices=StatusChoices,
+        default=StatusChoices.DRAFT,
+    )
+    payload = models.JSONField(
+        verbose_name="Documento JSON",
+        help_text="Último payload construído para esta submissão",
+    )
+    validation_errors = models.JSONField(
+        verbose_name="Erros de Validação",
+        default=list,
+        blank=True,
+        help_text="Erros de validação contra o JSON Schema, se houver",
+    )
+    protocol_number = models.CharField(
+        verbose_name="Número de Protocolo",
+        max_length=32,
+        null=True,
+        blank=True,
+        help_text="Preenchido após envio bem-sucedido ao webservice AUDESP",
+    )
+    built_at = models.DateTimeField(verbose_name="Construído em", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Submissão AUDESP Fase IV"
+        verbose_name_plural = "Submissões AUDESP Fase IV"
+        ordering = ("-built_at",)
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(document_type="EMPENHO", budget_commitment__isnull=False)
+                    | models.Q(document_type="AJUSTE", budget_commitment__isnull=True)
+                ),
+                name="fase_iv_empenho_requires_budget_commitment",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["contract", "document_type", "-built_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.contract.name} - {self.get_document_type_display()} ({self.get_status_display()})"

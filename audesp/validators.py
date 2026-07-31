@@ -1,9 +1,12 @@
-"""Local validation of a built Fase V payload against the official AUDESP
-JSON Schema files (downloaded from the TCESP documentation page, version
-1.14) — catches structural/format errors before ever calling the webservice.
+"""Local validation of a built AUDESP payload against the official JSON
+Schema files (downloaded from the TCESP documentation pages) — catches
+structural/format errors before ever calling the webservice.
 
-The schema files live in docs/audesp/, one subdirectory per ajuste type,
-matching AudespSubmission.AjusteTypeChoices.
+Covers both phases this app builds payloads for:
+- Fase V (docs/audesp/, version 1.14) — one subdirectory per ajuste type,
+  matching AudespSubmission.AjusteTypeChoices.
+- Fase IV (docs/audesp_fase_iv/) — "ajuste" (v2.0.0) and "empenho" (v1),
+  matching AudespFaseIVSubmission.DocumentTypeChoices.
 """
 
 import json
@@ -15,6 +18,12 @@ from jsonschema.exceptions import ValidationError
 from jsonschema.validators import extend
 
 DOCS_DIR = Path(__file__).resolve().parent.parent / "docs" / "audesp"
+FASE_IV_DOCS_DIR = Path(__file__).resolve().parent.parent / "docs" / "audesp_fase_iv"
+
+FASE_IV_SCHEMA_PATHS = {
+    "AJUSTE": FASE_IV_DOCS_DIR / "ajuste_v2_0_0" / "ajuste_schema_v2.json",
+    "EMPENHO": FASE_IV_DOCS_DIR / "empenho_v1" / "empenho_schema_v1.json",
+}
 
 SCHEMA_PATHS = {
     "CONTRATO_GESTAO": DOCS_DIR
@@ -38,8 +47,7 @@ SCHEMA_PATHS = {
 }
 
 
-def _load_schema(ajuste_type):
-    path = SCHEMA_PATHS[ajuste_type]
+def _load_schema(path):
     with open(path, encoding="utf-8") as schema_file:
         return json.load(schema_file)
 
@@ -69,16 +77,7 @@ _AudespValidator = extend(
 )
 
 
-def validate_payload(payload, ajuste_type):
-    """Validate `payload` (a dict) against the AUDESP JSON Schema for
-    `ajuste_type` (one of AudespSubmission.AjusteTypeChoices' values).
-
-    Returns a list of {"message": str, "path": str} dicts — empty means the
-    payload is structurally valid per the JSON Schema (still no guarantee it
-    passes AUDESP's server-side data-validation rules from the manual, which
-    aren't expressible in JSON Schema and run only after submission).
-    """
-    schema = _load_schema(ajuste_type)
+def _validate_against(payload, schema):
     validator = _AudespValidator(schema)
     errors = []
     for error in sorted(validator.iter_errors(payload), key=lambda e: list(e.path)):
@@ -89,3 +88,26 @@ def validate_payload(payload, ajuste_type):
             }
         )
     return errors
+
+
+def validate_payload(payload, ajuste_type):
+    """Validate `payload` (a dict) against the Fase V AUDESP JSON Schema for
+    `ajuste_type` (one of AudespSubmission.AjusteTypeChoices' values).
+
+    Returns a list of {"message": str, "path": str} dicts — empty means the
+    payload is structurally valid per the JSON Schema (still no guarantee it
+    passes AUDESP's server-side data-validation rules from the manual, which
+    aren't expressible in JSON Schema and run only after submission).
+    """
+    return _validate_against(payload, _load_schema(SCHEMA_PATHS[ajuste_type]))
+
+
+def validate_fase_iv_payload(payload, document_type):
+    """Validate `payload` against the Fase IV AUDESP JSON Schema for
+    `document_type` (one of AudespFaseIVSubmission.DocumentTypeChoices'
+    values — AJUSTE or EMPENHO, both submitted through the same webservice
+    endpoint but with different payload shapes/schemas).
+
+    Same return shape and same caveat as `validate_payload`.
+    """
+    return _validate_against(payload, _load_schema(FASE_IV_SCHEMA_PATHS[document_type]))

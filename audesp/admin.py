@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib import admin
 
 from audesp import secrets as audesp_secrets
-from audesp.models import AudespCredential, AudespSubmission
+from audesp.models import AudespCredential, AudespFaseIVSubmission, AudespSubmission
 from utils.admin import BaseModelAdmin
 
 
@@ -19,6 +19,21 @@ class AudespSubmissionAdmin(BaseModelAdmin):
         "built_at",
     )
     list_filter = ("organization", "ajuste_type", "status", "fiscal_year")
+    search_fields = ("id", "contract__name", "protocol_number")
+    readonly_fields = ("payload", "validation_errors", "built_at")
+
+
+@admin.register(AudespFaseIVSubmission)
+class AudespFaseIVSubmissionAdmin(BaseModelAdmin):
+    list_display = (
+        "organization",
+        "contract",
+        "document_type",
+        "status",
+        "protocol_number",
+        "built_at",
+    )
+    list_filter = ("organization", "document_type", "status")
     search_fields = ("id", "contract__name", "protocol_number")
     readonly_fields = ("payload", "validation_errors", "built_at")
 

@@ -1,0 +1,343 @@
+{
+  "$schema": "\nhttps://json-schema.org/draft-07/schema#",
+  "title": "Edital",
+  "description": "JSON schema para o envio de ajustes. Ano exercício: 2023.",
+  "type": "object",
+  "required": [
+    "descritor",
+    "fonteRecursosContratacao",
+    "itens",
+    "tipoContratoId",
+    "numeroContratoEmpenho",
+    "anoContrato",
+    "categoriaProcessoId",
+    "receita",
+    "niFornecedor",
+    "tipoPessoaFornecedor",
+    "nomeRazaoSocialFornecedor",
+    "objetoContrato",
+    "valorInicial",
+    "dataAssinatura",
+    "dataVigenciaInicio",
+    "dataVigenciaFim",
+    "tipoObjetoContrato"
+  ],
+  "properties": {
+    "descritor": {
+      "type": "object",
+      "properties": {
+        "municipio": {
+          "$id": "#root/descritor/municipio",
+          "title": "Municipio",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999
+        },
+        "entidade": {
+          "$id": "#root/descritor/entidade",
+          "title": "Entidade",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999
+        },
+        "adesaoParticipacao": {
+          "$id": "#root/descritor/adesaoParticipacao",
+          "title": "Informa se é o caso de adesão ou participação em licitação gerenciada por outra entidade",
+          "type": "boolean"
+        },
+        "gerenciadoraJurisdicionada": {
+          "$id": "#root/descritor/gerenciadoraJurisdicionada",
+          "title": "Informa se a entidade gerenciadora da licitação é jurisdicionada ao TCE-SP",
+          "type": "boolean"
+        },
+        "cnpjGerenciadora": {
+          "$id": "#root/descritor/cnpjGerenciadora",
+          "title": "CNPJ da entidade gerenciadora da Licitação",
+          "type": "string",
+          "minLength": 14,
+          "maxLength": 14
+        },
+        "municipioGerenciador": {
+          "$id": "#root/descritor/municipioGerenciador",
+          "title": "Municipio",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999
+        },
+        "entidadeGerenciadora": {
+          "$id": "#root/descritor/entidadeGerenciadora",
+          "title": "Entidade",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999
+        },
+        "codigoEdital": {
+          "$id": "#root/descritor/codigoEdital",
+          "title": "Código único que identifica o Edital original",
+          "type": "string",
+          "maxLength": 25
+        },
+        "codigoAta": {
+          "$id": "#root/descritor/codigoAta",
+          "title": "Código da ata de registro de preços\t",
+          "type": "string",
+          "maxLength": 30
+        },
+        "codigoContrato": {
+          "$id": "#root/descritor/codigoContrato",
+          "title": "Código único que identifica o ajuste",
+          "type": "string",
+          "maxLength": 25
+        },
+        "retificacao": {
+          "title": "Identifica se o documento é uma retificação; true - Retificação; false - Não é retificação",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "municipio",
+        "entidade",
+        "adesaoParticipacao",
+        "codigoEdital",
+        "codigoContrato",
+        "retificacao"
+      ],
+      "additionalProperties": false
+    },
+    "fonteRecursosContratacao": {
+      "title": "Lista de fontes de recursos que constam na declaração da existência de recursos orçamentários para a contratação",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "title": "item",
+        "type": "number",
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98
+        ]
+      }
+    },
+    "itens": {
+      "title": "Lista de itens constratados",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "title": "item",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999999999999
+      }
+    },
+    "tipoContratoId": {
+      "description": "Tipo de contrato",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        12
+      ]
+    },
+    "numeroContratoEmpenho": {
+      "title": "Número do contrato ou empenho com força de contrato no sistema de origem",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "anoContrato": {
+      "title": "Ano do contrato",
+      "type": "number",
+      "minimum": 1970,
+      "maximum": 2099
+    },
+    "processo": {
+      "title": "Número do processo no sistema de origem",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "categoriaProcessoId": {
+      "description": "Categoria do Processo",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "receita": {
+      "title": "Informa se o processo gera receita ou despesa para a entidade.",
+      "type": "boolean"
+    },
+    "despesas": {
+      "title": "Lista de classificações de despesa",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "title": "despesa",
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 8
+      }
+    },
+    "codigoUnidade": {
+      "title": "Codigo solicitado pelo Portal Nacional de Compras Públicas às entidades que efetuaram a publicação via PNCP",
+      "type": "string",
+      "maxLength": 30
+    },
+    "niFornecedor": {
+      "title": "Número de identificação do fornecedor/arrematante; CNPJ, CPF ou identificador de empresa estrangeira",
+      "type": "string",
+      "maxLength": 50
+    },
+    "tipoPessoaFornecedor": {
+      "title": "PJ-Pessoa Jurídica PF-Pessoa Física PE-Estrangeiro",
+      "type": "string",
+      "enum": [
+        "PJ",
+        "PF",
+        "PE"
+      ]
+    },
+    "nomeRazaoSocialFornecedor": {
+      "title": "Nome ou razão social do fornecedor/arrematante",
+      "type": "string",
+      "maxLength": 100
+    },
+    "niFornecedorSubContratado": {
+      "title": "Número de identificação do fornecedor subcontratado; CNPJ, CPF ou identificador de empresa estrangeira; Somente em caso de subcontratação; Não se aplica a leilão",
+      "type": "string",
+      "maxLength": 50
+    },
+    "tipoPessoaFornecedorSubContratado": {
+      "title": "PJ-Pessoa Jurídica PF-Pessoa Física PE-Estrangeiro",
+      "type": "string",
+      "enum": [
+        "PJ",
+        "PF",
+        "PE"
+      ]
+    },
+    "nomeRazaoSocialFornecedorSubContratado": {
+      "title": "Nome ou razão social do fornecedor subcontratado; Somente em caso de subcontratação; Não se aplica a leilão",
+      "type": "string",
+      "maxLength": 100
+    },
+    "objetoContrato": {
+      "title": "Descrição do objeto do contrato",
+      "type": "string",
+      "maxLength": 5120
+    },
+    "informacaoComplementar": {
+      "title": "Informações complementares; Se existirem;",
+      "type": "string",
+      "maxLength": 5120
+    },
+    "valorInicial": {
+      "title": "Valor inicial do contrato. Precisão de 4 dígitos decimais; Ex: 100.0000",
+      "type": "number",
+      "multipleOf": 0.0001
+    },
+    "numeroParcelas": {
+      "title": "Número de parcelas",
+      "type": "integer",
+      "minimum": 1
+    },
+    "valorParcela": {
+      "title": "Valor da parcela. Precisão de 4 dígitos decimais; Ex: 100.0000",
+      "type": "number",
+      "multipleOf": 0.0001
+    },
+    "valorGlobal": {
+      "title": "Valor global do contrato. Precisão de 4 dígitos decimais; Ex: 100.0000",
+      "type": "number",
+      "multipleOf": 0.0001
+    },
+    "valorAcumulado": {
+      "title": "Valor acumulado do contrato. Precisão de 4 dígitos decimais; Ex: 100.0000",
+      "type": "number",
+      "multipleOf": 0.0001
+    },
+    "dataAssinatura": {
+      "title": "Data de assinatura do contrato",
+      "type": "string",
+      "format": "date"
+    },
+    "dataVigenciaInicio": {
+      "title": "Data de início da vigência do contrato",
+      "type": "string",
+      "format": "date"
+    },
+    "dataVigenciaFim": {
+      "title": "Data de fim da vigência do contrato",
+      "type": "string",
+      "format": "date"
+    },
+    "vigenciaMeses": {
+      "title": "Não havendo definição da data inicial da vigência, a validade pode ser informada em quantidade de meses.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "tipoObjetoContrato": {
+      "description": "Objeto do contrato",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ]
+    }
+  }
+}

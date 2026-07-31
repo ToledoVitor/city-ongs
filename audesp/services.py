@@ -1,6 +1,7 @@
 """Thin orchestration: build -> validate -> submit -> poll, for one of the 5
 real ajuste types (Declaração Negativa is deliberately not wired up here —
-see the note at the bottom of this module).
+see the note at the bottom of this module), plus the Fase IV Ajuste/Empenho
+orchestration near the bottom.
 
 This is glue, not a full ops workflow: no retificação handling, no
 inconformidade surfacing UI, no scheduling. See AUDESP_FASE_V_AUDIT.md §8
@@ -14,9 +15,11 @@ from audesp.builders import (
     termo_fomento,
     termo_parceria,
 )
+from audesp.builders.fase_iv import ajuste as fase_iv_ajuste
+from audesp.builders.fase_iv import empenho as fase_iv_empenho
 from audesp.clients import AudespClient
-from audesp.models import AudespCredential, AudespSubmission
-from audesp.validators import validate_payload
+from audesp.models import AudespCredential, AudespFaseIVSubmission, AudespSubmission
+from audesp.validators import validate_fase_iv_payload, validate_payload
 
 _BUILDERS = {
     AudespSubmission.AjusteTypeChoices.CONTRATO_GESTAO: contrato_gestao.build_payload,
@@ -102,3 +105,74 @@ def _client_for(city_hall, environment):
 # negative declaration *for* — building this orchestration would mean
 # guessing at that modeling gap instead of deciding it. See
 # AUDESP_FASE_V_AUDIT.md §10.
+
+
+# --- Fase IV (see AUDESP_FASE_IV_AUDIT.md) ---
+
+
+def build_and_validate_fase_iv_ajuste(
+    contract, *, codigo_edital, itens, retificacao=False, funding_sources=None
+):
+    """Builds + locally validates a Fase IV "ajuste" payload, recording the
+    attempt as a new AudespFaseIVSubmission row regardless of outcome.
+    `codigo_edital`/`itens` reference a Licitação/Dispensa record this
+    codebase doesn't register — see fase_iv.ajuste.build_payload's
+    docstring and AUDESP_FASE_IV_AUDIT.md before calling this with real data.
+    """
+    payload = fase_iv_ajuste.build_payload(
+        contract,
+        codigo_edital=codigo_edital,
+        itens=itens,
+        retificacao=retificacao,
+        funding_sources=funding_sources,
+    )
+    errors = validate_fase_iv_payload(payload, "AJUSTE")
+    return AudespFaseIVSubmission.objects.create(
+        organization=contract.organization,
+        contract=contract,
+        document_type=AudespFaseIVSubmission.DocumentTypeChoices.AJUSTE,
+        status=AudespFaseIVSubmission.StatusChoices.INVALID
+        if errors
+        else AudespFaseIVSubmission.StatusChoices.VALID,
+        payload=payload,
+        validation_errors=errors,
+    )
+
+
+def build_and_validate_fase_iv_empenho(budget_commitment, *, retificacao=False):
+    """Same as `build_and_validate_fase_iv_ajuste`, for the "empenho"
+    sub-módulo payload shape — requires `budget_commitment.contract` to
+    already have a real `audesp_agreement_code` (the ajuste this empenho
+    is registered against).
+    """
+    payload = fase_iv_empenho.build_payload(budget_commitment, retificacao=retificacao)
+    errors = validate_fase_iv_payload(payload, "EMPENHO")
+    return AudespFaseIVSubmission.objects.create(
+        organization=budget_commitment.contract.organization,
+        contract=budget_commitment.contract,
+        budget_commitment=budget_commitment,
+        document_type=AudespFaseIVSubmission.DocumentTypeChoices.EMPENHO,
+        status=AudespFaseIVSubmission.StatusChoices.INVALID
+        if errors
+        else AudespFaseIVSubmission.StatusChoices.VALID,
+        payload=payload,
+        validation_errors=errors,
+    )
+
+
+def submit_fase_iv(submission, environment=AudespCredential.EnvironmentChoices.PILOTO):
+    """Sends an already-built, already-VALID AudespFaseIVSubmission (either
+    document_type) to the webservice — both go through the same
+    `enviar_ajuste` client method per the manual's sub-módulo note.
+    """
+    if submission.status != AudespFaseIVSubmission.StatusChoices.VALID:
+        raise ValueError(
+            f"Cannot submit an AudespFaseIVSubmission with status "
+            f"{submission.status!r} — only VALID submissions may be sent."
+        )
+    client = _client_for(submission.contract.organization.city_hall, environment)
+    result = client.enviar_ajuste(submission.payload)
+    submission.protocol_number = result["protocolo"]
+    submission.status = AudespFaseIVSubmission.StatusChoices.SUBMITTED
+    submission.save(update_fields=["protocol_number", "status"])
+    return submission

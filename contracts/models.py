@@ -141,7 +141,16 @@ class Contract(BaseOrganizationTenantModel):
         max_length=32,
         null=True,
         blank=True,
-        help_text="Código do ajuste no Sistema Audesp Fase V (campo codigo_ajuste do descritor)",
+        help_text=(
+            "Código do ajuste no Sistema Audesp: campo codigo_ajuste do "
+            "descritor na Fase V, campo descritor.codigoContrato na Fase IV"
+        ),
+    )
+    signature_date = models.DateField(
+        verbose_name="Data de Assinatura",
+        null=True,
+        blank=True,
+        help_text="Data de assinatura do ajuste (distinta do início de vigência)",
     )
     internal_code = models.PositiveIntegerField(
         verbose_name="Código interno para importação",
