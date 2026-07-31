@@ -148,7 +148,11 @@ class AudespClient:
         | `Rejeitado` (see `erros[]`, classificação Indicativo/Impeditivo)
         -> eventually `Substituído` (overwritten by retificação) or
         `Excluído` (cascaded exclusion from a retificação on an earlier
-        exercício).
+        exercício). See `audesp.services.check_status` for how (most of)
+        these map onto `AudespSubmission.StatusChoices`, and
+        `audesp.services.submit`/`find_cascade_affected_submissions` for the
+        local cascade-exclusion guard that runs before a retificação is
+        even sent.
         """
         response = self._request_with_retry(
             "GET",

@@ -9,7 +9,17 @@ from utils.models import BaseModel
 class AudespSubmission(BaseOrganizationTenantModel):
     """Tracks one built (and optionally submitted) Fase V JSON payload for a
     (contract, fiscal_year). Building/validating happens locally; submission
-    to the AUDESP webservice is a later phase (no API client exists yet)."""
+    to the AUDESP webservice is a later phase (no API client exists yet).
+
+    Retificação (manual §1.2 point 4): resending a *complete* document with
+    `retificacao=True` fully replaces the prior submission for the same
+    exercício. Retifying an exercício older than the latest submitted one
+    cascades server-side -- every later exercício still SUBMITTED/ACCEPTED
+    at TCESP flips to `Excluído`. `audesp.services.submit` runs that check
+    locally before sending and flips the affected rows to
+    `StatusChoices.EXCLUDED` as a side effect, so this table doesn't
+    silently go stale relative to what TCESP actually did.
+    """
 
     class AjusteTypeChoices(models.TextChoices):
         CONTRATO_GESTAO = "CONTRATO_GESTAO", "Contrato de Gestão"
@@ -26,6 +36,13 @@ class AudespSubmission(BaseOrganizationTenantModel):
         SUBMITTED = "SUBMITTED", "Enviado"
         ACCEPTED = "ACCEPTED", "Aceito"
         REJECTED = "REJECTED", "Rejeitado"
+        # Cascaded exclusion (manual §1.2 point 4), not a rejection: this
+        # submission was itself fine, but TCESP voided it server-side because
+        # a *later* retificação replaced an earlier exercício of the same
+        # (contract, ajuste_type). Different remediation than REJECTED --
+        # rejected needs a fix before resending, excluded-by-cascade just
+        # needs a plain resend of this same exercício.
+        EXCLUDED = "EXCLUDED", "Excluído"
 
     contract = models.ForeignKey(
         Contract,
@@ -38,6 +55,14 @@ class AudespSubmission(BaseOrganizationTenantModel):
         verbose_name="Tipo de Ajuste (AUDESP)",
         max_length=20,
         choices=AjusteTypeChoices,
+    )
+    retificacao = models.BooleanField(
+        verbose_name="Retificação",
+        default=False,
+        help_text="Reenvio integral que substitui a prestação anterior deste "
+        "exercício (manual §1.2, item 4). Retificar um exercício anterior ao "
+        "último enviado exclui, em cascata, os exercícios posteriores já "
+        "enviados/aceitos no TCESP.",
     )
     status = models.CharField(
         verbose_name="Status",
