@@ -12,6 +12,7 @@ Props (all optional except `name`):
     value          (str)   initial value.
     placeholder    (str)   placeholder text.
     required       (bool)  required attr.
+    disabled       (bool)  disabled attr — dims the input (see .ui-input:disabled).
     autocomplete   (str)   autocomplete attr.
     autofocus      (bool)  autofocus attr.
     hint           (str)   helper text shown under the input.
@@ -36,6 +37,7 @@ Props (all optional except `name`):
       {% if value %}value="{{ value }}"{% endif %}
       {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
       {% if required %}required{% endif %}
+      {% if disabled %}disabled{% endif %}
       {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
       {% if autofocus %}autofocus{% endif %}
       {% if error %}aria-invalid="true" aria-describedby="{{ field_id }}-error"{% endif %}

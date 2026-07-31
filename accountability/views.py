@@ -20,20 +20,60 @@ from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 from accountability.forms import (
     AccountabilityCreateForm,
     AccountabilityFileForm,
+    ActivityReportPublicationFormSet,
+    ActivityReportPublicationStatusForm,
+    AnnualStatementCreateForm,
+    AnnualStatementUpdateForm,
+    BalanceAdjustmentForm,
+    BoardParticipationFormSet,
+    BudgetCommitmentForm,
+    ConclusiveOpinionDeclarationFormSet,
+    ConclusiveOpinionForm,
+    ConflictOfInterestDeclarationForm,
+    DeductionForm,
+    EvaluationReportForm,
     ExpenseForm,
+    ExpenseRejectionForm,
     FavoredForm,
+    FinancialStatementsForm,
+    FinancialStatementsPublicationFormSet,
+    FundTransferForm,
     ImportXLSXAccountabilityForm,
+    OpinionOrMinutesForm,
+    OpinionOrMinutesPublicationFormSet,
+    PhysicalFinancialExecutionStatementForm,
+    PhysicalFinancialExecutionStatementPublicationFormSet,
+    PurchasingRegulationForm,
+    PurchasingRegulationPublicationFormSet,
     ReconcileExpenseForm,
     ReconcileRevenueForm,
+    RefundForm,
+    RelatedCompanyFormSet,
     ResourceSourceForm,
     RevenueForm,
 )
 from accountability.models import (
     Accountability,
     AccountabilityFile,
+    ActivityReportPublicationStatus,
+    AnnualStatement,
+    BalanceAdjustment,
+    BudgetCommitment,
+    ConclusiveOpinion,
+    ConclusiveOpinionDeclaration,
+    ConflictOfInterestDeclaration,
+    Deduction,
+    EvaluationReport,
     Expense,
     ExpenseFile,
+    ExpenseRejection,
     Favored,
+    FinancialStatements,
+    FundTransfer,
+    OpinionOrMinutes,
+    PhysicalFinancialExecutionStatement,
+    PurchasingRegulation,
+    Refund,
     ResourceSource,
     Revenue,
     RevenueFile,
@@ -2283,3 +2323,945 @@ def unreconcile_revenue_view(request, pk):
         "accountability:accountability-detail",
         pk=revenue.accountability.id,
     )
+
+
+# =============================================================================
+# AUDESP Fase V - user-facing CRUD for the Phase 0 domain models. Until now
+# these existed only in Django admin (see accountability/admin.py); the views
+# below give city hall / OSC staff an actual in-app way to enter this data.
+#
+# Design notes:
+# - None of these views write to `activity.ActivityLog`: every existing
+#   `ActivityLogChoices` member is specific to an already-shipped feature, and
+#   adding new members would alter `ActivityLog.action`'s `choices=` kwarg,
+#   which `makemigrations` treats as a model state change requiring a new
+#   migration - contradicting this change's "views/urls/templates only, no
+#   model changes" scope.
+# - `organization` is intentionally never set explicitly on these new rows:
+#   `accounts.middlewares.TenantMiddleware` already wraps every authenticated
+#   request in `tenant_context(request.user.organization)`, and
+#   `OrganizationTenantBaseClass.save()` picks that up automatically - the
+#   same assumption `create_contract_accountability_view` above already
+#   relies on.
+# =============================================================================
+
+
+@method_decorator(log_view_access, name="dispatch")
+class AnnualStatementListView(UserAccessViewMixin, LoginRequiredMixin, ListView):
+    model = AnnualStatement
+    context_object_name = "annual_statements"
+    paginate_by = 10
+    ordering = "-fiscal_year"
+    contract_field_prefix = "contract__"
+
+    template_name = "accountability/annual_statement/list.html"
+    login_url = "/auth/login"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        query = self.request.GET.get("q", "")
+        queryset = self.model.objects.select_related("contract")
+        queryset = self.get_user_filtered_queryset(queryset)
+
+        if query:
+            queryset = queryset.filter(Q(contract__name__icontains=query))
+
+        return queryset.order_by("-fiscal_year", "contract__name")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q", "")
+        return context
+
+
+@login_required
+def create_contract_annual_statement_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = AnnualStatementCreateForm(request.POST)
+        if form.is_valid():
+            exists = AnnualStatement.objects.filter(
+                contract=contract,
+                fiscal_year=form.cleaned_data["fiscal_year"],
+            ).exists()
+            if exists:
+                return render(
+                    request,
+                    "accountability/annual_statement/create.html",
+                    {
+                        "contract": contract,
+                        "form": form,
+                        "annual_statement_exists": True,
+                    },
+                )
+
+            annual_statement = form.save(commit=False)
+            annual_statement.contract = contract
+            annual_statement.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+
+        return render(
+            request,
+            "accountability/annual_statement/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = AnnualStatementCreateForm()
+    return render(
+        request,
+        "accountability/annual_statement/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+@login_required
+def annual_statement_detail_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+
+    context = {
+        "annual_statement": annual_statement,
+        "contract": annual_statement.contract,
+        "purchasing_regulation": getattr(
+            annual_statement, "purchasing_regulation", None
+        ),
+        "execution_statement": getattr(annual_statement, "execution_statement", None),
+        "financial_statements": getattr(annual_statement, "financial_statements", None),
+        "activity_report_publication_status": getattr(
+            annual_statement, "activity_report_publication_status", None
+        ),
+        "conflict_of_interest_declaration": getattr(
+            annual_statement, "conflict_of_interest_declaration", None
+        ),
+        "conclusive_opinion": getattr(annual_statement, "conclusive_opinion", None),
+        "opinions_or_minutes": annual_statement.opinions_or_minutes.order_by("type"),
+        "evaluation_reports": annual_statement.evaluation_reports.order_by("type"),
+    }
+    return render(request, "accountability/annual_statement/detail.html", context)
+
+
+class AnnualStatementUpdateView(LoginRequiredMixin, UpdateView):
+    model = AnnualStatement
+    form_class = AnnualStatementUpdateForm
+    template_name = "accountability/annual_statement/update.html"
+    context_object_name = "annual_statement"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "accountability:annual-statement-detail", kwargs={"pk": self.object.id}
+        )
+
+
+# --- Empenhos (BudgetCommitment) and Repasses (FundTransfer) - manual §17/§18,
+# both contract-scoped ledgers surfaced as a tab on the contract detail page.
+
+
+@login_required
+def create_budget_commitment_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = BudgetCommitmentForm(request.POST)
+        if form.is_valid():
+            # `contract` is excluded from the form (assigned from the URL, not
+            # user input), so Django's automatic validate_unique() silently
+            # skips `unique_budget_commitment_per_agreement` entirely (any
+            # constraint touching an excluded field is skipped, regardless of
+            # what the instance's field value actually is) - check by hand or
+            # a genuine duplicate raises a raw IntegrityError instead of a
+            # friendly form error.
+            exists = BudgetCommitment.objects.filter(
+                contract=contract,
+                number=form.cleaned_data["number"],
+                issue_date=form.cleaned_data["issue_date"],
+            ).exists()
+            if exists:
+                return render(
+                    request,
+                    "accountability/budget_commitment/create.html",
+                    {
+                        "contract": contract,
+                        "form": form,
+                        "budget_commitment_exists": True,
+                    },
+                )
+
+            budget_commitment = form.save(commit=False)
+            budget_commitment.contract = contract
+            budget_commitment.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/budget_commitment/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = BudgetCommitmentForm()
+    return render(
+        request,
+        "accountability/budget_commitment/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class BudgetCommitmentUpdateView(LoginRequiredMixin, UpdateView):
+    model = BudgetCommitment
+    form_class = BudgetCommitmentForm
+    template_name = "accountability/budget_commitment/create.html"
+    context_object_name = "budget_commitment"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def form_valid(self, form):
+        # Same excluded-field gap as create_budget_commitment_view: `contract`
+        # isn't a form field, so Django's automatic validate_unique() skips
+        # unique_budget_commitment_per_agreement outright - check by hand.
+        exists = (
+            BudgetCommitment.objects.filter(
+                contract=self.object.contract,
+                number=form.cleaned_data["number"],
+                issue_date=form.cleaned_data["issue_date"],
+            )
+            .exclude(pk=self.object.pk)
+            .exists()
+        )
+        if exists:
+            return self.render_to_response(
+                self.get_context_data(form=form, budget_commitment_exists=True)
+            )
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+# --- §12 Ajustes de Saldo, §14 Descontos, §15 Devoluções, §16 Glosas - all
+# simple contract-scoped ledger adjustments, same tab as Empenhos/Repasses.
+
+
+@login_required
+def create_balance_adjustment_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = BalanceAdjustmentForm(request.POST, contract=contract)
+        if form.is_valid():
+            adjustment = form.save(commit=False)
+            adjustment.contract = contract
+            adjustment.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/balance_adjustment/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = BalanceAdjustmentForm(contract=contract)
+    return render(
+        request,
+        "accountability/balance_adjustment/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class BalanceAdjustmentUpdateView(LoginRequiredMixin, UpdateView):
+    model = BalanceAdjustment
+    form_class = BalanceAdjustmentForm
+    template_name = "accountability/balance_adjustment/create.html"
+    context_object_name = "balance_adjustment"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["contract"] = self.object.contract
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+@login_required
+def create_expense_rejection_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = ExpenseRejectionForm(request.POST, contract=contract)
+        if form.is_valid():
+            rejection = form.save(commit=False)
+            rejection.contract = contract
+            rejection.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/expense_rejection/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = ExpenseRejectionForm(contract=contract)
+    return render(
+        request,
+        "accountability/expense_rejection/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class ExpenseRejectionUpdateView(LoginRequiredMixin, UpdateView):
+    model = ExpenseRejection
+    form_class = ExpenseRejectionForm
+    template_name = "accountability/expense_rejection/create.html"
+    context_object_name = "expense_rejection"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["contract"] = self.object.contract
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+@login_required
+def create_deduction_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = DeductionForm(request.POST)
+        if form.is_valid():
+            deduction = form.save(commit=False)
+            deduction.contract = contract
+            deduction.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/deduction/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = DeductionForm()
+    return render(
+        request,
+        "accountability/deduction/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class DeductionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Deduction
+    form_class = DeductionForm
+    template_name = "accountability/deduction/create.html"
+    context_object_name = "deduction"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+@login_required
+def create_refund_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = RefundForm(request.POST)
+        if form.is_valid():
+            refund = form.save(commit=False)
+            refund.contract = contract
+            refund.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/refund/create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = RefundForm()
+    return render(
+        request,
+        "accountability/refund/create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class RefundUpdateView(LoginRequiredMixin, UpdateView):
+    model = Refund
+    form_class = RefundForm
+    template_name = "accountability/refund/create.html"
+    context_object_name = "refund"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+# --- §22 Regulamento de Compras, §23 Extrato de Execução, §28 Demonstrações
+# Contábeis and §30 Publicação do Relatório de Atividades are all a single
+# one-to-one "settings for this year" record plus a small list of
+# publications - so each gets a get-or-create-then-edit view of identical
+# shape, just parametrized by model/form/formset.
+
+
+@login_required
+def annual_statement_purchasing_regulation_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    regulation, _ = PurchasingRegulation.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    if request.method == "POST":
+        form = PurchasingRegulationForm(request.POST, instance=regulation)
+        formset = PurchasingRegulationPublicationFormSet(
+            request.POST, instance=regulation
+        )
+        if form.is_valid() and formset.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = PurchasingRegulationForm(instance=regulation)
+        formset = PurchasingRegulationPublicationFormSet(instance=regulation)
+
+    return render(
+        request,
+        "accountability/annual_statement/purchasing_regulation.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+        },
+    )
+
+
+@login_required
+def annual_statement_execution_statement_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    statement, _ = PhysicalFinancialExecutionStatement.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    if request.method == "POST":
+        form = PhysicalFinancialExecutionStatementForm(request.POST, instance=statement)
+        formset = PhysicalFinancialExecutionStatementPublicationFormSet(
+            request.POST, instance=statement
+        )
+        if form.is_valid() and formset.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = PhysicalFinancialExecutionStatementForm(instance=statement)
+        formset = PhysicalFinancialExecutionStatementPublicationFormSet(
+            instance=statement
+        )
+
+    return render(
+        request,
+        "accountability/annual_statement/execution_statement.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+        },
+    )
+
+
+@login_required
+def annual_statement_financial_statements_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    statements, _ = FinancialStatements.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    if request.method == "POST":
+        form = FinancialStatementsForm(request.POST, instance=statements)
+        formset = FinancialStatementsPublicationFormSet(
+            request.POST, instance=statements
+        )
+        if form.is_valid() and formset.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = FinancialStatementsForm(instance=statements)
+        formset = FinancialStatementsPublicationFormSet(instance=statements)
+
+    return render(
+        request,
+        "accountability/annual_statement/financial_statements.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+        },
+    )
+
+
+@login_required
+def annual_statement_activity_report_publication_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    status, _ = ActivityReportPublicationStatus.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    if request.method == "POST":
+        form = ActivityReportPublicationStatusForm(request.POST, instance=status)
+        formset = ActivityReportPublicationFormSet(request.POST, instance=status)
+        if form.is_valid() and formset.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = ActivityReportPublicationStatusForm(instance=status)
+        formset = ActivityReportPublicationFormSet(instance=status)
+
+    return render(
+        request,
+        "accountability/annual_statement/activity_report_publication.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+        },
+    )
+
+
+# --- §29 Parecer ou Ata - FK (not one-to-one): a statement can carry more
+# than one, one per `OpinionOrMinutes.TypeChoices` member.
+
+
+@login_required
+def create_annual_statement_opinion_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+
+    opinion_type_exists = False
+
+    if request.method == "POST":
+        form = OpinionOrMinutesForm(request.POST)
+        formset = OpinionOrMinutesPublicationFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            # `annual_statement` is excluded from the form, so
+            # unique_opinion_or_minutes_type_per_annual_statement is never
+            # checked by Django's automatic validate_unique() (see the
+            # analogous comment on create_budget_commitment_view) - check by
+            # hand instead of letting a genuine duplicate raise a raw
+            # IntegrityError.
+            opinion_type_exists = OpinionOrMinutes.objects.filter(
+                annual_statement=annual_statement,
+                type=form.cleaned_data["type"],
+            ).exists()
+            if not opinion_type_exists:
+                with db_transaction.atomic():
+                    opinion = form.save(commit=False)
+                    opinion.annual_statement = annual_statement
+                    opinion.save()
+
+                    publications = formset.save(commit=False)
+                    for publication in publications:
+                        publication.opinion_or_minutes = opinion
+                        publication.save()
+
+                return redirect(
+                    "accountability:annual-statement-detail", pk=annual_statement.id
+                )
+    else:
+        form = OpinionOrMinutesForm()
+        formset = OpinionOrMinutesPublicationFormSet()
+
+    return render(
+        request,
+        "accountability/annual_statement/opinion_form.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+            "opinion_type_exists": opinion_type_exists,
+        },
+    )
+
+
+@login_required
+def update_annual_statement_opinion_view(request, pk, opinion_pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    opinion = get_object_or_404(
+        OpinionOrMinutes, id=opinion_pk, annual_statement=annual_statement
+    )
+
+    opinion_type_exists = False
+
+    if request.method == "POST":
+        form = OpinionOrMinutesForm(request.POST, instance=opinion)
+        formset = OpinionOrMinutesPublicationFormSet(request.POST, instance=opinion)
+        if form.is_valid() and formset.is_valid():
+            # Same excluded-field gap as create_annual_statement_opinion_view
+            # - check by hand.
+            opinion_type_exists = (
+                OpinionOrMinutes.objects.filter(
+                    annual_statement=annual_statement,
+                    type=form.cleaned_data["type"],
+                )
+                .exclude(pk=opinion.pk)
+                .exists()
+            )
+            if not opinion_type_exists:
+                with db_transaction.atomic():
+                    form.save()
+                    formset.save()
+                return redirect(
+                    "accountability:annual-statement-detail", pk=annual_statement.id
+                )
+    else:
+        form = OpinionOrMinutesForm(instance=opinion)
+        formset = OpinionOrMinutesPublicationFormSet(instance=opinion)
+
+    return render(
+        request,
+        "accountability/annual_statement/opinion_form.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "opinion": opinion,
+            "form": form,
+            "formset": formset,
+            "opinion_type_exists": opinion_type_exists,
+        },
+    )
+
+
+# --- §25/§26/§27 Relatório de Avaliação/Governamental/Monitoramento - FK, no
+# publications of its own.
+
+
+@login_required
+def create_annual_statement_evaluation_report_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+
+    report_type_exists = False
+
+    if request.method == "POST":
+        form = EvaluationReportForm(request.POST)
+        if form.is_valid():
+            # `annual_statement` is excluded from the form, so
+            # unique_evaluation_report_type_per_annual_statement is never
+            # checked by Django's automatic validate_unique() (see the
+            # analogous comment on create_budget_commitment_view) - check by
+            # hand instead of letting a genuine duplicate raise a raw
+            # IntegrityError.
+            report_type_exists = EvaluationReport.objects.filter(
+                annual_statement=annual_statement,
+                type=form.cleaned_data["type"],
+            ).exists()
+            if not report_type_exists:
+                report = form.save(commit=False)
+                report.annual_statement = annual_statement
+                report.save()
+                return redirect(
+                    "accountability:annual-statement-detail", pk=annual_statement.id
+                )
+    else:
+        form = EvaluationReportForm()
+
+    return render(
+        request,
+        "accountability/annual_statement/evaluation_report_form.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "report_type_exists": report_type_exists,
+            "form": form,
+        },
+    )
+
+
+class EvaluationReportUpdateView(LoginRequiredMixin, UpdateView):
+    model = EvaluationReport
+    form_class = EvaluationReportForm
+    template_name = "accountability/annual_statement/evaluation_report_form.html"
+    context_object_name = "report"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("annual_statement__contract").get(
+            id=self.kwargs["pk"]
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["annual_statement"] = self.object.annual_statement
+        context["contract"] = self.object.annual_statement.contract
+        return context
+
+    def form_valid(self, form):
+        # Same excluded-field gap as create_annual_statement_evaluation_report_view
+        # - check by hand.
+        exists = (
+            EvaluationReport.objects.filter(
+                annual_statement=self.object.annual_statement,
+                type=form.cleaned_data["type"],
+            )
+            .exclude(pk=self.object.pk)
+            .exists()
+        )
+        if exists:
+            return self.render_to_response(
+                self.get_context_data(form=form, report_type_exists=True)
+            )
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "accountability:annual-statement-detail",
+            kwargs={"pk": self.object.annual_statement.id},
+        )
+
+
+# --- §24 Declarações (conflito de interesse) - one-to-one plus two small
+# inline lists (empresas pertencentes / participação no quadro diretivo).
+
+
+@login_required
+def annual_statement_conflict_of_interest_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    declaration, _ = ConflictOfInterestDeclaration.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    if request.method == "POST":
+        form = ConflictOfInterestDeclarationForm(request.POST, instance=declaration)
+        companies_formset = RelatedCompanyFormSet(
+            request.POST, instance=declaration, prefix="companies"
+        )
+        board_formset = BoardParticipationFormSet(
+            request.POST, instance=declaration, prefix="board"
+        )
+        if (
+            form.is_valid()
+            and companies_formset.is_valid()
+            and board_formset.is_valid()
+        ):
+            with db_transaction.atomic():
+                form.save()
+                companies_formset.save()
+                board_formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = ConflictOfInterestDeclarationForm(instance=declaration)
+        companies_formset = RelatedCompanyFormSet(
+            instance=declaration, prefix="companies"
+        )
+        board_formset = BoardParticipationFormSet(instance=declaration, prefix="board")
+
+    return render(
+        request,
+        "accountability/annual_statement/conflict_of_interest.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "companies_formset": companies_formset,
+            "board_formset": board_formset,
+        },
+    )
+
+
+# --- §33 Parecer Conclusivo - one-to-one plus exactly 7 fixed declarations
+# (one per `ConclusiveOpinionDeclaration.DeclarationTypeChoices` member).
+
+
+@login_required
+def annual_statement_conclusive_opinion_view(request, pk):
+    annual_statement = get_object_or_404(
+        AnnualStatement.objects.select_related("contract"), id=pk
+    )
+    opinion, _ = ConclusiveOpinion.objects.get_or_create(
+        annual_statement=annual_statement
+    )
+
+    for (
+        declaration_type,
+        _label,
+    ) in ConclusiveOpinionDeclaration.DeclarationTypeChoices.choices:
+        ConclusiveOpinionDeclaration.objects.get_or_create(
+            conclusive_opinion=opinion, declaration_type=declaration_type
+        )
+
+    declarations_queryset = opinion.declarations.order_by("declaration_type")
+
+    if request.method == "POST":
+        form = ConclusiveOpinionForm(request.POST, instance=opinion)
+        formset = ConclusiveOpinionDeclarationFormSet(
+            request.POST, queryset=declarations_queryset
+        )
+        if form.is_valid() and formset.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                formset.save()
+            return redirect(
+                "accountability:annual-statement-detail", pk=annual_statement.id
+            )
+    else:
+        form = ConclusiveOpinionForm(instance=opinion)
+        formset = ConclusiveOpinionDeclarationFormSet(queryset=declarations_queryset)
+
+    return render(
+        request,
+        "accountability/annual_statement/conclusive_opinion.html",
+        {
+            "annual_statement": annual_statement,
+            "contract": annual_statement.contract,
+            "form": form,
+            "formset": formset,
+        },
+    )
+
+
+@login_required
+def create_fund_transfer_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+    budget_commitments_exist = BudgetCommitment.objects.filter(
+        contract=contract
+    ).exists()
+
+    if request.method == "POST":
+        form = FundTransferForm(request.POST, contract=contract)
+        if form.is_valid():
+            fund_transfer = form.save(commit=False)
+            fund_transfer.contract = contract
+            fund_transfer.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "accountability/fund_transfer/create.html",
+            {
+                "contract": contract,
+                "form": form,
+                "budget_commitments_exist": budget_commitments_exist,
+            },
+        )
+
+    form = FundTransferForm(contract=contract)
+    return render(
+        request,
+        "accountability/fund_transfer/create.html",
+        {
+            "contract": contract,
+            "form": form,
+            "budget_commitments_exist": budget_commitments_exist,
+        },
+    )
+
+
+class FundTransferUpdateView(LoginRequiredMixin, UpdateView):
+    model = FundTransfer
+    form_class = FundTransferForm
+    template_name = "accountability/fund_transfer/create.html"
+    context_object_name = "fund_transfer"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["contract"] = self.object.contract
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        context["budget_commitments_exist"] = True
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )

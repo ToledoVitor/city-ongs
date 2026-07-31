@@ -1,6 +1,7 @@
 from django import forms
 
 from accounts.models import Area, OrganizationDocument, User
+from audesp.forms import AudespCredentialAdminForm
 from utils.widgets import (
     BaseCharFieldFormWidget,
     BaseEmailFormWidget,
@@ -228,3 +229,19 @@ class OrganizationDocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if organization:
             self.instance.organization = organization
+
+
+class AudespCredentialSettingsForm(AudespCredentialAdminForm):
+    """City-hall-scoped variant of `AudespCredentialAdminForm` for the
+    settings page (`accounts:audesp-credentials-form`), reusing its exact
+    username/password/DEVELOPMENT validation as-is.
+
+    `city_hall` and `environment` are deliberately dropped from the visible
+    fields: the view sets both on the (fetched-or-new) instance before the
+    form ever binds, from the URL's `environment` and the current user's
+    `request.user.organization.city_hall` — never from user input, so
+    nobody can pick another city hall's row through this page.
+    """
+
+    class Meta(AudespCredentialAdminForm.Meta):
+        fields = ("is_active",)

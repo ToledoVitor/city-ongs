@@ -1,0 +1,55 @@
+{% load humanize %}
+
+<div class="ui-stack ui-stack--lg">
+  <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+    <div class="ui-stack ui-stack--xxs">
+      <h2 class="ui-display-sm" style="margin:0;">AUDESP Fase V</h2>
+      <p class="ui-body-sm ui-text-muted" style="margin:0;">Prestação de contas dos repasses ao terceiro setor.</p>
+    </div>
+    <a href="{% url 'audesp:fase-v-panel' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">
+      <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      Abrir painel AUDESP
+    </a>
+  </header>
+
+  {% with recent=contract.audesp_submissions.all|slice:":5" %}
+    {% if recent %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead>
+            <tr>
+              <th>Exercício</th>
+              <th>Tipo de ajuste</th>
+              <th>Status</th>
+              <th>Construído em</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ item.fiscal_year }}</span></td>
+                <td><span class="ui-body-sm">{{ item.get_ajuste_type_display }}</span></td>
+                <td>{% include 'audesp/fase_v/partials/status_pill.html' with status=item.status %}</td>
+                <td><span class="ui-body-sm ui-text-muted">{{ item.built_at|date:"d/m/Y H:i" }}</span></td>
+                <td class="ui-text-right">
+                  <a href="{% url 'audesp:fase-v-panel' contract.id %}?fiscal_year={{ item.fiscal_year }}" class="ui-btn ui-btn--subtle ui-btn--sm">Detalhes</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty">
+        <div class="ui-empty__icon" aria-hidden="true">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+        </div>
+        <p class="ui-display-sm">Nenhuma submissão AUDESP ainda</p>
+        <p class="ui-body-sm ui-text-muted">Abra o painel para montar o primeiro envio deste contrato.</p>
+      </div>
+    {% endif %}
+  {% endwith %}
+</div>

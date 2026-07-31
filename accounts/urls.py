@@ -1,6 +1,8 @@
 from django.urls import path
 
 from accounts.views import (
+    AudespCredentialSettingsFormView,
+    AudespCredentialSettingsListView,
     FolderManagerCreateView,
     FolderManagersDetailView,
     FolderManagersListView,
@@ -17,6 +19,7 @@ from accounts.views import (
     OrganizationDocumentUpdateView,
     get_committee_members,
     read_notification_view,
+    toggle_audesp_credential_status,
     toggle_folder_manager_status,
     toggle_organization_accountant_status,
     toggle_organization_committee_status,
@@ -128,5 +131,22 @@ urlpatterns = [
         "documents/<uuid:pk>/toggle-visibility/",
         OrganizationDocumentToggleVisibilityView.as_view(),
         name="documents-toggle-visibility",
+    ),
+    # AUDESP credential settings (city-hall-scoped, see audesp/models.py's
+    # AudespCredential docstring)
+    path(
+        "audesp/",
+        AudespCredentialSettingsListView.as_view(),
+        name="audesp-credentials-list",
+    ),
+    path(
+        "audesp/<str:environment>/",
+        AudespCredentialSettingsFormView.as_view(),
+        name="audesp-credentials-form",
+    ),
+    path(
+        "audesp/<str:environment>/toggle-status/",
+        toggle_audesp_credential_status,
+        name="audesp-credentials-toggle-status",
     ),
 ]

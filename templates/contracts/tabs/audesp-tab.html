@@ -1,0 +1,295 @@
+{% load humanize %}
+
+<div class="ui-stack ui-stack--2xl">
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Prestações anuais (AUDESP)</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Uma prestação por exercício, no formato exigido pelo AUDESP Fase V.</p>
+      </div>
+      <a href="{% url 'accountability:annual-statement-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Nova prestação anual</a>
+    </header>
+    {% if annual_statements %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Exercício</th><th>Data da prestação</th><th></th></tr></thead>
+          <tbody>
+            {% for annual_statement in annual_statements %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ annual_statement.fiscal_year }}</span></td>
+                <td>{{ annual_statement.statement_date|default:"Não informada" }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Abrir</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma prestação anual cadastrada</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Empenhos</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §17.</p>
+      </div>
+      <a href="{% url 'accountability:budget-commitment-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar empenho</a>
+    </header>
+    {% if budget_commitments %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Número</th><th>Emissão</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for budget_commitment in budget_commitments %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ budget_commitment.number }}</span></td>
+                <td>{{ budget_commitment.issue_date }}</td>
+                <td>{{ budget_commitment.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:budget-commitment-update' budget_commitment.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum empenho cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Repasses</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §18 — repasse efetivo vinculado a um empenho.</p>
+      </div>
+      <a href="{% url 'accountability:fund-transfer-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar repasse</a>
+    </header>
+    {% if fund_transfers %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Empenho</th><th>Data do repasse</th><th>Valor repassado</th><th></th></tr></thead>
+          <tbody>
+            {% for fund_transfer in fund_transfers %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ fund_transfer.budget_commitment.number }}</span></td>
+                <td>{{ fund_transfer.transfer_date }}</td>
+                <td>{{ fund_transfer.transferred_value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:fund-transfer-update' fund_transfer.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum repasse cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Ajustes de saldo</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §12 — retificação ou inclusão de repasse/pagamento de período anterior.</p>
+      </div>
+      <a href="{% url 'accountability:balance-adjustment-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar ajuste</a>
+    </header>
+    {% if balance_adjustments %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Tipo</th><th>Data</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for adjustment in balance_adjustments %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ adjustment.get_type_display }}</span></td>
+                <td>{{ adjustment.date }}</td>
+                <td>{{ adjustment.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:balance-adjustment-update' adjustment.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum ajuste de saldo cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Glosas</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §16 — análise de cada documento fiscal (ou de pagamento de Folha Ordinária).</p>
+      </div>
+      <a href="{% url 'accountability:expense-rejection-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar glosa</a>
+    </header>
+    {% if expense_rejections %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Despesa / pagamento</th><th>Resultado</th><th>Valor da glosa</th><th></th></tr></thead>
+          <tbody>
+            {% for rejection in expense_rejections %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ rejection.expense.identification|default:rejection.payment_date }}</span></td>
+                <td>{{ rejection.get_analysis_result_display }}</td>
+                <td>{{ rejection.rejected_value|default:"—" }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:expense-rejection-update' rejection.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma glosa cadastrada</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Descontos</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §14.</p>
+      </div>
+      <a href="{% url 'accountability:deduction-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar desconto</a>
+    </header>
+    {% if deductions %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for deduction in deductions %}
+              <tr>
+                <td>{{ deduction.date }}</td>
+                <td><span class="ui-body-md-strong">{{ deduction.description }}</span></td>
+                <td>{{ deduction.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:deduction-update' deduction.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum desconto cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Devoluções</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §15.</p>
+      </div>
+      <a href="{% url 'accountability:refund-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar devolução</a>
+    </header>
+    {% if refunds %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Data</th><th>Natureza</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for refund in refunds %}
+              <tr>
+                <td>{{ refund.date }}</td>
+                <td><span class="ui-body-md-strong">{{ refund.get_nature_display }}</span></td>
+                <td>{{ refund.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:refund-update' refund.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma devolução cadastrada</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Contratos com fornecedores</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §7 — contratos firmados com fornecedores usando recursos do ajuste.</p>
+      </div>
+      <a href="{% url 'contracts:supplier-contract-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar contrato</a>
+    </header>
+    {% if supplier_contracts %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Número</th><th>Credor</th><th>Assinatura</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for supplier_contract in supplier_contracts %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ supplier_contract.number }}</span></td>
+                <td>{{ supplier_contract.creditor_name|default:supplier_contract.creditor_document_number }}</td>
+                <td>{{ supplier_contract.signature_date }}</td>
+                <td>{{ supplier_contract.amount }}</td>
+                <td class="ui-text-right"><a href="{% url 'contracts:supplier-contract-update' supplier_contract.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum contrato com fornecedor cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Bens</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §6 — um registro por evento (aquisição, cessão ou baixa/devolução).</p>
+      </div>
+      <a href="{% url 'contracts:asset-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar bem</a>
+    </header>
+    {% if assets %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Categoria</th><th>Evento</th><th>Descrição</th><th>Data</th><th></th></tr></thead>
+          <tbody>
+            {% for asset in assets %}
+              <tr>
+                <td>{{ asset.get_category_display }}</td>
+                <td>{{ asset.get_event_display }}</td>
+                <td><span class="ui-body-md-strong">{{ asset.description }}</span></td>
+                <td>{{ asset.date }}</td>
+                <td class="ui-text-right"><a href="{% url 'contracts:asset-update' asset.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum bem cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Referências de certidões</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §20/§21 — identificadores de certidões já emitidas no Sistema Audesp Fase V.</p>
+      </div>
+      <a href="{% url 'contracts:certificate-reference-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar referência</a>
+    </header>
+    {% if certificate_references %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Tipo</th><th>Identificação</th><th></th></tr></thead>
+          <tbody>
+            {% for reference in certificate_references %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ reference.get_type_display }}</span></td>
+                <td>{{ reference.identification }}</td>
+                <td class="ui-text-right"><a href="{% url 'contracts:certificate-reference-update' reference.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma referência de certidão cadastrada</p></div>
+    {% endif %}
+  </div>
+
+</div>

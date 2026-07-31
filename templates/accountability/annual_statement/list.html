@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Prestações anuais (AUDESP) — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Prestações anuais (AUDESP)</span>
+    </nav>
+    <div class="page__header-row">
+      <div class="ui-stack ui-stack--xs">
+        <h1 class="ui-display-lg page__title">Prestações anuais (AUDESP)</h1>
+        <p class="ui-body-md ui-text-muted page__subtitle">Uma prestação por ajuste e exercício, no formato exigido pelo AUDESP Fase V.</p>
+      </div>
+    </div>
+  </header>
+
+  {% include 'commons/search-bar.html' with placeholder="Pesquisar por nome do contrato…" %}
+
+  {% if annual_statements %}
+    <div class="ui-table-wrap">
+      <table class="ui-table">
+        <thead><tr><th>Contrato</th><th>Exercício</th><th>Data da prestação</th><th></th></tr></thead>
+        <tbody>
+          {% for annual_statement in annual_statements %}
+            <tr>
+              <td><span class="ui-body-md-strong">{{ annual_statement.contract.name }}</span></td>
+              <td>{{ annual_statement.fiscal_year }}</td>
+              <td>{{ annual_statement.statement_date|default:"Não informada" }}</td>
+              <td class="ui-text-right">
+                <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Ver</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include 'commons/paginator.html' with page_obj=page_obj %}
+  {% else %}
+    <div class="ui-empty">
+      <p class="ui-display-md">Nenhuma prestação anual encontrada</p>
+      <p class="ui-body-md ui-text-muted">
+        {% if request.GET.q %}Não encontramos prestações para "<strong>{{ request.GET.q }}</strong>".{% else %}Crie uma prestação anual a partir da aba AUDESP de um contrato.{% endif %}
+      </p>
+      {% if request.GET.q %}<a href="{% url 'accountability:annual-statements-list' %}" class="ui-btn ui-btn--secondary">Limpar pesquisa</a>{% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
