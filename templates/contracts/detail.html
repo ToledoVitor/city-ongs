@@ -169,6 +169,23 @@
           Aditivos
         </button>
       </li>
+
+      <li role="presentation">
+        <button
+          id="audesp-fase-iv-tab"
+          class="contract-tab"
+          data-tabs-target="#audesp-fase-iv"
+          type="button"
+          role="tab"
+          aria-controls="audesp-fase-iv"
+          aria-selected="false"
+        >
+          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          AUDESP Fase IV
+        </button>
+      </li>
     </ul>
   </div>
 
@@ -203,6 +220,10 @@
 
     <div class="ui-card hidden" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
       {% include 'contracts/tabs/documents-tab.html' with contract=contract %}
+    </div>
+
+    <div class="ui-card hidden" id="audesp-fase-iv" role="tabpanel" aria-labelledby="audesp-fase-iv-tab">
+      {% include 'contracts/tabs/audesp-fase-iv-tab.html' with contract=contract %}
     </div>
   </div>
 

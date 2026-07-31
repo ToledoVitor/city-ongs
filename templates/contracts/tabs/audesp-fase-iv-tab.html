@@ -1,0 +1,164 @@
+{% load humanize %}
+{% load audesp_fase_iv_tags %}
+{% budget_commitments_for contract as budget_commitments %}
+{% audesp_fase_iv_submissions_for contract as fase_iv_submissions %}
+
+<div class="ui-stack ui-stack--lg">
+  <header class="ui-stack ui-stack--xxs">
+    <h2 class="ui-display-sm" style="margin:0;">AUDESP Fase IV — Licitações e Contratos</h2>
+    <p class="ui-body-sm ui-text-muted" style="margin:0;">Registro do ajuste (o instrumento em si) e dos empenhos junto ao TCE-SP — etapa prévia e obrigatória à prestação de contas da Fase V.</p>
+  </header>
+
+  <div class="audesp-fase-iv-grid">
+    <article class="ui-card ui-card--soft ui-stack ui-stack--md">
+      <div class="ui-stack ui-stack--xxs">
+        <p class="ui-body-md-strong" style="margin:0;">Ajuste</p>
+        <p class="ui-caption" style="margin:0;">Registra o contrato/instrumento: partes, valor, vigência e edital de origem.</p>
+      </div>
+      <a href="{% url 'audesp:fase-iv-ajuste-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm" style="align-self:flex-start;">
+        <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Registrar ajuste
+      </a>
+    </article>
+
+    <article class="ui-card ui-card--soft ui-stack ui-stack--md">
+      <div class="ui-stack ui-stack--xxs">
+        <p class="ui-body-md-strong" style="margin:0;">Empenho</p>
+        <p class="ui-caption" style="margin:0;">Registra uma nota de empenho adicional para este ajuste.</p>
+      </div>
+      {% if budget_commitments %}
+        <form method="post" action="{% url 'audesp:fase-iv-empenho-create' contract.id %}" class="audesp-empenho-form">
+          {% csrf_token %}
+          <select name="budget_commitment" class="filter-field__control" required>
+            <option value="">Selecione um empenho</option>
+            {% for bc in budget_commitments %}
+              <option value="{{ bc.id }}">{{ bc.number }} — {{ bc.issue_date|date:"d/m/Y" }} — R$ {{ bc.value|intcomma }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">Registrar</button>
+        </form>
+      {% else %}
+        <div class="ui-empty" style="padding: 20px;">
+          <p class="ui-body-md-strong" style="margin:0;">Nenhum empenho cadastrado</p>
+          <p class="ui-caption" style="margin:0;">Cadastre um empenho para este contrato antes de registrá-lo no AUDESP.</p>
+        </div>
+      {% endif %}
+    </article>
+  </div>
+
+  <section class="ui-stack ui-stack--sm">
+    <p class="ui-body-md-strong" style="margin:0;">Histórico de submissões</p>
+    {% if fase_iv_submissions %}
+      <div class="audesp-fase-iv-history-scroll">
+        <table class="audesp-fase-iv-history">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Referência</th>
+              <th>Status</th>
+              <th>Protocolo</th>
+              <th>Construído em</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in fase_iv_submissions %}
+              <tr>
+                <td>{{ submission.get_document_type_display }}</td>
+                <td>{% if submission.budget_commitment %}{{ submission.budget_commitment.number }}{% else %}—{% endif %}</td>
+                <td>
+                  {% include 'audesp/fase_iv/_status_pill.html' with submission=submission %}
+                  {% if submission.validation_errors %}
+                    <details class="audesp-fase-iv-errors">
+                      <summary class="ui-caption">{{ submission.validation_errors|length }} erro{{ submission.validation_errors|length|pluralize }}</summary>
+                      <ul class="ui-caption">
+                        {% for error in submission.validation_errors %}
+                          <li>{% if error.path %}<strong>{{ error.path }}</strong>: {% endif %}{{ error.message }}</li>
+                        {% endfor %}
+                      </ul>
+                    </details>
+                  {% endif %}
+                </td>
+                <td>{{ submission.protocol_number|default:"—" }}</td>
+                <td>{{ submission.built_at|date:"d/m/Y H:i" }}</td>
+                <td class="ui-text-right">
+                  {% if submission.status == "VALID" %}
+                    <form method="post" action="{% url 'audesp:fase-iv-submission-submit' submission.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="ui-btn ui-btn--subtle ui-btn--sm">Enviar</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty">
+        <div class="ui-empty__icon" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <p class="ui-display-sm">Nenhuma submissão ainda</p>
+        <p class="ui-body-sm ui-text-muted">Registre um ajuste ou empenho acima para começar.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<style>
+  .audesp-fase-iv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .audesp-empenho-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .audesp-empenho-form select {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .audesp-fase-iv-history-scroll {
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: var(--rounded-lg);
+    border: 1px solid var(--color-canvas-soft);
+  }
+  .audesp-fase-iv-history {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-text);
+  }
+  .audesp-fase-iv-history th {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-canvas-soft);
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--color-body);
+    padding: 8px 12px;
+  }
+  .audesp-fase-iv-history td {
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 18px;
+    border-top: 1px solid var(--color-canvas-soft);
+    vertical-align: middle;
+  }
+  .audesp-fase-iv-errors { display: inline-block; margin-left: 6px; }
+  .audesp-fase-iv-errors summary { cursor: pointer; color: var(--color-toast-error); display: inline; }
+  .audesp-fase-iv-errors ul { margin: 6px 0 0; padding-left: 16px; }
+</style>

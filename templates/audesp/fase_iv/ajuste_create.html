@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar ajuste (AUDESP Fase IV) — {{ contract.name }}{% endblock %}
+
+{% block content %}
+<section class="audesp-ajuste-page ui-form">
+
+  <header class="audesp-ajuste-page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Registrar ajuste</span>
+    </nav>
+    <div class="ui-row ui-row--between" style="align-items: baseline;">
+      <h1 class="ui-display-md" style="margin: 0;">Registrar ajuste (AUDESP Fase IV)</h1>
+      <p class="ui-caption" style="margin: 0;">Constrói e valida o documento antes do envio ao TCE-SP.</p>
+    </div>
+  </header>
+
+  <div class="audesp-ajuste-grid">
+    {# ====================== Left: form ====================== #}
+    <form method="post" class="ui-card audesp-ajuste-form">
+      {% csrf_token %}
+
+      <div class="audesp-ajuste-form__scroll ui-stack ui-stack--lg">
+        <div class="ui-empty" style="text-align:left; padding: 16px 20px; background-color: var(--color-canvas-softer);">
+          <p class="ui-body-sm" style="margin:0;">
+            O código do edital/dispensa e os itens contratados vêm do processo de
+            licitação, dispensa ou chamamento público já registrado no Portal
+            AUDESP — este sistema não cadastra esse processo. Consulte o setor
+            de licitações da prefeitura se não souber esses valores.
+          </p>
+        </div>
+
+        {% if form.non_field_errors %}
+          {% include 'commons/form-errors.html' with form=form %}
+        {% endif %}
+
+        <div class="ui-field">
+          <label class="ui-field__label" for="{{ form.codigo_edital.id_for_label }}">{{ form.codigo_edital.label }}</label>
+          {{ form.codigo_edital }}
+          {% if form.codigo_edital.errors %}<p class="ui-field__error">{{ form.codigo_edital.errors.0 }}</p>{% else %}<p class="ui-field__hint">{{ form.codigo_edital.help_text }}</p>{% endif %}
+        </div>
+
+        <div class="ui-field">
+          <label class="ui-field__label" for="{{ form.itens.id_for_label }}">{{ form.itens.label }}</label>
+          {{ form.itens }}
+          {% if form.itens.errors %}<p class="ui-field__error">{{ form.itens.errors.0 }}</p>{% else %}<p class="ui-field__hint">{{ form.itens.help_text }}</p>{% endif %}
+        </div>
+
+        <label class="ui-row" style="gap: 8px; cursor: pointer;">
+          {{ form.retificacao }}
+          <span class="ui-body-sm">{{ form.retificacao.label }}</span>
+        </label>
+      </div>
+
+      <div class="audesp-ajuste-form__footer">
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Voltar</a>
+        <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">
+          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg>
+          Construir e validar
+        </button>
+      </div>
+    </form>
+
+    {# ====================== Right: preview ====================== #}
+    <aside class="ui-card audesp-ajuste-preview" aria-live="polite">
+      <header class="audesp-ajuste-preview__header">
+        <p class="ui-caption" style="margin: 0;">Resultado</p>
+        {% if submission %}
+          {% include 'audesp/fase_iv/_status_pill.html' with submission=submission %}
+        {% endif %}
+      </header>
+
+      <div class="audesp-ajuste-preview__surface">
+        {% if not submission %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 13h6m-6 4h4m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6l6 6v11a2 2 0 0 1-2 2Z"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Sem documento construído</p>
+            <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 320px; text-align: center;">Preencha o formulário à esquerda e clique em <strong style="color: var(--color-ink); font-weight: 600;">Construir e validar</strong>.</p>
+          </div>
+
+        {% elif submission.status == "INVALID" %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon audesp-ajuste-preview__icon--error" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 9v3m0 3h.01M5.062 19h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4a2 2 0 0 0-3.464 0L3.33 16.5c-.77.833.192 2.5 1.732 2.5Z"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Documento inválido</p>
+            <ul class="audesp-ajuste-preview__errors">
+              {% for error in submission.validation_errors %}
+                <li>{% if error.path %}<strong>{{ error.path }}</strong>: {% endif %}{{ error.message }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+        {% elif submission.status == "VALID" %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon audesp-ajuste-preview__icon--success" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m5 13 4 4L19 7"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Documento válido</p>
+            <p class="ui-body-sm ui-text-muted" style="margin: 0 0 8px; max-width: 320px; text-align: center;">Passou na validação local contra o schema do TCE-SP. Pronto para envio.</p>
+            <form method="post" action="{% url 'audesp:fase-iv-submission-submit' submission.id %}">
+              {% csrf_token %}
+              <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">Enviar ao AUDESP</button>
+            </form>
+          </div>
+
+        {% elif submission.status == "SUBMITTED" %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Enviado ao AUDESP</p>
+            <p class="ui-body-sm ui-text-muted" style="margin: 0;">Protocolo {{ submission.protocol_number }} — aguardando retorno do TCE-SP.</p>
+          </div>
+
+        {% elif submission.status == "REJECTED" %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon audesp-ajuste-preview__icon--error" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 9v3m0 3h.01M5.062 19h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4a2 2 0 0 0-3.464 0L3.33 16.5c-.77.833.192 2.5 1.732 2.5Z"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Rejeitado pelo AUDESP</p>
+            <p class="ui-body-sm ui-text-muted" style="margin: 0 0 8px;">Protocolo {{ submission.protocol_number|default:"—" }}</p>
+            <ul class="audesp-ajuste-preview__errors">
+              {% for error in submission.validation_errors %}
+                <li>{% if error.path %}<strong>{{ error.path }}</strong>: {% endif %}{{ error.message }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+        {% elif submission.status == "ACCEPTED" %}
+          <div class="audesp-ajuste-preview__state">
+            <div class="audesp-ajuste-preview__icon audesp-ajuste-preview__icon--success" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="m5 13 4 4L19 7"/></svg>
+            </div>
+            <p class="ui-body-md-strong" style="margin: 0;">Aceito pelo AUDESP</p>
+            <p class="ui-body-sm ui-text-muted" style="margin: 0;">Protocolo {{ submission.protocol_number }}</p>
+          </div>
+
+        {% else %}
+          <div class="audesp-ajuste-preview__state">
+            <p class="ui-body-md-strong" style="margin: 0;">{{ submission.get_status_display }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <footer class="audesp-ajuste-preview__footer">
+        {% if submission %}
+          <p class="ui-caption" style="margin: 0;">Construído em {{ submission.built_at|date:"d/m/Y H:i" }}</p>
+        {% else %}
+          <p class="ui-caption" style="margin: 0;">Aguardando construção</p>
+        {% endif %}
+      </footer>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .audesp-ajuste-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    height: calc(100vh - 2 * var(--space-lg));
+    min-height: 560px;
+  }
+  .audesp-ajuste-page__header { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+
+  .audesp-ajuste-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: var(--space-md);
+  }
+  @media (max-width: 1080px) {
+    .audesp-ajuste-page { height: auto; }
+    .audesp-ajuste-grid { grid-template-columns: 1fr; }
+    .audesp-ajuste-preview { min-height: 420px; }
+  }
+
+  .audesp-ajuste-form { display: flex; flex-direction: column; padding: 0; min-height: 0; }
+  .audesp-ajuste-form__scroll { flex: 1; overflow-y: auto; padding: var(--space-lg); }
+  .audesp-ajuste-form__footer {
+    flex-shrink: 0;
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 12px var(--space-lg);
+    border-top: 1px solid var(--color-canvas-soft);
+    background-color: var(--color-canvas-softer);
+    border-bottom-left-radius: var(--rounded-xl);
+    border-bottom-right-radius: var(--rounded-xl);
+  }
+
+  .audesp-ajuste-preview { display: flex; flex-direction: column; padding: 0; min-height: 0; overflow: hidden; }
+  .audesp-ajuste-preview__header {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 12px var(--space-lg);
+    border-bottom: 1px solid var(--color-canvas-soft);
+  }
+  .audesp-ajuste-preview__surface {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--color-canvas-softer);
+    min-height: 0;
+    display: flex;
+  }
+  .audesp-ajuste-preview__state {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: var(--space-2xl);
+    text-align: center;
+  }
+  .audesp-ajuste-preview__icon {
+    width: 56px; height: 56px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--rounded-full);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    margin-bottom: 4px;
+  }
+  .audesp-ajuste-preview__icon--success { color: var(--color-toast-success); }
+  .audesp-ajuste-preview__icon--error { color: var(--color-toast-error); }
+  .audesp-ajuste-preview__errors {
+    text-align: left;
+    max-width: 420px;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-body);
+    margin: 0;
+    padding-left: 18px;
+  }
+  .audesp-ajuste-preview__footer {
+    flex-shrink: 0;
+    padding: 10px var(--space-lg);
+    border-top: 1px solid var(--color-canvas-soft);
+  }
+</style>
+{% endblock %}
