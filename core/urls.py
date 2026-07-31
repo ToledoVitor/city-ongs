@@ -54,6 +54,10 @@ urlpatterns = [
         "accounts/",
         include(("accounts.urls", "accounts"), namespace="accounts"),
     ),
+    path(
+        "audesp/",
+        include(("audesp.urls", "audesp"), namespace="audesp"),
+    ),
     path("bank/", include(("bank.urls", "bank"), namespace="bank")),
     path(
         "contracts/",

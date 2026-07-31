@@ -142,6 +142,7 @@ Always verify changes proportionally to the risk:
 - For migrations, ensure they are created only when model changes require them.
 - For UI/template changes, describe the manual path to verify if automated coverage is not available.
 - If you could not run validation, say so explicitly.
+- Docker/Postgres may not be available in the coding environment. `python manage.py check` and `makemigrations --check` still work without a live DB (set the required env vars from `.env.example` directly in the shell — no `.env` file needed). To exercise views end-to-end anyway: import `core.settings` and overwrite `DATABASES["default"]` with a sqlite `:memory:` engine **before** calling `django.setup()` (mutating `django.conf.settings.DATABASES` afterward is too late — something during app-registry population already caches a real `DatabaseWrapper` against the old config), then `call_command("migrate")`, seed via `accounts.management.commands.seed_dev.run_seed()` (idempotent, covers most domain models including AUDESP Fase V fixtures), and drive `django.test.Client` against it. Tenant-scoped models (`BaseOrganizationTenantModel`) need an active tenant outside a real request — set it directly via `from easy_tenants.utils import state; state.set({"enabled": True, "tenant": some_organization})` rather than wrapping the whole script in a `with` block.
 
 ## Safety Rules
 
