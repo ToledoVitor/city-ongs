@@ -52,6 +52,7 @@ from django.views.decorators.http import require_POST
 
 from audesp import services as audesp_services
 from audesp.clients import AudespError
+from audesp.services import AudespCascadeConfirmationRequired
 from audesp.forms import (
     CONCESSION_TYPE_AJUSTE_TYPE_HINTS,
     AudespFaseIVAjusteForm,
@@ -295,7 +296,16 @@ class AudespFaseVBuildView(_ContractScopedView):
 
 class AudespFaseVSubmitView(_ContractScopedView):
     """POST-only: sends an already-VALID AudespSubmission to the AUDESP
-    Piloto webservice."""
+    Piloto webservice.
+
+    For a retificação that would cascade-exclude later exercícios still
+    live at TCESP, `audesp.services.submit` raises
+    `AudespCascadeConfirmationRequired` instead of sending anything — this
+    view surfaces that as a warning naming the affected years and asks the
+    user to tick "confirm_cascade" on the same form and resubmit, rather
+    than silently proceeding or silently blocking (AUDESP_FASE_V_AUDIT.md
+    §9: "the ops UI must warn before submission, not after").
+    """
 
     def post(self, request, contract_id, submission_id):
         contract = self._get_contract(contract_id)
@@ -309,8 +319,20 @@ class AudespFaseVSubmitView(_ContractScopedView):
             )
             return redirect(_panel_url(contract, submission.fiscal_year))
 
+        confirm_cascade = request.POST.get("confirm_cascade") == "on"
         try:
-            audesp_services.submit(submission)
+            audesp_services.submit(submission, confirm_cascade=confirm_cascade)
+        except AudespCascadeConfirmationRequired as exc:
+            years = ", ".join(str(year) for year in exc.affected_fiscal_years)
+            messages.warning(
+                request,
+                f"Esta retificação vai excluir os exercícios já enviados "
+                f"({years}) na AUDESP, que precisarão ser reenviados depois. "
+                "Marque a confirmação abaixo e envie novamente para prosseguir.",
+            )
+            return redirect(
+                f"{_panel_url(contract, submission.fiscal_year)}#cascade-warning-{submission.id}"
+            )
         except _NO_CREDENTIAL_EXCEPTIONS:
             messages.error(request, _NO_CREDENTIAL_MESSAGE)
         except (AudespError, ValueError) as exc:

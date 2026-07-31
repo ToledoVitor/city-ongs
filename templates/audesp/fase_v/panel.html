@@ -121,8 +121,14 @@
 
           <div class="ui-row" style="gap: 8px; flex-wrap: wrap;">
             {% if latest_submission.status == "VALID" %}
-              <form method="post" action="{% url 'audesp:fase-v-submit' contract.id latest_submission.id %}">
+              <form method="post" action="{% url 'audesp:fase-v-submit' contract.id latest_submission.id %}" id="cascade-warning-{{ latest_submission.id }}">
                 {% csrf_token %}
+                {% if latest_submission.retificacao %}
+                  <label class="ui-body-sm" style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                    <input type="checkbox" name="confirm_cascade">
+                    Confirmo a exclusão de exercícios posteriores já enviados, se houver
+                  </label>
+                {% endif %}
                 <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">Enviar para a AUDESP (Piloto)</button>
               </form>
             {% endif %}
