@@ -8,8 +8,31 @@ from django.db.models.functions import Coalesce
 from accountability.models import (
     Accountability,
     AccountabilityFile,
+    ActivityReportPublication,
+    ActivityReportPublicationStatus,
+    AnnualStatement,
+    BalanceAdjustment,
+    BoardParticipation,
+    BudgetCommitment,
+    ConclusiveOpinion,
+    ConclusiveOpinionDeclaration,
+    ConflictOfInterestDeclaration,
+    Deduction,
+    EvaluationReport,
     Expense,
+    ExpenseRejection,
     Favored,
+    FinancialStatements,
+    FinancialStatementsPublication,
+    FundTransfer,
+    OpinionOrMinutes,
+    OpinionOrMinutesPublication,
+    PhysicalFinancialExecutionStatement,
+    PhysicalFinancialExecutionStatementPublication,
+    PurchasingRegulation,
+    PurchasingRegulationPublication,
+    Refund,
+    RelatedCompany,
     ResourceSource,
     Revenue,
 )
@@ -19,11 +42,13 @@ from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseDateFormWidget,
     BaseFileFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
     BaseTextAreaFormWidget,
     CustomCheckboxSelectMultiple,
+    CustomCPFWidget,
 )
 
 
@@ -435,3 +460,529 @@ class AccountabilityFileForm(forms.ModelForm):
             "name": BaseCharFieldFormWidget(placeholder="Arquivo xxxxx"),
             "file": BaseFileFormWidget(),
         }
+
+
+# =============================================================================
+# AUDESP Fase V - AnnualStatement (the (contract, fiscal_year) anchor) and its
+# blocks. See accountability/models.py for the full field-by-field docstrings.
+# =============================================================================
+
+
+class AnnualStatementCreateForm(forms.ModelForm):
+    class Meta:
+        model = AnnualStatement
+        fields = ["fiscal_year"]
+
+        widgets = {
+            "fiscal_year": BaseNumberFormWidget(placeholder="2025"),
+        }
+
+
+class AnnualStatementUpdateForm(forms.ModelForm):
+    class Meta:
+        model = AnnualStatement
+        fields = [
+            "statement_date",
+            "reference_period_start_date",
+            "reference_period_end_date",
+        ]
+
+        widgets = {
+            "statement_date": BaseDateFormWidget(required=False),
+            "reference_period_start_date": BaseDateFormWidget(required=False),
+            "reference_period_end_date": BaseDateFormWidget(required=False),
+        }
+
+
+class BudgetCommitmentForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = BudgetCommitment
+        fields = [
+            "number",
+            "issue_date",
+            "economic_classification",
+            "funding_source_type",
+            "value",
+            "description",
+            "spending_authority_cpf",
+        ]
+
+        widgets = {
+            "number": BaseCharFieldFormWidget(),
+            "issue_date": BaseDateFormWidget(),
+            "economic_classification": BaseCharFieldFormWidget(),
+            "funding_source_type": BaseSelectFormWidget(),
+            "description": BaseTextAreaFormWidget(),
+            "spending_authority_cpf": CustomCPFWidget(),
+        }
+
+
+class FundTransferForm(forms.ModelForm):
+    planned_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+    transferred_value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = FundTransfer
+        fields = [
+            "budget_commitment",
+            "planned_date",
+            "transfer_date",
+            "planned_value",
+            "transferred_value",
+            "value_difference_justification",
+            "bank_document_type",
+            "other_description",
+            "document_number",
+            "bank",
+            "bank_branch",
+            "account_number",
+        ]
+
+        widgets = {
+            "budget_commitment": BaseSelectFormWidget(),
+            "planned_date": BaseDateFormWidget(),
+            "transfer_date": BaseDateFormWidget(),
+            "value_difference_justification": BaseTextAreaFormWidget(required=False),
+            "bank_document_type": BaseSelectFormWidget(),
+            "other_description": BaseCharFieldFormWidget(required=False),
+            "document_number": BaseCharFieldFormWidget(),
+            "bank": BaseNumberFormWidget(placeholder="Código do banco (tabela BACEN)"),
+            "bank_branch": BaseCharFieldFormWidget(),
+            "account_number": BaseCharFieldFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["budget_commitment"].queryset = BudgetCommitment.objects.filter(
+                contract=self.contract
+            )
+        else:
+            self.fields["budget_commitment"].queryset = BudgetCommitment.objects.none()
+
+
+class ExpenseRejectionForm(forms.ModelForm):
+    rejected_value = DecimalMaskedField(max_digits=12, decimal_places=2, required=False)
+
+    class Meta:
+        model = ExpenseRejection
+        fields = [
+            "expense",
+            "payment_date",
+            "analysis_result",
+            "rejected_value",
+        ]
+
+        widgets = {
+            "expense": BaseSelectFormWidget(required=False),
+            "payment_date": BaseDateFormWidget(required=False),
+            "analysis_result": BaseSelectFormWidget(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["expense"].queryset = Expense.objects.filter(
+                accountability__contract=self.contract
+            )
+        else:
+            self.fields["expense"].queryset = Expense.objects.none()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get("expense") and not cleaned_data.get("payment_date"):
+            raise forms.ValidationError(
+                "Informe a despesa (documento fiscal) ou a data de pagamento da "
+                "Folha Ordinária."
+            )
+        return cleaned_data
+
+
+class DeductionForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = Deduction
+        fields = ["date", "description", "value"]
+
+        widgets = {
+            "date": BaseDateFormWidget(),
+            "description": BaseCharFieldFormWidget(),
+        }
+
+
+class RefundForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = Refund
+        fields = ["date", "nature", "value"]
+
+        widgets = {
+            "date": BaseDateFormWidget(),
+            "nature": BaseSelectFormWidget(),
+        }
+
+
+class BalanceAdjustmentForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = BalanceAdjustment
+        fields = [
+            "type",
+            "planned_date",
+            "date",
+            "funding_source_type",
+            "value",
+            "expense",
+            "payment_method_type",
+            "bank",
+            "bank_branch",
+            "account_number",
+            "transaction_number",
+        ]
+
+        widgets = {
+            "type": BaseSelectFormWidget(),
+            "planned_date": BaseDateFormWidget(required=False),
+            "date": BaseDateFormWidget(),
+            "funding_source_type": BaseSelectFormWidget(),
+            "expense": BaseSelectFormWidget(required=False),
+            "payment_method_type": BaseSelectFormWidget(required=False),
+            "bank": BaseNumberFormWidget(required=False),
+            "bank_branch": BaseCharFieldFormWidget(required=False),
+            "account_number": BaseCharFieldFormWidget(required=False),
+            "transaction_number": BaseCharFieldFormWidget(required=False),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.contract = kwargs.pop("contract", None)
+        super().__init__(*args, **kwargs)
+
+        if self.contract:
+            self.fields["expense"].queryset = Expense.objects.filter(
+                accountability__contract=self.contract
+            )
+        else:
+            self.fields["expense"].queryset = Expense.objects.none()
+
+
+# --- §22 Regulamento de Compras (Contrato de Gestão only) -------------------
+
+
+class PurchasingRegulationForm(forms.ModelForm):
+    class Meta:
+        model = PurchasingRegulation
+        fields = [
+            "had_initial_publication",
+            "was_regulation_amended",
+            "had_amended_regulation_publication",
+        ]
+
+
+class PurchasingRegulationPublicationForm(forms.ModelForm):
+    class Meta:
+        model = PurchasingRegulationPublication
+        fields = [
+            "phase",
+            "publication_vehicle_type",
+            "vehicle_name",
+            "publication_date",
+            "website_url",
+        ]
+
+        widgets = {
+            "phase": BaseSelectFormWidget(),
+            "publication_vehicle_type": BaseSelectFormWidget(),
+            "vehicle_name": BaseCharFieldFormWidget(required=False),
+            "publication_date": BaseDateFormWidget(),
+            "website_url": BaseCharFieldFormWidget(required=False),
+        }
+
+
+PurchasingRegulationPublicationFormSet = forms.inlineformset_factory(
+    PurchasingRegulation,
+    PurchasingRegulationPublication,
+    fk_name="regulation",
+    form=PurchasingRegulationPublicationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §23 Extrato de Execução Física e Financeira (Termo de Parceria only) ---
+
+
+class PhysicalFinancialExecutionStatementForm(forms.ModelForm):
+    class Meta:
+        model = PhysicalFinancialExecutionStatement
+        fields = ["has_statement", "statement_follows_template"]
+
+
+class PhysicalFinancialExecutionStatementPublicationForm(forms.ModelForm):
+    class Meta:
+        model = PhysicalFinancialExecutionStatementPublication
+        fields = [
+            "publication_vehicle_type",
+            "vehicle_name",
+            "publication_date",
+            "website_url",
+        ]
+
+        widgets = {
+            "publication_vehicle_type": BaseSelectFormWidget(),
+            "vehicle_name": BaseCharFieldFormWidget(required=False),
+            "publication_date": BaseDateFormWidget(),
+            "website_url": BaseCharFieldFormWidget(required=False),
+        }
+
+
+PhysicalFinancialExecutionStatementPublicationFormSet = forms.inlineformset_factory(
+    PhysicalFinancialExecutionStatement,
+    PhysicalFinancialExecutionStatementPublication,
+    fk_name="statement",
+    form=PhysicalFinancialExecutionStatementPublicationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §28 Demonstrações Contábeis (todos os tipos de ajuste) -----------------
+
+
+class FinancialStatementsForm(forms.ModelForm):
+    class Meta:
+        model = FinancialStatements
+        fields = [
+            "accountant_crc_number",
+            "accountant_cpf",
+            "accountant_crc_in_good_standing",
+        ]
+
+        widgets = {
+            "accountant_crc_number": BaseCharFieldFormWidget(required=False),
+            "accountant_cpf": CustomCPFWidget(),
+        }
+
+
+class FinancialStatementsPublicationForm(forms.ModelForm):
+    class Meta:
+        model = FinancialStatementsPublication
+        fields = [
+            "publication_vehicle_type",
+            "vehicle_name",
+            "publication_date",
+            "website_url",
+        ]
+
+        widgets = {
+            "publication_vehicle_type": BaseSelectFormWidget(),
+            "vehicle_name": BaseCharFieldFormWidget(required=False),
+            "publication_date": BaseDateFormWidget(),
+            "website_url": BaseCharFieldFormWidget(required=False),
+        }
+
+
+FinancialStatementsPublicationFormSet = forms.inlineformset_factory(
+    FinancialStatements,
+    FinancialStatementsPublication,
+    fk_name="financial_statement",
+    form=FinancialStatementsPublicationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §30 Publicação do Relatório de Atividades (Contrato de Gestão only) ----
+
+
+class ActivityReportPublicationStatusForm(forms.ModelForm):
+    class Meta:
+        model = ActivityReportPublicationStatus
+        fields = ["was_published_in_fiscal_year"]
+
+
+class ActivityReportPublicationForm(forms.ModelForm):
+    class Meta:
+        model = ActivityReportPublication
+        fields = [
+            "publication_vehicle_type",
+            "vehicle_name",
+            "publication_date",
+            "website_url",
+        ]
+
+        widgets = {
+            "publication_vehicle_type": BaseSelectFormWidget(),
+            "vehicle_name": BaseCharFieldFormWidget(required=False),
+            "publication_date": BaseDateFormWidget(),
+            "website_url": BaseCharFieldFormWidget(required=False),
+        }
+
+
+ActivityReportPublicationFormSet = forms.inlineformset_factory(
+    ActivityReportPublicationStatus,
+    ActivityReportPublication,
+    fk_name="publication_status",
+    form=ActivityReportPublicationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §29 Parecer ou Ata (combinação varia por tipo de ajuste) ---------------
+
+
+class OpinionOrMinutesForm(forms.ModelForm):
+    class Meta:
+        model = OpinionOrMinutes
+        fields = ["type", "was_published", "conclusion"]
+
+        widgets = {
+            "type": BaseSelectFormWidget(),
+            "conclusion": BaseSelectFormWidget(required=False),
+        }
+
+
+class OpinionOrMinutesPublicationForm(forms.ModelForm):
+    class Meta:
+        model = OpinionOrMinutesPublication
+        fields = [
+            "publication_vehicle_type",
+            "vehicle_name",
+            "publication_date",
+            "website_url",
+        ]
+
+        widgets = {
+            "publication_vehicle_type": BaseSelectFormWidget(),
+            "vehicle_name": BaseCharFieldFormWidget(required=False),
+            "publication_date": BaseDateFormWidget(),
+            "website_url": BaseCharFieldFormWidget(required=False),
+        }
+
+
+OpinionOrMinutesPublicationFormSet = forms.inlineformset_factory(
+    OpinionOrMinutes,
+    OpinionOrMinutesPublication,
+    fk_name="opinion_or_minutes",
+    form=OpinionOrMinutesPublicationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §25/26/27 Relatório de Avaliação/Governamental/Monitoramento -----------
+
+
+class EvaluationReportForm(forms.ModelForm):
+    class Meta:
+        model = EvaluationReport
+        fields = ["type", "final_report_issued", "conclusion", "justification"]
+
+        widgets = {
+            "type": BaseSelectFormWidget(),
+            "conclusion": BaseSelectFormWidget(required=False),
+            "justification": BaseTextAreaFormWidget(required=False),
+        }
+
+
+# --- §24 Declarações (conflito de interesse) --------------------------------
+
+
+class ConflictOfInterestDeclarationForm(forms.ModelForm):
+    class Meta:
+        model = ConflictOfInterestDeclaration
+        fields = [
+            "hired_related_companies",
+            "had_political_agents_in_board",
+            "purchases_comply_with_own_regulation",
+        ]
+
+
+class RelatedCompanyForm(forms.ModelForm):
+    class Meta:
+        model = RelatedCompany
+        fields = ["cnpj", "cpf"]
+
+        widgets = {
+            "cnpj": BaseCharFieldFormWidget(placeholder="00.000.000/0000-00"),
+            "cpf": CustomCPFWidget(),
+        }
+
+
+RelatedCompanyFormSet = forms.inlineformset_factory(
+    ConflictOfInterestDeclaration,
+    RelatedCompany,
+    fk_name="declaration",
+    form=RelatedCompanyForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+class BoardParticipationForm(forms.ModelForm):
+    class Meta:
+        model = BoardParticipation
+        fields = ["officer_cpf", "hired_cpfs"]
+
+        widgets = {
+            "officer_cpf": CustomCPFWidget(),
+            "hired_cpfs": BaseTextAreaFormWidget(required=False, rows=2),
+        }
+        help_texts = {
+            "hired_cpfs": (
+                'Lista de CPFs em formato JSON, ex.: ["12345678900", "98765432100"]'
+            ),
+        }
+
+
+BoardParticipationFormSet = forms.inlineformset_factory(
+    ConflictOfInterestDeclaration,
+    BoardParticipation,
+    fk_name="declaration",
+    form=BoardParticipationForm,
+    extra=1,
+    can_delete=True,
+)
+
+
+# --- §33 Parecer Conclusivo --------------------------------------------------
+
+
+class ConclusiveOpinionForm(forms.ModelForm):
+    class Meta:
+        model = ConclusiveOpinion
+        fields = ["opinion_identification", "conclusion", "remarks"]
+
+        widgets = {
+            "opinion_identification": BaseCharFieldFormWidget(required=False),
+            "conclusion": BaseSelectFormWidget(),
+            "remarks": BaseTextAreaFormWidget(required=False),
+        }
+
+
+class ConclusiveOpinionDeclarationForm(forms.ModelForm):
+    class Meta:
+        model = ConclusiveOpinionDeclaration
+        fields = ["answer", "justification"]
+
+        widgets = {
+            "answer": BaseSelectFormWidget(),
+            "justification": BaseTextAreaFormWidget(required=False, rows=2),
+        }
+
+
+ConclusiveOpinionDeclarationFormSet = forms.modelformset_factory(
+    ConclusiveOpinionDeclaration,
+    form=ConclusiveOpinionDeclarationForm,
+    extra=0,
+    can_delete=False,
+)

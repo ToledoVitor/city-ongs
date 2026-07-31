@@ -6,6 +6,8 @@ from django.db.models import Sum
 
 from accounts.models import User
 from contracts.models import (
+    Asset,
+    CertificateReference,
     Company,
     Contract,
     ContractAddendum,
@@ -19,10 +21,12 @@ from contracts.models import (
     ContractItemNewValueRequest,
     ContractItemSupplement,
     ContractStep,
+    SupplierContract,
 )
 from utils.fields import DecimalMaskedField
 from utils.widgets import (
     BaseCharFieldFormWidget,
+    BaseDateFormWidget,
     BaseFileFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
@@ -701,4 +705,92 @@ class ContractItemSupplementUpdateForm(forms.ModelForm):
 
         widgets = {
             "observations": BaseTextAreaFormWidget(required=False),
+        }
+
+
+# =============================================================================
+# AUDESP Fase V - contracts-app models (§6 Relação de Bens, §7 Contratos,
+# §20/§21 referências de certidão). Contract-scoped, surfaced as a tab on the
+# contract detail page (see templates/contracts/tabs/audesp-tab.html).
+# =============================================================================
+
+
+class SupplierContractForm(forms.ModelForm):
+    amount = DecimalMaskedField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        model = SupplierContract
+        fields = [
+            "number",
+            "creditor_document_type",
+            "creditor_document_number",
+            "creditor_name",
+            "signature_date",
+            "validity_type",
+            "validity_start_date",
+            "validity_end_date",
+            "purpose",
+            "contracting_nature",
+            "contracting_nature_other",
+            "selection_criteria",
+            "selection_criteria_other",
+            "purchase_regulation_article",
+            "amount",
+            "value_type",
+        ]
+
+        widgets = {
+            "number": BaseCharFieldFormWidget(),
+            "creditor_document_type": BaseSelectFormWidget(),
+            "creditor_document_number": BaseCharFieldFormWidget(),
+            "creditor_name": BaseCharFieldFormWidget(required=False),
+            "signature_date": BaseDateFormWidget(),
+            "validity_type": BaseSelectFormWidget(),
+            "validity_start_date": BaseDateFormWidget(),
+            "validity_end_date": BaseDateFormWidget(required=False),
+            "purpose": BaseTextAreaFormWidget(),
+            "contracting_nature_other": BaseCharFieldFormWidget(required=False),
+            "selection_criteria": BaseSelectFormWidget(),
+            "selection_criteria_other": BaseCharFieldFormWidget(required=False),
+            "purchase_regulation_article": BaseCharFieldFormWidget(required=False),
+            "value_type": BaseSelectFormWidget(),
+        }
+        help_texts = {
+            "contracting_nature": (
+                "Lista de códigos AUDESP (1-36) em formato JSON, ex.: [1, 5, 12]"
+            ),
+        }
+
+
+class AssetForm(forms.ModelForm):
+    value = DecimalMaskedField(max_digits=12, decimal_places=2, required=False)
+
+    class Meta:
+        model = Asset
+        fields = [
+            "category",
+            "event",
+            "asset_number",
+            "description",
+            "date",
+            "value",
+        ]
+
+        widgets = {
+            "category": BaseSelectFormWidget(),
+            "event": BaseSelectFormWidget(),
+            "asset_number": BaseCharFieldFormWidget(required=False),
+            "description": BaseTextAreaFormWidget(),
+            "date": BaseDateFormWidget(),
+        }
+
+
+class CertificateReferenceForm(forms.ModelForm):
+    class Meta:
+        model = CertificateReference
+        fields = ["type", "identification"]
+
+        widgets = {
+            "type": BaseSelectFormWidget(),
+            "identification": BaseCharFieldFormWidget(),
         }

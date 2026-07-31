@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Declarações — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 860px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-breadcrumb__item">Prestação {{ annual_statement.fiscal_year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Declarações</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Declarações (conflito de interesse)</h1>
+    <p class="ui-body-md ui-text-muted">Manual AUDESP §24 — aplicável a todos os tipos de ajuste.</p>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Declarações</h2>
+      <div class="ui-stack ui-stack--md">
+        {% for field in form %}
+          <div class="ui-field">
+            <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Empresas pertencentes a dirigentes contratadas</h2>
+      {{ companies_formset.management_form }}
+      <div class="ui-stack ui-stack--md">
+        {% for company_form in companies_formset %}
+          <div class="ui-card ui-card--softer ui-stack ui-stack--md">
+            {% for hidden in company_form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="ui-grid-2">
+              {% for field in company_form.visible_fields %}
+                {% if field.name != "DELETE" %}
+                  <div class="ui-field">
+                    <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if company_form.instance.pk %}
+              <label class="ui-body-sm" style="display:flex; align-items:center; gap:6px;">{{ company_form.DELETE }} Remover</label>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Participação de agentes políticos no quadro diretivo</h2>
+      {{ board_formset.management_form }}
+      <div class="ui-stack ui-stack--md">
+        {% for board_form in board_formset %}
+          <div class="ui-card ui-card--softer ui-stack ui-stack--md">
+            {% for hidden in board_form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="ui-grid-2">
+              {% for field in board_form.visible_fields %}
+                {% if field.name != "DELETE" %}
+                  <div class="ui-field">
+                    <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+                    {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if board_form.instance.pk %}
+              <label class="ui-body-sm" style="display:flex; align-items:center; gap:6px;">{{ board_form.DELETE }} Remover</label>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

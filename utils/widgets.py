@@ -45,6 +45,41 @@ class BaseCharFieldFormWidget(forms.TextInput):
         super().__init__(*args, **kwargs)
 
 
+class BaseDateFormWidget(forms.DateInput):
+    def __init__(self, *args, placeholder="dd/mm/aaaa", required=True, **kwargs):
+        kwargs.setdefault("attrs", {}).update(
+            {
+                "class": " ".join(
+                    [
+                        "block",
+                        "w-full",
+                        "px-3",
+                        "py-2.5",
+                        "text-sm",
+                        "text-gray-900",
+                        "bg-gray-200",
+                        "border",
+                        "border-gray-300",
+                        "rounded-lg",
+                        "placeholder-gray-400",
+                        "focus:ring-2",
+                        "focus:ring-blue-500",
+                        "focus:border-blue-500",
+                        "transition-colors",
+                        "duration-200",
+                    ]
+                ),
+                "required": required,
+                "placeholder": placeholder,
+                "datepicker": "",
+                "datepicker-autohide": "",
+                "datepicker-format": "dd/mm/yyyy",
+                "datepicker-language": "pt",
+            }
+        )
+        super().__init__(*args, **kwargs)
+
+
 class BaseNumberFormWidget(forms.NumberInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(

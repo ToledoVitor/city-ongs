@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Empenho — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 720px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">{% if budget_commitment %}Atualizar{% else %}Novo{% endif %} empenho</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">{% if budget_commitment %}Atualizar empenho{% else %}Novo empenho{% endif %}</h1>
+    <p class="ui-body-md ui-text-muted">Manual AUDESP §17 — vincula o repasse a um número de empenho orçamentário.</p>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Dados do empenho</h2>
+      <div class="ui-stack ui-stack--md">
+        {% for field in form %}
+          <div class="ui-field">
+            <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if budget_commitment_exists %}
+      <div class="form-errors" role="alert">
+        <div class="form-errors__indicator" aria-hidden="true"></div>
+        <div class="form-errors__body">
+          <p class="ui-body-md-strong form-errors__title">Erro ao criar empenho</p>
+          <p class="form-errors__item">Já existe um empenho com este número e data de emissão para este contrato.</p>
+        </div>
+      </div>
+    {% endif %}
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">{% if budget_commitment %}Atualizar{% else %}Criar{% endif %} empenho</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

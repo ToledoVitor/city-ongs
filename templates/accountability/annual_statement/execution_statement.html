@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Extrato de execução física e financeira — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 860px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-breadcrumb__item">Prestação {{ annual_statement.fiscal_year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Extrato de execução</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Extrato de execução física e financeira</h1>
+    <p class="ui-body-md ui-text-muted">Manual AUDESP §23 — aplicável apenas a Termo de Parceria.</p>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Extrato</h2>
+      <div class="ui-stack ui-stack--md">
+        {% for field in form %}
+          <div class="ui-field">
+            <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% include 'accountability/annual_statement/_publications_formset.html' with formset=formset title="Publicações do extrato" %}
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

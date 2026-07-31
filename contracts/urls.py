@@ -2,6 +2,8 @@ from django.urls import path
 
 from bank.views import create_bank_account_view
 from contracts.views import (
+    AssetUpdateView,
+    CertificateReferenceUpdateView,
     CompanyCreateView,
     CompanyDetailView,
     CompanyListView,
@@ -15,6 +17,7 @@ from contracts.views import (
     ContractUpdateView,
     ContractWorkPlanView,
     ItemValueRequestReviewView,
+    SupplierContractUpdateView,
     contract_item_purchase_file_delete_view,
     contract_item_purchase_file_upload_view,
     contract_item_purchases_list_view,
@@ -24,6 +27,8 @@ from contracts.views import (
     contract_item_supplementations_update_view,
     contract_status_change_view,
     contract_timeline_update_view,
+    create_asset_view,
+    create_certificate_reference_view,
     create_contract_addendum_view,
     create_contract_document_view,
     create_contract_execution_view,
@@ -32,6 +37,7 @@ from contracts.views import (
     create_contract_item_view,
     create_execution_activity_view,
     create_execution_file_view,
+    create_supplier_contract_view,
     delete_contract_document_view,
     interested_delete_view,
     item_new_value_request_view,
@@ -231,5 +237,36 @@ urlpatterns = [
         "items/purchases/files/delete/<uuid:pk>",
         contract_item_purchase_file_delete_view,
         name="item-purchase-file-delete",
+    ),
+    # --- AUDESP Fase V --------------------------------------------------
+    path(
+        "detail/<uuid:pk>/supplier-contracts/create/",
+        create_supplier_contract_view,
+        name="supplier-contract-create",
+    ),
+    path(
+        "supplier-contracts/<uuid:pk>/update/",
+        SupplierContractUpdateView.as_view(),
+        name="supplier-contract-update",
+    ),
+    path(
+        "detail/<uuid:pk>/assets/create/",
+        create_asset_view,
+        name="asset-create",
+    ),
+    path(
+        "assets/<uuid:pk>/update/",
+        AssetUpdateView.as_view(),
+        name="asset-update",
+    ),
+    path(
+        "detail/<uuid:pk>/certificate-references/create/",
+        create_certificate_reference_view,
+        name="certificate-reference-create",
+    ),
+    path(
+        "certificate-references/<uuid:pk>/update/",
+        CertificateReferenceUpdateView.as_view(),
+        name="certificate-reference-update",
     ),
 ]
