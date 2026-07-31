@@ -89,6 +89,7 @@ from utils.mixins import (
     CommitteeMemberUpdateMixin,
     UserAccessViewMixin,
 )
+from utils.regex import only_digits
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +178,24 @@ class ResourceSourceCreateView(
     def post(self, request, *args, **kwargs):
         form = ResourceSourceForm(request.POST)
         if form.is_valid():
+            # `organization` is excluded from the form (assigned from the
+            # logged-in user, not user input). ResourceSourceForm.clean()
+            # only checks (name, document), not the (organization, document)
+            # pair the model's own clean()/save() and DB constraint actually
+            # enforce - two sources with the same document but different
+            # names slip past the form check and only hit the model's check
+            # inside save(), which this view never wraps in a try/except, so
+            # a genuine duplicate raises an uncaught ValidationError instead
+            # of a friendly form error. Check by hand first.
+            source_exists = ResourceSource.objects.filter(
+                organization=request.user.organization,
+                document=only_digits(form.cleaned_data["document"]),
+            ).exists()
+            if source_exists:
+                return self.render_to_response(
+                    self.get_context_data(form=form, source_exists=True)
+                )
+
             with db_transaction.atomic():
                 source = form.save(commit=False)
                 source.organization = request.user.organization
@@ -838,6 +857,24 @@ class FavoredCreateView(CommitteeMemberCreateMixin, LoginRequiredMixin, Template
     def post(self, request, *args, **kwargs):
         form = FavoredForm(request.POST)
         if form.is_valid():
+            # `organization` is excluded from the form (assigned from the
+            # logged-in user, not user input). FavoredForm.clean() only
+            # checks (name, document), not the (organization, document) pair
+            # the model's own clean()/save() and DB constraint actually
+            # enforce - two favoreds with the same document but different
+            # names slip past the form check and only hit the model's check
+            # inside save(), which this view never wraps in a try/except, so
+            # a genuine duplicate raises an uncaught ValidationError instead
+            # of a friendly form error. Check by hand first.
+            favored_exists = Favored.objects.filter(
+                organization=request.user.organization,
+                document=only_digits(form.cleaned_data["document"]),
+            ).exists()
+            if favored_exists:
+                return self.render_to_response(
+                    self.get_context_data(form=form, favored_exists=True)
+                )
+
             with db_transaction.atomic():
                 favored = form.save(commit=False)
                 favored.organization = request.user.organization

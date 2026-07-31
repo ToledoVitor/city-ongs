@@ -44,6 +44,16 @@
       </div>
     </section>
 
+    {% if activity_exists %}
+      <div class="form-errors" role="alert">
+        <div class="form-errors__indicator" aria-hidden="true"></div>
+        <div class="form-errors__body">
+          <p class="ui-body-md-strong form-errors__title">Erro ao criar atividade</p>
+          <p class="form-errors__item">Já existe uma atividade com este nome nesta etapa.</p>
+        </div>
+      </div>
+    {% endif %}
+
     {% include 'commons/form-errors.html' with form=form %}
 
     <div class="ui-row ui-row--end" style="gap: 8px;">
