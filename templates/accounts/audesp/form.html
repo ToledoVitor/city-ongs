@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_create %}Configurar{% else %}Editar{% endif %} credencial {{ environment_label }} — Portal SITTS{% endblock %}
+
+{% block customcss %}
+<style>
+  /* Dense settings form — see CLAUDE.MD § UI Density & Voice ("Compact controls"). */
+  .audesp-credential-form .ui-input {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .audesp-credential-form .ui-field__label {
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--color-body);
+    font-weight: 500;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page ui-form audesp-credential-form" style="max-width: 640px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accounts:audesp-credentials-list' %}" class="ui-breadcrumb__item">Credenciais AUDESP</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">{{ environment_label }}</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">{% if is_create %}Configurar{% else %}Editar{% endif %} credencial — {{ environment_label }}</h1>
+    <p class="ui-body-md ui-text-muted page__subtitle">{{ city_hall.name }}</p>
+  </header>
+
+  {% if form.fields.username.disabled %}
+    {% include 'ui/alert.html' with variant='info' title='Ambiente de desenvolvimento' message='Usuário e senha vêm do .env (AUDESP_PILOTO_USERNAME/PASSWORD ou AUDESP_PRODUCAO_USERNAME/PASSWORD) — não é possível editá-los aqui.' %}
+  {% endif %}
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <div class="ui-stack ui-stack--md">
+        {% include 'ui/text_input.html' with name='username' label='Usuário' value=form.username.value required=credentials_required disabled=form.fields.username.disabled autocomplete='username' error=form.username.errors.0 %}
+
+        {% include 'ui/password_input.html' with name='password' label='Senha' placeholder='••••••••' required=False disabled=form.fields.password.disabled autocomplete='new-password' hint=form.fields.password.help_text error=form.password.errors.0 %}
+
+        <label class="ui-row" style="gap: 8px; cursor: pointer;">
+          {{ form.is_active }}
+          <span class="ui-body-md">Credencial ativa</span>
+        </label>
+      </div>
+    </section>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accounts:audesp-credentials-list' %}" class="ui-btn ui-btn--secondary ui-btn--sm">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm" {% if form.fields.username.disabled %}disabled{% endif %}>{% if is_create %}Salvar{% else %}Salvar alterações{% endif %}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

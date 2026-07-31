@@ -284,6 +284,14 @@ geometric display sans, sentence-case voice).
     border-color: var(--color-toast-error);
     box-shadow: 0 0 0 1px var(--color-toast-error) inset;
   }
+  input.ui-input:disabled,
+  textarea.ui-input:disabled,
+  select.ui-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  input.ui-input:disabled:hover,
+  textarea.ui-input:disabled:hover { background-color: var(--color-canvas-soft); }
 
   .ui-input-icon-btn {
     position: absolute;
@@ -304,6 +312,8 @@ geometric display sans, sentence-case voice).
   }
   .ui-input-icon-btn:hover { color: var(--color-ink); background-color: var(--color-canvas); }
   .ui-input-icon-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18); }
+  .ui-input-icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ui-input-icon-btn:disabled:hover { color: var(--color-body); background-color: transparent; }
 
   /* === Select === */
   .ui-select {
