@@ -1,0 +1,17 @@
+{% comment %}
+Renders a `.ui-status` pill for one AudespSubmission.StatusChoices value.
+Usage: {% include 'audesp/fase_v/partials/status_pill.html' with status=submission.status %}
+{% endcomment %}
+{% if status == "DRAFT" %}
+  <span class="ui-status ui-status--neutral">Rascunho</span>
+{% elif status == "VALID" %}
+  <span class="ui-status ui-status--success">Válido</span>
+{% elif status == "INVALID" %}
+  <span class="ui-status ui-status--error">Inválido</span>
+{% elif status == "SUBMITTED" %}
+  <span class="ui-status ui-status--info">Enviado</span>
+{% elif status == "ACCEPTED" %}
+  <span class="ui-status ui-status--success">Aceito</span>
+{% elif status == "REJECTED" %}
+  <span class="ui-status ui-status--error">Rejeitado</span>
+{% endif %}

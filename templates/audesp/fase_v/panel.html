@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}AUDESP Fase V — {{ contract.trailing_code }} — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">AUDESP Fase V</span>
+    </nav>
+    <div class="page__header-row">
+      <h1 class="ui-display-lg page__title">AUDESP Fase V</h1>
+    </div>
+  </header>
+
+  <div class="audesp-fv-grid">
+    {# ====================== Left: build form + history ====================== #}
+    <div class="ui-stack ui-stack--lg">
+      <form method="post" action="{% url 'audesp:fase-v-build' contract.id %}" class="ui-card">
+        {% csrf_token %}
+        <h2 class="ui-display-sm" style="margin:0 0 4px;">Montar novo envio</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0 0 16px;">Escolha o exercício e o tipo de ajuste para montar e validar o payload localmente.</p>
+
+        <div class="filter-row">
+          <div class="filter-field">
+            <label class="filter-field__label" for="{{ form.fiscal_year.id_for_label }}">{{ form.fiscal_year.label }}</label>
+            {{ form.fiscal_year }}
+          </div>
+          <div class="filter-field" style="max-width: 280px;">
+            <label class="filter-field__label" for="{{ form.ajuste_type.id_for_label }}">{{ form.ajuste_type.label }}</label>
+            {{ form.ajuste_type }}
+          </div>
+          <div class="filter-row__actions">
+            <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">
+              <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              Montar payload
+            </button>
+          </div>
+        </div>
+
+        {% if contract.concession_type == "GRANT" %}
+          <p class="ui-field__hint" style="margin-top:10px;">Este contrato usa "Concessão", que não corresponde a nenhum tipo de ajuste da AUDESP Fase V — escolha o tipo manualmente.</p>
+        {% endif %}
+        <p class="ui-field__hint" style="margin-top:10px;">Precisa registrar uma {{ declaracao_negativa_label }}? Ainda não disponível nesta tela.</p>
+      </form>
+
+      <section class="ui-card">
+        <header class="ui-row ui-row--between" style="margin-bottom: 12px;">
+          <h2 class="ui-display-sm" style="margin:0;">Histórico — exercício {{ fiscal_year }}</h2>
+        </header>
+
+        {% if history %}
+          <div class="ui-table-wrap audesp-fv-history">
+            <table class="ui-table">
+              <thead>
+                <tr>
+                  <th>Tipo de ajuste</th>
+                  <th>Status</th>
+                  <th>Protocolo</th>
+                  <th>Construído em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in history %}
+                  <tr>
+                    <td><span class="ui-body-sm">{{ item.get_ajuste_type_display }}</span></td>
+                    <td>{% include 'audesp/fase_v/partials/status_pill.html' with status=item.status %}</td>
+                    <td><span class="ui-body-sm">{{ item.protocol_number|default:"—" }}</span></td>
+                    <td><span class="ui-body-sm ui-text-muted">{{ item.built_at|date:"d/m/Y H:i" }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="ui-empty">
+            <div class="ui-empty__icon" aria-hidden="true">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="ui-display-sm">Nenhum envio para este exercício</p>
+            <p class="ui-body-sm ui-text-muted">Monte o primeiro payload ao lado.</p>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    {# ====================== Right: current status / preview ====================== #}
+    <aside class="ui-card audesp-fv-preview">
+      <header class="ui-row ui-row--between" style="margin-bottom: 16px;">
+        <h2 class="ui-display-sm" style="margin:0;">Status atual</h2>
+        {% if latest_submission %}{% include 'audesp/fase_v/partials/status_pill.html' with status=latest_submission.status %}{% endif %}
+      </header>
+
+      {% if not latest_submission %}
+        <div class="ui-empty">
+          <div class="ui-empty__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 13h6m-6 4h4m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6l6 6v11a2 2 0 0 1-2 2Z"/></svg>
+          </div>
+          <p class="ui-body-md-strong" style="margin:0;">Nenhum payload montado</p>
+          <p class="ui-body-sm ui-text-muted" style="margin:0; max-width: 320px; text-align:center;">Escolha o exercício e o tipo de ajuste à esquerda e clique em <strong style="color: var(--color-ink); font-weight:600;">Montar payload</strong>.</p>
+        </div>
+      {% else %}
+        <div class="ui-stack ui-stack--lg">
+          <dl class="ui-dl">
+            <dt>Tipo de ajuste</dt><dd>{{ latest_submission.get_ajuste_type_display }}</dd>
+            <dt>Construído em</dt><dd>{{ latest_submission.built_at|date:"d/m/Y H:i" }}</dd>
+            {% if latest_submission.protocol_number %}
+              <dt>Protocolo</dt><dd>{{ latest_submission.protocol_number }}</dd>
+            {% endif %}
+          </dl>
+
+          <div class="ui-row" style="gap: 8px; flex-wrap: wrap;">
+            {% if latest_submission.status == "VALID" %}
+              <form method="post" action="{% url 'audesp:fase-v-submit' contract.id latest_submission.id %}">
+                {% csrf_token %}
+                <button type="submit" class="ui-btn ui-btn--primary ui-btn--sm">Enviar para a AUDESP (Piloto)</button>
+              </form>
+            {% endif %}
+            {% if latest_submission.protocol_number %}
+              <form method="post" action="{% url 'audesp:fase-v-check-status' contract.id latest_submission.id %}">
+                {% csrf_token %}
+                <button type="submit" class="ui-btn ui-btn--secondary ui-btn--sm">Verificar status na AUDESP</button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if error_groups %}
+            <div class="ui-stack ui-stack--sm">
+              <p class="ui-body-sm-strong" style="margin:0;">{{ latest_submission.validation_errors|length }} erro{{ latest_submission.validation_errors|length|pluralize }} de validação</p>
+              <p class="ui-caption" style="margin:0;">Mensagens geradas pelo schema JSON oficial da AUDESP, agrupadas por seção do documento.</p>
+              <div class="audesp-fv-error-groups">
+                {% for group in error_groups %}
+                  <details class="audesp-fv-error-group">
+                    <summary>{{ group.label }} <span class="ui-caption">({{ group.errors|length }})</span></summary>
+                    <ul class="audesp-fv-error-list">
+                      {% for err in group.errors %}
+                        <li><span class="ui-caption">{{ err.path }}</span> — {{ err.message }}</li>
+                      {% endfor %}
+                    </ul>
+                  </details>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if payload_json %}
+            <details class="audesp-fv-payload">
+              <summary class="ui-body-sm-strong">Ver payload JSON</summary>
+              <div class="ui-row" style="gap: 8px; margin: 10px 0;">
+                <button type="button" id="audesp-fv-copy-json" class="ui-btn ui-btn--subtle ui-btn--sm">Copiar JSON</button>
+                <button type="button" id="audesp-fv-download-json" class="ui-btn ui-btn--subtle ui-btn--sm">Baixar JSON</button>
+              </div>
+              <pre id="audesp-fv-json" class="audesp-fv-json">{{ payload_json }}</pre>
+            </details>
+          {% endif %}
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+
+<style>
+  .audesp-fv-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: start;
+  }
+  @media (max-width: 1080px) {
+    .audesp-fv-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Long content stays inside a contained scroll area instead of pushing
+     the page taller — see CLAUDE.MD "No scrolling on common desktop sizes". */
+  .audesp-fv-history { max-height: 280px; overflow-y: auto; }
+
+  .audesp-fv-error-groups {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .audesp-fv-error-group {
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-md);
+    padding: 10px 12px;
+  }
+  .audesp-fv-error-group summary {
+    cursor: pointer;
+    font-family: var(--font-text);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--color-ink);
+  }
+  .audesp-fv-error-list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--color-body);
+  }
+
+  .audesp-fv-payload summary { cursor: pointer; }
+  .audesp-fv-json {
+    max-height: 320px;
+    overflow: auto;
+    background-color: var(--color-canvas-softer);
+    border-radius: var(--rounded-md);
+    padding: 12px 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: pre;
+  }
+</style>
+
+<script>
+  (function () {
+    var copyBtn = document.getElementById('audesp-fv-copy-json');
+    var downloadBtn = document.getElementById('audesp-fv-download-json');
+    var jsonEl = document.getElementById('audesp-fv-json');
+
+    function toast(variant, message) {
+      if (window.UIToast) {
+        window.UIToast.show({ variant: variant, message: message, duration: 2500 });
+      }
+    }
+
+    if (copyBtn && jsonEl) {
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(jsonEl.textContent).then(function () {
+          toast('success', 'JSON copiado.');
+        }, function () {
+          toast('error', 'Não foi possível copiar.');
+        });
+      });
+    }
+
+    if (downloadBtn && jsonEl) {
+      downloadBtn.addEventListener('click', function () {
+        var blob = new Blob([jsonEl.textContent], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'audesp-fase-v-{{ contract.trailing_code }}-{{ fiscal_year }}.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    }
+  })();
+</script>
+{% endblock %}
