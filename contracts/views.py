@@ -910,6 +910,28 @@ def create_execution_activity_view(request, pk):
     if request.method == "POST":
         form = ContractExecutionActivityForm(request.POST, execution=execution)
         if form.is_valid():
+            # `execution` is excluded from the form (assigned from the URL,
+            # not user input), so Django's automatic validate_unique() skips
+            # unique_activity_per_execution_step outright (see the analogous
+            # comment on accountability.views.create_budget_commitment_view) -
+            # check by hand instead of letting a genuine duplicate raise a
+            # raw IntegrityError.
+            activity_exists = ContractExecutionActivity.objects.filter(
+                execution=execution,
+                step=form.cleaned_data["step"],
+                name=form.cleaned_data["name"],
+            ).exists()
+            if activity_exists:
+                return render(
+                    request,
+                    "contracts/execution/activity-create.html",
+                    {
+                        "execution": execution,
+                        "form": form,
+                        "activity_exists": True,
+                    },
+                )
+
             with transaction.atomic():
                 activity = form.save(commit=False)
                 activity.execution = execution
@@ -954,6 +976,24 @@ class ContractExecutionActivityUpdateView(
         return kwargs
 
     def form_valid(self, form):
+        # Same excluded-field gap as create_execution_activity_view:
+        # `execution` isn't a form field, so Django's automatic
+        # validate_unique() skips unique_activity_per_execution_step
+        # outright - check by hand.
+        exists = (
+            ContractExecutionActivity.objects.filter(
+                execution=self.object.execution,
+                step=form.cleaned_data["step"],
+                name=form.cleaned_data["name"],
+            )
+            .exclude(pk=self.object.pk)
+            .exists()
+        )
+        if exists:
+            return self.render_to_response(
+                self.get_context_data(form=form, activity_exists=True)
+            )
+
         _ = ActivityLog.objects.create(
             user=self.request.user,
             user_email=self.request.user.email,
