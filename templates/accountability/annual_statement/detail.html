@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Prestação {{ annual_statement.fiscal_year }} — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Prestação {{ annual_statement.fiscal_year }}</span>
+    </nav>
+    <div class="page__header-row">
+      <div class="ui-stack ui-stack--xs">
+        <h1 class="ui-display-lg page__title">Prestação anual {{ annual_statement.fiscal_year }} (AUDESP)</h1>
+        <p class="ui-body-md ui-text-muted page__subtitle">{{ contract.name }}</p>
+      </div>
+      <div class="page__actions">
+        <a href="{% url 'accountability:annual-statement-update' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Editar datas</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="ui-card ui-stack ui-stack--md">
+    <h2 class="ui-display-sm" style="margin:0;">Dados da prestação</h2>
+    <dl class="ui-dl">
+      <dt>Data da prestação de contas</dt>
+      <dd>{{ annual_statement.statement_date|default:"Não informada" }}</dd>
+      <dt>Início do período de referência</dt>
+      <dd>{{ annual_statement.reference_period_start_date|default:"Não informado" }}</dd>
+      <dt>Fim do período de referência</dt>
+      <dd>{{ annual_statement.reference_period_end_date|default:"Não informado" }}</dd>
+    </dl>
+  </section>
+
+  <section class="ui-stack ui-stack--md">
+    <h2 class="ui-display-md" style="margin:0;">Relatórios e publicações</h2>
+    <div class="ui-grid-2">
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Regulamento de compras</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§22 — Contrato de Gestão</p>
+          </div>
+          {% if purchasing_regulation %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-purchasing-regulation' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Extrato de execução física e financeira</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§23 — Termo de Parceria</p>
+          </div>
+          {% if execution_statement %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-execution-statement' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Demonstrações contábeis</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§28 — todos os ajustes</p>
+          </div>
+          {% if financial_statements %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-financial-statements' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Publicação do relatório de atividades</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§30 — Contrato de Gestão</p>
+          </div>
+          {% if activity_report_publication_status %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-activity-report-publication' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Declarações (conflito de interesse)</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§24 — todos os ajustes</p>
+          </div>
+          {% if conflict_of_interest_declaration %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-conflict-of-interest' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+      <section class="ui-card ui-card--soft ui-stack ui-stack--md">
+        <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 8px;">
+          <div class="ui-stack ui-stack--xxs">
+            <h3 class="ui-body-md-strong" style="margin:0;">Parecer conclusivo</h3>
+            <p class="ui-caption ui-text-muted" style="margin:0;">§33 — todos os ajustes</p>
+          </div>
+          {% if conclusive_opinion %}<span class="ui-status ui-status--success">Configurado</span>{% else %}<span class="ui-status ui-status--neutral">Pendente</span>{% endif %}
+        </div>
+        <a href="{% url 'accountability:annual-statement-conclusive-opinion' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Configurar</a>
+      </section>
+
+    </div>
+  </section>
+
+  <section class="ui-stack ui-stack--md">
+    <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 12px;">
+      <h2 class="ui-display-md" style="margin:0;">Pareceres e atas</h2>
+      <a href="{% url 'accountability:annual-statement-opinion-create' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar parecer/ata</a>
+    </div>
+    {% if opinions_or_minutes %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Tipo</th><th>Publicado?</th><th>Conclusão</th><th></th></tr></thead>
+          <tbody>
+            {% for opinion in opinions_or_minutes %}
+              <tr>
+                <td>{{ opinion.get_type_display }}</td>
+                <td>{% if opinion.was_published %}Sim{% else %}Não{% endif %}</td>
+                <td>{{ opinion.get_conclusion_display|default:"—" }}</td>
+                <td class="ui-text-right">
+                  <a href="{% url 'accountability:annual-statement-opinion-update' annual_statement.id opinion.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty">
+        <p class="ui-display-sm">Nenhum parecer ou ata cadastrado</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="ui-stack ui-stack--md">
+    <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 12px;">
+      <h2 class="ui-display-md" style="margin:0;">Relatórios de avaliação</h2>
+      <a href="{% url 'accountability:annual-statement-evaluation-report-create' annual_statement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar relatório</a>
+    </div>
+    {% if evaluation_reports %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Tipo</th><th>Relatório final emitido?</th><th>Conclusão</th><th></th></tr></thead>
+          <tbody>
+            {% for report in evaluation_reports %}
+              <tr>
+                <td>{{ report.get_type_display }}</td>
+                <td>{% if report.final_report_issued %}Sim{% else %}Não{% endif %}</td>
+                <td>{{ report.get_conclusion_display|default:"—" }}</td>
+                <td class="ui-text-right">
+                  <a href="{% url 'accountability:annual-statement-evaluation-report-update' report.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty">
+        <p class="ui-display-sm">Nenhum relatório de avaliação cadastrado</p>
+      </div>
+    {% endif %}
+  </section>
+
+</section>
+{% endblock %}

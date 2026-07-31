@@ -1,0 +1,46 @@
+{% comment %}
+Shared "list of publications" formset block, reused by every §22/23/28/29/30
+publication list (all built on `accountability.models.PublicationBase`).
+Expects: `formset` (an inlineformset_factory instance already bound to its
+parent) and `title`.
+{% endcomment %}
+<section class="ui-card ui-stack ui-stack--lg">
+  <h2 class="ui-display-sm" style="margin:0;">{{ title }}</h2>
+  <p class="ui-body-sm ui-text-muted" style="margin:0;">Veículos de publicação já divulgados para este item.</p>
+
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}
+    <div class="form-errors" role="alert">
+      <div class="form-errors__indicator" aria-hidden="true"></div>
+      <div class="form-errors__body">
+        <ul class="form-errors__list">
+          {% for error in formset.non_form_errors %}<li class="form-errors__item">{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="ui-stack ui-stack--md">
+    {% for pub_form in formset %}
+      <div class="ui-card ui-card--softer ui-stack ui-stack--md">
+        {% for hidden in pub_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="ui-grid-2">
+          {% for field in pub_form.visible_fields %}
+            {% if field.name != "DELETE" %}
+              <div class="ui-field">
+                <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if pub_form.instance.pk %}
+          <label class="ui-body-sm" style="display:flex; align-items:center; gap:6px;">
+            {{ pub_form.DELETE }} Remover esta publicação
+          </label>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</section>

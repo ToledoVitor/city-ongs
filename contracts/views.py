@@ -21,6 +21,8 @@ from accounts.models import Committee
 from activity.models import ActivityLog
 from contracts.choices import NatureCategories
 from contracts.forms import (
+    AssetForm,
+    CertificateReferenceForm,
     CompanyCreateForm,
     CompanyUpdateForm,
     ContractAddendumForm,
@@ -41,8 +43,11 @@ from contracts.forms import (
     ContractStatusUpdateForm,
     ContractStepFormSet,
     ItemValueReviewForm,
+    SupplierContractForm,
 )
 from contracts.models import (
+    Asset,
+    CertificateReference,
     Company,
     Contract,
     ContractAddendum,
@@ -59,6 +64,7 @@ from contracts.models import (
     ContractItemReview,
     ContractItemSupplement,
     ContractMonthTransfer,
+    SupplierContract,
 )
 from utils.choices import StatusChoices
 from utils.logging import log_database_operation, log_view_access
@@ -356,6 +362,40 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
             "-created_at"
         )[:12]
         context["documents"] = documents
+
+        # --- AUDESP Fase V - "AUDESP" tab (contracts/tabs/audesp-tab.html) ---
+        context["annual_statements"] = self.object.annual_statements.filter(
+            deleted_at__isnull=True
+        ).order_by("-fiscal_year")[:12]
+        context["budget_commitments"] = self.object.budget_commitments.filter(
+            deleted_at__isnull=True
+        ).order_by("-issue_date")[:12]
+        context["fund_transfers"] = (
+            self.object.fund_transfers.filter(deleted_at__isnull=True)
+            .select_related("budget_commitment")
+            .order_by("-transfer_date")[:12]
+        )
+        context["balance_adjustments"] = self.object.balance_adjustments.filter(
+            deleted_at__isnull=True
+        ).order_by("-date")[:12]
+        context["expense_rejections"] = self.object.expense_rejections.filter(
+            deleted_at__isnull=True
+        ).order_by("-created_at")[:12]
+        context["deductions"] = self.object.deductions.filter(
+            deleted_at__isnull=True
+        ).order_by("-date")[:12]
+        context["refunds"] = self.object.refunds.filter(
+            deleted_at__isnull=True
+        ).order_by("-date")[:12]
+        context["supplier_contracts"] = self.object.supplier_contracts.filter(
+            deleted_at__isnull=True
+        ).order_by("-signature_date")[:12]
+        context["assets"] = self.object.assets.filter(deleted_at__isnull=True).order_by(
+            "-date"
+        )[:12]
+        context["certificate_references"] = self.object.certificate_references.filter(
+            deleted_at__isnull=True
+        ).order_by("type")[:12]
 
         return context
 
@@ -1872,3 +1912,231 @@ def delete_contract_document_view(request, pk):
     document = get_object_or_404(ContractDocument, id=pk)
     document.delete()
     return redirect("contracts:contracts-detail", pk=document.contract.id)
+
+
+# =============================================================================
+# AUDESP Fase V - contracts-app models (§6 Relação de Bens, §7 Contratos,
+# §20/§21 referências de certidão), surfaced as the "AUDESP" tab on the
+# contract detail page (templates/contracts/tabs/audesp-tab.html). Same
+# "no ActivityLog / no explicit organization=" reasoning documented in
+# accountability/views.py applies here too.
+# =============================================================================
+
+
+@login_required
+def create_supplier_contract_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = SupplierContractForm(request.POST)
+        if form.is_valid():
+            # `contract` is excluded from the form, so
+            # unique_supplier_contract_per_agreement is never checked by
+            # Django's automatic validate_unique() (any constraint touching
+            # an excluded field is skipped outright - see the analogous
+            # comment on accountability.views.create_budget_commitment_view) -
+            # check by hand instead of letting a genuine duplicate raise a
+            # raw IntegrityError.
+            exists = SupplierContract.objects.filter(
+                contract=contract,
+                number=form.cleaned_data["number"],
+                signature_date=form.cleaned_data["signature_date"],
+                creditor_document_type=form.cleaned_data["creditor_document_type"],
+                creditor_document_number=form.cleaned_data["creditor_document_number"],
+            ).exists()
+            if exists:
+                return render(
+                    request,
+                    "contracts/supplier-contract-create.html",
+                    {
+                        "contract": contract,
+                        "form": form,
+                        "supplier_contract_exists": True,
+                    },
+                )
+
+            supplier_contract = form.save(commit=False)
+            supplier_contract.contract = contract
+            supplier_contract.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "contracts/supplier-contract-create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = SupplierContractForm()
+    return render(
+        request,
+        "contracts/supplier-contract-create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class SupplierContractUpdateView(LoginRequiredMixin, UpdateView):
+    model = SupplierContract
+    form_class = SupplierContractForm
+    template_name = "contracts/supplier-contract-create.html"
+    context_object_name = "supplier_contract"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def form_valid(self, form):
+        # Same excluded-field gap as create_supplier_contract_view - check
+        # by hand.
+        exists = (
+            SupplierContract.objects.filter(
+                contract=self.object.contract,
+                number=form.cleaned_data["number"],
+                signature_date=form.cleaned_data["signature_date"],
+                creditor_document_type=form.cleaned_data["creditor_document_type"],
+                creditor_document_number=form.cleaned_data["creditor_document_number"],
+            )
+            .exclude(pk=self.object.pk)
+            .exists()
+        )
+        if exists:
+            return self.render_to_response(
+                self.get_context_data(form=form, supplier_contract_exists=True)
+            )
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+@login_required
+def create_asset_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = AssetForm(request.POST)
+        if form.is_valid():
+            asset = form.save(commit=False)
+            asset.contract = contract
+            asset.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "contracts/asset-create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = AssetForm()
+    return render(
+        request,
+        "contracts/asset-create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class AssetUpdateView(LoginRequiredMixin, UpdateView):
+    model = Asset
+    form_class = AssetForm
+    template_name = "contracts/asset-create.html"
+    context_object_name = "asset"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )
+
+
+@login_required
+def create_certificate_reference_view(request, pk):
+    contract = get_object_or_404(Contract, id=pk)
+
+    if request.method == "POST":
+        form = CertificateReferenceForm(request.POST)
+        if form.is_valid():
+            # `contract` is excluded from the form, so
+            # unique_certificate_reference_per_type is never checked by
+            # Django's automatic validate_unique() (see the analogous comment
+            # on accountability.views.create_budget_commitment_view) - check
+            # by hand instead of letting a genuine duplicate raise a raw
+            # IntegrityError.
+            exists = CertificateReference.objects.filter(
+                contract=contract, type=form.cleaned_data["type"]
+            ).exists()
+            if exists:
+                return render(
+                    request,
+                    "contracts/certificate-reference-create.html",
+                    {
+                        "contract": contract,
+                        "form": form,
+                        "certificate_reference_exists": True,
+                    },
+                )
+
+            reference = form.save(commit=False)
+            reference.contract = contract
+            reference.save()
+            return redirect("contracts:contracts-detail", pk=contract.id)
+        return render(
+            request,
+            "contracts/certificate-reference-create.html",
+            {"contract": contract, "form": form},
+        )
+
+    form = CertificateReferenceForm()
+    return render(
+        request,
+        "contracts/certificate-reference-create.html",
+        {"contract": contract, "form": form},
+    )
+
+
+class CertificateReferenceUpdateView(LoginRequiredMixin, UpdateView):
+    model = CertificateReference
+    form_class = CertificateReferenceForm
+    template_name = "contracts/certificate-reference-create.html"
+    context_object_name = "certificate_reference"
+    login_url = "/auth/login"
+
+    def get_object(self, queryset=None):
+        return self.model.objects.select_related("contract").get(id=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contract"] = self.object.contract
+        return context
+
+    def form_valid(self, form):
+        # Same excluded-field gap as create_certificate_reference_view -
+        # check by hand.
+        exists = (
+            CertificateReference.objects.filter(
+                contract=self.object.contract, type=form.cleaned_data["type"]
+            )
+            .exclude(pk=self.object.pk)
+            .exists()
+        )
+        if exists:
+            return self.render_to_response(
+                self.get_context_data(form=form, certificate_reference_exists=True)
+            )
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
+        )

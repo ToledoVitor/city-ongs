@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Relatório de avaliação — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 720px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-breadcrumb__item">Prestação {{ annual_statement.fiscal_year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">{% if report %}Atualizar{% else %}Novo{% endif %} relatório</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">{% if report %}Atualizar relatório de avaliação{% else %}Novo relatório de avaliação{% endif %}</h1>
+    <p class="ui-body-md ui-text-muted">Manual AUDESP §25/§26/§27 — Comissão de Avaliação, Governamental ou Monitoramento, conforme o tipo de ajuste.</p>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Relatório</h2>
+      <div class="ui-stack ui-stack--md">
+        {% for field in form %}
+          <div class="ui-field">
+            <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if report_type_exists %}
+      <div class="form-errors" role="alert">
+        <div class="form-errors__indicator" aria-hidden="true"></div>
+        <div class="form-errors__body">
+          <p class="ui-body-md-strong form-errors__title">Erro ao criar relatório</p>
+          <p class="form-errors__item">Já existe um relatório deste tipo para esta prestação anual.</p>
+        </div>
+      </div>
+    {% endif %}
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">{% if report %}Atualizar{% else %}Criar{% endif %}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

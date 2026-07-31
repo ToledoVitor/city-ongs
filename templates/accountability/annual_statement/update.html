@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Atualizar prestação anual — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 720px;">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:contracts-detail' annual_statement.contract.id %}" class="ui-breadcrumb__item">{{ annual_statement.contract.trailing_code }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-breadcrumb__item">{{ annual_statement.fiscal_year }}</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Atualizar</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Atualizar prestação anual {{ annual_statement.fiscal_year }}</h1>
+  </header>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+
+    <section class="ui-card ui-stack ui-stack--lg">
+      <h2 class="ui-display-sm" style="margin:0;">Datas da prestação</h2>
+      <div class="ui-stack ui-stack--md">
+        {% for field in form %}
+          <div class="ui-field">
+            <label for="{{ field.id_for_label }}" class="ui-field__label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="ui-field__hint">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<p class="ui-field__error">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% include 'commons/form-errors.html' with form=form %}
+
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'accountability:annual-statement-detail' annual_statement.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Salvar</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
