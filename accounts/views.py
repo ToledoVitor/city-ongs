@@ -4,10 +4,11 @@ from typing import Any
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -23,6 +24,7 @@ from django.views.generic import (
 
 from accounts.forms import (
     AreasForm,
+    AudespCredentialSettingsForm,
     FolderManagerCreateForm,
     OrganizationAccountantCreateForm,
     OrganizationCommitteeCreateForm,
@@ -31,6 +33,7 @@ from accounts.forms import (
 from accounts.models import Committee, OrganizationDocument, User
 from accounts.services import notify_user_account_created
 from activity.models import ActivityLog, Notification
+from audesp.models import AudespCredential
 from utils.mixins import AdminRequiredMixin
 from utils.password import generate_random_password
 
@@ -672,6 +675,130 @@ class OrganizationDocumentToggleVisibilityView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy("accounts:documents-list")
+
+
+class AudespCredentialSettingsListView(AdminRequiredMixin, TemplateView):
+    """City-hall-scoped settings page: shows, for the current user's city
+    hall, which of the two AUDESP environments (Piloto / Produção) already
+    have a credential registered and whether it's active. See
+    `AudespCredential`'s docstring — one row per (city_hall, environment),
+    shared by every organization under that city hall.
+    """
+
+    template_name = "accounts/audesp/list.html"
+    login_url = "/auth/login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        city_hall = self.request.user.organization.city_hall
+        credentials_by_environment = {
+            credential.environment: credential
+            for credential in AudespCredential.objects.filter(city_hall=city_hall)
+        }
+        context["city_hall"] = city_hall
+        context["environment_rows"] = [
+            {
+                "value": value,
+                "label": label,
+                "credential": credentials_by_environment.get(value),
+            }
+            for value, label in AudespCredential.EnvironmentChoices.choices
+        ]
+        return context
+
+
+class AudespCredentialSettingsFormView(AdminRequiredMixin, TemplateView):
+    """Create-or-update view for one (city_hall, environment) AUDESP
+    credential. There's no user-facing "create" vs "edit" URL split: the
+    environment is fixed by the URL and the city hall by the current user,
+    so this always resolves to the single row that pair may have (or
+    builds a fresh, unsaved one) — see `AudespCredentialSettingsForm`.
+    """
+
+    template_name = "accounts/audesp/form.html"
+    login_url = "/auth/login"
+
+    def _get_credential(self):
+        environment = self.kwargs["environment"]
+        if environment not in AudespCredential.EnvironmentChoices.values:
+            raise Http404("Ambiente AUDESP inválido.")
+
+        city_hall = self.request.user.organization.city_hall
+        credential = AudespCredential.objects.filter(
+            city_hall=city_hall, environment=environment
+        ).first()
+        if credential is None:
+            credential = AudespCredential(city_hall=city_hall, environment=environment)
+        return credential
+
+    def get_context_data(self, credential=None, form=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        credential = credential or self._get_credential()
+        form = form or AudespCredentialSettingsForm(instance=credential)
+        # NOTE: `credential.pk` is truthy even for a brand-new row — see the
+        # comment in AudespCredentialAdminForm.save() — so "is this a create"
+        # has to go through `_state.adding` instead.
+        is_create = credential._state.adding
+        context["form"] = form
+        context["city_hall"] = credential.city_hall
+        context["is_create"] = is_create
+        context["environment_label"] = AudespCredential.EnvironmentChoices(
+            credential.environment
+        ).label
+        # Both fields are only mandatory together, and only when there's no
+        # existing row yet — editing may leave them blank to keep the
+        # current secret (see AudespCredentialAdminForm.save()).
+        context["credentials_required"] = (
+            is_create and not form.fields["username"].disabled
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        credential = self._get_credential()
+        is_create = credential._state.adding
+        form = AudespCredentialSettingsForm(request.POST, instance=credential)
+
+        if form.is_valid():
+            try:
+                form.save()
+            except ValidationError as exc:
+                form.add_error(None, exc)
+            else:
+                messages.success(
+                    request,
+                    "Credencial AUDESP configurada com sucesso!"
+                    if is_create
+                    else "Credencial AUDESP atualizada com sucesso!",
+                )
+                return redirect("accounts:audesp-credentials-list")
+
+        context = self.get_context_data(credential=credential, form=form)
+        return self.render_to_response(context)
+
+
+@login_required
+@require_POST
+def toggle_audesp_credential_status(request, environment):
+    if environment not in AudespCredential.EnvironmentChoices.values:
+        raise Http404("Ambiente AUDESP inválido.")
+    if not request.user.has_admin_access:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    credential = get_object_or_404(
+        AudespCredential,
+        city_hall=request.user.organization.city_hall,
+        environment=environment,
+    )
+    credential.is_active = not credential.is_active
+    credential.save(update_fields=["is_active", "updated_at"])
+
+    messages.success(
+        request,
+        "Credencial ativada com sucesso!"
+        if credential.is_active
+        else "Credencial desativada com sucesso!",
+    )
+    return redirect("accounts:audesp-credentials-list")
 
 
 @login_required

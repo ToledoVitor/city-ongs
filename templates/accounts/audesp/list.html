@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Credenciais AUDESP — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page">
+
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Credenciais AUDESP</span>
+    </nav>
+    <div class="ui-stack ui-stack--xs">
+      <h1 class="ui-display-lg page__title">Credenciais AUDESP</h1>
+      <p class="ui-body-md ui-text-muted page__subtitle">Login do TCESP usado para enviar prestações de {{ city_hall.name }} ao AUDESP — um por ambiente.</p>
+    </div>
+  </header>
+
+  <div class="ui-table-wrap">
+    <table class="ui-table">
+      <thead><tr><th>Ambiente</th><th>Configuração</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for row in environment_rows %}
+          <tr>
+            <td><span class="ui-body-md-strong">{{ row.label }}</span></td>
+            <td>
+              {% if row.credential %}<span class="ui-status ui-status--info">Configurada</span>
+              {% else %}<span class="ui-status">Não configurada</span>{% endif %}
+            </td>
+            <td>
+              {% if row.credential %}
+                {% if row.credential.is_active %}<span class="ui-status ui-status--success">Ativa</span>
+                {% else %}<span class="ui-status ui-status--error">Inativa</span>{% endif %}
+              {% else %}
+                <span class="ui-text-mute">—</span>
+              {% endif %}
+            </td>
+            <td class="ui-text-right">
+              <div class="ui-row" style="gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                {% if row.credential %}
+                  <form method="post" action="{% url 'accounts:audesp-credentials-toggle-status' row.value %}" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="ui-btn ui-btn--subtle ui-btn--sm" {% if row.credential.is_active %}style="color:#842029;"{% endif %}>{% if row.credential.is_active %}Desativar{% else %}Ativar{% endif %}</button>
+                  </form>
+                  <a href="{% url 'accounts:audesp-credentials-form' row.value %}" class="ui-btn ui-btn--secondary ui-btn--sm">Editar</a>
+                {% else %}
+                  <a href="{% url 'accounts:audesp-credentials-form' row.value %}" class="ui-btn ui-btn--primary ui-btn--sm">Configurar</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
