@@ -14,11 +14,18 @@ class AudespSubmissionAdmin(BaseModelAdmin):
         "contract",
         "fiscal_year",
         "ajuste_type",
+        "retificacao",
         "status",
         "protocol_number",
         "built_at",
     )
-    list_filter = ("organization", "ajuste_type", "status", "fiscal_year")
+    list_filter = (
+        "organization",
+        "ajuste_type",
+        "retificacao",
+        "status",
+        "fiscal_year",
+    )
     search_fields = ("id", "contract__name", "protocol_number")
     readonly_fields = ("payload", "validation_errors", "built_at")
 
