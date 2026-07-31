@@ -1,0 +1,16 @@
+{% comment %}
+Renders a `.ui-status` pill for an AudespFaseIVSubmission (or the
+equivalent Fase V AudespSubmission — both share the same status
+vocabulary). Expects `submission` in context.
+{% endcomment %}
+{% if submission.status == "ACCEPTED" %}
+  <span class="ui-status ui-status--success">{{ submission.get_status_display }}</span>
+{% elif submission.status == "VALID" %}
+  <span class="ui-status ui-status--info">{{ submission.get_status_display }}</span>
+{% elif submission.status == "SUBMITTED" %}
+  <span class="ui-status ui-status--warning">{{ submission.get_status_display }}</span>
+{% elif submission.status == "INVALID" or submission.status == "REJECTED" %}
+  <span class="ui-status ui-status--error">{{ submission.get_status_display }}</span>
+{% else %}
+  <span class="ui-status">{{ submission.get_status_display }}</span>
+{% endif %}
