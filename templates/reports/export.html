@@ -12,10 +12,7 @@
       <span class="ui-breadcrumb__sep">/</span>
       <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Relatórios</span>
     </nav>
-    <div class="ui-row ui-row--between" style="align-items: baseline;">
-      <h1 class="ui-display-md" style="margin: 0;">Exportar relatório</h1>
-      <p class="ui-caption" style="margin: 0;">Configure os filtros e veja a pré-visualização ao lado.</p>
-    </div>
+    <h1 class="ui-display-md" style="margin: 0;">Exportar relatório</h1>
   </header>
 
   <div class="reports-grid">
@@ -25,53 +22,85 @@
 
       <div class="reports-form__scroll">
         <section class="ui-stack ui-stack--sm">
-          <p class="ui-caption" style="margin: 0;">Informações básicas</p>
+          <p class="reports-form__group-label">Informações básicas</p>
           <div class="ui-field">
-            <label class="ui-field__label" for="id_contract">Contrato</label>
+            <label class="ui-field__label" for="{{ form.contract.id_for_label }}">Contrato</label>
             {{ form.contract }}
             {% if form.contract.errors %}<p class="ui-field__error">{{ form.contract.errors.0 }}</p>{% endif %}
           </div>
           <div class="ui-field">
-            <label class="ui-field__label" for="id_report_model">Modelo de relatório</label>
+            <label class="ui-field__label" for="{{ form.report_model.id_for_label }}">Modelo de relatório</label>
             {{ form.report_model }}
             {% if form.report_model.errors %}<p class="ui-field__error">{{ form.report_model.errors.0 }}</p>{% endif %}
           </div>
         </section>
 
         <section class="ui-stack ui-stack--sm">
-          <p class="ui-caption" style="margin: 0;">Período de análise</p>
-          <div class="reports-period">
-            <p class="ui-field__label">Início</p>
+          <p class="reports-form__group-label">Período de análise</p>
+          <fieldset class="reports-period">
+            <legend class="ui-field__label">Início</legend>
             <div class="ui-grid-2">
-              <div class="ui-field">{{ form.start_month }}{% if form.start_month.errors %}<p class="ui-field__error">{{ form.start_month.errors.0 }}</p>{% endif %}</div>
-              <div class="ui-field">{{ form.start_year }}{% if form.start_year.errors %}<p class="ui-field__error">{{ form.start_year.errors.0 }}</p>{% endif %}</div>
+              <div class="ui-field">
+                <label class="ui-visually-hidden" for="{{ form.start_month.id_for_label }}">Mês inicial</label>
+                {{ form.start_month }}
+                {% if form.start_month.errors %}<p class="ui-field__error">{{ form.start_month.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="ui-field">
+                <label class="ui-visually-hidden" for="{{ form.start_year.id_for_label }}">Ano inicial</label>
+                {{ form.start_year }}
+                {% if form.start_year.errors %}<p class="ui-field__error">{{ form.start_year.errors.0 }}</p>{% endif %}
+              </div>
             </div>
-          </div>
-          <div class="reports-period">
-            <p class="ui-field__label">Término</p>
+          </fieldset>
+          <fieldset class="reports-period">
+            <legend class="ui-field__label">Término</legend>
             <div class="ui-grid-2">
-              <div class="ui-field">{{ form.end_month }}{% if form.end_month.errors %}<p class="ui-field__error">{{ form.end_month.errors.0 }}</p>{% endif %}</div>
-              <div class="ui-field">{{ form.end_year }}{% if form.end_year.errors %}<p class="ui-field__error">{{ form.end_year.errors.0 }}</p>{% endif %}</div>
+              <div class="ui-field">
+                <label class="ui-visually-hidden" for="{{ form.end_month.id_for_label }}">Mês final</label>
+                {{ form.end_month }}
+                {% if form.end_month.errors %}<p class="ui-field__error">{{ form.end_month.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="ui-field">
+                <label class="ui-visually-hidden" for="{{ form.end_year.id_for_label }}">Ano final</label>
+                {{ form.end_year }}
+                {% if form.end_year.errors %}<p class="ui-field__error">{{ form.end_year.errors.0 }}</p>{% endif %}
+              </div>
             </div>
-          </div>
+          </fieldset>
         </section>
 
+        {% with formset=form.responsible_formset %}
+        {% if formset %}
         <section class="ui-stack ui-stack--xxs">
-          <button type="button" id="toggle-responsibles" class="ui-btn ui-btn--subtle ui-btn--sm" style="justify-content: space-between;">
+          <button type="button" id="toggle-responsibles" class="ui-btn ui-btn--subtle ui-btn--sm" aria-expanded="false" aria-controls="responsibles-content" style="justify-content: space-between;">
             <span>Demais responsáveis <span class="ui-text-mute">(opcional)</span></span>
             <svg id="responsibles-icon" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 200ms ease;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
           </button>
           <div id="responsibles-content" class="hidden ui-stack ui-stack--sm" style="padding-top: 8px;">
-            {% for field in form %}
-              {% if 'responsible' in field.name or 'autority' in field.name or 'manager' in field.name %}
+            {{ formset.management_form }}
+            {% for responsible_form in formset.forms %}
+              <div class="reports-responsible">
                 <div class="ui-field">
-                  <label class="ui-field__label">{{ field.label }}</label>
-                  {{ field }}
+                  <label class="ui-field__label" for="{{ responsible_form.user.id_for_label }}">Responsável</label>
+                  {{ responsible_form.user }}
+                  {% if responsible_form.user.errors %}<p class="ui-field__error">{{ responsible_form.user.errors.0 }}</p>{% endif %}
                 </div>
-              {% endif %}
+                <div class="ui-field">
+                  <label class="ui-field__label" for="{{ responsible_form.interest.id_for_label }}">Responsabilidade</label>
+                  {{ responsible_form.interest }}
+                  {% if responsible_form.interest.errors %}<p class="ui-field__error">{{ responsible_form.interest.errors.0 }}</p>{% endif %}
+                </div>
+                {% comment %}
+                  can_delete=True on the formset; nothing is persisted here, so
+                  the DELETE flag stays hidden instead of showing a checkbox.
+                {% endcomment %}
+                <div class="hidden">{{ responsible_form.DELETE }}</div>
+              </div>
             {% endfor %}
           </div>
         </section>
+        {% endif %}
+        {% endwith %}
       </div>
 
       <div class="reports-form__footer">
@@ -84,16 +113,26 @@
     </form>
 
     {# ====================== Right: preview ====================== #}
-    <aside class="ui-card reports-preview" aria-live="polite">
+    <aside class="ui-card reports-preview">
       <header class="reports-preview__header">
         <div class="ui-stack ui-stack--xxs" style="min-width: 0;">
-          <p class="ui-caption" style="margin: 0;">Pré-visualização</p>
-          <p id="preview-filename" class="ui-body-sm-strong" style="margin: 0; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Aguardando geração…</p>
+          <p class="reports-form__group-label">Pré-visualização</p>
+          <p id="preview-filename" class="ui-body-sm-strong ui-text-truncate" style="margin: 0; max-width: 340px;">Aguardando geração</p>
         </div>
-        <a id="preview-download" href="#" download class="ui-btn ui-btn--secondary ui-btn--sm" aria-disabled="true">
-          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
-          Baixar PDF
-        </a>
+        <div class="reports-preview__actions">
+          <button type="button" id="preview-copy" class="ui-btn ui-btn--subtle ui-btn--sm" disabled title="Copiar o PDF para a área de transferência">
+            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1"/></svg>
+            <span id="preview-copy-text">Copiar</span>
+          </button>
+          <a id="preview-open" href="#" target="_blank" rel="noopener" class="ui-btn ui-btn--subtle ui-btn--sm" aria-disabled="true" tabindex="-1">
+            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4h6v6m0-6L10 14M9 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>
+            Abrir
+          </a>
+          <a id="preview-download" href="#" download class="ui-btn ui-btn--secondary ui-btn--sm" aria-disabled="true" tabindex="-1">
+            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+            Baixar
+          </a>
+        </div>
       </header>
 
       <div class="reports-preview__surface">
@@ -104,7 +143,7 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 13h6m-6 4h4m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6l6 6v11a2 2 0 0 1-2 2Z"/></svg>
           </div>
           <p class="ui-body-md-strong" style="margin: 0;">Sem pré-visualização</p>
-          <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 320px; text-align: center;">Escolha um contrato e modelo à esquerda e clique em <strong style="color: var(--color-ink); font-weight: 600;">Gerar relatório</strong>.</p>
+          <p class="ui-body-sm ui-text-muted" style="margin: 0; max-width: 320px; text-align: center;">Escolha um contrato e um modelo, depois <strong style="color: var(--color-ink); font-weight: 600;">Gerar relatório</strong>.</p>
         </div>
 
         <div id="preview-loading" class="reports-preview__state hidden">
@@ -122,35 +161,37 @@
         </div>
       </div>
 
+      {% comment %}
+        Only the status line is a live region — announcing the whole card would
+        re-read the injected PDF iframe on every state change.
+      {% endcomment %}
       <footer class="reports-preview__footer">
-        <p id="preview-meta" class="ui-caption" style="margin: 0;">Aguardando geração</p>
+        <p id="preview-meta" class="ui-caption ui-text-truncate" role="status" aria-live="polite" style="margin: 0;">Aguardando geração</p>
       </footer>
     </aside>
   </div>
 </section>
 
 <style>
-  /* Page fills the shell viewport so the preview never forces a page scroll. */
+  /* Page fills the shell viewport so the preview never forces a page scroll.
+     --shell-main-pad-y is the total vertical padding on .shell__main. */
   .reports-page {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    height: calc(100vh - 2 * var(--space-lg));
+    height: calc(100dvh - var(--shell-main-pad-y));
     min-height: 560px;
   }
-  .reports-page__header { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+  .reports-page__header { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
 
   .reports-grid {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr);
+    /* The form needs a fixed comfortable width; every remaining pixel goes to
+       the preview, which is the artifact the user is actually here for. */
+    grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
     gap: var(--space-md);
-  }
-  @media (max-width: 1080px) {
-    .reports-page { height: auto; }
-    .reports-grid { grid-template-columns: 1fr; }
-    .reports-preview { min-height: 520px; }
   }
 
   /* === Left: form ============================================ */
@@ -171,21 +212,41 @@
     display: flex; justify-content: flex-end; gap: 8px;
     padding: 12px var(--space-lg);
     border-top: 1px solid var(--color-canvas-soft);
-    background-color: var(--color-canvas-softer);
+    /* Canvas, not canvas-softer: on mobile the page background is also
+       canvas-softer, which made the footer read as detached from the card. */
+    background-color: var(--color-canvas);
     border-bottom-left-radius: var(--rounded-xl);
     border-bottom-right-radius: var(--rounded-xl);
+  }
+  /* Group heading must outrank the field labels beneath it. */
+  .reports-form__group-label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--color-ink);
   }
   .reports-period {
     background-color: var(--color-canvas-softer);
     border-radius: var(--rounded-md);
     padding: 10px 12px;
+    margin: 0;
+    border: 0;
     display: flex; flex-direction: column; gap: 6px;
   }
+  .reports-period > legend { padding: 0; margin-bottom: 2px; float: left; width: 100%; }
   .reports-period .ui-field__label { margin: 0; }
+  .reports-responsible {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 10px 12px;
+    background-color: var(--color-canvas-softer);
+    border-radius: var(--rounded-md);
+  }
 
   /* Compact form override — applies on top of the global `.ui-form` rules. */
   .ui-form--compact select:not(.ui-select),
-  .ui-form--compact input[type="text"]:not(.ui-input),
+  .ui-form--compact input[type="text"]:not(.ui-input):not(.ui-combobox__search),
   .ui-form--compact input[type="number"]:not(.ui-input),
   .ui-form--compact input[type="date"]:not(.ui-input),
   .ui-form--compact input[type="email"]:not(.ui-input) {
@@ -222,6 +283,7 @@
     padding: 12px var(--space-lg);
     border-bottom: 1px solid var(--color-canvas-soft);
   }
+  .reports-preview__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .reports-preview__surface {
     flex: 1;
     position: relative;
@@ -259,11 +321,14 @@
   @keyframes reports-preview-spin {
     to { transform: rotate(360deg); }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .reports-preview__spinner { animation-duration: 2.4s; }
+  }
   .reports-preview__footer {
     flex-shrink: 0;
     padding: 10px var(--space-lg);
     border-top: 1px solid var(--color-canvas-soft);
-    background-color: var(--color-canvas-softer);
+    background-color: var(--color-canvas);
     border-bottom-left-radius: var(--rounded-xl);
     border-bottom-right-radius: var(--rounded-xl);
   }
@@ -272,15 +337,43 @@
     pointer-events: none;
     opacity: 0.5;
   }
+
+  /* Narrow viewports: stack, and let the page scroll normally. Must come
+     AFTER the base rules above — at equal specificity, source order decides,
+     and an earlier media query loses to the later `min-height: 0`. */
+  @media (max-width: 1080px) {
+    .reports-page { height: auto; }
+    .reports-grid { grid-template-columns: minmax(0, 1fr); }
+    .reports-preview { min-height: 520px; }
+    .reports-preview__header { flex-wrap: wrap; }
+    #preview-filename { max-width: 100%; }
+  }
 </style>
 
 <script>
   (function () {
     var currentBlobUrl = null;
+    var currentBlob = null;
 
     function el(id) { return document.getElementById(id); }
     function show(elm) { if (elm) elm.classList.remove('hidden'); }
     function hide(elm) { if (elm) elm.classList.add('hidden'); }
+
+    function setLinkEnabled(link, enabled, url, filename) {
+      if (!link) return;
+      if (enabled) {
+        link.href = url;
+        if (filename && link.hasAttribute('download')) link.setAttribute('download', filename);
+        link.removeAttribute('aria-disabled');
+        link.removeAttribute('tabindex');
+      } else {
+        link.removeAttribute('href');
+        link.setAttribute('aria-disabled', 'true');
+        // Without this an href-less anchor still lands in the tab order on
+        // some browsers once it has been enabled at least once.
+        link.setAttribute('tabindex', '-1');
+      }
+    }
 
     function setState(state, opts) {
       opts = opts || {};
@@ -289,6 +382,8 @@
       var error = el('preview-error');
       var iframe = el('preview-iframe');
       var downloadBtn = el('preview-download');
+      var openBtn = el('preview-open');
+      var copyBtn = el('preview-copy');
       var filenameEl = el('preview-filename');
       var metaEl = el('preview-meta');
       var submitBtn = el('report-submit');
@@ -296,44 +391,58 @@
 
       hide(empty); hide(loading); hide(error); hide(iframe);
 
+      var ready = state === 'ready';
+      setLinkEnabled(downloadBtn, ready, opts.url, opts.filename);
+      setLinkEnabled(openBtn, ready, opts.url);
+      if (copyBtn) copyBtn.disabled = !ready;
+      if (el('preview-copy-text')) el('preview-copy-text').textContent = 'Copiar';
+
       if (state === 'empty') {
         show(empty);
-        filenameEl.textContent = 'Aguardando geração…';
+        filenameEl.textContent = 'Aguardando geração';
         metaEl.textContent = 'Aguardando geração';
-        downloadBtn.setAttribute('aria-disabled', 'true');
-        downloadBtn.removeAttribute('href');
         if (submitBtn) submitBtn.disabled = false;
         if (submitText) submitText.textContent = 'Gerar relatório';
       } else if (state === 'loading') {
         show(loading);
-        downloadBtn.setAttribute('aria-disabled', 'true');
-        downloadBtn.removeAttribute('href');
         if (submitBtn) submitBtn.disabled = true;
         if (submitText) submitText.textContent = 'Gerando…';
         metaEl.textContent = 'Gerando…';
-      } else if (state === 'ready') {
+      } else if (ready) {
         show(iframe);
-        iframe.src = opts.url;
+        // Suppress the built-in viewer chrome: the thumbnail navpane ate a
+        // third of the surface and its toolbar duplicated our own actions.
+        iframe.src = opts.url + '#toolbar=0&navpanes=0&view=FitH';
         filenameEl.textContent = opts.filename || 'relatorio.pdf';
-        downloadBtn.href = opts.url;
-        downloadBtn.setAttribute('download', opts.filename || 'relatorio.pdf');
-        downloadBtn.removeAttribute('aria-disabled');
-        metaEl.textContent = (opts.contract || '') + (opts.period ? ' · ' + opts.period : '') + (opts.modelName ? ' · ' + opts.modelName : '');
+        var meta = (opts.contract || '') + (opts.period ? ' · ' + opts.period : '') + (opts.modelName ? ' · ' + opts.modelName : '');
+        metaEl.textContent = meta;
+        // Truncated to keep the footer one line; full text on hover.
+        metaEl.title = meta;
         if (submitBtn) submitBtn.disabled = false;
         if (submitText) submitText.textContent = 'Regenerar';
       } else if (state === 'error') {
         show(error);
         var msg = el('preview-error-message');
         if (msg) msg.textContent = opts.message || 'Tente novamente em alguns instantes.';
+        // Header used to keep saying "Aguardando geração" while the body
+        // showed a failure.
+        filenameEl.textContent = 'Falha na geração';
+        metaEl.textContent = 'Falha na geração';
         if (submitBtn) submitBtn.disabled = false;
         if (submitText) submitText.textContent = 'Gerar novamente';
-        metaEl.textContent = 'Falha na geração';
       }
     }
 
     function toast(variant, message) {
       if (window.UIToast) {
-        window.UIToast.show({ variant: variant, message: message, duration: variant === 'error' ? 5000 : 3000 });
+        window.UIToast.show({
+          variant: variant,
+          message: message,
+          // Top-right: the default bottom-center stack sat on top of the
+          // pinned form footer buttons.
+          position: 'top-right',
+          duration: variant === 'error' ? 5000 : 3000
+        });
       }
     }
 
@@ -350,18 +459,40 @@
       var responsiblesContent = el('responsibles-content');
       var responsiblesIcon = el('responsibles-icon');
       var resetBtn = el('report-reset');
+      var copyBtn = el('preview-copy');
 
       if (toggleBtn) {
         toggleBtn.addEventListener('click', function () {
-          responsiblesContent.classList.toggle('hidden');
-          responsiblesIcon.style.transform = responsiblesContent.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+          var collapsed = responsiblesContent.classList.toggle('hidden');
+          toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          responsiblesIcon.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
         });
       }
 
       if (resetBtn) {
+        // Native reset restores the server-rendered defaults for the selects;
+        // the comboboxes reset themselves via their own form reset listener.
         resetBtn.addEventListener('click', function () {
-          // After native reset clears the form, snap preview back to empty
           setTimeout(function () { setState('empty'); }, 0);
+        });
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+          if (!currentBlob) return;
+          var label = el('preview-copy-text');
+          function done(ok) {
+            if (label) label.textContent = ok ? 'Copiado' : 'Copiar';
+            if (!ok) toast('error', 'Não foi possível copiar o PDF.');
+            if (ok) setTimeout(function () { if (label) label.textContent = 'Copiar'; }, 2000);
+          }
+          if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+            navigator.clipboard.write([
+              new ClipboardItem({ 'application/pdf': currentBlob })
+            ]).then(function () { done(true); }).catch(function () { done(false); });
+          } else {
+            done(false);
+          }
         });
       }
 
@@ -395,13 +526,13 @@
             if (currentBlobUrl) {
               try { URL.revokeObjectURL(currentBlobUrl); } catch (_) {}
             }
-            var blob = pdfBlobFromBase64(result.data.pdf_data);
-            currentBlobUrl = URL.createObjectURL(blob);
+            currentBlob = pdfBlobFromBase64(result.data.pdf_data);
+            currentBlobUrl = URL.createObjectURL(currentBlob);
             setState('ready', {
               url: currentBlobUrl,
               filename: result.data.filename,
               contract: result.data.contract_name,
-              modelName: result.data.report_model,
+              modelName: result.data.report_model_label || result.data.report_model,
               period: result.data.start_date && result.data.end_date
                 ? result.data.start_date + ' – ' + result.data.end_date
                 : ''
