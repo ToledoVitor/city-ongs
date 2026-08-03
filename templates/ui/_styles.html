@@ -463,7 +463,11 @@ geometric display sans, sentence-case voice).
     padding: 8px;
     border-bottom: 1px solid var(--color-canvas-soft);
   }
-  .ui-combobox__search {
+  /* Bumped to (0,1,1) for the same reason as `.ui-input`: Tailwind
+     preflight's `[type="text"], …` reset is (0,1,0) and loads later in the
+     cascade, so an equal-specificity selector loses its padding and
+     font-size to it. */
+  input.ui-combobox__search {
     width: 100%;
     min-height: 36px;
     padding: 8px 12px 8px 34px;
@@ -476,8 +480,8 @@ geometric display sans, sentence-case voice).
     line-height: 18px;
     outline: none;
   }
-  .ui-combobox__search::placeholder { color: var(--color-body); }
-  .ui-combobox__search:focus { border-color: var(--color-ink); background-color: var(--color-canvas); }
+  input.ui-combobox__search::placeholder { color: var(--color-body); }
+  input.ui-combobox__search:focus { border-color: var(--color-ink); background-color: var(--color-canvas); }
   .ui-combobox__search-icon {
     position: absolute;
     left: 18px;
@@ -935,14 +939,14 @@ geometric display sans, sentence-case voice).
   @media (max-width: 720px) { .ui-grid-2, .ui-grid-3 { grid-template-columns: 1fr; } }
 
   /* === Generic form styling — applies to any Django-rendered form field inside .ui-form === */
-  .ui-form input[type="text"]:not(.ui-input):not(.file-drop-zone__input),
+  .ui-form input[type="text"]:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search),
   .ui-form input[type="email"]:not(.ui-input),
   .ui-form input[type="number"]:not(.ui-input),
   .ui-form input[type="date"]:not(.ui-input),
   .ui-form input[type="url"]:not(.ui-input),
   .ui-form input[type="tel"]:not(.ui-input),
   .ui-form input[type="password"]:not(.ui-input),
-  .ui-form input[type="search"]:not(.ui-input),
+  .ui-form input[type="search"]:not(.ui-input):not(.ui-combobox__search),
   .ui-form select:not(.ui-select),
   .ui-form textarea:not(.ui-textarea) {
     width: 100%;
@@ -972,7 +976,7 @@ geometric display sans, sentence-case voice).
   /* The Django widgets in utils.widgets carry no utility classes, so their
      placeholder colour has to come from here. AA-compliant (5.6:1 on the
      canvas-soft fill) — see the note on input.ui-input::placeholder. */
-  .ui-form input:not(.ui-input):not(.file-drop-zone__input)::placeholder,
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search)::placeholder,
   .ui-form textarea:not(.ui-textarea)::placeholder { color: var(--color-body); }
 
   /* File input — the only Django-rendered control the rules above do not
@@ -992,10 +996,10 @@ geometric display sans, sentence-case voice).
   }
   .ui-form input[type="file"]:not(.file-drop-zone__input):hover { background-color: var(--color-surface-pressed); }
   .ui-form input[type="file"]:not(.file-drop-zone__input):focus { outline: none; border-color: var(--color-ink); border-style: solid; }
-  .ui-form input:not(.ui-input):not(.file-drop-zone__input):hover,
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search):hover,
   .ui-form select:not(.ui-select):hover,
   .ui-form textarea:not(.ui-textarea):hover { background-color: var(--color-surface-pressed); }
-  .ui-form input:not(.ui-input):not(.file-drop-zone__input):focus,
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search):focus,
   .ui-form select:not(.ui-select):focus,
   .ui-form textarea:not(.ui-textarea):focus {
     border-color: var(--color-ink);
