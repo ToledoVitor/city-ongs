@@ -1,0 +1,45 @@
+# Keeps the build context (and every pushed image layer) small. Artifact
+# Registry bills per GB stored and the deploy workflow tags a new image on
+# every run, so anything left in here is paid for indefinitely.
+
+# Version control
+.git
+.gitignore
+
+# Agent/editor state. .claude/ holds git worktrees — full repo copies.
+.claude/
+.cursor/
+.vscode/
+.github/
+
+# 31MB local-only binary; Cloud Run reaches Cloud SQL via the built-in
+# connector, not this proxy.
+cloud-sql-proxy
+
+# Local virtualenv — the image builds its own at /opt/venv
+.venv
+
+# Recreated by core.settings on import; never read back in the container
+logs/
+
+# Docs are not read by any code path. pyproject sets `package = false`,
+# so uv never needs README.md to build.
+docs/
+*.md
+*.MD
+
+# Secrets never belong in an image. Non-dev environments read config from
+# Secret Manager; local dev gets .env via the compose `env_file`, which is
+# a runtime mount and unaffected by this file.
+.env
+.env.example
+
+# Dev-only tooling
+docker-compose.yml
+.pre-commit-config.yaml
+
+# Build/OS cruft
+.DS_Store
+**/__pycache__/
+*.pyc
+*.pyo

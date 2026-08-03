@@ -46,6 +46,10 @@ make migrate
 make run
 ```
 
+## Deploy
+
+O deploy de produção e a retenção de imagens no Artifact Registry estão documentados em [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Logs
 
 Os logs são armazenados em:
