@@ -1,417 +1,335 @@
 {% extends "base.html" %}
-{% load humanize %}
 
-{% block title %}{{ contract.trailing_code }} — Portal SITTS{% endblock %}
+{% block title %}{{ contract.trailing_code }} — {{ section.label }} — Portal SITTS{% endblock %}
 
-{% block content %}
-<section class="page">
-
-  <header class="page__header">
-    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
-      <a href="{% url 'home' %}" class="ui-breadcrumb__item">
-        <svg width="14" height="14" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-        Início
-      </a>
-      <span class="ui-breadcrumb__sep">/</span>
-      <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
-      <span class="ui-breadcrumb__sep">/</span>
-      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">{{ contract.trailing_code }}</span>
-    </nav>
-
-    <div class="page__header-row">
-      <h1 class="ui-display-lg page__title">Contrato {{ contract.trailing_code }}</h1>
-    </div>
-  </header>
-
-  <div class="contract-tabs__wrap">
-    <ul
-      class="contract-tabs"
-      id="default-styled-tab"
-      data-tabs-toggle="#default-styled-tab-content"
-      data-tabs-active-classes="contract-tab--active"
-      data-tabs-inactive-classes=""
-      role="tablist"
-    >
-      <li role="presentation">
-        <button
-          id="details-tab"
-          class="contract-tab contract-tab--active"
-          data-tabs-target="#details"
-          type="button"
-          role="tab"
-          aria-controls="details"
-          aria-selected="true"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Detalhes
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="interesteds-tab"
-          class="contract-tab"
-          data-tabs-target="#interesteds"
-          type="button"
-          role="tab"
-          aria-controls="interesteds"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          Interessados
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="accounts-tab"
-          class="contract-tab"
-          data-tabs-target="#accounts"
-          type="button"
-          role="tab"
-          aria-controls="accounts"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-          </svg>
-          Contas
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="goals-tab"
-          class="contract-tab"
-          data-tabs-target="#goals"
-          type="button"
-          role="tab"
-          aria-controls="goals"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-          Metas
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="items-tab"
-          class="contract-tab"
-          data-tabs-target="#items"
-          type="button"
-          role="tab"
-          aria-controls="items"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-          </svg>
-          Itens
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="accountability-tab"
-          class="contract-tab"
-          data-tabs-target="#accountability"
-          type="button"
-          role="tab"
-          aria-controls="accountability"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-          </svg>
-          Prestação
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="execution-tab"
-          class="contract-tab"
-          data-tabs-target="#execution"
-          type="button"
-          role="tab"
-          aria-controls="execution"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          Execução
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="addendums-tab"
-          class="contract-tab"
-          data-tabs-target="#addendums"
-          type="button"
-          role="tab"
-          aria-controls="addendums"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Aditivos
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="audesp-tab"
-          class="contract-tab"
-          data-tabs-target="#audesp"
-          type="button"
-          role="tab"
-          aria-controls="audesp"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          Dados AUDESP
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="audesp-fase-v-tab"
-          class="contract-tab"
-          data-tabs-target="#audesp-fase-v"
-          type="button"
-          role="tab"
-          aria-controls="audesp-fase-v"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          AUDESP Fase V
-        </button>
-      </li>
-
-      <li role="presentation">
-        <button
-          id="audesp-fase-iv-tab"
-          class="contract-tab"
-          data-tabs-target="#audesp-fase-iv"
-          type="button"
-          role="tab"
-          aria-controls="audesp-fase-iv"
-          aria-selected="false"
-        >
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          AUDESP Fase IV
-        </button>
-      </li>
-    </ul>
-  </div>
-
-  <div id="default-styled-tab-content">
-    <div class="ui-card" id="details" role="tabpanel" aria-labelledby="details-tab">
-      {% include 'contracts/tabs/details-tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="interesteds" role="tabpanel" aria-labelledby="interesteds-tab">
-      {% include 'contracts/tabs/interesteds-tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="accounts" role="tabpanel" aria-labelledby="accounts-tab">
-      {% include 'contracts/tabs/banks-tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="goals" role="tabpanel" aria-labelledby="goals-tab">
-      {% include 'contracts/tabs/goals-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-    </div>
-
-    <div class="ui-card hidden" id="items" role="tabpanel" aria-labelledby="items-tab">
-      {% include 'contracts/tabs/items-tab.html' with contract=contract user=user csrf_token=csrf_token items_totals=items_totals value_requests=value_requests %}
-    </div>
-
-    <div class="ui-card hidden" id="accountability" role="tabpanel" aria-labelledby="accountability-tab">
-      {% include 'contracts/tabs/accountability-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-    </div>
-
-    <div class="ui-card hidden" id="execution" role="tabpanel" aria-labelledby="execution-tab">
-      {% include 'contracts/tabs/execution-tab.html' with contract=contract user=user csrf_token=csrf_token %}
-    </div>
-
-    <div class="ui-card hidden" id="addendums" role="tabpanel" aria-labelledby="addendums-tab">
-      {% include 'contracts/tabs/documents-tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="audesp" role="tabpanel" aria-labelledby="audesp-tab">
-      {% include 'contracts/tabs/audesp-tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="audesp-fase-v" role="tabpanel" aria-labelledby="audesp-fase-v-tab">
-      {% include 'contracts/partials/audesp_fase_v_tab.html' with contract=contract %}
-    </div>
-
-    <div class="ui-card hidden" id="audesp-fase-iv" role="tabpanel" aria-labelledby="audesp-fase-iv-tab">
-      {% include 'contracts/tabs/audesp-fase-iv-tab.html' with contract=contract %}
-    </div>
-  </div>
-
-  <section class="ui-card ui-card--soft contract-history">
-    <header class="contract-history__header">
-      <div class="contract-history__icon" aria-hidden="true">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </div>
-      <div class="ui-stack ui-stack--xxs">
-        <h3 class="ui-display-sm" style="margin:0;">Histórico de edições</h3>
-        <p class="ui-body-sm ui-text-muted" style="margin:0;">Últimas 10 alterações realizadas no contrato.</p>
-      </div>
-    </header>
-
-    {% if contract.recent_logs %}
-      <ul class="contract-history__list">
-        {% for log in contract.recent_logs %}
-          <li class="contract-history__item">
-            <div class="contract-history__avatar" aria-hidden="true">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-              </svg>
-            </div>
-            <div class="contract-history__body">
-              <p class="ui-body-md-strong" style="margin:0;">{{ log.action_label }}</p>
-              <p class="ui-caption" style="margin:0;">{{ log.user_email }}</p>
-            </div>
-            <time class="ui-caption contract-history__time">{{ log.created_at }}</time>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="ui-empty">
-        <div class="ui-empty__icon" aria-hidden="true">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-        <p class="ui-display-sm">Nenhum registro encontrado</p>
-        <p class="ui-body-sm ui-text-muted">Ainda não há alterações registradas para este contrato.</p>
-      </div>
-    {% endif %}
-  </section>
-</section>
-
+{% block customcss %}
+<script>
+  /* The primary nav steps back to an icon rail here, because this page carries
+     its own left contextual panel. Applied before paint to avoid a flash. */
+  document.documentElement.classList.add('contract-focus');
+</script>
 <style>
-  .contract-tabs__wrap {
-    overflow-x: auto;
-    background-color: var(--color-canvas-soft);
-    border-radius: var(--rounded-xl);
-    padding: 6px;
+  .contract-shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: var(--space-xl);
+    height: calc(100dvh - var(--shell-main-pad-y));
   }
-  .contract-tabs__wrap::-webkit-scrollbar { height: 6px; }
-  .contract-tabs__wrap::-webkit-scrollbar-thumb { background: var(--color-mute); border-radius: 3px; }
-  .contract-tabs {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    list-style: none;
+
+  /* --- Left contextual panel ------------------------------------------- */
+  .contract-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-height: 0;
+  }
+  .contract-nav__id {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .contract-nav__code {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--color-body);
+  }
+  .contract-nav__name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 22px;
+    color: var(--color-ink);
     margin: 0;
-    padding: 0;
-    flex-wrap: nowrap;
   }
-  .contract-tab {
-    display: inline-flex;
+
+  /* Long nav scrolls inside itself; the document never scrolls. The bottom
+     fade signals there is more below, so a clipped item does not read as a
+     rendering bug. */
+  .contract-nav__nav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+  }
+  /* Once scrolled to the end there is nothing more to hint at. */
+  .contract-nav__nav[data-at-end="true"] {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .contract-nav__nav::-webkit-scrollbar { width: 6px; }
+  .contract-nav__nav::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.14); border-radius: 3px; }
+
+  .contract-nav__group { display: flex; flex-direction: column; gap: 1px; margin-bottom: 14px; }
+  .contract-nav__group:last-child { margin-bottom: 0; }
+  .contract-nav__eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    /* --color-mute is calibrated for the dark sidebar (9.5:1 on ink). On this
+       light panel it lands at 1.98:1, so use the body tone instead (5.6:1). */
+    color: var(--color-body);
+    padding: 0 12px 4px;
+  }
+
+  .contract-nav__link {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 10px;
+    padding: 8px 12px;
     border-radius: var(--rounded-pill);
     font-family: var(--font-text);
     font-weight: 500;
-    font-size: 14px;
-    line-height: 16px;
+    font-size: 13px;
+    line-height: 18px;
     color: var(--color-body);
-    background: transparent;
-    border: 0;
-    cursor: pointer;
     text-decoration: none;
-    transition: background-color 140ms ease, color 140ms ease;
-    white-space: nowrap;
+    transition: background-color 120ms ease, color 120ms ease;
+    /* Leaves room past the bottom fade when scrolled into view. */
+    scroll-margin: 8px 0 28px;
   }
-  .contract-tab:hover { color: var(--color-ink); }
-  .contract-tab--active {
+  .contract-nav__link:hover { background-color: var(--color-canvas-soft); color: var(--color-ink); }
+  .contract-nav__link:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-ink); }
+  .contract-nav__link--active {
     background-color: var(--color-canvas);
     color: var(--color-ink);
     box-shadow: var(--shadow-3);
   }
+  .contract-nav__icon { flex-shrink: 0; display: inline-flex; }
+  .contract-nav__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  #default-styled-tab-content { display: flex; flex-direction: column; gap: var(--space-2xl); }
-  #default-styled-tab-content > .hidden { display: none !important; }
-
-  .contract-history { display: flex; flex-direction: column; gap: var(--space-lg); }
-  .contract-history__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .contract-history__icon {
-    width: 40px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-  }
-  .contract-history__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* --- Right body ------------------------------------------------------- */
+  .contract-body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-md);
+    min-height: 0;
+    min-width: 0;
   }
-  .contract-history__item {
+  .contract-body__header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background-color: var(--color-canvas);
-    border-radius: var(--rounded-lg);
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
   }
-  .contract-history__avatar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--rounded-full);
-    background-color: var(--color-ink);
-    color: var(--color-on-dark);
-  }
-  .contract-history__body { flex: 1; min-width: 0; }
-  .contract-history__time {
-    white-space: nowrap;
-    background-color: var(--color-canvas-soft);
-    padding: 4px 10px;
-    border-radius: var(--rounded-pill);
-  }
+  .contract-body__actions { display: flex; align-items: center; gap: 8px; }
 
-  @media (max-width: 480px) {
-    .contract-history__time { display: none; }
+  /* The section body is the only scroll container on the page, and it is also
+     the page's white surface. Without it, soft fills (#efefef) would sit on the
+     softer page background (#f3f3f3) at ~1.03:1 and read as invisible. */
+  .contract-section {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+    background-color: var(--color-canvas);
+    border-radius: var(--rounded-xl);
+    padding: var(--space-xl);
+  }
+  .contract-section::-webkit-scrollbar { width: 8px; }
+  .contract-section::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.14); border-radius: 4px; }
+
+  /* Swap feedback: the outgoing body dims rather than collapsing, so the
+     layout never jumps between sections. */
+  .contract-section[data-loading="true"] { opacity: 0.45; pointer-events: none; transition: opacity 120ms ease; }
+
+  @media (max-width: 1024px) {
+    .contract-shell { grid-template-columns: 1fr; height: auto; }
+    .contract-nav__nav, .contract-section { overflow: visible; }
+    .contract-nav { flex-direction: column; }
   }
 </style>
+{% endblock customcss %}
+
+{% block content %}
+<section class="contract-shell">
+
+  {% include 'contracts/partials/_section_nav.html' %}
+
+  <div class="contract-body">
+
+    <header class="contract-body__header">
+      <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+        <span class="ui-breadcrumb__sep">/</span>
+        <a href="{% url 'contracts:contracts-list' %}" class="ui-breadcrumb__item">Contratos</a>
+        <span class="ui-breadcrumb__sep">/</span>
+        <a href="{% url 'contracts:contracts-detail' contract.id %}" class="ui-breadcrumb__item">{{ contract.trailing_code }}</a>
+        <span class="ui-breadcrumb__sep">/</span>
+        <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page" data-section-label>{{ section.label }}</span>
+      </nav>
+
+      {% if user.has_admin_access %}
+        <div class="contract-body__actions">
+          <a href="{% url 'contracts:contracts-update' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Editar contrato</a>
+
+          <button type="button" id="contract-more-btn" data-dropdown-toggle="contract-more" class="ui-btn ui-btn--secondary ui-btn--sm" aria-label="Mais ações">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          </button>
+          <div id="contract-more" class="hidden ui-card" style="padding:6px; min-width:220px; z-index:50;">
+            <a href="{% url 'contracts:contract-workplan' contract.id %}" target="_blank" rel="noopener" class="contract-nav__link">Plano de trabalho</a>
+            <a href="{% url 'contracts:contract-timeline' contract.id %}" class="contract-nav__link">Cronograma de repasse</a>
+            <a href="{% url 'contracts:contract-status-change' contract.id %}" class="contract-nav__link">Alterar status</a>
+          </div>
+        </div>
+      {% endif %}
+    </header>
+
+    {# Swapped in place by the nav; id is the fetch target. #}
+    <div class="contract-section" id="contract-section">
+      {% include section.template %}
+    </div>
+  </div>
+</section>
+
+<script>
+  /* === Contract section nav ==============================================
+     Each section is a real URL that renders standalone. This upgrades the nav
+     to fetch just the section body and swap it in, so switching sections never
+     reloads the page. If anything fails, we fall back to normal navigation.
+     ===================================================================== */
+  (function () {
+    var nav = document.getElementById('contract-section-nav');
+    var target = document.getElementById('contract-section');
+    if (!nav || !target || !window.fetch || !window.history || !history.pushState) return;
+
+    var inFlight = null;
+    /* Bumped per request. A response that is not from the newest request is
+       stale — it must never swap content or trigger the reload fallback, or
+       fast clicking (and coalesced popstate events) could reload the page. */
+    var requestId = 0;
+
+    function setActive(slug) {
+      nav.querySelectorAll('.contract-nav__link').forEach(function (link) {
+        var active = link.dataset.section === slug;
+        link.classList.toggle('contract-nav__link--active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      var link = nav.querySelector('.contract-nav__link[data-section="' + slug + '"]');
+      if (!link) return;
+      var label = link.querySelector('.contract-nav__label');
+      if (!label) return;
+
+      var crumb = document.querySelector('[data-section-label]');
+      if (crumb) crumb.textContent = label.textContent;
+      document.title = '{{ contract.trailing_code }} — ' + label.textContent + ' — Portal SITTS';
+
+      /* A section clicked at the edge of the scroller should end up fully in
+         view, not half under the fade. */
+      link.scrollIntoView({ block: 'nearest' });
+      syncFade();
+    }
+
+    /* Re-run the initialisers that base.html only wires on DOMContentLoaded.
+       Anything using event delegation (toasts, form loader) needs nothing. */
+    function reinit(root) {
+      if (typeof window.initFlowbite === 'function') window.initFlowbite();
+      if (window.SITTS && typeof window.SITTS.initMasks === 'function') {
+        window.SITTS.initMasks(root);
+      }
+    }
+
+    function load(url, slug, push) {
+      if (inFlight) inFlight.abort();
+      var controller = new AbortController();
+      inFlight = controller;
+
+      var id = ++requestId;
+      target.dataset.loading = 'true';
+
+      fetch(url, {
+        headers: { 'X-Contract-Section': '1' },
+        credentials: 'same-origin',
+        signal: controller.signal
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.text();
+        })
+        .then(function (html) {
+          if (id !== requestId) return;
+          inFlight = null;
+          target.innerHTML = html;
+          delete target.dataset.loading;
+          if (push) history.pushState({ section: slug }, '', url);
+          setActive(slug);
+          target.scrollTop = 0;
+          reinit(target);
+        })
+        .catch(function (error) {
+          /* A superseded request failing is expected; only the newest request
+             is allowed to fall back to a full page load. */
+          if (id !== requestId || error.name === 'AbortError') return;
+          inFlight = null;
+          delete target.dataset.loading;
+          /* Give the user the page rather than a broken shell. */
+          window.location.href = url;
+        });
+    }
+
+    nav.addEventListener('click', function (event) {
+      var link = event.target.closest('.contract-nav__link');
+      if (!link || !nav.contains(link)) return;
+      /* Let the browser handle modified clicks — new tab, download, etc. */
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+      event.preventDefault();
+      var slug = link.dataset.section;
+      if (link.classList.contains('contract-nav__link--active')) return;
+      load(link.href, slug, true);
+    });
+
+    window.addEventListener('popstate', function (event) {
+      var slug = (event.state && event.state.section) || '{{ section.slug }}';
+      var link = nav.querySelector('.contract-nav__link[data-section="' + slug + '"]');
+      load(link ? link.href : window.location.href, slug, false);
+    });
+
+    /* Seed history so the first Back press returns here rather than skipping
+       straight out of the contract. */
+    history.replaceState({ section: '{{ section.slug }}' }, '', window.location.href);
+
+    /* Keep the bottom fade honest, and make sure a deep-linked section that sits
+       below the fold is visible on arrival. */
+    function syncFade() {
+      var atEnd = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 1;
+      nav.dataset.atEnd = atEnd ? 'true' : 'false';
+    }
+
+    function revealActive() {
+      var current = nav.querySelector('.contract-nav__link--active');
+      if (current) current.scrollIntoView({ block: 'nearest' });
+      syncFade();
+    }
+
+    nav.addEventListener('scroll', syncFade);
+    window.addEventListener('resize', syncFade);
+
+    /* This script runs mid-body, so scrollHeight is not final yet — measuring
+       now would report the nav as unscrollable and wrongly hide the fade. */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        requestAnimationFrame(revealActive);
+      });
+    } else {
+      requestAnimationFrame(revealActive);
+    }
+  })();
+</script>
 {% endblock %}

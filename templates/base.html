@@ -287,41 +287,47 @@
     }
 
     /* === Collapsed state (desktop only) ================================== */
+    /* Two triggers share this geometry:
+       .sidebar-collapsed — the user's own toggle, persisted in localStorage.
+       .contract-focus    — set by pages that render their own left contextual
+                            panel (contract detail), so the primary nav steps
+                            back to an icon rail without touching the user's
+                            saved preference. */
     @media (min-width: 640px) {
-      html.sidebar-collapsed .sidebar { width: var(--sidebar-width-collapsed); padding: 24px 12px; }
-      html.sidebar-collapsed .shell__main { margin-left: var(--sidebar-width-collapsed); }
-      html.sidebar-collapsed .sidebar__toggle { left: calc(var(--sidebar-width-collapsed) - 14px); }
-      html.sidebar-collapsed .sidebar__toggle svg { transform: rotate(180deg); }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar { width: var(--sidebar-width-collapsed); padding: 24px 12px; }
+      html:is(.sidebar-collapsed, .contract-focus) .shell__main { margin-left: var(--sidebar-width-collapsed); }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__toggle { left: calc(var(--sidebar-width-collapsed) - 14px); }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__toggle svg { transform: rotate(180deg); }
 
-      html.sidebar-collapsed .sidebar__header { padding: 0; display: flex; justify-content: center; }
-      html.sidebar-collapsed .ui-wordmark__name { display: none; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__header { padding: 0; display: flex; justify-content: center; }
+      html:is(.sidebar-collapsed, .contract-focus) .ui-wordmark__name { display: none; }
 
-      html.sidebar-collapsed .sidebar__eyebrow { display: none; }
-      html.sidebar-collapsed .sidebar__group { margin-top: 12px; }
-      html.sidebar-collapsed .sidebar__group--first { margin-top: 0; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__eyebrow { display: none; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__group { margin-top: 12px; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__group--first { margin-top: 0; }
 
-      html.sidebar-collapsed .nav-link {
+      html:is(.sidebar-collapsed, .contract-focus) .nav-link {
         padding: 10px 0;
         justify-content: center;
         gap: 0;
       }
-      html.sidebar-collapsed .nav-link__label { display: none; }
-      html.sidebar-collapsed .nav-link--active::before {
+      html:is(.sidebar-collapsed, .contract-focus) .nav-link__label { display: none; }
+      html:is(.sidebar-collapsed, .contract-focus) .nav-link--active::before {
         left: 0;
         top: 6px;
         bottom: 6px;
         border-radius: 0 3px 3px 0;
       }
 
-      html.sidebar-collapsed .sidebar__action {
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__action {
         padding: 10px 0;
         gap: 0;
       }
-      html.sidebar-collapsed .sidebar__action > span:not(.sidebar__count) { display: none; }
-      html.sidebar-collapsed .sidebar__action {
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__action > span:not(.sidebar__count) { display: none; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__action {
         position: relative;
       }
-      html.sidebar-collapsed .sidebar__count {
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__count {
         position: absolute;
         top: -4px;
         right: -4px;
@@ -333,7 +339,7 @@
         color: var(--color-ink);
         border: 2px solid var(--color-ink);
       }
-      html.sidebar-collapsed .sidebar__version { display: none; }
+      html:is(.sidebar-collapsed, .contract-focus) .sidebar__version { display: none; }
     }
 
     /* === Loader overlay ================================================== */
@@ -888,28 +894,29 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Phone mask
-    document.querySelectorAll('input[data-mask="(00) 00000-0000"]').forEach(function(input) {
-      IMask(input, {
-        mask: '(00) 00000-0000',
-        lazy: false,
-        placeholderChar: '_',
-        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
+  // Input masks. Exposed on window so pages that swap content in without a
+  // page load (e.g. the contract section nav) can mask the new fields too.
+  // Idempotent: an input is only ever masked once.
+  window.SITTS = window.SITTS || {};
+  window.SITTS.initMasks = function(root) {
+    var scope = root || document;
+    ['(00) 00000-0000', '000.000.000-00'].forEach(function(mask) {
+      scope.querySelectorAll('input[data-mask="' + mask + '"]').forEach(function(input) {
+        if (input.dataset.maskReady === 'true') return;
+        input.dataset.maskReady = 'true';
+        IMask(input, {
+          mask: mask,
+          lazy: false,
+          placeholderChar: '_',
+          prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
+        });
+        input.addEventListener('invalid', function(e) { e.preventDefault(); });
       });
-      input.addEventListener('invalid', function(e) { e.preventDefault(); });
     });
+  };
 
-    // CPF mask
-    document.querySelectorAll('input[data-mask="000.000.000-00"]').forEach(function(input) {
-      IMask(input, {
-        mask: '000.000.000-00',
-        lazy: false,
-        placeholderChar: '_',
-        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
-      });
-      input.addEventListener('invalid', function(e) { e.preventDefault(); });
-    });
+  document.addEventListener("DOMContentLoaded", function() {
+    window.SITTS.initMasks(document);
 
     // Notifications fetch + render with the new card chrome
     var notificationsLoaded = false;
@@ -984,19 +991,20 @@
     }, 500);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("form").forEach(function(form) {
-      form.addEventListener("submit", function() {
-        var loader = document.getElementById("loader-overlay");
-        if (loader) loader.classList.remove("hidden");
-        if (form.getAttribute("target") === "download_iframe") {
-          pollForFileDownload();
-        } else {
-          var btn = form.querySelector('button[type="submit"]');
-          if (btn) btn.disabled = true;
-        }
-      });
-    });
+  // Delegated so it also covers forms added after load — content swapped in by
+  // the contract section nav, Flowbite modals, etc.
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== "FORM") return;
+
+    var loader = document.getElementById("loader-overlay");
+    if (loader) loader.classList.remove("hidden");
+    if (form.getAttribute("target") === "download_iframe") {
+      pollForFileDownload();
+    } else {
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+    }
   });
 
   // Datepicker pt-BR localization (unchanged behavior)

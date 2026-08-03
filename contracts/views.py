@@ -8,12 +8,13 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.query import QuerySet
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
@@ -66,6 +67,12 @@ from contracts.models import (
     ContractMonthTransfer,
     SupplierContract,
 )
+from contracts.sections import (
+    DEFAULT_SECTION_SLUG,
+    Section,
+    get_section,
+    nav_groups,
+)
 from utils.choices import StatusChoices
 from utils.logging import log_database_operation, log_view_access
 from utils.mixins import (
@@ -78,6 +85,23 @@ from utils.mixins import (
 from utils.views import ComboboxSearchView
 
 logger = logging.getLogger(__name__)
+
+
+def redirect_to_section(contract_id, section_slug: str | None = None):
+    """Redirect to a contract detail section.
+
+    ``contracts-detail`` stays the canonical URL for the default section, so the
+    many existing ``redirect("contracts:contracts-detail", ...)`` call sites keep
+    working untouched.  Pass a slug to land the user on the section they were
+    actually working in.
+    """
+    if section_slug and section_slug != DEFAULT_SECTION_SLUG:
+        return redirect(
+            "contracts:contracts-detail-section",
+            pk=contract_id,
+            section=section_slug,
+        )
+    return redirect("contracts:contracts-detail", pk=contract_id)
 
 
 @method_decorator(log_view_access, name="dispatch")
@@ -253,39 +277,59 @@ class ContractUpdateView(CommitteeMemberUpdateMixin, AdminRequiredMixin, Templat
 
 @method_decorator(log_view_access, name="dispatch")
 class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
+    """Contract detail page, rendered one section at a time.
+
+    Every section has its own URL so it can be linked, bookmarked and reached
+    with the browser's back button.  Each section declares the queryset work it
+    needs in contracts.sections, so a request pays only for the section being
+    viewed instead of building all of them.
+
+    A request carrying the ``X-Contract-Section`` header gets just the section
+    body, which lets a client swap sections without a page load.  Plain requests
+    render the full page, so the nav works as ordinary links too.
+    """
+
     model = Contract
     template_name = "contracts/detail.html"
     context_object_name = "contract"
     login_url = "/auth/login"
 
+    #: Set by clients fetching a single section.
+    fragment_header = "HTTP_X_CONTRACT_SECTION"
+
+    #: Which section a modal POST should land on, so submitting from a section
+    #: does not bounce the user back to Detalhes.
+    post_sections = {
+        "items_modal": "items",
+        "goals_modal": "goals",
+    }
+
+    @cached_property
+    def section(self) -> Section:
+        section = get_section(self.kwargs.get("section"))
+        if section is None:
+            raise Http404(
+                f"Seção de contrato inexistente: {self.kwargs.get('section')!r}"
+            )
+        return section
+
+    @property
+    def is_fragment(self) -> bool:
+        return self.fragment_header in self.request.META
+
+    def get_template_names(self) -> list[str]:
+        # A fragment request wants the section body only — no base.html, no nav.
+        return [self.section.template] if self.is_fragment else [self.template_name]
+
     def get_queryset(self) -> QuerySet[Any]:
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                "contractor_company",
-                "contractor_manager",
-                "hired_company",
-                "hired_manager",
-                "organization",
-                "investing_account",
-                "checking_account",
-            )
-            .prefetch_related(
-                "accountabilities",
-                "addendums",
-                "items",
-                "interested_parts",
-                "interested_parts__user",
-                "goals",
-                "goals__steps",
-            )
-        )
+        queryset = super().get_queryset()
+        if self.section.select_related:
+            queryset = queryset.select_related(*self.section.select_related)
+        if self.section.prefetch_related:
+            queryset = queryset.prefetch_related(*self.section.prefetch_related)
+        return queryset
 
     def get_object(self, queryset=None) -> Contract:
-        # Must go through get_queryset(): building the queryset from
-        # self.model.objects.all() here meant none of the joins above were ever
-        # applied, so the page ran a full set of N+1 queries.
         return get_object_or_404(
             self.get_user_filtered_queryset(self.get_queryset()),
             id=self.kwargs["pk"],
@@ -293,113 +337,11 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-
-        executions = (
-            self.object.executions.filter(deleted_at__isnull=True)
-            .annotate(
-                count_activities=Count(
-                    "activities",
-                    filter=Q(activities__deleted_at__isnull=True),
-                    distinct=True,
-                ),
-                count_files=Count(
-                    "files",
-                    filter=Q(files__deleted_at__isnull=True),
-                    distinct=True,
-                ),
-            )
-            .prefetch_related("activities", "files")
-            .order_by("-year", "-month")[:12]
-        )
-        context["executions"] = executions
-
-        accountabilities = (
-            self.object.accountabilities.filter(deleted_at__isnull=True)
-            .prefetch_related(
-                "revenues",
-                "expenses",
-            )
-            .annotate(
-                count_revenues=Count(
-                    "revenues",
-                    filter=Q(revenues__deleted_at__isnull=True)
-                    & Q(deleted_at__isnull=True),
-                    distinct=True,
-                ),
-                count_expenses=Count(
-                    "expenses",
-                    filter=Q(expenses__deleted_at__isnull=True)
-                    & Q(deleted_at__isnull=True),
-                    distinct=True,
-                ),
-            )
-            .order_by("-year", "-month")[:12]
-        )
-        context["accountabilities"] = accountabilities
-
-        interested_parts = (
-            self.object.interested_parts.filter(deleted_at__isnull=True)
-            .select_related("user")
-            .order_by("user__first_name")[:12]
-        )
-        context["interested_parts"] = interested_parts
-
-        value_requests = ContractItemNewValueRequest.objects.filter(
-            raise_item__contract=self.object,
-            status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
-        ).select_related("raise_item")[:12]
-        context["value_requests"] = value_requests
-
-        context["items_totals"] = self.object.items.aggregate(
-            total_month=Coalesce(Sum("month_expense"), Value(Decimal("0.00"))),
-            total_year=Coalesce(Sum("anual_expense"), Value(Decimal("0.00"))),
-        )
-
-        addendums = self.object.addendums.filter(deleted_at__isnull=True).order_by(
-            "-created_at"
-        )[:12]
-        context["addendums"] = addendums
-
-        documents = self.object.documents.filter(deleted_at__isnull=True).order_by(
-            "-created_at"
-        )[:12]
-        context["documents"] = documents
-
-        # --- AUDESP Fase V - "AUDESP" tab (contracts/tabs/audesp-tab.html) ---
-        context["annual_statements"] = self.object.annual_statements.filter(
-            deleted_at__isnull=True
-        ).order_by("-fiscal_year")[:12]
-        context["budget_commitments"] = self.object.budget_commitments.filter(
-            deleted_at__isnull=True
-        ).order_by("-issue_date")[:12]
-        context["fund_transfers"] = (
-            self.object.fund_transfers.filter(deleted_at__isnull=True)
-            .select_related("budget_commitment")
-            .order_by("-transfer_date")[:12]
-        )
-        context["balance_adjustments"] = self.object.balance_adjustments.filter(
-            deleted_at__isnull=True
-        ).order_by("-date")[:12]
-        context["expense_rejections"] = self.object.expense_rejections.filter(
-            deleted_at__isnull=True
-        ).order_by("-created_at")[:12]
-        context["deductions"] = self.object.deductions.filter(
-            deleted_at__isnull=True
-        ).order_by("-date")[:12]
-        context["refunds"] = self.object.refunds.filter(
-            deleted_at__isnull=True
-        ).order_by("-date")[:12]
-        context["supplier_contracts"] = self.object.supplier_contracts.filter(
-            deleted_at__isnull=True
-        ).order_by("-signature_date")[:12]
-        context["assets"] = self.object.assets.filter(deleted_at__isnull=True).order_by(
-            "-date"
-        )[:12]
-        context["certificate_references"] = self.object.certificate_references.filter(
-            deleted_at__isnull=True
-        ).order_by("type")[:12]
-
+        context["section"] = self.section
+        context["nav_groups"] = nav_groups()
+        context.update(self.section.get_context(self.object))
         return context
+
 
     def post(self, request, pk, *args, **kwargs):
         if not self.request.POST.get("csrfmiddlewaretoken"):
@@ -480,7 +422,9 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
                     logger.warning(f"form_type: {form_type} is not a valid form")
                     return redirect("contracts:contracts-list")
 
-        return redirect("contracts:contracts-detail", pk=contract.id)
+        return redirect_to_section(
+            contract.id, self.post_sections.get(form_type)
+        )
 
 
 @login_required

@@ -854,6 +854,23 @@ geometric display sans, sentence-case voice).
     background-color: var(--color-canvas);
     color: var(--color-body);
   }
+  /* For pages that stack several subsections, each with its own empty state.
+     At full size four of these are ~760px of near-identical grey, which buries
+     the headings that tell them apart. */
+  .ui-empty--compact {
+    padding: 14px 16px;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 8px;
+  }
+  .ui-empty--compact .ui-empty__icon { display: none; }
+  .ui-empty--compact .ui-display-sm {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    color: var(--color-body);
+  }
 
   /* === Toolbar / filter row === */
   .ui-toolbar {
