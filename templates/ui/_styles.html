@@ -29,6 +29,11 @@ geometric display sans, sentence-case voice).
     --color-hairline-mid: #4b4b4b;
     --color-mute: #afafaf;
     --color-on-dark: #ffffff;
+    /* Placeholder text. Cannot go lighter than #646464: inputs swap to
+       --color-surface-pressed (#e2e2e2) on hover, and #5e5e5e is the lightest
+       declared token clearing WCAG AA 4.5:1 there (5.01:1). --color-mute
+       (#afafaf) fails on every input surface (2.19:1 / 1.91:1 / 1.69:1). */
+    --color-placeholder: var(--color-body);
 
     /* === Colors — surface === */
     --color-canvas: #ffffff;
@@ -264,7 +269,7 @@ geometric display sans, sentence-case voice).
   /* Hide IE's native arrow */
   select.ui-input::-ms-expand { display: none; }
   input.ui-input::placeholder,
-  textarea.ui-input::placeholder { color: var(--color-mute); }
+  textarea.ui-input::placeholder { color: var(--color-placeholder); }
   input.ui-input:hover,
   textarea.ui-input:hover,
   select.ui-input:hover { background-color: var(--color-surface-pressed); }
@@ -366,7 +371,7 @@ geometric display sans, sentence-case voice).
     resize: vertical;
     transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
   }
-  .ui-textarea::placeholder { color: var(--color-mute); }
+  .ui-textarea::placeholder { color: var(--color-placeholder); }
   .ui-textarea:hover { background-color: var(--color-surface-pressed); }
   .ui-textarea:focus {
     border-color: var(--color-ink);
