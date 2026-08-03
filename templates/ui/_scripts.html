@@ -7,6 +7,7 @@ Include once near the bottom of any page that uses the UI components:
 Provides:
   • Password show/hide toggle (data-ui-password-toggle="<input-id>")
   • window.UIToast.show({ message, variant, position, duration })
+  • window.UICombobox — searchable/paginated select (see ui/combobox.html)
 {% endcomment %}
 
 <script>
@@ -196,6 +197,399 @@ Provides:
     document.addEventListener('DOMContentLoaded', drainQueuedToasts);
   } else {
     drainQueuedToasts();
+  }
+})();
+</script>
+
+<script>
+/* ==================================================================== *
+ * Combobox runtime — window.UICombobox                                 *
+ *                                                                      *
+ * Searchable replacement for a native <select>. Two modes, chosen by    *
+ * the presence of data-url:                                            *
+ *                                                                      *
+ *   remote  — data-url points at a ComboboxSearchView. The first page   *
+ *             (data-page-size items, default 10) loads on first open,   *
+ *             never on page load; typing refetches with ?q=; scrolling  *
+ *             to the bottom of the list fetches ?page=N+1. The full     *
+ *             option set is NEVER serialized into the page.             *
+ *   static  — options come from the inline application/json <script>    *
+ *             payload (rendered by the `json_script` filter) and are     *
+ *             filtered client-side. No requests.                        *
+ *                                                                      *
+ * The selected value lives in a hidden <input>, so Django form handling *
+ * is unchanged; ModelChoiceField still validates against its queryset.  *
+ * ==================================================================== */
+(function () {
+  var SEARCH_DEBOUNCE_MS = 250;
+  var registry = new WeakMap();
+
+  /* Case- and accent-insensitive fold, so "saude" matches "Saúde" and
+     "convenio" matches "convênio". Mirrors the server side, which uses the
+     Postgres `unaccent` lookup — static mode must behave the same as remote. */
+  function fold(value) {
+    var text = String(value == null ? '' : value).toLowerCase();
+    if (!text.normalize) return text;
+    // \u0300-\u036f is the combining diacritical marks block.
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function parseJSONScript(root, selector) {
+    var node = root.querySelector(selector);
+    if (!node) return null;
+    try {
+      return JSON.parse(node.textContent || 'null');
+    } catch (e) {
+      if (window.console) console.warn('[UICombobox] invalid options payload', e);
+      return null;
+    }
+  }
+
+  function create(root) {
+    if (registry.has(root)) return registry.get(root);
+
+    var trigger = root.querySelector('[data-ui-combobox-trigger]');
+    var valueEl = root.querySelector('[data-ui-combobox-value]');
+    var hidden = root.querySelector('[data-ui-combobox-input]');
+    var panel = root.querySelector('[data-ui-combobox-panel]');
+    var search = root.querySelector('[data-ui-combobox-search]');
+    var list = root.querySelector('[data-ui-combobox-list]');
+    var status = root.querySelector('[data-ui-combobox-status]');
+    if (!trigger || !valueEl || !hidden || !panel || !list) return null;
+
+    var url = root.getAttribute('data-url') || '';
+    var pageSize = parseInt(root.getAttribute('data-page-size') || '10', 10) || 10;
+    var placeholder = root.getAttribute('data-placeholder') || 'Selecione';
+    var emptyText = root.getAttribute('data-empty-text') || 'Nenhum resultado';
+    var isStatic = !url;
+    var staticItems = isStatic
+      ? (parseJSONScript(root, 'script[type="application/json"]') || [])
+      : null;
+
+    var initialValue = hidden.value || '';
+    var initialLabel = valueEl.getAttribute('data-selected-text') || '';
+
+    var items = [];
+    var optionEls = [];
+    var activeIndex = -1;
+    var page = 1;
+    var hasMore = false;
+    var loading = false;
+    var query = '';
+    var open = false;
+    var controller = null;
+    var debounceId = null;
+
+    /* --- status line ------------------------------------------------- */
+    function setStatus(text, variant) {
+      if (!status) return;
+      status.textContent = text || '';
+      status.hidden = !text;
+      status.classList.toggle('ui-combobox__status--error', variant === 'error');
+    }
+
+    function setLoadingRow(on) {
+      if (!status) return;
+      if (on) {
+        status.hidden = false;
+        status.classList.remove('ui-combobox__status--error');
+        status.innerHTML = '<span class="ui-combobox__spinner" aria-hidden="true"></span><span>Carregando…</span>';
+      } else if (!status.textContent.trim() || status.querySelector('.ui-combobox__spinner')) {
+        status.hidden = true;
+        status.textContent = '';
+      }
+    }
+
+    /* --- rendering --------------------------------------------------- */
+    function renderList() {
+      list.innerHTML = '';
+      optionEls = [];
+      var lastGroup = null;
+
+      items.forEach(function (item, index) {
+        if (item.group && item.group !== lastGroup) {
+          lastGroup = item.group;
+          var groupEl = document.createElement('li');
+          groupEl.className = 'ui-combobox__group';
+          groupEl.setAttribute('role', 'presentation');
+          groupEl.textContent = item.group;
+          list.appendChild(groupEl);
+        }
+
+        var li = document.createElement('li');
+        li.className = 'ui-combobox__option';
+        li.id = root.id + '-opt-' + index;
+        li.setAttribute('role', 'option');
+        li.setAttribute('data-value', String(item.id));
+        li.setAttribute('aria-selected', String(item.id) === hidden.value ? 'true' : 'false');
+
+        var text = document.createElement('span');
+        text.className = 'ui-combobox__option-text';
+        text.textContent = item.text;
+        li.appendChild(text);
+
+        if (item.subtext) {
+          var sub = document.createElement('span');
+          sub.className = 'ui-combobox__option-sub';
+          sub.textContent = item.subtext;
+          li.appendChild(sub);
+        }
+
+        li.addEventListener('mousedown', function (ev) {
+          // mousedown (not click) so the panel closes before the search
+          // input's blur handler can race the selection.
+          ev.preventDefault();
+          selectIndex(index);
+        });
+        list.appendChild(li);
+        optionEls.push(li);
+      });
+
+      if (!items.length && !loading) setStatus(emptyText);
+      else if (!loading) setStatus('');
+
+      setActiveIndex(items.length ? 0 : -1);
+      // A page that does not fill the list leaves nothing to scroll, so keep
+      // pulling pages until the list overflows or the server runs dry.
+      // setTimeout, not requestAnimationFrame: rAF is suspended while the
+      // document is hidden, which would stall the chain in a background tab.
+      if (hasMore) window.setTimeout(maybeLoadMore, 0);
+    }
+
+    function maybeLoadMore() {
+      if (!hasMore || loading || !open) return;
+      var remaining = list.scrollHeight - list.scrollTop - list.clientHeight;
+      // A short list has remaining === 0 and can never scroll — load anyway.
+      if (remaining < 80) loadPage(page + 1);
+    }
+
+    function setActiveIndex(index) {
+      activeIndex = index;
+      optionEls.forEach(function (el, i) {
+        el.classList.toggle('ui-combobox__option--active', i === index);
+      });
+      if (search) {
+        search.setAttribute(
+          'aria-activedescendant',
+          index >= 0 && optionEls[index] ? optionEls[index].id : ''
+        );
+      }
+      if (index >= 0 && optionEls[index]) {
+        optionEls[index].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    /* --- data ------------------------------------------------------- */
+    function matchesQuery(item, q) {
+      if (!q) return true;
+      var needle = fold(q);
+      return fold(item.text).indexOf(needle) !== -1
+        || fold(item.subtext).indexOf(needle) !== -1
+        || fold(item.group).indexOf(needle) !== -1;
+    }
+
+    function loadStatic() {
+      items = staticItems.filter(function (item) { return matchesQuery(item, query); });
+      hasMore = false;
+      renderList();
+    }
+
+    function loadPage(targetPage) {
+      if (isStatic) return loadStatic();
+      if (loading) return;
+      loading = true;
+      if (targetPage === 1) setStatus('');
+      setLoadingRow(true);
+
+      if (controller) controller.abort();
+      controller = ('AbortController' in window) ? new AbortController() : null;
+
+      var qs = '?q=' + encodeURIComponent(query)
+        + '&page=' + targetPage
+        + '&page_size=' + pageSize;
+
+      fetch(url + qs, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        signal: controller ? controller.signal : undefined
+      }).then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      }).then(function (data) {
+        loading = false;
+        setLoadingRow(false);
+        page = data.page || targetPage;
+        hasMore = !!data.has_more;
+        var results = Array.isArray(data.results) ? data.results : [];
+        items = targetPage === 1 ? results : items.concat(results);
+        renderList();
+      }).catch(function (err) {
+        if (err && err.name === 'AbortError') return;
+        loading = false;
+        setLoadingRow(false);
+        setStatus('Não foi possível carregar. Tente novamente.', 'error');
+      });
+    }
+
+    function scheduleSearch() {
+      if (debounceId) window.clearTimeout(debounceId);
+      debounceId = window.setTimeout(function () {
+        debounceId = null;
+        page = 1;
+        if (isStatic) loadStatic();
+        else loadPage(1);
+      }, isStatic ? 0 : SEARCH_DEBOUNCE_MS);
+    }
+
+    /* --- selection --------------------------------------------------- */
+    function applySelection(value, label) {
+      hidden.value = value == null ? '' : String(value);
+      if (label) {
+        valueEl.textContent = label;
+        valueEl.classList.remove('ui-combobox__value--placeholder');
+      } else {
+        valueEl.textContent = placeholder;
+        valueEl.classList.add('ui-combobox__value--placeholder');
+      }
+      valueEl.setAttribute('data-selected-text', label || '');
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function selectIndex(index) {
+      var item = items[index];
+      if (!item) return;
+      applySelection(item.id, item.text);
+      closePanel(true);
+    }
+
+    /* --- open/close -------------------------------------------------- */
+    function positionPanel() {
+      root.classList.remove('ui-combobox--drop-up');
+      var rect = trigger.getBoundingClientRect();
+      var panelHeight = panel.offsetHeight || 280;
+      if (rect.bottom + panelHeight + 8 > window.innerHeight && rect.top > panelHeight) {
+        root.classList.add('ui-combobox--drop-up');
+      }
+    }
+
+    function openPanel() {
+      if (open) return;
+      open = true;
+      root.classList.add('ui-combobox--open');
+      trigger.setAttribute('aria-expanded', 'true');
+      positionPanel();
+      if (search) { search.value = query; search.focus(); }
+      if (isStatic) loadStatic();
+      else if (!items.length) loadPage(1);
+      else renderList();
+    }
+
+    function closePanel(returnFocus) {
+      if (!open) return;
+      open = false;
+      root.classList.remove('ui-combobox--open', 'ui-combobox--drop-up');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (returnFocus) trigger.focus();
+    }
+
+    /* --- events ------------------------------------------------------ */
+    list.addEventListener('scroll', maybeLoadMore);
+
+    trigger.addEventListener('click', function () {
+      if (open) closePanel(true);
+      else openPanel();
+    });
+
+    trigger.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowDown' || ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        openPanel();
+      }
+    });
+
+    if (search) {
+      search.addEventListener('input', function () {
+        query = search.value.trim();
+        scheduleSearch();
+      });
+
+      search.addEventListener('keydown', function (ev) {
+        switch (ev.key) {
+          case 'ArrowDown':
+            ev.preventDefault();
+            if (optionEls.length) setActiveIndex(Math.min(activeIndex + 1, optionEls.length - 1));
+            break;
+          case 'ArrowUp':
+            ev.preventDefault();
+            if (optionEls.length) setActiveIndex(Math.max(activeIndex - 1, 0));
+            break;
+          case 'Home':
+            if (optionEls.length) { ev.preventDefault(); setActiveIndex(0); }
+            break;
+          case 'End':
+            if (optionEls.length) { ev.preventDefault(); setActiveIndex(optionEls.length - 1); }
+            break;
+          case 'Enter':
+            // Always swallow Enter — otherwise it submits the owning form.
+            ev.preventDefault();
+            if (activeIndex >= 0) selectIndex(activeIndex);
+            break;
+          case 'Escape':
+            ev.preventDefault();
+            closePanel(true);
+            break;
+          case 'Tab':
+            closePanel(false);
+            break;
+        }
+      });
+    }
+
+    document.addEventListener('click', function (ev) {
+      if (open && !root.contains(ev.target)) closePanel(false);
+    });
+
+    var owningForm = root.closest('form');
+    if (owningForm) {
+      owningForm.addEventListener('reset', function () {
+        // Native reset does not touch a hidden input we drive by hand.
+        window.setTimeout(function () {
+          query = '';
+          page = 1;
+          items = [];
+          applySelection(initialValue, initialLabel);
+          closePanel(false);
+        }, 0);
+      });
+    }
+
+    var api = {
+      root: root,
+      open: openPanel,
+      close: function () { closePanel(false); },
+      clear: function () { applySelection('', ''); },
+      getValue: function () { return hidden.value; },
+      setValue: applySelection,
+      refresh: function () { items = []; page = 1; if (open) loadPage(1); }
+    };
+    registry.set(root, api);
+    return api;
+  }
+
+  function initAll(scope) {
+    (scope || document).querySelectorAll('[data-ui-combobox]').forEach(create);
+  }
+
+  window.UICombobox = {
+    init: initAll,
+    create: create,
+    get: function (root) { return registry.get(root) || null; }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { initAll(); });
+  } else {
+    initAll();
   }
 })();
 </script>

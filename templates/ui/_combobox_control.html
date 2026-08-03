@@ -1,0 +1,82 @@
+{% comment %}
+ui/_combobox_control.html — the combobox control itself, without the field
+wrapper (no label, hint or error). Included by both `ui/combobox.html` (the
+include-API component) and `ui/combobox_widget.html` (the Django widget), so
+the two share a single implementation.
+
+Expects the caller to have resolved: wrapper_id, name, ph, url, options, value,
+selected_text, search_placeholder, empty_text, page_size, size, surface,
+disabled, error.
+{% endcomment %}
+<div
+  class="ui-combobox{% if size == 'sm' %} ui-combobox--sm{% endif %}{% if surface == 'softer' %} ui-combobox--on-soft{% endif %}"
+  id="{{ wrapper_id }}"
+  data-ui-combobox
+  {% if url %}data-url="{{ url }}"{% endif %}
+  data-page-size="{{ page_size|default:10 }}"
+  data-placeholder="{{ ph }}"
+  data-empty-text="{{ empty_text|default:'Nenhum resultado' }}"
+>
+  <input
+    type="hidden"
+    name="{{ name }}"
+    id="{{ wrapper_id }}-input"
+    value="{{ value|default_if_none:'' }}"
+    data-ui-combobox-input
+  />
+
+  <button
+    type="button"
+    class="ui-combobox__trigger"
+    id="{{ wrapper_id }}-trigger"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-controls="{{ wrapper_id }}-panel"
+    {% if error %}aria-invalid="true" aria-describedby="{{ wrapper_id }}-error"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    data-ui-combobox-trigger
+  >
+    <span
+      class="ui-combobox__value{% if not selected_text %} ui-combobox__value--placeholder{% endif %}"
+      data-ui-combobox-value
+      data-selected-text="{{ selected_text|default_if_none:'' }}"
+    >{% if selected_text %}{{ selected_text }}{% else %}{{ ph }}{% endif %}</span>
+  </button>
+
+  <div class="ui-combobox__panel" id="{{ wrapper_id }}-panel" data-ui-combobox-panel>
+    <div class="ui-combobox__search-wrap">
+      <span class="ui-combobox__search-icon" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </span>
+      <input
+        type="text"
+        class="ui-combobox__search"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="{{ wrapper_id }}-list"
+        aria-autocomplete="list"
+        aria-activedescendant=""
+        aria-label="{{ search_placeholder|default:'Buscar' }}"
+        placeholder="{{ search_placeholder|default:'Buscar…' }}"
+        autocomplete="off"
+        data-ui-combobox-search
+      />
+    </div>
+
+    <ul
+      class="ui-combobox__list"
+      id="{{ wrapper_id }}-list"
+      role="listbox"
+      aria-label="{{ ph }}"
+      data-ui-combobox-list
+    ></ul>
+
+    <p class="ui-combobox__status" role="status" hidden data-ui-combobox-status></p>
+  </div>
+
+  {% comment %}
+    Static mode payload. `json_script` is the built-in filter — it escapes the
+    closing script tag, so options cannot break out of the element.
+  {% endcomment %}
+  {% if not url %}{{ options|json_script }}{% endif %}
+</div>

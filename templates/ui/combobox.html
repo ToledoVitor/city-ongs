@@ -1,0 +1,59 @@
+{% comment %}
+ui/combobox.html — searchable select. Drop-in replacement for a native
+<select> when the option list is long enough that shipping every <option> in
+the page is wasteful, or when users need to type to find a value.
+
+Two modes:
+
+  remote — pass `url` (a ComboboxSearchView endpoint). Nothing is fetched on
+           page load; the first `page_size` options load when the panel is
+           first opened, typing refetches, scrolling the list loads the next
+           page. Page weight stays constant however large the queryset grows.
+
+  static — pass `options` (an iterable of dicts). Filtered client-side, no
+           requests. Use for fixed choice lists that need search or groups.
+
+Usage — remote:
+    {% include 'ui/combobox.html' with name='contract' label='Contrato' url=contract_options_url placeholder='Selecione um contrato' size='sm' %}
+
+Usage — static, with groups:
+    {% include 'ui/combobox.html' with name='report_model' label='Modelo' options=model_options size='sm' %}
+
+For a Django form field, use utils.widgets.ComboboxSelectWidget instead — it
+renders the same control through ui/combobox_widget.html.
+
+Props (all optional except `name`):
+    name            (str)   form field name.                            REQUIRED
+    id              (str)   wrapper id. Defaults to `id_<name>`.
+    label           (str)   visible label. Omit to render no label.
+    url             (str)   remote endpoint. Presence selects remote mode.
+    options         (iter)  static option dicts: {id, text, subtext, group}.
+    value           (str)   currently selected value.
+    selected_text   (str)   label for `value` — rendered server-side so an
+                            edit form shows the current selection with no fetch.
+    placeholder     (str)   trigger text when nothing is selected.
+    search_placeholder (str) placeholder inside the search box.
+    empty_text      (str)   message when a search returns nothing.
+    page_size       (int)   options per request in remote mode. Default 10.
+    required        (bool)  marks the label with an asterisk.
+    disabled        (bool)  disables the trigger.
+    size            (str)   'sm' for the 38px dense control. Default 52px.
+    surface         (str)   'softer' to sit on a canvas-soft background.
+    error           (str)   error message; also sets aria-invalid on the trigger.
+    hint            (str)   helper text under the control.
+{% endcomment %}
+
+{% with auto_id="id_"|add:name ph=placeholder|default:"Selecione" %}
+{% with wrapper_id=id|default:auto_id %}
+<div class="ui-field">
+  {% if label %}
+    <label class="ui-field__label" for="{{ wrapper_id }}-trigger">{{ label }}{% if required %}<span aria-hidden="true" style="color: var(--color-ink); margin-left:2px;">*</span>{% endif %}</label>
+  {% endif %}
+
+  {% include 'ui/_combobox_control.html' %}
+
+  {% if hint and not error %}<p class="ui-field__hint">{{ hint }}</p>{% endif %}
+  {% if error %}<p class="ui-field__error" id="{{ wrapper_id }}-error">{{ error }}</p>{% endif %}
+</div>
+{% endwith %}
+{% endwith %}

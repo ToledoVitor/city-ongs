@@ -1,0 +1,8 @@
+{% comment %}
+ui/combobox_widget.html — Django widget template for ComboboxSelectWidget.
+
+Renders the bare control; the label, hint and error come from the surrounding
+form template, exactly as they do for a native <select>. Point the label at
+`{{ field.id_for_label }}` — the widget resolves that to the trigger button.
+{% endcomment %}
+{% include 'ui/_combobox_control.html' with wrapper_id=widget.attrs.id name=widget.name ph=widget.combobox.placeholder url=widget.combobox.url options=widget.combobox.options value=widget.combobox.value selected_text=widget.combobox.selected_text search_placeholder=widget.combobox.search_placeholder empty_text=widget.combobox.empty_text page_size=widget.combobox.page_size size=widget.combobox.size surface=widget.combobox.surface disabled=widget.attrs.disabled error=widget.combobox.error %}
