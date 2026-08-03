@@ -268,28 +268,28 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
                 "hired_company",
                 "hired_manager",
                 "organization",
-                "inversting_account",
+                "investing_account",
                 "checking_account",
             )
             .prefetch_related(
                 "accountabilities",
                 "addendums",
                 "items",
-                "items__items_reviews",
-                "items__items_reviews__reviewer",
                 "interested_parts",
                 "interested_parts__user",
                 "goals",
-                "goals__goals_reviews",
-                "goals__goals_reviews__reviewer",
                 "goals__steps",
             )
         )
 
-    def get_object(self, queryset=None):
-        base_queryset = self.model.objects.all()
-        filtered_queryset = self.get_user_filtered_queryset(base_queryset)
-        return filtered_queryset.get(id=self.kwargs["pk"])
+    def get_object(self, queryset=None) -> Contract:
+        # Must go through get_queryset(): building the queryset from
+        # self.model.objects.all() here meant none of the joins above were ever
+        # applied, so the page ran a full set of N+1 queries.
+        return get_object_or_404(
+            self.get_user_filtered_queryset(self.get_queryset()),
+            id=self.kwargs["pk"],
+        )
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
