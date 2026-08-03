@@ -87,6 +87,27 @@ geometric display sans, sentence-case voice).
     text-rendering: optimizeLegibility;
   }
 
+  /* === Skip link === */
+  .ui-skip-link {
+    position: fixed;
+    /* Parked off-screen via `top` rather than `transform`: nothing else can
+       compose with it, and it survives any ancestor stacking context. */
+    top: -120px;
+    left: 8px;
+    z-index: 10000;
+    padding: 10px 18px;
+    border-radius: var(--rounded-pill);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    text-decoration: none;
+    transition: top 140ms ease;
+  }
+  .ui-skip-link:focus { top: 8px; outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25); }
+
   /* === Typography utility classes === */
   .ui-display-xxl { font-family: var(--font-display); font-weight: 700; font-size: 52px; line-height: 64px; letter-spacing: 0; color: var(--color-ink); margin: 0; }
   .ui-display-xl  { font-family: var(--font-display); font-weight: 700; font-size: 36px; line-height: 44px; color: var(--color-ink); margin: 0; }
@@ -263,8 +284,11 @@ geometric display sans, sentence-case voice).
   }
   /* Hide IE's native arrow */
   select.ui-input::-ms-expand { display: none; }
+  /* --color-body, not --color-mute: #afafaf placeholders land at 1.9:1 on the
+     canvas-soft fill, well under the 4.5:1 AA floor. Placeholder text is in
+     scope for WCAG 1.4.3. */
   input.ui-input::placeholder,
-  textarea.ui-input::placeholder { color: var(--color-mute); }
+  textarea.ui-input::placeholder { color: var(--color-body); }
   input.ui-input:hover,
   textarea.ui-input:hover,
   select.ui-input:hover { background-color: var(--color-surface-pressed); }
@@ -350,6 +374,190 @@ geometric display sans, sentence-case voice).
     box-shadow: 0 0 0 1px var(--color-toast-error) inset;
   }
 
+  /* === Combobox ==============================================================
+     Searchable, paginated replacement for a native <select>. Geometry mirrors
+     .ui-select so the two can sit side by side in the same form. See
+     ui/combobox.html for the include API and window.UICombobox for behaviour. */
+  .ui-combobox { position: relative; width: 100%; }
+
+  .ui-combobox__trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 44px 14px 16px;
+    min-height: 52px;
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 20px;
+    text-align: left;
+    border: 1px solid transparent;
+    outline: none;
+    cursor: pointer;
+    background-image:
+      url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 16 16'%3E%3Cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    transition: background-color 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  }
+  .ui-combobox__trigger:hover { background-color: var(--color-surface-pressed); }
+  .ui-combobox__trigger:focus-visible,
+  .ui-combobox__trigger[aria-expanded="true"] {
+    border-color: var(--color-ink);
+    background-color: var(--color-canvas);
+    box-shadow: 0 0 0 1px var(--color-ink) inset;
+  }
+  .ui-combobox__trigger[aria-invalid="true"] {
+    border-color: var(--color-toast-error);
+    box-shadow: 0 0 0 1px var(--color-toast-error) inset;
+  }
+  .ui-combobox__trigger:disabled { opacity: 0.6; cursor: not-allowed; }
+  .ui-combobox__trigger:disabled:hover { background-color: var(--color-canvas-soft); }
+
+  /* Dense variant — matches the 36–40px control height used in app forms. */
+  .ui-combobox--sm .ui-combobox__trigger {
+    min-height: 38px;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+    line-height: 18px;
+    background-position: right 10px center;
+    background-size: 14px;
+  }
+  .ui-combobox--on-soft .ui-combobox__trigger { background-color: var(--color-canvas-softer); }
+
+  .ui-combobox__value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui-combobox__value--placeholder { color: var(--color-body); }
+
+  /* --- Panel --- */
+  .ui-combobox__panel {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+  }
+  .ui-combobox--open .ui-combobox__panel { display: flex; }
+  /* Flipped above the trigger when there is no room below. */
+  .ui-combobox--drop-up .ui-combobox__panel { top: auto; bottom: calc(100% + 4px); }
+
+  .ui-combobox__search-wrap {
+    flex-shrink: 0;
+    position: relative;
+    padding: 8px;
+    border-bottom: 1px solid var(--color-canvas-soft);
+  }
+  /* Bumped to (0,1,1) for the same reason as `.ui-input`: Tailwind
+     preflight's `[type="text"], …` reset is (0,1,0) and loads later in the
+     cascade, so an equal-specificity selector loses its padding and
+     font-size to it. */
+  input.ui-combobox__search {
+    width: 100%;
+    min-height: 36px;
+    padding: 8px 12px 8px 34px;
+    border-radius: var(--rounded-md);
+    border: 1px solid transparent;
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-size: 14px;
+    line-height: 18px;
+    outline: none;
+  }
+  input.ui-combobox__search::placeholder { color: var(--color-body); }
+  input.ui-combobox__search:focus { border-color: var(--color-ink); background-color: var(--color-canvas); }
+  .ui-combobox__search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-body);
+    pointer-events: none;
+    display: inline-flex;
+  }
+
+  .ui-combobox__list {
+    flex: 1;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .ui-combobox__group {
+    padding: 8px 10px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--color-body);
+  }
+  .ui-combobox__option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    min-height: 36px;
+    border-radius: var(--rounded-md);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 18px;
+    color: var(--color-ink);
+  }
+  .ui-combobox__option:hover,
+  .ui-combobox__option--active { background-color: var(--color-canvas-soft); }
+  .ui-combobox__option[aria-selected="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .ui-combobox__option-sub { font-size: 12px; line-height: 16px; color: var(--color-body); }
+  .ui-combobox__option[aria-selected="true"] .ui-combobox__option-sub { color: rgba(255, 255, 255, 0.72); }
+
+  .ui-combobox__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 10px;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--color-body);
+    text-align: center;
+  }
+  .ui-combobox__status--error { color: var(--color-toast-error); }
+
+  .ui-combobox__spinner {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    border: 2px solid var(--color-canvas-soft);
+    border-top-color: var(--color-ink);
+    border-radius: 50%;
+    animation: ui-combobox-spin 700ms linear infinite;
+  }
+  @keyframes ui-combobox-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-combobox__spinner { animation-duration: 2s; }
+    .ui-combobox__trigger { transition: none; }
+  }
+
   /* === Textarea === */
   .ui-textarea {
     width: 100%;
@@ -366,7 +574,7 @@ geometric display sans, sentence-case voice).
     resize: vertical;
     transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
   }
-  .ui-textarea::placeholder { color: var(--color-mute); }
+  .ui-textarea::placeholder { color: var(--color-body); }
   .ui-textarea:hover { background-color: var(--color-surface-pressed); }
   .ui-textarea:focus {
     border-color: var(--color-ink);
@@ -439,7 +647,24 @@ geometric display sans, sentence-case voice).
   .ui-row--end        { justify-content: flex-end; }
 
   .ui-text-muted   { color: var(--color-body); }
-  .ui-text-mute    { color: var(--color-mute); }
+  /* `--color-mute` (#afafaf) is a *decorative* token — as text it lands at
+     1.9:1 on canvas-soft, well under the 4.5:1 AA floor. Both text utilities
+     therefore resolve to --color-body; keep --color-mute for separators,
+     dividers and icon chrome only. */
+  .ui-text-mute    { color: var(--color-body); }
+  /* Available to assistive tech, invisible on screen. For labelling a control
+     whose purpose is already obvious from an adjacent visible heading. */
+  .ui-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
   .ui-text-center  { text-align: center; }
   .ui-text-right   { text-align: right; }
   .ui-text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -714,14 +939,14 @@ geometric display sans, sentence-case voice).
   @media (max-width: 720px) { .ui-grid-2, .ui-grid-3 { grid-template-columns: 1fr; } }
 
   /* === Generic form styling — applies to any Django-rendered form field inside .ui-form === */
-  .ui-form input[type="text"]:not(.ui-input):not(.file-drop-zone__input),
+  .ui-form input[type="text"]:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search),
   .ui-form input[type="email"]:not(.ui-input),
   .ui-form input[type="number"]:not(.ui-input),
   .ui-form input[type="date"]:not(.ui-input),
   .ui-form input[type="url"]:not(.ui-input),
   .ui-form input[type="tel"]:not(.ui-input),
   .ui-form input[type="password"]:not(.ui-input),
-  .ui-form input[type="search"]:not(.ui-input),
+  .ui-form input[type="search"]:not(.ui-input):not(.ui-combobox__search),
   .ui-form select:not(.ui-select),
   .ui-form textarea:not(.ui-textarea) {
     width: 100%;
@@ -748,10 +973,33 @@ geometric display sans, sentence-case voice).
     cursor: pointer;
   }
   .ui-form textarea:not(.ui-textarea) { min-height: 120px; resize: vertical; padding: 16px; }
-  .ui-form input:not(.ui-input):not(.file-drop-zone__input):hover,
+  /* The Django widgets in utils.widgets carry no utility classes, so their
+     placeholder colour has to come from here. AA-compliant (5.6:1 on the
+     canvas-soft fill) — see the note on input.ui-input::placeholder. */
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search)::placeholder,
+  .ui-form textarea:not(.ui-textarea)::placeholder { color: var(--color-body); }
+
+  /* File input — the only Django-rendered control the rules above do not
+     cover, since input[type=file] needs its own affordance. */
+  .ui-form input[type="file"]:not(.file-drop-zone__input) {
+    width: 100%;
+    padding: 10px 12px;
+    min-height: 52px;
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-size: 14px;
+    line-height: 20px;
+    border: 1px dashed var(--color-hairline-mid);
+    cursor: pointer;
+  }
+  .ui-form input[type="file"]:not(.file-drop-zone__input):hover { background-color: var(--color-surface-pressed); }
+  .ui-form input[type="file"]:not(.file-drop-zone__input):focus { outline: none; border-color: var(--color-ink); border-style: solid; }
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search):hover,
   .ui-form select:not(.ui-select):hover,
   .ui-form textarea:not(.ui-textarea):hover { background-color: var(--color-surface-pressed); }
-  .ui-form input:not(.ui-input):not(.file-drop-zone__input):focus,
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input):not(.ui-combobox__search):focus,
   .ui-form select:not(.ui-select):focus,
   .ui-form textarea:not(.ui-textarea):focus {
     border-color: var(--color-ink);

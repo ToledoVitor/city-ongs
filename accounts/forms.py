@@ -200,14 +200,13 @@ class OrganizationDocumentForm(forms.ModelForm):
             "description": forms.Textarea(
                 attrs={
                     "class": TEXTAREA_CLASS,
-                    # 3 rows, not 4: `ui-input`'s 16px/24px type is taller per
-                    # row than the old 14px/20px, and 4 rows tipped this page
-                    # into scrolling at 1366x768.
-                    "rows": "3",
+                    "rows": "4",
                     "placeholder": "Digite a descrição do documento",
                 }
             ),
-            "file": forms.FileInput(attrs={"class": INPUT_CLASS}),
+            # No class: `.ui-form input[type="file"]` gives file inputs their own
+            # 52px dashed affordance, which suits them better than `ui-input`.
+            "file": forms.FileInput(),
             # No class: `.ui-form input[type="checkbox"]` sizes it and sets
             # `accent-color`, and a bare checkbox renders natively elsewhere.
             "is_public": forms.CheckboxInput(),

@@ -41,7 +41,6 @@ from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
 from utils.widgets import (
-    INPUT_CLASS,
     BaseCharFieldFormWidget,
     BaseDateFormWidget,
     BaseFileFormWidget,
@@ -298,9 +297,8 @@ class FavoredForm(forms.ModelForm):
 
 
 class ImportXLSXAccountabilityForm(forms.Form):
-    xlsx_file = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={"class": INPUT_CLASS})
-    )
+    # No class on the widget: `.ui-form input[type="file"]` styles it.
+    xlsx_file = forms.FileField()
 
     def clean_xlsx(self):
         xlsx = self.cleaned_data.get("xlsx")

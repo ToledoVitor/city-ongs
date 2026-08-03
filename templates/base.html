@@ -33,6 +33,10 @@
     :root {
       --sidebar-width-expanded: 256px;
       --sidebar-width-collapsed: 72px;
+      /* Total vertical padding on .shell__main. Full-height pages size
+         themselves with calc(100dvh - var(--shell-main-pad-y)); keep this in
+         sync with the .shell__main padding rules below. */
+      --shell-main-pad-y: 104px;
     }
 
     /* === Shell ============================================================ */
@@ -51,6 +55,7 @@
       transition: margin-left 220ms ease;
     }
     @media (min-width: 640px) {
+      :root { --shell-main-pad-y: 80px; }
       .shell__main {
         margin-left: var(--sidebar-width-expanded);
         padding: 32px 32px 48px;
@@ -572,6 +577,9 @@
 
 <body class="shell">
 
+  {# Keyboard users reach the page content without tabbing the whole sidebar. #}
+  <a href="#main" class="ui-skip-link">Ir para o conteúdo</a>
+
   {# === Loader overlay (toggled via .hidden by form-submit JS) === #}
   <div id="loader-overlay" class="hidden shell__loader-backdrop" role="status" aria-live="polite">
     <div class="shell__loader-card">
@@ -784,7 +792,7 @@
   </aside>
   {% endwith %}
 
-  <main class="shell__main">
+  <main class="shell__main" id="main">
     {% block content %}{% endblock %}
   </main>
 

@@ -72,8 +72,10 @@ from utils.mixins import (
     AdminRequiredMixin,
     CommitteeMemberCreateMixin,
     CommitteeMemberUpdateMixin,
+    UserAccessQuerysetMixin,
     UserAccessViewMixin,
 )
+from utils.views import ComboboxSearchView
 
 logger = logging.getLogger(__name__)
 
@@ -2180,3 +2182,31 @@ class CertificateReferenceUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy(
             "contracts:contracts-detail", kwargs={"pk": self.object.contract.id}
         )
+
+
+class ContractOptionsView(UserAccessQuerysetMixin, ComboboxSearchView):
+    """Option source for contract comboboxes.
+
+    Scoped with the same `filter_by_user_access` rules the contract form
+    fields use, so the endpoint never widens what a user can already pick.
+    """
+
+    search_fields = ("name", "objective", "code")
+    numeric_search_fields = ("internal_code",)
+    ordering = ("-internal_code",)
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return (
+            self.filter_by_user_access(Contract.objects.all(), self.request.user)
+            .select_related("area")
+            .distinct()
+        )
+
+    def serialize(self, obj) -> dict:
+        # Must match ContractChoiceField.label_from_instance so the label the
+        # endpoint returns and the one rendered for a preselected value agree.
+        return {
+            "id": str(obj.pk),
+            "text": obj.name_with_code,
+            "subtext": obj.status_label,
+        }

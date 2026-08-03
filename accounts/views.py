@@ -36,6 +36,7 @@ from activity.models import ActivityLog, Notification
 from audesp.models import AudespCredential
 from utils.mixins import AdminRequiredMixin
 from utils.password import generate_random_password
+from utils.views import ComboboxSearchView
 
 logger = logging.getLogger(__name__)
 
@@ -827,3 +828,34 @@ def get_committee_members(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+class InterestedUserOptionsView(ComboboxSearchView):
+    """Option source for "responsible user" comboboxes.
+
+    Restricted to users who are already an interested part on a contract in one
+    of the requester's areas — the same scope the report responsible field has
+    always used.
+    """
+
+    search_fields = ("first_name", "last_name", "email")
+    ordering = ("first_name", "last_name")
+
+    def get_queryset(self) -> QuerySet[Any]:
+        from contracts.models import ContractInterestedPart
+
+        interested_part_users = (
+            ContractInterestedPart.objects.filter(
+                contract__area__in=self.request.user.areas.all()
+            )
+            .values_list("user", flat=True)
+            .distinct()
+        )
+        return User.objects.filter(id__in=interested_part_users).distinct()
+
+    def serialize(self, obj) -> dict:
+        return {
+            "id": str(obj.pk),
+            "text": obj.get_full_name() or obj.email,
+            "subtext": obj.email,
+        }

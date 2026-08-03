@@ -1,17 +1,26 @@
 from django import forms
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 from phonenumber_field.formfields import PhoneNumberField
 
-# Control classes are defined in `templates/ui/_styles.html`. Emit those instead
-# of Tailwind utilities: the `.ui-*` rules are element-scoped
-# (`input.ui-input`, `select.ui-input`, …), so they carry the ink/canvas palette
-# from DESIGN.md with or without a surrounding `.ui-form` wrapper.
+# Control classes are defined in `templates/ui/_styles.html`. Emit those rather
+# than relying on the generic `.ui-form … :not(.ui-input)` fallbacks: the `.ui-*`
+# rules are element-scoped (`input.ui-input`, `select.ui-input`, …), so they
+# carry the ink/canvas palette from DESIGN.md with or without a surrounding
+# `.ui-form` wrapper.
 #
 # Selects and textareas carry `ui-select`/`ui-textarea` on top of `ui-input`.
-# The generic `.ui-form` fallbacks are written as `select:not(.ui-select)` /
+# The generic fallbacks are written as `select:not(.ui-select)` /
 # `textarea:not(.ui-textarea)` — specificity (0,2,1), which outranks
 # `select.ui-input` (0,1,1). Without the extra token those fallbacks would keep
 # winning inside a `.ui-form`. It also restores `resize: vertical`, which
 # `ui-input` alone does not set on a textarea.
+#
+# Two widgets deliberately stay classless: `BaseFileFormWidget`, because
+# `.ui-form input[type="file"]` gives file inputs their own 52px dashed
+# affordance, and `ComboboxSelectWidget`, which renders the `ui/combobox.html`
+# component instead of a native control.
 INPUT_CLASS = "ui-input"
 SELECT_CLASS = "ui-input ui-select"
 TEXTAREA_CLASS = "ui-input ui-textarea"
@@ -100,6 +109,129 @@ class BaseSelectFormWidget(forms.Select):
         super().__init__(*args, **kwargs)
 
 
+class ComboboxSelectWidget(forms.Select):
+    """Searchable select backed by `ui/combobox.html`.
+
+    Two modes, matching the component:
+
+    * remote (`url_name` given) — `optgroups()` is neutered so **no** option is
+      ever serialized into the page. The browser fetches pages of 10 from the
+      endpoint instead, which keeps the rendered payload constant no matter how
+      large the queryset grows. `ModelChoiceField.to_python()` still validates
+      the submitted id against the field's queryset, so access scoping is
+      unchanged — only rendering is decoupled.
+    * static (no `url_name`) — the field's own choices are embedded as JSON and
+      filtered client-side. `descriptions` adds a second line per option and
+      `groups` buckets them under headings.
+
+    The widget renders through `render_to_string` rather than Django's form
+    renderer because this project keeps templates in a project-level `DIRS`
+    entry, which the default `DjangoTemplates` form renderer does not search.
+    """
+
+    template_name = "ui/combobox_widget.html"
+
+    def __init__(
+        self,
+        *args,
+        url_name=None,
+        placeholder="Selecione",
+        search_placeholder="Buscar…",
+        empty_text="Nenhum resultado",
+        descriptions=None,
+        groups=None,
+        page_size=10,
+        size="sm",
+        surface=None,
+        **kwargs,
+    ):
+        self.url_name = url_name
+        self.placeholder = placeholder
+        self.search_placeholder = search_placeholder
+        self.empty_text = empty_text
+        self.descriptions = descriptions or {}
+        self.groups = groups or {}
+        self.page_size = page_size
+        self.size = size
+        self.surface = surface
+        super().__init__(*args, **kwargs)
+
+    @property
+    def is_remote(self) -> bool:
+        return bool(self.url_name)
+
+    def id_for_label(self, id_):
+        # The focusable control is the trigger button, not the wrapper div, so
+        # `<label for="{{ field.id_for_label }}">` points at something usable.
+        return f"{id_}-trigger" if id_ else id_
+
+    def optgroups(self, name, value, attrs=None):
+        # Remote mode never ships the option list; static mode ships it as JSON
+        # in `combobox.options` instead of as <option> elements.
+        return []
+
+    def _static_options(self) -> list[dict]:
+        options = []
+        for choice_value, choice_label in self.choices:
+            if choice_value in ("", None):
+                # The blank choice becomes the trigger placeholder.
+                continue
+            option = {"id": str(choice_value), "text": str(choice_label)}
+            description = self.descriptions.get(choice_value)
+            if description:
+                option["subtext"] = str(description)
+            group = self.groups.get(choice_value)
+            if group:
+                option["group"] = str(group)
+            options.append(option)
+        return options
+
+    def _selected_text(self, value) -> str:
+        if value in ("", None):
+            return ""
+        iterator = self.choices
+        queryset = getattr(iterator, "queryset", None)
+        if queryset is not None:
+            # Single targeted lookup — never evaluates the whole queryset.
+            obj = queryset.filter(pk=value).first()
+            if obj is None:
+                return ""
+            field = getattr(iterator, "field", None)
+            return str(field.label_from_instance(obj) if field else obj)
+        for choice_value, choice_label in self.choices:
+            if str(choice_value) == str(value):
+                return str(choice_label)
+        return ""
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        raw_value = value[0] if isinstance(value, list | tuple) and value else value
+        raw_value = "" if raw_value is None else str(raw_value)
+
+        context["widget"]["combobox"] = {
+            "url": reverse(self.url_name) if self.is_remote else "",
+            "options": [] if self.is_remote else self._static_options(),
+            "value": raw_value,
+            "selected_text": self._selected_text(raw_value),
+            "placeholder": self.placeholder,
+            "search_placeholder": self.search_placeholder,
+            "empty_text": self.empty_text,
+            "page_size": self.page_size,
+            "size": self.size,
+            "surface": self.surface,
+            # Set by the form template via add_error → attrs; mirrored here so
+            # the control can flag aria-invalid without a second lookup.
+            "error": bool(attrs and attrs.get("aria-invalid")),
+        }
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        context = self.get_context(name, value, attrs)
+        return mark_safe(  # noqa: S308 - template output is already escaped
+            render_to_string(self.template_name, context)
+        )
+
+
 class BaseEmailFormWidget(forms.EmailInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
@@ -118,7 +250,6 @@ class BaseFileFormWidget(forms.FileInput):
     def __init__(self, *args, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": INPUT_CLASS,
                 "required": required,
             }
         )
