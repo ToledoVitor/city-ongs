@@ -1,0 +1,121 @@
+{% load humanize %}
+
+<div class="ui-stack ui-stack--2xl">
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Ajustes de saldo</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §12 — retificação ou inclusão de repasse/pagamento de período anterior.</p>
+      </div>
+      <a href="{% url 'accountability:balance-adjustment-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar ajuste</a>
+    </header>
+    {% if balance_adjustments %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Tipo</th><th>Data</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for adjustment in balance_adjustments %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ adjustment.get_type_display }}</span></td>
+                <td>{{ adjustment.date }}</td>
+                <td>{{ adjustment.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:balance-adjustment-update' adjustment.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum ajuste de saldo cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Glosas</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §16 — análise de cada documento fiscal (ou de pagamento de Folha Ordinária).</p>
+      </div>
+      <a href="{% url 'accountability:expense-rejection-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar glosa</a>
+    </header>
+    {% if expense_rejections %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Despesa / pagamento</th><th>Resultado</th><th>Valor da glosa</th><th></th></tr></thead>
+          <tbody>
+            {% for rejection in expense_rejections %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ rejection.expense.identification|default:rejection.payment_date }}</span></td>
+                <td>{{ rejection.get_analysis_result_display }}</td>
+                <td>{{ rejection.rejected_value|default:"—" }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:expense-rejection-update' rejection.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma glosa cadastrada</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Descontos</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §14.</p>
+      </div>
+      <a href="{% url 'accountability:deduction-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar desconto</a>
+    </header>
+    {% if deductions %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for deduction in deductions %}
+              <tr>
+                <td>{{ deduction.date }}</td>
+                <td><span class="ui-body-md-strong">{{ deduction.description }}</span></td>
+                <td>{{ deduction.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:deduction-update' deduction.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhum desconto cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Devoluções</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §15.</p>
+      </div>
+      <a href="{% url 'accountability:refund-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar devolução</a>
+    </header>
+    {% if refunds %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Data</th><th>Natureza</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for refund in refunds %}
+              <tr>
+                <td>{{ refund.date }}</td>
+                <td><span class="ui-body-md-strong">{{ refund.get_nature_display }}</span></td>
+                <td>{{ refund.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:refund-update' refund.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty"><p class="ui-display-sm">Nenhuma devolução cadastrada</p></div>
+    {% endif %}
+  </div>
+
+</div>

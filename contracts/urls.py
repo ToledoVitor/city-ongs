@@ -271,4 +271,13 @@ urlpatterns = [
         CertificateReferenceUpdateView.as_view(),
         name="certificate-reference-update",
     ),
+    # --- Contract detail sections ---------------------------------------
+    # Declared last so the specific single-segment routes above (workplan/,
+    # timeline/, purchases/, …) keep priority.  Slugs are validated against
+    # contracts.sections.SECTIONS, so anything else 404s.
+    path(
+        "detail/<uuid:pk>/<slug:section>/",
+        ContractsDetailView.as_view(),
+        name="contracts-detail-section",
+    ),
 ]

@@ -1,0 +1,40 @@
+{% comment %}
+Left contextual nav for the contract detail page. Groups and labels come from
+contracts.sections.nav_groups(); every item is a real link to a real URL, so the
+nav works with JavaScript disabled and is keyboard-navigable without any
+tab-widget scripting.
+{% endcomment %}
+<aside class="contract-nav" aria-label="Seções do contrato">
+
+  <header class="contract-nav__id">
+    <span class="contract-nav__code">Contrato {{ contract.trailing_code }}</span>
+    <h1 class="contract-nav__name">{{ contract.name }}</h1>
+    {% include 'contracts/partials/_status_pill.html' with contract=contract %}
+  </header>
+
+  <nav class="contract-nav__nav" id="contract-section-nav">
+    {% for group in nav_groups %}
+      <div class="contract-nav__group">
+        <span class="contract-nav__eyebrow">{{ group.label }}</span>
+        {% for item in group.sections %}
+          {% if item.slug == 'details' %}
+            {% url 'contracts:contracts-detail' contract.id as item_url %}
+          {% else %}
+            {% url 'contracts:contracts-detail-section' contract.id item.slug as item_url %}
+          {% endif %}
+          <a
+            href="{{ item_url }}"
+            class="contract-nav__link{% if item.slug == section.slug %} contract-nav__link--active{% endif %}"
+            data-section="{{ item.slug }}"
+            {% if item.slug == section.slug %}aria-current="page"{% endif %}
+          >
+            <span class="contract-nav__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ item.icon }}"/></svg>
+            </span>
+            <span class="contract-nav__label">{{ item.label }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </nav>
+</aside>
