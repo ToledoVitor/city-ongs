@@ -8,7 +8,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Ajustes de saldo</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §12 — retificação ou inclusão de repasse/pagamento de período anterior.</p>
       </div>
-      <a href="{% url 'accountability:balance-adjustment-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar ajuste</a>
+      <a href="{% url 'accountability:balance-adjustment-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar ajuste</a>
     </header>
     {% if balance_adjustments %}
       <div class="ui-table-wrap">
@@ -27,7 +27,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum ajuste de saldo cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum ajuste de saldo cadastrado</p></div>
     {% endif %}
   </div>
 
@@ -37,7 +37,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Glosas</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §16 — análise de cada documento fiscal (ou de pagamento de Folha Ordinária).</p>
       </div>
-      <a href="{% url 'accountability:expense-rejection-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar glosa</a>
+      <a href="{% url 'accountability:expense-rejection-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar glosa</a>
     </header>
     {% if expense_rejections %}
       <div class="ui-table-wrap">
@@ -56,7 +56,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhuma glosa cadastrada</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhuma glosa cadastrada</p></div>
     {% endif %}
   </div>
 
@@ -66,7 +66,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Descontos</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §14.</p>
       </div>
-      <a href="{% url 'accountability:deduction-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar desconto</a>
+      <a href="{% url 'accountability:deduction-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar desconto</a>
     </header>
     {% if deductions %}
       <div class="ui-table-wrap">
@@ -85,7 +85,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum desconto cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum desconto cadastrado</p></div>
     {% endif %}
   </div>
 
@@ -95,7 +95,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Devoluções</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §15.</p>
       </div>
-      <a href="{% url 'accountability:refund-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar devolução</a>
+      <a href="{% url 'accountability:refund-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar devolução</a>
     </header>
     {% if refunds %}
       <div class="ui-table-wrap">
@@ -114,7 +114,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhuma devolução cadastrada</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhuma devolução cadastrada</p></div>
     {% endif %}
   </div>
 

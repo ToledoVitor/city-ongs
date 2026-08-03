@@ -8,7 +8,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Contratos com fornecedores</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §7 — contratos firmados com fornecedores usando recursos do ajuste.</p>
       </div>
-      <a href="{% url 'contracts:supplier-contract-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar contrato</a>
+      <a href="{% url 'contracts:supplier-contract-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar contrato</a>
     </header>
     {% if supplier_contracts %}
       <div class="ui-table-wrap">
@@ -28,7 +28,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum contrato com fornecedor cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum contrato com fornecedor cadastrado</p></div>
     {% endif %}
   </div>
 
@@ -38,7 +38,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Bens</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §6 — um registro por evento (aquisição, cessão ou baixa/devolução).</p>
       </div>
-      <a href="{% url 'contracts:asset-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar bem</a>
+      <a href="{% url 'contracts:asset-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar bem</a>
     </header>
     {% if assets %}
       <div class="ui-table-wrap">
@@ -58,7 +58,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum bem cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum bem cadastrado</p></div>
     {% endif %}
   </div>
 
@@ -68,7 +68,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Referências de certidões</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §20/§21 — identificadores de certidões já emitidas no Sistema Audesp Fase V.</p>
       </div>
-      <a href="{% url 'contracts:certificate-reference-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar referência</a>
+      <a href="{% url 'contracts:certificate-reference-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar referência</a>
     </header>
     {% if certificate_references %}
       <div class="ui-table-wrap">
@@ -86,7 +86,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhuma referência de certidão cadastrada</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhuma referência de certidão cadastrada</p></div>
     {% endif %}
   </div>
 

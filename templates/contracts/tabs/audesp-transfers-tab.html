@@ -8,7 +8,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Empenhos</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §17.</p>
       </div>
-      <a href="{% url 'accountability:budget-commitment-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar empenho</a>
+      <a href="{% url 'accountability:budget-commitment-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar empenho</a>
     </header>
     {% if budget_commitments %}
       <div class="ui-table-wrap">
@@ -27,7 +27,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum empenho cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum empenho cadastrado</p></div>
     {% endif %}
   </div>
 
@@ -37,7 +37,7 @@
         <h2 class="ui-display-sm" style="margin:0;">Repasses</h2>
         <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §18 — repasse efetivo vinculado a um empenho.</p>
       </div>
-      <a href="{% url 'accountability:fund-transfer-create' contract.id %}" class="ui-btn ui-btn--primary ui-btn--sm">Adicionar repasse</a>
+      <a href="{% url 'accountability:fund-transfer-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar repasse</a>
     </header>
     {% if fund_transfers %}
       <div class="ui-table-wrap">
@@ -56,7 +56,7 @@
         </table>
       </div>
     {% else %}
-      <div class="ui-empty"><p class="ui-display-sm">Nenhum repasse cadastrado</p></div>
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum repasse cadastrado</p></div>
     {% endif %}
   </div>
 
