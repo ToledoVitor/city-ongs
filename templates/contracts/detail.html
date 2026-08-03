@@ -47,13 +47,22 @@
     margin: 0;
   }
 
-  /* Long nav scrolls inside itself; the document never scrolls. */
+  /* Long nav scrolls inside itself; the document never scrolls. The bottom
+     fade signals there is more below, so a clipped item does not read as a
+     rendering bug. */
   .contract-nav__nav {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 4px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent 100%);
+  }
+  /* Once scrolled to the end there is nothing more to hint at. */
+  .contract-nav__nav[data-at-end="true"] {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   .contract-nav__nav::-webkit-scrollbar { width: 6px; }
   .contract-nav__nav::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.14); border-radius: 3px; }
@@ -85,6 +94,8 @@
     color: var(--color-body);
     text-decoration: none;
     transition: background-color 120ms ease, color 120ms ease;
+    /* Leaves room past the bottom fade when scrolled into view. */
+    scroll-margin: 8px 0 28px;
   }
   .contract-nav__link:hover { background-color: var(--color-canvas-soft); color: var(--color-ink); }
   .contract-nav__link:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-ink); }
@@ -128,6 +139,10 @@
   }
   .contract-section::-webkit-scrollbar { width: 8px; }
   .contract-section::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.14); border-radius: 4px; }
+
+  /* Swap feedback: the outgoing body dims rather than collapsing, so the
+     layout never jumps between sections. */
+  .contract-section[data-loading="true"] { opacity: 0.45; pointer-events: none; transition: opacity 120ms ease; }
 
   @media (max-width: 1024px) {
     .contract-shell { grid-template-columns: 1fr; height: auto; }
@@ -177,4 +192,144 @@
     </div>
   </div>
 </section>
+
+<script>
+  /* === Contract section nav ==============================================
+     Each section is a real URL that renders standalone. This upgrades the nav
+     to fetch just the section body and swap it in, so switching sections never
+     reloads the page. If anything fails, we fall back to normal navigation.
+     ===================================================================== */
+  (function () {
+    var nav = document.getElementById('contract-section-nav');
+    var target = document.getElementById('contract-section');
+    if (!nav || !target || !window.fetch || !window.history || !history.pushState) return;
+
+    var inFlight = null;
+    /* Bumped per request. A response that is not from the newest request is
+       stale — it must never swap content or trigger the reload fallback, or
+       fast clicking (and coalesced popstate events) could reload the page. */
+    var requestId = 0;
+
+    function setActive(slug) {
+      nav.querySelectorAll('.contract-nav__link').forEach(function (link) {
+        var active = link.dataset.section === slug;
+        link.classList.toggle('contract-nav__link--active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      var link = nav.querySelector('.contract-nav__link[data-section="' + slug + '"]');
+      if (!link) return;
+      var label = link.querySelector('.contract-nav__label');
+      if (!label) return;
+
+      var crumb = document.querySelector('[data-section-label]');
+      if (crumb) crumb.textContent = label.textContent;
+      document.title = '{{ contract.trailing_code }} — ' + label.textContent + ' — Portal SITTS';
+
+      /* A section clicked at the edge of the scroller should end up fully in
+         view, not half under the fade. */
+      link.scrollIntoView({ block: 'nearest' });
+      syncFade();
+    }
+
+    /* Re-run the initialisers that base.html only wires on DOMContentLoaded.
+       Anything using event delegation (toasts, form loader) needs nothing. */
+    function reinit(root) {
+      if (typeof window.initFlowbite === 'function') window.initFlowbite();
+      if (window.SITTS && typeof window.SITTS.initMasks === 'function') {
+        window.SITTS.initMasks(root);
+      }
+    }
+
+    function load(url, slug, push) {
+      if (inFlight) inFlight.abort();
+      var controller = new AbortController();
+      inFlight = controller;
+
+      var id = ++requestId;
+      target.dataset.loading = 'true';
+
+      fetch(url, {
+        headers: { 'X-Contract-Section': '1' },
+        credentials: 'same-origin',
+        signal: controller.signal
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.text();
+        })
+        .then(function (html) {
+          if (id !== requestId) return;
+          inFlight = null;
+          target.innerHTML = html;
+          delete target.dataset.loading;
+          if (push) history.pushState({ section: slug }, '', url);
+          setActive(slug);
+          target.scrollTop = 0;
+          reinit(target);
+        })
+        .catch(function (error) {
+          /* A superseded request failing is expected; only the newest request
+             is allowed to fall back to a full page load. */
+          if (id !== requestId || error.name === 'AbortError') return;
+          inFlight = null;
+          delete target.dataset.loading;
+          /* Give the user the page rather than a broken shell. */
+          window.location.href = url;
+        });
+    }
+
+    nav.addEventListener('click', function (event) {
+      var link = event.target.closest('.contract-nav__link');
+      if (!link || !nav.contains(link)) return;
+      /* Let the browser handle modified clicks — new tab, download, etc. */
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+      event.preventDefault();
+      var slug = link.dataset.section;
+      if (link.classList.contains('contract-nav__link--active')) return;
+      load(link.href, slug, true);
+    });
+
+    window.addEventListener('popstate', function (event) {
+      var slug = (event.state && event.state.section) || '{{ section.slug }}';
+      var link = nav.querySelector('.contract-nav__link[data-section="' + slug + '"]');
+      load(link ? link.href : window.location.href, slug, false);
+    });
+
+    /* Seed history so the first Back press returns here rather than skipping
+       straight out of the contract. */
+    history.replaceState({ section: '{{ section.slug }}' }, '', window.location.href);
+
+    /* Keep the bottom fade honest, and make sure a deep-linked section that sits
+       below the fold is visible on arrival. */
+    function syncFade() {
+      var atEnd = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 1;
+      nav.dataset.atEnd = atEnd ? 'true' : 'false';
+    }
+
+    function revealActive() {
+      var current = nav.querySelector('.contract-nav__link--active');
+      if (current) current.scrollIntoView({ block: 'nearest' });
+      syncFade();
+    }
+
+    nav.addEventListener('scroll', syncFade);
+    window.addEventListener('resize', syncFade);
+
+    /* This script runs mid-body, so scrollHeight is not final yet — measuring
+       now would report the nav as unscrollable and wrongly hide the fade. */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        requestAnimationFrame(revealActive);
+      });
+    } else {
+      requestAnimationFrame(revealActive);
+    }
+  })();
+</script>
 {% endblock %}
