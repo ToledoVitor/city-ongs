@@ -12,6 +12,7 @@ from contracts.views import (
     ContractExecutionActivityUpdateView,
     ContractExecutionDetailView,
     ContractsDetailView,
+    ContractOptionsView,
     ContractsListView,
     ContractTimelineView,
     ContractUpdateView,
@@ -51,6 +52,7 @@ from contracts.views import (
 
 urlpatterns = [
     path("", ContractsListView.as_view(), name="contracts-list"),
+    path("options/", ContractOptionsView.as_view(), name="contract-options"),
     path("create/", ContractCreateView.as_view(), name="contracts-create"),
     path(
         "update/<uuid:pk>/",
