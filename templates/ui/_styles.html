@@ -789,6 +789,29 @@ geometric display sans, sentence-case voice).
     cursor: pointer;
   }
   .ui-form textarea:not(.ui-textarea) { min-height: 120px; resize: vertical; padding: 16px; }
+  /* The Django widgets in utils.widgets carry no utility classes, so their
+     placeholder colour has to come from here. AA-compliant (5.6:1 on the
+     canvas-soft fill) — see the note on input.ui-input::placeholder. */
+  .ui-form input:not(.ui-input):not(.file-drop-zone__input)::placeholder,
+  .ui-form textarea:not(.ui-textarea)::placeholder { color: var(--color-body); }
+
+  /* File input — the only Django-rendered control the rules above do not
+     cover, since input[type=file] needs its own affordance. */
+  .ui-form input[type="file"]:not(.file-drop-zone__input) {
+    width: 100%;
+    padding: 10px 12px;
+    min-height: 52px;
+    border-radius: var(--rounded-md);
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    font-size: 14px;
+    line-height: 20px;
+    border: 1px dashed var(--color-hairline-mid);
+    cursor: pointer;
+  }
+  .ui-form input[type="file"]:not(.file-drop-zone__input):hover { background-color: var(--color-surface-pressed); }
+  .ui-form input[type="file"]:not(.file-drop-zone__input):focus { outline: none; border-color: var(--color-ink); border-style: solid; }
   .ui-form input:not(.ui-input):not(.file-drop-zone__input):hover,
   .ui-form select:not(.ui-select):hover,
   .ui-form textarea:not(.ui-textarea):hover { background-color: var(--color-surface-pressed); }

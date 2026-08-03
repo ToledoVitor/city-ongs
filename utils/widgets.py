@@ -13,26 +13,6 @@ class BaseCharFieldFormWidget(forms.TextInput):
     ):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block",
-                        "w-full",
-                        "px-3",
-                        "py-2.5",
-                        "text-sm",
-                        "text-gray-900",
-                        "bg-gray-200",
-                        "border",
-                        "border-gray-300",
-                        "rounded-lg",
-                        "placeholder-gray-400",
-                        "focus:ring-2",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                        "transition-colors",
-                        "duration-200",
-                    ]
-                ),
                 "required": required,
             }
         )
@@ -49,26 +29,6 @@ class BaseDateFormWidget(forms.DateInput):
     def __init__(self, *args, placeholder="dd/mm/aaaa", required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block",
-                        "w-full",
-                        "px-3",
-                        "py-2.5",
-                        "text-sm",
-                        "text-gray-900",
-                        "bg-gray-200",
-                        "border",
-                        "border-gray-300",
-                        "rounded-lg",
-                        "placeholder-gray-400",
-                        "focus:ring-2",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                        "transition-colors",
-                        "duration-200",
-                    ]
-                ),
                 "required": required,
                 "placeholder": placeholder,
                 "datepicker": "",
@@ -84,26 +44,6 @@ class BaseNumberFormWidget(forms.NumberInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block",
-                        "w-full",
-                        "px-3",
-                        "py-2.5",
-                        "text-sm",
-                        "text-gray-900",
-                        "bg-gray-200",
-                        "border",
-                        "border-gray-300",
-                        "rounded-lg",
-                        "placeholder-gray-400",
-                        "focus:ring-2",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                        "transition-colors",
-                        "duration-200",
-                    ]
-                ),
                 "required": required,
             }
         )
@@ -117,27 +57,6 @@ class BaseTextAreaFormWidget(forms.Textarea):
     def __init__(self, *args, placeholder=None, required=True, rows=3, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block",
-                        "w-full",
-                        "px-3",
-                        "py-2.5",
-                        "text-sm",
-                        "text-gray-900",
-                        "bg-gray-200",
-                        "border",
-                        "border-gray-300",
-                        "rounded-lg",
-                        "placeholder-gray-400",
-                        "focus:ring-2",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                        "transition-colors",
-                        "duration-200",
-                        "resize-vertical",
-                    ]
-                ),
                 "rows": rows,
                 "required": required,
             }
@@ -152,25 +71,6 @@ class BaseSelectFormWidget(forms.Select):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block",
-                        "w-full",
-                        "px-3",
-                        "py-2.5",
-                        "text-sm",
-                        "text-gray-900",
-                        "bg-gray-200",
-                        "border",
-                        "border-gray-300",
-                        "rounded-lg",
-                        "focus:ring-2",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                        "transition-colors",
-                        "duration-200",
-                    ]
-                ),
                 "required": required,
             }
         )
@@ -184,22 +84,6 @@ class BaseEmailFormWidget(forms.EmailInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "border",
-                        "text-sm",
-                        "rounded-lg",
-                        "block",
-                        "w-full",
-                        "p-2.5",
-                        "bg-gray-200",
-                        "border-gray-600",
-                        "placeholder-gray-600",
-                        "text-black",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                    ]
-                ),
                 "required": required,
             }
         )
@@ -213,13 +97,6 @@ class BaseFileFormWidget(forms.FileInput):
     def __init__(self, *args, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
-                "class": " ".join(
-                    [
-                        "block w-full text-sm text-gray-900 border",
-                        "border-gray-600 rounded-lg cursor-pointer",
-                        "bg-gray-300 focus:outline-none",
-                    ]
-                ),
                 "required": required,
             }
         )
@@ -248,22 +125,6 @@ class CustomPhoneNumberField(PhoneNumberField):
             "widget",
             forms.TextInput(
                 attrs={
-                    "class": " ".join(
-                        [
-                            "w-full",
-                            "p-2.5",
-                            "block",
-                            "text-sm",
-                            "border",
-                            "rounded-lg",
-                            "placeholder-gray-600",
-                            "bg-gray-300",
-                            "border-gray-600",
-                            "text-black",
-                            "focus:ring-blue-500",
-                            "focus:border-blue-500",
-                        ]
-                    ),
                     "placeholder": "(00) 00000-0000",
                     "data-mask": "(00) 00000-0000",
                     "type": "tel",
@@ -279,22 +140,6 @@ class CustomCPFWidget(forms.TextInput):
         kwargs.setdefault(
             "attrs",
             {
-                "class": " ".join(
-                    [
-                        "w-full",
-                        "p-2.5",
-                        "block",
-                        "text-sm",
-                        "border",
-                        "rounded-lg",
-                        "placeholder-gray-600",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "text-black",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                    ]
-                ),
                 "placeholder": "000.000.000-00",
                 "data-mask": "000.000.000-00",
                 "type": "text",
@@ -309,22 +154,6 @@ class CustomCNPJWidget(forms.TextInput):
         kwargs.setdefault(
             "attrs",
             {
-                "class": " ".join(
-                    [
-                        "w-full",
-                        "p-2.5",
-                        "block",
-                        "text-sm",
-                        "border",
-                        "rounded-lg",
-                        "placeholder-gray-600",
-                        "bg-gray-300",
-                        "border-gray-600",
-                        "text-black",
-                        "focus:ring-blue-500",
-                        "focus:border-blue-500",
-                    ]
-                ),
                 "placeholder": "00.000.000/0000-00",
                 "data-mask": "00.000.000/0000-00",
                 "type": "text",
