@@ -1,0 +1,63 @@
+{% load humanize %}
+
+<div class="ui-stack ui-stack--2xl">
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Empenhos</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §17.</p>
+      </div>
+      <a href="{% url 'accountability:budget-commitment-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar empenho</a>
+    </header>
+    {% if budget_commitments %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Número</th><th>Emissão</th><th>Valor</th><th></th></tr></thead>
+          <tbody>
+            {% for budget_commitment in budget_commitments %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ budget_commitment.number }}</span></td>
+                <td>{{ budget_commitment.issue_date }}</td>
+                <td>{{ budget_commitment.value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:budget-commitment-update' budget_commitment.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum empenho cadastrado</p></div>
+    {% endif %}
+  </div>
+
+  <div class="ui-stack ui-stack--lg">
+    <header class="ui-row ui-row--between" style="gap: var(--space-md); flex-wrap: wrap;">
+      <div class="ui-stack ui-stack--xxs">
+        <h2 class="ui-display-sm" style="margin:0;">Repasses</h2>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">Manual AUDESP §18 — repasse efetivo vinculado a um empenho.</p>
+      </div>
+      <a href="{% url 'accountability:fund-transfer-create' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Adicionar repasse</a>
+    </header>
+    {% if fund_transfers %}
+      <div class="ui-table-wrap">
+        <table class="ui-table">
+          <thead><tr><th>Empenho</th><th>Data do repasse</th><th>Valor repassado</th><th></th></tr></thead>
+          <tbody>
+            {% for fund_transfer in fund_transfers %}
+              <tr>
+                <td><span class="ui-body-md-strong">{{ fund_transfer.budget_commitment.number }}</span></td>
+                <td>{{ fund_transfer.transfer_date }}</td>
+                <td>{{ fund_transfer.transferred_value }}</td>
+                <td class="ui-text-right"><a href="{% url 'accountability:fund-transfer-update' fund_transfer.id %}" class="ui-btn ui-btn--subtle ui-btn--sm">Editar</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="ui-empty ui-empty--compact"><p class="ui-display-sm">Nenhum repasse cadastrado</p></div>
+    {% endif %}
+  </div>
+
+</div>

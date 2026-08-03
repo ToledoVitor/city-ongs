@@ -46,13 +46,8 @@ class BankAccountForm(forms.ModelForm):
 
 
 class UpdateOFXForm(forms.Form):
-    ofx_file = forms.FileField(
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
-            }
-        )
-    )
+    # No class on the widget: `.ui-form input[type="file"]` styles it.
+    ofx_file = forms.FileField()
 
     def clean_ofx_file(self):
         ofx_file = self.cleaned_data.get("ofx_file")

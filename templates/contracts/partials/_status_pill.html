@@ -1,0 +1,12 @@
+{# Contract status as a semantic pill. Expects `contract` in context. #}
+{% if contract.status == 'PLANNING' %}
+  <span class="ui-status ui-status--warning">{{ contract.status_label }}</span>
+{% elif contract.status == 'EXECUTION' %}
+  <span class="ui-status ui-status--success">{{ contract.status_label }}</span>
+{% elif contract.status == 'FINISHED' %}
+  <span class="ui-status">{{ contract.status_label }}</span>
+{% elif contract.status == 'CANCELLED' %}
+  <span class="ui-status ui-status--error">{{ contract.status_label }}</span>
+{% else %}
+  <span class="ui-status ui-status--info">{{ contract.status_label }}</span>
+{% endif %}

@@ -1,76 +1,33 @@
 {% load humanize %}
 
+{% comment %}
+Contract identity (code, name, status) lives in the left contextual panel, and
+contract-level actions live in the page header — this section carries the facts
+only.
+{% endcomment %}
 <div class="ui-stack ui-stack--2xl">
 
-  <div class="contract-hero">
-    <div class="contract-hero__body">
-      <div class="ui-stack ui-stack--md">
-        <div>
-          {% if contract.status == 'PLANNING' %}
-            <span class="ui-status ui-status--warning">{{ contract.status_label }}</span>
-          {% elif contract.status == 'EXECUTION' %}
-            <span class="ui-status ui-status--success">{{ contract.status_label }}</span>
-          {% elif contract.status == 'FINISHED' %}
-            <span class="ui-status">{{ contract.status_label }}</span>
-          {% elif contract.status == 'CANCELLED' %}
-            <span class="ui-status ui-status--error">{{ contract.status_label }}</span>
-          {% else %}
-            <span class="ui-status ui-status--info">{{ contract.status_label }}</span>
-          {% endif %}
-        </div>
-        <h2 class="ui-display-md" style="margin:0;">{{ contract.name_with_code }}</h2>
-        <dl class="ui-dl">
-          <dt>Licitação</dt>
-          <dd>{{ contract.bidding|default:"—" }}</dd>
-          <dt>Organização</dt>
-          <dd>{{ contract.organization.name }}</dd>
-          <dt>Área de atuação</dt>
-          <dd>{{ contract.area.name }}</dd>
-        </dl>
-        {% if contract.file and user.has_admin_access %}
-          <a href="{{ contract.file.url }}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--sm">
-            <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Baixar arquivo
-          </a>
-        {% endif %}
-      </div>
-    </div>
-
-    <aside class="contract-hero__actions">
-      <a href="{% url 'contracts:contract-workplan' contract.id %}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--full">
-        <svg width="16" height="16" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M6 2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 1 0 0-2h-2v-2h2a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2h-8v16h5v2H7a1 1 0 1 1 0-2h1V2H6Z" clip-rule="evenodd"/>
+  <section class="ui-stack ui-stack--md">
+    <dl class="ui-dl contract-facts">
+      <dt>Licitação</dt>
+      <dd>{{ contract.bidding|default:"—" }}</dd>
+      <dt>Organização</dt>
+      <dd>{{ contract.organization.name }}</dd>
+      <dt>Área de atuação</dt>
+      <dd>{{ contract.area.name }}</dd>
+    </dl>
+    {% if contract.file and user.has_admin_access %}
+      <a href="{{ contract.file.url }}" target="_blank" rel="noopener" class="ui-btn ui-btn--secondary ui-btn--sm" style="align-self:flex-start;">
+        <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        Plano de trabalho
+        Baixar arquivo
       </a>
-      <a href="{% url 'contracts:contract-timeline' contract.id %}" class="ui-btn ui-btn--secondary ui-btn--full">
-        <svg width="16" height="16" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" clip-rule="evenodd"/>
-        </svg>
-        Cronograma de repasse
-      </a>
-      {% if user.has_admin_access %}
-        <a href="{% url 'contracts:contracts-update' contract.id %}" class="ui-btn ui-btn--primary ui-btn--full">
-          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.3 4.8 2.9 2.9M7 7H4a1 1 0 0 0-1 1v10c0 .6.4 1 1 1h11c.6 0 1-.4 1-1v-4.5m2.4-10a2 2 0 0 1 0 3l-6.8 6.8L8 14l.7-3.6 6.8-6.8a2 2 0 0 1 2.9 0Z"/>
-          </svg>
-          Editar contrato
-        </a>
-        <a href="{% url 'contracts:contract-status-change' contract.id %}" class="ui-btn ui-btn--subtle ui-btn--full">
-          <svg width="16" height="16" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z"/>
-            <path d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"/>
-          </svg>
-          Alterar status
-        </a>
-      {% endif %}
-    </aside>
-  </div>
+    {% endif %}
+  </section>
 
   <section class="ui-stack ui-stack--lg">
-    <h3 class="ui-display-sm" style="margin:0;">Informações financeiras</h3>
+    <h2 class="ui-display-sm" style="margin:0;">Informações financeiras</h2>
     <div class="contract-stats">
       <article class="contract-stats__card">
         <p class="ui-caption" style="margin:0;">Valor do contrato</p>
@@ -86,86 +43,101 @@
   </section>
 
   <section class="ui-stack ui-stack--md">
-    <h3 class="ui-display-sm" style="margin:0;">Objetivo do contrato</h3>
-    <div class="ui-card ui-card--soft">
-      <p class="ui-body-md" style="margin:0;">{{ contract.objective|default:"Sem objetivo cadastrado." }}</p>
+    <h2 class="ui-display-sm" style="margin:0;">Objetivo do contrato</h2>
+    <p class="ui-body-md" style="margin:0;">{{ contract.objective|default:"Sem objetivo cadastrado." }}</p>
+  </section>
+
+  {% comment %}
+  Named "Partes do contrato", not "Partes interessadas": these are the legal
+  parties to the ajuste. The Interessados section lists the people following the
+  contract, which is a different thing.
+  {% endcomment %}
+  <section class="ui-stack ui-stack--lg">
+    <h2 class="ui-display-sm" style="margin:0;">Partes do contrato</h2>
+    <div class="contract-parties">
+      <article class="contract-parties__card">
+        <p class="ui-caption" style="margin:0 0 6px;">Contratante</p>
+        <p class="ui-body-md-strong" style="margin:0;">{{ contract.contractor_company.name|default:"—" }}</p>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">{{ contract.contractor_company.cnpj|default:"—" }}</p>
+      </article>
+      <article class="contract-parties__card">
+        <p class="ui-caption" style="margin:0 0 6px;">Gestora contratante</p>
+        <p class="ui-body-md-strong" style="margin:0;">{{ contract.contractor_manager.name|default:"—" }}</p>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">{{ contract.contractor_manager.cnpj|default:"—" }}</p>
+      </article>
+      <article class="contract-parties__card">
+        <p class="ui-caption" style="margin:0 0 6px;">Contratada</p>
+        <p class="ui-body-md-strong" style="margin:0;">{{ contract.hired_company.name|default:"—" }}</p>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">{{ contract.hired_company.cnpj|default:"—" }}</p>
+      </article>
+      <article class="contract-parties__card">
+        <p class="ui-caption" style="margin:0 0 6px;">Gestora contratada</p>
+        <p class="ui-body-md-strong" style="margin:0;">{{ contract.hired_manager.name|default:"—" }}</p>
+        <p class="ui-body-sm ui-text-muted" style="margin:0;">{{ contract.hired_manager.cnpj|default:"—" }}</p>
+      </article>
     </div>
   </section>
 
-  <section class="ui-stack ui-stack--lg">
-    <h3 class="ui-display-sm" style="margin:0;">Partes interessadas</h3>
-    <div class="contract-stakeholders">
-      <article class="ui-card ui-card--soft">
-        <p class="ui-body-md-strong" style="margin:0 0 8px;">Contratante</p>
-        <dl class="ui-dl">
-          <dt>Nome</dt>
-          <dd>{{ contract.contractor_company.name|default:"—" }}</dd>
-          <dt>CNPJ</dt>
-          <dd>{{ contract.contractor_company.cnpj|default:"—" }}</dd>
-        </dl>
-      </article>
-      <article class="ui-card ui-card--soft">
-        <p class="ui-body-md-strong" style="margin:0 0 8px;">Gestora contratante</p>
-        <dl class="ui-dl">
-          <dt>Nome</dt>
-          <dd>{{ contract.contractor_manager.name|default:"—" }}</dd>
-          <dt>CNPJ</dt>
-          <dd>{{ contract.contractor_manager.cnpj|default:"—" }}</dd>
-        </dl>
-      </article>
-      <article class="ui-card ui-card--soft">
-        <p class="ui-body-md-strong" style="margin:0 0 8px;">Contratada</p>
-        <dl class="ui-dl">
-          <dt>Nome</dt>
-          <dd>{{ contract.hired_company.name|default:"—" }}</dd>
-          <dt>CNPJ</dt>
-          <dd>{{ contract.hired_company.cnpj|default:"—" }}</dd>
-        </dl>
-      </article>
-      <article class="ui-card ui-card--soft">
-        <p class="ui-body-md-strong" style="margin:0 0 8px;">Gestora contratada</p>
-        <dl class="ui-dl">
-          <dt>Nome</dt>
-          <dd>{{ contract.hired_manager.name|default:"—" }}</dd>
-          <dt>CNPJ</dt>
-          <dd>{{ contract.hired_manager.cnpj|default:"—" }}</dd>
-        </dl>
-      </article>
-    </div>
+  <section class="ui-stack ui-stack--md">
+    <h2 class="ui-display-sm" style="margin:0;">Histórico de edições</h2>
+    {% if contract.recent_logs %}
+      <ul class="contract-history">
+        {% for log in contract.recent_logs %}
+          <li class="contract-history__item">
+            <div class="contract-history__body">
+              <p class="ui-body-md-strong" style="margin:0;">{{ log.action_label }}</p>
+              <p class="ui-caption" style="margin:0;">{{ log.user_email }}</p>
+            </div>
+            <time class="ui-caption contract-history__time">{{ log.created_at }}</time>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="ui-body-sm ui-text-muted" style="margin:0;">Nenhuma alteração registrada.</p>
+    {% endif %}
   </section>
 </div>
 
 <style>
-  .contract-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
-    gap: var(--space-2xl);
-    background-color: var(--color-canvas-soft);
-    border-radius: var(--rounded-xl);
-    padding: var(--space-2xl);
-  }
-  .contract-hero__body { min-width: 0; }
-  .contract-hero__actions { display: flex; flex-direction: column; gap: 10px; }
+  .contract-facts { margin: 0; }
   .contract-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-lg);
   }
   .contract-stats__card {
-    background-color: var(--color-canvas);
-    border: 1px solid var(--color-canvas-soft);
+    background-color: var(--color-canvas-soft);
     border-radius: var(--rounded-xl);
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
-  .contract-stakeholders {
+  .contract-parties {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
   }
-  @media (max-width: 880px) {
-    .contract-hero { grid-template-columns: 1fr; }
+  .contract-parties__card {
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+    padding: var(--space-md);
+    min-width: 0;
+  }
+  .contract-parties__card p { overflow-wrap: anywhere; }
+
+  .contract-history { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .contract-history__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background-color: var(--color-canvas-soft);
+    border-radius: var(--rounded-lg);
+  }
+  .contract-history__body { flex: 1; min-width: 0; }
+  .contract-history__time { white-space: nowrap; color: var(--color-body); }
+  @media (max-width: 560px) {
+    .contract-history__time { display: none; }
   }
 </style>
