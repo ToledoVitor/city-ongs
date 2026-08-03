@@ -3,6 +3,9 @@ from django import forms
 from accounts.models import Area, OrganizationDocument, User
 from audesp.forms import AudespCredentialAdminForm
 from utils.widgets import (
+    INPUT_CLASS,
+    SELECT_CLASS,
+    TEXTAREA_CLASS,
     BaseCharFieldFormWidget,
     BaseEmailFormWidget,
     CustomCNPJWidget,
@@ -186,42 +189,27 @@ class OrganizationDocumentForm(forms.ModelForm):
         model = OrganizationDocument
         fields = ["document_type", "title", "description", "file", "is_public"]
 
-        base_input_class = (
-            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg "
-            "focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-        )
-
         widgets = {
-            "document_type": forms.Select(attrs={"class": base_input_class}),
+            "document_type": forms.Select(attrs={"class": SELECT_CLASS}),
             "title": forms.TextInput(
                 attrs={
-                    "class": base_input_class,
+                    "class": INPUT_CLASS,
                     "placeholder": "Digite o título do documento",
                 }
             ),
             "description": forms.Textarea(
                 attrs={
-                    "class": base_input_class,
+                    "class": TEXTAREA_CLASS,
                     "rows": "4",
                     "placeholder": "Digite a descrição do documento",
                 }
             ),
-            "file": forms.FileInput(
-                attrs={
-                    "class": (
-                        "block w-full text-sm text-gray-900 border border-gray-300 "
-                        "rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                    )
-                }
-            ),
-            "is_public": forms.CheckboxInput(
-                attrs={
-                    "class": (
-                        "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded "
-                        "focus:ring-blue-500 focus:ring-2"
-                    )
-                }
-            ),
+            # No class: `.ui-form input[type="file"]` gives file inputs their own
+            # 52px dashed affordance, which suits them better than `ui-input`.
+            "file": forms.FileInput(),
+            # No class: `.ui-form input[type="checkbox"]` sizes it and sets
+            # `accent-color`, and a bare checkbox renders natively elsewhere.
+            "is_public": forms.CheckboxInput(),
         }
 
     def __init__(self, *args, **kwargs):

@@ -4,6 +4,27 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from phonenumber_field.formfields import PhoneNumberField
 
+# Control classes are defined in `templates/ui/_styles.html`. Emit those rather
+# than relying on the generic `.ui-form … :not(.ui-input)` fallbacks: the `.ui-*`
+# rules are element-scoped (`input.ui-input`, `select.ui-input`, …), so they
+# carry the ink/canvas palette from DESIGN.md with or without a surrounding
+# `.ui-form` wrapper.
+#
+# Selects and textareas carry `ui-select`/`ui-textarea` on top of `ui-input`.
+# The generic fallbacks are written as `select:not(.ui-select)` /
+# `textarea:not(.ui-textarea)` — specificity (0,2,1), which outranks
+# `select.ui-input` (0,1,1). Without the extra token those fallbacks would keep
+# winning inside a `.ui-form`. It also restores `resize: vertical`, which
+# `ui-input` alone does not set on a textarea.
+#
+# Two widgets deliberately stay classless: `BaseFileFormWidget`, because
+# `.ui-form input[type="file"]` gives file inputs their own 52px dashed
+# affordance, and `ComboboxSelectWidget`, which renders the `ui/combobox.html`
+# component instead of a native control.
+INPUT_CLASS = "ui-input"
+SELECT_CLASS = "ui-input ui-select"
+TEXTAREA_CLASS = "ui-input ui-textarea"
+
 
 class BaseCharFieldFormWidget(forms.TextInput):
     def __init__(
@@ -16,6 +37,7 @@ class BaseCharFieldFormWidget(forms.TextInput):
     ):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": INPUT_CLASS,
                 "required": required,
             }
         )
@@ -32,6 +54,7 @@ class BaseDateFormWidget(forms.DateInput):
     def __init__(self, *args, placeholder="dd/mm/aaaa", required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": INPUT_CLASS,
                 "required": required,
                 "placeholder": placeholder,
                 "datepicker": "",
@@ -47,6 +70,7 @@ class BaseNumberFormWidget(forms.NumberInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": INPUT_CLASS,
                 "required": required,
             }
         )
@@ -60,6 +84,7 @@ class BaseTextAreaFormWidget(forms.Textarea):
     def __init__(self, *args, placeholder=None, required=True, rows=3, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": TEXTAREA_CLASS,
                 "rows": rows,
                 "required": required,
             }
@@ -74,6 +99,7 @@ class BaseSelectFormWidget(forms.Select):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": SELECT_CLASS,
                 "required": required,
             }
         )
@@ -210,6 +236,7 @@ class BaseEmailFormWidget(forms.EmailInput):
     def __init__(self, *args, placeholder=None, required=True, **kwargs):
         kwargs.setdefault("attrs", {}).update(
             {
+                "class": INPUT_CLASS,
                 "required": required,
             }
         )
@@ -251,6 +278,7 @@ class CustomPhoneNumberField(PhoneNumberField):
             "widget",
             forms.TextInput(
                 attrs={
+                    "class": INPUT_CLASS,
                     "placeholder": "(00) 00000-0000",
                     "data-mask": "(00) 00000-0000",
                     "type": "tel",
@@ -266,6 +294,7 @@ class CustomCPFWidget(forms.TextInput):
         kwargs.setdefault(
             "attrs",
             {
+                "class": INPUT_CLASS,
                 "placeholder": "000.000.000-00",
                 "data-mask": "000.000.000-00",
                 "type": "text",
@@ -280,6 +309,7 @@ class CustomCNPJWidget(forms.TextInput):
         kwargs.setdefault(
             "attrs",
             {
+                "class": INPUT_CLASS,
                 "placeholder": "00.000.000/0000-00",
                 "data-mask": "00.000.000/0000-00",
                 "type": "text",

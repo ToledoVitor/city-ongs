@@ -19,6 +19,12 @@ class LowerCaseEmailField(models.EmailField):
 
 
 class DecimalMaskedField(forms.DecimalField):
+    # Money fields sit next to `utils.widgets` controls in every form that uses
+    # them, so they need the same `ui-input` geometry. Set only the class here —
+    # `required` comes from the field, and hardcoding it in attrs would mark the
+    # `required=False` call sites as required in the rendered HTML.
+    widget = forms.NumberInput(attrs={"class": "ui-input"})
+
     def to_python(self, value):
         if isinstance(value, str):
             value = re.sub(r"\.", "", value).replace(",", ".")

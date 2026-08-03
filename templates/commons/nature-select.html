@@ -1,7 +1,7 @@
 <select
     id="{{ id|default_if_none:'id_nature' }}"
     name="{{ name|default_if_none:'nature' }}"
-    class="ui-select"
+    class="ui-input ui-select"
     required
 >
     <option value="" {% if not selected_value %}selected{% endif %}>----</option>
