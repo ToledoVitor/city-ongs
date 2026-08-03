@@ -7,44 +7,144 @@ from django.forms import formset_factory
 from accounts.models import User
 from contracts.models import Contract, ContractInterestedPart
 from utils.mixins import UserAccessFormMixin
-from utils.widgets import BaseSelectFormWidget
+from utils.widgets import BaseSelectFormWidget, ComboboxSelectWidget
 
-REPORTS_OPTIONS = [
-    ("rp_1", "Repasses: Terceiro Setor (RP) - 1"),
-    ("rp_2", "Repasses: Terceiro Setor (RP) - 2"),
-    ("rp_3", "Repasses: Terceiro Setor (RP) - 3"),
-    ("rp_4", "Repasses: Terceiro Setor (RP) - 4"),
-    ("rp_5", "Repasses: Terceiro Setor (RP) - 5"),
-    ("rp_6", "Repasses: Terceiro Setor (RP) - 6"),
-    ("rp_7", "Repasses: Terceiro Setor (RP) - 7"),
-    ("rp_8", "Repasses: Terceiro Setor (RP) - 8"),
-    ("rp_9", "Repasses: Terceiro Setor (RP) - 9"),
-    ("rp_10", "Repasses: Terceiro Setor (RP) - 10"),
-    ("rp_11", "Repasses: Terceiro Setor (RP) - 11"),
-    ("rp_12", "Repasses: Terceiro Setor (RP) - 12"),
-    ("rp_13", "Repasses: Terceiro Setor (RP) - 13"),
-    ("rp_14", "Repasses: Terceiro Setor (RP) - 14"),
-    ("period_expenses", "Despesas: Realizadas no Período"),
+_GROUP_PUBLIC_BODIES = "Repasses a órgãos públicos"
+_GROUP_THIRD_SECTOR = "Repasses ao terceiro setor"
+_GROUP_MANAGEMENT = "Demonstrativos gerenciais"
+
+# (value, label, subtitle, group). Labels and subtitles mirror the anexo
+# heading each exporter actually prints, so the picker matches the PDF.
+REPORT_MODELS = (
+    ("rp_1", "RP-01 — Repasses a órgãos públicos", "", _GROUP_PUBLIC_BODIES),
+    (
+        "rp_2",
+        "RP-02 — Demonstrativo integral de receitas e despesas",
+        "Repasses a órgãos públicos",
+        _GROUP_PUBLIC_BODIES,
+    ),
+    (
+        "rp_3",
+        "RP-03 — Termo de ciência e de notificação",
+        "Repasses a órgãos públicos",
+        _GROUP_PUBLIC_BODIES,
+    ),
+    ("rp_4", "RP-04 — Repasses ao terceiro setor", "", _GROUP_THIRD_SECTOR),
+    (
+        "rp_5",
+        "RP-05 — Termo de ciência e de notificação",
+        "Contrato de gestão",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_6",
+        "RP-06 — Demonstrativo integral de receitas e despesas",
+        "Contrato de gestão",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_7",
+        "RP-07 — Termo de ciência e de notificação",
+        "Termo de parceria",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_8",
+        "RP-08 — Demonstrativo integral de receitas e despesas",
+        "Termo de parceria",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_9",
+        "RP-09 — Termo de ciência e de notificação",
+        "Termo de colaboração/fomento",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_10",
+        "RP-10 — Demonstrativo integral de receitas e despesas",
+        "Termo de colaboração/fomento",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_11",
+        "RP-11 — Termo de ciência e de notificação",
+        "Termo de convênio",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_12",
+        "RP-12 — Demonstrativo integral de receitas e despesas",
+        "Termo de convênio",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_13",
+        "RP-13 — Termo de ciência e de notificação",
+        "Auxílios, subvenções e contribuições",
+        _GROUP_THIRD_SECTOR,
+    ),
+    (
+        "rp_14",
+        "RP-14 — Demonstrativo integral de receitas e despesas",
+        "Auxílios, subvenções e contribuições",
+        _GROUP_THIRD_SECTOR,
+    ),
+    ("period_expenses", "Despesas realizadas no período", "", _GROUP_MANAGEMENT),
     (
         "predicted_versus_realized",
-        "Demonstrativo de Repasses: Previsto versus Realizado",
+        "Repasses previstos versus realizados",
+        "",
+        _GROUP_MANAGEMENT,
     ),
     (
         "consolidated",
-        "Consolidado das Conciliações Bancárias",
+        "Consolidado das conciliações bancárias",
+        "",
+        _GROUP_MANAGEMENT,
     ),
-]
+)
+
+REPORTS_OPTIONS = [(value, label) for value, label, _, _ in REPORT_MODELS]
+REPORT_MODEL_LABELS = dict(REPORTS_OPTIONS)
+REPORT_MODEL_DESCRIPTIONS = {
+    value: subtitle for value, _, subtitle, _ in REPORT_MODELS if subtitle
+}
+REPORT_MODEL_GROUPS = {value: group for value, _, _, group in REPORT_MODELS}
+
+
+class ContractChoiceField(forms.ModelChoiceField):
+    """Zero-pads the internal code so the label matches ContractOptionsView."""
+
+    def label_from_instance(self, obj):
+        return obj.name_with_code
+
+
+def year_choices():
+    """Callable so a long-lived process still offers the current year after a
+    new year rolls over. Must stay a plain function — a staticmethod object in
+    a field's `choices` breaks `Field.__deepcopy__` (it cannot be pickled).
+    """
+    return [(year, year) for year in range(2020, datetime.now().year + 1)]
 
 
 class AdditionalResponsibleForm(forms.Form):
     user = forms.ModelChoiceField(
         queryset=User.objects.none(),
         required=False,
-        widget=BaseSelectFormWidget(required=False),
-        empty_label="Selecione um usuário",
+        label="Responsável",
+        widget=ComboboxSelectWidget(
+            url_name="accounts:interested-user-options",
+            placeholder="Selecione um usuário",
+            search_placeholder="Buscar por nome ou e-mail…",
+            empty_text="Nenhum usuário encontrado",
+        ),
     )
     interest = forms.ChoiceField(
-        choices=[], required=False, widget=BaseSelectFormWidget(required=False)
+        choices=[],
+        required=False,
+        label="Responsabilidade",
+        widget=BaseSelectFormWidget(required=False),
     )
 
     def __init__(self, *args, **kwargs):
@@ -109,52 +209,76 @@ class ReportForm(UserAccessFormMixin, forms.Form):
         (11, "Novembro"),
         (12, "Dezembro"),
     ]
-    YEAR_CHOICES = [(year, year) for year in range(2020, datetime.now().year + 1)]
 
     start_month = forms.ChoiceField(
         choices=MONTH_CHOICES,
         required=True,
-        label="Mês Inicial",
+        label="Mês inicial",
         widget=BaseSelectFormWidget(),
     )
     start_year = forms.ChoiceField(
-        choices=YEAR_CHOICES,
+        choices=year_choices,
         required=True,
-        label="Ano Inicial",
+        label="Ano inicial",
         widget=BaseSelectFormWidget(),
     )
     end_month = forms.ChoiceField(
         choices=MONTH_CHOICES,
         required=True,
-        label="Mês Final",
+        label="Mês final",
         widget=BaseSelectFormWidget(),
     )
     end_year = forms.ChoiceField(
-        choices=YEAR_CHOICES,
+        choices=year_choices,
         required=True,
-        label="Ano Final",
+        label="Ano final",
         widget=BaseSelectFormWidget(),
     )
 
     report_model = forms.ChoiceField(
-        choices=REPORTS_OPTIONS,
-        label="Escolha um modelo de relatório",
-        widget=BaseSelectFormWidget(),
+        # Leading blank choice: without it the field silently defaults to the
+        # first model and a user can generate a report they never chose.
+        choices=[("", "Selecione um modelo")] + REPORTS_OPTIONS,
+        label="Modelo de relatório",
+        widget=ComboboxSelectWidget(
+            placeholder="Selecione um modelo",
+            search_placeholder="Buscar por anexo ou tipo…",
+            empty_text="Nenhum modelo encontrado",
+            descriptions=REPORT_MODEL_DESCRIPTIONS,
+            groups=REPORT_MODEL_GROUPS,
+        ),
     )
-    contract = forms.ModelChoiceField(
+    contract = ContractChoiceField(
         queryset=Contract.objects.none(),
-        label="Escolha um contrato",
-        empty_label="Selecione um contrato",
-        widget=BaseSelectFormWidget(),
+        label="Contrato",
+        widget=ComboboxSelectWidget(
+            url_name="contracts:contract-options",
+            placeholder="Selecione um contrato",
+            search_placeholder="Buscar por nome ou código…",
+            empty_text="Nenhum contrato encontrado",
+        ),
     )
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
+        # `.distinct()` matters: the non-master branch of filter_by_user_access
+        # joins interested_parts, which multiplies rows per contract.
         self.fields["contract"].queryset = (
             self.get_user_filtered_contract_queryset(self.request.user)
-        ).order_by("-internal_code")
+            .distinct()
+            .order_by("-internal_code")
+        )
+
+        # Default to the current year to date. The previous defaults were the
+        # first choice of each select (January 2020), which produced a valid
+        # but meaningless report on an untouched form.
+        today = datetime.now()
+        self.fields["start_month"].initial = 1
+        self.fields["start_year"].initial = today.year
+        self.fields["end_month"].initial = today.month
+        self.fields["end_year"].initial = today.year
 
         self.responsible_formset = None
 

@@ -1,19 +1,37 @@
 import base64
+import logging
 from io import BytesIO
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+from django.utils.text import slugify
 from django.views.generic import TemplateView
 
 from contracts.models import Contract, ContractInterestedPart
-from reports.forms import ReportForm
+from reports.forms import REPORT_MODEL_LABELS, ReportForm
 from reports.services import export_report
 
+logger = logging.getLogger(__name__)
 
-class ReportsView(TemplateView):
+GENERIC_FAILURE_MESSAGE = "Não foi possível gerar o relatório. Revise o contrato e o período e tente novamente."
+
+
+def build_report_filename(report_model: str, contract: Contract) -> str:
+    """Slug-based filename — no spaces, no accents, stable across platforms."""
+    return (
+        f"{slugify(report_model)}-{slugify(contract.name_with_code)}"
+        f"-{timezone.now().strftime('%Y-%m-%d')}.pdf"
+    )
+
+
+class ReportsView(LoginRequiredMixin, TemplateView):
     template_name = "reports/export.html"
+    # settings has no LOGIN_URL, so Django's /accounts/login/ default would
+    # 404. Matches the login_url used across the contracts views.
+    login_url = "/auth/login"
 
     def get_form(self):
         return ReportForm(request=self.request)
@@ -82,10 +100,8 @@ class ReportsView(TemplateView):
             buffer.seek(0)
 
             response = HttpResponse(buffer, content_type="application/pdf")
-            response["Content-Disposition"] = (
-                f'attachment; filename="{report_model}_{contract.name}_'
-                f'{timezone.now().strftime("%Y-%m-%d")}.pdf"'
-            )
+            filename = build_report_filename(report_model, contract)
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
             response.set_cookie("fileDownload", "true", max_age=60)
             return response
 
@@ -93,9 +109,8 @@ class ReportsView(TemplateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-class ReportGenerateAPIView(TemplateView):
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+class ReportGenerateAPIView(LoginRequiredMixin, TemplateView):
+    login_url = "/auth/login"
 
     def post(self, request):
         try:
@@ -160,10 +175,7 @@ class ReportGenerateAPIView(TemplateView):
             pdf_data = buffer.read()
             pdf_base64 = base64.b64encode(pdf_data).decode("utf-8")
 
-            filename = (
-                f"{report_model}_{contract.name}_"
-                f"{timezone.now().strftime('%Y-%m-%d')}.pdf"
-            )
+            filename = build_report_filename(report_model, contract)
 
             # Check if it's an AJAX request expecting JSON
             is_ajax = request.headers.get(
@@ -178,8 +190,11 @@ class ReportGenerateAPIView(TemplateView):
                         "success": True,
                         "pdf_data": pdf_base64,
                         "filename": filename,
-                        "contract_name": contract.name,
+                        "contract_name": contract.name_with_code,
                         "report_model": report_model,
+                        "report_model_label": REPORT_MODEL_LABELS.get(
+                            report_model, report_model
+                        ),
                         "start_date": start_date.strftime("%d/%m/%Y"),
                         "end_date": end_date.strftime("%d/%m/%Y"),
                     }
@@ -199,7 +214,14 @@ class ReportGenerateAPIView(TemplateView):
 
                 return response
 
-        except (ValueError, AttributeError) as e:
+        except (ValueError, AttributeError, TypeError, KeyError):
+            # The exception text leaks internals (attribute names, model
+            # internals) straight into the UI, so it goes to the log and the
+            # user gets an actionable message instead.
+            logger.exception(
+                "Report generation failed for user %s",
+                getattr(request.user, "id", None),
+            )
             return JsonResponse(
-                {"success": False, "message": f"Erro interno: {str(e)}"}, status=500
+                {"success": False, "message": GENERIC_FAILURE_MESSAGE}, status=500
             )

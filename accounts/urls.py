@@ -6,6 +6,7 @@ from accounts.views import (
     FolderManagerCreateView,
     FolderManagersDetailView,
     FolderManagersListView,
+    InterestedUserOptionsView,
     OrganizationAccountantCreateView,
     OrganizationAccountantsDetailView,
     OrganizationAccountantsListView,
@@ -28,6 +29,11 @@ from accounts.views import (
 
 urlpatterns = [
     # API Endpoints
+    path(
+        "interested-users/options/",
+        InterestedUserOptionsView.as_view(),
+        name="interested-user-options",
+    ),
     path(
         "get-committee-members/",
         get_committee_members,
