@@ -24,9 +24,14 @@ class ComboboxSearchView(LoginRequiredMixin, View):
     """
 
     search_fields: tuple[str, ...] = ()
+    numeric_search_fields: tuple[str, ...] = ()
     ordering: tuple[str, ...] = ()
     page_size = 10
     max_page_size = 50
+    # Accent-insensitive matching, so "saude" finds "Saúde" and "convenio"
+    # finds "Convênio". Set False for numeric-only fields, where unaccent is
+    # wasted work and blocks any index on the column.
+    unaccent_search = True
 
     def get_queryset(self) -> QuerySet:
         raise NotImplementedError
@@ -48,11 +53,16 @@ class ComboboxSearchView(LoginRequiredMixin, View):
         return max(1, min(requested, self.max_page_size))
 
     def filter_queryset(self, queryset: QuerySet, query: str) -> QuerySet:
-        if not query or not self.search_fields:
+        if not query or not (self.search_fields or self.numeric_search_fields):
             return queryset
 
         condition = Q()
+        lookup = "unaccent__icontains" if self.unaccent_search else "icontains"
         for field in self.search_fields:
+            condition |= Q(**{f"{field}__{lookup}": query})
+        # unaccent() is a text function — casting a numeric column through it
+        # errors out, so codes and ids match with a plain icontains.
+        for field in self.numeric_search_fields:
             condition |= Q(**{f"{field}__icontains": query})
         return queryset.filter(condition)
 

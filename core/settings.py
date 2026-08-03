@@ -107,6 +107,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Registers the `unaccent` lookup used by ComboboxSearchView so searching
+    # "saude" matches "Saúde". Requires the unaccent extension (see the
+    # accounts.0003 migration).
+    "django.contrib.postgres",
     # Internal apps
     "accountability",
     "activity",
