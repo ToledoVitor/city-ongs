@@ -45,7 +45,7 @@
         <div class="ui-field"><label for="position" class="ui-field__label">Cargo</label><input type="text" name="position" id="position" value="{{ accountant.position }}" required class="ui-input"></div>
         <div class="ui-field">
           <label for="is_active" class="ui-field__label">Status</label>
-          <select name="is_active" id="is_active" required class="ui-select">
+          <select name="is_active" id="is_active" required class="ui-input ui-select">
             <option value="True" {% if accountant.is_active %}selected{% endif %}>Ativo</option>
             <option value="False" {% if not accountant.is_active %}selected{% endif %}>Inativo</option>
           </select>
