@@ -183,7 +183,13 @@
   }
   .reports-period .ui-field__label { margin: 0; }
 
-  /* Compact form override — applies on top of the global `.ui-form` rules. */
+  /* Compact form override — applies on top of the global `.ui-form` rules.
+     Covers both the `.ui-*` controls emitted by `utils/widgets.py` and the
+     bare fields the generic `.ui-form` fallbacks style. The `.ui-input`
+     selectors are element-qualified so they reach (0,2,1) and outrank
+     `input.ui-input` / `select.ui-input` in `templates/ui/_styles.html`. */
+  .ui-form--compact input.ui-input,
+  .ui-form--compact select.ui-input,
   .ui-form--compact select:not(.ui-select),
   .ui-form--compact input[type="text"]:not(.ui-input),
   .ui-form--compact input[type="number"]:not(.ui-input),
@@ -194,6 +200,7 @@
     font-size: 14px;
     line-height: 18px;
   }
+  .ui-form--compact select.ui-input,
   .ui-form--compact select:not(.ui-select) {
     padding-right: 32px;
     background-position: right 10px center;

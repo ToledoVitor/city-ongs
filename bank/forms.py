@@ -4,6 +4,7 @@ from bank.models import BankAccount, BankStatement, Transaction
 from utils.fields import DecimalMaskedField
 from utils.regex import only_digits
 from utils.widgets import (
+    INPUT_CLASS,
     BaseCharFieldFormWidget,
     BaseNumberFormWidget,
     BaseSelectFormWidget,
@@ -47,11 +48,7 @@ class BankAccountForm(forms.ModelForm):
 
 class UpdateOFXForm(forms.Form):
     ofx_file = forms.FileField(
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
-            }
-        )
+        widget=forms.ClearableFileInput(attrs={"class": INPUT_CLASS})
     )
 
     def clean_ofx_file(self):

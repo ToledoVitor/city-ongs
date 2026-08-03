@@ -41,6 +41,7 @@ from contracts.models import ContractItem
 from utils.fields import DecimalMaskedField
 from utils.formats import format_into_brazilian_currency
 from utils.widgets import (
+    INPUT_CLASS,
     BaseCharFieldFormWidget,
     BaseDateFormWidget,
     BaseFileFormWidget,
@@ -298,11 +299,7 @@ class FavoredForm(forms.ModelForm):
 
 class ImportXLSXAccountabilityForm(forms.Form):
     xlsx_file = forms.FileField(
-        widget=forms.ClearableFileInput(
-            attrs={
-                "class": "block w-full text-sm text-black border rounded-lg cursor-pointer focus:outline-none bg-gray-300 border-gray-600 placeholder-gray-400"
-            }
-        )
+        widget=forms.ClearableFileInput(attrs={"class": INPUT_CLASS})
     )
 
     def clean_xlsx(self):
@@ -337,11 +334,9 @@ class CustomTransactionMultipleChoiceField(forms.ModelMultipleChoiceField):
 class ReconcileExpenseForm(forms.Form):
     transactions = CustomTransactionMultipleChoiceField(
         queryset=Transaction.objects.none(),
-        widget=CustomCheckboxSelectMultiple(
-            input_attrs={
-                "class": "w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-400 border-gray-500"
-            }
-        ),
+        # No class: both reconcile templates size these and set `accent-color`
+        # via `#id_transactions input[type="checkbox"]`.
+        widget=CustomCheckboxSelectMultiple(),
         required=True,
     )
 
@@ -400,11 +395,9 @@ class ReconcileExpenseForm(forms.Form):
 class ReconcileRevenueForm(forms.Form):
     transactions = CustomTransactionMultipleChoiceField(
         queryset=Transaction.objects.none(),
-        widget=CustomCheckboxSelectMultiple(
-            input_attrs={
-                "class": "w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-400 border-gray-500"
-            }
-        ),
+        # No class: both reconcile templates size these and set `accent-color`
+        # via `#id_transactions input[type="checkbox"]`.
+        widget=CustomCheckboxSelectMultiple(),
         required=True,
     )
 
