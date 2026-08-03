@@ -1,7 +1,7 @@
 from django.db import models
 
-from accounts.models import BaseOrganizationTenantModel, CityHall
 from accountability.models import BudgetCommitment
+from accounts.models import BaseOrganizationTenantModel, CityHall
 from audesp import secrets as audesp_secrets
 from contracts.models import Contract
 from utils.models import BaseModel

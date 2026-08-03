@@ -4,20 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('audesp', '0002_audespcredential'),
+        ("audesp", "0002_audespcredential"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='audespsubmission',
-            name='retificacao',
-            field=models.BooleanField(default=False, help_text='Reenvio integral que substitui a prestação anterior deste exercício (manual §1.2, item 4). Retificar um exercício anterior ao último enviado exclui, em cascata, os exercícios posteriores já enviados/aceitos no TCESP.', verbose_name='Retificação'),
+            model_name="audespsubmission",
+            name="retificacao",
+            field=models.BooleanField(
+                default=False,
+                help_text="Reenvio integral que substitui a prestação anterior deste exercício (manual §1.2, item 4). Retificar um exercício anterior ao último enviado exclui, em cascata, os exercícios posteriores já enviados/aceitos no TCESP.",
+                verbose_name="Retificação",
+            ),
         ),
         migrations.AlterField(
-            model_name='audespsubmission',
-            name='status',
-            field=models.CharField(choices=[('DRAFT', 'Rascunho'), ('VALID', 'Válido'), ('INVALID', 'Inválido'), ('SUBMITTED', 'Enviado'), ('ACCEPTED', 'Aceito'), ('REJECTED', 'Rejeitado'), ('EXCLUDED', 'Excluído')], default='DRAFT', max_length=10, verbose_name='Status'),
+            model_name="audespsubmission",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("DRAFT", "Rascunho"),
+                    ("VALID", "Válido"),
+                    ("INVALID", "Inválido"),
+                    ("SUBMITTED", "Enviado"),
+                    ("ACCEPTED", "Aceito"),
+                    ("REJECTED", "Rejeitado"),
+                    ("EXCLUDED", "Excluído"),
+                ],
+                default="DRAFT",
+                max_length=10,
+                verbose_name="Status",
+            ),
         ),
     ]
