@@ -4,30 +4,51 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contracts', '0002_contract_audesp_agreement_code_and_more'),
+        ("contracts", "0002_contract_audesp_agreement_code_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='contract',
-            name='signature_date',
-            field=models.DateField(blank=True, help_text='Data de assinatura do ajuste (distinta do início de vigência)', null=True, verbose_name='Data de Assinatura'),
+            model_name="contract",
+            name="signature_date",
+            field=models.DateField(
+                blank=True,
+                help_text="Data de assinatura do ajuste (distinta do início de vigência)",
+                null=True,
+                verbose_name="Data de Assinatura",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcontract',
-            name='signature_date',
-            field=models.DateField(blank=True, help_text='Data de assinatura do ajuste (distinta do início de vigência)', null=True, verbose_name='Data de Assinatura'),
+            model_name="historicalcontract",
+            name="signature_date",
+            field=models.DateField(
+                blank=True,
+                help_text="Data de assinatura do ajuste (distinta do início de vigência)",
+                null=True,
+                verbose_name="Data de Assinatura",
+            ),
         ),
         migrations.AlterField(
-            model_name='contract',
-            name='audesp_agreement_code',
-            field=models.CharField(blank=True, help_text='Código do ajuste no Sistema Audesp: campo codigo_ajuste do descritor na Fase V, campo descritor.codigoContrato na Fase IV', max_length=32, null=True, verbose_name='Código do Ajuste (AUDESP)'),
+            model_name="contract",
+            name="audesp_agreement_code",
+            field=models.CharField(
+                blank=True,
+                help_text="Código do ajuste no Sistema Audesp: campo codigo_ajuste do descritor na Fase V, campo descritor.codigoContrato na Fase IV",
+                max_length=32,
+                null=True,
+                verbose_name="Código do Ajuste (AUDESP)",
+            ),
         ),
         migrations.AlterField(
-            model_name='historicalcontract',
-            name='audesp_agreement_code',
-            field=models.CharField(blank=True, help_text='Código do ajuste no Sistema Audesp: campo codigo_ajuste do descritor na Fase V, campo descritor.codigoContrato na Fase IV', max_length=32, null=True, verbose_name='Código do Ajuste (AUDESP)'),
+            model_name="historicalcontract",
+            name="audesp_agreement_code",
+            field=models.CharField(
+                blank=True,
+                help_text="Código do ajuste no Sistema Audesp: campo codigo_ajuste do descritor na Fase V, campo descritor.codigoContrato na Fase IV",
+                max_length=32,
+                null=True,
+                verbose_name="Código do Ajuste (AUDESP)",
+            ),
         ),
     ]

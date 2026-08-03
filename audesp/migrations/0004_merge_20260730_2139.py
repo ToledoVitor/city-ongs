@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('audesp', '0003_audespfaseivsubmission'),
-        ('audesp', '0003_audespsubmission_retificacao_and_more'),
+        ("audesp", "0003_audespfaseivsubmission"),
+        ("audesp", "0003_audespsubmission_retificacao_and_more"),
     ]
 
-    operations = [
-    ]
+    operations = []
