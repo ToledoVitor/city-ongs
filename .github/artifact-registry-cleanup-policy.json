@@ -1,0 +1,24 @@
+[
+  {
+    "name": "keep-tagged-releases",
+    "action": { "type": "Keep" },
+    "condition": {
+      "tagState": "TAGGED",
+      "tagPrefixes": ["production", "latest"]
+    }
+  },
+  {
+    "name": "keep-5-most-recent",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": {
+      "keepCount": 5
+    }
+  },
+  {
+    "name": "delete-stale-timestamped-builds",
+    "action": { "type": "Delete" },
+    "condition": {
+      "olderThan": "30d"
+    }
+  }
+]

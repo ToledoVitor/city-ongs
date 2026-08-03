@@ -45,7 +45,7 @@ jobs:
       
           gcloud auth configure-docker ${{ env.DOCKER_REGISTRY }} --quiet
       
-          docker build -t $IMAGE_NAME .
+          docker build -f dockerfile -t $IMAGE_NAME .
           docker push $IMAGE_NAME
       
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
@@ -74,6 +74,11 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           image: ${{ steps.docker_build.outputs.IMAGE_NAME }}
           revision_traffic: 'LATEST=100'
+          # Pinned so a console edit can never silently reintroduce
+          # always-on billing. min-instances=0 keeps scale-to-zero;
+          # cpu-throttling bills CPU only while a request is in flight;
+          # max-instances caps the blast radius of a traffic spike.
+          flags: '--min-instances=0 --max-instances=2 --cpu-throttling'
 
       - name: Tag production docker image
         run: |
