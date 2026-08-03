@@ -888,28 +888,29 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Phone mask
-    document.querySelectorAll('input[data-mask="(00) 00000-0000"]').forEach(function(input) {
-      IMask(input, {
-        mask: '(00) 00000-0000',
-        lazy: false,
-        placeholderChar: '_',
-        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
+  // Input masks. Exposed on window so pages that swap content in without a
+  // page load (e.g. the contract section nav) can mask the new fields too.
+  // Idempotent: an input is only ever masked once.
+  window.SITTS = window.SITTS || {};
+  window.SITTS.initMasks = function(root) {
+    var scope = root || document;
+    ['(00) 00000-0000', '000.000.000-00'].forEach(function(mask) {
+      scope.querySelectorAll('input[data-mask="' + mask + '"]').forEach(function(input) {
+        if (input.dataset.maskReady === 'true') return;
+        input.dataset.maskReady = 'true';
+        IMask(input, {
+          mask: mask,
+          lazy: false,
+          placeholderChar: '_',
+          prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
+        });
+        input.addEventListener('invalid', function(e) { e.preventDefault(); });
       });
-      input.addEventListener('invalid', function(e) { e.preventDefault(); });
     });
+  };
 
-    // CPF mask
-    document.querySelectorAll('input[data-mask="000.000.000-00"]').forEach(function(input) {
-      IMask(input, {
-        mask: '000.000.000-00',
-        lazy: false,
-        placeholderChar: '_',
-        prepare: function(s) { return s.replace(/[^0-9]/g, ''); }
-      });
-      input.addEventListener('invalid', function(e) { e.preventDefault(); });
-    });
+  document.addEventListener("DOMContentLoaded", function() {
+    window.SITTS.initMasks(document);
 
     // Notifications fetch + render with the new card chrome
     var notificationsLoaded = false;
@@ -984,19 +985,20 @@
     }, 500);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("form").forEach(function(form) {
-      form.addEventListener("submit", function() {
-        var loader = document.getElementById("loader-overlay");
-        if (loader) loader.classList.remove("hidden");
-        if (form.getAttribute("target") === "download_iframe") {
-          pollForFileDownload();
-        } else {
-          var btn = form.querySelector('button[type="submit"]');
-          if (btn) btn.disabled = true;
-        }
-      });
-    });
+  // Delegated so it also covers forms added after load — content swapped in by
+  // the contract section nav, Flowbite modals, etc.
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== "FORM") return;
+
+    var loader = document.getElementById("loader-overlay");
+    if (loader) loader.classList.remove("hidden");
+    if (form.getAttribute("target") === "download_iframe") {
+      pollForFileDownload();
+    } else {
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+    }
   });
 
   // Datepicker pt-BR localization (unchanged behavior)
