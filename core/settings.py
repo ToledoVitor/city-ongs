@@ -114,14 +114,19 @@ if not os.path.exists(os.path.join(BASE_DIR, "logs")):
 ALLOWED_HOSTS: List[str] = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    # Cloud Run's own URL. Keep it: it stays reachable if DNS or the domain
-    # mapping's certificate ever breaks, which makes it the way back in.
+    # Cloud Run's own URL. Keep it: it stays reachable if DNS, Firebase Hosting
+    # or the managed certificate breaks, which makes it the way back in. It is
+    # also the way around Firebase's 60s timeout for a long report export.
     "https://sitts-bdhqfqo3cq-rj.a.run.app",
-    "https://www.sitts.com.br",
-    "https://sitts.com.br",
-    # Left over from the deleted project; no longer mapped to any service.
-    "https://gestao-sitts-web.com",
+    "https://app.sitts.com.br",
+    "https://sitts-504501.web.app",
 ]
+
+# Both Cloud Run and Firebase Hosting terminate TLS and forward the original
+# scheme in this header. Without it Django treats every request as plain HTTP:
+# request.is_secure() returns False, build_absolute_uri() emits http:// links
+# into password-reset emails, and secure cookies never get set.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 INSTALLED_APPS = [
