@@ -55,9 +55,12 @@ jobs:
 
       - name: Pre-deploy (migrate and collectstatic)
         run: |
-          gcloud run jobs update ${{ env.SERVICE }}-pre-deploy \
+          # `deploy`, not `update`: update requires the job to already exist, so
+          # a rebuilt project could never run this workflow once. deploy creates
+          # it on first run and updates it thereafter.
+          gcloud run jobs deploy ${{ env.SERVICE }}-pre-deploy \
           --labels ^,^application=${{ env.SERVICE }},component=pre-deploy \
-          --set-env-vars="ENV=production,GOOGLE_CLOUD_PROJECT=sitts-504501" \
+          --set-env-vars="ENV=production,GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}" \
           --set-secrets=DJANGO_SETTINGS=django_settings:latest \
           --region=${{ env.REGION }} \
           --image=${{ env.IMAGE_NAME }} \
