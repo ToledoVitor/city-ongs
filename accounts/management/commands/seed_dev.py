@@ -3,7 +3,7 @@
 Creates a full development scenario:
   - 3 city halls
   - 2 organizations (one with rich data, one mostly empty for cross-org tests)
-  - 4 areas, 2 users, 4 companies
+  - 4 areas, 4 users (incl. 2 gestores de pasta), 6 companies
   - 2 contracts (one in EXECUTION with full history, one in PLANNING)
   - 2 funding sources, 3 favored payees
   - Bank accounts (checking + investing) per contract, with statements + transactions
@@ -170,6 +170,53 @@ def ensure_company(organization, cnpj_digits, **fields):
         if _apply_updates(company, fields):
             company.save()
     return company
+
+
+def ensure_contract_parties(organization):
+    """The four Company rows every seeded contract points at.
+
+    A contract renders four parties (see contracts/tabs/details-tab.html): the
+    two sides of the agreement and the managing folder on each side. All four
+    are nullable FKs to Company, so leaving them unset produces a contract list
+    where "Gestora contratante" and "Gestora contratada" render blank.
+
+    Idempotent via ensure_company, so this is safe to call from every seed
+    function that creates contracts.
+    """
+    return {
+        "contractor_company": ensure_company(
+            organization,
+            "24479422000150",
+            name="Empresa Contratante",
+        ),
+        "contractor_manager": ensure_company(
+            organization,
+            "11222333000181",
+            name="Secretaria Municipal de Gestão",
+            street="Praça São Judas Tadeu",
+            number=10,
+            district="Centro",
+            city="Várzea Paulista",
+            uf=StatesChoices.SP,
+            postal_code="13220000",
+        ),
+        "hired_company": ensure_company(
+            organization,
+            "49279736000130",
+            name="Empresa Contratada",
+        ),
+        "hired_manager": ensure_company(
+            organization,
+            "33444555000181",
+            name="Instituto Gestor Cidadania",
+            street="Avenida Paulista",
+            number=1578,
+            district="Bela Vista",
+            city="São Paulo",
+            uf=StatesChoices.SP,
+            postal_code="01310200",
+        ),
+    }
 
 
 def ensure_user(
@@ -749,9 +796,12 @@ def seed_contracts_and_movements(*, organization, area_primary, area_secondary):
         organization, "21135963000172", "Folha de Pagamento — Equipe Programa Saúde"
     )
 
+    parties = ensure_contract_parties(organization)
+
     # --- Contract A (active, with full history) -------------------------
     contract_a = ensure_contract(
         organization,
+        **parties,
         internal_code=1001,
         name="Programa Saúde Comunitária 2026",
         concession_type=Contract.ConcessionChoices.COLLABORATION,
@@ -824,6 +874,7 @@ def seed_contracts_and_movements(*, organization, area_primary, area_secondary):
     # --- Contract B (planning only, no movements yet) -------------------
     contract_b = ensure_contract(
         organization,
+        **parties,
         internal_code=1002,
         name="Cultura no Bairro 2026/2027",
         concession_type=Contract.ConcessionChoices.PARTNERSHIP,
@@ -1326,8 +1377,11 @@ def seed_audesp_phase_v_fixtures(*, organization, areas, contract_a, contract_b)
 
     # Contrato de Gestão, Convênio and Termo de Fomento: no existing contract
     # covers these 3 ConcessionChoices, so create them fresh.
+    parties = ensure_contract_parties(organization)
+
     contract_gestao = ensure_contract(
         organization,
+        **parties,
         internal_code=1003,
         name="Gestão do Hospital Municipal 2026",
         concession_type=Contract.ConcessionChoices.MANAGEMENT,
@@ -1350,6 +1404,7 @@ def seed_audesp_phase_v_fixtures(*, organization, areas, contract_a, contract_b)
     )
     contract_convenio = ensure_contract(
         organization,
+        **parties,
         internal_code=1004,
         name="Convênio Assistência Social 2026",
         concession_type=Contract.ConcessionChoices.AGREEMENT,
@@ -1372,6 +1427,7 @@ def seed_audesp_phase_v_fixtures(*, organization, areas, contract_a, contract_b)
     )
     contract_fomento = ensure_contract(
         organization,
+        **parties,
         internal_code=1005,
         name="Termo de Fomento Esporte e Lazer 2026",
         concession_type=Contract.ConcessionChoices.DEVELOPMENTO,
@@ -1577,6 +1633,32 @@ def run_seed():
         is_staff=False,
         areas=[a1, a2],
     )
+    # Gestores de pasta. FolderManagersListView filters on
+    # access_level=FOLDER_MANAGER *and* areas__in=request.user.areas, so these
+    # only show up for a viewer sharing at least one area — hence primary_areas,
+    # which is what admin@admin.com carries.
+    ensure_user(
+        email="gestor.saude@dev.local",
+        organization=org_primary,
+        access_level=User.AccessChoices.FOLDER_MANAGER,
+        cpf="52998224725",
+        first_name="Carla",
+        last_name="Gestora",
+        is_superuser=False,
+        is_staff=False,
+        areas=[a1, a3],
+    )
+    ensure_user(
+        email="gestor.cultura@dev.local",
+        organization=org_primary,
+        access_level=User.AccessChoices.FOLDER_MANAGER,
+        cpf="39053344705",
+        first_name="Bruno",
+        last_name="Gestor",
+        is_superuser=False,
+        is_staff=False,
+        areas=[a2],
+    )
 
     ensure_company(
         org_primary,
@@ -1648,6 +1730,8 @@ def run_seed():
         "logins": [
             ("admin@admin.com", User.AccessChoices.MASTER, True),
             ("contador@dev.local", User.AccessChoices.ORGANIZATION_ACCOUNTANT, False),
+            ("gestor.saude@dev.local", User.AccessChoices.FOLDER_MANAGER, False),
+            ("gestor.cultura@dev.local", User.AccessChoices.FOLDER_MANAGER, False),
         ],
         "scenario": scenario,
         "audesp_fixtures": audesp_fixtures,
