@@ -16,11 +16,11 @@ The Cloud Run scaling flags are pinned in the workflow rather than left to the s
 
 ## Instance sizing
 
-`--cpu=1 --memory=512Mi --execution-environment=gen1 --concurrency=8 --timeout=300`, on top of `--min-instances=0 --max-instances=2 --cpu-throttling`.
+`--cpu=1 --memory=1Gi --execution-environment=gen1 --concurrency=4 --timeout=300`, on top of `--min-instances=0 --max-instances=2 --cpu-throttling`.
 
-### Why 512Mi
+### Why 1Gi
 
-Measured, not guessed. A benchmark boots the real production image, builds the WSGI app, and renders all 17 reports against a contract carrying 20,000 expenses and 20,000 revenues — far past anything in production today:
+A benchmark boots the real production image, builds the WSGI app, and renders all 17 reports against a contract carrying 20,000 expenses and 20,000 revenues — far past anything in production today:
 
 | stage | RSS |
 |---|---|
@@ -28,14 +28,16 @@ Measured, not guessed. A benchmark boots the real production image, builds the W
 | after the URLconf resolves | ~159 MiB |
 | peak, rendering all 17 reports twice | ~342 MiB |
 
-512Mi leaves ~170 MiB over that peak. 256Mi and 384Mi are both under it, so 512Mi is the smallest tier that fits. If the footprint ever drops meaningfully, gen1 does allow going below 512Mi — gen2 does not.
+**That peak is a serial figure — one report at a time.** The service runs 4 gunicorn threads in a single process, so two design partners exporting large reports at the same moment share one heap. On the 512Mi tier the ~170 MiB of apparent headroom is consumed by the second concurrent render, and the failure mode is an OOM kill: the instance dies, the request returns 503, and nothing is written to Cloud Logging.
 
-Two things move that number:
+1Gi is chosen because the smaller tier optimises a number that is already zero. Cloud Run's free tier covers 360,000 GiB-seconds per month; at three concurrent users this service uses a low single-digit percentage of it, so 512Mi and 1Gi bill identically. Sizing tightly buys nothing and costs availability.
+
+Two things move the underlying number:
 
 - **pandas + numpy cost ~95 MiB resident** and are needed only by the XLSX *upload* path. `accountability/xlsx/__init__.py` defers that import (PEP 562 module `__getattr__`) so a worker that never handles an upload never pays it. That lowers the *floor* — RSS after URLconf resolution went from ~202 MiB to ~159 MiB — but not the peak, which is dominated by report rendering rather than by imports.
 - **Report rendering churns memory the allocator only partly returns to the OS**, so a long-lived worker drifts upward. `--max-requests 400` in the dockerfile recycles the worker and puts a floor under the drift.
 
-One caveat on that peak: it is RSS sampled in-process, not an observed OOM. Nobody has yet run the suite under a hard 256Mi/384Mi cgroup cap to find where it actually dies. 512Mi is sized from measured peak plus headroom — the conservative direction — but the empirical floor is still unverified.
+Two caveats on the peak. It is RSS sampled in-process, not an observed OOM — nobody has run the suite under a hard cgroup cap to find where it actually dies. And it has only ever been measured single-threaded; the concurrent-render peak that actually governs the tier is inferred, not measured. Measuring it is the obvious next step if the tier is ever revisited.
 
 ### Why 1 vCPU, and not less
 
@@ -45,11 +47,26 @@ Cloud Run allows fractional CPU down to 0.08, which looks like the cheaper choic
 
 gen2 buys full Linux compatibility that nothing here needs, boots slower, and floors memory at 512Mi. With `--min-instances=0` almost every request pays a cold start, so startup latency is the thing worth optimising.
 
+This one is an assumption carried from the general case rather than a measurement against this image. If cold starts turn out to be the dominant complaint from design partners, time a gen2 revision before assuming gen1 is the faster of the two.
+
 ### Concurrency and threads
 
-`--concurrency=8` sits against the 4 gunicorn threads configured in the dockerfile. Mild queueing on one instance is cheaper than spinning up a second. The thread count is also the per-instance database connection ceiling: Django holds one Postgres connection per thread (`CONN_MAX_AGE` in `core/settings.py`), so `max-instances=2 x 4 threads` is at most 8 connections against the database — worth re-checking against `max_connections` if either number changes.
+`--concurrency=4` matches the 4 gunicorn threads configured in the dockerfile. Dispatching more requests than the process can actually run in parallel does not add throughput — the surplus parks in the kernel socket backlog, where Cloud Run's autoscaler cannot see it and gunicorn's `--timeout 0` does not bound it. Matching the two also makes the memory ceiling deterministic: at most four concurrent report renders per instance, which is what the tier in *Why 1Gi* is sized against.
+
+The thread count is also the per-instance database connection ceiling: Django holds one Postgres connection per thread (`CONN_MAX_AGE` in `core/settings.py`), so `max-instances=2 x 4 threads` is at most 8 connections against the database — worth re-checking against `max_connections` if either number changes.
 
 `--timeout=300` bounds how long a wedged request can keep an instance billable. gunicorn's own `--timeout 0` is deliberate: Cloud Run enforces the real limit, and a large PDF export can legitimately run long.
+
+### Threads are new, and some module state predates them
+
+Before this configuration the image ran a single synchronous worker, so nothing in the codebase had to be thread-safe. Two places hold process-global state that is now shared across four request threads. Neither is known to misbehave today; both are worth remembering before raising the thread count:
+
+- `contracts/views.py` calls `locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")` inside request handlers. `setlocale` mutates process-wide state, not thread-local state. It is benign here only because the image already sets `LC_ALL=pt_BR.UTF-8`, so every thread writes the identical value.
+- `reports/exporters/base.py` tracks live exporters in a class-level `weakref.WeakSet` and exposes `cleanup_all()`, which would close PDFs belonging to other threads' in-flight requests. Nothing calls it today.
+
+### If the database ever moves off Cloud SQL
+
+`CONN_MAX_AGE=60` assumes a direct connection. Behind a transaction-mode pooler (PgBouncer, Supabase's Supavisor) persistent connections and server-side cursors both break: set `CONN_MAX_AGE=0` and `DISABLE_SERVER_SIDE_CURSORS=True`, or use the pooler's session-mode port.
 
 ## Image size
 

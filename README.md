@@ -7,6 +7,7 @@
 ### Pré-requisitos
 - Docker e Docker Compose
 - [uv](https://docs.astral.sh/uv/) (apenas se for rodar fora do container)
+- `libpq` (apenas para o setup local sem Docker — ver abaixo)
 - Google Cloud SDK (para deploy)
 
 ### Setup com Docker (recomendado)
@@ -32,6 +33,16 @@ docker compose exec app python manage.py migrate
 A aplicação estará disponível em http://localhost:8000.
 
 ### Setup local (sem Docker)
+
+O projeto usa `psycopg2` compilado a partir do fonte (e não `psycopg2-binary`,
+ver `docs/DEPLOY.md`), então o `pg_config` precisa estar no `PATH` antes do
+`uv sync`. No macOS o `libpq` é keg-only:
+
+```bash
+brew install libpq && export PATH="$(brew --prefix libpq)/bin:$PATH"
+```
+
+No Debian/Ubuntu: `sudo apt install libpq-dev`.
 
 1. Instale as dependências:
 ```bash

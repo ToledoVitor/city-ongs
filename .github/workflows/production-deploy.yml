@@ -83,10 +83,13 @@ jobs:
           # cpu-throttling bills CPU only while a request is in flight;
           # max-instances caps the blast radius of a traffic spike.
           #
-          # memory=512Mi: measured peak RSS rendering every report against a
-          # contract with 20k expenses + 20k revenues is ~342 MiB (see
-          # docs/DEPLOY.md). 256Mi and 384Mi are both under that; 512Mi is the
-          # smallest tier that fits, with ~170 MiB to spare.
+          # memory=1Gi: the ~342 MiB peak measured in docs/DEPLOY.md is a
+          # *serial* figure — one report at a time. This service runs 4 gunicorn
+          # threads, so two concurrent large exports share one process and the
+          # 512Mi tier's ~170 MiB of headroom is gone. Cloud Run's free tier
+          # covers 360k GiB-seconds/month, which at this traffic means 1Gi and
+          # 512Mi both bill zero; the smaller tier buys nothing and risks an
+          # OOM kill, which surfaces as a 503 with no traceback.
           #
           # cpu=1 is not padding — below 1 vCPU Cloud Run forces
           # max-concurrency to 1, so every simultaneous request would need its
@@ -94,22 +97,27 @@ jobs:
           # two in-flight requests, and under request-based billing it costs
           # more than one shared instance, not less.
           #
-          # gen1 boots faster than gen2 and allows sub-512Mi if the footprint
-          # ever shrinks; gen2 buys nothing here and has a 512Mi floor. With
-          # min-instances=0 nearly every request pays a cold start, so startup
-          # latency is the thing to optimise.
+          # gen1 boots faster than gen2; with min-instances=0 nearly every
+          # request pays a cold start, so startup latency is the thing to
+          # optimise. This is an assumption carried from the general case, not
+          # something measured against this image — worth timing once deployed.
           #
-          # concurrency=8 against the 4 gunicorn threads in the dockerfile:
-          # mild queueing is cheaper than a second instance at this traffic.
+          # concurrency=4 matches the 4 gunicorn threads in the dockerfile.
+          # Dispatching more than the process can actually run in parallel only
+          # parks the surplus in the socket backlog, where it is invisible to
+          # Cloud Run's autoscaler and unbounded by gunicorn's --timeout 0.
+          # Matching the two also makes the memory ceiling deterministic: at
+          # most 4 concurrent renders per instance.
+          #
           # timeout=300 bounds how long a wedged request can bill.
           flags: >-
             --min-instances=0
             --max-instances=2
             --cpu-throttling
             --cpu=1
-            --memory=512Mi
+            --memory=1Gi
             --execution-environment=gen1
-            --concurrency=8
+            --concurrency=4
             --timeout=300
 
       - name: Tag production docker image
