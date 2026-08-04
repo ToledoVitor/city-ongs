@@ -5,6 +5,7 @@ from datetime import date
 from django.conf import settings
 from fpdf import XPos, YPos
 
+from reports.exporters.commons.contract_info import expenditure_orderer_info
 from reports.exporters.commons.exporters import BasePdf
 from utils.formats import (
     document_mask,
@@ -275,19 +276,7 @@ class PassOn11PDFExporter:
         self.pdf.ln(10)
 
     def _draw_expenditure_orderer(self):
-        manager = self.contract.contractor_manager
-
-        # 1. Obter Nome e Documento de forma segura
-        manager_name = manager.name if manager else "Não Informado"
-        manager_cnpj = document_mask(
-            str(manager.cnpj) if manager and manager.cnpj else ""
-        )
-
-        # 2. Obter o Cargo usando o objeto 'organization' e a função getattr para segurança
-        # Se organization ou position for None, retorna 'Não Informado'
-        org = getattr(self.contract, "organization", None)
-        position_value = getattr(org, "position", None) if org else None
-        cargo_text = position_value if position_value else "Não Informado"
+        manager_name, cargo_text, manager_cnpj = expenditure_orderer_info(self.contract)
 
         self.__set_font(font_size=8, bold=True)
         self.pdf.cell(
