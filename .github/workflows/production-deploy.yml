@@ -84,9 +84,9 @@ jobs:
           # max-instances caps the blast radius of a traffic spike.
           #
           # memory=512Mi: measured peak RSS rendering every report against a
-          # contract with 20k expenses + 20k revenues is ~295 MiB (see
-          # docs/DEPLOY.md). 256Mi has no headroom over that; 512Mi is the
-          # next tier up and the smallest safe one.
+          # contract with 20k expenses + 20k revenues is ~342 MiB (see
+          # docs/DEPLOY.md). 256Mi and 384Mi are both under that; 512Mi is the
+          # smallest tier that fits, with ~170 MiB to spare.
           #
           # cpu=1 is not padding — below 1 vCPU Cloud Run forces
           # max-concurrency to 1, so every simultaneous request would need its

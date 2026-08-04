@@ -24,16 +24,18 @@ Measured, not guessed. A benchmark boots the real production image, builds the W
 
 | stage | RSS |
 |---|---|
-| idle worker (WSGI app built, before first request) | ~103 MiB |
+| idle worker (WSGI app built, before first request) | ~108 MiB |
 | after the URLconf resolves | ~159 MiB |
-| peak, rendering every report twice | ~295 MiB |
+| peak, rendering all 17 reports twice | ~342 MiB |
 
-256Mi has no headroom over that peak, so 512Mi is the smallest safe tier. If the footprint ever drops meaningfully, gen1 does allow going below 512Mi — gen2 does not.
+512Mi leaves ~170 MiB over that peak. 256Mi and 384Mi are both under it, so 512Mi is the smallest tier that fits. If the footprint ever drops meaningfully, gen1 does allow going below 512Mi — gen2 does not.
 
-Two things move that number, both of which the code now avoids paying for by default:
+Two things move that number:
 
-- **pandas + numpy cost ~95 MiB resident** and are needed only by the XLSX *upload* path. `accountability/xlsx/__init__.py` defers that import (PEP 562 module `__getattr__`) so a worker that never handles an upload never pays it.
-- **Report rendering leaves memory the allocator does not return to the OS**, so a long-lived worker drifts upward. `--max-requests 400` in the dockerfile recycles the worker and puts a floor under the drift.
+- **pandas + numpy cost ~95 MiB resident** and are needed only by the XLSX *upload* path. `accountability/xlsx/__init__.py` defers that import (PEP 562 module `__getattr__`) so a worker that never handles an upload never pays it. That lowers the *floor* — RSS after URLconf resolution went from ~202 MiB to ~159 MiB — but not the peak, which is dominated by report rendering rather than by imports.
+- **Report rendering churns memory the allocator only partly returns to the OS**, so a long-lived worker drifts upward. `--max-requests 400` in the dockerfile recycles the worker and puts a floor under the drift.
+
+One caveat on that peak: it is RSS sampled in-process, not an observed OOM. Nobody has yet run the suite under a hard 256Mi/384Mi cgroup cap to find where it actually dies. 512Mi is sized from measured peak plus headroom — the conservative direction — but the empirical floor is still unverified.
 
 ### Why 1 vCPU, and not less
 
