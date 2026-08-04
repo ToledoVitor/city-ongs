@@ -12,7 +12,57 @@ What one run does:
 4. Deploys to the `sitts` Cloud Run service with 100% traffic to the new revision.
 5. Moves the `production` and `latest` tags onto the image it just built.
 
-The Cloud Run scaling flags are pinned in the workflow (`--min-instances=0 --max-instances=2 --cpu-throttling`) rather than left to the service's stored config, so an edit in the console cannot silently reintroduce always-on billing.
+The Cloud Run scaling flags are pinned in the workflow rather than left to the service's stored config, so an edit in the console cannot silently reintroduce always-on billing.
+
+## Instance sizing
+
+`--cpu=1 --memory=512Mi --execution-environment=gen1 --concurrency=8 --timeout=300`, on top of `--min-instances=0 --max-instances=2 --cpu-throttling`.
+
+### Why 512Mi
+
+Measured, not guessed. A benchmark boots the real production image, builds the WSGI app, and renders all 17 reports against a contract carrying 20,000 expenses and 20,000 revenues — far past anything in production today:
+
+| stage | RSS |
+|---|---|
+| idle worker (WSGI app built, before first request) | ~103 MiB |
+| after the URLconf resolves | ~159 MiB |
+| peak, rendering every report twice | ~295 MiB |
+
+256Mi has no headroom over that peak, so 512Mi is the smallest safe tier. If the footprint ever drops meaningfully, gen1 does allow going below 512Mi — gen2 does not.
+
+Two things move that number, both of which the code now avoids paying for by default:
+
+- **pandas + numpy cost ~95 MiB resident** and are needed only by the XLSX *upload* path. `accountability/xlsx/__init__.py` defers that import (PEP 562 module `__getattr__`) so a worker that never handles an upload never pays it.
+- **Report rendering leaves memory the allocator does not return to the OS**, so a long-lived worker drifts upward. `--max-requests 400` in the dockerfile recycles the worker and puts a floor under the drift.
+
+### Why 1 vCPU, and not less
+
+Cloud Run allows fractional CPU down to 0.08, which looks like the cheaper choice and is not: **below 1 vCPU, maximum concurrency is forced to 1**. Every simultaneous request would then need its own instance, and `--max-instances=2` would cap the entire service at two in-flight requests. Under request-based billing one shared instance is both cheaper and faster.
+
+### Why gen1
+
+gen2 buys full Linux compatibility that nothing here needs, boots slower, and floors memory at 512Mi. With `--min-instances=0` almost every request pays a cold start, so startup latency is the thing worth optimising.
+
+### Concurrency and threads
+
+`--concurrency=8` sits against the 4 gunicorn threads configured in the dockerfile. Mild queueing on one instance is cheaper than spinning up a second. The thread count is also the per-instance database connection ceiling: Django holds one Postgres connection per thread (`CONN_MAX_AGE` in `core/settings.py`), so `max-instances=2 x 4 threads` is at most 8 connections against the database — worth re-checking against `max_connections` if either number changes.
+
+`--timeout=300` bounds how long a wedged request can keep an instance billable. gunicorn's own `--timeout 0` is deliberate: Cloud Run enforces the real limit, and a large PDF export can legitimately run long.
+
+## Image size
+
+With `--min-instances=0` the image is pulled on essentially every cold start, so its size is latency (and billed startup time), not just registry storage.
+
+Two dependencies were declared twice in ways that silently inflated it. Both wheels in each pair install into the *same* import path, so which one won was install-order luck, and uninstalling either could delete files the other still claimed:
+
+- `psycopg2` **and** `psycopg2-binary` — same `psycopg2/` package. The source build won in practice, leaving ~11 MB of the binary wheel's bundled libpq/libssl unused in the image.
+- `phonenumbers` **and** `django-phonenumber-field[phonenumberslite]` — same `phonenumbers/` package. The explicit `phonenumbers` pin dragged back the 38 MB of geocoding/carrier metadata the `lite` extra exists to avoid, *and* pinned an older version over the newer one.
+
+Dropping the redundant halves took the image from 497 MB to 444 MB with no behaviour change.
+
+`psycopg2-binary` is the one that looks tempting to keep, because it would remove the builder stage entirely. It is deliberately not used: the binary wheel bundles its own libssl, this image already loads `cryptography` in the same process, and that is the collision psycopg upstream warns about. The builder stage costs build time, not image size.
+
+Note for local development on macOS: building `psycopg2` from source needs `pg_config` on `PATH` (`brew install libpq`).
 
 ## Artifact Registry retention
 

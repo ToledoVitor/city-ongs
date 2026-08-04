@@ -59,6 +59,10 @@ jobs:
           --set-secrets=DJANGO_SETTINGS=django_settings:latest \
           --region=${{ env.REGION }} \
           --image=${{ env.IMAGE_NAME }} \
+          --cpu=1 \
+          --memory=512Mi \
+          --max-retries=1 \
+          --task-timeout=600 \
           --command="sh" \
           --args="-c" \
           --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; python manage.py migrate && python manage.py collectstatic --noinput" \
@@ -78,7 +82,35 @@ jobs:
           # always-on billing. min-instances=0 keeps scale-to-zero;
           # cpu-throttling bills CPU only while a request is in flight;
           # max-instances caps the blast radius of a traffic spike.
-          flags: '--min-instances=0 --max-instances=2 --cpu-throttling'
+          #
+          # memory=512Mi: measured peak RSS rendering every report against a
+          # contract with 20k expenses + 20k revenues is ~295 MiB (see
+          # docs/DEPLOY.md). 256Mi has no headroom over that; 512Mi is the
+          # next tier up and the smallest safe one.
+          #
+          # cpu=1 is not padding — below 1 vCPU Cloud Run forces
+          # max-concurrency to 1, so every simultaneous request would need its
+          # own instance. With max-instances=2 that caps the whole service at
+          # two in-flight requests, and under request-based billing it costs
+          # more than one shared instance, not less.
+          #
+          # gen1 boots faster than gen2 and allows sub-512Mi if the footprint
+          # ever shrinks; gen2 buys nothing here and has a 512Mi floor. With
+          # min-instances=0 nearly every request pays a cold start, so startup
+          # latency is the thing to optimise.
+          #
+          # concurrency=8 against the 4 gunicorn threads in the dockerfile:
+          # mild queueing is cheaper than a second instance at this traffic.
+          # timeout=300 bounds how long a wedged request can bill.
+          flags: >-
+            --min-instances=0
+            --max-instances=2
+            --cpu-throttling
+            --cpu=1
+            --memory=512Mi
+            --execution-environment=gen1
+            --concurrency=8
+            --timeout=300
 
       - name: Tag production docker image
         run: |

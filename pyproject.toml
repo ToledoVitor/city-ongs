@@ -18,15 +18,23 @@ dependencies = [
     "pandas>=2.2.3,<3.0.0",
     "openpyxl>=3.1.5,<4.0.0",
     "gunicorn>=23.0.0,<24.0.0",
+    # psycopg2 only — NOT psycopg2-binary as well. Both wheels install into the
+    # same `psycopg2/` path, so having both meant whichever unpacked last won,
+    # and the loser's ~11 MB of bundled libpq/libssl rode along unused. The
+    # source build is also what psycopg upstream recommends for production: the
+    # binary wheel carries its own libssl, which can collide with the copy
+    # `cryptography` already links into this same process.
     "psycopg2>=2.9.10,<3.0.0",
-    "psycopg2-binary>=2.9.10,<3.0.0",
     "django-environ>=0.12.0,<0.13.0",
     "google-cloud-secret-manager>=2.23.0,<3.0.0",
     "google-cloud-storage>=3.0.0,<4.0.0",
     "django-storages[google]>=1.14.5,<2.0.0",
     "sendgrid>=6.11.0,<7.0.0",
+    # The `phonenumberslite` extra is the whole point here: it drops the 38 MB
+    # of geocoding/carrier metadata nothing in this project reads. Declaring
+    # `phonenumbers` as well pulled the full build back in *and* pinned an
+    # older version over the same `phonenumbers/` namespace.
     "django-phonenumber-field[phonenumberslite]>=8.0.0,<9.0.0",
-    "phonenumbers>=8.13.30,<9.0.0",
     "jsonschema>=4.26.0",
     "requests>=2.34.0",
 ]
