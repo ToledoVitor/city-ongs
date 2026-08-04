@@ -114,7 +114,7 @@ if not os.path.exists(os.path.join(BASE_DIR, "logs")):
 ALLOWED_HOSTS: List[str] = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://sitts-665645565019.southamerica-east1.run.app",
+    "https://sitts-bdhqfqo3cq-rj.a.run.app",
     "https://gestao-sitts-web.com",
 ]
 

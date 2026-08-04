@@ -129,6 +129,7 @@ jobs:
             --service-account=${{ env.RUNTIME_SA }}
             --add-cloudsql-instances=${{ env.CLOUDSQL_INSTANCE }}
             --set-env-vars=GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}
+            --allow-unauthenticated
 
       - name: Tag production docker image
         run: |
