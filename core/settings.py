@@ -111,7 +111,22 @@ LOGGING = {
 if not os.path.exists(os.path.join(BASE_DIR, "logs")):
     os.makedirs(os.path.join(BASE_DIR, "logs"))
 
-ALLOWED_HOSTS: List[str] = ["*"]
+if DEVELOPMENT:
+    ALLOWED_HOSTS: List[str] = ["*"]
+else:
+    # Read from the environment so a wrong entry can be corrected by editing the
+    # django_settings secret, rather than needing a code change and a redeploy —
+    # a bad ALLOWED_HOSTS makes every request a 400, including the way in to fix
+    # it. The default is the full set of hosts that actually reach this service.
+    ALLOWED_HOSTS: List[str] = env.list(
+        "ALLOWED_HOSTS",
+        default=[
+            "app.sitts.com.br",
+            "sitts-bdhqfqo3cq-rj.a.run.app",
+            "sitts-504501.web.app",
+            "sitts-504501.firebaseapp.com",
+        ],
+    )
 
 CSRF_TRUSTED_ORIGINS = [
     # Cloud Run's own URL. Keep it: it stays reachable if DNS, Firebase Hosting
@@ -120,7 +135,14 @@ CSRF_TRUSTED_ORIGINS = [
     "https://sitts-bdhqfqo3cq-rj.a.run.app",
     "https://app.sitts.com.br",
     "https://sitts-504501.web.app",
+    "https://sitts-504501.firebaseapp.com",
 ]
+
+# Cookies must never travel in cleartext. Paired with SECURE_PROXY_SSL_HEADER
+# below, which is what lets Django recognise the proxied request as HTTPS in
+# the first place. Off in development, where there is no TLS to ride.
+SESSION_COOKIE_SECURE = not DEVELOPMENT
+CSRF_COOKIE_SECURE = not DEVELOPMENT
 
 # Both Cloud Run and Firebase Hosting terminate TLS and forward the original
 # scheme in this header. Without it Django treats every request as plain HTTP:

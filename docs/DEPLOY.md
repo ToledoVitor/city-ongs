@@ -74,6 +74,78 @@ Only `www` is mapped. The apex is handled by Hostinger's own domain forwarding t
 
 After DNS resolves, `WEBSITE_URL` in the `django_settings` secret must move to the new domain — it builds the links in password-reset emails, so it is the one setting that silently breaks if forgotten.
 
+## Reaching a running deployment
+
+Cloud Run has no SSH and no exec. There are three ways in; which one you want depends on whether you need the production *container* or just the production *database*.
+
+### 1. A one-off management command
+
+Runs inside the real image with the real `django_settings` secret. This is the right tool for `migrate`, `showmigrations`, `createsuperuser`, or a data fix that must see production config.
+
+It works by overriding the arguments of the existing pre-deploy job:
+
+```bash
+gcloud beta run jobs execute sitts-pre-deploy \
+  --project=sitts-504501 --region=southamerica-east1 \
+  --args="-c" \
+  --args="set -o allexport; source /secrets/DJANGO_SETTINGS; set +o allexport; python manage.py showmigrations" \
+  --wait
+```
+
+`beta` is required — `--args` override does not exist on the GA `gcloud run jobs execute`. Note this is strictly non-interactive: no `manage.py shell`, and any command that prompts will hang until the task timeout. Output goes to Cloud Logging, not your terminal.
+
+### 2. An interactive Django shell against the production database
+
+Cloud Run cannot give you one, but the Cloud SQL Auth Proxy plus a local checkout can. Start the tunnel:
+
+```bash
+./cloud-sql-proxy sitts-504501:southamerica-east1:sitts-db --port 5433 --token "$(gcloud auth print-access-token)"
+```
+
+`--token` is not optional in practice. The proxy defaults to Application Default Credentials, which are a *separate* credential from your `gcloud` CLI login and go stale independently — the symptom is `invalid_grant / reauth related error (invalid_rapt)` and a connection that closes immediately. Passing the CLI's own access token sidesteps the whole problem. The token lasts about an hour.
+
+Then pull the production config and point a local Django at the tunnel:
+
+```bash
+gcloud secrets versions access latest --secret=django_settings --project=sitts-504501 > /tmp/prod.env
+```
+
+```bash
+PYTHONPATH="$PWD" DEVELOPMENT=true DEBUG=false SECRET_KEY=unused \
+DB_NAME=sitts DB_USER=sitts DB_PASSWORD="$(grep '^DB_PASSWORD=' /tmp/prod.env | cut -d= -f2-)" \
+DB_HOST=127.0.0.1 DB_PORT=5433 STATIC_URL=/static/ GS_BUCKET_NAME=sitts-504501-media \
+uv run python manage.py shell
+```
+
+Four things to be careful about:
+
+- **This is production data.** There is no undo, and `db-f1-micro` restores are not fast.
+- `DEVELOPMENT=true` only changes *where settings come from* — env instead of Secret Manager. It does not point anything at a local database. The tunnel is what decides that.
+- `GS_BUCKET_NAME` above is the real bucket. Anything that writes a `FileField` touches production storage.
+- Delete `/tmp/prod.env` when you are done; it holds the database password and `SECRET_KEY`.
+
+### 3. Raw psql
+
+Same tunnel, no Django:
+
+```bash
+psql -h 127.0.0.1 -p 5433 -U sitts -d sitts
+```
+
+## Creating the first superuser
+
+`manage.py createsuperuser` does not work on this model and the `superuser` Makefile target must not be used against a real environment — it hardcodes a known password.
+
+Three model constraints make this less mechanical than usual:
+
+- `USERNAME_FIELD` is `email`, and `organization` is a non-nullable FK that `REQUIRED_FIELDS` does not include, so the interactive command cannot supply it.
+- A `User` needs an `Organization`, which needs a `CityHall`. Both must exist first.
+- `User.save()` calls `clean()` directly, which requires **exactly one** of `cpf` or `cnpj`. This is not skippable via `full_clean(exclude=...)` — the check runs on every save.
+
+So the account has to be built explicitly: create the `CityHall`, create the `Organization`, then construct the `User` with `organization`, one of `cpf`/`cnpj`, `is_staff`, `is_superuser`, and `set_password()`.
+
+Leave `password_redefined=False`. `ForcePasswordChangeMiddleware` then redirects the account to `/auth/force-password-change/` until the password is changed, which makes any generated bootstrap password single-use.
+
 ## Storage: two buckets, on purpose
 
 Uploads and static assets are split, and they must stay split.
