@@ -30,6 +30,16 @@ Project `sitts-504501` (number `665645565019`), everything in `southamerica-east
 | Runtime SA | `sitts-run@…` | Cloud Run identity |
 | Deploy SA | `github-deploy@…` | assumed by GitHub Actions via WIF |
 
+### IAM the workflow actually needs
+
+`github-deploy` holds `run.admin` and `artifactregistry.writer` at project level, `iam.serviceAccountUser` on `sitts-run`, and **`artifactregistry.repoAdmin` on the repository**.
+
+That last one is not optional and fails in a way that looks like success. The final step moves the `production` and `latest` tags onto the new image, and *moving* an existing tag means deleting it first — `artifactregistry.writer` grants create but not `artifactregistry.tags.delete`. So the very first deploy into a fresh project passes (no tags exist yet) and every deploy after it fails on the last step, after the service has already been updated. Granting `repoAdmin` on the repository rather than the project keeps it scoped.
+
+`sitts-run` holds `cloudsql.client`, `logging.logWriter`, `storage.objectAdmin` on both buckets, `secretmanager.secretAccessor` on `django_settings`, and `iam.serviceAccountTokenCreator` **on itself** for signing media URLs.
+
+The Cloud Run service is `--allow-unauthenticated`: it has to be anonymously reachable or nobody can load the login page. Django's own authentication protects the content.
+
 Deliberately **absent**, because each is a fixed monthly charge that buys nothing at this traffic:
 
 - **No load balancer.** The `.run.app` URL is the entry point. A global external ALB costs ~$18-25/mo for the forwarding rule alone, before traffic; Cloud Run domain mapping is the free alternative if a custom domain is needed.
