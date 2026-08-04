@@ -13,6 +13,22 @@ env.read_env(env_file)
 
 DEVELOPMENT = env("DEVELOPMENT")
 
+# Reuse each worker's Postgres connection instead of dialing a new one per
+# request. On Cloud Run the round trip to Cloud SQL is the single biggest
+# fixed cost in a short request, and every connection held open is one of the
+# instance's scarce slots on a small Postgres tier — hence a short TTL rather
+# than a persistent pool.
+#
+# CONN_HEALTH_CHECKS is what makes reuse safe here: with cpu-throttling the
+# instance is frozen between requests, so a socket can go dead unnoticed.
+# Django then pings the connection before handing it over and reconnects
+# instead of raising InterfaceError on the first query.
+#
+# Budget the ceiling as max_cloud_run_instances x gunicorn_threads. Keep it
+# under the database's max_connections.
+CONN_MAX_AGE = env.int("CONN_MAX_AGE", default=60)
+CONN_HEALTH_CHECKS = True
+
 if DEVELOPMENT:
     # Database
     DATABASES: Dict[str, Dict[str, Any]] = {
@@ -23,6 +39,8 @@ if DEVELOPMENT:
             "PASSWORD": env("DB_PASSWORD"),
             "HOST": env("DB_HOST"),
             "PORT": env("DB_PORT", default=None),
+            "CONN_MAX_AGE": CONN_MAX_AGE,
+            "CONN_HEALTH_CHECKS": CONN_HEALTH_CHECKS,
         }
     }
 else:
@@ -45,6 +63,8 @@ else:
             "PASSWORD": env("DB_PASSWORD"),
             "HOST": env("DB_HOST"),
             "PORT": "",
+            "CONN_MAX_AGE": CONN_MAX_AGE,
+            "CONN_HEALTH_CHECKS": CONN_HEALTH_CHECKS,
         }
     }
 

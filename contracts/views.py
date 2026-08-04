@@ -342,7 +342,6 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
         context.update(self.section.get_context(self.object))
         return context
 
-
     def post(self, request, pk, *args, **kwargs):
         if not self.request.POST.get("csrfmiddlewaretoken"):
             return redirect("contracts:contracts-list")
@@ -422,9 +421,7 @@ class ContractsDetailView(UserAccessViewMixin, LoginRequiredMixin, DetailView):
                     logger.warning(f"form_type: {form_type} is not a valid form")
                     return redirect("contracts:contracts-list")
 
-        return redirect_to_section(
-            contract.id, self.post_sections.get(form_type)
-        )
+        return redirect_to_section(contract.id, self.post_sections.get(form_type))
 
 
 @login_required
@@ -1096,6 +1093,9 @@ class ContractWorkPlanView(LoginRequiredMixin, DetailView):
 
 
 def get_monthly_transfers(contract):
+    # setlocale muda estado global do processo, não da thread. O container roda
+    # 4 threads gunicorn (ver docs/DEPLOY.md), então isto só é seguro porque a
+    # imagem já define LC_ALL=pt_BR.UTF-8 e toda thread grava o mesmo valor.
     locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
     transfers = (
@@ -1156,6 +1156,7 @@ class ContractTimelineView(LoginRequiredMixin, DetailView):
 
 
 def _get_months_list(contract: Contract):
+    # Estado global do processo — ver a nota em get_monthly_transfers.
     locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
     months = []
