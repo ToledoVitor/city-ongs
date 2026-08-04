@@ -286,7 +286,11 @@ geometric display sans, sentence-case voice).
   select.ui-input::-ms-expand { display: none; }
   /* --color-body, not --color-mute: #afafaf placeholders land at 1.9:1 on the
      canvas-soft fill, well under the 4.5:1 AA floor. Placeholder text is in
-     scope for WCAG 1.4.3. */
+     scope for WCAG 1.4.3.
+     Don't lighten this past #646464. The binding surface is not the #efefef
+     resting fill but the #e2e2e2 one these inputs swap to on :hover, where
+     #646464 is the lightest passing value; #5e5e5e measures 5.01:1 there.
+     (#6d6d6d is 4.4999:1 on #efefef alone — it does not pass.) */
   input.ui-input::placeholder,
   textarea.ui-input::placeholder { color: var(--color-body); }
   input.ui-input:hover,
