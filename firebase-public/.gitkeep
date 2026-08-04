@@ -1,0 +1,10 @@
+Intentionally empty.
+
+Firebase Hosting requires a `public` directory, but every path is rewritten to
+the Cloud Run service (see firebase.json). Hosting checks for a static file
+first and falls through to the rewrite when it finds none — so keeping this
+directory empty is what routes all traffic to Django.
+
+Static assets are NOT served from here. They live in the public GCS bucket and
+are fetched directly by the browser, which also keeps them out of Firebase's
+360 MB/day free transfer allowance.

@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "site": "sitts-504501",
+    "public": "firebase-public",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "sitts",
+          "region": "southamerica-east1"
+        }
+      }
+    ]
+  }
+}
