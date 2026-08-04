@@ -55,6 +55,25 @@ Cloud SQL has **deletion protection enabled**. To actually delete the instance y
 gcloud sql instances patch sitts-db --project=sitts-504501 --no-deletion-protection
 ```
 
+## Custom domain
+
+`www.sitts.com.br`, served through a **Cloud Run domain mapping**. It costs nothing and provisions a Google-managed certificate automatically.
+
+The alternative is a global external Application Load Balancer, which is what most Cloud Run documentation steers you toward. Its forwarding rule alone is roughly $18-25/mo before a single request — more than the entire rest of this project's infrastructure combined, for a service handling three users. Domain mapping carries a lower availability SLO and Google treats it as legacy, but at this scale that is the correct trade.
+
+Domain mappings *are* supported in `southamerica-east1`, despite the region gaps in Google's own docs. Verified by attempting one: the failure was ownership verification, not region.
+
+### Bringing up a domain
+
+1. Verify ownership in Google Search Console. `gcloud domains verify sitts.com.br` opens the right page; the TXT record it asks for goes in Hostinger's DNS. Verify the **apex**, not `www` — the apex covers every subdomain.
+2. `gcloud beta run domain-mappings create --service=sitts --domain=www.sitts.com.br --region=southamerica-east1`.
+3. Add the DNS records that command prints, at Hostinger. For a subdomain it is a single `CNAME` to `ghs.googlehosted.com.`
+4. Wait for the certificate. Usually ~15 minutes, occasionally hours. `gcloud beta run domain-mappings describe` reports status.
+
+Only `www` is mapped. The apex is handled by Hostinger's own domain forwarding to `https://www.sitts.com.br`, which avoids pinning Google's four A records at the apex and keeps one canonical host for cookies and sessions.
+
+After DNS resolves, `WEBSITE_URL` in the `django_settings` secret must move to the new domain — it builds the links in password-reset emails, so it is the one setting that silently breaks if forgotten.
+
 ## Storage: two buckets, on purpose
 
 Uploads and static assets are split, and they must stay split.

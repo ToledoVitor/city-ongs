@@ -114,7 +114,12 @@ if not os.path.exists(os.path.join(BASE_DIR, "logs")):
 ALLOWED_HOSTS: List[str] = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
+    # Cloud Run's own URL. Keep it: it stays reachable if DNS or the domain
+    # mapping's certificate ever breaks, which makes it the way back in.
     "https://sitts-bdhqfqo3cq-rj.a.run.app",
+    "https://www.sitts.com.br",
+    "https://sitts.com.br",
+    # Left over from the deleted project; no longer mapped to any service.
     "https://gestao-sitts-web.com",
 ]
 
