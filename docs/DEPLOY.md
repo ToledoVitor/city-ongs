@@ -6,13 +6,59 @@
 
 What one run does:
 
-1. Authenticates to GCP through Workload Identity Federation as `github-deploy@sitts-project.iam.gserviceaccount.com`.
+1. Authenticates to GCP through Workload Identity Federation as `github-deploy@sitts-504501.iam.gserviceaccount.com`.
 2. Builds the image and pushes it to Artifact Registry under a timestamped tag.
 3. Runs `migrate` and `collectstatic` as the `sitts-pre-deploy` Cloud Run job, reading config from the `django_settings` secret.
 4. Deploys to the `sitts` Cloud Run service with 100% traffic to the new revision.
 5. Moves the `production` and `latest` tags onto the image it just built.
 
 The Cloud Run scaling flags are pinned in the workflow rather than left to the service's stored config, so an edit in the console cannot silently reintroduce always-on billing.
+
+## What exists in GCP
+
+Project `sitts-504501` (number `665645565019`), everything in `southamerica-east1`. The previous project was deleted; this is a rebuild.
+
+| Resource | Name | Notes |
+|---|---|---|
+| Cloud SQL | `sitts-db` | POSTGRES_16, `db-f1-micro`, **zonal**, 10GB SSD, public IP, 7 daily backups |
+| Cloud Run service | `sitts` | scale-to-zero |
+| Cloud Run job | `sitts-pre-deploy` | `migrate` + `collectstatic` |
+| Artifact Registry | `cloud-run-source-deploy` | cleanup policy applied |
+| GCS | `sitts-504501-static` | **public** — CSS/JS/admin assets |
+| GCS | `sitts-504501-media` | **private** — uploads, signed URLs |
+| Secret Manager | `django_settings` | all runtime config |
+| Runtime SA | `sitts-run@…` | Cloud Run identity |
+| Deploy SA | `github-deploy@…` | assumed by GitHub Actions via WIF |
+
+Deliberately **absent**, because each is a fixed monthly charge that buys nothing at this traffic:
+
+- **No load balancer.** The `.run.app` URL is the entry point. A global external ALB costs ~$18-25/mo for the forwarding rule alone, before traffic; Cloud Run domain mapping is the free alternative if a custom domain is needed.
+- **No Serverless VPC Access connector.** Cloud SQL has a public IP with *zero* authorized networks, and Cloud Run reaches it through the built-in Cloud SQL connector (`--add-cloudsql-instances`), which is IAM-authenticated and free. Switching the instance to private IP would force a connector back in at ~$15-20/mo.
+- **No HA / regional availability.** That is an exact 2x on the Cloud SQL bill.
+- **No App Engine.** The old `app.yaml` targeted App Engine Flex, which runs always-on VMs and does not scale to zero.
+
+A billing budget of $15/mo is set on the billing account with alerts at 50%, 80% and 100%. Cloud SQL is the only meaningful line item — everything else lands under ~$1/mo combined.
+
+Cloud SQL has **deletion protection enabled**. To actually delete the instance you must clear it first:
+
+```bash
+gcloud sql instances patch sitts-db --project=sitts-504501 --no-deletion-protection
+```
+
+## Storage: two buckets, on purpose
+
+Uploads and static assets are split, and they must stay split.
+
+Templates render `{{ obj.file.url }}` directly, so whatever the storage backend returns *is* the link handed to the browser. Before the split there was one bucket with `GS_QUERYSTRING_AUTH = False`, meaning unsigned URLs — which only work if the bucket is world-readable. `roles/storage.objectViewer` on `allUsers` also grants `storage.objects.list`, so that configuration would have let anyone who learned the bucket name enumerate and download every contract, bank statement and accountability attachment in the system, on a product that also stores CPF.
+
+Now:
+
+- `sitts-504501-static` is public and unsigned. It holds CSS, JS and Django admin assets. Nothing sensitive, and unsigned URLs stay cacheable.
+- `sitts-504501-media` is private. `querystring_auth` is on, so every URL is signed and expires after 15 minutes.
+
+Signing from Cloud Run uses the IAM `signBlob` API rather than a service-account key file, which is why `sitts-run` holds `roles/iam.serviceAccountTokenCreator` **on itself**. Remove that binding and every file link in the app breaks.
+
+Note what this does *not* do: a signed URL is bearer access for its lifetime, and nothing checks that the requester belongs to the tenant that owns the file. Serving uploads through a permission-checked Django view is the real fix if the threat model tightens.
 
 ## Instance sizing
 
@@ -103,24 +149,24 @@ Deliberate, for three reasons:
 
 ### Applying it
 
-Run from a machine authenticated as an account with registry admin on `sitts-project` (the deploy service account does not have it — see above). Note that the active `gcloud` project is probably not `sitts-project`, hence the explicit `--project`.
+Run from a machine authenticated as an account with registry admin on `sitts-504501` (the deploy service account does not have it — see above). Note that the active `gcloud` project is probably not `sitts-504501`, hence the explicit `--project`.
 
 Arm it in dry-run mode first. Policies are evaluated and the matches are logged, but nothing is deleted:
 
 ```bash
-gcloud artifacts repositories set-cleanup-policies cloud-run-source-deploy --project=sitts-project --location=southamerica-east1 --policy=.github/artifact-registry-cleanup-policy.json --dry-run
+gcloud artifacts repositories set-cleanup-policies cloud-run-source-deploy --project=sitts-504501 --location=southamerica-east1 --policy=.github/artifact-registry-cleanup-policy.json --dry-run
 ```
 
 Review what it would have removed in Cloud Logging before going further. Once the matches look right, make it live:
 
 ```bash
-gcloud artifacts repositories set-cleanup-policies cloud-run-source-deploy --project=sitts-project --location=southamerica-east1 --policy=.github/artifact-registry-cleanup-policy.json --no-dry-run
+gcloud artifacts repositories set-cleanup-policies cloud-run-source-deploy --project=sitts-504501 --location=southamerica-east1 --policy=.github/artifact-registry-cleanup-policy.json --no-dry-run
 ```
 
 Confirm what the repository ended up with:
 
 ```bash
-gcloud artifacts repositories describe cloud-run-source-deploy --project=sitts-project --location=southamerica-east1
+gcloud artifacts repositories describe cloud-run-source-deploy --project=sitts-504501 --location=southamerica-east1
 ```
 
 Re-run the same command after editing the JSON — it is declarative and replaces the stored policies, so it is safe to apply repeatedly.

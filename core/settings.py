@@ -1,5 +1,6 @@
 import io
 import os
+from datetime import timedelta
 from typing import Any, Dict, List
 
 import environ
@@ -45,7 +46,7 @@ if DEVELOPMENT:
     }
 else:
     print("reading gcloud env settings")
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "sitts-project")
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "sitts-504501")
     settings_name = "django_settings"
 
     # Pull secrets from Secret Manager
@@ -113,7 +114,7 @@ if not os.path.exists(os.path.join(BASE_DIR, "logs")):
 ALLOWED_HOSTS: List[str] = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://sitts-455340212401.southamerica-east1.run.app",
+    "https://sitts-665645565019.southamerica-east1.run.app",
     "https://gestao-sitts-web.com",
 ]
 
@@ -225,24 +226,56 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# [START gaeflex_py_django_static_config]
-# Define static storage via django-storages[google]
+# Static files (CSS, JavaScript, Images) and user uploads.
+#
+# Two buckets on purpose. Uploaded documents — contracts, bank statements,
+# accountability attachments — carry CPF and municipal financial data;
+# stylesheets do not. Serving both from one public bucket makes every upload
+# world-readable, and `roles/storage.objectViewer` on allUsers also grants
+# storage.objects.list, so the entire media set would be enumerable by anyone
+# who found the bucket name. Keep the two apart.
 STATIC_URL = env("STATIC_URL")
+
+# Falls back to the single pre-split bucket so an environment that has not been
+# migrated yet still boots. Read with a default of its own: passing
+# `default=env("GS_BUCKET_NAME")` would evaluate eagerly and raise even when the
+# two new names are set.
+_legacy_bucket = env("GS_BUCKET_NAME", default="")
+GS_STATIC_BUCKET_NAME = env("GS_STATIC_BUCKET_NAME", default=_legacy_bucket)
+GS_MEDIA_BUCKET_NAME = env("GS_MEDIA_BUCKET_NAME", default=_legacy_bucket)
+
 STORAGES = {
+    # Private bucket. querystring_auth signs every URL, so a link works for the
+    # signature's lifetime and cannot be guessed or shared indefinitely.
+    # Templates render `{{ obj.file.url }}` directly, so this is what stands
+    # between an upload and the open internet.
+    #
+    # Signing on Cloud Run goes through the IAM signBlob API rather than a key
+    # file: the runtime service account needs roles/iam.serviceAccountTokenCreator
+    # on itself (see docs/DEPLOY.md).
     "default": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": GS_MEDIA_BUCKET_NAME,
+            "default_acl": None,
+            "querystring_auth": True,
+            "expiration": timedelta(minutes=15),
+        },
     },
+    # Public bucket: CSS/JS/admin assets only. Unsigned so URLs stay stable and
+    # cacheable — nothing here is sensitive.
     "staticfiles": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": GS_STATIC_BUCKET_NAME,
+            "default_acl": None,
+            "querystring_auth": False,
+        },
     },
 }
-GS_QUERYSTRING_AUTH = False
-GS_BUCKET_NAME = env("GS_BUCKET_NAME")
-GS_DEFAULT_ACL = None
-STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
-DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
-# [END gaeflex_py_django_static_config]
+
+# Kept for anything still reading the module-level name directly.
+GS_BUCKET_NAME = GS_MEDIA_BUCKET_NAME
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/stable/ref/settings/#default-auto-field
