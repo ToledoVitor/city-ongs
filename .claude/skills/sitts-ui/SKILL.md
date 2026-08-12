@@ -126,3 +126,7 @@ python tools/build_ui_mockup.py && open .claude/skills/sitts-ui/references/mocku
 The mockup embeds the `<style>` block straight out of
 `templates/ui/_styles.html`, so it cannot drift from the shipped CSS. Regenerate
 it after editing tokens or components.
+
+**Open the mockup in a browser — don't read it as text.** It's ~16k tokens and
+nearly all of that is the stylesheet, which you can read at its source. The
+rendered page is the point.
