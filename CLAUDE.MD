@@ -69,8 +69,15 @@ and shells: `from easy_tenants.utils import state; state.set({"enabled": True, "
 Set it directly — wrapping the whole script in a `with tenant_context(...)` block
 does not survive the way you'd expect.
 
-**No async worker.** WSGI request path only — no Celery, no queue, no separate
-worker process. Anything slow runs inside the request or not at all.
+**No async worker.** WSGI request path only (`core.wsgi`, Gunicorn: one process,
+4 threads) — no Celery, no queue, no separate worker. Anything slow runs inside the
+request or not at all. The threads are newer than some of the code; see
+`sitts-deploy` for the two spots holding process-global state.
+
+**Two GCS buckets, and they must stay split.** `sitts-504501-static` is public and
+unsigned; `sitts-504501-media` is private with signed URLs. They were one bucket
+once, and that configuration let anyone who learned the bucket name enumerate every
+contract, bank statement, and attachment. Details in `sitts-deploy`.
 
 **Non-development settings come from Google Secret Manager**, not `.env`. The
 payload is the `django_settings` secret in the project named by
