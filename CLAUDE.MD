@@ -1,174 +1,98 @@
 # CLAUDE.MD
 
-## Read CLAUDE.md and relevant architecture notes before coding
+SITTS (`city-ongs`) — Sistema Integrado de Transparência e Transferências
+Sociais. A Django app for third-sector accountability: city halls transfer public
+money to NGOs under a contract, the NGO reports how it was spent, and the whole
+trail is auditable — including machine submission to São Paulo's TCE via the
+AUDESP webservice. Server-rendered templates, multi-tenant by organization.
 
-This file is the persistent working guide for Claude Code in this repository. Treat it as a living document: keep it concise, practical, and current. When you learn a durable project convention, workflow, or architectural rule, update this file.
+Keep this file short. It is loaded on every request. Task-specific depth lives in
+the skills below; non-obvious traps live in Gotchas.
 
-On typical macOS disks the volume is case-insensitive, so keep this single filename (`CLAUDE.MD`). Do not add a separate root `CLAUDE.md` symlink or duplicate; it can replace this file. Tools that expect `CLAUDE.md` usually resolve the same path as `CLAUDE.MD`.
+> Filename note: keep this exact name. On a case-insensitive macOS volume a
+> sibling `CLAUDE.md` resolves to the same path and can silently replace this
+> file. Don't add one.
 
-## Authority
+## Skills — load the one that matches the work
 
-Agents must treat this file and `DESIGN.md` as binding project context. Read them before substantive work when the task involves stack, workflows, UI, or product tone. If anything here disagrees with generic advice, follow this repository.
+| Skill | When |
+|---|---|
+| `sitts-ui` | `templates/`, CSS, UI copy. Pairs with `DESIGN.md`, the binding UI spec. |
+| `sitts-verify` | Running checks or exercising views, especially without Docker/Postgres. |
+| `sitts-audesp` | Anything under `audesp/` or touching TCE-SP payloads. |
+| `sitts-deploy` | GCP, Cloud Run, IAM, image retention. |
+| `sitts-known-bugs` | Debugging, or before touching `transparency_portal`, `reports/exporters`, the bank OFX import, or accountability review views. |
 
-You are a financial specialist working on an accountability project. The project needs to be elegant, clean, smooth, and user friendly: trustworthy copy, clear money flows, and UI that matches `DESIGN.md`.
+Run `make help` for commands.
 
-## Goals
+## Code is English-only
 
-- Make safe, minimal, repo-consistent changes.
-- Prefer project conventions over generic framework advice.
-- Preserve user work and avoid unrelated edits.
-- Keep this file focused on long-lived guidance, not task-specific notes.
+Model and class names, fields, choice *member* names, methods, variables — all
+English, even though the domain is Brazilian-Portuguese (AUDESP / TCE
+compliance). Portuguese is allowed only in `verbose_name`, `help_text`, choice
+*labels*, docstrings/comments, and anything rendered to a user.
 
-## Project Snapshot
+The exception is established domain acronyms with no English equivalent already
+in use here: `cpf`, `cnpj`, `cns`, `cbo`. Keep those as-is rather than inventing
+a translation.
 
-- Project name: `city-ongs` / `SITTS - Sistema Integrado de Trânsparencia ao Terceiro Setor`
-- Stack: Python `3.12`, Django, PostgreSQL
-- Dependency management: `uv`
-- Main entrypoint: `manage.py`
-- Settings module: `core.settings`
-- Main Django apps:
-  - `accounts`
-  - `accountability`
-  - `activity`
-  - `bank`
-  - `contracts`
-  - `dashboard`
-  - `reports`
-  - `transparency_portal`
-- Server-rendered UI uses Django templates under `templates/`
+## Gotchas
 
-## First Files To Check
+**`organization` is auto-populated — never set it by hand.**
+`accounts.middlewares.TenantMiddleware` wraps every authenticated request in
+`easy_tenants.tenant_context(request.user.organization)`, and
+`OrganizationTenantBaseClass.save()` reads that context. `create_contract_accountability_view`
+in `accountability/views.py` is the reference. Several older views still assign it
+explicitly (`accountability/views.py:191,201,870,880,1102,1205`,
+`contracts/views.py:215,682`) — that's redundant for request-scoped views, not
+required, and not a pattern to copy.
 
-When you need project context, prefer these files first:
+**A parent FK excluded from a `ModelForm` silently disables `UniqueConstraint`
+validation.** This one ships 500s. The repo-wide pattern is that contract-scoped
+child models take their parent FK from the URL in the view, not as a form field
+(`BudgetCommitment.contract`, `OpinionOrMinutes.annual_statement`). Django's
+`ModelForm._get_validation_exclusions()` puts any field absent from `Meta.fields`
+into `exclude`, and `Model._get_unique_checks()` skips a `UniqueConstraint`
+**entirely** if **any** of its fields are in `exclude` — regardless of whether
+that field has a value on the instance. Pre-setting the FK on an unsaved instance
+passed via `instance=` does not help; the skip is keyed off `exclude`, not the
+value.
 
-- `README.md` for local setup and standard commands
-- `DESIGN.md` for product and design context
-- `FUNCIONALIDADES_SISTEMA.md` for system capabilities and domain behavior
-- `core/settings.py` for runtime, environment, logging, and installed apps
-- `templates/base.html` for shared layout and frontend conventions
+The only fix is checking by hand before saving, in **both** the create view and
+any `UpdateView.form_valid()` override. Working example:
+[`accountability/views.py:345-365`](accountability/views.py:345) (`accountability_exists`).
+Skip it and a genuine duplicate raises an unhandled `IntegrityError` instead of a
+validation error.
 
-## Standard Workflow
+**Tenant-scoped models need an explicit tenant outside a request.** For scripts
+and shells: `from easy_tenants.utils import state; state.set({"enabled": True, "tenant": org})`.
+Set it directly — wrapping the whole script in a `with tenant_context(...)` block
+does not survive the way you'd expect.
 
-Prefer the existing project commands instead of inventing new ones:
+**No async worker.** WSGI request path only — no Celery, no queue, no separate
+worker process. Anything slow runs inside the request or not at all.
 
-- Start app with Docker: `make up`
-- Stop app: `make down`
-- Local install: `uv sync`
-- Run server locally: `make run`
-- Create migrations: `make makemigrations`
-- Apply migrations: `make migrate`
-- Format code: `make format`
-- Install hooks: `make pre-commit`
+**Non-development settings come from Google Secret Manager**, not `.env`. The
+payload is the `django_settings` secret in the project named by
+`GOOGLE_CLOUD_PROJECT`. `.env` + `django-environ` is the local path only.
 
-If a command already exists in `Makefile`, use it first.
+**`psycopg2` is compiled from source, not `psycopg2-binary`.** `pg_config` must
+be on `PATH` before `uv sync`. On macOS `libpq` is keg-only:
+`brew install libpq && export PATH="$(brew --prefix libpq)/bin:$PATH"`.
 
-## Editing Rules
+**Test coverage is two apps, not seven.** `accounts/tests.py` (13 tests) and
+`audesp/tests.py` (17) are real. `accountability`, `activity`, `bank`,
+`contracts`, and `reports` are one-line stubs. `make test` runs what exists —
+don't read a green run as broad coverage, and don't assume an untested path works.
 
-- Keep changes small and scoped to the user request.
-- Do not refactor unrelated code while implementing a feature or fix.
-- Preserve naming, file layout, and patterns already used in the touched app.
-- Prefer fixing the root cause over adding one-off workarounds.
-- Avoid introducing new dependencies unless clearly necessary.
-- Do not edit `.env` or commit secrets.
-- Be careful with generated or sensitive files.
+## Non-negotiable
 
-## Django Conventions
+This is a compliance system handling public money. These are not style
+preferences.
 
-- Keep app-specific logic inside the relevant Django app whenever possible.
-- When changing data models, also evaluate whether migrations are required.
-- When changing views, check related templates, urls, forms, and permissions.
-- When changing templates, keep the current server-rendered approach and reuse base layout patterns.
-- Prefer existing service/helper modules when the app already separates business logic from views or models.
-- **Code is English-only.** Model/class names, field names, choice member names, method names, variable names — all English, even when modeling a Brazilian-Portuguese domain (e.g. AUDESP/TCE compliance terms). Only `verbose_name`, `help_text`, choice *labels* (the human-facing string in a `Choices` tuple), docstrings/comments, and frontend-rendered text (templates, UI copy) may be in Portuguese. Established domain acronyms with no English equivalent in use elsewhere in the codebase (`cpf`, `cnpj`, `cns`, `cbo`) are the only exception — keep those as-is rather than inventing a translation.
-- **`organization` is auto-populated on save, don't set it by hand.** `accounts.middlewares.TenantMiddleware` wraps every authenticated request in `easy_tenants.tenant_context(request.user.organization)`, and `OrganizationTenantBaseClass.save()` reads that context automatically. `create_contract_accountability_view` (accountability/views.py) is the reference example — it never assigns `.organization`. A couple of older views (`ResourceSourceCreateView`, `FavoredCreateView`) still set it explicitly; that's redundant, not required, for request-scoped views.
-- **Pitfall: a parent FK excluded from a `ModelForm` silently disables `UniqueConstraint` validation on any constraint that includes it.** Pattern used throughout this codebase: contract-scoped (or similarly parent-scoped) child models take their parent FK from the URL in the view, not as a form field (e.g. `BudgetCommitment.contract`, `OpinionOrMinutes.annual_statement`). Django's `ModelForm._get_validation_exclusions()` puts any field absent from `Meta.fields` into `exclude`, and `Model._get_unique_checks()` skips a `UniqueConstraint` *entirely* if **any** of its fields are in `exclude` — regardless of whether that field actually has a value on the instance. Pre-setting the excluded FK on an unsaved instance passed via `instance=` does **not** fix this (the skip is keyed off `exclude`, not the instance's current value). The only fix: check for the duplicate by hand before saving (`Model.objects.filter(parent=parent, **cleaned_data_subset).exists()`), mirroring `create_contract_accountability_view`'s existing `accountability_exists` check — do this in both the create view and any `UpdateView.form_valid()` override (the same exclusion applies on update). Forgetting this surfaces as an unhandled 500 `IntegrityError` on a genuine duplicate, not a validation error.
-
-## UI Density & Voice
-
-Binding rules for any UI work in this repo. These are the *defaults* — deviate only when a screen genuinely needs more breathing room and say why in the PR.
-
-### No scrolling on common desktop sizes
-
-- A standard page (list, detail, dashboard, form) should **fit a 1366×768 viewport without the document scrolling**. Test at that size before declaring done.
-- **Horizontal scroll is a bug, not a feature.** If a table is wider than the viewport: tighten columns, drop padding, truncate values with `text-overflow: ellipsis`, hide low-signal columns at narrower breakpoints — anything before `overflow-x: auto` on the page.
-- Long content goes in a *contained* scroll area (a card body, a modal body, an iframe), never on `<body>`. The user should always see the page chrome.
-- Pin primary actions (submit, save, cancel) to a footer inside the card, not floating at the bottom of an ever-growing form.
-
-### Compact controls
-
-- Form fields: 36–40px tall, 8–12px horizontal padding, 14px text. The 52px `.ui-form` default is for marketing/auth pages, not dense app forms — use `.ui-form--compact` (defined on `/reports`) or inline the override.
-- Labels: 11px, uppercase, 0.4px letter-spacing, `color: var(--color-body)`, weight 500. Above the control, 4px gap.
-- Buttons in dense areas use `.ui-btn--sm`. Reserve `.ui-btn` (default size) for hero calls-to-action.
-- Filters: use the shared `.filter-row` / `.filter-field` pattern from `templates/ui/_styles.html`. Don't reinvent.
-
-### Concise copy
-
-- **One screen, one job.** State it in the heading. No subhead unless the heading really can't carry it alone.
-- Sentence case for everything (headings, buttons, menu items). No ALL-CAPS labels except the 11px caption style.
-- Cut "Bem-vindo ao", "Por favor", "Aqui você pode", "Clique no botão abaixo". Trust the user.
-- Empty states are **one strong line + one small line**, not a paragraph. Pair with a clear action.
-- Errors say what's wrong + what to do, in that order, in fewer than 12 words when possible.
-
-### Preview-first when there's an output
-
-- When a form *produces* something (a PDF, a report, a generated message), the page should be **inputs on the left, live preview/result on the right**. Don't make the user submit blind.
-- Preview pane needs four states: empty (cta back to the form), loading (spinner + 1 line), success (the actual artifact), error (the real message + retry affordance).
-- Success state should also wire up download/share/copy on the same artifact — no second request to the server.
-
-### Visual fidelity to `DESIGN.md`
-
-The base palette is the ink/canvas duet, but **semantic color earns its keep where it communicates meaning**. The distinction is *chrome* (decorative) vs *signal* (meaningful).
-
-**Use ink/canvas only for:**
-
-- Buttons (primary = ink, secondary = canvas-soft, subtle = transparent). No blue/indigo/purple/green/red button chrome.
-- Card surfaces, page backgrounds, sidebar, navigation. No gradients, no decorative accents.
-- Hero CTAs, headings, body text.
-
-**Use semantic color (red / green / yellow / blue / orange) for:**
-
-- **Status pills** — `Paga` green, `Não paga` red, `Em análise` warning, `Conciliada` info. Use `.ui-status` + `.ui-status--success|warning|error|info` from `_styles.html`, never bespoke `bg-*` classes.
-- **Toasts and alerts** — variant follows severity (`success`, `error`, `warning`, `info`).
-- **Charts and KPIs** — series colors differentiate sources/categories. Money flows, multi-source dashboards, comparison views.
-- **Inline indicators** — red dot for unread, green check for verified, orange triangle for warning. Small and purposeful.
-- **Destructive confirmations** — soft red surface on the "Excluir" action in modals.
-
-**Geometry:** pill (`var(--rounded-pill)`) for buttons & chips; `var(--rounded-xl)` for cards. One accent at a time in dense areas — don't stack three competing colored buttons in the same row.
-
-## Validation
-
-Always verify changes proportionally to the risk:
-
-- Run focused checks for the touched area first.
-- For Python/style issues, prefer `make format`.
-- For migrations, ensure they are created only when model changes require them.
-- For UI/template changes, describe the manual path to verify if automated coverage is not available.
-- If you could not run validation, say so explicitly.
-- Docker/Postgres may not be available in the coding environment. `python manage.py check` and `makemigrations --check` still work without a live DB (set the required env vars from `.env.example` directly in the shell — no `.env` file needed). To exercise views end-to-end anyway: import `core.settings` and overwrite `DATABASES["default"]` with a sqlite `:memory:` engine **before** calling `django.setup()` (mutating `django.conf.settings.DATABASES` afterward is too late — something during app-registry population already caches a real `DatabaseWrapper` against the old config), then `call_command("migrate")`, seed via `accounts.management.commands.seed_dev.run_seed()` (idempotent, covers most domain models including AUDESP Fase V fixtures), and drive `django.test.Client` against it. Tenant-scoped models (`BaseOrganizationTenantModel`) need an active tenant outside a real request — set it directly via `from easy_tenants.utils import state; state.set({"enabled": True, "tenant": some_organization})` rather than wrapping the whole script in a `with` block.
-
-## Safety Rules
-
-- Never overwrite or revert user changes you did not make.
-- Ignore unrelated dirty-worktree files unless the user asks otherwise.
-- Never use destructive git commands unless explicitly requested.
-- Before making broad changes, confirm the pattern by reading the local implementation first.
-- Prefer repository evidence over assumptions.
-
-## How To Maintain This File
-
-Update `CLAUDE.MD` when you discover stable information such as:
-
-- architectural boundaries
-- naming conventions
-- recurring pitfalls
-- preferred commands
-- testing expectations
-- deployment or environment constraints that affect coding work
-
-Do not add:
-
-- temporary task notes
-- personal reminders that are not repo conventions
-- noisy checklists with no project-specific value
-
-When updating this file, optimize for future agents: short, specific, and actionable beats comprehensive but vague.
+- **Never edit `.env`, never commit a secret.** Production config lives in Secret Manager.
+- **Never fabricate AUDESP reference-table labels.** Some fields store raw TCESP/BACEN numeric codes because the official label lists aren't published (`Expense.issuing_state`, `FundTransfer.bank`, `BalanceAdjustment.bank`). Leaving a raw code is correct; inventing a label that a municipality then files with the TCE is not. Source the official list or leave it.
+- **`is_public` on `transparency_portal` is a publication gate, not a UI filter.** Every public view must filter on it. A partnership flipped non-public — under investigation, or opted out — must 404, not render.
+- **Deploy is irreversible by hand.** `.github/workflows/production-deploy.yml` fires only on manual `workflow_dispatch`, nothing validates it in CI, and it sends 100% of traffic to the new revision. Image retention is applied by hand, so the rollback horizon is finite. Load `sitts-deploy` before touching it.
+- **The audit trail must survive the actor.** `ActivityLog` / `Notification` are the compliance record. Don't add a hard-delete path to them.
+- **No destructive git commands unless asked** — no `reset --hard`, no force-push, no branch deletion.
