@@ -27,7 +27,8 @@ def build_payload(contract, fiscal_year, ajuste_type):
     `AudespSubmission.AjusteTypeChoices` value except DECLARACAO_NEGATIVA
     itself) — it isn't inferred from `contract.concession_type`, since that
     pre-existing field doesn't map 1:1 onto AUDESP's 5 ajuste types (it also
-    has a GRANT/"Concessão" option with no AUDESP equivalent, see DEBTS.md).
+    has a GRANT/"Concessão" option with no AUDESP equivalent — see the
+    `sitts-known-bugs` skill).
     """
     with tenant_context(contract.organization):
         return {

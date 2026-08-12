@@ -64,6 +64,20 @@ renders**.
 - `contracts/models.py:117-123` — `ConcessionChoices.DEVELOPMENTO` is a typo'd member whose label ("Contrato de Fomento") doesn't match AUDESP's term ("Termo de Fomento"), plus a sixth value `GRANT` with no ajuste-type counterpart. This is why the AUDESP builders never infer from `concession_type` — see `sitts-audesp`.
 - CPF/CNPJ typing is inconsistent repo-wide: `Company.cnpj` uses `django_cpf_cnpj`'s typed `CNPJField`, every other document field is a plain `CharField` + validator.
 
+## Dangling doc pointers in user-visible help text
+
+Two `help_text` strings point staff users at an internal audit document that no
+longer exists at that path (it's now `references/bugs.md` under this skill):
+
+- `accountability/models.py:534` — `"Código AUDESP (1-27) — tabela de referência pendente (ver DEBTS.md / manual §8.1)"`
+- `accountability/models.py:1591` — `"Código do banco (tabela BACEN) — tabela de referência pendente (ver DEBTS.md)"`
+
+Independently of the broken path, admin help text shouldn't cite an internal
+tracker at all. Fixing them means editing `help_text`, which Django requires a
+migration for — deliberately not done in the docs-only change that moved the file,
+so it isn't hidden inside an unrelated commit. Drop the parenthetical and keep
+"tabela de referência pendente".
+
 ## Stale tests
 
 `audesp.tests.AudespFaseIVViewsTests.test_contract_detail_page_renders_fase_iv_tab`
