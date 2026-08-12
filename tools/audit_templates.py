@@ -8,13 +8,13 @@ drift.
 Classification per template:
 
   DONE     uses `.ui-*` classes or `ui/*` includes, no chromatic Tailwind chrome
+  TOKENS   no `.ui-*`, but styles itself from `var(--*)` — also on the system
   PARTIAL  uses both — check whether the legacy hits are real or an override
   LEGACY   only legacy chrome
-  NEUTRAL  neither; expected for email templates, standalone-shell pages, and
-           the `ui/` primitives themselves
+  NEUTRAL  neither; each remaining case is explained in EXPECTED_NEUTRAL below
 
     python tools/audit_templates.py
-    python tools/audit_templates.py --verbose   # list DONE and NEUTRAL too
+    python tools/audit_templates.py --verbose   # list every category
 """
 
 from __future__ import annotations
@@ -106,7 +106,7 @@ def main() -> int:
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="also list DONE and NEUTRAL templates",
+        help="list every category, not just the ones needing attention",
     )
     args = parser.parse_args()
 
@@ -142,11 +142,15 @@ def main() -> int:
         if status == "NEUTRAL" and not neutral_reason(rel)
     ]
     if unexplained:
-        print(f"\n{len(unexplained)} unexplained template(s) with no design-system usage:")
+        print(
+            f"\n{len(unexplained)} unexplained template(s) with no design-system usage:"
+        )
         for rel in unexplained:
             print(f"  {rel}")
     else:
-        print("\nEvery template is on the design system, or neutral for a known reason.")
+        print(
+            "\nEvery template is on the design system, or neutral for a known reason."
+        )
 
     # PARTIAL and LEGACY are worth a human look but are not build failures:
     # a PARTIAL can be a deliberate override (see sitts-ui, seg-group__btn).
