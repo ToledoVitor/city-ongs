@@ -1,6 +1,15 @@
-# DEBTS.md
+# Known bugs and tech debt — full write-ups
 
-Findings hit while implementing the AUDESP Fase V plan ([AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md)) that are **not** part of that refactor — bugs, inconsistencies, missing coverage, unrelated tech debt. Logged here instead of fixed inline, so the AUDESP work stays scoped.
+> Moved here from the repo root (`DEBTS.md`) during the context audit, and merged
+> with the visual-refactor log that used to live in `TECH_DEBT.MD`. Loaded via the
+> `sitts-known-bugs` skill; the skill's own SKILL.md is the index.
+>
+> `TECH_DEBT.MD` was an append-only log that contradicted itself — several entries
+> dated 2026-05-14 said a refactor was pending and later entries on the same date
+> said it was DONE. Only the resolved outcome is carried forward below, under
+> "Visual refactor — what actually remains".
+
+Findings hit while implementing the AUDESP Fase V plan (`../../sitts-audesp/references/fase-v.md`) that are **not** part of that refactor — bugs, inconsistencies, missing coverage, unrelated tech debt. Logged here instead of fixed inline, so the AUDESP work stays scoped.
 
 Format per entry: file:line, what's wrong, why it's out of scope, suggested fix (if obvious).
 
@@ -23,7 +32,7 @@ Two fields added during the Fase V model build store the raw AUDESP numeric code
 - `Expense.issuing_state` (`accountability/models.py`) — 27 numeric codes (manual §8), presumably IBGE UF codes, no label list published.
 - `FundTransfer.bank` / `BalanceAdjustment.bank` (`accountability/models.py`) — full BACEN bank-code list (~400+ values per the schema `enum`), no labels at all in the schema or manual.
 
-Not resolved here because building an accurate label table means sourcing the official TCESP/BACEN domain lists, not writing code — this is exactly the "Phase 1: reference data" step already called out in [AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md) §8. Fabricating labels in a compliance system is worse than leaving the raw code.
+Not resolved here because building an accurate label table means sourcing the official TCESP/BACEN domain lists, not writing code — this is exactly the "Phase 1: reference data" step already called out in `sitts-audesp/references/fase-v.md` §8. Fabricating labels in a compliance system is worse than leaving the raw code.
 
 **Suggested fix**: source the official lists (BACEN's public bank-code table for `banco`; a TCESP support ticket or the Fase IV cadastro for `estado_emissor`) and convert both to proper `IntegerChoices` before the JSON builder (Phase 4) starts relying on them for display purposes — the raw values are already correct for the wire format either way.
 
@@ -61,7 +70,7 @@ Practical effect on the AUDESP builders: `audesp/builders/declaracao_negativa.py
 
 ## RP-08 exporter hardcodes "dd/mm/aa" and "Nao sei o que é" as real report values
 
-`reports/exporters/pass_on_8.py:372-373` — the "resources available" table's pass-on-date and credit-document-number cells are hardcoded to the literal strings `"dd/mm/aa"` and `"Nao sei o que é"` instead of real data, and ship on every RP-08 export. The exporter already computes `self.latest_pass_on_info` (a `Revenue` query filtered to `PUBLIC_TRANSFER`, pulling `receive_date`/`identification`) but never uses it here — sibling exporter `pass_on_6.py` computes the identical attribute and does wire it into this same table. Unrelated to AUDESP Fase V — legacy `reports` exporter.
+`reports/exporters/pass_on_8.py:372-373` — the "resources available" table's pass-on-date and credit-document-number cells are hardcoded to the literal strings `"dd/mm/aa"` and `"Nao sei o que é"` instead of real data, and ship on every RP-08 export. Sibling exporter `pass_on_6.py` computes `self.latest_pass_on_info` (a `Revenue` query filtered to `PUBLIC_TRANSFER`, pulling `receive_date`/`identification`) at `pass_on_6.py:80` and wires it into this same table at `367-368`. **Correction to the original entry, which claimed pass_on_8 also computes it: it does not** — `latest_pass_on_info` appears nowhere in `pass_on_8.py`, so the fix has to add the query, not just use it. Unrelated to AUDESP Fase V — legacy `reports` exporter.
 
 **Suggested fix**: source the real values from `self.latest_pass_on_info`, mirroring how `pass_on_6.py` already does it.
 
@@ -175,3 +184,80 @@ Practical effect on the AUDESP builders: `audesp/builders/declaracao_negativa.py
 
 ---
 
+---
+
+## Visual refactor — what actually remains
+
+Reconciled from the old `TECH_DEBT.MD` log against the current tree via
+`make audit-templates` (175 templates: 156 on `.ui-*`, 1 token-only, 0 legacy).
+Entries the log listed as pending and later marked DONE are omitted.
+
+### Open
+
+- **The 15 email templates** (`templates/email/*.html`) are the only UI surface not
+  on the design system. They need inline styles and table layouts, not the in-app
+  primitives, because mail clients strip CSS classes.
+  `templates/registration/password_reset_email.html` belongs to this set too — it's
+  wrapped by `email/base_email.html` despite its location.
+
+- **`templates/reports/export.html`** — the "Demais responsáveis" expand panel
+  iterates `{% for field in form %}` and matches by substring (`responsible`,
+  `autority`, `manager`). Brittle if field names change; a
+  `form.responsible_fields` accessor would be sturdier.
+
+- **Accountability tables lost the sticky actions column.** The original
+  `expenses-table.html` / `revenues-table.html` used `sticky right-0 z-10` on the
+  actions `<td>` so Visualizar/Duplicar/Excluir stayed visible during horizontal
+  scroll. The refactor dropped it. The tables fit common viewport widths today, so
+  it doesn't bite yet; on a narrower laptop or a wider data shape it will.
+  Reintroduce as `.ui-table__cell--sticky-right`
+  (`position: sticky; right: 0; background-color: var(--color-canvas)`).
+
+- **Contract items tab** — the "Avaliar" vs "Detalhes" modal label is inverted
+  relative to the permission check (`user.can_change_statuses` vs `can_review`).
+  Cosmetic; the copy was preserved as-is from the legacy template.
+
+- **Dashboard multi-selects** — the Status and Contract filters were simplified
+  from custom Flowbite dropdowns to native `<select multiple>` under time
+  pressure. Functionality is intact, polish isn't.
+
+- **Inline SVG icons are duplicated across many pages.** Extracting a
+  `templates/ui/icons.html` library would dedupe them and keep stroke widths
+  consistent.
+
+- **No automated UI tests.** The refactor was verified by browser walkthrough at
+  desktop width only. There is no Playwright/Cypress smoke coverage for login,
+  contracts list/detail, or accountability detail — and no viewport assertion
+  behind the density rule in `sitts-ui`.
+
+- **Some Django form widgets set their own classes in Python**, which overrides the
+  generic `.ui-form` CSS. Verify the rendered control rather than assuming the
+  stylesheet won.
+
+### Resolved, kept for context
+
+- The per-row modals in `expenses-table.html` (6 types) and `revenues-table.html`
+  (5) were migrated to `.ui-modal__*` / `.ui-alert*` / `.ui-btn--danger`. The
+  "Documentos" two-column modal uses `.exp-docs-grid` / `.exp-docs-list` /
+  `.exp-docs-dropzone`, and the drag-drop handler toggles
+  `.exp-docs-dropzone--active` rather than the old `bg-green-50`.
+- `advanced_search.html` and all seven reconcile/review flows were refactored.
+  `.ui-status` got a global `white-space: nowrap` so short status pills don't wrap
+  in narrow cells.
+- `reports/exporters/pass_on_1.py:_draw_down_informations` now guards
+  `contractor_company` and renders `LOCAL: —` when it's missing. The broader
+  concern stands: the other `pass_on_*.py` exporters still assume many optional
+  contract fields are populated.
+- The contract detail tabs were reworked again after that log was written — each
+  section now has its own URL (`1108463`, `3bcc42e`), which is what left
+  `audesp/tests.py`'s Fase IV tab assertion stale. The old note about Flowbite
+  `data-tabs-toggle` needing re-init no longer applies.
+
+### One deliberate-looking wart that is deliberate
+
+`templates/accountability/accountability/detail.html:603-611` contains seven
+`bg-blue-600` references. They are **not** leftover legacy chrome — the segmented
+control's active state is still toggled by JS using Tailwind class names, and this
+CSS force-maps them to ink with `!important`. Removing the override without
+changing the JS makes the active tab invisible. `make audit-templates` reports this
+file as PARTIAL for that reason.

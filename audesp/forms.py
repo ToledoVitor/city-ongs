@@ -76,8 +76,8 @@ REAL_AJUSTE_TYPE_CHOICES = [
 ]
 
 #: Best-effort *default suggestion* only, never an auto-decision — per
-#: DEBTS.md ("Contract.ConcessionChoices doesn't map 1:1 onto AUDESP's 5
-#: ajuste types"), GRANT ("Concessão") has no corresponding Fase V ajuste
+#: the `sitts-known-bugs` skill ("Contract.ConcessionChoices doesn't map 1:1
+#: onto AUDESP's 5 ajuste types"), GRANT ("Concessão") has no Fase V ajuste
 #: type at all, so it's left out rather than guessed at, and DEVELOPMENTO's
 #: label ("Contrato de Fomento") doesn't match AUDESP's own term for the
 #: same instrument ("Termo de Fomento") even though the mapping itself

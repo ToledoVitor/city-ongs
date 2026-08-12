@@ -1,12 +1,17 @@
 # AUDESP Fase IV — "Licitações e Contratos" Integration Audit
 
+> Moved here from the repo root during the context audit. Loaded via the
+> `sitts-audesp` skill. Kept intact; note that §7 corrects a stale claim in
+> `fase-v.md`, so read this one second.
+
+
 Status: Ajuste + Empenho builders scaffolded and verified against real TCE-SP JSON Schemas; Licitação/Dispensa registration deliberately **not** built (see §4 Scope decision). Source docs: real JSON Schemas v2.0.0 (ajuste) and v1 (empenho) downloaded from `tce.sp.gov.br/audesp/documentacao/reformulacao-fase-iv-jsonschemas-e-documentacao-xlsx`, the OpenAPI spec (`audesp.tce.sp.gov.br/api/audesp.yaml`), and TCE-SP's own 2026 field/label spreadsheet (`Novo Modelo da Fase IV_2026_v02_externo.xlsx`) — not just search-result prose. Nothing deployed yet — every recommendation below assumes schemas/flows can still change freely.
 
 ---
 
 ## 0. Why this exists
 
-[AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md) §2 flagged, unresolved, that Fase V's `codigo_ajuste` and certidão references (§20/§21) point at "a separate subsystem, likely Fase IV / cadastro" without confirming it. This doc resolves that hedge: yes, Fase IV is that subsystem, and it is a **different AUDESP phase with its own JSON Schemas, its own endpoint namespace (`/f4/...` vs Fase V's `/f5/...`), and its own generic (non-third-sector-aware) data model** — it is not a variant of Fase V, and building it is not a matter of reusing Fase V's builders.
+[fase-v.md](fase-v.md) §2 flagged, unresolved, that Fase V's `codigo_ajuste` and certidão references (§20/§21) point at "a separate subsystem, likely Fase IV / cadastro" without confirming it. This doc resolves that hedge: yes, Fase IV is that subsystem, and it is a **different AUDESP phase with its own JSON Schemas, its own endpoint namespace (`/f4/...` vs Fase V's `/f5/...`), and its own generic (non-third-sector-aware) data model** — it is not a variant of Fase V, and building it is not a matter of reusing Fase V's builders.
 
 ## 1. What Fase IV actually is
 
@@ -54,7 +59,7 @@ No dedicated "enviar-empenho" endpoint exists. Per the Ajuste manual's own footn
 
 ### 3.2 Empenho (`docs/audesp_fase_iv/empenho_v1/empenho_schema_v1.json`)
 
-Only 3 top-level fields (`additionalProperties: false`): `descritor` (municipio/entidade/numeroEmpenho/anoEmpenho/retificacao), `codigoContrato`, `dataEmissaoEmpenho` — all sourced directly from the pre-existing `accountability.BudgetCommitment` model (which already closes the gap [AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md) §5 flagged as missing — see §7 below). No open questions on this half.
+Only 3 top-level fields (`additionalProperties: false`): `descritor` (municipio/entidade/numeroEmpenho/anoEmpenho/retificacao), `codigoContrato`, `dataEmissaoEmpenho` — all sourced directly from the pre-existing `accountability.BudgetCommitment` model (which already closes the gap [fase-v.md](fase-v.md) §5 flagged as missing — see §7 below). No open questions on this half.
 
 **Discrepancy worth flagging:** TCE-SP's 2026 label spreadsheet's "Empenho de Contrato" sheet documents 5 more fields (`tipoPessoa`, `niCredorFornecedor`, `nomeCredorFornecedor`, `codigoNaturezaDespesa`, `fonteRecurso`) that are **not** in the currently-downloadable schema, which forbids additional properties. The spreadsheet appears to describe a schema revision ahead of what's live — sending those fields today would fail validation, so the builder deliberately omits them. Re-check `empenho_schema_v1.json` for a new version before this goes live.
 
@@ -64,7 +69,7 @@ Only 3 top-level fields (`additionalProperties: false`): `descritor` (municipio/
 
 **Not built, by design:** Licitação/Dispensa/Inexigibilidade registration (the `enviar-licitacao` module). TCE-SP's own field rules for Ajuste are explicit that `codigoEdital` must reference an **already-registered** Licitação/Dispensa document ("Validar se a Licitação foi cadastrada: -Se adesaoParticipação = false: município, entidade e codigoEdital") — Ajuste is not a standalone submission. The Licitação module's own field list (50 rows: licitantes, habilitação results, orçamento/proposta values, garantias, índices econômicos) models the city hall's own procurement/selection process — a different business process SITTS has never captured and, per this system's own scope (third-sector fund-transfer accountability for the receiving OSC side), arguably shouldn't: it's the city hall's procurement/legal department's process, not the NGO-accountability platform's.
 
-This mirrors the precedent [AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md) §2 already set for certidão references: *"these are NOT free text — they're IDs of records that must already exist in AUDESP itself... we only need to store and validate the reference id, not build the issuance system."* `codigo_edital` and `itens` are therefore **required, explicit parameters** on `fase_iv.ajuste.build_payload` — never inferred or defaulted — so a caller is forced to supply a real, externally-registered value rather than get a silently-wrong one.
+This mirrors the precedent [fase-v.md](fase-v.md) §2 already set for certidão references: *"these are NOT free text — they're IDs of records that must already exist in AUDESP itself... we only need to store and validate the reference id, not build the issuance system."* `codigo_edital` and `itens` are therefore **required, explicit parameters** on `fase_iv.ajuste.build_payload` — never inferred or defaulted — so a caller is forced to supply a real, externally-registered value rather than get a silently-wrong one.
 
 If SITTS should own Licitação/Dispensa registration too (e.g., because no other system currently does it for these city halls), that's a real, separate scope decision — flag it and this doc can be extended with a §8 the same way Fase V grew phases.
 
@@ -80,7 +85,7 @@ These are PNCP's generic public-procurement taxonomies (confirmed via the 2026 l
 
 ### 5.3 Fase IV's own retificação/status vocabulary
 
-`AudespClient.consulta_fase_iv` returns whatever `/f4/consulta/{protocolo}` sends — not yet confirmed against a live response (no piloto credentials exercised against Fase IV yet, mirroring the same caveat already logged for Fase V in [AUDESP_FASE_V_AUDIT.md](AUDESP_FASE_V_AUDIT.md) §8).
+`AudespClient.consulta_fase_iv` returns whatever `/f4/consulta/{protocolo}` sends — not yet confirmed against a live response (no piloto credentials exercised against Fase IV yet, mirroring the same caveat already logged for Fase V in [fase-v.md](fase-v.md) §8).
 
 ## 6. Model changes
 
@@ -88,7 +93,7 @@ These are PNCP's generic public-procurement taxonomies (confirmed via the 2026 l
 - `Contract.audesp_agreement_code`'s help_text updated — it's now documented as serving both Fase V's `codigo_ajuste` and Fase IV's `descritor.codigoContrato` (same value, same field, confirmed identical semantics from both schemas' field descriptions).
 - `audesp.AudespFaseIVSubmission` (new) — mirrors `AudespSubmission`'s shape; one `document_type` (AJUSTE/EMPENHO) instead of a separate model per shape, since both share a lifecycle, an endpoint, and a status vocabulary.
 
-## 7. Corrections to AUDESP_FASE_V_AUDIT.md
+## 7. Corrections to fase-v.md
 
 Its own gap matrix (§5) said *"Empenhos (none) — no concept of 'empenho' (budget commitment) exists anywhere."* That's stale: `accountability.BudgetCommitment` already exists (added during this project's earlier phases) and is exactly what Fase IV's Empenho builder above reads from — no new domain model was needed for it, only the AUDESP-submission-tracking layer (`AudespFaseIVSubmission`).
 
