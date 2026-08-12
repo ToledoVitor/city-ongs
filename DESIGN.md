@@ -203,6 +203,6 @@ Django-include primitives live in `templates/ui/`: `button.html`, `card.html`,
 | What are the tokens? | `templates/ui/_styles.html` `:root` (lines 19–73) |
 | What does a component look like? | `.claude/skills/sitts-ui/references/mockup.html` |
 | What primitives can I include? | `templates/ui/*.html` |
-| Which templates are on the system? | `python scripts/audit_templates.py` |
+| Which templates are on the system? | `python tools/audit_templates.py` |
 | Density, copy, and layout rules | skill `sitts-ui` |
 | Where did this language come from? | `docs/design-reference-uber.md` |

@@ -113,13 +113,13 @@ hand.
 Templates on the design system vs. not:
 
 ```bash
-python scripts/audit_templates.py
+python tools/audit_templates.py
 ```
 
 To see every primitive rendered on one page:
 
 ```bash
-python scripts/build_ui_mockup.py && open .claude/skills/sitts-ui/references/mockup.html
+python tools/build_ui_mockup.py && open .claude/skills/sitts-ui/references/mockup.html
 ```
 
 The mockup embeds the `<style>` block straight out of
