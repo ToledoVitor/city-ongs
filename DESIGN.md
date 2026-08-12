@@ -103,9 +103,11 @@ text face carries no headline.
 element. Cards are `rounded.xl` 16px. Two documented exceptions: `.ui-btn--lg`
 takes `rounded.xl` (the large-form CTA), and inputs take `rounded.md` 8px.
 
-**Sentence case is the voice.** Headings, buttons, menu items. The only
-uppercase in the system is the 11px field-label caption
-(`text-transform: uppercase; letter-spacing: 0.4px` — `_styles.html:512`).
+**Sentence case is the voice.** Headings, buttons, menu items, and form labels
+(`.ui-field__label` is 14px/500/ink, sentence case). Uppercase is confined to four
+11px `letter-spacing: 0.4px` selectors: `.filter-field__label`,
+`.ui-table thead th`, `.ui-dl dt`, and `.ui-combobox__group`. Don't extend it
+past those.
 
 **Elevation defaults to flat.** Level 0 is the norm; cards lean on
 canvas-vs-canvas-soft contrast. `shadow-1` for elevated cards, `shadow-2` for
@@ -154,7 +156,7 @@ parallel chrome inline.
 
 | Family | Variants | Notes |
 |---|---|---|
-| `.ui-btn` | `primary` `secondary` `subtle` `floating` `ghost` `danger` · `sm` `lg` `full` | 44px default, `--sm` 36px, `--lg` 56px + `rounded.xl` |
+| `.ui-btn` | `primary` `secondary` `subtle` `floating` `ghost` `danger` · `sm` `lg` `full` | `min-height` 44 / `--sm` 36 / `--lg` 56 + `rounded.xl`; renders 36/46/58 once the 1px border is counted |
 | `.ui-card` | `soft` `softer` `dark` `elevated` `flush` · `sm` `lg` | `rounded.xl`, `space.2xl` padding |
 | `.ui-input` `.ui-select` `.ui-textarea` | `on-soft` `has-icon-right` | `rounded.md`; `.ui-form` styles raw Django-rendered fields |
 | `.ui-table` | `auto` `hover-link` | wrap in `.ui-table-wrap` / `.ui-table-scroll` for contained overflow |
