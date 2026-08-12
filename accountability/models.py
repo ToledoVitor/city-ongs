@@ -531,7 +531,7 @@ class Expense(BaseOrganizationTenantModel):
         verbose_name="Estado Emissor do Documento Fiscal",
         null=True,
         blank=True,
-        help_text="Código AUDESP (1-27) — tabela de referência pendente (ver DEBTS.md / manual §8.1)",
+        help_text="Código AUDESP (1-27) — tabela de referência pendente",
     )
     expense_category_type = models.PositiveSmallIntegerField(
         verbose_name="Categoria de Despesas (AUDESP)",
@@ -1588,7 +1588,7 @@ class FundTransfer(BaseOrganizationTenantModel):
     )
     bank = models.PositiveIntegerField(
         verbose_name="Banco",
-        help_text="Código do banco (tabela BACEN) — tabela de referência pendente (ver DEBTS.md)",
+        help_text="Código do banco (tabela BACEN) — tabela de referência pendente",
     )
     bank_branch = models.CharField(verbose_name="Agência", max_length=16)
     account_number = models.CharField(verbose_name="Conta", max_length=16)
