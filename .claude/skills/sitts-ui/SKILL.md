@@ -71,12 +71,13 @@ names.** `templates/accountability/accountability/detail.html:603-611` maps
 Delete the override without first changing the JS and the active tab goes
 invisible.
 
-**Standalone pages don't use `.ui-*` utilities and that's correct.** `login.html`,
-the four `password_reset_*`, `force_password_change.html`, `home.html`, and
-`transparency_portal/base.html` have their own shell and consume tokens directly
-via `var(--color-*)` (`home.html` has 43 such references). They're on the design
-system; they just don't extend `templates/base.html`. Don't "fix" them into
-`.ui-*` classes.
+**A page can be fully on the system with zero `.ui-*` classes.** `home.html`
+styles itself entirely from the tokens (43 `var(--*)` references, no utilities).
+It is not legacy — don't "convert" it. The standalone-shell pages (`login.html`,
+the four `password_reset_*`, `force_password_change.html`,
+`transparency_portal/base.html`) do use `.ui-*` and simply don't extend
+`templates/base.html`. `make audit-templates` reports both cases separately, so
+trust it over a grep for `ui-`.
 
 **Email templates use no tokens at all, by design.** The 15 files under
 `templates/email/` need inline styles and table layouts — Gmail and Outlook strip
