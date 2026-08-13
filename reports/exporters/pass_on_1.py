@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
@@ -9,7 +8,7 @@ from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from contracts.models import Contract
-from reports.exporters.commons.exporters import BasePdf
+from reports.exporters.base import BasePDFExporter
 from utils.choices import MonthChoices
 from utils.formats import (
     format_into_brazilian_currency,
@@ -20,35 +19,27 @@ font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
-@dataclass
-class PassOn1PDFExporter:
-    pdf = None
-    default_cell_height = 5
-
+class PassOn1PDFExporter(BasePDFExporter):
     def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.set_font("FreeSans", size=8)
-        pdf.set_fill_color(233, 234, 236)
-        self.pdf = pdf
+        super().__init__()
+        self.initialize_pdf(
+            font_specs=[("", font_path), ("B", font_bold_path)],
+            base_font_size=8,
+            fill_color=(233, 234, 236),
+        )
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
-
     def __database_queries(self):
-        self.contracts_queryset = Contract.objects.filter(
-            area__city_hall=self.contract.area.city_hall,
-            checking_account__isnull=False,
-        ).order_by("start_of_vigency")
+        self.contracts_queryset = (
+            Contract.objects.filter(
+                area__city_hall=self.contract.area.city_hall,
+                checking_account__isnull=False,
+            )
+            .select_related("organization", "checking_account")
+            .order_by("start_of_vigency")
+        )
         self.all_values_in_contracts = self.contracts_queryset.filter().aggregate(
             Sum("total_value")
         )["total_value__sum"] or Decimal("0.00")
@@ -64,7 +55,7 @@ class PassOn1PDFExporter:
         return self.pdf
 
     def _draw_header(self):
-        self.__set_font(font_size=9, bold=True)
+        self._set_font(font_size=9, bold=True)
         header_text = (
             "ANEXO RP-01 REPASSES A ÓRGÃOS PÚBLICOS \n"
             " RELAÇÃO DOS VALORES TRANSFERIDOS DE \n"
@@ -84,7 +75,7 @@ class PassOn1PDFExporter:
 
     def _draw_up_informations(self):
         # Cabeçalho e títulos
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         exercicio_text = (
@@ -227,7 +218,7 @@ class PassOn1PDFExporter:
         self.pdf.ln(10)
 
     def _draw_down_informations(self):
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
         local_text = (
             (
@@ -279,7 +270,7 @@ class PassOn1PDFExporter:
         self.pdf.ln(10)
 
     def _draw_observations(self):
-        self.__set_font(font_size=7)
+        self._set_font(font_size=7)
         self.pdf.cell(
             0,
             0,

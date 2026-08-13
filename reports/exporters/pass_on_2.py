@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -10,7 +9,8 @@ from fpdf.fonts import FontFace
 
 from accountability.models import Expense, Revenue
 from bank.models import BankStatement
-from reports.exporters.commons.exporters import BasePdf
+from contracts.models import ContractAddendum
+from reports.exporters.base import BasePDFExporter
 from utils.formats import (
     document_mask,
     format_into_brazilian_currency,
@@ -25,30 +25,25 @@ font_bold_italic_path = os.path.join(
 )
 
 
-@dataclass
-class PassOn2PDFExporter:
-    pdf = None
-    default_cell_height = 5
-
+class PassOn2PDFExporter(BasePDFExporter):
     def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.add_font("FreeSans", "I", font_italic_path, uni=True)
-        pdf.add_font("FreeSans", "BI", font_bold_italic_path, uni=True)
-        pdf.set_fill_color(233, 234, 236)
-        self.pdf = pdf
+        super().__init__()
+        self.initialize_pdf(
+            font_specs=[
+                ("", font_path),
+                ("B", font_bold_path),
+                ("I", font_italic_path),
+                ("BI", font_bold_italic_path),
+            ],
+            fill_color=(233, 234, 236),
+        )
         self.contract = contract
-        self.start_date = start_date - timedelta(days=365)
+        self.start_date = start_date
         self.end_date = end_date
-
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
+        # Referência para o extrato do "saldo do exercício anterior" — um ano
+        # antes do início do período pedido. Mantida separada de start_date
+        # para não deslocar os filtros de receitas/despesas do período real.
+        self.previous_year_reference = start_date - timedelta(days=365)
 
     def __database_queries(self):
         self.checking_account = self.contract.checking_account
@@ -61,12 +56,12 @@ class PassOn2PDFExporter:
             )
             .filter(
                 Q(
-                    reference_month__gte=self.start_date.month,
-                    reference_year__gte=self.start_date.year,
+                    reference_month__gte=self.previous_year_reference.month,
+                    reference_year__gte=self.previous_year_reference.year,
                 )
                 | Q(
-                    reference_month__lt=self.start_date.month,
-                    reference_year__gt=self.start_date.year,
+                    reference_month__lt=self.previous_year_reference.month,
+                    reference_year__gt=self.previous_year_reference.year,
                 )
             )
             .order_by("reference_year", "reference_month")
@@ -84,9 +79,11 @@ class PassOn2PDFExporter:
             accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
-        )
+        ).select_related("favored")
 
         self.paid_expenses = self.expense_queryset.filter(paid=True)
+
+        self.addendum_queryset = ContractAddendum.objects.filter(contract=self.contract)
 
     def handle(self):
         self.__database_queries()
@@ -103,7 +100,7 @@ class PassOn2PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_font(font_size=9, bold=True)
+        self._set_font(font_size=9, bold=True)
         self.pdf.multi_cell(
             0,
             4,
@@ -116,7 +113,7 @@ class PassOn2PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 10)
 
     def _draw_form(self):
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -205,7 +202,7 @@ class PassOn2PDFExporter:
             new_x=XPos.LMARGIN,
             new_y=YPos.NEXT,
         )
-        self.__set_font(font_size=7, bold=False)
+        self._set_font(font_size=7, bold=False)
         table_data = []
         table_data.append(
             [
@@ -221,7 +218,7 @@ class PassOn2PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position}",
                 ]
             ),
         )
@@ -252,7 +249,7 @@ class PassOn2PDFExporter:
                         self.pdf.set_fill_color(255, 255, 255)
                     data.cell(text=text, align="L", border=0)
 
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         self.pdf.cell(
             0,
             self.default_cell_height,
@@ -266,8 +263,8 @@ class PassOn2PDFExporter:
 
     def _draw_table_I(self):
         opening_balance = self.statement_queryset.filter(
-            reference_month=self.start_date.month,
-            reference_year=self.start_date.year,
+            reference_month=self.previous_year_reference.month,
+            reference_year=self.previous_year_reference.year,
         ).aggregate(Sum("opening_balance"))["opening_balance__sum"] or Decimal("0.00")
 
         closing_checking_account = self.statement_queryset.filter(
@@ -326,7 +323,7 @@ class PassOn2PDFExporter:
             ]
         )
 
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -357,7 +354,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(15)
 
     def _draw_signatories_notification(self):
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         self.pdf.multi_cell(
             190,
             5,
@@ -384,13 +381,15 @@ class PassOn2PDFExporter:
             up_table_data.append(
                 [
                     format_into_brazilian_date(expense.liquidation),
-                    "Tipo do documento (Holerite, Nota Fiscal, etc...)",  # TODO <-
+                    expense.liquidation_form_label or "—",
                     expense.favored.name,
                     expense.nature_label,
                     format_into_brazilian_currency(expense.value),
                 ],
             )
             total_expense_value += expense.value
+
+        unapplied_transfer_value = self.revenue_total - total_expense_value
 
         down_table_data = [
             [
@@ -399,16 +398,19 @@ class PassOn2PDFExporter:
             ],
             [
                 "RECURSO DO REPASSE NÃO APLICADO",
-                "O que sobrou do contrato",
-            ],  # TODO
-            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", "Valor glosado"],  # TODO
+                f"{format_into_brazilian_currency(unapplied_transfer_value)}",
+            ],
+            # Não há campo no modelo que registre devolução efetiva de
+            # recursos ao órgão concessor — deixado em branco em vez de
+            # inventar um valor, até existir uma fonte de dado real.
+            ["VALOR DEVOLVIDO AO ÓRGÃO CONCESSOR", "—"],
             [
                 "VALOR AUTORIZADO PARA APLICAÇÃO NO EXERCÍCIO SEGUINTE",
-                "Recurso - Devolvido",
-            ],  # TODO
+                "—",
+            ],
         ]
 
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -455,7 +457,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_org_notification(self):
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         self.pdf.multi_cell(
             190,
             5,
@@ -478,19 +480,37 @@ class PassOn2PDFExporter:
                 "VALOR GLOBAL DO AJUSTE",
             ],
         ]
-        table_data.append(  # TODO Após adendo (Ajuste = Adendo), necessário criar tabela
+        hired_company = self.contract.hired_company
+        contratado_cnpj = (
+            f"{hired_company.name} / {hired_company.cnpj}" if hired_company else "—"
+        )
+        # LICITAÇÃO Nº e FONTE não têm campo correspondente no modelo — "—"
+        # em vez de um valor inventado, até existir uma fonte de dado real.
+        table_data.append(
             [
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
-                f"{...}",
+                f"{self.contract.name_with_code}",
+                format_into_brazilian_date(self.contract.start_of_vigency),
+                contratado_cnpj,
+                f"{self.contract.objective}",
+                "—",
+                "—",
+                format_into_brazilian_currency(self.contract.total_value),
             ]
         )
+        for addendum in self.addendum_queryset:
+            table_data.append(
+                [
+                    f"{self.contract.name_with_code}",
+                    format_into_brazilian_date(addendum.start_of_vigency),
+                    contratado_cnpj,
+                    f"{self.contract.objective}",
+                    "—",
+                    "—",
+                    format_into_brazilian_currency(addendum.total_value),
+                ]
+            )
 
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.cell(
             190,
             self.default_cell_height,
@@ -521,7 +541,7 @@ class PassOn2PDFExporter:
         self.pdf.ln(10)
 
     def _draw_observation(self):
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         contractor_company = self.contract.contractor_company
         self.pdf.cell(
             0,
@@ -562,7 +582,7 @@ class PassOn2PDFExporter:
             self.pdf.get_y(),
         )
         self.pdf.ln(3)
-        self.__set_font(font_size=7, bold=False)
+        self._set_font(font_size=7, bold=False)
         self.pdf.cell(
             0,
             0,

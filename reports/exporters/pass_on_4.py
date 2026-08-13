@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from decimal import Decimal
 
 from django.conf import settings
@@ -8,8 +7,8 @@ from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
 from accountability.models import Revenue
-from contracts.models import Contract
-from reports.exporters.commons.exporters import BasePdf
+from contracts.models import Contract, ContractAddendum
+from reports.exporters.base import BasePDFExporter
 from utils.formats import (
     format_into_brazilian_currency,
     format_into_brazilian_date,
@@ -19,28 +18,16 @@ font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
-@dataclass
-class PassOn4PDFExporter:
-    pdf = None
-    default_cell_height = 5
-
+class PassOn4PDFExporter(BasePDFExporter):
     def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.set_font("FreeSans", "", 8)
-        self.pdf = pdf
+        super().__init__()
+        self.initialize_pdf(
+            font_specs=[("", font_path), ("B", font_bold_path)],
+            base_font_size=8,
+        )
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
-
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
 
     def __background_gray_color(self, gray):
         if gray:
@@ -57,6 +44,20 @@ class PassOn4PDFExporter:
             | Q(bank_account=self.investing_account)
         ).exclude(bank_account__isnull=True)
 
+        # Aditivos substituem o valor global original do ajuste — o mais
+        # recente (por vigência) é o valor vigente; sem aditivo, vale o
+        # valor original do contrato.
+        latest_addendum = (
+            ContractAddendum.objects.filter(contract=self.contract)
+            .order_by("-end_of_vigency")
+            .first()
+        )
+        self.current_global_value = (
+            latest_addendum.total_value
+            if latest_addendum
+            else self.contract.total_value
+        )
+
     def handle(self):
         self.__database_queries()
         self._draw_header()
@@ -72,7 +73,7 @@ class PassOn4PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_font(font_size=10, bold=True)
+        self._set_font(font_size=10, bold=True)
         self.pdf.cell(
             0,
             0,
@@ -93,7 +94,7 @@ class PassOn4PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 5)
 
     def _draw_informations(self):
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         start = self.contract.start_of_vigency
         end = self.contract.end_of_vigency
         self.pdf.cell(
@@ -103,7 +104,7 @@ class PassOn4PDFExporter:
         )
         self.pdf.ln(4)
         self.pdf.cell(
-            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.name}",
+            text=f"**ÓRGÃO CONCESSOR:** {self.contract.organization.city_hall.name}",
             markdown=True,
             h=self.default_cell_height,
         )
@@ -148,7 +149,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    "Valor Global do Ajuste - Valor do adendo",
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -177,7 +178,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_font(self.default_cell_height)
+            self._set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -205,7 +206,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.PARTNERSHIP
         )
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Termo de Parceria Nº**",
@@ -232,7 +233,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    "Valor Global do Ajuste - Valor do adendo",
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -261,7 +262,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_font(self.default_cell_height)
+            self._set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -289,7 +290,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.COLLABORATION
         )
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Termo de Colaboração Nº**",
@@ -316,7 +317,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    "Valor Global do Ajuste - Valor do adendo",
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -345,7 +346,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_font(self.default_cell_height)
+            self._set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -373,7 +374,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.DEVELOPMENTO
         )
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.ln(3)
         header_data = [
             "**Contrato de Fomento Nº**",
@@ -400,7 +401,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    "Valor Global do Ajuste - Valor do adendo",
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -429,7 +430,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_font(self.default_cell_height)
+            self._set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -457,7 +458,7 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.AGREEMENT
         )
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Convênio Nº**",
@@ -484,7 +485,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{contract.end_of_vigency}",
-                    "Valor Global do Ajuste - Valor do adendo",
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",
@@ -513,7 +514,7 @@ class PassOn4PDFExporter:
             for text in header_data:
                 header.cell(text=text, align="C")
 
-            self.__set_font(self.default_cell_height)
+            self._set_font(self.default_cell_height)
             for item in table_data:
                 self.__background_gray_color(gray=False)
                 data = table.row()
@@ -541,14 +542,14 @@ class PassOn4PDFExporter:
         ).filter(
             accountability__contract__concession_type=Contract.ConcessionChoices.GRANT
         )
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         self.pdf.cell(
             text="II - AUXÍLIOS, SUBVENÇÕES E/OU CONTRIBUIÇÕES PAGOS:",
             markdown=True,
             h=self.default_cell_height,
         )
         self.pdf.ln(2)
-        self.__set_font(font_size=7, bold=True)
+        self._set_font(font_size=7, bold=True)
         self.pdf.ln()
         header_data = [
             "**Tipo da Concessão**",
@@ -575,7 +576,7 @@ class PassOn4PDFExporter:
                     f"{hired_company.city}/{hired_company.uf} | {hired_company.street}, nº {hired_company.number} - {hired_company.district}",
                     f"{revenue.receive_date}",
                     f"{format_into_brazilian_date(contract.end_of_vigency)}",
-                    "ClassAdendo",  # TODO criar classe adendo
+                    f"{format_into_brazilian_currency(self.current_global_value)}",
                     f"{contract.objective}",
                     f"{revenue.source}",
                     f"{format_into_brazilian_currency(revenue.value)}",

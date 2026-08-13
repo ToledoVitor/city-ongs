@@ -1,17 +1,19 @@
-import copy
 import os
-from dataclasses import dataclass
 from decimal import Decimal
 
 from django.conf import settings
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from fpdf import XPos, YPos
 from fpdf.fonts import FontFace
 
-from accountability.models import Expense, Revenue
-from contracts.choices import NatureCategories
+from accountability.models import Expense
 from contracts.models import ContractAddendum
-from reports.exporters.commons.exporters import BasePdf
+from reports.exporters.base import BasePDFExporter
+from reports.exporters.commons.integral_statement import (
+    build_revenue_summary,
+    categorize_expenses,
+    convert_decimal_to_brl,
+)
 from utils.formats import (
     document_mask,
     format_into_brazilian_currency,
@@ -22,144 +24,35 @@ font_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSans.ttf")
 font_bold_path = os.path.join(settings.BASE_DIR, "static/fonts/FreeSansBold.ttf")
 
 
-@dataclass
-class PassOn6PDFExporter:
-    pdf = None
-    default_cell_height = 5
-
+class PassOn6PDFExporter(BasePDFExporter):
     def __init__(self, contract, start_date, end_date):
-        pdf = BasePdf(orientation="portrait", unit="mm", format="A4")
-        pdf.add_page()
-        pdf.set_margins(10, 15, 10)
-        pdf.add_font("FreeSans", "", font_path, uni=True)
-        pdf.add_font("FreeSans", "B", font_bold_path, uni=True)
-        pdf.set_font("FreeSans", "", 8)
-        self.pdf = pdf
+        super().__init__()
+        self.initialize_pdf(
+            font_specs=[("", font_path), ("B", font_bold_path)],
+            base_font_size=8,
+        )
         self.contract = contract
         self.start_date = start_date
         self.end_date = end_date
 
-    def __set_font(self, font_size=7, bold=False):
-        if bold:
-            self.pdf.set_font("FreeSans", "B", font_size)
-        else:
-            self.pdf.set_font("FreeSans", "", font_size)
-
     def __database_queries(self):
-        self.checking_account = self.contract.checking_account
-        self.investing_account = self.contract.investing_account
+        summary = build_revenue_summary(self.contract, self.start_date, self.end_date)
+        self.checking_account = summary.checking_account
+        self.investing_account = summary.investing_account
+        self.revenue_queryset = summary.revenue_queryset
+        self.all_pass_on_values = summary.all_pass_on_values
+        self.previous_balance = summary.previous_balance
+        self.investment_income = summary.investment_income
+        self.own_resources = summary.own_resources
+        self.other_revenues_value = summary.other_revenues_value
+        self.latest_pass_on_info = summary.latest_pass_on_info
 
-        # Queries para Receitas
-        self.revenue_queryset = Revenue.objects.filter(
-            Q(bank_account=self.checking_account)
-            | Q(bank_account=self.investing_account),
-            receive_date__gte=self.start_date,
-            receive_date__lte=self.end_date,
-        ).exclude(bank_account__isnull=True)
-
-        self.all_pass_on_values = self.revenue_queryset.aggregate(Sum("value"))[
-            "value__sum"
-        ] or Decimal("0.00")
-
-        self.previous_balance = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.PREVIOUS_BALANCE
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.investment_income = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.INVESTMENT_INCOME
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.own_resources = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.OWN_RESOURCES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.other_revenues_value = self.revenue_queryset.filter(
-            revenue_nature=Revenue.Nature.OTHER_REVENUES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.latest_pass_on_info = (
-            self.revenue_queryset.filter(revenue_nature=Revenue.Nature.PUBLIC_TRANSFER)
-            .order_by("-receive_date")
-            .values("receive_date", "identification")
-            .first()
-        )
-
-        # Queries para Despesas
         self.expense_queryset = Expense.objects.filter(
             accountability__contract=self.contract,
             liquidation__gte=self.start_date,
             liquidation__lte=self.end_date,
         )
 
-        self.hr_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.HUMAN_RESOURCES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.other_hr_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.OTHER_HUMAN_RESOURCES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.services_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.OTHER_THIRD_PARTY
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.other_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.OTHER_EXPENSES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.goods_materials_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.PERMANENT_GOODS
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.consumables_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.OTHER_CONSUMABLES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.medical_and_hospital_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.MEDICAL_AND_HOSPITAL
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.medical_services_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.MEDICAL_SERVICES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.medicines_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.MEDICINES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.works_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.WORKS
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.public_utilities_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.PUBLIC_UTILITIES
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.financial_banking_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.FINANCIAL_AND_BANKING
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.fuel_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.FUEL
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.foodstuffs_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.FOODSTUFFS
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.real_state_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.REAL_STATE
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.miscellaneous_expenses = self.expense_queryset.filter(
-            nature__in=NatureCategories.MISCELLANEOUS
-        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
-
-        self.all_expenses_value = self.expense_queryset.aggregate(Sum("value"))[
-            "value__sum"
-        ] or Decimal("0.00")
-
-        # Querie para Aditivos
         self.addendum_queryset = ContractAddendum.objects.filter(
             contract=self.contract,
         )
@@ -183,7 +76,7 @@ class PassOn6PDFExporter:
 
     def _draw_header(self):
         # Cabeçalho e títulos
-        self.__set_font(font_size=11, bold=True)
+        self._set_font(font_size=11, bold=True)
         self.pdf.multi_cell(
             0,
             self.default_cell_height,
@@ -196,7 +89,7 @@ class PassOn6PDFExporter:
         self.pdf.set_y(self.pdf.get_y() + 10)
 
     def _draw_informations(self):
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         self.pdf.cell(
             text=f"**Contratante:** {self.contract.organization.city_hall.name}",
             markdown=True,
@@ -236,7 +129,7 @@ class PassOn6PDFExporter:
         self.pdf.ln(self.default_cell_height)
 
     def _draw_first_table(self):
-        self.__set_font(font_size=7, bold=False)
+        self._set_font(font_size=7, bold=False)
         table_data = []
         table_data.append(
             [
@@ -252,7 +145,7 @@ class PassOn6PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position}",
                 ]
             ),
         )
@@ -285,7 +178,7 @@ class PassOn6PDFExporter:
 
     def _draw_partners_data(self):
         self.pdf.ln(self.default_cell_height)
-        self.__set_font(font_size=8)
+        self._set_font(font_size=8)
         self.pdf.multi_cell(
             text=f"**Objeto do Contrato de Gestão:** {self.contract.objective}",
             markdown=True,
@@ -312,7 +205,7 @@ class PassOn6PDFExporter:
         self.pdf.ln(self.default_cell_height)
 
     def _draw_documents_table(self):
-        self.__set_font(font_size=7, bold=False)
+        self._set_font(font_size=7, bold=False)
         self.pdf.ln()
         table_data = [
             ["**DOCUMENTO**", "**DATA**", "**VIGÊNCIA**", "**VALOR - R$**"],
@@ -327,7 +220,7 @@ class PassOn6PDFExporter:
         for addendum in self.addendum_queryset:
             table_data.append(
                 [
-                    addendum.contract.name_with_code,
+                    self.contract.name_with_code,
                     format_into_brazilian_date(addendum.start_of_vigency),
                     format_into_brazilian_date(addendum.end_of_vigency),
                     format_into_brazilian_currency(addendum.total_value),
@@ -353,7 +246,7 @@ class PassOn6PDFExporter:
     def _draw_header_resources_table(self):
         self.pdf.ln(7)
 
-        self.__set_font(font_size=8, bold=False)
+        self._set_font(font_size=8, bold=False)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -441,8 +334,11 @@ class PassOn6PDFExporter:
         ]
 
         self.sum_items_a_to_d = (
-            self.previous_balance + self.all_pass_on_values + self.investment_income
-        )  # TODO inserir valor de D
+            self.previous_balance
+            + self.all_pass_on_values
+            + self.investment_income
+            + self.other_revenues_value
+        )
 
         extern_revenue_data.append(
             [
@@ -470,7 +366,7 @@ class PassOn6PDFExporter:
         ]
 
         col_widths = [100, 50, 40]
-        self.__set_font(7)
+        self._set_font(7)
         font = FontFace("FreeSans", "", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
         with self.pdf.table(
@@ -501,7 +397,7 @@ class PassOn6PDFExporter:
 
     def _draw_resources_footer(self):
         self.pdf.ln(self.default_cell_height)
-        self.__set_font(7)
+        self._set_font(7)
         self.pdf.cell(
             text="(1) Verba: Federal, Estadual ou Municipal, devendo ser elaborado um anexo para cada fonte de recurso.",
             h=self.default_cell_height,
@@ -530,7 +426,7 @@ class PassOn6PDFExporter:
         )
 
         self.pdf.ln(7)
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -559,8 +455,10 @@ class PassOn6PDFExporter:
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
-        expenses_dict = self.__categorize_expenses()
-        expenses_dict = self.__convert_decimal_to_brl(expenses_dict)
+        expenses_dict = categorize_expenses(
+            self.contract, self.start_date, self.end_date, inclusive_bounds=False
+        )
+        expenses_dict = convert_decimal_to_brl(expenses_dict)
 
         table_data = [
             [
@@ -736,7 +634,7 @@ class PassOn6PDFExporter:
                 total.cell(text=text, align=text_align)
 
     def _draw_expenses_footer(self):
-        self.__set_font()
+        self._set_font()
         self.pdf.cell(
             text="(4) Verba: Federal, Estadual, Municipal e Recursos Próprios, devendo ser elaborado um anexo para cada fonte de recurso.",
             h=self.default_cell_height,
@@ -781,7 +679,7 @@ class PassOn6PDFExporter:
 
     def _draw_financial_table(self):
         self.pdf.ln(7)
-        self.__set_font(font_size=8, bold=True)
+        self._set_font(font_size=8, bold=True)
         self.pdf.cell(
             190,
             h=self.default_cell_height,
@@ -792,7 +690,9 @@ class PassOn6PDFExporter:
             new_y=YPos.NEXT,
         )
 
-        expenses_dict = self.__categorize_expenses()
+        expenses_dict = categorize_expenses(
+            self.contract, self.start_date, self.end_date, inclusive_bounds=False
+        )
         non_planned_paid_expenses_sum = self.expense_queryset.filter(
             planned=False
         ).aggregate(sum=Sum("value"))["sum"] or Decimal("0.00")
@@ -846,7 +746,7 @@ class PassOn6PDFExporter:
 
     def _draw_last_informations(self):
         self.pdf.ln(7)
-        self.__set_font()
+        self._set_font()
         self.pdf.multi_cell(
             text="Declaro(amos), na qualidade de responsável(is) pela entidade supra epigrafada, sob as penas da Lei, que a despesa relacionada comprova a exata aplicação dos recursos recebidos para os fins indicados, conforme programa de trabalho aprovado, proposto ao Órgão Público Contratante.",
             markdown=True,
@@ -892,7 +792,7 @@ class PassOn6PDFExporter:
                 "",
                 "",
                 " ",
-                f"Nome: {self.contract.supervision_autority.get_full_name()} - Confirmar campo",
+                f"Nome: {self.contract.supervision_autority.get_full_name()}",
             ]
         )
         (
@@ -901,7 +801,7 @@ class PassOn6PDFExporter:
                     "",
                     "",
                     " ",
-                    f"Papel: {self.contract.supervision_autority.position} - Confirmar variável",
+                    f"Papel: {self.contract.supervision_autority.position}",
                 ]
             ),
         )
@@ -931,139 +831,3 @@ class PassOn6PDFExporter:
                     else:
                         self.pdf.set_fill_color(255, 255, 255)
                     data.cell(text=text, align="L", border=0)
-
-    def __categorize_expenses(self) -> dict:
-        expenses = Expense.objects.filter(item__contract=self.contract).filter(
-            due_date__gte=self.start_date, due_date__lte=self.end_date
-        )
-
-        base_empty_dict = {
-            "accounted_on": Decimal(0.00),
-            "not_accounted": Decimal(0.00),
-            "accounted_and_paid": Decimal(0.00),
-            "paid_on": Decimal(0.00),
-            "not_paid": Decimal(0.00),
-        }
-        categorized_expenses = {
-            "HUMAN_RESOURCES": copy.deepcopy(base_empty_dict),
-            "OTHER_HUMAN_RESOURCES": copy.deepcopy(base_empty_dict),
-            "PERMANENT_GOODS": copy.deepcopy(base_empty_dict),
-            "OTHER_THIRD_PARTY": copy.deepcopy(base_empty_dict),
-            "PUBLIC_UTILITIES": copy.deepcopy(base_empty_dict),
-            "FUEL": copy.deepcopy(base_empty_dict),
-            "FINANCIAL_AND_BANKING": copy.deepcopy(base_empty_dict),
-            "FOODSTUFFS": copy.deepcopy(base_empty_dict),
-            "REAL_STATE": copy.deepcopy(base_empty_dict),
-            "MISCELLANEOUS": copy.deepcopy(base_empty_dict),
-            "MEDICAL_AND_HOSPITAL": copy.deepcopy(base_empty_dict),
-            "MEDICAL_SERVICES": copy.deepcopy(base_empty_dict),
-            "MEDICINES": copy.deepcopy(base_empty_dict),
-            "WORKS": copy.deepcopy(base_empty_dict),
-            "OTHER_EXPENSES": copy.deepcopy(base_empty_dict),
-            "OTHER_CONSUMABLES": copy.deepcopy(base_empty_dict),
-            "TOTAL": copy.deepcopy(base_empty_dict),
-        }
-
-        for expense in expenses:
-            expense_category = self.__get_expense_nature_category(expense=expense)
-            if not expense_category:
-                continue
-
-            accounted_on_period = (
-                expense.competency
-                and self.start_date.date() < expense.competency < self.end_date.date()
-            )
-            paid_on_period = (
-                expense.due_date
-                and self.start_date.date() < expense.due_date < self.end_date.date()
-            )
-
-            if paid_on_period and accounted_on_period:
-                categorized_expenses[expense_category]["accounted_and_paid"] += (
-                    expense.value
-                )
-                categorized_expenses[expense_category]["accounted_on"] += expense.value
-                categorized_expenses[expense_category]["paid_on"] += expense.value
-
-                categorized_expenses["TOTAL"]["accounted_and_paid"] += expense.value
-                categorized_expenses["TOTAL"]["paid_on"] += expense.value
-                categorized_expenses["TOTAL"]["accounted_on"] += expense.value
-
-            elif paid_on_period and not accounted_on_period:
-                categorized_expenses[expense_category]["not_accounted"] += expense.value
-                categorized_expenses[expense_category]["paid_on"] += expense.value
-
-                categorized_expenses["TOTAL"]["not_accounted"] += expense.value
-                categorized_expenses["TOTAL"]["paid_on"] += expense.value
-
-            elif not paid_on_period and accounted_on_period:
-                categorized_expenses[expense_category]["not_paid"] += expense.value
-                categorized_expenses[expense_category]["accounted_on"] += expense.value
-
-                categorized_expenses["TOTAL"]["accounted_on"] += expense.value
-                categorized_expenses["TOTAL"]["not_paid"] += expense.value
-
-        return categorized_expenses
-
-    def __get_expense_nature_category(self, expense: Expense):
-        if not expense.nature:
-            return None
-
-        if expense.nature in NatureCategories.HUMAN_RESOURCES:
-            return "HUMAN_RESOURCES"
-
-        if expense.nature in NatureCategories.OTHER_HUMAN_RESOURCES:
-            return "OTHER_HUMAN_RESOURCES"
-
-        if expense.nature in NatureCategories.PERMANENT_GOODS:
-            return "PERMANENT_GOODS"
-
-        if expense.nature in NatureCategories.OTHER_THIRD_PARTY:
-            return "OTHER_THIRD_PARTY"
-
-        if expense.nature in NatureCategories.PUBLIC_UTILITIES:
-            return "PUBLIC_UTILITIES"
-
-        if expense.nature in NatureCategories.FUEL:
-            return "FUEL"
-
-        if expense.nature in NatureCategories.FINANCIAL_AND_BANKING:
-            return "FINANCIAL_AND_BANKING"
-
-        if expense.nature in NatureCategories.FOODSTUFFS:
-            return "FOODSTUFFS"
-
-        if expense.nature in NatureCategories.REAL_STATE:
-            return "REAL_STATE"
-
-        if expense.nature in NatureCategories.MISCELLANEOUS:
-            return "MISCELLANEOUS"
-
-        if expense.nature in NatureCategories.MEDICAL_AND_HOSPITAL:
-            return "MEDICAL_AND_HOSPITAL"
-
-        if expense.nature in NatureCategories.MEDICAL_SERVICES:
-            return "MEDICAL_SERVICES"
-
-        if expense.nature in NatureCategories.MEDICINES:
-            return "MEDICINES"
-
-        if expense.nature in NatureCategories.WORKS:
-            return "WORKS"
-
-        if expense.nature in NatureCategories.OTHER_EXPENSES:
-            return "OTHER_EXPENSES"
-
-        if expense.nature in NatureCategories.OTHER_CONSUMABLES:
-            return "OTHER_CONSUMABLES"
-
-        return None
-
-    def __convert_decimal_to_brl(self, expenses_dict):
-        for key, value in expenses_dict.items():
-            if isinstance(value, Decimal):
-                expenses_dict[key] = format_into_brazilian_currency(value)
-            elif isinstance(value, dict):
-                self.__convert_decimal_to_brl(value)
-
-        return expenses_dict
