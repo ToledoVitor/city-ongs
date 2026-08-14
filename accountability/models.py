@@ -146,6 +146,7 @@ class AccountabilityFile(
         verbose_name="Criado por",
         related_name="accountability_files",
         on_delete=models.SET_NULL,
+        null=True,
     )
     file = models.FileField(
         verbose_name="Arquivo",
@@ -780,8 +781,6 @@ class ExpenseFile(BaseOrganizationTenantModel):
         verbose_name="Prestação",
         related_name="expense_documents",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     created_by = models.ForeignKey(
         User,
