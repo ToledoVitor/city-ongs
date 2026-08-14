@@ -473,10 +473,16 @@
     <div class="ui-row ui-row--between" style="flex-wrap: wrap; gap: 12px;">
       <h2 class="ui-display-md" style="margin: 0;">Despesas cadastradas</h2>
       {% if accountability.is_on_execution and user.can_update_accountability %}
-        <a href="{% url 'accountability:batch-reconcile' accountability.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
-          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-          Conciliar em lote
-        </a>
+        <div class="ui-row" style="gap: 8px;">
+          <a href="{% url 'accountability:expense-document-workspace' accountability.id %}" class="ui-btn ui-btn--primary ui-btn--sm">
+            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+            Organizar documentos
+          </a>
+          <a href="{% url 'accountability:batch-reconcile' accountability.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
+            <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+            Conciliar transações
+          </a>
+        </div>
       {% endif %}
     </div>
     <div class="detail-table-wrap">

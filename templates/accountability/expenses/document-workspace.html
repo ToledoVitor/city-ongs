@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Organizar documentos — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="doc-workspace" data-upload-url="{% url 'accountability:expense-document-bulk-upload' accountability.id %}" data-assign-url="{% url 'accountability:expense-document-assign' accountability.id %}">
+  <header class="doc-workspace__header">
+    <div>
+      <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'accountability:accountability-detail' accountability.id %}" class="ui-breadcrumb__item">Prestação {{ accountability.month }}/{{ accountability.year }}</a>
+        <span class="ui-breadcrumb__sep">/</span>
+        <span class="ui-breadcrumb__item ui-breadcrumb__item--current">Documentos</span>
+      </nav>
+      <h1 class="ui-display-lg">Organizar documentos</h1>
+    </div>
+    <div class="doc-workspace__summary" aria-live="polite">
+      <span><strong id="document-total">{{ documents|length }}</strong> documentos</span>
+      <span class="ui-status ui-status--warning"><strong id="unassigned-total">{{ unassigned_count }}</strong> sem despesa</span>
+    </div>
+  </header>
+
+  <div id="workspace-alert" class="ui-alert hidden" role="alert"></div>
+
+  <div class="doc-workspace__grid">
+    <aside class="doc-panel doc-panel--documents">
+      <div id="upload-zone" class="doc-upload" tabindex="0" role="button" aria-controls="document-files">
+        <input id="document-files" type="file" name="files" multiple accept=".pdf,.jpg,.jpeg,.png" hidden>
+        <svg width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+        <div><p class="ui-body-sm-strong">Solte até 50 arquivos</p><p class="ui-caption">PDF, JPG ou PNG · 10 MB cada</p></div>
+        <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm" id="choose-files">Escolher</button>
+      </div>
+      <div id="upload-progress" class="doc-progress hidden" aria-live="polite">
+        <div class="doc-progress__copy"><span id="upload-label">Enviando documentos…</span><strong id="upload-percent">0%</strong></div>
+        <div class="doc-progress__track"><span id="upload-bar"></span></div>
+      </div>
+
+      <div class="doc-toolbar">
+        <label class="doc-search">
+          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
+          <input id="document-search" type="search" placeholder="Buscar documento" aria-label="Buscar documento">
+        </label>
+        <button type="button" class="ui-chip ui-chip--action is-active" data-filter="all">Todos</button>
+        <button type="button" class="ui-chip ui-chip--action" data-filter="unassigned">Sem despesa</button>
+      </div>
+
+      <div class="doc-list-heading">
+        <label class="ui-caption"><input id="select-visible" type="checkbox"> Selecionar visíveis</label>
+        <span id="selected-count" class="ui-caption">0 selecionados</span>
+      </div>
+      <div id="document-list" class="doc-list">
+        {% for document in documents %}
+          <article class="doc-card" draggable="true" data-document-id="{{ document.id }}" data-expense-id="{{ document.expense_id|default:'' }}" data-name="{{ document.name|lower }}">
+            <input class="doc-card__check" type="checkbox" aria-label="Selecionar {{ document.name }}">
+            <a href="{{ document.workspace_url }}" target="_blank" rel="noopener" class="doc-card__preview" tabindex="-1">
+              {% if document.is_workspace_image %}
+                <img src="{{ document.workspace_url }}" alt="">
+              {% else %}
+                <span>PDF</span>
+              {% endif %}
+            </a>
+            <div class="doc-card__body">
+              <a href="{{ document.workspace_url }}" target="_blank" rel="noopener" class="doc-card__name" title="{{ document.name }}">{{ document.name }}</a>
+              <p class="doc-card__assignment">{% if document.expense %}{{ document.expense.identification }}{% else %}Sem despesa{% endif %}</p>
+            </div>
+            <span class="doc-card__handle" aria-hidden="true">⋮⋮</span>
+          </article>
+        {% empty %}
+          <div id="document-empty" class="ui-empty doc-empty">
+            <p class="ui-body-sm-strong">Nenhum documento</p>
+            <p class="ui-caption">Solte arquivos acima para começar.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <main class="doc-panel doc-panel--expenses">
+      <div class="expense-toolbar">
+        <div><h2 class="ui-display-sm">Despesas</h2><p class="ui-caption">Arraste documentos para despesa correspondente.</p></div>
+        <label class="doc-search doc-search--expense">
+          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
+          <input id="expense-search" type="search" placeholder="Buscar despesa ou favorecido" aria-label="Buscar despesa">
+        </label>
+      </div>
+      <button type="button" class="expense-card expense-card--unassign" data-expense-id="" data-expense-name="Sem despesa">
+        <span class="expense-card__icon">×</span><span><strong>Remover vínculo</strong><small>Voltar documentos para caixa de entrada</small></span>
+      </button>
+      <div id="expense-list" class="expense-list">
+        {% for expense in expenses %}
+          <button type="button" class="expense-card" data-expense-id="{{ expense.id }}" data-expense-name="{{ expense.identification }}" data-search="{{ expense.identification|lower }} {{ expense.favored.name|default:''|lower }}">
+            <span class="expense-card__main"><strong>{{ expense.identification }}</strong><small>{{ expense.favored.name|default:"Sem favorecido" }} · venc. {{ expense.due_date|date:"d/m/Y"|default:"—" }}</small></span>
+            <span class="expense-card__value">R$ {{ expense.value|intcomma }}</span>
+            <span class="expense-card__count" data-count="{{ expense.document_count }}">{{ expense.document_count }}</span>
+          </button>
+        {% empty %}
+          <div class="ui-empty"><p class="ui-body-sm-strong">Nenhuma despesa cadastrada</p></div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+
+  <div id="selection-bar" class="selection-bar hidden">
+    <strong><span id="selection-total">0</span> <span id="selection-label">selecionados</span></strong>
+    <select id="bulk-expense" class="ui-input" aria-label="Escolher despesa">
+      <option value="">Escolha uma despesa</option>
+      {% for expense in expenses %}<option value="{{ expense.id }}">{{ expense.identification }}</option>{% endfor %}
+    </select>
+    <button type="button" id="bulk-assign" class="ui-btn ui-btn--primary ui-btn--sm">Vincular</button>
+    <button type="button" id="clear-selection" class="ui-btn ui-btn--subtle ui-btn--sm">Limpar</button>
+  </div>
+</section>
+
+<style>
+  .doc-workspace { height: calc(100dvh - var(--shell-main-pad-y)); min-height: 580px; display: flex; flex-direction: column; gap: 12px; }
+  .doc-workspace__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .doc-workspace__summary { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .doc-workspace__grid { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(340px, 0.9fr) minmax(440px, 1.35fr); gap: 12px; }
+  .doc-panel { min-height: 0; border: 1px solid #d8d8d8; border-radius: var(--rounded-xl); background: var(--color-canvas); padding: 16px; }
+  .doc-panel--documents { display: flex; flex-direction: column; }
+  .doc-upload { min-height: 70px; display: flex; align-items: center; gap: 12px; border: 1.5px dashed var(--color-hairline-mid); border-radius: var(--rounded-lg); padding: 10px 12px; cursor: pointer; transition: background 120ms, border-color 120ms; }
+  .doc-upload > div { flex: 1; }
+  .doc-upload.is-over { background: var(--color-canvas-soft); border-color: var(--color-ink); }
+  .doc-progress { padding-top: 10px; }
+  .doc-progress__copy { display: flex; justify-content: space-between; font-size: 12px; }
+  .doc-progress__track { height: 5px; margin-top: 5px; overflow: hidden; border-radius: 999px; background: var(--color-canvas-soft); }
+  .doc-progress__track span { display: block; width: 0; height: 100%; background: var(--color-ink); transition: width 100ms; }
+  .doc-toolbar, .expense-toolbar { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
+  .doc-search { min-width: 0; flex: 1; height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--color-canvas-soft); }
+  .doc-search input { width: 100%; min-width: 0; border: 0; padding: 0; background: transparent; font-size: 13px; box-shadow: none !important; }
+  .doc-toolbar .ui-chip.is-active { background: var(--color-ink); color: white; }
+  .doc-list-heading { display: flex; justify-content: space-between; padding: 3px 2px 7px; }
+  .doc-list { min-height: 0; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+  .doc-card { display: grid; grid-template-columns: 18px 42px minmax(0, 1fr) 18px; align-items: center; gap: 9px; min-height: 54px; border: 1px solid #dedede; border-radius: var(--rounded-lg); padding: 5px 8px; background: white; cursor: grab; }
+  .doc-card:hover { border-color: var(--color-hairline-mid); }
+  .doc-card.is-selected { border-color: var(--color-ink); background: var(--color-canvas-softer); }
+  .doc-card.is-moving { opacity: .48; }
+  .doc-card__preview { width: 42px; height: 42px; display: grid; place-items: center; overflow: hidden; border-radius: 7px; background: var(--color-canvas-soft); color: var(--color-body); font-size: 10px; font-weight: 700; text-decoration: none; }
+  .doc-card__preview img { width: 100%; height: 100%; object-fit: cover; }
+  .doc-card__body { min-width: 0; }
+  .doc-card__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-ink); font-size: 13px; font-weight: 500; text-decoration: none; }
+  .doc-card__assignment { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 2px 0 0; color: var(--color-body); font-size: 11px; }
+  .doc-card__handle { color: var(--color-mute); letter-spacing: -3px; }
+  .doc-empty { margin: auto 0; }
+  .doc-panel--expenses { display: flex; flex-direction: column; }
+  .expense-toolbar { justify-content: space-between; margin-top: 0; }
+  .doc-search--expense { max-width: 280px; flex-basis: 220px; }
+  .expense-list { min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 8px; padding: 8px 4px 0 0; }
+  .expense-card { width: 100%; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; align-items: center; gap: 8px; border: 1px solid #dedede; border-radius: var(--rounded-lg); background: white; padding: 10px; color: var(--color-ink); text-align: left; cursor: pointer; transition: border-color 100ms, background 100ms, transform 100ms; }
+  .expense-card:hover, .expense-card.is-over { border-color: var(--color-ink); background: var(--color-canvas-softer); }
+  .expense-card.is-over { transform: scale(1.015); }
+  .expense-card__main { min-width: 0; }
+  .expense-card strong, .expense-card small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .expense-card strong { font-size: 13px; }
+  .expense-card small { margin-top: 3px; color: var(--color-body); font-size: 11px; }
+  .expense-card__value { font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .expense-card__count { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--color-canvas-soft); font-size: 11px; font-weight: 600; }
+  .expense-card--unassign { grid-template-columns: 28px 1fr; border-style: dashed; margin-bottom: 2px; }
+  .expense-card__icon { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--color-canvas-soft); }
+  .selection-bar { position: fixed; z-index: 25; left: calc((100vw + var(--sidebar-width-expanded)) / 2); bottom: 20px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; min-width: 520px; padding: 9px 10px 9px 16px; border-radius: var(--rounded-pill); background: var(--color-ink); color: white; box-shadow: var(--shadow-2); }
+  .selection-bar .ui-input { min-width: 220px; height: 36px; border-radius: 999px; padding: 0 12px; font-size: 13px; color: var(--color-ink); }
+  .selection-bar .ui-btn--subtle { background: #282828; color: white; }
+  .selection-bar .ui-btn--primary { background: white; color: var(--color-ink); }
+  .hidden { display: none !important; }
+  @media (max-width: 1100px) { .expense-list { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) {
+    .doc-workspace { height: auto; min-height: 0; }
+    .doc-workspace__header { align-items: flex-start; flex-direction: column; }
+    .doc-workspace__grid { display: flex; flex-direction: column; }
+    .doc-panel { min-height: 520px; }
+    .doc-panel--expenses { min-height: 560px; }
+    .doc-toolbar { flex-wrap: wrap; }
+    .doc-toolbar .doc-search { flex-basis: 100%; }
+    .expense-toolbar { align-items: flex-start; flex-direction: column; }
+    .doc-search--expense { width: 100%; max-width: none; flex-basis: 36px; }
+    .selection-bar { left: 12px; right: 12px; bottom: 12px; transform: none; min-width: 0; flex-wrap: wrap; border-radius: var(--rounded-xl); }
+    .selection-bar .ui-input { order: 3; flex: 1 0 100%; }
+  }
+</style>
+
+<script>
+(function () {
+  const workspace = document.querySelector('.doc-workspace');
+  const uploadZone = document.getElementById('upload-zone');
+  const fileInput = document.getElementById('document-files');
+  const documentList = document.getElementById('document-list');
+  const selectionBar = document.getElementById('selection-bar');
+  const csrfToken = '{{ csrf_token }}';
+  let activeFilter = 'all';
+  let draggedIds = [];
+
+  function documentCards() { return Array.from(documentList.querySelectorAll('.doc-card')); }
+  function selectedCards() { return documentCards().filter(card => card.querySelector('.doc-card__check').checked); }
+  function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
+  function showAlert(message, type) {
+    const alert = document.getElementById('workspace-alert');
+    alert.className = 'ui-alert ui-alert--' + (type || 'error');
+    alert.innerHTML = '<span class="ui-alert__indicator"></span><div class="ui-alert__body"><p class="ui-body-sm-strong">' + escapeHtml(message) + '</p></div>';
+    window.setTimeout(() => alert.classList.add('hidden'), 5000);
+  }
+  function refreshSelection() {
+    const selected = selectedCards();
+    document.getElementById('selected-count').textContent = selected.length + ' selecionados';
+    document.getElementById('selection-total').textContent = selected.length;
+    document.getElementById('selection-label').textContent = selected.length === 1 ? 'selecionado' : 'selecionados';
+    selectionBar.classList.toggle('hidden', selected.length === 0);
+    documentCards().forEach(card => card.classList.toggle('is-selected', card.querySelector('.doc-card__check').checked));
+  }
+  function applyFilters() {
+    const query = document.getElementById('document-search').value.trim().toLowerCase();
+    documentCards().forEach(card => {
+      const matchesText = card.dataset.name.includes(query);
+      const matchesState = activeFilter === 'all' || !card.dataset.expenseId;
+      card.classList.toggle('hidden', !matchesText || !matchesState);
+    });
+  }
+  function createDocumentCard(documentData) {
+    const card = document.createElement('article');
+    card.className = 'doc-card';
+    card.draggable = true;
+    card.dataset.documentId = documentData.id;
+    card.dataset.expenseId = '';
+    card.dataset.name = documentData.name.toLowerCase();
+    const preview = documentData.is_image ? '<img src="' + encodeURI(documentData.url) + '" alt="">' : '<span>PDF</span>';
+    card.innerHTML = '<input class="doc-card__check" type="checkbox" aria-label="Selecionar ' + escapeHtml(documentData.name) + '">' +
+      '<a href="' + encodeURI(documentData.url) + '" target="_blank" rel="noopener" class="doc-card__preview" tabindex="-1">' + preview + '</a>' +
+      '<div class="doc-card__body"><a href="' + encodeURI(documentData.url) + '" target="_blank" rel="noopener" class="doc-card__name" title="' + escapeHtml(documentData.name) + '">' + escapeHtml(documentData.name) + '</a><p class="doc-card__assignment">Sem despesa</p></div><span class="doc-card__handle" aria-hidden="true">⋮⋮</span>';
+    bindCard(card);
+    documentList.prepend(card);
+  }
+  function bindCard(card) {
+    card.querySelector('.doc-card__check').addEventListener('change', refreshSelection);
+    card.addEventListener('dragstart', event => {
+      if (!card.querySelector('.doc-card__check').checked) {
+        selectedCards().forEach(item => item.querySelector('.doc-card__check').checked = false);
+        card.querySelector('.doc-card__check').checked = true;
+        refreshSelection();
+      }
+      draggedIds = selectedCards().map(item => item.dataset.documentId);
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', draggedIds.join(','));
+    });
+  }
+  documentCards().forEach(bindCard);
+
+  async function uploadFiles(files) {
+    files = Array.from(files);
+    if (!files.length) return;
+    if (files.length > 50) { showAlert('Envie no máximo 50 arquivos por vez.'); return; }
+    const progress = document.getElementById('upload-progress');
+    progress.classList.remove('hidden');
+    const chunks = [];
+    for (let index = 0; index < files.length; index += 5) chunks.push(files.slice(index, index + 5));
+    try {
+      for (let index = 0; index < chunks.length; index++) {
+        const data = new FormData();
+        chunks[index].forEach(file => data.append('files', file));
+        const response = await fetch(workspace.dataset.uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: data });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Não foi possível enviar os documentos.');
+        document.getElementById('document-empty')?.remove();
+        result.documents.forEach(createDocumentCard);
+        const percent = Math.round(((index + 1) / chunks.length) * 100);
+      document.getElementById('upload-percent').textContent = percent + '%';
+      document.getElementById('upload-bar').style.width = percent + '%';
+      }
+      progress.classList.add('hidden');
+      document.getElementById('document-total').textContent = documentCards().length;
+      document.getElementById('unassigned-total').textContent = documentCards().filter(card => !card.dataset.expenseId).length;
+      fileInput.value = '';
+      applyFilters();
+    } catch (error) {
+      progress.classList.add('hidden');
+      showAlert(error.message);
+    }
+  }
+  document.getElementById('choose-files').addEventListener('click', event => { event.stopPropagation(); fileInput.click(); });
+  uploadZone.addEventListener('click', event => { if (event.target.id !== 'choose-files') fileInput.click(); });
+  uploadZone.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
+  ['dragenter', 'dragover'].forEach(name => uploadZone.addEventListener(name, event => { event.preventDefault(); uploadZone.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach(name => uploadZone.addEventListener(name, event => { event.preventDefault(); uploadZone.classList.remove('is-over'); }));
+  uploadZone.addEventListener('drop', event => uploadFiles(event.dataTransfer.files));
+
+  async function assignDocuments(ids, expenseId, expenseName) {
+    const cards = ids.map(id => documentList.querySelector('[data-document-id="' + id + '"]')).filter(Boolean);
+    const previous = cards.map(card => ({ card, expenseId: card.dataset.expenseId, label: card.querySelector('.doc-card__assignment').textContent }));
+    cards.forEach(card => { card.classList.add('is-moving'); card.dataset.expenseId = expenseId || ''; card.querySelector('.doc-card__assignment').textContent = expenseName || 'Sem despesa'; });
+    try {
+      const response = await fetch(workspace.dataset.assignUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({ document_ids: ids, expense_id: expenseId || null }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível vincular.');
+      updateCounts(previous.map(item => item.expenseId), expenseId, cards.length);
+      cards.forEach(card => { card.classList.remove('is-moving'); card.querySelector('.doc-card__check').checked = false; });
+      refreshSelection(); applyFilters();
+    } catch (error) {
+      previous.forEach(item => { item.card.dataset.expenseId = item.expenseId; item.card.querySelector('.doc-card__assignment').textContent = item.label; item.card.classList.remove('is-moving'); });
+      showAlert(error.message);
+    }
+  }
+  function updateCounts(previousIds, newId, movedCount) {
+    previousIds.forEach(id => {
+      if (!id) return;
+      const badge = document.querySelector('.expense-card[data-expense-id="' + id + '"] .expense-card__count');
+      if (badge) badge.textContent = Math.max(0, Number(badge.textContent) - 1);
+    });
+    if (newId) {
+      const badge = document.querySelector('.expense-card[data-expense-id="' + newId + '"] .expense-card__count');
+      if (badge) badge.textContent = Number(badge.textContent) + movedCount;
+    }
+    document.getElementById('unassigned-total').textContent = documentCards().filter(card => !card.dataset.expenseId).length;
+  }
+  document.querySelectorAll('.expense-card').forEach(expenseCard => {
+    ['dragenter', 'dragover'].forEach(name => expenseCard.addEventListener(name, event => { event.preventDefault(); expenseCard.classList.add('is-over'); }));
+    ['dragleave', 'drop'].forEach(name => expenseCard.addEventListener(name, event => { event.preventDefault(); expenseCard.classList.remove('is-over'); }));
+    expenseCard.addEventListener('drop', () => assignDocuments(draggedIds, expenseCard.dataset.expenseId, expenseCard.dataset.expenseName));
+    expenseCard.addEventListener('click', () => {
+      const ids = selectedCards().map(card => card.dataset.documentId);
+      if (ids.length) assignDocuments(ids, expenseCard.dataset.expenseId, expenseCard.dataset.expenseName);
+    });
+  });
+  document.getElementById('bulk-assign').addEventListener('click', () => {
+    const select = document.getElementById('bulk-expense');
+    if (!select.value) { showAlert('Escolha uma despesa.'); return; }
+    assignDocuments(selectedCards().map(card => card.dataset.documentId), select.value, select.options[select.selectedIndex].text);
+  });
+  document.getElementById('clear-selection').addEventListener('click', () => { selectedCards().forEach(card => card.querySelector('.doc-card__check').checked = false); refreshSelection(); });
+  document.getElementById('select-visible').addEventListener('change', event => { documentCards().filter(card => !card.classList.contains('hidden')).forEach(card => card.querySelector('.doc-card__check').checked = event.target.checked); refreshSelection(); });
+  document.getElementById('document-search').addEventListener('input', applyFilters);
+  document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('is-active', item === button)); applyFilters(); }));
+  document.getElementById('expense-search').addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); document.querySelectorAll('#expense-list .expense-card').forEach(card => card.classList.toggle('hidden', !card.dataset.search.includes(query))); });
+})();
+</script>
+{% endblock %}
