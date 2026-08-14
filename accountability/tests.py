@@ -64,14 +64,16 @@ class ExpenseDocumentWorkspaceTests(TestCase):
                 file=SimpleUploadedFile(name, b"%PDF-test"),
             )
 
-    def create_expense(self, identification, *, accountability=None, favored=None):
+    def create_expense(
+        self, identification, *, accountability=None, favored=None, value="100.00"
+    ):
         with tenant_context(self.user.organization):
             return Expense.objects.create(
                 accountability=accountability or self.accountability,
                 source=self.expense.source,
                 favored=favored,
                 identification=identification,
-                value="100.00",
+                value=value,
                 competency=self.expense.competency,
             )
 
@@ -210,6 +212,29 @@ class ExpenseDocumentWorkspaceTests(TestCase):
             [item["id"] for item in favored_search["results"]],
         )
 
+    def test_expense_list_prioritizes_missing_then_value_not_document_count(self):
+        missing = self.create_expense("Missing documents", value="10.00")
+        one_document = self.create_expense("One document", value="100.00")
+        two_documents = self.create_expense("Two documents", value="300.00")
+        self.create_document("one.pdf", expense=one_document)
+        self.create_document("two-a.pdf", expense=two_documents)
+        self.create_document("two-b.pdf", expense=two_documents)
+
+        response = self.client.get(
+            reverse(
+                "accountability:expense-document-expense-list",
+                args=[self.accountability.id],
+            ),
+            {"q": "document"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result_ids = [item["id"] for item in response.json()["results"]]
+        self.assertEqual(
+            result_ids,
+            [str(missing.id), str(two_documents.id), str(one_document.id)],
+        )
+
     def test_workspace_renders_api_backed_controls(self):
         response = self.client.get(
             reverse(
@@ -228,6 +253,8 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         self.assertContains(response, 'id="hide-expenses-with-documents"')
         self.assertContains(response, 'id="document-sentinel"')
         self.assertContains(response, 'id="expense-sentinel"')
+        self.assertContains(response, 'id="document-end"')
+        self.assertContains(response, 'id="expense-end"')
         self.assertNotContains(response, 'class="doc-card__name"')
 
     def test_bulk_upload_creates_unassigned_documents(self):

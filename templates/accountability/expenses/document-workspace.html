@@ -48,10 +48,10 @@
         <div class="doc-progress__track"><span id="upload-bar"></span></div>
       </div>
 
-      <div class="doc-toolbar">
-        <label class="doc-search">
+      <div class="doc-toolbar filter-row">
+        <label class="doc-search filter-field">
           <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
-          <input id="document-search" type="search" placeholder="Buscar documento" aria-label="Buscar documento">
+          <input id="document-search" class="filter-field__control" type="search" placeholder="Buscar documento" aria-label="Buscar documento">
         </label>
         <div class="doc-filter-group" aria-label="Filtrar documentos">
           <button type="button" class="ui-chip ui-chip--action is-active" data-filter="unassigned" aria-pressed="true">Sem despesa</button>
@@ -76,8 +76,9 @@
           <p id="document-empty-title" class="ui-body-sm-strong">Nenhum documento sem despesa</p>
           <p class="ui-caption">Envie arquivos ou altere o filtro.</p>
         </div>
-        <button id="document-error" type="button" class="feed-error hidden">Não foi possível carregar. Tentar novamente</button>
+        <button id="document-error" type="button" class="ui-btn ui-btn--subtle ui-btn--sm feed-error hidden">Não foi possível carregar. Tentar novamente</button>
         <div id="document-sentinel" class="feed-sentinel" aria-hidden="true"></div>
+        <p id="document-end" class="feed-end feed-state ui-caption hidden">Todos os documentos carregados.</p>
       </div>
     </aside>
 
@@ -93,9 +94,9 @@
         </label>
       </div>
 
-      <label class="doc-search doc-search--expense">
+      <label class="doc-search doc-search--expense filter-field">
         <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
-        <input id="expense-search" type="search" placeholder="Buscar despesa ou favorecido" aria-label="Buscar despesa ou favorecido">
+        <input id="expense-search" class="filter-field__control" type="search" placeholder="Buscar despesa ou favorecido" aria-label="Buscar despesa ou favorecido">
       </label>
 
       <button type="button" class="expense-card expense-card--unassign" data-expense-id="" data-expense-name="Sem despesa">
@@ -115,8 +116,9 @@
           <p class="ui-body-sm-strong">Nenhuma despesa encontrada</p>
           <p class="ui-caption">Altere busca ou filtro.</p>
         </div>
-        <button id="expense-error" type="button" class="feed-error hidden">Não foi possível carregar. Tentar novamente</button>
+        <button id="expense-error" type="button" class="ui-btn ui-btn--subtle ui-btn--sm feed-error hidden">Não foi possível carregar. Tentar novamente</button>
         <div id="expense-sentinel" class="feed-sentinel" aria-hidden="true"></div>
+        <p id="expense-end" class="feed-end feed-state ui-caption hidden">Todas as despesas carregadas.</p>
       </div>
     </main>
   </div>
@@ -147,10 +149,10 @@
 
   .doc-toolbar, .expense-toolbar { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
   .expense-toolbar { justify-content: space-between; margin-top: 0; }
-  .doc-search { min-width: 0; flex: 1; height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 11px; border: 1px solid transparent; border-radius: var(--rounded-md); background: var(--color-canvas-soft); transition: border-color 120ms, background 120ms; }
-  .doc-search:focus-within { border-color: var(--color-ink); background: var(--color-canvas); }
-  .doc-search input { width: 100%; min-width: 0; height: 100%; border: 0; padding: 0; border-radius: var(--rounded-md); background: transparent; font-size: 13px; box-shadow: none !important; }
-  .doc-search--expense { flex: 0 0 auto; width: 100%; margin-bottom: 8px; }
+  .doc-search.filter-field { position: relative; min-width: 0; max-width: none; flex: 1; display: block; }
+  .doc-search svg { position: absolute; z-index: 1; left: 11px; top: 10px; color: var(--color-body); pointer-events: none; }
+  .doc-search input.filter-field__control { min-width: 0; padding-left: 34px; }
+  .doc-search--expense.filter-field { flex: 0 0 auto; width: 100%; margin-bottom: 8px; }
   .doc-filter-group { display: flex; align-items: center; gap: 6px; }
   .doc-filter-group .ui-chip { min-height: 36px; }
   .doc-filter-group .ui-chip.is-active { background: var(--color-ink); color: white; }
@@ -200,7 +202,8 @@
   .feed-state { margin: auto 0; padding: 20px 12px; text-align: center; }
   .feed-state--loading { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--color-body); font-size: 12px; }
   .feed-spinner { width: 15px; height: 15px; border: 2px solid var(--color-canvas-soft); border-top-color: var(--color-ink); border-radius: var(--rounded-full); animation: feed-spin 700ms linear infinite; }
-  .feed-error { width: 100%; margin: 10px 0; border: 0; border-radius: var(--rounded-pill); padding: 9px 12px; background: rgba(217, 33, 33, .08); color: var(--color-toast-error); font-size: 12px; cursor: pointer; }
+  .feed-error { width: 100%; margin: 10px 0; }
+  .feed-end { margin-top: 4px; padding: 10px 12px; }
   .feed-sentinel { flex: 0 0 1px; width: 100%; }
   @keyframes feed-spin { to { transform: rotate(360deg); } }
 
@@ -211,7 +214,13 @@
   #jump-to-expenses { display: none; }
   .hidden { display: none !important; }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1180px) {
+    .doc-workspace__grid { grid-template-columns: minmax(290px, .75fr) minmax(0, 1.25fr); }
+    .doc-toolbar { align-items: stretch; flex-direction: column; }
+    .doc-filter-group { order: -1; }
+    .doc-filter-group .ui-chip { flex: 1; }
+  }
+  @media (max-width: 1050px) {
     .doc-workspace { height: auto; min-height: 0; }
     .doc-workspace__grid { display: flex; flex-direction: column; }
     .doc-panel { min-height: 520px; }
@@ -219,9 +228,6 @@
   }
   @media (max-width: 760px) {
     .doc-workspace__header { align-items: flex-start; flex-direction: column; }
-    .doc-toolbar { align-items: stretch; flex-direction: column; }
-    .doc-filter-group { order: -1; }
-    .doc-filter-group .ui-chip { flex: 1; }
     .expense-hide-toggle { min-height: 44px; }
     .expense-card { min-height: 76px; }
     .expense-card__aside { min-width: 108px; }
@@ -304,7 +310,6 @@
     documentCards().forEach(card => {
       const selected = selectedDocumentIds.has(card.dataset.documentId);
       card.classList.toggle('is-selected', selected);
-      card.setAttribute('aria-checked', selected ? 'true' : 'false');
       card.querySelector('.doc-card__check').checked = selected;
     });
     document.querySelectorAll('.expense-card').forEach(card => {
@@ -338,8 +343,6 @@
     const card = document.createElement('article');
     card.className = 'doc-card';
     card.draggable = true;
-    card.tabIndex = 0;
-    card.setAttribute('role', 'checkbox');
     card.dataset.documentId = documentData.id;
     card.dataset.expenseId = documentData.expense_id || '';
 
@@ -384,12 +387,6 @@
 
     card.append(checkbox, preview, body, createEyeAction(documentData), handle);
     card.addEventListener('click', () => toggleDocumentSelection(card));
-    card.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        toggleDocumentSelection(card);
-      }
-    });
     card.addEventListener('dragstart', event => {
       if (!selectedDocumentIds.has(documentData.id)) {
         selectedDocumentIds.clear();
@@ -407,6 +404,7 @@
     const hasCards = documentCards().length > 0;
     document.getElementById('document-loading').classList.toggle('hidden', !documentFeed.loading || hasCards);
     document.getElementById('document-empty').classList.toggle('hidden', documentFeed.loading || hasCards || documentFeed.page === 0);
+    document.getElementById('document-end').classList.toggle('hidden', documentFeed.loading || !hasCards || documentFeed.hasMore);
     document.getElementById('document-empty-title').textContent = documentFeed.scope === 'unassigned' ? 'Nenhum documento sem despesa' : 'Nenhum documento encontrado';
     documentList.setAttribute('aria-busy', documentFeed.loading ? 'true' : 'false');
   }
@@ -539,6 +537,7 @@
     const hasCards = expenseCards().length > 0;
     document.getElementById('expense-loading').classList.toggle('hidden', !expenseFeed.loading || hasCards);
     document.getElementById('expense-empty').classList.toggle('hidden', expenseFeed.loading || hasCards || expenseFeed.page === 0);
+    document.getElementById('expense-end').classList.toggle('hidden', expenseFeed.loading || !hasCards || expenseFeed.hasMore);
     expenseList.setAttribute('aria-busy', expenseFeed.loading ? 'true' : 'false');
   }
 
@@ -607,6 +606,8 @@
     }
 
     const progress = document.getElementById('upload-progress');
+    document.getElementById('upload-percent').textContent = '0%';
+    document.getElementById('upload-bar').style.width = '0%';
     progress.classList.remove('hidden');
     const chunks = [];
     for (let index = 0; index < files.length; index += 5) chunks.push(files.slice(index, index + 5));

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction as db_transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -1890,6 +1890,13 @@ def expense_document_expense_list_view(request, pk):
                 distinct=True,
             )
         )
+        .annotate(
+            has_documents=Case(
+                When(document_count__gt=0, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
     )
     query = (request.GET.get("q") or "").strip()
     if query:
@@ -1899,7 +1906,7 @@ def expense_document_expense_list_view(request, pk):
     if (request.GET.get("without_documents") or "").lower() == "true":
         expenses = expenses.filter(document_count=0)
     expenses = expenses.order_by(
-        "document_count",
+        "has_documents",
         "-value",
         "identification",
         "pk",
