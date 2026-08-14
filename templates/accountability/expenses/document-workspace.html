@@ -1,10 +1,15 @@
 {% extends "base.html" %}
-{% load humanize %}
 
 {% block title %}Organizar documentos — Portal SITTS{% endblock %}
 
 {% block content %}
-<section class="doc-workspace" data-upload-url="{% url 'accountability:expense-document-bulk-upload' accountability.id %}" data-assign-url="{% url 'accountability:expense-document-assign' accountability.id %}">
+<section
+  class="doc-workspace"
+  data-documents-url="{% url 'accountability:expense-document-list' accountability.id %}"
+  data-expenses-url="{% url 'accountability:expense-document-expense-list' accountability.id %}"
+  data-upload-url="{% url 'accountability:expense-document-bulk-upload' accountability.id %}"
+  data-assign-url="{% url 'accountability:expense-document-assign' accountability.id %}"
+>
   <header class="doc-workspace__header">
     <div>
       <nav class="ui-breadcrumb" aria-label="Breadcrumb">
@@ -15,97 +20,111 @@
       <h1 class="ui-display-lg">Organizar documentos</h1>
     </div>
     <div class="doc-workspace__summary" aria-live="polite">
-      <span><strong id="document-total">{{ documents|length }}</strong> documentos</span>
-      <span class="ui-status ui-status--warning"><strong id="unassigned-total">{{ unassigned_count }}</strong> sem despesa</span>
+      <span><strong id="document-total">—</strong> documentos</span>
+      <span class="ui-status ui-status--warning"><strong id="unassigned-total">—</strong> sem despesa</span>
     </div>
   </header>
 
   <div id="workspace-alert" class="ui-alert hidden" role="alert"></div>
 
   <div class="doc-workspace__grid">
-    <aside class="doc-panel doc-panel--documents">
+    <aside class="doc-panel doc-panel--documents" aria-labelledby="documents-heading">
+      <h2 id="documents-heading" class="sr-only">Documentos</h2>
       <div id="upload-zone" class="doc-upload" tabindex="0" role="button" aria-controls="document-files">
         <input id="document-files" type="file" name="files" multiple accept=".pdf,.jpg,.jpeg,.png" hidden>
         <svg width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>
-        <div><p class="ui-body-sm-strong">Solte até 50 arquivos</p><p class="ui-caption">PDF, JPG ou PNG · 10 MB cada</p></div>
+        <div class="doc-upload__copy">
+          <p class="ui-body-sm-strong">Solte até 50 arquivos</p>
+          <p class="ui-caption">PDF, JPG ou PNG · 10 MB cada</p>
+        </div>
         <button type="button" class="ui-btn ui-btn--secondary ui-btn--sm" id="choose-files">Escolher</button>
       </div>
+
       <div id="upload-progress" class="doc-progress hidden" aria-live="polite">
-        <div class="doc-progress__copy"><span id="upload-label">Enviando documentos…</span><strong id="upload-percent">0%</strong></div>
+        <div class="doc-progress__copy">
+          <span id="upload-label">Enviando documentos…</span>
+          <strong id="upload-percent">0%</strong>
+        </div>
         <div class="doc-progress__track"><span id="upload-bar"></span></div>
       </div>
 
       <div class="doc-toolbar">
         <label class="doc-search">
-          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
+          <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
           <input id="document-search" type="search" placeholder="Buscar documento" aria-label="Buscar documento">
         </label>
-        <button type="button" class="ui-chip ui-chip--action is-active" data-filter="all">Todos</button>
-        <button type="button" class="ui-chip ui-chip--action" data-filter="unassigned">Sem despesa</button>
+        <div class="doc-filter-group" aria-label="Filtrar documentos">
+          <button type="button" class="ui-chip ui-chip--action is-active" data-filter="unassigned" aria-pressed="true">Sem despesa</button>
+          <button type="button" class="ui-chip ui-chip--action" data-filter="all" aria-pressed="false">Todos</button>
+        </div>
       </div>
 
       <div class="doc-list-heading">
-        <label class="ui-caption"><input id="select-visible" type="checkbox"> Selecionar visíveis</label>
+        <label class="ui-caption doc-select-loaded">
+          <input id="select-visible" type="checkbox">
+          Selecionar carregados
+        </label>
         <span id="selected-count" class="ui-caption">0 selecionados</span>
       </div>
-      <div id="document-list" class="doc-list">
-        {% for document in documents %}
-          <article class="doc-card" draggable="true" data-document-id="{{ document.id }}" data-expense-id="{{ document.expense_id|default:'' }}" data-name="{{ document.name|lower }}">
-            <input class="doc-card__check" type="checkbox" aria-label="Selecionar {{ document.name }}">
-            <a href="{{ document.workspace_url }}" target="_blank" rel="noopener" class="doc-card__preview" tabindex="-1">
-              {% if document.is_workspace_image %}
-                <img src="{{ document.workspace_url }}" alt="">
-              {% else %}
-                <span>PDF</span>
-              {% endif %}
-            </a>
-            <div class="doc-card__body">
-              <a href="{{ document.workspace_url }}" target="_blank" rel="noopener" class="doc-card__name" title="{{ document.name }}">{{ document.name }}</a>
-              <p class="doc-card__assignment">{% if document.expense %}{{ document.expense.identification }}{% else %}Sem despesa{% endif %}</p>
-            </div>
-            <span class="doc-card__handle" aria-hidden="true">⋮⋮</span>
-          </article>
-        {% empty %}
-          <div id="document-empty" class="ui-empty doc-empty">
-            <p class="ui-body-sm-strong">Nenhum documento</p>
-            <p class="ui-caption">Solte arquivos acima para começar.</p>
-          </div>
-        {% endfor %}
+
+      <div id="document-list" class="doc-list" role="list" aria-busy="true">
+        <div id="document-loading" class="feed-state feed-state--loading">
+          <span class="feed-spinner" aria-hidden="true"></span>
+          <span>Carregando documentos…</span>
+        </div>
+        <div id="document-empty" class="ui-empty feed-state hidden">
+          <p id="document-empty-title" class="ui-body-sm-strong">Nenhum documento sem despesa</p>
+          <p class="ui-caption">Envie arquivos ou altere o filtro.</p>
+        </div>
+        <button id="document-error" type="button" class="feed-error hidden">Não foi possível carregar. Tentar novamente</button>
+        <div id="document-sentinel" class="feed-sentinel" aria-hidden="true"></div>
       </div>
     </aside>
 
-    <main class="doc-panel doc-panel--expenses">
+    <main id="expenses-panel" class="doc-panel doc-panel--expenses" aria-labelledby="expenses-heading">
       <div class="expense-toolbar">
-        <div><h2 class="ui-display-sm">Despesas</h2><p class="ui-caption">Arraste documentos para despesa correspondente.</p></div>
-        <label class="doc-search doc-search--expense">
-          <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
-          <input id="expense-search" type="search" placeholder="Buscar despesa ou favorecido" aria-label="Buscar despesa">
+        <div>
+          <h2 id="expenses-heading" class="ui-display-sm">Despesas</h2>
+          <p class="ui-caption">Arraste ou selecione documentos e escolha uma despesa.</p>
+        </div>
+        <label id="hide-expenses-control" class="expense-hide-toggle">
+          <input id="hide-expenses-with-documents" type="checkbox">
+          <span>Ocultar com documentos</span>
         </label>
       </div>
+
+      <label class="doc-search doc-search--expense">
+        <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6" stroke-width="1.5"/><path d="m13.5 13.5 4 4" stroke-width="1.5"/></svg>
+        <input id="expense-search" type="search" placeholder="Buscar despesa ou favorecido" aria-label="Buscar despesa ou favorecido">
+      </label>
+
       <button type="button" class="expense-card expense-card--unassign" data-expense-id="" data-expense-name="Sem despesa">
-        <span class="expense-card__icon">×</span><span><strong>Remover vínculo</strong><small>Voltar documentos para caixa de entrada</small></span>
+        <span class="expense-card__icon">×</span>
+        <span>
+          <strong>Remover vínculo</strong>
+          <small>Voltar documentos para caixa de entrada</small>
+        </span>
       </button>
-      <div id="expense-list" class="expense-list">
-        {% for expense in expenses %}
-          <button type="button" class="expense-card" data-expense-id="{{ expense.id }}" data-expense-name="{{ expense.identification }}" data-search="{{ expense.identification|lower }} {{ expense.favored.name|default:''|lower }}">
-            <span class="expense-card__main"><strong>{{ expense.identification }}</strong><small>{{ expense.favored.name|default:"Sem favorecido" }} · venc. {{ expense.due_date|date:"d/m/Y"|default:"—" }}</small></span>
-            <span class="expense-card__value">R$ {{ expense.value|intcomma }}</span>
-            <span class="expense-card__count" data-count="{{ expense.document_count }}">{{ expense.document_count }}</span>
-          </button>
-        {% empty %}
-          <div class="ui-empty"><p class="ui-body-sm-strong">Nenhuma despesa cadastrada</p></div>
-        {% endfor %}
+
+      <div id="expense-list" class="expense-list" aria-busy="true">
+        <div id="expense-loading" class="feed-state feed-state--loading">
+          <span class="feed-spinner" aria-hidden="true"></span>
+          <span>Carregando despesas…</span>
+        </div>
+        <div id="expense-empty" class="ui-empty feed-state hidden">
+          <p class="ui-body-sm-strong">Nenhuma despesa encontrada</p>
+          <p class="ui-caption">Altere busca ou filtro.</p>
+        </div>
+        <button id="expense-error" type="button" class="feed-error hidden">Não foi possível carregar. Tentar novamente</button>
+        <div id="expense-sentinel" class="feed-sentinel" aria-hidden="true"></div>
       </div>
     </main>
   </div>
 
-  <div id="selection-bar" class="selection-bar hidden">
+  <div id="selection-bar" class="selection-bar hidden" aria-live="polite">
     <strong><span id="selection-total">0</span> <span id="selection-label">selecionados</span></strong>
-    <select id="bulk-expense" class="ui-input" aria-label="Escolher despesa">
-      <option value="">Escolha uma despesa</option>
-      {% for expense in expenses %}<option value="{{ expense.id }}">{{ expense.identification }}</option>{% endfor %}
-    </select>
-    <button type="button" id="bulk-assign" class="ui-btn ui-btn--primary ui-btn--sm">Vincular</button>
+    <span class="selection-bar__hint">Escolha uma despesa para vincular</span>
+    <button type="button" id="jump-to-expenses" class="ui-btn ui-btn--primary ui-btn--sm">Ver despesas</button>
     <button type="button" id="clear-selection" class="ui-btn ui-btn--subtle ui-btn--sm">Limpar</button>
   </div>
 </section>
@@ -114,66 +133,112 @@
   .doc-workspace { height: calc(100dvh - var(--shell-main-pad-y)); min-height: 580px; display: flex; flex-direction: column; gap: 12px; }
   .doc-workspace__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
   .doc-workspace__summary { display: flex; align-items: center; gap: 12px; font-size: 13px; }
-  .doc-workspace__grid { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(340px, 0.9fr) minmax(440px, 1.35fr); gap: 12px; }
+  .doc-workspace__grid { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(340px, .86fr) minmax(500px, 1.45fr); gap: 12px; }
   .doc-panel { min-height: 0; border: 1px solid #d8d8d8; border-radius: var(--rounded-xl); background: var(--color-canvas); padding: 16px; }
-  .doc-panel--documents { display: flex; flex-direction: column; }
-  .doc-upload { min-height: 70px; display: flex; align-items: center; gap: 12px; border: 1.5px dashed var(--color-hairline-mid); border-radius: var(--rounded-lg); padding: 10px 12px; cursor: pointer; transition: background 120ms, border-color 120ms; }
-  .doc-upload > div { flex: 1; }
+  .doc-panel--documents, .doc-panel--expenses { display: flex; flex-direction: column; }
+
+  .doc-upload { min-height: 70px; display: flex; align-items: center; gap: 12px; border: 1.5px dashed var(--color-hairline-mid); border-radius: var(--rounded-xl); padding: 10px 12px; cursor: pointer; transition: background 120ms, border-color 120ms; }
+  .doc-upload__copy { min-width: 0; flex: 1; }
   .doc-upload.is-over { background: var(--color-canvas-soft); border-color: var(--color-ink); }
   .doc-progress { padding-top: 10px; }
   .doc-progress__copy { display: flex; justify-content: space-between; font-size: 12px; }
-  .doc-progress__track { height: 5px; margin-top: 5px; overflow: hidden; border-radius: 999px; background: var(--color-canvas-soft); }
+  .doc-progress__track { height: 5px; margin-top: 5px; overflow: hidden; border-radius: var(--rounded-pill); background: var(--color-canvas-soft); }
   .doc-progress__track span { display: block; width: 0; height: 100%; background: var(--color-ink); transition: width 100ms; }
+
   .doc-toolbar, .expense-toolbar { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
-  .doc-search { min-width: 0; flex: 1; height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--color-canvas-soft); }
-  .doc-search input { width: 100%; min-width: 0; border: 0; padding: 0; background: transparent; font-size: 13px; box-shadow: none !important; }
-  .doc-toolbar .ui-chip.is-active { background: var(--color-ink); color: white; }
+  .expense-toolbar { justify-content: space-between; margin-top: 0; }
+  .doc-search { min-width: 0; flex: 1; height: 38px; display: flex; align-items: center; gap: 7px; padding: 0 11px; border: 1px solid transparent; border-radius: var(--rounded-md); background: var(--color-canvas-soft); transition: border-color 120ms, background 120ms; }
+  .doc-search:focus-within { border-color: var(--color-ink); background: var(--color-canvas); }
+  .doc-search input { width: 100%; min-width: 0; height: 100%; border: 0; padding: 0; border-radius: var(--rounded-md); background: transparent; font-size: 13px; box-shadow: none !important; }
+  .doc-search--expense { flex: 0 0 auto; width: 100%; margin-bottom: 8px; }
+  .doc-filter-group { display: flex; align-items: center; gap: 6px; }
+  .doc-filter-group .ui-chip { min-height: 36px; }
+  .doc-filter-group .ui-chip.is-active { background: var(--color-ink); color: white; }
   .doc-list-heading { display: flex; justify-content: space-between; padding: 3px 2px 7px; }
-  .doc-list { min-height: 0; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
-  .doc-card { display: grid; grid-template-columns: 18px 42px minmax(0, 1fr) 18px; align-items: center; gap: 9px; min-height: 54px; border: 1px solid #dedede; border-radius: var(--rounded-lg); padding: 5px 8px; background: white; cursor: grab; }
+  .doc-select-loaded { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .doc-select-loaded input, .doc-card__check { border-radius: 5px; color: var(--color-ink); }
+
+  .doc-list, .expense-list { position: relative; min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: 4px; }
+  .doc-list { display: flex; flex-direction: column; gap: 7px; }
+  .expense-list { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
+  .doc-card { display: grid; grid-template-columns: 18px 42px minmax(0, 1fr) 36px 14px; align-items: center; gap: 9px; min-height: 60px; border: 1px solid #dedede; border-radius: var(--rounded-xl); padding: 7px 9px; background: white; cursor: pointer; transition: border-color 100ms, background 100ms, opacity 100ms; }
   .doc-card:hover { border-color: var(--color-hairline-mid); }
+  .doc-card:focus-visible { outline: 2px solid var(--color-ink); outline-offset: -2px; }
   .doc-card.is-selected { border-color: var(--color-ink); background: var(--color-canvas-softer); }
   .doc-card.is-moving { opacity: .48; }
-  .doc-card__preview { width: 42px; height: 42px; display: grid; place-items: center; overflow: hidden; border-radius: 7px; background: var(--color-canvas-soft); color: var(--color-body); font-size: 10px; font-weight: 700; text-decoration: none; }
+  .doc-card__preview { width: 42px; height: 42px; display: grid; place-items: center; overflow: hidden; border-radius: var(--rounded-md); background: var(--color-canvas-soft); color: var(--color-body); font-size: 10px; font-weight: 700; }
   .doc-card__preview img { width: 100%; height: 100%; object-fit: cover; }
   .doc-card__body { min-width: 0; }
-  .doc-card__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-ink); font-size: 13px; font-weight: 500; text-decoration: none; }
-  .doc-card__assignment { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 2px 0 0; color: var(--color-body); font-size: 11px; }
-  .doc-card__handle { color: var(--color-mute); letter-spacing: -3px; }
-  .doc-empty { margin: auto 0; }
-  .doc-panel--expenses { display: flex; flex-direction: column; }
-  .expense-toolbar { justify-content: space-between; margin-top: 0; }
-  .doc-search--expense { max-width: 280px; flex-basis: 220px; }
-  .expense-list { min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 8px; padding: 8px 4px 0 0; }
-  .expense-card { width: 100%; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; align-items: center; gap: 8px; border: 1px solid #dedede; border-radius: var(--rounded-lg); background: white; padding: 10px; color: var(--color-ink); text-align: left; cursor: pointer; transition: border-color 100ms, background 100ms, transform 100ms; }
-  .expense-card:hover, .expense-card.is-over { border-color: var(--color-ink); background: var(--color-canvas-softer); }
-  .expense-card.is-over { transform: scale(1.015); }
-  .expense-card__main { min-width: 0; }
-  .expense-card strong, .expense-card small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .expense-card strong { font-size: 13px; }
-  .expense-card small { margin-top: 3px; color: var(--color-body); font-size: 11px; }
-  .expense-card__value { font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .expense-card__count { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--color-canvas-soft); font-size: 11px; font-weight: 600; }
-  .expense-card--unassign { grid-template-columns: 28px 1fr; border-style: dashed; margin-bottom: 2px; }
-  .expense-card__icon { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--color-canvas-soft); }
+  .doc-card__name, .doc-card__assignment { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doc-card__name { margin: 0; color: var(--color-ink); font-size: 13px; font-weight: 600; }
+  .doc-card__assignment { margin: 2px 0 0; color: var(--color-body); font-size: 11px; }
+  .doc-card__view { width: 36px; height: 36px; }
+  .doc-card__handle { color: var(--color-mute); letter-spacing: -3px; cursor: grab; }
+
+  .expense-hide-toggle { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: var(--rounded-pill); background: var(--color-canvas-soft); color: var(--color-body); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .expense-hide-toggle input { width: 15px; height: 15px; border-radius: 5px; color: var(--color-ink); }
+  .expense-hide-toggle.is-active { background: var(--color-ink); color: white; }
+  .expense-card { width: 100%; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; border: 1px solid #dedede; border-left-width: 4px; border-radius: var(--rounded-xl); background: white; padding: 11px 13px; color: var(--color-ink); text-align: left; cursor: pointer; transition: border-color 100ms, background 100ms, transform 100ms; }
+  .expense-card--missing { border-left-color: var(--color-toast-warning); background: #fffdf7; }
+  .expense-card--has-documents { border-left-color: var(--color-toast-success); background: #f9fdfa; }
+  .expense-card:hover, .expense-card.is-over, .expense-card.can-assign { border-color: var(--color-ink); }
+  .expense-card.is-over { transform: scale(1.008); background: var(--color-canvas-softer); }
+  .expense-card__content { min-width: 0; }
+  .expense-card__title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+  .expense-card__meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--color-body); font-size: 11px; }
+  .expense-card__meta span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .expense-card__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .expense-tag { display: inline-flex; align-items: center; min-height: 24px; padding: 3px 8px; border-radius: var(--rounded-pill); background: var(--color-canvas-soft); color: var(--color-body); font-size: 10px; font-weight: 500; }
+  .expense-card__aside { min-width: 130px; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+  .expense-card__value { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .expense-card__status { white-space: nowrap; }
+  .expense-card--unassign { grid-template-columns: 30px 1fr; border-left-width: 1px; border-style: dashed; margin-bottom: 2px; background: var(--color-canvas); }
+  .expense-card--unassign strong, .expense-card--unassign small { display: block; }
+  .expense-card--unassign small { margin-top: 2px; color: var(--color-body); font-size: 11px; }
+  .expense-card__icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--rounded-full); background: var(--color-canvas-soft); }
+
+  .feed-state { margin: auto 0; padding: 20px 12px; text-align: center; }
+  .feed-state--loading { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--color-body); font-size: 12px; }
+  .feed-spinner { width: 15px; height: 15px; border: 2px solid var(--color-canvas-soft); border-top-color: var(--color-ink); border-radius: var(--rounded-full); animation: feed-spin 700ms linear infinite; }
+  .feed-error { width: 100%; margin: 10px 0; border: 0; border-radius: var(--rounded-pill); padding: 9px 12px; background: rgba(217, 33, 33, .08); color: var(--color-toast-error); font-size: 12px; cursor: pointer; }
+  .feed-sentinel { flex: 0 0 1px; width: 100%; }
+  @keyframes feed-spin { to { transform: rotate(360deg); } }
+
   .selection-bar { position: fixed; z-index: 25; left: calc((100vw + var(--sidebar-width-expanded)) / 2); bottom: 20px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; min-width: 520px; padding: 9px 10px 9px 16px; border-radius: var(--rounded-pill); background: var(--color-ink); color: white; box-shadow: var(--shadow-2); }
-  .selection-bar .ui-input { min-width: 220px; height: 36px; border-radius: 999px; padding: 0 12px; font-size: 13px; color: var(--color-ink); }
+  .selection-bar__hint { flex: 1; color: #d8d8d8; font-size: 12px; }
   .selection-bar .ui-btn--subtle { background: #282828; color: white; }
   .selection-bar .ui-btn--primary { background: white; color: var(--color-ink); }
+  #jump-to-expenses { display: none; }
   .hidden { display: none !important; }
-  @media (max-width: 1100px) { .expense-list { grid-template-columns: 1fr; } }
-  @media (max-width: 760px) {
+
+  @media (max-width: 1100px) {
     .doc-workspace { height: auto; min-height: 0; }
-    .doc-workspace__header { align-items: flex-start; flex-direction: column; }
     .doc-workspace__grid { display: flex; flex-direction: column; }
     .doc-panel { min-height: 520px; }
-    .doc-panel--expenses { min-height: 560px; }
-    .doc-toolbar { flex-wrap: wrap; }
-    .doc-toolbar .doc-search { flex-basis: 100%; }
-    .expense-toolbar { align-items: flex-start; flex-direction: column; }
-    .doc-search--expense { width: 100%; max-width: none; flex-basis: 36px; }
+    .doc-panel--expenses { min-height: 600px; }
+  }
+  @media (max-width: 760px) {
+    .doc-workspace__header { align-items: flex-start; flex-direction: column; }
+    .doc-toolbar { align-items: stretch; flex-direction: column; }
+    .doc-filter-group { order: -1; }
+    .doc-filter-group .ui-chip { flex: 1; }
+    .expense-hide-toggle { min-height: 44px; }
+    .expense-card { min-height: 76px; }
+    .expense-card__aside { min-width: 108px; }
+    .doc-card__handle { display: none; }
+    .doc-card { grid-template-columns: 18px 42px minmax(0, 1fr) 40px; min-height: 64px; }
+    .doc-card__view { width: 40px; height: 40px; }
     .selection-bar { left: 12px; right: 12px; bottom: 12px; transform: none; min-width: 0; flex-wrap: wrap; border-radius: var(--rounded-xl); }
-    .selection-bar .ui-input { order: 3; flex: 1 0 100%; }
+    .selection-bar__hint { flex-basis: calc(100% - 140px); }
+    #jump-to-expenses { display: inline-flex; }
+  }
+  @media (max-width: 480px) {
+    .doc-upload { flex-wrap: wrap; }
+    .doc-upload__copy { flex-basis: calc(100% - 40px); }
+    .doc-upload .ui-btn { width: 100%; }
+    .expense-card { align-items: flex-start; grid-template-columns: 1fr; }
+    .expense-card__aside { width: 100%; align-items: flex-start; flex-direction: row; justify-content: space-between; }
+    .expense-card--unassign { grid-template-columns: 30px 1fr; }
   }
 </style>
 
@@ -183,69 +248,364 @@
   const uploadZone = document.getElementById('upload-zone');
   const fileInput = document.getElementById('document-files');
   const documentList = document.getElementById('document-list');
+  const expenseList = document.getElementById('expense-list');
   const selectionBar = document.getElementById('selection-bar');
   const csrfToken = '{{ csrf_token }}';
-  let activeFilter = 'all';
+  const selectedDocumentIds = new Set();
+  const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   let draggedIds = [];
 
-  function documentCards() { return Array.from(documentList.querySelectorAll('.doc-card')); }
-  function selectedCards() { return documentCards().filter(card => card.querySelector('.doc-card__check').checked); }
-  function escapeHtml(value) { const node = document.createElement('div'); node.textContent = value; return node.innerHTML; }
+  const documentFeed = {
+    page: 0,
+    hasMore: true,
+    loading: false,
+    controller: null,
+    version: 0,
+    query: '',
+    scope: 'unassigned'
+  };
+  const expenseFeed = {
+    page: 0,
+    hasMore: true,
+    loading: false,
+    controller: null,
+    version: 0,
+    query: '',
+    withoutDocuments: false
+  };
+
+  function documentCards() {
+    return Array.from(documentList.querySelectorAll('.doc-card'));
+  }
+
   function showAlert(message, type) {
     const alert = document.getElementById('workspace-alert');
     alert.className = 'ui-alert ui-alert--' + (type || 'error');
-    alert.innerHTML = '<span class="ui-alert__indicator"></span><div class="ui-alert__body"><p class="ui-body-sm-strong">' + escapeHtml(message) + '</p></div>';
+    alert.innerHTML = '<span class="ui-alert__indicator"></span><div class="ui-alert__body"><p class="ui-body-sm-strong"></p></div>';
+    alert.querySelector('p').textContent = message;
     window.setTimeout(() => alert.classList.add('hidden'), 5000);
   }
+
+  function debounce(callback, delay) {
+    let timer;
+    return function () {
+      const args = arguments;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => callback.apply(null, args), delay);
+    };
+  }
+
   function refreshSelection() {
-    const selected = selectedCards();
-    document.getElementById('selected-count').textContent = selected.length + ' selecionados';
-    document.getElementById('selection-total').textContent = selected.length;
-    document.getElementById('selection-label').textContent = selected.length === 1 ? 'selecionado' : 'selecionados';
-    selectionBar.classList.toggle('hidden', selected.length === 0);
-    documentCards().forEach(card => card.classList.toggle('is-selected', card.querySelector('.doc-card__check').checked));
-  }
-  function applyFilters() {
-    const query = document.getElementById('document-search').value.trim().toLowerCase();
+    const total = selectedDocumentIds.size;
+    document.getElementById('selected-count').textContent = total + ' selecionados';
+    document.getElementById('selection-total').textContent = total;
+    document.getElementById('selection-label').textContent = total === 1 ? 'selecionado' : 'selecionados';
+    selectionBar.classList.toggle('hidden', total === 0);
     documentCards().forEach(card => {
-      const matchesText = card.dataset.name.includes(query);
-      const matchesState = activeFilter === 'all' || !card.dataset.expenseId;
-      card.classList.toggle('hidden', !matchesText || !matchesState);
+      const selected = selectedDocumentIds.has(card.dataset.documentId);
+      card.classList.toggle('is-selected', selected);
+      card.setAttribute('aria-checked', selected ? 'true' : 'false');
+      card.querySelector('.doc-card__check').checked = selected;
     });
+    document.querySelectorAll('.expense-card').forEach(card => {
+      card.classList.toggle('can-assign', total > 0);
+    });
+    const loadedCards = documentCards();
+    document.getElementById('select-visible').checked = Boolean(loadedCards.length) && loadedCards.every(card => selectedDocumentIds.has(card.dataset.documentId));
   }
+
+  function toggleDocumentSelection(card) {
+    const id = card.dataset.documentId;
+    if (selectedDocumentIds.has(id)) selectedDocumentIds.delete(id);
+    else selectedDocumentIds.add(id);
+    refreshSelection();
+  }
+
+  function createEyeAction(documentData) {
+    const eye = document.createElement('a');
+    eye.href = documentData.url;
+    eye.target = '_blank';
+    eye.rel = 'noopener';
+    eye.className = 'ui-icon-btn doc-card__view';
+    eye.title = 'Visualizar documento';
+    eye.setAttribute('aria-label', 'Visualizar ' + documentData.name + ' em nova aba');
+    eye.innerHTML = '<svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12C3.8 7.9 7.6 5 12 5s8.2 2.9 9.5 7c-1.3 4.1-5.1 7-9.5 7s-8.2-2.9-9.5-7Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>';
+    eye.addEventListener('click', event => event.stopPropagation());
+    return eye;
+  }
+
   function createDocumentCard(documentData) {
     const card = document.createElement('article');
     card.className = 'doc-card';
     card.draggable = true;
+    card.tabIndex = 0;
+    card.setAttribute('role', 'checkbox');
     card.dataset.documentId = documentData.id;
-    card.dataset.expenseId = '';
-    card.dataset.name = documentData.name.toLowerCase();
-    const preview = documentData.is_image ? '<img src="' + encodeURI(documentData.url) + '" alt="">' : '<span>PDF</span>';
-    card.innerHTML = '<input class="doc-card__check" type="checkbox" aria-label="Selecionar ' + escapeHtml(documentData.name) + '">' +
-      '<a href="' + encodeURI(documentData.url) + '" target="_blank" rel="noopener" class="doc-card__preview" tabindex="-1">' + preview + '</a>' +
-      '<div class="doc-card__body"><a href="' + encodeURI(documentData.url) + '" target="_blank" rel="noopener" class="doc-card__name" title="' + escapeHtml(documentData.name) + '">' + escapeHtml(documentData.name) + '</a><p class="doc-card__assignment">Sem despesa</p></div><span class="doc-card__handle" aria-hidden="true">⋮⋮</span>';
-    bindCard(card);
-    documentList.prepend(card);
-  }
-  function bindCard(card) {
-    card.querySelector('.doc-card__check').addEventListener('change', refreshSelection);
+    card.dataset.expenseId = documentData.expense_id || '';
+
+    const checkbox = document.createElement('input');
+    checkbox.className = 'doc-card__check';
+    checkbox.type = 'checkbox';
+    checkbox.setAttribute('aria-label', 'Selecionar ' + documentData.name);
+    checkbox.checked = selectedDocumentIds.has(documentData.id);
+    checkbox.addEventListener('click', event => event.stopPropagation());
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) selectedDocumentIds.add(documentData.id);
+      else selectedDocumentIds.delete(documentData.id);
+      refreshSelection();
+    });
+
+    const preview = document.createElement('span');
+    preview.className = 'doc-card__preview';
+    if (documentData.is_image) {
+      const image = document.createElement('img');
+      image.src = documentData.url;
+      image.alt = '';
+      preview.appendChild(image);
+    } else {
+      preview.textContent = 'PDF';
+    }
+
+    const body = document.createElement('div');
+    body.className = 'doc-card__body';
+    const name = document.createElement('p');
+    name.className = 'doc-card__name';
+    name.title = documentData.name;
+    name.textContent = documentData.name;
+    const assignment = document.createElement('p');
+    assignment.className = 'doc-card__assignment';
+    assignment.textContent = documentData.expense_name || 'Sem despesa';
+    body.append(name, assignment);
+
+    const handle = document.createElement('span');
+    handle.className = 'doc-card__handle';
+    handle.setAttribute('aria-hidden', 'true');
+    handle.textContent = '⋮⋮';
+
+    card.append(checkbox, preview, body, createEyeAction(documentData), handle);
+    card.addEventListener('click', () => toggleDocumentSelection(card));
+    card.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleDocumentSelection(card);
+      }
+    });
     card.addEventListener('dragstart', event => {
-      if (!card.querySelector('.doc-card__check').checked) {
-        selectedCards().forEach(item => item.querySelector('.doc-card__check').checked = false);
-        card.querySelector('.doc-card__check').checked = true;
+      if (!selectedDocumentIds.has(documentData.id)) {
+        selectedDocumentIds.clear();
+        selectedDocumentIds.add(documentData.id);
         refreshSelection();
       }
-      draggedIds = selectedCards().map(item => item.dataset.documentId);
+      draggedIds = Array.from(selectedDocumentIds);
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', draggedIds.join(','));
     });
+    return card;
   }
-  documentCards().forEach(bindCard);
+
+  function setDocumentState() {
+    const hasCards = documentCards().length > 0;
+    document.getElementById('document-loading').classList.toggle('hidden', !documentFeed.loading || hasCards);
+    document.getElementById('document-empty').classList.toggle('hidden', documentFeed.loading || hasCards || documentFeed.page === 0);
+    document.getElementById('document-empty-title').textContent = documentFeed.scope === 'unassigned' ? 'Nenhum documento sem despesa' : 'Nenhum documento encontrado';
+    documentList.setAttribute('aria-busy', documentFeed.loading ? 'true' : 'false');
+  }
+
+  async function loadDocuments(options) {
+    const reset = Boolean(options && options.reset);
+    if (reset) {
+      documentFeed.version += 1;
+      if (documentFeed.controller) documentFeed.controller.abort();
+      documentFeed.page = 0;
+      documentFeed.hasMore = true;
+      documentFeed.loading = false;
+      documentCards().forEach(card => card.remove());
+      document.getElementById('document-error').classList.add('hidden');
+    }
+    if (documentFeed.loading || !documentFeed.hasMore) return;
+
+    const version = documentFeed.version;
+    const targetPage = documentFeed.page + 1;
+    const controller = new AbortController();
+    documentFeed.controller = controller;
+    documentFeed.loading = true;
+    setDocumentState();
+
+    const params = new URLSearchParams({
+      q: documentFeed.query,
+      scope: documentFeed.scope,
+      page: String(targetPage),
+      page_size: '20'
+    });
+    try {
+      const response = await fetch(workspace.dataset.documentsUrl + '?' + params, {
+        headers: { 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        signal: controller.signal
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível carregar documentos.');
+      if (version !== documentFeed.version) return;
+      result.results.forEach(item => documentList.insertBefore(createDocumentCard(item), document.getElementById('document-sentinel')));
+      documentFeed.page = result.page;
+      documentFeed.hasMore = Boolean(result.has_more);
+      document.getElementById('document-total').textContent = result.total;
+      document.getElementById('unassigned-total').textContent = result.unassigned_total;
+      refreshSelection();
+    } catch (error) {
+      if (error.name !== 'AbortError' && version === documentFeed.version) {
+        document.getElementById('document-error').classList.remove('hidden');
+      }
+    } finally {
+      if (documentFeed.controller === controller) {
+        documentFeed.loading = false;
+        setDocumentState();
+      }
+    }
+  }
+
+  function createTag(text) {
+    const tag = document.createElement('span');
+    tag.className = 'expense-tag';
+    tag.textContent = text;
+    return tag;
+  }
+
+  function bindExpenseTarget(card) {
+    ['dragenter', 'dragover'].forEach(name => card.addEventListener(name, event => {
+      event.preventDefault();
+      card.classList.add('is-over');
+    }));
+    ['dragleave', 'drop'].forEach(name => card.addEventListener(name, event => {
+      event.preventDefault();
+      card.classList.remove('is-over');
+    }));
+    card.addEventListener('drop', () => {
+      if (draggedIds.length) assignDocuments(draggedIds, card.dataset.expenseId, card.dataset.expenseName);
+    });
+    card.addEventListener('click', () => {
+      if (selectedDocumentIds.size) assignDocuments(Array.from(selectedDocumentIds), card.dataset.expenseId, card.dataset.expenseName);
+    });
+  }
+
+  function createExpenseCard(expenseData) {
+    const card = document.createElement('button');
+    const hasDocuments = expenseData.document_count > 0;
+    card.type = 'button';
+    card.className = 'expense-card ' + (hasDocuments ? 'expense-card--has-documents' : 'expense-card--missing');
+    card.dataset.expenseId = expenseData.id;
+    card.dataset.expenseName = expenseData.identification;
+
+    const content = document.createElement('span');
+    content.className = 'expense-card__content';
+    const title = document.createElement('strong');
+    title.className = 'expense-card__title';
+    title.title = expenseData.identification;
+    title.textContent = expenseData.identification;
+    const meta = document.createElement('span');
+    meta.className = 'expense-card__meta';
+    const favored = document.createElement('span');
+    favored.title = expenseData.favored_name;
+    favored.textContent = expenseData.favored_name;
+    const dueDate = document.createElement('span');
+    dueDate.textContent = '· venc. ' + (expenseData.due_date || '—');
+    meta.append(favored, dueDate);
+    const tags = document.createElement('span');
+    tags.className = 'expense-card__tags';
+    [expenseData.nature_label, expenseData.document_type_label]
+      .filter(label => label && label !== '-')
+      .forEach(label => tags.appendChild(createTag(label)));
+    content.append(title, meta, tags);
+
+    const aside = document.createElement('span');
+    aside.className = 'expense-card__aside';
+    const value = document.createElement('span');
+    value.className = 'expense-card__value';
+    value.textContent = currencyFormatter.format(Number(expenseData.value));
+    const status = document.createElement('span');
+    status.className = 'ui-status expense-card__status ' + (hasDocuments ? 'ui-status--success' : 'ui-status--warning');
+    status.textContent = hasDocuments ? expenseData.document_count + (expenseData.document_count === 1 ? ' documento' : ' documentos') : 'Sem documento';
+    aside.append(value, status);
+    card.append(content, aside);
+    bindExpenseTarget(card);
+    return card;
+  }
+
+  function expenseCards() {
+    return Array.from(expenseList.querySelectorAll('.expense-card'));
+  }
+
+  function setExpenseState() {
+    const hasCards = expenseCards().length > 0;
+    document.getElementById('expense-loading').classList.toggle('hidden', !expenseFeed.loading || hasCards);
+    document.getElementById('expense-empty').classList.toggle('hidden', expenseFeed.loading || hasCards || expenseFeed.page === 0);
+    expenseList.setAttribute('aria-busy', expenseFeed.loading ? 'true' : 'false');
+  }
+
+  async function loadExpenses(options) {
+    const reset = Boolean(options && options.reset);
+    if (reset) {
+      expenseFeed.version += 1;
+      if (expenseFeed.controller) expenseFeed.controller.abort();
+      expenseFeed.page = 0;
+      expenseFeed.hasMore = true;
+      expenseFeed.loading = false;
+      expenseCards().forEach(card => card.remove());
+      document.getElementById('expense-error').classList.add('hidden');
+    }
+    if (expenseFeed.loading || !expenseFeed.hasMore) return;
+
+    const version = expenseFeed.version;
+    const targetPage = expenseFeed.page + 1;
+    const controller = new AbortController();
+    expenseFeed.controller = controller;
+    expenseFeed.loading = true;
+    setExpenseState();
+
+    const params = new URLSearchParams({
+      q: expenseFeed.query,
+      without_documents: expenseFeed.withoutDocuments ? 'true' : 'false',
+      page: String(targetPage),
+      page_size: '20'
+    });
+    try {
+      const response = await fetch(workspace.dataset.expensesUrl + '?' + params, {
+        headers: { 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        signal: controller.signal
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Não foi possível carregar despesas.');
+      if (version !== expenseFeed.version) return;
+      result.results.forEach(item => expenseList.insertBefore(createExpenseCard(item), document.getElementById('expense-sentinel')));
+      expenseFeed.page = result.page;
+      expenseFeed.hasMore = Boolean(result.has_more);
+      refreshSelection();
+    } catch (error) {
+      if (error.name !== 'AbortError' && version === expenseFeed.version) {
+        document.getElementById('expense-error').classList.remove('hidden');
+      }
+    } finally {
+      if (expenseFeed.controller === controller) {
+        expenseFeed.loading = false;
+        setExpenseState();
+      }
+    }
+  }
 
   async function uploadFiles(files) {
     files = Array.from(files);
     if (!files.length) return;
-    if (files.length > 50) { showAlert('Envie no máximo 50 arquivos por vez.'); return; }
+    if (files.length > 50) {
+      showAlert('Envie no máximo 50 arquivos por vez.');
+      return;
+    }
+    const invalid = files.find(file => file.size > 10 * 1024 * 1024 || !/\.(pdf|jpe?g|png)$/i.test(file.name));
+    if (invalid) {
+      showAlert(invalid.name + ': formato inválido ou arquivo maior que 10 MB.');
+      return;
+    }
+
     const progress = document.getElementById('upload-progress');
     progress.classList.remove('hidden');
     const chunks = [];
@@ -254,80 +614,139 @@
       for (let index = 0; index < chunks.length; index++) {
         const data = new FormData();
         chunks[index].forEach(file => data.append('files', file));
-        const response = await fetch(workspace.dataset.uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: data });
+        const response = await fetch(workspace.dataset.uploadUrl, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: data
+        });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Não foi possível enviar os documentos.');
-        document.getElementById('document-empty')?.remove();
-        result.documents.forEach(createDocumentCard);
+        if (!response.ok) throw new Error(result.error || 'Não foi possível enviar documentos.');
         const percent = Math.round(((index + 1) / chunks.length) * 100);
-      document.getElementById('upload-percent').textContent = percent + '%';
-      document.getElementById('upload-bar').style.width = percent + '%';
+        document.getElementById('upload-percent').textContent = percent + '%';
+        document.getElementById('upload-bar').style.width = percent + '%';
       }
-      progress.classList.add('hidden');
-      document.getElementById('document-total').textContent = documentCards().length;
-      document.getElementById('unassigned-total').textContent = documentCards().filter(card => !card.dataset.expenseId).length;
       fileInput.value = '';
-      applyFilters();
+      await loadDocuments({ reset: true });
     } catch (error) {
-      progress.classList.add('hidden');
       showAlert(error.message);
+    } finally {
+      progress.classList.add('hidden');
     }
   }
-  document.getElementById('choose-files').addEventListener('click', event => { event.stopPropagation(); fileInput.click(); });
-  uploadZone.addEventListener('click', event => { if (event.target.id !== 'choose-files') fileInput.click(); });
-  uploadZone.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInput.click(); } });
-  fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
-  ['dragenter', 'dragover'].forEach(name => uploadZone.addEventListener(name, event => { event.preventDefault(); uploadZone.classList.add('is-over'); }));
-  ['dragleave', 'drop'].forEach(name => uploadZone.addEventListener(name, event => { event.preventDefault(); uploadZone.classList.remove('is-over'); }));
-  uploadZone.addEventListener('drop', event => uploadFiles(event.dataTransfer.files));
 
   async function assignDocuments(ids, expenseId, expenseName) {
-    const cards = ids.map(id => documentList.querySelector('[data-document-id="' + id + '"]')).filter(Boolean);
-    const previous = cards.map(card => ({ card, expenseId: card.dataset.expenseId, label: card.querySelector('.doc-card__assignment').textContent }));
-    cards.forEach(card => { card.classList.add('is-moving'); card.dataset.expenseId = expenseId || ''; card.querySelector('.doc-card__assignment').textContent = expenseName || 'Sem despesa'; });
+    if (!ids.length) return;
+    const loadedCards = ids.map(id => documentList.querySelector('[data-document-id="' + id + '"]')).filter(Boolean);
+    const previous = loadedCards.map(card => ({
+      card: card,
+      expenseId: card.dataset.expenseId,
+      label: card.querySelector('.doc-card__assignment').textContent
+    }));
+    loadedCards.forEach(card => {
+      card.classList.add('is-moving');
+      card.dataset.expenseId = expenseId || '';
+      card.querySelector('.doc-card__assignment').textContent = expenseName || 'Sem despesa';
+    });
     try {
-      const response = await fetch(workspace.dataset.assignUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({ document_ids: ids, expense_id: expenseId || null }) });
+      const response = await fetch(workspace.dataset.assignUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ document_ids: ids, expense_id: expenseId || null })
+      });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Não foi possível vincular.');
-      updateCounts(previous.map(item => item.expenseId), expenseId, cards.length);
-      cards.forEach(card => { card.classList.remove('is-moving'); card.querySelector('.doc-card__check').checked = false; });
-      refreshSelection(); applyFilters();
+      ids.forEach(id => selectedDocumentIds.delete(id));
+      draggedIds = [];
+      await Promise.all([loadDocuments({ reset: true }), loadExpenses({ reset: true })]);
+      refreshSelection();
     } catch (error) {
-      previous.forEach(item => { item.card.dataset.expenseId = item.expenseId; item.card.querySelector('.doc-card__assignment').textContent = item.label; item.card.classList.remove('is-moving'); });
+      previous.forEach(item => {
+        item.card.dataset.expenseId = item.expenseId;
+        item.card.querySelector('.doc-card__assignment').textContent = item.label;
+        item.card.classList.remove('is-moving');
+      });
       showAlert(error.message);
     }
   }
-  function updateCounts(previousIds, newId, movedCount) {
-    previousIds.forEach(id => {
-      if (!id) return;
-      const badge = document.querySelector('.expense-card[data-expense-id="' + id + '"] .expense-card__count');
-      if (badge) badge.textContent = Math.max(0, Number(badge.textContent) - 1);
-    });
-    if (newId) {
-      const badge = document.querySelector('.expense-card[data-expense-id="' + newId + '"] .expense-card__count');
-      if (badge) badge.textContent = Number(badge.textContent) + movedCount;
+
+  document.getElementById('choose-files').addEventListener('click', event => {
+    event.stopPropagation();
+    fileInput.click();
+  });
+  uploadZone.addEventListener('click', event => {
+    if (event.target.id !== 'choose-files') fileInput.click();
+  });
+  uploadZone.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      fileInput.click();
     }
-    document.getElementById('unassigned-total').textContent = documentCards().filter(card => !card.dataset.expenseId).length;
-  }
-  document.querySelectorAll('.expense-card').forEach(expenseCard => {
-    ['dragenter', 'dragover'].forEach(name => expenseCard.addEventListener(name, event => { event.preventDefault(); expenseCard.classList.add('is-over'); }));
-    ['dragleave', 'drop'].forEach(name => expenseCard.addEventListener(name, event => { event.preventDefault(); expenseCard.classList.remove('is-over'); }));
-    expenseCard.addEventListener('drop', () => assignDocuments(draggedIds, expenseCard.dataset.expenseId, expenseCard.dataset.expenseName));
-    expenseCard.addEventListener('click', () => {
-      const ids = selectedCards().map(card => card.dataset.documentId);
-      if (ids.length) assignDocuments(ids, expenseCard.dataset.expenseId, expenseCard.dataset.expenseName);
+  });
+  fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
+  ['dragenter', 'dragover'].forEach(name => uploadZone.addEventListener(name, event => {
+    event.preventDefault();
+    uploadZone.classList.add('is-over');
+  }));
+  ['dragleave', 'drop'].forEach(name => uploadZone.addEventListener(name, event => {
+    event.preventDefault();
+    uploadZone.classList.remove('is-over');
+  }));
+  uploadZone.addEventListener('drop', event => uploadFiles(event.dataTransfer.files));
+
+  document.getElementById('select-visible').addEventListener('change', event => {
+    documentCards().forEach(card => {
+      if (event.target.checked) selectedDocumentIds.add(card.dataset.documentId);
+      else selectedDocumentIds.delete(card.dataset.documentId);
     });
+    refreshSelection();
   });
-  document.getElementById('bulk-assign').addEventListener('click', () => {
-    const select = document.getElementById('bulk-expense');
-    if (!select.value) { showAlert('Escolha uma despesa.'); return; }
-    assignDocuments(selectedCards().map(card => card.dataset.documentId), select.value, select.options[select.selectedIndex].text);
+  document.getElementById('clear-selection').addEventListener('click', () => {
+    selectedDocumentIds.clear();
+    refreshSelection();
   });
-  document.getElementById('clear-selection').addEventListener('click', () => { selectedCards().forEach(card => card.querySelector('.doc-card__check').checked = false); refreshSelection(); });
-  document.getElementById('select-visible').addEventListener('change', event => { documentCards().filter(card => !card.classList.contains('hidden')).forEach(card => card.querySelector('.doc-card__check').checked = event.target.checked); refreshSelection(); });
-  document.getElementById('document-search').addEventListener('input', applyFilters);
-  document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('is-active', item === button)); applyFilters(); }));
-  document.getElementById('expense-search').addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); document.querySelectorAll('#expense-list .expense-card').forEach(card => card.classList.toggle('hidden', !card.dataset.search.includes(query))); });
+  document.getElementById('jump-to-expenses').addEventListener('click', () => {
+    document.getElementById('expenses-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('document-search').addEventListener('input', debounce(event => {
+    documentFeed.query = event.target.value.trim();
+    loadDocuments({ reset: true });
+  }, 250));
+  document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
+    documentFeed.scope = button.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(item => {
+      const active = item === button;
+      item.classList.toggle('is-active', active);
+      item.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    loadDocuments({ reset: true });
+  }));
+
+  document.getElementById('expense-search').addEventListener('input', debounce(event => {
+    expenseFeed.query = event.target.value.trim();
+    loadExpenses({ reset: true });
+  }, 250));
+  document.getElementById('hide-expenses-with-documents').addEventListener('change', event => {
+    expenseFeed.withoutDocuments = event.target.checked;
+    document.getElementById('hide-expenses-control').classList.toggle('is-active', event.target.checked);
+    loadExpenses({ reset: true });
+  });
+
+  document.getElementById('document-error').addEventListener('click', () => loadDocuments({ reset: documentFeed.page === 0 }));
+  document.getElementById('expense-error').addEventListener('click', () => loadExpenses({ reset: expenseFeed.page === 0 }));
+  bindExpenseTarget(document.querySelector('.expense-card--unassign'));
+
+  const documentObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) loadDocuments();
+  }, { root: documentList, rootMargin: '100px' });
+  const expenseObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) loadExpenses();
+  }, { root: expenseList, rootMargin: '100px' });
+  documentObserver.observe(document.getElementById('document-sentinel'));
+  expenseObserver.observe(document.getElementById('expense-sentinel'));
+
+  loadDocuments({ reset: true });
+  loadExpenses({ reset: true });
 })();
 </script>
 {% endblock %}

@@ -50,6 +50,8 @@ from accountability.views import (
     duplicate_accountability_expense_view,
     duplicate_accountability_revenue_view,
     expense_delete_view,
+    expense_document_expense_list_view,
+    expense_document_list_view,
     expense_document_workspace_view,
     get_available_reviewers_view,
     gloss_accountability_expense_view,
@@ -109,6 +111,16 @@ urlpatterns = [
         "detail/<uuid:pk>/documents/upload/",
         bulk_upload_expense_documents_view,
         name="expense-document-bulk-upload",
+    ),
+    path(
+        "detail/<uuid:pk>/documents/list/",
+        expense_document_list_view,
+        name="expense-document-list",
+    ),
+    path(
+        "detail/<uuid:pk>/documents/expenses/",
+        expense_document_expense_list_view,
+        name="expense-document-expense-list",
     ),
     path(
         "detail/<uuid:pk>/documents/assign/",

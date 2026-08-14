@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from accountability.forms import (
@@ -96,6 +96,8 @@ logger = logging.getLogger(__name__)
 
 EXPENSE_DOCUMENT_MAX_FILES = 50
 EXPENSE_DOCUMENT_MAX_SIZE = 10 * 1024 * 1024
+EXPENSE_DOCUMENT_PAGE_SIZE = 20
+EXPENSE_DOCUMENT_MAX_PAGE_SIZE = 50
 EXPENSE_DOCUMENT_EXTENSIONS = {".jpeg", ".jpg", ".pdf", ".png"}
 EXPENSE_DOCUMENT_SIGNATURES = {
     ".pdf": (b"%PDF-",),
@@ -1794,20 +1796,87 @@ def expense_document_workspace_view(request, pk):
     )
     if not request.user.can_update_accountability or not accountability.is_on_execution:
         return redirect("accountability:accountability-detail", pk=accountability.id)
-
-    documents = list(
-        ExpenseFile.objects.filter(
-            accountability=accountability,
-            deleted_at__isnull=True,
-        )
-        .select_related("expense", "created_by")
-        .order_by("expense_id", "-created_at")
+    return render(
+        request,
+        "accountability/expenses/document-workspace.html",
+        {"accountability": accountability},
     )
-    for document in documents:
-        document.workspace_url = document.file.url
-        document.is_workspace_image = document.name.lower().endswith(
-            (".jpg", ".jpeg", ".png")
-        )
+
+
+def _workspace_page(request, queryset):
+    try:
+        page = max(1, int(request.GET.get("page") or 1))
+    except (TypeError, ValueError):
+        page = 1
+    try:
+        page_size = int(request.GET.get("page_size") or EXPENSE_DOCUMENT_PAGE_SIZE)
+    except (TypeError, ValueError):
+        page_size = EXPENSE_DOCUMENT_PAGE_SIZE
+    page_size = max(1, min(page_size, EXPENSE_DOCUMENT_MAX_PAGE_SIZE))
+    offset = (page - 1) * page_size
+    rows = list(queryset[offset : offset + page_size + 1])
+    return rows[:page_size], len(rows) > page_size, page
+
+
+@require_GET
+@login_required
+def expense_document_list_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
+    base_documents = ExpenseFile.objects.filter(
+        accountability=accountability,
+        deleted_at__isnull=True,
+    )
+    totals = base_documents.aggregate(
+        total=Count("id"),
+        unassigned_total=Count("id", filter=Q(expense__isnull=True)),
+    )
+
+    documents = base_documents.select_related("expense")
+    if request.GET.get("scope") != "all":
+        documents = documents.filter(expense__isnull=True)
+    query = (request.GET.get("q") or "").strip()
+    if query:
+        documents = documents.filter(name__icontains=query)
+    documents = documents.order_by("-created_at", "pk")
+
+    rows, has_more, page = _workspace_page(request, documents)
+    return JsonResponse(
+        {
+            "results": [
+                {
+                    "id": str(document.id),
+                    "name": document.name,
+                    "url": document.file.url,
+                    "is_image": document.name.lower().endswith(
+                        (".jpg", ".jpeg", ".png")
+                    ),
+                    "expense_id": (
+                        str(document.expense_id) if document.expense_id else None
+                    ),
+                    "expense_name": (
+                        document.expense.identification if document.expense else None
+                    ),
+                }
+                for document in rows
+            ],
+            "has_more": has_more,
+            "page": page,
+            "total": totals["total"],
+            "unassigned_total": totals["unassigned_total"],
+        }
+    )
+
+
+@require_GET
+@login_required
+def expense_document_expense_list_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
     expenses = (
         Expense.objects.filter(
             accountability=accountability,
@@ -1816,20 +1885,51 @@ def expense_document_workspace_view(request, pk):
         .select_related("favored")
         .annotate(
             document_count=Count(
-                "files", filter=Q(files__deleted_at__isnull=True), distinct=True
+                "files",
+                filter=Q(files__deleted_at__isnull=True),
+                distinct=True,
             )
         )
-        .order_by("-value", "identification")
     )
-    return render(
-        request,
-        "accountability/expenses/document-workspace.html",
+    query = (request.GET.get("q") or "").strip()
+    if query:
+        expenses = expenses.filter(
+            Q(identification__icontains=query) | Q(favored__name__icontains=query)
+        )
+    if (request.GET.get("without_documents") or "").lower() == "true":
+        expenses = expenses.filter(document_count=0)
+    expenses = expenses.order_by(
+        "document_count",
+        "-value",
+        "identification",
+        "pk",
+    )
+
+    rows, has_more, page = _workspace_page(request, expenses)
+    return JsonResponse(
         {
-            "accountability": accountability,
-            "documents": documents,
-            "expenses": expenses,
-            "unassigned_count": sum(not document.expense_id for document in documents),
-        },
+            "results": [
+                {
+                    "id": str(expense.id),
+                    "identification": expense.identification,
+                    "favored_name": (
+                        expense.favored.name if expense.favored else "Sem favorecido"
+                    ),
+                    "nature_label": expense.nature_label,
+                    "document_type_label": expense.document_type_label,
+                    "due_date": (
+                        expense.due_date.strftime("%d/%m/%Y")
+                        if expense.due_date
+                        else None
+                    ),
+                    "value": str(expense.value),
+                    "document_count": expense.document_count,
+                }
+                for expense in rows
+            ],
+            "has_more": has_more,
+            "page": page,
+        }
     )
 
 
