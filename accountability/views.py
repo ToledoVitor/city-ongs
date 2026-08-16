@@ -12,7 +12,7 @@ from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_GET, require_POST
@@ -1818,6 +1818,15 @@ def _workspace_page(request, queryset):
     return rows[:page_size], len(rows) > page_size, page
 
 
+def _serialize_expense_document(document):
+    return {
+        "id": str(document.id),
+        "name": document.name,
+        "url": document.file.url,
+        "is_image": document.name.lower().endswith((".jpg", ".jpeg", ".png")),
+    }
+
+
 @require_GET
 @login_required
 def expense_document_list_view(request, pk):
@@ -1847,12 +1856,7 @@ def expense_document_list_view(request, pk):
         {
             "results": [
                 {
-                    "id": str(document.id),
-                    "name": document.name,
-                    "url": document.file.url,
-                    "is_image": document.name.lower().endswith(
-                        (".jpg", ".jpeg", ".png")
-                    ),
+                    **_serialize_expense_document(document),
                     "expense_id": (
                         str(document.expense_id) if document.expense_id else None
                     ),
@@ -1931,11 +1935,45 @@ def expense_document_expense_list_view(request, pk):
                     ),
                     "value": str(expense.value),
                     "document_count": expense.document_count,
+                    "documents_url": reverse(
+                        "accountability:expense-document-expense-documents",
+                        args=[accountability.id, expense.id],
+                    ),
                 }
                 for expense in rows
             ],
             "has_more": has_more,
             "page": page,
+        }
+    )
+
+
+@require_GET
+@login_required
+def expense_document_expense_documents_view(request, pk, expense_pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
+    expense = get_object_or_404(
+        Expense,
+        id=expense_pk,
+        accountability=accountability,
+        deleted_at__isnull=True,
+    )
+    documents = ExpenseFile.objects.filter(
+        accountability=accountability,
+        expense=expense,
+        deleted_at__isnull=True,
+    ).order_by("-created_at", "pk")
+    total = documents.count()
+    rows, has_more, page = _workspace_page(request, documents)
+    return JsonResponse(
+        {
+            "results": [_serialize_expense_document(document) for document in rows],
+            "has_more": has_more,
+            "page": page,
+            "total": total,
         }
     )
 

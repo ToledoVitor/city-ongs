@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from easy_tenants import tenant_context
 
 from accountability.models import Accountability, Expense, ExpenseFile
@@ -162,6 +163,59 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         self.assertEqual(
             payload["results"][0]["favored_name"], self.expense.favored.name
         )
+        self.assertEqual(
+            payload["results"][0]["documents_url"],
+            reverse(
+                "accountability:expense-document-expense-documents",
+                args=[self.accountability.id, without_document.id],
+            ),
+        )
+
+    def test_expense_documents_endpoint_is_scoped_and_paginated(self):
+        target_expense = self.create_expense("Disclosure target")
+        other_expense = self.create_expense("Disclosure other expense")
+        other_accountability_expense = self.create_expense(
+            "Disclosure other accountability",
+            accountability=self.other_accountability,
+        )
+        for index in range(21):
+            self.create_document(f"target-{index:02}.pdf", expense=target_expense)
+        self.create_document("other-expense.pdf", expense=other_expense)
+        self.create_document(
+            "other-accountability.pdf",
+            accountability=self.other_accountability,
+            expense=other_accountability_expense,
+        )
+        deleted = self.create_document("deleted.pdf", expense=target_expense)
+        with tenant_context(self.user.organization):
+            deleted.deleted_at = timezone.now()
+            deleted.save(update_fields=["deleted_at", "updated_at"])
+
+        url = reverse(
+            "accountability:expense-document-expense-documents",
+            args=[self.accountability.id, target_expense.id],
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload["results"]), 20)
+        self.assertTrue(payload["has_more"])
+        self.assertEqual(payload["page"], 1)
+        self.assertEqual(payload["total"], 21)
+        self.assertTrue(
+            all(item["name"].startswith("target-") for item in payload["results"])
+        )
+
+        second_page = self.client.get(url, {"page": 2}).json()
+        self.assertEqual(len(second_page["results"]), 1)
+        self.assertFalse(second_page["has_more"])
+
+        for index in range(30):
+            self.create_document(f"target-extra-{index:02}.pdf", expense=target_expense)
+        capped_page = self.client.get(url, {"page_size": 999}).json()
+        self.assertEqual(len(capped_page["results"]), 50)
+        self.assertTrue(capped_page["has_more"])
 
     def test_expense_list_searches_and_paginates(self):
         for index in range(21):
@@ -255,6 +309,13 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         self.assertContains(response, 'id="expense-sentinel"')
         self.assertContains(response, 'id="document-end"')
         self.assertContains(response, 'id="expense-end"')
+        self.assertContains(
+            response,
+            "Selecione documentos vinculados em Todos ou remova abaixo",
+        )
+        self.assertContains(response, "expenseDisclosureStates")
+        self.assertContains(response, "linkedSelectedIds")
+        self.assertContains(response, "Vincular ")
         self.assertNotContains(response, 'class="doc-card__name"')
 
     def test_bulk_upload_creates_unassigned_documents(self):
@@ -312,6 +373,30 @@ class ExpenseDocumentWorkspaceTests(TestCase):
                 ).count(),
                 2,
             )
+
+    def test_assign_endpoint_unlinks_without_deleting(self):
+        document = self.create_document("mismoved.pdf", expense=self.expense)
+
+        response = self.client.post(
+            reverse(
+                "accountability:expense-document-assign",
+                args=[self.accountability.id],
+            ),
+            data=json.dumps(
+                {
+                    "document_ids": [str(document.id)],
+                    "expense_id": None,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json()["expense_id"])
+        with tenant_context(self.user.organization):
+            document.refresh_from_db()
+            self.assertIsNone(document.expense_id)
+            self.assertTrue(ExpenseFile.objects.filter(id=document.id).exists())
 
     def test_upload_rejects_unsupported_files_without_partial_save(self):
         response = self.client.post(
