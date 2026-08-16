@@ -181,7 +181,7 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         for index in range(21):
             self.create_document(f"target-{index:02}.pdf", expense=target_expense)
         self.create_document("other-expense.pdf", expense=other_expense)
-        other_accountability_document = self.create_document(
+        self.create_document(
             "other-accountability.pdf",
             accountability=self.other_accountability,
             expense=other_accountability_expense,
@@ -222,21 +222,6 @@ class ExpenseDocumentWorkspaceTests(TestCase):
             args=[self.accountability.id, other_accountability_expense.id],
         )
         self.assertEqual(self.client.get(foreign_expense_url).status_code, 404)
-
-        cross_accountability_assignment = self.client.post(
-            reverse(
-                "accountability:expense-document-assign",
-                args=[self.accountability.id],
-            ),
-            data=json.dumps(
-                {
-                    "document_ids": [str(other_accountability_document.id)],
-                    "expense_id": str(target_expense.id),
-                }
-            ),
-            content_type="application/json",
-        )
-        self.assertEqual(cross_accountability_assignment.status_code, 400)
 
     def test_expense_list_searches_and_paginates(self):
         for index in range(21):
@@ -418,6 +403,31 @@ class ExpenseDocumentWorkspaceTests(TestCase):
             document.refresh_from_db()
             self.assertIsNone(document.expense_id)
             self.assertTrue(ExpenseFile.objects.filter(id=document.id).exists())
+
+    def test_assign_endpoint_rejects_cross_accountability_document(self):
+        foreign_document = self.create_document(
+            "foreign.pdf",
+            accountability=self.other_accountability,
+        )
+
+        response = self.client.post(
+            reverse(
+                "accountability:expense-document-assign",
+                args=[self.accountability.id],
+            ),
+            data=json.dumps(
+                {
+                    "document_ids": [str(foreign_document.id)],
+                    "expense_id": str(self.expense.id),
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        with tenant_context(self.user.organization):
+            foreign_document.refresh_from_db()
+            self.assertIsNone(foreign_document.expense_id)
 
     def test_upload_rejects_unsupported_files_without_partial_save(self):
         response = self.client.post(

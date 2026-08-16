@@ -625,6 +625,7 @@
         loading: false,
         loaded: false,
         controller: null,
+        version: 0,
         error: null
       });
     }
@@ -723,6 +724,7 @@
     const state = getExpenseDisclosureState(expenseId);
     if (state.loading || !state.hasMore) return;
     const targetPage = state.page + 1;
+    const version = state.version;
     const controller = new AbortController();
     state.controller = controller;
     state.loading = true;
@@ -738,15 +740,15 @@
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Não foi possível carregar documentos vinculados.');
-      if (state.controller !== controller) return;
+      if (state.controller !== controller || state.version !== version) return;
       state.items = targetPage === 1 ? result.results : state.items.concat(result.results);
       state.page = result.page;
       state.hasMore = Boolean(result.has_more);
       state.loaded = true;
     } catch (error) {
-      if (error.name !== 'AbortError' && state.controller === controller) state.error = error.message;
+      if (error.name !== 'AbortError' && state.controller === controller && state.version === version) state.error = error.message;
     } finally {
-      if (state.controller === controller) {
+      if (state.controller === controller && state.version === version) {
         state.loading = false;
         renderExpenseDisclosure(card);
       }
@@ -930,6 +932,7 @@
       });
       affectedExpenseIds.forEach(id => {
         const state = expenseDisclosureStates.get(id);
+        if (state) state.version += 1;
         if (state?.controller) state.controller.abort();
         expenseDisclosureStates.delete(id);
       });
@@ -971,6 +974,7 @@
       if (!response.ok) throw new Error(result.error || 'Não foi possível remover o vínculo.');
 
       const state = expenseDisclosureStates.get(expenseId);
+      if (state) state.version += 1;
       if (state?.controller) state.controller.abort();
       expenseDisclosureStates.delete(expenseId);
       const metadata = documentMetadata.get(documentId);
