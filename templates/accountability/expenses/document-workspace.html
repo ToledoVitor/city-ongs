@@ -680,9 +680,15 @@
     }
 
     if (state.loaded && !state.items.length) {
-      const empty = document.createElement('p');
+      const empty = document.createElement('div');
       empty.className = 'expense-documents__state';
-      empty.textContent = 'Nenhum documento vinculado';
+      const emptyTitle = document.createElement('p');
+      emptyTitle.className = 'ui-body-sm-strong';
+      emptyTitle.textContent = 'Nenhum documento vinculado';
+      const emptyHint = document.createElement('p');
+      emptyHint.className = 'ui-caption';
+      emptyHint.textContent = 'Selecione documentos à esquerda e use Vincular.';
+      empty.append(emptyTitle, emptyHint);
       disclosure.appendChild(empty);
       return;
     }
