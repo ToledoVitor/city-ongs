@@ -181,7 +181,7 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         for index in range(21):
             self.create_document(f"target-{index:02}.pdf", expense=target_expense)
         self.create_document("other-expense.pdf", expense=other_expense)
-        self.create_document(
+        other_accountability_document = self.create_document(
             "other-accountability.pdf",
             accountability=self.other_accountability,
             expense=other_accountability_expense,
@@ -216,6 +216,27 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         capped_page = self.client.get(url, {"page_size": 999}).json()
         self.assertEqual(len(capped_page["results"]), 50)
         self.assertTrue(capped_page["has_more"])
+
+        foreign_expense_url = reverse(
+            "accountability:expense-document-expense-documents",
+            args=[self.accountability.id, other_accountability_expense.id],
+        )
+        self.assertEqual(self.client.get(foreign_expense_url).status_code, 404)
+
+        cross_accountability_assignment = self.client.post(
+            reverse(
+                "accountability:expense-document-assign",
+                args=[self.accountability.id],
+            ),
+            data=json.dumps(
+                {
+                    "document_ids": [str(other_accountability_document.id)],
+                    "expense_id": str(target_expense.id),
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(cross_accountability_assignment.status_code, 400)
 
     def test_expense_list_searches_and_paginates(self):
         for index in range(21):

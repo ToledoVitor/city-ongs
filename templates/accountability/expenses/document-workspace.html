@@ -215,8 +215,9 @@
   .expense-document { min-width: 0; min-height: 44px; display: grid; grid-template-columns: 34px minmax(0, 1fr) 40px auto; align-items: center; gap: 8px; border-radius: var(--rounded-lg); background: var(--color-canvas); padding: 5px 7px; }
   .expense-document__type { width: 34px; height: 34px; display: grid; place-items: center; border-radius: var(--rounded-md); background: var(--color-canvas-soft); color: var(--color-body); font-size: 9px; font-weight: 700; }
   .expense-document__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
-  .expense-document__view { width: 40px; height: 40px; }
+  .expense-document__view { width: 44px; height: 44px; }
   .expense-document__unlink { min-height: 40px; padding: 7px 11px; font-size: 12px; }
+  .expense-document__error { grid-column: 2 / -1; margin: 0; color: var(--color-toast-error); font-size: 11px; line-height: 16px; }
   .expense-documents__state { padding: 13px 8px; color: var(--color-body); font-size: 12px; text-align: center; }
   .expense-documents__state--loading { display: flex; align-items: center; justify-content: center; gap: 8px; }
   .expense-documents__more { width: 100%; margin-top: 7px; }
@@ -288,6 +289,7 @@
   const expenseDisclosureStates = new Map();
   const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   let activeExpenseId = null;
+  let assignmentInFlight = false;
   let draggedIds = [];
 
   const documentFeed = {
@@ -352,12 +354,16 @@
       if (assignButton) {
         assignButton.classList.toggle('hidden', total === 0);
         assignButton.textContent = 'Vincular ' + total;
+        assignButton.disabled = assignmentInFlight;
       }
     });
     const bulkUnassign = document.getElementById('bulk-unassign');
-    bulkUnassign.disabled = linkedTotal === 0;
-    bulkUnassign.setAttribute('aria-disabled', linkedTotal === 0 ? 'true' : 'false');
+    bulkUnassign.disabled = linkedTotal === 0 || assignmentInFlight;
+    bulkUnassign.setAttribute('aria-disabled', linkedTotal === 0 || assignmentInFlight ? 'true' : 'false');
     document.getElementById('bulk-unassign-label').textContent = linkedTotal > 0 ? 'Remover vínculo de ' + linkedTotal : 'Remover vínculo';
+    document.querySelectorAll('.expense-document__unlink').forEach(button => {
+      button.disabled = assignmentInFlight;
+    });
     const loadedCards = documentCards();
     document.getElementById('select-visible').checked = Boolean(loadedCards.length) && loadedCards.every(card => selectedDocumentIds.has(card.dataset.documentId));
   }
@@ -527,6 +533,7 @@
       target.classList.remove('is-over');
     }));
     target.addEventListener('drop', () => {
+      if (assignmentInFlight) return;
       const ids = linkedOnly ? draggedIds.filter(id => documentMetadata.get(id)?.expenseId) : draggedIds;
       if (ids.length) assignDocuments(ids, target.dataset.expenseId, target.dataset.expenseName);
     });
@@ -594,9 +601,7 @@
     assignButton.addEventListener('click', async event => {
       event.stopPropagation();
       if (!selectedDocumentIds.size) return;
-      assignButton.disabled = true;
       await assignDocuments(Array.from(selectedDocumentIds), expenseData.id, expenseData.identification);
-      if (assignButton.isConnected) assignButton.disabled = false;
     });
 
     const disclosure = document.createElement('section');
@@ -839,6 +844,15 @@
     }
   }
 
+  async function reloadExpensePages(pageCount) {
+    await loadExpenses({ reset: true });
+    while (expenseFeed.page < pageCount && expenseFeed.hasMore) {
+      const previousPage = expenseFeed.page;
+      await loadExpenses();
+      if (expenseFeed.page === previousPage) break;
+    }
+  }
+
   async function uploadFiles(files) {
     files = Array.from(files);
     if (!files.length) return;
@@ -883,7 +897,9 @@
   }
 
   async function assignDocuments(ids, expenseId, expenseName) {
-    if (!ids.length) return;
+    if (!ids.length || assignmentInFlight) return;
+    assignmentInFlight = true;
+    refreshSelection();
     const affectedExpenseIds = new Set(
       ids.map(id => documentMetadata.get(id)?.expenseId).filter(Boolean)
     );
@@ -929,11 +945,22 @@
         item.card.classList.remove('is-moving');
       });
       showAlert(error.message);
+    } finally {
+      assignmentInFlight = false;
+      refreshSelection();
     }
   }
 
   async function unlinkExpenseDocument(documentId, expenseId, button) {
+    if (assignmentInFlight) return;
+    assignmentInFlight = true;
+    refreshSelection();
     button.disabled = true;
+    button.removeAttribute('aria-describedby');
+    const row = button.closest('.expense-document');
+    const previousError = row.querySelector('.expense-document__error');
+    if (previousError) previousError.remove();
+    const loadedExpensePages = Math.max(expenseFeed.page, 1);
     try {
       const response = await fetch(workspace.dataset.assignUrl, {
         method: 'POST',
@@ -949,14 +976,25 @@
       const metadata = documentMetadata.get(documentId);
       if (metadata) metadata.expenseId = '';
       activeExpenseId = null;
-      await Promise.all([loadDocuments({ reset: true }), loadExpenses({ reset: true })]);
+      await Promise.all([loadDocuments({ reset: true }), reloadExpensePages(loadedExpensePages)]);
       refreshSelection();
       const refreshedCard = expenseList.querySelector('[data-expense-id="' + expenseId + '"]');
       if (refreshedCard) toggleExpenseDisclosure(refreshedCard);
       showAlert('Documento voltou para Sem despesa.', 'success');
     } catch (error) {
       if (button.isConnected) button.disabled = false;
+      if (row.isConnected) {
+        const inlineError = document.createElement('p');
+        inlineError.id = 'expense-document-error-' + documentId;
+        inlineError.className = 'expense-document__error';
+        inlineError.textContent = error.message;
+        row.appendChild(inlineError);
+        button.setAttribute('aria-describedby', inlineError.id);
+      }
       showAlert(error.message);
+    } finally {
+      assignmentInFlight = false;
+      refreshSelection();
     }
   }
 
