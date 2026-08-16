@@ -1,3 +1,4 @@
+import json
 import logging
 import unicodedata
 from datetime import date
@@ -7,14 +8,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction as db_transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import Prefetch, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from accountability.forms import (
@@ -92,6 +93,18 @@ from utils.mixins import (
 from utils.regex import only_digits
 
 logger = logging.getLogger(__name__)
+
+EXPENSE_DOCUMENT_MAX_FILES = 50
+EXPENSE_DOCUMENT_MAX_SIZE = 10 * 1024 * 1024
+EXPENSE_DOCUMENT_PAGE_SIZE = 20
+EXPENSE_DOCUMENT_MAX_PAGE_SIZE = 50
+EXPENSE_DOCUMENT_EXTENSIONS = {".jpeg", ".jpg", ".pdf", ".png"}
+EXPENSE_DOCUMENT_SIGNATURES = {
+    ".pdf": (b"%PDF-",),
+    ".png": (b"\x89PNG\r\n\x1a\n",),
+    ".jpg": (b"\xff\xd8\xff",),
+    ".jpeg": (b"\xff\xd8\xff",),
+}
 
 
 @method_decorator(log_view_access, name="dispatch")
@@ -1775,6 +1788,311 @@ def upload_expense_file_view(request, pk):
     return redirect("accountability:accountability-detail", pk=accountability.pk)
 
 
+@login_required
+def expense_document_workspace_view(request, pk):
+    """Manage many expense documents without round-trips between expense pages."""
+    accountability = get_object_or_404(
+        Accountability.objects.select_related("contract"), id=pk
+    )
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return redirect("accountability:accountability-detail", pk=accountability.id)
+    return render(
+        request,
+        "accountability/expenses/document-workspace.html",
+        {"accountability": accountability},
+    )
+
+
+def _workspace_page(request, queryset):
+    try:
+        page = max(1, int(request.GET.get("page") or 1))
+    except (TypeError, ValueError):
+        page = 1
+    try:
+        page_size = int(request.GET.get("page_size") or EXPENSE_DOCUMENT_PAGE_SIZE)
+    except (TypeError, ValueError):
+        page_size = EXPENSE_DOCUMENT_PAGE_SIZE
+    page_size = max(1, min(page_size, EXPENSE_DOCUMENT_MAX_PAGE_SIZE))
+    offset = (page - 1) * page_size
+    rows = list(queryset[offset : offset + page_size + 1])
+    return rows[:page_size], len(rows) > page_size, page
+
+
+def _serialize_expense_document(document):
+    return {
+        "id": str(document.id),
+        "name": document.name,
+        "url": document.file.url,
+        "is_image": document.name.lower().endswith((".jpg", ".jpeg", ".png")),
+    }
+
+
+@require_GET
+@login_required
+def expense_document_list_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
+    base_documents = ExpenseFile.objects.filter(
+        accountability=accountability,
+        deleted_at__isnull=True,
+    )
+    totals = base_documents.aggregate(
+        total=Count("id"),
+        unassigned_total=Count("id", filter=Q(expense__isnull=True)),
+    )
+
+    documents = base_documents.select_related("expense")
+    if request.GET.get("scope") != "all":
+        documents = documents.filter(expense__isnull=True)
+    query = (request.GET.get("q") or "").strip()
+    if query:
+        documents = documents.filter(name__icontains=query)
+    documents = documents.order_by("-created_at", "pk")
+
+    rows, has_more, page = _workspace_page(request, documents)
+    return JsonResponse(
+        {
+            "results": [
+                {
+                    **_serialize_expense_document(document),
+                    "expense_id": (
+                        str(document.expense_id) if document.expense_id else None
+                    ),
+                    "expense_name": (
+                        document.expense.identification if document.expense else None
+                    ),
+                }
+                for document in rows
+            ],
+            "has_more": has_more,
+            "page": page,
+            "total": totals["total"],
+            "unassigned_total": totals["unassigned_total"],
+        }
+    )
+
+
+@require_GET
+@login_required
+def expense_document_expense_list_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
+    expenses = (
+        Expense.objects.filter(
+            accountability=accountability,
+            deleted_at__isnull=True,
+        )
+        .select_related("favored")
+        .annotate(
+            document_count=Count(
+                "files",
+                filter=Q(files__deleted_at__isnull=True),
+                distinct=True,
+            )
+        )
+        .annotate(
+            has_documents=Case(
+                When(document_count__gt=0, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+    )
+    query = (request.GET.get("q") or "").strip()
+    if query:
+        expenses = expenses.filter(
+            Q(identification__icontains=query) | Q(favored__name__icontains=query)
+        )
+    if (request.GET.get("without_documents") or "").lower() == "true":
+        expenses = expenses.filter(document_count=0)
+    expenses = expenses.order_by(
+        "has_documents",
+        "-value",
+        "identification",
+        "pk",
+    )
+
+    rows, has_more, page = _workspace_page(request, expenses)
+    return JsonResponse(
+        {
+            "results": [
+                {
+                    "id": str(expense.id),
+                    "identification": expense.identification,
+                    "favored_name": (
+                        expense.favored.name if expense.favored else "Sem favorecido"
+                    ),
+                    "nature_label": expense.nature_label,
+                    "document_type_label": expense.document_type_label,
+                    "due_date": (
+                        expense.due_date.strftime("%d/%m/%Y")
+                        if expense.due_date
+                        else None
+                    ),
+                    "value": str(expense.value),
+                    "document_count": expense.document_count,
+                    "documents_url": reverse(
+                        "accountability:expense-document-expense-documents",
+                        args=[accountability.id, expense.id],
+                    ),
+                }
+                for expense in rows
+            ],
+            "has_more": has_more,
+            "page": page,
+        }
+    )
+
+
+@require_GET
+@login_required
+def expense_document_expense_documents_view(request, pk, expense_pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Consulta não permitida."}, status=403)
+
+    expense = get_object_or_404(
+        Expense,
+        id=expense_pk,
+        accountability=accountability,
+        deleted_at__isnull=True,
+    )
+    documents = ExpenseFile.objects.filter(
+        accountability=accountability,
+        expense=expense,
+        deleted_at__isnull=True,
+    ).order_by("-created_at", "pk")
+    total = documents.count()
+    rows, has_more, page = _workspace_page(request, documents)
+    return JsonResponse(
+        {
+            "results": [_serialize_expense_document(document) for document in rows],
+            "has_more": has_more,
+            "page": page,
+            "total": total,
+        }
+    )
+
+
+@require_POST
+@login_required
+def bulk_upload_expense_documents_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Upload não permitido."}, status=403)
+
+    files = request.FILES.getlist("files")
+    if not files:
+        return JsonResponse({"error": "Selecione ao menos um arquivo."}, status=400)
+    if len(files) > EXPENSE_DOCUMENT_MAX_FILES:
+        return JsonResponse(
+            {
+                "error": f"Envie no máximo {EXPENSE_DOCUMENT_MAX_FILES} arquivos por vez."
+            },
+            status=400,
+        )
+
+    errors = []
+    for uploaded_file in files:
+        extension = (
+            f".{uploaded_file.name.rsplit('.', 1)[-1].lower()}"
+            if "." in uploaded_file.name
+            else ""
+        )
+        if extension not in EXPENSE_DOCUMENT_EXTENSIONS:
+            errors.append(f"{uploaded_file.name}: formato não aceito")
+        elif uploaded_file.size > EXPENSE_DOCUMENT_MAX_SIZE:
+            errors.append(f"{uploaded_file.name}: excede 10 MB")
+        else:
+            header = uploaded_file.read(8)
+            uploaded_file.seek(0)
+            if not any(
+                header.startswith(signature)
+                for signature in EXPENSE_DOCUMENT_SIGNATURES[extension]
+            ):
+                errors.append(f"{uploaded_file.name}: conteúdo inválido")
+    if errors:
+        return JsonResponse({"error": errors[0], "errors": errors}, status=400)
+
+    created = []
+    for uploaded_file in files:
+        document = ExpenseFile.objects.create(
+            accountability=accountability,
+            created_by=request.user,
+            name=uploaded_file.name[:128],
+            file=uploaded_file,
+        )
+        created.append(
+            {
+                "id": str(document.id),
+                "name": document.name,
+                "url": document.file.url,
+                "is_image": document.name.lower().endswith((".jpg", ".jpeg", ".png")),
+            }
+        )
+
+    return JsonResponse({"documents": created}, status=201)
+
+
+@require_POST
+@login_required
+def assign_expense_documents_view(request, pk):
+    accountability = get_object_or_404(Accountability, id=pk)
+    if not request.user.can_update_accountability or not accountability.is_on_execution:
+        return JsonResponse({"error": "Alteração não permitida."}, status=403)
+
+    try:
+        payload = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Dados inválidos."}, status=400)
+
+    if not isinstance(payload, dict):
+        return JsonResponse({"error": "Dados inválidos."}, status=400)
+    document_ids = payload.get("document_ids") or []
+    if not isinstance(document_ids, list) or not document_ids:
+        return JsonResponse({"error": "Selecione ao menos um documento."}, status=400)
+    if not all(isinstance(document_id, str) for document_id in document_ids):
+        return JsonResponse({"error": "Documentos inválidos."}, status=400)
+
+    expense_id = payload.get("expense_id")
+    expense = None
+    if expense_id:
+        expense = get_object_or_404(
+            Expense,
+            id=expense_id,
+            accountability=accountability,
+            deleted_at__isnull=True,
+        )
+
+    with db_transaction.atomic():
+        documents = list(
+            ExpenseFile.objects.select_for_update().filter(
+                id__in=document_ids,
+                accountability=accountability,
+                deleted_at__isnull=True,
+            )
+        )
+        if len(documents) != len(set(document_ids)):
+            return JsonResponse(
+                {"error": "Um ou mais documentos não existem."}, status=400
+            )
+        for document in documents:
+            document.expense = expense
+            document.save(update_fields=["expense", "accountability", "updated_at"])
+
+    return JsonResponse(
+        {
+            "document_ids": [str(document.id) for document in documents],
+            "expense_id": str(expense.id) if expense else None,
+            "expense_name": expense.identification if expense else None,
+        }
+    )
+
+
 @require_POST
 @login_required
 def upload_revenue_file_view(request, pk):
@@ -1816,7 +2134,7 @@ def upload_revenue_file_view(request, pk):
 def delete_expense_file_view(request, pk):
     """Delete an expense file."""
     file = get_object_or_404(ExpenseFile, pk=pk)
-    accountability = file.expense.accountability
+    accountability = file.accountability or file.expense.accountability
 
     if not request.user.can_update_accountability:
         return redirect(
@@ -1830,8 +2148,8 @@ def delete_expense_file_view(request, pk):
             user=request.user,
             user_email=request.user.email,
             action=ActivityLog.ActivityLogChoices.DELETED_EXPENSE_FILE,
-            target_object_id=file.expense.id,
-            target_content_object=file.expense,
+            target_object_id=file.expense_id or accountability.id,
+            target_content_object=file.expense or accountability,
         )
 
     next_url = request.POST.get("next")

@@ -147,7 +147,6 @@ class AccountabilityFile(
         related_name="accountability_files",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
     )
     file = models.FileField(
         verbose_name="Arquivo",
@@ -774,6 +773,14 @@ class ExpenseFile(BaseOrganizationTenantModel):
         verbose_name="Despesa",
         related_name="files",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    accountability = models.ForeignKey(
+        Accountability,
+        verbose_name="Prestação",
+        related_name="expense_documents",
+        on_delete=models.CASCADE,
     )
     created_by = models.ForeignKey(
         User,
@@ -792,6 +799,23 @@ class ExpenseFile(BaseOrganizationTenantModel):
     )
 
     history = HistoricalRecords()
+
+    def clean(self):
+        super().clean()
+        if not self.expense and not self.accountability:
+            raise ValidationError("Informe a prestação ou a despesa do documento.")
+        if (
+            self.expense
+            and self.accountability
+            and self.expense.accountability_id != self.accountability_id
+        ):
+            raise ValidationError("A despesa pertence a outra prestação.")
+
+    def save(self, *args, **kwargs):
+        if self.expense_id:
+            self.accountability_id = self.expense.accountability_id
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"Arquivo de Despesa {self.id}"

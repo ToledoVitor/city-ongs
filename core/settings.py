@@ -284,6 +284,13 @@ STORAGES = {
     },
 }
 
+if DEVELOPMENT:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+    STORAGES["default"] = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    }
+
 # Kept for anything still reading the module-level name directly.
 GS_BUCKET_NAME = GS_MEDIA_BUCKET_NAME
 
