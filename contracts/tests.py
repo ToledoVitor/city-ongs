@@ -122,6 +122,7 @@ class ContractChangeApprovalWorkflowTests(TestCase):
                 "requester@example.com": "11144477735",
                 "unrelated@example.com": "93541134780",
                 "other@example.com": "12345678909",
+                "interested.reviewer@example.com": "39053344705",
             }[email],
             organization=organization,
             access_level=access_level,
@@ -415,6 +416,33 @@ class ContractChangeApprovalWorkflowTests(TestCase):
                 anual_raise=Decimal("300.00"),
             )
         self.client.force_login(self.reviewer)
+
+        response = self.client.post(
+            reverse("contracts:review-value-requests", args=[value_request.id]),
+            {"status": "APPROVED", "rejection_reason": ""},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        value_request.refresh_from_db()
+        self.assertEqual(
+            value_request.status,
+            ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+        )
+
+    def test_interested_folder_manager_cannot_review_reallocation(self):
+        interested_reviewer = self.create_user(
+            "interested.reviewer@example.com",
+            self.organization,
+            User.AccessChoices.FOLDER_MANAGER,
+        )
+        with tenant_context(self.organization):
+            self.contract.interested_parts.create(
+                organization=self.organization,
+                user=interested_reviewer,
+                interest="PROJECT_MANAGER",
+            )
+        value_request = self.create_reallocation_request()
+        self.client.force_login(interested_reviewer)
 
         response = self.client.post(
             reverse("contracts:review-value-requests", args=[value_request.id]),

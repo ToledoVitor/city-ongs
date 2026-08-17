@@ -1468,6 +1468,8 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self) -> QuerySet[Any]:
         contracts = _accessible_contracts(self.request.user)
+        if not self.request.user.has_admin_access:
+            contracts = contracts.filter(supervision_autority=self.request.user)
         return ContractItemNewValueRequest.objects.filter(
             raise_item__contract__in=contracts,
             downgrade_item__contract__in=contracts,
