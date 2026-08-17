@@ -254,6 +254,14 @@ _legacy_bucket = env("GS_BUCKET_NAME", default="")
 GS_STATIC_BUCKET_NAME = env("GS_STATIC_BUCKET_NAME", default=_legacy_bucket)
 GS_MEDIA_BUCKET_NAME = env("GS_MEDIA_BUCKET_NAME", default=_legacy_bucket)
 
+GCS_MEDIA_STORAGE_OPTIONS = {
+    "bucket_name": GS_MEDIA_BUCKET_NAME,
+    "default_acl": None,
+    "querystring_auth": True,
+    "expiration": timedelta(minutes=15),
+    "iam_sign_blob": True,
+}
+
 STORAGES = {
     # Private bucket. querystring_auth signs every URL, so a link works for the
     # signature's lifetime and cannot be guessed or shared indefinitely.
@@ -265,12 +273,7 @@ STORAGES = {
     # on itself (see docs/DEPLOY.md).
     "default": {
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "bucket_name": GS_MEDIA_BUCKET_NAME,
-            "default_acl": None,
-            "querystring_auth": True,
-            "expiration": timedelta(minutes=15),
-        },
+        "OPTIONS": GCS_MEDIA_STORAGE_OPTIONS,
     },
     # Public bucket: CSS/JS/admin assets only. Unsigned so URLs stay stable and
     # cacheable — nothing here is sensitive.

@@ -1827,6 +1827,20 @@ def _serialize_expense_document(document):
     }
 
 
+def _delete_expense_document_files(documents):
+    for document in documents:
+        try:
+            document.file.delete(save=False)
+        except Exception:
+            logger.exception(
+                "Failed to delete expense document file after upload failure",
+                extra={
+                    "accountability_id": str(document.accountability_id),
+                    "document_id": str(document.id),
+                },
+            )
+
+
 @require_GET
 @login_required
 def expense_document_list_view(request, pk):
@@ -2018,24 +2032,38 @@ def bulk_upload_expense_documents_view(request, pk):
     if errors:
         return JsonResponse({"error": errors[0], "errors": errors}, status=400)
 
-    created = []
-    for uploaded_file in files:
-        document = ExpenseFile.objects.create(
-            accountability=accountability,
-            created_by=request.user,
-            name=uploaded_file.name[:128],
-            file=uploaded_file,
+    created_documents = []
+    created_payload = []
+    try:
+        with db_transaction.atomic():
+            for uploaded_file in files:
+                document = ExpenseFile(
+                    accountability=accountability,
+                    created_by=request.user,
+                    name=uploaded_file.name[:128],
+                )
+                # Object storage is outside the DB transaction. Track the blob
+                # before saving the row so an insert failure cannot orphan it.
+                document.file.save(uploaded_file.name, uploaded_file, save=False)
+                created_documents.append(document)
+                document.save(force_insert=True)
+                created_payload.append(_serialize_expense_document(document))
+    except Exception:
+        logger.exception(
+            "Bulk expense document upload failed",
+            extra={
+                "accountability_id": str(accountability.id),
+                "file_count": len(files),
+                "user_id": str(request.user.id),
+            },
         )
-        created.append(
-            {
-                "id": str(document.id),
-                "name": document.name,
-                "url": document.file.url,
-                "is_image": document.name.lower().endswith((".jpg", ".jpeg", ".png")),
-            }
+        _delete_expense_document_files(created_documents)
+        return JsonResponse(
+            {"error": "Não foi possível enviar os documentos. Tente novamente."},
+            status=500,
         )
 
-    return JsonResponse({"documents": created}, status=201)
+    return JsonResponse({"documents": created_payload}, status=201)
 
 
 @require_POST

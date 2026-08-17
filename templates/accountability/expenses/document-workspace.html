@@ -861,6 +861,14 @@
     }
   }
 
+  async function parseJsonResponse(response, fallbackMessage) {
+    try {
+      return await response.json();
+    } catch (error) {
+      throw new Error(fallbackMessage);
+    }
+  }
+
   async function uploadFiles(files) {
     files = Array.from(files);
     if (!files.length) return;
@@ -884,13 +892,14 @@
       for (let index = 0; index < chunks.length; index++) {
         const data = new FormData();
         chunks[index].forEach(file => data.append('files', file));
+        const uploadErrorMessage = 'Não foi possível enviar os documentos. Tente novamente.';
         const response = await fetch(workspace.dataset.uploadUrl, {
           method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
+          headers: { 'X-CSRFToken': csrfToken, 'Accept': 'application/json' },
           body: data
         });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Não foi possível enviar documentos.');
+        const result = await parseJsonResponse(response, uploadErrorMessage);
+        if (!response.ok) throw new Error(result.error || uploadErrorMessage);
         const percent = Math.round(((index + 1) / chunks.length) * 100);
         document.getElementById('upload-percent').textContent = percent + '%';
         document.getElementById('upload-bar').style.width = percent + '%';
