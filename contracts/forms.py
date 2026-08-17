@@ -719,6 +719,7 @@ class ContractItemSupplementUpdateForm(forms.ModelForm):
 class ContractItemSupplementReviewForm(forms.ModelForm):
     status = forms.ChoiceField(
         choices=[
+            ("", "Selecione…"),
             (ContractItemSupplement.ReviewStatus.APPROVED, "Aprovada"),
             (ContractItemSupplement.ReviewStatus.REJECTED, "Rejeitada"),
         ],
@@ -738,6 +739,8 @@ class ContractItemSupplementReviewForm(forms.ModelForm):
         status = cleaned_data.get("status")
         rejection_reason = cleaned_data.get("rejection_reason")
 
+        if not status:
+            raise forms.ValidationError("Selecione uma decisão")
         if (
             status == ContractItemSupplement.ReviewStatus.REJECTED
             and not rejection_reason

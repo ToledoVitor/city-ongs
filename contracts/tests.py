@@ -9,6 +9,7 @@ from easy_tenants import tenant_context
 
 from accounts.models import Area, CityHall, Organization
 from activity.models import ActivityLog
+from contracts.forms import ContractItemSupplementUpdateForm
 from contracts.models import (
     Contract,
     ContractItem,
@@ -151,9 +152,15 @@ class ContractChangeApprovalWorkflowTests(TestCase):
     def test_supplement_update_persists_the_legacy_amount_field(self):
         supplement = self.create_supplement()
         self.client.force_login(self.requester)
+        edit_url = reverse(
+            "contracts:item-supplementations-update", args=[supplement.id]
+        )
+
+        response = self.client.get(edit_url)
+        self.assertContains(response, 'value="100')
 
         response = self.client.post(
-            reverse("contracts:item-supplementations-update", args=[supplement.id]),
+            edit_url,
             {"supplement_value": "250,00", "observations": "Atualizado"},
         )
 
@@ -177,7 +184,10 @@ class ContractChangeApprovalWorkflowTests(TestCase):
             "contracts:item-supplementations-review", args=[supplement.id]
         )
 
-        response = self.client.post(review_url, {"status": "APPROVED"})
+        response = self.client.post(
+            review_url,
+            {"status": "APPROVED", "rejection_reason": "Não deve persistir"},
+        )
 
         self.assertRedirects(
             response,
@@ -189,9 +199,10 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         )
         self.assertEqual(supplement.reviewed_by, self.reviewer)
         self.assertIsNotNone(supplement.reviewed_at)
+        self.assertIsNone(supplement.rejection_reason)
         self.assertTrue(
             self.has_activity(
-                ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                "APPROVED_CONTRACT_ITEM_SUPPLEMENT",
                 supplement.id,
             )
         )
@@ -233,6 +244,23 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         self.client.force_login(self.cross_tenant_user)
         self.assertEqual(self.client.get(review_url).status_code, 404)
 
+    def test_supplement_review_requires_an_explicit_decision(self):
+        supplement = self.create_supplement()
+        self.client.force_login(self.reviewer)
+        review_url = reverse(
+            "contracts:item-supplementations-review", args=[supplement.id]
+        )
+
+        response = self.client.get(review_url)
+        self.assertContains(response, '<option value="">Selecione…</option>', html=True)
+
+        response = self.client.post(review_url, {"status": "", "rejection_reason": ""})
+        self.assertEqual(response.status_code, 200)
+        supplement.refresh_from_db()
+        self.assertEqual(
+            supplement.status, ContractItemSupplement.ReviewStatus.IN_REVIEW
+        )
+
     def test_supplement_rejection_records_its_reason_and_audit_event(self):
         supplement = self.create_supplement()
         self.client.force_login(self.reviewer)
@@ -254,10 +282,41 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         self.assertEqual(supplement.reviewed_by, self.reviewer)
         self.assertTrue(
             self.has_activity(
-                ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                "REJECTED_CONTRACT_ITEM_SUPPLEMENT",
                 supplement.id,
             )
         )
+
+    def test_stale_supplement_update_cannot_reopen_a_terminal_decision(self):
+        supplement = self.create_supplement()
+        self.client.force_login(self.requester)
+        edit_url = reverse(
+            "contracts:item-supplementations-update", args=[supplement.id]
+        )
+        original_is_valid = ContractItemSupplementUpdateForm.is_valid
+
+        def approve_before_stale_save(form):
+            ContractItemSupplement.objects.filter(id=supplement.id).update(
+                status=ContractItemSupplement.ReviewStatus.APPROVED
+            )
+            return original_is_valid(form)
+
+        with patch(
+            "contracts.views.ContractItemSupplementUpdateForm.is_valid",
+            autospec=True,
+            side_effect=approve_before_stale_save,
+        ):
+            response = self.client.post(
+                edit_url,
+                {"supplement_value": "250,00", "observations": "Tentativa atrasada"},
+            )
+
+        self.assertEqual(response.status_code, 404)
+        supplement.refresh_from_db()
+        self.assertEqual(
+            supplement.status, ContractItemSupplement.ReviewStatus.APPROVED
+        )
+        self.assertEqual(supplement.suplement_value, Decimal("100.00"))
 
     @patch("activity.services.SendGridClient.notify")
     def test_reallocation_rejection_changes_neither_item_and_logs_decision(
@@ -282,7 +341,7 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         self.assertEqual(self.downgrade_item.anual_expense, Decimal("2400.00"))
         self.assertTrue(
             self.has_activity(
-                ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM,
+                "REJECTED_CONTRACT_ITEM_VALUE_REQUEST",
                 value_request.id,
             )
         )
@@ -294,7 +353,8 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         review_url = reverse("contracts:review-value-requests", args=[value_request.id])
 
         response = self.client.post(
-            review_url, {"status": "APPROVED", "rejection_reason": ""}
+            review_url,
+            {"status": "APPROVED", "rejection_reason": "Não deve persistir"},
         )
 
         self.assertRedirects(
@@ -306,9 +366,11 @@ class ContractChangeApprovalWorkflowTests(TestCase):
         self.assertEqual(self.raise_item.anual_expense, Decimal("1500.00"))
         self.assertEqual(self.downgrade_item.month_expense, Decimal("175.00"))
         self.assertEqual(self.downgrade_item.anual_expense, Decimal("2100.00"))
+        value_request.refresh_from_db()
+        self.assertIsNone(value_request.rejection_reason)
         self.assertTrue(
             self.has_activity(
-                ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM,
+                "APPROVED_CONTRACT_ITEM_VALUE_REQUEST",
                 value_request.id,
             )
         )

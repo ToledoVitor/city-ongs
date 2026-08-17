@@ -1415,7 +1415,11 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
             )
 
             instance.status = form.cleaned_data["status"]
-            instance.rejection_reason = form.cleaned_data["rejection_reason"]
+            instance.rejection_reason = (
+                form.cleaned_data["rejection_reason"]
+                if instance.status == ContractItemNewValueRequest.ReviewStatus.REJECTED
+                else None
+            )
             instance.save()
 
             if instance.status == ContractItemNewValueRequest.ReviewStatus.APPROVED:
@@ -1426,7 +1430,11 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
                 instance.downgrade_item.month_expense -= instance.month_raise
                 instance.downgrade_item.anual_expense -= instance.anual_raise
                 instance.downgrade_item.save()
-            action = ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM
+            action = (
+                ActivityLog.ActivityLogChoices.APPROVED_CONTRACT_ITEM_VALUE_REQUEST
+                if instance.status == ContractItemNewValueRequest.ReviewStatus.APPROVED
+                else ActivityLog.ActivityLogChoices.REJECTED_CONTRACT_ITEM_VALUE_REQUEST
+            )
 
             _ = ActivityLog.objects.create(
                 user=self.request.user,
@@ -1727,8 +1735,11 @@ def contract_item_supplementations_update_view(request, pk):
         form = ContractItemSupplementUpdateForm(request.POST, instance=supplement)
         if form.is_valid():
             with transaction.atomic():
-                supplement = form.save(commit=False)
+                supplement = _accessible_supplement_or_404(
+                    request, pk, pending_only=True, for_update=True
+                )
                 supplement.suplement_value = form.cleaned_data["supplement_value"]
+                supplement.observations = form.cleaned_data["observations"]
                 supplement.save()
 
                 _ = ActivityLog.objects.create(
@@ -1771,7 +1782,11 @@ def contract_item_supplementations_review_view(request, pk):
                     request, pk, pending_only=True, for_update=True
                 )
                 supplement.status = form.cleaned_data["status"]
-                supplement.rejection_reason = form.cleaned_data["rejection_reason"]
+                supplement.rejection_reason = (
+                    form.cleaned_data["rejection_reason"]
+                    if supplement.status == ContractItemSupplement.ReviewStatus.REJECTED
+                    else None
+                )
                 supplement.reviewed_by = request.user
                 supplement.reviewed_at = timezone.now()
                 supplement.save()
@@ -1779,7 +1794,12 @@ def contract_item_supplementations_review_view(request, pk):
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
-                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                    action=(
+                        ActivityLog.ActivityLogChoices.APPROVED_CONTRACT_ITEM_SUPPLEMENT
+                        if supplement.status
+                        == ContractItemSupplement.ReviewStatus.APPROVED
+                        else ActivityLog.ActivityLogChoices.REJECTED_CONTRACT_ITEM_SUPPLEMENT
+                    ),
                     target_object_id=supplement.id,
                     target_content_object=supplement,
                 )
