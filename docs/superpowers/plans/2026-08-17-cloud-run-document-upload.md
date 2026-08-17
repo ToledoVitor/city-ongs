@@ -120,4 +120,4 @@ Run focused workspace test. Expected: PASS.
 - [x] **Step 1: Run focused accountability tests**
 - [x] **Step 2: Run `make check`, `make test-sqlite`, and `make audit-templates`**
 - [x] **Step 3: Review diff against `main`**
-- [ ] **Step 4: Commit, push branch, and open PR linking issue #80**
+- [x] **Step 4: Commit, push branch, and open PR linking issue #80**
