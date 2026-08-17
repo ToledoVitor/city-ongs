@@ -443,6 +443,27 @@ class ExpenseDocumentWorkspaceTests(TestCase):
             )
         self.assertEqual(self.media_files(), files_before_upload)
 
+    def test_bulk_upload_removes_stored_file_when_model_save_fails(self):
+        files_before_upload = self.media_files()
+
+        def fail_after_storage(document, *args, **kwargs):
+            self.assertTrue(document.file.storage.exists(document.file.name))
+            raise RuntimeError("database insert failed")
+
+        with patch.object(ExpenseFile, "save", autospec=True) as model_save:
+            model_save.side_effect = fail_after_storage
+            response = self.client.post(
+                reverse(
+                    "accountability:expense-document-bulk-upload",
+                    args=[self.accountability.id],
+                ),
+                {"files": [SimpleUploadedFile("orphan-on-insert.pdf", b"%PDF-test")]},
+            )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(self.media_files(), files_before_upload)
+
     def test_bulk_upload_signed_url_failure_returns_json_error(self):
         with patch(
             "django.core.files.storage.FileSystemStorage.url",

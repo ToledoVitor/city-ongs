@@ -2037,13 +2037,16 @@ def bulk_upload_expense_documents_view(request, pk):
     try:
         with db_transaction.atomic():
             for uploaded_file in files:
-                document = ExpenseFile.objects.create(
+                document = ExpenseFile(
                     accountability=accountability,
                     created_by=request.user,
                     name=uploaded_file.name[:128],
-                    file=uploaded_file,
                 )
+                # Object storage is outside the DB transaction. Track the blob
+                # before saving the row so an insert failure cannot orphan it.
+                document.file.save(uploaded_file.name, uploaded_file, save=False)
                 created_documents.append(document)
+                document.save(force_insert=True)
                 created_payload.append(_serialize_expense_document(document))
     except Exception:
         logger.exception(
