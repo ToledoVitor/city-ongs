@@ -45,6 +45,8 @@ class ActivityLogEmailNotificationHandler:
             ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_ITEM: self.build_item_comented_log,
             ActivityLog.ActivityLogChoices.REQUEST_NEW_VALUE_ITEM: self.build_item_value_request_log,
             ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM: self.build_item_value_analised_log,
+            ActivityLog.ActivityLogChoices.APPROVED_CONTRACT_ITEM_VALUE_REQUEST: self.build_item_value_analised_log,
+            ActivityLog.ActivityLogChoices.REJECTED_CONTRACT_ITEM_VALUE_REQUEST: self.build_item_value_analised_log,
         }
         return builders_mapper.get(activity_log.action, None)
 

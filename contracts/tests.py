@@ -8,7 +8,7 @@ from django.urls import reverse
 from easy_tenants import tenant_context
 
 from accounts.models import Area, CityHall, Organization
-from activity.models import ActivityLog
+from activity.models import ActivityLog, Notification
 from contracts.forms import ContractItemSupplementUpdateForm
 from contracts.models import (
     Contract,
@@ -345,6 +345,13 @@ class ContractChangeApprovalWorkflowTests(TestCase):
                 value_request.id,
             )
         )
+        with tenant_context(self.organization):
+            self.assertTrue(
+                Notification.objects.filter(
+                    recipient=self.requester,
+                    category=Notification.Category.CONTRACT_ITEM_VALUE_REVIEWED,
+                ).exists()
+            )
 
     @patch("activity.services.SendGridClient.notify")
     def test_reallocation_approval_changes_both_items_exactly_once(self, _notify):
@@ -374,6 +381,13 @@ class ContractChangeApprovalWorkflowTests(TestCase):
                 value_request.id,
             )
         )
+        with tenant_context(self.organization):
+            self.assertTrue(
+                Notification.objects.filter(
+                    recipient=self.requester,
+                    category=Notification.Category.CONTRACT_ITEM_VALUE_REVIEWED,
+                ).exists()
+            )
 
         repeat_response = self.client.post(
             review_url, {"status": "APPROVED", "rejection_reason": ""}
