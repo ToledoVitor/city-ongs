@@ -27,23 +27,23 @@
 - Consumes: django-storages `GoogleCloudStorage(iam_sign_blob=True)`.
 - Produces: `GCS_MEDIA_STORAGE_OPTIONS`, used by production `STORAGES` and tests.
 
-- [ ] **Step 1: Write failing token-only credential test**
+- [x] **Step 1: Write failing token-only credential test**
 
 Create storage from `GCS_MEDIA_STORAGE_OPTIONS`, call `storage.url()`, and assert
 `Blob.generate_signed_url()` receives `service_account_email` and `access_token`.
 
-- [ ] **Step 2: Verify red**
+- [x] **Step 2: Verify red**
 
 Run: `make test-sqlite TEST=accountability.tests.CloudStorageConfigurationTests`
 
 Expected: FAIL because production options do not enable IAM signing.
 
-- [ ] **Step 3: Enable IAM signing**
+- [x] **Step 3: Enable IAM signing**
 
 Add `"iam_sign_blob": True` to reusable private-media options and wire those
 options into `STORAGES["default"]`.
 
-- [ ] **Step 4: Verify green**
+- [x] **Step 4: Verify green**
 
 Run same focused test. Expected: PASS.
 
@@ -57,16 +57,16 @@ Run same focused test. Expected: PASS.
 - Consumes: `_serialize_expense_document(document)` and `db_transaction.atomic()`.
 - Produces: `_delete_expense_document_files(documents)` cleanup helper and JSON 500 contract.
 
-- [ ] **Step 1: Write failing rollback test**
+- [x] **Step 1: Write failing rollback test**
 
 Patch storage URL generation to fail after file creation. Post two valid files.
 Assert status 500, JSON generic error, zero new rows, and empty media directory.
 
-- [ ] **Step 2: Verify red**
+- [x] **Step 2: Verify red**
 
 Run focused rollback test. Expected: FAIL with propagated/HTML 500 and persisted first file.
 
-- [ ] **Step 3: Implement transaction and blob cleanup**
+- [x] **Step 3: Implement transaction and blob cleanup**
 
 Create and serialize documents inside `db_transaction.atomic()`. On exception,
 delete every recorded file, log original failure, and return:
@@ -78,7 +78,7 @@ JsonResponse(
 )
 ```
 
-- [ ] **Step 4: Verify green**
+- [x] **Step 4: Verify green**
 
 Run focused upload tests. Expected: PASS.
 
@@ -92,19 +92,19 @@ Run focused upload tests. Expected: PASS.
 - Consumes: Fetch `Response`.
 - Produces: `parseJsonResponse(response, fallbackMessage)`.
 
-- [ ] **Step 1: Add failing rendered-template assertion**
+- [x] **Step 1: Add failing rendered-template assertion**
 
 Assert upload workspace includes stable fallback copy and guarded parser call.
 
-- [ ] **Step 2: Verify red**
+- [x] **Step 2: Verify red**
 
 Run focused workspace render test. Expected: FAIL because guarded parser is absent.
 
-- [ ] **Step 3: Add guarded parser**
+- [x] **Step 3: Add guarded parser**
 
 Catch JSON decoding errors and throw fallback message. Use it for upload responses.
 
-- [ ] **Step 4: Verify green**
+- [x] **Step 4: Verify green**
 
 Run focused workspace test. Expected: PASS.
 
@@ -117,7 +117,7 @@ Run focused workspace test. Expected: PASS.
 - Consumes: completed tasks.
 - Produces: verified commit and separate pull request against `main`.
 
-- [ ] **Step 1: Run focused accountability tests**
-- [ ] **Step 2: Run `make check`, `make test-sqlite`, and `make audit-templates`**
+- [x] **Step 1: Run focused accountability tests**
+- [x] **Step 2: Run `make check`, `make test-sqlite`, and `make audit-templates`**
 - [ ] **Step 3: Review diff against `main`**
 - [ ] **Step 4: Commit, push branch, and open PR linking issue #80**

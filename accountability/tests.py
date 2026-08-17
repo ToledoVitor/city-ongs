@@ -1,16 +1,70 @@
 import json
 import shutil
 import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from easy_tenants import tenant_context
+from google.auth.credentials import Credentials
+from google.cloud.storage.blob import Blob
+from storages.backends.gcloud import GoogleCloudStorage
 
 from accountability.models import Accountability, Expense, ExpenseFile
 from accounts.models import User
+from core import settings as project_settings
+
+
+class TokenOnlyCredentials(Credentials):
+    def refresh(self, request):
+        pass
+
+    @property
+    def service_account_email(self):
+        return "sitts-run@sitts-504501.iam.gserviceaccount.com"
+
+
+class CloudStorageConfigurationTests(SimpleTestCase):
+    def test_private_media_urls_use_iam_sign_blob_with_token_credentials(self):
+        credentials = TokenOnlyCredentials()
+        credentials.token = "access-token"
+        storage_options = dict(
+            getattr(
+                project_settings,
+                "GCS_MEDIA_STORAGE_OPTIONS",
+                {
+                    "default_acl": None,
+                    "querystring_auth": True,
+                },
+            )
+        )
+        storage_options["bucket_name"] = "sitts-private-media"
+        storage = GoogleCloudStorage(
+            credentials=credentials,
+            project_id="sitts-504501",
+            **storage_options,
+        )
+
+        with patch.object(
+            Blob,
+            "generate_signed_url",
+            return_value="https://storage.example/signed-document",
+        ) as generate_signed_url:
+            url = storage.url("uploads/expenses/document.pdf")
+
+        self.assertEqual(url, "https://storage.example/signed-document")
+        self.assertEqual(
+            generate_signed_url.call_args.kwargs.get("service_account_email"),
+            credentials.service_account_email,
+        )
+        self.assertEqual(
+            generate_signed_url.call_args.kwargs.get("access_token"),
+            "access-token",
+        )
 
 
 class ExpenseDocumentWorkspaceTests(TestCase):
@@ -77,6 +131,14 @@ class ExpenseDocumentWorkspaceTests(TestCase):
                 value=value,
                 competency=self.expense.competency,
             )
+
+    def media_files(self):
+        media_root = Path(self.media_root)
+        return {
+            path.relative_to(media_root)
+            for path in media_root.rglob("*")
+            if path.is_file()
+        }
 
     def test_document_list_defaults_to_unassigned_and_paginates(self):
         for index in range(21):
@@ -321,6 +383,11 @@ class ExpenseDocumentWorkspaceTests(TestCase):
         )
         self.assertContains(response, "expenseDisclosureStates")
         self.assertContains(response, "linkedSelectedIds")
+        self.assertContains(response, "parseJsonResponse")
+        self.assertContains(
+            response,
+            "Não foi possível enviar os documentos. Tente novamente.",
+        )
         self.assertContains(response, "Vincular ")
         self.assertNotContains(response, 'class="doc-card__name"')
 
@@ -343,6 +410,58 @@ class ExpenseDocumentWorkspaceTests(TestCase):
             documents = ExpenseFile.objects.filter(accountability=self.accountability)
             self.assertEqual(documents.count(), 2)
             self.assertFalse(documents.filter(expense__isnull=False).exists())
+
+    def test_bulk_upload_rolls_back_rows_and_files_when_signed_url_fails(self):
+        with tenant_context(self.user.organization):
+            document_count = ExpenseFile.objects.filter(
+                accountability=self.accountability
+            ).count()
+        files_before_upload = self.media_files()
+
+        with patch(
+            "django.core.files.storage.FileSystemStorage.url",
+            side_effect=RuntimeError("signed URL failed"),
+        ):
+            response = self.client.post(
+                reverse(
+                    "accountability:expense-document-bulk-upload",
+                    args=[self.accountability.id],
+                ),
+                {
+                    "files": [
+                        SimpleUploadedFile("rollback-1.pdf", b"%PDF-test"),
+                        SimpleUploadedFile("rollback-2.pdf", b"%PDF-test"),
+                    ]
+                },
+            )
+
+        self.assertEqual(response.status_code, 500)
+        with tenant_context(self.user.organization):
+            self.assertEqual(
+                ExpenseFile.objects.filter(accountability=self.accountability).count(),
+                document_count,
+            )
+        self.assertEqual(self.media_files(), files_before_upload)
+
+    def test_bulk_upload_signed_url_failure_returns_json_error(self):
+        with patch(
+            "django.core.files.storage.FileSystemStorage.url",
+            side_effect=RuntimeError("signed URL failed"),
+        ):
+            response = self.client.post(
+                reverse(
+                    "accountability:expense-document-bulk-upload",
+                    args=[self.accountability.id],
+                ),
+                {"files": [SimpleUploadedFile("json-error.pdf", b"%PDF-test")]},
+            )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(
+            response.json(),
+            {"error": "Não foi possível enviar os documentos. Tente novamente."},
+        )
 
     def test_assign_endpoint_moves_many_documents_to_one_expense(self):
         with tenant_context(self.user.organization):
