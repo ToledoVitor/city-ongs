@@ -36,12 +36,12 @@
         {{ form.rejection_reason }}
         <p class="ui-field__hint">Obrigatório somente para rejeição.</p>
       </div>
+      <div class="ui-card__footer ui-row ui-row--end">
+        <a href="{% url 'contracts:item-supplementations' supplement.item.contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+        <button type="submit" class="ui-btn ui-btn--primary">Registrar decisão</button>
+      </div>
     </section>
     {% include 'commons/form-errors.html' with form=form %}
-    <div class="ui-row ui-row--end" style="gap: 8px;">
-      <a href="{% url 'contracts:item-supplementations' supplement.item.contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
-      <button type="submit" class="ui-btn ui-btn--primary">Registrar decisão</button>
-    </div>
   </form>
 </section>
 {% endblock %}

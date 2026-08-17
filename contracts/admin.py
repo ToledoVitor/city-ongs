@@ -276,7 +276,9 @@ class ContractItemPurchaseProcessDocumentInline(admin.TabularInline):
 class ContractItemSupplementInline(admin.TabularInline):
     model = ContractItemSupplement
     extra = 0
-    fields = ("suplement_value",)
+    fields = ("suplement_value", "status")
+    readonly_fields = fields
+    can_delete = False
 
 
 @admin.register(ContractItem)
@@ -315,6 +317,22 @@ class ContractItemSupplementAdmin(BaseModelAdmin):
         "id",
         "item__name",
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly = set(super().get_readonly_fields(request, obj))
+        if obj and obj.status != ContractItemSupplement.ReviewStatus.IN_REVIEW:
+            readonly.update(
+                {
+                    "item",
+                    "suplement_value",
+                    "observations",
+                    "status",
+                    "rejection_reason",
+                    "reviewed_by",
+                    "reviewed_at",
+                }
+            )
+        return tuple(readonly)
 
 
 @admin.register(ContractInterestedPart)

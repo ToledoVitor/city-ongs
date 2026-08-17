@@ -2,13 +2,18 @@ import datetime
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.test import RequestFactory
 from django.test import TestCase
 from django.urls import reverse
 from easy_tenants import tenant_context
 
 from accounts.models import Area, CityHall, Organization
 from activity.models import ActivityLog, Notification
+from accountability.models import Accountability, Expense, ResourceSource
+from contracts.admin import ContractItemSupplementAdmin
 from contracts.forms import ContractItemSupplementUpdateForm
 from contracts.models import (
     Contract,
@@ -129,6 +134,28 @@ class ContractChangeApprovalWorkflowTests(TestCase):
                 organization=self.organization,
                 item=self.raise_item,
                 suplement_value=Decimal("100.00"),
+            )
+
+    def create_expense(self, value):
+        with tenant_context(self.organization):
+            accountability = Accountability.objects.create(
+                organization=self.organization,
+                contract=self.contract,
+                month=1,
+                year=2026,
+            )
+            source = ResourceSource.objects.create(
+                organization=self.organization,
+                name="Prefeitura",
+            )
+            return Expense.objects.create(
+                organization=self.organization,
+                accountability=accountability,
+                identification="Despesa posterior",
+                value=value,
+                source=source,
+                item=self.downgrade_item,
+                competency=datetime.date(2026, 1, 10),
             )
 
     def create_reallocation_request(self):
@@ -317,6 +344,112 @@ class ContractChangeApprovalWorkflowTests(TestCase):
             supplement.status, ContractItemSupplement.ReviewStatus.APPROVED
         )
         self.assertEqual(supplement.suplement_value, Decimal("100.00"))
+
+    def test_terminal_supplement_cannot_be_changed_outside_review_workflow(self):
+        supplement = self.create_supplement()
+        with tenant_context(self.organization):
+            ContractItemSupplement.objects.filter(id=supplement.id).update(
+                status=ContractItemSupplement.ReviewStatus.APPROVED,
+                reviewed_by=self.reviewer,
+            )
+        supplement.refresh_from_db()
+        supplement.suplement_value = Decimal("999.00")
+
+        with tenant_context(self.organization):
+            with self.assertRaises(ValidationError):
+                supplement.save()
+
+        supplement.refresh_from_db()
+        self.assertEqual(supplement.suplement_value, Decimal("100.00"))
+
+    def test_terminal_supplement_fields_are_readonly_in_admin(self):
+        supplement = self.create_supplement()
+        with tenant_context(self.organization):
+            ContractItemSupplement.objects.filter(id=supplement.id).update(
+                status=ContractItemSupplement.ReviewStatus.REJECTED,
+            )
+        supplement.refresh_from_db()
+        model_admin = ContractItemSupplementAdmin(
+            ContractItemSupplement, admin.site
+        )
+
+        readonly = model_admin.get_readonly_fields(
+            RequestFactory().get("/"), supplement
+        )
+
+        self.assertTrue(
+            {
+                "item",
+                "suplement_value",
+                "observations",
+                "status",
+                "rejection_reason",
+                "reviewed_by",
+                "reviewed_at",
+            }.issubset(set(readonly))
+        )
+
+    def test_supplement_review_actions_stay_inside_form_card(self):
+        supplement = self.create_supplement()
+        self.client.force_login(self.reviewer)
+
+        response = self.client.get(
+            reverse("contracts:item-supplementations-review", args=[supplement.id])
+        )
+
+        body = response.content.decode()
+        form_start = body.index('<form method="post"')
+        form_end = body.index("</form>", form_start)
+        form_body = body[form_start:form_end]
+        self.assertIn("ui-card__footer", form_body)
+        self.assertNotIn('style="gap:', form_body)
+
+    def test_reallocation_requester_cannot_review_own_request(self):
+        with tenant_context(self.organization):
+            value_request = ContractItemNewValueRequest.objects.create(
+                organization=self.organization,
+                requested_by=self.reviewer,
+                downgrade_item=self.downgrade_item,
+                raise_item=self.raise_item,
+                month_raise=Decimal("25.00"),
+                anual_raise=Decimal("300.00"),
+            )
+        self.client.force_login(self.reviewer)
+
+        response = self.client.post(
+            reverse("contracts:review-value-requests", args=[value_request.id]),
+            {"status": "APPROVED", "rejection_reason": ""},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        value_request.refresh_from_db()
+        self.assertEqual(
+            value_request.status,
+            ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+        )
+
+    @patch("activity.services.SendGridClient.notify")
+    def test_reallocation_approval_revalidates_current_expense_floor(self, _notify):
+        value_request = self.create_reallocation_request()
+        self.create_expense(Decimal("2201.00"))
+        self.client.force_login(self.reviewer)
+
+        response = self.client.post(
+            reverse("contracts:review-value-requests", args=[value_request.id]),
+            {"status": "APPROVED", "rejection_reason": ""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "despesas atuais")
+        value_request.refresh_from_db()
+        self.raise_item.refresh_from_db()
+        self.downgrade_item.refresh_from_db()
+        self.assertEqual(
+            value_request.status,
+            ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+        )
+        self.assertEqual(self.raise_item.anual_expense, Decimal("1200.00"))
+        self.assertEqual(self.downgrade_item.anual_expense, Decimal("2400.00"))
 
     @patch("activity.services.SendGridClient.notify")
     def test_reallocation_rejection_changes_neither_item_and_logs_decision(

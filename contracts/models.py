@@ -2,6 +2,7 @@ import os
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max, Q
 from django_cpf_cnpj.fields import CNPJField
@@ -1240,6 +1241,28 @@ class ContractItemSupplement(BaseOrganizationTenantModel):
 
     def __str__(self) -> str:
         return f"{self.item.name} - {self.suplement_value}"
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            original = type(self).all_objects.filter(pk=self.pk).first()
+            if original and original.status != self.ReviewStatus.IN_REVIEW:
+                protected_fields = (
+                    "item_id",
+                    "suplement_value",
+                    "observations",
+                    "status",
+                    "rejection_reason",
+                    "reviewed_by_id",
+                    "reviewed_at",
+                )
+                if any(
+                    getattr(self, field) != getattr(original, field)
+                    for field in protected_fields
+                ):
+                    raise ValidationError(
+                        "Uma suplementação já avaliada não pode ser alterada."
+                    )
+        return super().save(*args, **kwargs)
 
     @property
     def status_label(self) -> str:

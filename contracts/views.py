@@ -1414,7 +1414,26 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
                 self.get_queryset().select_for_update(), id=self.kwargs["pk"]
             )
 
-            instance.status = form.cleaned_data["status"]
+            if instance.requested_by_id == self.request.user.id:
+                raise Http404
+
+            requested_status = form.cleaned_data["status"]
+            if requested_status == ContractItemNewValueRequest.ReviewStatus.APPROVED:
+                expended_value = instance.downgrade_item.expenses.filter(
+                    deleted_at__isnull=True
+                ).aggregate(total=Sum("value"))["total"] or Decimal("0.00")
+                remaining_budget = (
+                    instance.downgrade_item.anual_expense - instance.anual_raise
+                )
+                if expended_value > remaining_budget:
+                    form.add_error(
+                        None,
+                        "Não é possível aprovar: as despesas atuais excedem o "
+                        "valor anual restante do item.",
+                    )
+                    return self.form_invalid(form)
+
+            instance.status = requested_status
             instance.rejection_reason = (
                 form.cleaned_data["rejection_reason"]
                 if instance.status == ContractItemNewValueRequest.ReviewStatus.REJECTED
