@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Avaliar suplementação — Portal SITTS{% endblock %}
+
+{% block content %}
+<section class="page ui-form" style="max-width: 720px;">
+  <header class="page__header">
+    <nav class="ui-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}" class="ui-breadcrumb__item">Início</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <a href="{% url 'contracts:item-supplementations' supplement.item.contract.id %}" class="ui-breadcrumb__item">Suplementações</a>
+      <span class="ui-breadcrumb__sep">/</span>
+      <span class="ui-breadcrumb__item ui-breadcrumb__item--current" aria-current="page">Avaliar</span>
+    </nav>
+    <h1 class="ui-display-lg page__title">Avaliar suplementação</h1>
+  </header>
+
+  <section class="ui-card ui-stack ui-stack--md">
+    <dl class="ui-dl">
+      <dt>Item</dt><dd>{{ supplement.item.name }}</dd>
+      <dt>Valor</dt><dd>R$ {{ supplement.suplement_value|intcomma }}</dd>
+      <dt>Observações</dt><dd>{{ supplement.observations|default:"—" }}</dd>
+    </dl>
+  </section>
+
+  <form method="post" class="ui-stack ui-stack--xl">
+    {% csrf_token %}
+    <section class="ui-card ui-stack ui-stack--lg">
+      <div class="ui-field">
+        <label for="id_status" class="ui-field__label">Decisão</label>
+        {{ form.status }}
+      </div>
+      <div class="ui-field">
+        <label for="id_rejection_reason" class="ui-field__label">Motivo da rejeição</label>
+        {{ form.rejection_reason }}
+        <p class="ui-field__hint">Obrigatório somente para rejeição.</p>
+      </div>
+    </section>
+    {% include 'commons/form-errors.html' with form=form %}
+    <div class="ui-row ui-row--end" style="gap: 8px;">
+      <a href="{% url 'contracts:item-supplementations' supplement.item.contract.id %}" class="ui-btn ui-btn--secondary">Voltar</a>
+      <button type="submit" class="ui-btn ui-btn--primary">Registrar decisão</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

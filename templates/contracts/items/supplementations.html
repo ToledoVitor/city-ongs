@@ -42,14 +42,19 @@
       <tbody>
         {% for supplement in supplementations %}
           <tr>
-            <td><span class="ui-status ui-status--success">{{ supplement.status_label }}</span></td>
+            <td><span class="ui-status {% if supplement.status == 'APPROVED' %}ui-status--success{% elif supplement.status == 'REJECTED' %}ui-status--error{% else %}ui-status--warning{% endif %}">{{ supplement.status_label }}</span></td>
             <td>{{ supplement.item.name }}</td>
             <td><span class="ui-body-md-strong">R$ {{ supplement.suplement_value|intcomma }}</span></td>
             <td class="ui-text-right">
+              {% if supplement.status == 'IN_REVIEW' and not user.is_committee_member %}
               <a href="{% url 'contracts:item-supplementations-update' supplement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">
                 <svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Editar
               </a>
+              {% endif %}
+              {% if supplement.status == 'IN_REVIEW' and user.can_change_statuses %}
+              <a href="{% url 'contracts:item-supplementations-review' supplement.id %}" class="ui-btn ui-btn--secondary ui-btn--sm">Avaliar</a>
+              {% endif %}
             </td>
           </tr>
         {% empty %}

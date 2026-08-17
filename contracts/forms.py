@@ -576,6 +576,14 @@ class ContractItemValueRequestForm(forms.ModelForm):
 
 
 class ItemValueReviewForm(forms.ModelForm):
+    status = forms.ChoiceField(
+        choices=[
+            (ContractItemNewValueRequest.ReviewStatus.APPROVED, "Aprovada"),
+            (ContractItemNewValueRequest.ReviewStatus.REJECTED, "Rejeitada"),
+        ],
+        widget=BaseSelectFormWidget(),
+    )
+
     class Meta:
         model = ContractItemNewValueRequest
         fields = [
@@ -586,8 +594,8 @@ class ItemValueReviewForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        rejected = cleaned_data["status"] == "REJECTED"
-        if rejected and not cleaned_data["rejection_reason"]:
+        rejected = cleaned_data.get("status") == "REJECTED"
+        if rejected and not cleaned_data.get("rejection_reason"):
             raise forms.ValidationError("É necessário informar um motivo para rejeição")
 
         return cleaned_data
@@ -706,6 +714,37 @@ class ContractItemSupplementUpdateForm(forms.ModelForm):
         widgets = {
             "observations": BaseTextAreaFormWidget(required=False),
         }
+
+
+class ContractItemSupplementReviewForm(forms.ModelForm):
+    status = forms.ChoiceField(
+        choices=[
+            (ContractItemSupplement.ReviewStatus.APPROVED, "Aprovada"),
+            (ContractItemSupplement.ReviewStatus.REJECTED, "Rejeitada"),
+        ],
+        widget=BaseSelectFormWidget(),
+    )
+
+    class Meta:
+        model = ContractItemSupplement
+        fields = ["status", "rejection_reason"]
+
+        widgets = {
+            "rejection_reason": BaseTextAreaFormWidget(required=False),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        status = cleaned_data.get("status")
+        rejection_reason = cleaned_data.get("rejection_reason")
+
+        if (
+            status == ContractItemSupplement.ReviewStatus.REJECTED
+            and not rejection_reason
+        ):
+            raise forms.ValidationError("É necessário informar um motivo para rejeição")
+
+        return cleaned_data
 
 
 # =============================================================================

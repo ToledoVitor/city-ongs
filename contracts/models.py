@@ -1218,6 +1218,25 @@ class ContractItemSupplement(BaseOrganizationTenantModel):
         null=True,
         blank=True,
     )
+    rejection_reason = models.CharField(
+        verbose_name="Motivo da rejeição",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        verbose_name="Revisado por",
+        related_name="reviewed_contract_item_supplements",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    reviewed_at = models.DateTimeField(
+        verbose_name="Revisado em",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return f"{self.item.name} - {self.suplement_value}"

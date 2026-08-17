@@ -13,6 +13,7 @@ from django.db.models.query import QuerySet
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.views.decorators.http import require_POST
@@ -39,6 +40,7 @@ from contracts.forms import (
     ContractItemForm,
     ContractItemPurchaseProcessForm,
     ContractItemSupplementForm,
+    ContractItemSupplementReviewForm,
     ContractItemSupplementUpdateForm,
     ContractItemValueRequestForm,
     ContractStatusUpdateForm,
@@ -102,6 +104,31 @@ def redirect_to_section(contract_id, section_slug: str | None = None):
             section=section_slug,
         )
     return redirect("contracts:contracts-detail", pk=contract_id)
+
+
+def _accessible_contracts(user):
+    """Return tenant-local contracts the user is allowed to access."""
+    return UserAccessQuerysetMixin.filter_by_user_access(
+        Contract.objects.all(), user
+    ).distinct()
+
+
+def _accessible_contract_or_404(request, pk):
+    return get_object_or_404(_accessible_contracts(request.user), id=pk)
+
+
+def _accessible_supplement_or_404(request, pk, pending_only=False, for_update=False):
+    supplements = ContractItemSupplement.objects.select_related("item__contract")
+    supplements = supplements.filter(
+        item__contract__in=_accessible_contracts(request.user)
+    )
+    if pending_only:
+        supplements = supplements.filter(
+            status=ContractItemSupplement.ReviewStatus.IN_REVIEW
+        )
+    if for_update:
+        supplements = supplements.select_for_update()
+    return get_object_or_404(supplements, id=pk)
 
 
 @method_decorator(log_view_access, name="dispatch")
@@ -1329,7 +1356,7 @@ def contract_status_change_view(request, pk):
 @log_view_access
 @login_required
 def item_new_value_request_view(request, pk):
-    contract = get_object_or_404(Contract, id=pk)
+    contract = _accessible_contract_or_404(request, pk)
     if request.method == "POST":
         form = ContractItemValueRequestForm(request.POST, contract=contract)
         if form.is_valid():
@@ -1376,42 +1403,54 @@ class ItemValueRequestReviewView(LoginRequiredMixin, UpdateView):
 
     login_url = "/auth/login"
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.can_change_statuses:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         with transaction.atomic():
-            instance = form.save(commit=False)
+            instance = get_object_or_404(
+                self.get_queryset().select_for_update(), id=self.kwargs["pk"]
+            )
 
-            instance.raise_item.month_expense += instance.month_raise
-            instance.raise_item.anual_expense += instance.anual_raise
-            instance.raise_item.save()
+            instance.status = form.cleaned_data["status"]
+            instance.rejection_reason = form.cleaned_data["rejection_reason"]
+            instance.save()
 
-            instance.downgrade_item.month_expense -= instance.month_raise
-            instance.downgrade_item.anual_expense -= instance.anual_raise
-            instance.downgrade_item.save()
+            if instance.status == ContractItemNewValueRequest.ReviewStatus.APPROVED:
+                instance.raise_item.month_expense += instance.month_raise
+                instance.raise_item.anual_expense += instance.anual_raise
+                instance.raise_item.save()
+
+                instance.downgrade_item.month_expense -= instance.month_raise
+                instance.downgrade_item.anual_expense -= instance.anual_raise
+                instance.downgrade_item.save()
+            action = ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM
 
             _ = ActivityLog.objects.create(
                 user=self.request.user,
                 user_email=self.request.user.email,
-                action=ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM,
-                target_object_id=instance.raise_item.contract.id,
-                target_content_object=instance.raise_item.contract,
+                action=action,
+                target_object_id=instance.id,
+                target_content_object=instance,
             )
 
-        return super().form_valid(form)
+        self.object = instance
+        return redirect(self.get_success_url())
 
     def get_queryset(self) -> QuerySet[Any]:
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                "requested_by",
-                "downgrade_item",
-                "raise_item",
-                "raise_item__contract",
-            )
+        contracts = _accessible_contracts(self.request.user)
+        return ContractItemNewValueRequest.objects.filter(
+            raise_item__contract__in=contracts,
+            downgrade_item__contract__in=contracts,
+            status=ContractItemNewValueRequest.ReviewStatus.IN_REVIEW,
+        ).select_related(
+            "requested_by",
+            "downgrade_item",
+            "raise_item",
+            "raise_item__contract",
         )
-
-    def get_object(self, queryset=None):
-        return self.model.objects.get(id=self.kwargs["pk"])
 
     def get_success_url(self) -> str:
         return reverse_lazy(
@@ -1628,7 +1667,7 @@ def contract_item_purchases_update_view(request, pk):
 
 @login_required
 def contract_item_supplementations_list_view(request, pk):
-    contract = get_object_or_404(Contract, id=pk)
+    contract = _accessible_contract_or_404(request, pk)
     if not contract.items.count:
         return redirect("contracts:contracts-detail", pk=contract.id)
 
@@ -1642,7 +1681,9 @@ def contract_item_supplementations_list_view(request, pk):
 
 @login_required
 def contract_item_supplementations_create_view(request, pk):
-    contract = get_object_or_404(Contract, id=pk)
+    contract = _accessible_contract_or_404(request, pk)
+    if request.user.is_committee_member:
+        raise Http404
     if contract.is_finished:
         return redirect("contracts:item-supplementations", pk=contract.id)
 
@@ -1658,8 +1699,8 @@ def contract_item_supplementations_create_view(request, pk):
                     user=request.user,
                     user_email=request.user.email,
                     action=ActivityLog.ActivityLogChoices.CREATED_CONTRACT_ITEM_SUPPLEMENT,
-                    target_object_id=supplement.item.id,
-                    target_content_object=supplement.item,
+                    target_object_id=supplement.id,
+                    target_content_object=supplement,
                 )
             return redirect("contracts:item-supplementations", pk=contract.id)
         else:
@@ -1679,21 +1720,23 @@ def contract_item_supplementations_create_view(request, pk):
 
 @login_required
 def contract_item_supplementations_update_view(request, pk):
-    supplement = get_object_or_404(ContractItemSupplement, id=pk)
+    if request.user.is_committee_member:
+        raise Http404
+    supplement = _accessible_supplement_or_404(request, pk, pending_only=True)
     if request.method == "POST":
         form = ContractItemSupplementUpdateForm(request.POST, instance=supplement)
         if form.is_valid():
             with transaction.atomic():
                 supplement = form.save(commit=False)
-                supplement.supplement_value = form.cleaned_data["supplement_value"]
+                supplement.suplement_value = form.cleaned_data["supplement_value"]
                 supplement.save()
 
                 _ = ActivityLog.objects.create(
                     user=request.user,
                     user_email=request.user.email,
                     action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
-                    target_object_id=supplement.item.id,
-                    target_content_object=supplement.item,
+                    target_object_id=supplement.id,
+                    target_content_object=supplement,
                 )
                 return redirect(
                     "contracts:item-supplementations",
@@ -1712,6 +1755,45 @@ def contract_item_supplementations_update_view(request, pk):
             "contracts/items/supplementations-update.html",
             {"supplement": supplement, "form": form},
         )
+
+
+@login_required
+def contract_item_supplementations_review_view(request, pk):
+    if not request.user.can_change_statuses:
+        raise Http404
+
+    supplement = _accessible_supplement_or_404(request, pk, pending_only=True)
+    if request.method == "POST":
+        form = ContractItemSupplementReviewForm(request.POST, instance=supplement)
+        if form.is_valid():
+            with transaction.atomic():
+                supplement = _accessible_supplement_or_404(
+                    request, pk, pending_only=True, for_update=True
+                )
+                supplement.status = form.cleaned_data["status"]
+                supplement.rejection_reason = form.cleaned_data["rejection_reason"]
+                supplement.reviewed_by = request.user
+                supplement.reviewed_at = timezone.now()
+                supplement.save()
+
+                _ = ActivityLog.objects.create(
+                    user=request.user,
+                    user_email=request.user.email,
+                    action=ActivityLog.ActivityLogChoices.UPDATED_CONTRACT_ITEM_SUPPLEMENT,
+                    target_object_id=supplement.id,
+                    target_content_object=supplement,
+                )
+            return redirect(
+                "contracts:item-supplementations", pk=supplement.item.contract.id
+            )
+    else:
+        form = ContractItemSupplementReviewForm(instance=supplement)
+
+    return render(
+        request,
+        "contracts/items/supplementations-review.html",
+        {"supplement": supplement, "form": form},
+    )
 
 
 @require_POST
