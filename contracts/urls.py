@@ -25,6 +25,7 @@ from contracts.views import (
     contract_item_purchases_update_view,
     contract_item_supplementations_create_view,
     contract_item_supplementations_list_view,
+    contract_item_supplementations_review_view,
     contract_item_supplementations_update_view,
     contract_status_change_view,
     contract_timeline_update_view,
@@ -229,6 +230,11 @@ urlpatterns = [
         "supplementations/update/<uuid:pk>",
         contract_item_supplementations_update_view,
         name="item-supplementations-update",
+    ),
+    path(
+        "supplementations/<uuid:pk>/review/",
+        contract_item_supplementations_review_view,
+        name="item-supplementations-review",
     ),
     path(
         "items/<uuid:pk>/purchases/files/upload",

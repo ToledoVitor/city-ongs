@@ -45,6 +45,8 @@ class ActivityLogEmailNotificationHandler:
             ActivityLog.ActivityLogChoices.COMMENTED_CONTRACT_ITEM: self.build_item_comented_log,
             ActivityLog.ActivityLogChoices.REQUEST_NEW_VALUE_ITEM: self.build_item_value_request_log,
             ActivityLog.ActivityLogChoices.ANALISED_NEW_VALUE_ITEM: self.build_item_value_analised_log,
+            ActivityLog.ActivityLogChoices.APPROVED_CONTRACT_ITEM_VALUE_REQUEST: self.build_item_value_analised_log,
+            ActivityLog.ActivityLogChoices.REJECTED_CONTRACT_ITEM_VALUE_REQUEST: self.build_item_value_analised_log,
         }
         return builders_mapper.get(activity_log.action, None)
 
@@ -63,15 +65,17 @@ class ActivityLogEmailNotificationHandler:
 
                 logger.info(f"Notifying users for action {activity_log.action}")
 
-            try:
-                sendgrid_client = SendGridClient()
-                sendgrid_client.notify(
-                    subject=subject,
-                    html_content=html_content,
-                    recipients=recipients,
-                )
-            except Exception as error:
-                logger.error(f"Error when sending email notification: {error}")
+            def send_email():
+                try:
+                    SendGridClient().notify(
+                        subject=subject,
+                        html_content=html_content,
+                        recipients=recipients,
+                    )
+                except Exception as error:
+                    logger.error(f"Error when sending email notification: {error}")
+
+            transaction.on_commit(send_email)
 
     def build_accountability_created_log(
         self, activity_log: ActivityLog
@@ -432,7 +436,7 @@ class ActivityLogEmailNotificationHandler:
         }
         html_content = render_to_string("email/new_value_reviewed.html", context)
 
-        recipient = contract.accountability_autority
+        recipient = contract.accountability_autority or value_request.requested_by
         Notification.objects.create(
             category=Notification.Category.CONTRACT_ITEM_VALUE_REVIEWED,
             recipient=recipient,

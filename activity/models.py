@@ -217,6 +217,22 @@ class ActivityLog(BaseOrganizationTenantModel):
             "DELETED_CONTRACT_ITEM_SUPPLEMENT",
             "Deletou suplemento de item",
         )
+        APPROVED_CONTRACT_ITEM_SUPPLEMENT = (
+            "APPROVED_CONTRACT_ITEM_SUPPLEMENT",
+            "Aprovou suplemento de item",
+        )
+        REJECTED_CONTRACT_ITEM_SUPPLEMENT = (
+            "REJECTED_CONTRACT_ITEM_SUPPLEMENT",
+            "Rejeitou suplemento de item",
+        )
+        APPROVED_CONTRACT_ITEM_VALUE_REQUEST = (
+            "APPROVED_CONTRACT_ITEM_VALUE_REQUEST",
+            "Aprovou remanejamento de valores de itens",
+        )
+        REJECTED_CONTRACT_ITEM_VALUE_REQUEST = (
+            "REJECTED_CONTRACT_ITEM_VALUE_REQUEST",
+            "Rejeitou remanejamento de valores de itens",
+        )
         # contract item purchase activities
         UPLOADED_CONTRACT_ITEM_PURCHASE_FILE = (
             "UPLOADED_CONTRACT_ITEM_PURCHASE_FILE",
