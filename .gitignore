@@ -176,3 +176,6 @@ cython_debug/
 *.ofx
 
 /scripts
+
+# Local-only deep-dive project context (regenerable via audit; not for the repo)
+PROJECT_CONTEXT.md

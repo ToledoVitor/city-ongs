@@ -185,7 +185,7 @@ class IntegralStatementTests(TestCase):
                 self.contract, self.start_date, self.end_date
             )
 
-        self.assertEqual(summary.all_pass_on_values, Decimal("3350.00"))
+        self.assertEqual(summary.all_pass_on_values, Decimal("3000.00"))
         self.assertEqual(summary.previous_balance, Decimal("0.00"))
         self.assertEqual(summary.investment_income, Decimal("50.00"))
         self.assertEqual(summary.own_resources, Decimal("300.00"))
@@ -214,11 +214,25 @@ class IntegralStatementTests(TestCase):
         self.assertEqual(categorized["TOTAL"]["accounted_and_paid"], Decimal("400.00"))
 
     def test_categorize_expenses_inclusive_vs_exclusive_bounds(self):
-        # Nenhuma despesa desta fixture cai exatamente na borda do período,
-        # então os dois modos devem concordar aqui — o objetivo deste teste
-        # é documentar que o parâmetro existe e não quebra, não a diferença
-        # de comportamento em si (ver REPORTS_TODO.md).
+        # Despesa cuja due_date/competency caem exatamente na borda inicial
+        # do período: com inclusive_bounds=True ela entra em
+        # "accounted_and_paid"/"paid_on"; com False (bordas estritas: `<`)
+        # ela não bate em nenhum dos três ramos e some do total inteiro —
+        # o próprio comportamento que este teste existe para documentar
+        # (ver REPORTS_TODO.md). A fixture original não cobria essa borda,
+        # o que deixava o teste verde independente do parâmetro funcionar.
         with tenant_context(self.organization):
+            Expense.objects.create(
+                organization=self.organization,
+                accountability=self.accountability,
+                identification="Despesa na borda do período",
+                value=Decimal("100.00"),
+                source=self.resource_source,
+                nature=NatureChoices.SALARIES_AND_WAGES,
+                competency=self.start_date.date(),
+                due_date=self.start_date.date(),
+            )
+
             inclusive = categorize_expenses(
                 self.contract, self.start_date, self.end_date, inclusive_bounds=True
             )
@@ -226,7 +240,11 @@ class IntegralStatementTests(TestCase):
                 self.contract, self.start_date, self.end_date, inclusive_bounds=False
             )
 
-        self.assertEqual(inclusive["TOTAL"], exclusive["TOTAL"])
+        self.assertNotEqual(inclusive["TOTAL"], exclusive["TOTAL"])
+        self.assertEqual(
+            inclusive["TOTAL"]["paid_on"] - exclusive["TOTAL"]["paid_on"],
+            Decimal("100.00"),
+        )
 
 
 class PassOn6PDFExporterRegressionTests(TestCase):

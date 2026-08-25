@@ -10,7 +10,7 @@ from accountability.models import Expense, Revenue
 from reports.exporters.base import BasePDFExporter
 from reports.exporters.commons.integral_statement import (
     build_revenue_summary,
-    categorize_expenses,
+    categorize_paid_expenses,
 )
 from utils.formats import (
     document_mask,
@@ -76,9 +76,10 @@ class PassOn14PDFExporter(BasePDFExporter):
             "liquidation"
         )
 
-        self.categorized_expenses = categorize_expenses(
-            self.contract, self.start_date, self.end_date, inclusive_bounds=True
-        )
+        # Mesma queryset (paid=True, dentro do período por `liquidation`)
+        # alimenta a tabela por categoria e a relação nominal abaixo, então
+        # as duas concordam no mesmo total de "despesa realizada".
+        self.categorized_expenses = categorize_paid_expenses(self.paid_expenses)
 
     def handle(self):
         self.__database_queries()
@@ -269,10 +270,15 @@ class PassOn14PDFExporter(BasePDFExporter):
                 "VALORES REPASSADOS - R$",
             ]
         ]
-        for pass_on in self.pass_on_queryset:
+        for index, pass_on in enumerate(self.pass_on_queryset):
             table_data.append(
                 [
-                    format_into_brazilian_currency(self.contract.total_value),
+                    # Valor previsto do contrato aparece uma única vez — nas
+                    # linhas seguintes ficaria em branco, senão a coluna
+                    # somaria o valor do contrato uma vez por repasse.
+                    format_into_brazilian_currency(self.contract.total_value)
+                    if index == 0
+                    else "",
                     pass_on.identification or "—",
                     format_into_brazilian_date(pass_on.receive_date),
                     format_into_brazilian_currency(pass_on.value),
@@ -364,12 +370,12 @@ class PassOn14PDFExporter(BasePDFExporter):
             ]
         ]
         for label, category_key in _EXPENSE_CATEGORIES:
-            value = self.categorized_expenses[category_key]["paid_on"]
+            value = self.categorized_expenses[category_key]
             table_data.append(
                 [label, period_label, format_into_brazilian_currency(value)]
             )
 
-        total_paid = self.categorized_expenses["TOTAL"]["paid_on"]
+        total_paid = self.categorized_expenses["TOTAL"]
         col_widths = [90, 60, 40]  # Total: 190
         font = FontFace("FreeSans", "B", size_pt=7)
         self.pdf.set_fill_color(255, 255, 255)
@@ -445,7 +451,7 @@ class PassOn14PDFExporter(BasePDFExporter):
                 [
                     format_into_brazilian_date(expense.liquidation),
                     expense.liquidation_form_label or "—",
-                    expense.favored.name,
+                    expense.favored.name if expense.favored else "—",
                     expense.nature_label,
                     format_into_brazilian_currency(expense.value),
                 ]

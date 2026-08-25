@@ -117,7 +117,8 @@ class CertificationTermPDFExporter(BasePDFExporter):
         raise NotImplementedError
 
     def _local_city(self) -> str:
-        return self.contract.hired_company.city
+        hired_company = self.contract.hired_company
+        return hired_company.city if hired_company else "—"
 
     def handle(self):
         self._draw_header()
@@ -277,7 +278,7 @@ class CertificationTermPDFExporter(BasePDFExporter):
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.city_hall.document))
+            text=document_mask(self.contract.organization.city_hall.document)
             or "CNPJ: Não Informado",
             h=self.default_cell_height,
         )
@@ -346,13 +347,24 @@ class CertificationTermPDFExporter(BasePDFExporter):
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.organization.document))
+            text=document_mask(self.contract.organization.document)
             or "CNPJ: Não Informado",
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
 
     def _draw_conclusion_signature_owner(self):
+        supervision_autority = self.contract.supervision_autority
+        autority_name = (
+            supervision_autority.get_full_name() if supervision_autority else None
+        )
+        autority_position = (
+            supervision_autority.position if supervision_autority else None
+        )
+        autority_cpf = document_mask(
+            supervision_autority.cpf if supervision_autority else None
+        )
+
         self._set_font(font_size=8, bold=True)
         self.pdf.cell(
             text=self.labels.conclusion_section_title,
@@ -366,25 +378,35 @@ class CertificationTermPDFExporter(BasePDFExporter):
         self.pdf.ln(4)
         self._set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text="Nome: Comitê",
+            text=f"Nome: {autority_name or 'Não Informado'}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text="Cargo: Comitê",
+            text=f"Cargo: {autority_position or 'Não Informado'}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.supervision_autority.cpf))
-            or "CPF: Não Informado",
+            text=autority_cpf or "CPF: Não Informado",
             h=self.default_cell_height,
         )
         self.pdf.ln(10)
 
     def _draw_account_signature_owner(self):
+        accountability_autority = self.contract.accountability_autority
+        autority_name = (
+            accountability_autority.get_full_name() if accountability_autority else None
+        )
+        autority_position = (
+            accountability_autority.position if accountability_autority else None
+        )
+        autority_cpf = document_mask(
+            accountability_autority.cpf if accountability_autority else None
+        )
+
         self._set_font(font_size=8, bold=True)
         self.pdf.cell(
             text=self.labels.account_section_title,
@@ -398,20 +420,19 @@ class CertificationTermPDFExporter(BasePDFExporter):
         self.pdf.ln(4)
         self._set_font(font_size=8, bold=False)
         self.pdf.cell(
-            text=f"Nome: {self.contract.accountability_autority.get_full_name()}",
+            text=f"Nome: {autority_name or 'Não Informado'}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text=f"Cargo: {self.contract.accountability_autority.position}",
+            text=f"Cargo: {autority_position or 'Não Informado'}",
             h=self.default_cell_height,
         )
         self.pdf.ln(4)
         self._set_font(font_size=8)
         self.pdf.cell(
-            text=document_mask(str(self.contract.accountability_autority.cpf))
-            or "CPF: Não Informado",
+            text=autority_cpf or "CPF: Não Informado",
             h=self.default_cell_height,
         )
         self.pdf.ln(15)

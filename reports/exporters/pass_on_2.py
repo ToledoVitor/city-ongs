@@ -1,5 +1,5 @@
 import os
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 from django.conf import settings
@@ -43,7 +43,16 @@ class PassOn2PDFExporter(BasePDFExporter):
         # Referência para o extrato do "saldo do exercício anterior" — um ano
         # antes do início do período pedido. Mantida separada de start_date
         # para não deslocar os filtros de receitas/despesas do período real.
-        self.previous_year_reference = start_date - timedelta(days=365)
+        # `timedelta(days=365)` não é "um ano civil" (bissexto quebra a
+        # conta); usa o mesmo dia/mês do ano anterior, com fallback para 28
+        # de fevereiro se start_date cair num 29/02 sem correspondente no
+        # ano anterior.
+        try:
+            self.previous_year_reference = start_date.replace(year=start_date.year - 1)
+        except ValueError:
+            self.previous_year_reference = start_date.replace(
+                year=start_date.year - 1, month=2, day=28
+            )
 
     def __database_queries(self):
         self.checking_account = self.contract.checking_account
@@ -74,6 +83,16 @@ class PassOn2PDFExporter(BasePDFExporter):
                 | Q(bank_account=self.investing_account)
             ).exclude(bank_account__isnull=True)
         )
+
+        self.revenue_in_time = self.revenue_queryset.filter(
+            receive_date__gte=self.start_date, receive_date__lte=self.end_date
+        )
+        # Só repasse público — self.revenue_in_time inclui toda natureza de
+        # receita (inclusive recurso próprio da entidade), e este total
+        # alimenta "RECURSO DO REPASSE NÃO APLICADO" na Tabela II.
+        self.revenue_total = self.revenue_in_time.filter(
+            revenue_nature=Revenue.Nature.PUBLIC_TRANSFER
+        ).aggregate(Sum("value"))["value__sum"] or Decimal("0.00")
 
         self.expense_queryset = Expense.objects.filter(
             accountability__contract=self.contract,
@@ -281,11 +300,6 @@ class PassOn2PDFExporter(BasePDFExporter):
 
         closing_balance = closing_checking_account + closing_investing_account
 
-        revenue_in_time = self.revenue_queryset.filter(
-            receive_date__gte=self.start_date, receive_date__lte=self.end_date
-        )
-        self.revenue_total = Decimal("0.00")
-
         contract = self.contract
         table_data = [
             ["", format_into_brazilian_currency(contract.total_value)],
@@ -300,14 +314,13 @@ class PassOn2PDFExporter(BasePDFExporter):
             ["__(INDICAR AS FONTES DO RECURSO)__", "R$"],
         ]
 
-        for revenue in revenue_in_time:
+        for revenue in self.revenue_in_time:
             table_data.append(
                 [
                     revenue.revenue_nature_label,
                     format_into_brazilian_currency(revenue.value),
                 ]
             )
-            self.revenue_total += revenue.value
 
         table_data.append(
             [
@@ -382,7 +395,7 @@ class PassOn2PDFExporter(BasePDFExporter):
                 [
                     format_into_brazilian_date(expense.liquidation),
                     expense.liquidation_form_label or "—",
-                    expense.favored.name,
+                    expense.favored.name if expense.favored else "—",
                     expense.nature_label,
                     format_into_brazilian_currency(expense.value),
                 ],

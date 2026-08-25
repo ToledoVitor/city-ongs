@@ -58,8 +58,7 @@ def build_revenue_summary(
         checking_account=checking_account,
         investing_account=investing_account,
         revenue_queryset=revenue_queryset,
-        all_pass_on_values=revenue_queryset.aggregate(Sum("value"))["value__sum"]
-        or Decimal("0.00"),
+        all_pass_on_values=_sum_by_nature(Revenue.Nature.PUBLIC_TRANSFER),
         previous_balance=_sum_by_nature(Revenue.Nature.PREVIOUS_BALANCE),
         investment_income=_sum_by_nature(Revenue.Nature.INVESTMENT_INCOME),
         own_resources=_sum_by_nature(Revenue.Nature.OWN_RESOURCES),
@@ -179,11 +178,41 @@ def categorize_expenses(
     return categorized
 
 
+def categorize_paid_expenses(expenses: QuerySet) -> dict:
+    """Soma um queryset de despesas já filtrado (`paid=True`, dentro do
+    período por `liquidation`) por categoria de natureza.
+
+    Usado pelo RP-14: ao contrário do RP-06/08/10/12, seu anexo não quebra
+    a "despesa realizada" em contabilizada/paga (due_date) vs.
+    efetivamente paga (liquidation) — as duas tabelas do modelo oficial
+    (por categoria e a relação nominal de despesas) precisam bater no
+    mesmo total, então ambas devem somar a mesma queryset de origem.
+    """
+    totals = {label: Decimal("0.00") for label, _ in _NATURE_CATEGORIES}
+    totals["TOTAL"] = Decimal("0.00")
+
+    for expense in expenses:
+        category = _get_expense_nature_category(expense)
+        if not category:
+            continue
+        totals[category] += expense.value
+        totals["TOTAL"] += expense.value
+
+    return totals
+
+
 def convert_decimal_to_brl(expenses_dict: dict) -> dict:
+    """Retorna uma cópia formatada em BRL — não muta `expenses_dict`, para
+    que o dict original com os `Decimal` continue reaproveitável por quem
+    chamou (ex.: cálculos financeiros que rodam depois da renderização da
+    tabela)."""
+    result = {}
     for key, value in expenses_dict.items():
         if isinstance(value, Decimal):
-            expenses_dict[key] = format_into_brazilian_currency(value)
+            result[key] = format_into_brazilian_currency(value)
         elif isinstance(value, dict):
-            convert_decimal_to_brl(value)
+            result[key] = convert_decimal_to_brl(value)
+        else:
+            result[key] = value
 
-    return expenses_dict
+    return result

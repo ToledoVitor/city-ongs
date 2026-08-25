@@ -57,6 +57,13 @@ class PassOn8PDFExporter(BasePDFExporter):
             contract=self.contract,
         )
 
+        # Calculado uma única vez: `convert_decimal_to_brl` (usado em
+        # `_draw_expenses_table`) não muta mais o dict, então o mesmo
+        # resultado com Decimal segue reaproveitável em `_draw_financial_table`.
+        self.categorized_expenses = categorize_expenses(
+            self.contract, self.start_date, self.end_date, inclusive_bounds=False
+        )
+
     def handle(self):
         self.__database_queries()
         self._draw_header()
@@ -449,10 +456,7 @@ class PassOn8PDFExporter(BasePDFExporter):
             "TOTAL DE DESPESAS PAGAS NESTE EXERCÍCIO (R$) (J= H + I)",
             "DESPESAS CONTABILIZADAS NESTE EXERCÍCIO A PAGAR EM EXERCÍCIOS SEGUINTES (R$)",
         ]
-        expenses_dict = categorize_expenses(
-            self.contract, self.start_date, self.end_date, inclusive_bounds=False
-        )
-        expenses_dict = convert_decimal_to_brl(expenses_dict)
+        expenses_dict = convert_decimal_to_brl(self.categorized_expenses)
 
         table_data = [
             [
@@ -684,14 +688,17 @@ class PassOn8PDFExporter(BasePDFExporter):
             new_y=YPos.NEXT,
         )
 
-        expenses_dict = categorize_expenses(
-            self.contract, self.start_date, self.end_date, inclusive_bounds=False
-        )
         non_planned_paid_expenses_sum = self.expense_queryset.filter(
             planned=False
         ).aggregate(sum=Sum("value"))["sum"] or Decimal("0.00")
 
-        j_value = expenses_dict["TOTAL"]["paid_on"]
+        # Mesmo valor de (G) já mostrado em `_draw_resources_table` — antes
+        # este total usava `contract.total_value`, que diverge sempre que a
+        # receita recebida no período não bate com o valor contratado (ex.:
+        # período parcial, aditivos), deixando duas linhas "(G)" com valores
+        # diferentes no mesmo PDF.
+        g_value = self.sum_items_a_to_d + self.own_resources
+        j_value = self.categorized_expenses["TOTAL"]["paid_on"]
         k_value = self.sum_items_a_to_d - (j_value - self.own_resources)
         l_value = non_planned_paid_expenses_sum
         m_value = k_value - l_value
@@ -699,7 +706,7 @@ class PassOn8PDFExporter(BasePDFExporter):
         table_data = [
             [
                 "(G) TOTAL DE RECURSOS DISPONÍVEL NO EXERCÍCIO",
-                f"{format_into_brazilian_currency(self.contract.total_value)}",
+                f"{format_into_brazilian_currency(g_value)}",
             ],
             [
                 "(J) DESPESAS PAGAS NO EXERCÍCIO (H+I)",

@@ -120,10 +120,10 @@ class PassOn1PDFExporter(BasePDFExporter):
         ]
         data_body = []
 
-        hired_company = self.contract.hired_company
-        date_law = self.contract.law_date
-        date_agreement = self.contract.agreement_date
         for contract in self.contracts_queryset:
+            hired_company = contract.hired_company
+            date_law = contract.law_date
+            date_agreement = contract.agreement_date
             hired_company_text = (
                 f"{hired_company.city}/{hired_company.uf} | "
                 f"{hired_company.street}, nº {hired_company.number} - "
